@@ -1,0 +1,29 @@
+name: Portable checks
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  portable-checks:
+    name: Portable checks
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Check Python syntax and public JSON
+        run: |
+          python3 -m py_compile install.py build.py test_install.py tests/make_synthetic_saves.py
+          python3 -m json.tool manifest.json > /dev/null
+          python3 -m json.tool dependencies.lock.json > /dev/null
+      - name: Generate synthetic parser fixtures
+        run: python3 tests/make_synthetic_saves.py /tmp/mcd2-fixtures
+      - name: Settings framing and semantic checks
+        run: |
+          g++ -std=c++20 -Isrc/native tests/settings_bridge_test.cpp -o /tmp/settings-framing
+          g++ -std=c++20 -Isrc/native tests/settings_bridge_semantic_test.cpp -o /tmp/settings-semantics
+          /tmp/settings-framing /tmp/mcd2-fixtures/settings.sav
+          /tmp/settings-semantics /tmp/mcd2-fixtures/settings.sav /tmp/mcd2-fixtures/runtime.sav
+      - name: Check frozen release reference
+        run: |
+          test "$(git ls-remote origin refs/tags/v0.1.0-preview.1 | cut -f1)" = 0e77429cf47eea672056986f8550ef3073937446

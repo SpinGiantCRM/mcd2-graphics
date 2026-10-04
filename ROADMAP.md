@@ -28,7 +28,7 @@ Investigate DLSS Frame Generation after the Reflex path is understood. Important
 
 ### 3. OptiScaler / broader provider support
 
-After the native NVIDIA path is established, prioritize OptiScaler compatibility so the project can reach users beyond the native DLSS path without maintaining every reconstruction implementation itself.
+After Reflex and Frame Generation, investigate complete FSR/XeSS provider support, including their supported Frame Generation paths, through OptiScaler or native integration. Choose the route with the best compatibility and maintenance cost after the provider tests.
 
 The goal is to make the existing game integration usable with alternative providers such as FSR- and XeSS-family reconstruction where OptiScaler supports them, and to leave room for provider-specific Frame Generation / Multi Frame Generation paths where those providers and the user's hardware support them.
 
