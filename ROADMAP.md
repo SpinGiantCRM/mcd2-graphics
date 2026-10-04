@@ -16,28 +16,37 @@ This roadmap describes current priorities, not release dates or guarantees. Item
 
 See [`docs/VALIDATION.md`](docs/VALIDATION.md) for the exact qualified and unqualified scope.
 
-## Next priorities
+## Priority order
 
-### NVIDIA Reflex
+### 1. NVIDIA Reflex
 
-Investigate and integrate Reflex as an independent feature before Frame Generation. It should remain useful with Native, DLAA and DLSS SR rendering modes where supported.
+Investigate and integrate Reflex first. It should remain useful with Native, DLAA and DLSS SR rendering modes where supported, and it provides the latency foundation needed before Frame Generation is treated as release-ready.
 
-### Frame Generation
+### 2. Frame Generation
 
 Investigate DLSS Frame Generation after the Reflex path is understood. Important game-specific work includes presentation lifecycle and separating the rendered scene from UI/HUD composition where required.
 
-### Ray Reconstruction — conditional
+### 3. OptiScaler / broader provider support
 
-Ray Reconstruction is a priority only if the existing renderer exposes a genuinely useful pre-denoised lighting/reflection boundary and the material/geometry guides needed to use RR correctly. The project will not add RR merely as a label or rebuild a large ray-traced renderer solely to claim support.
+After the native NVIDIA path is established, prioritize OptiScaler compatibility so the project can reach users beyond the native DLSS path without maintaining every reconstruction implementation itself.
 
-### Shadows / lighting
+The goal is to make the existing game integration usable with alternative providers such as FSR- and XeSS-family reconstruction where OptiScaler supports them, and to leave room for provider-specific Frame Generation / Multi Frame Generation paths where those providers and the user's hardware support them.
 
-After the higher-priority NVIDIA feature work, continue investigating the game's shadow and lighting artifacts. Any replacement should preserve Minecraft Dungeons II's visual identity while improving clearly broken or unstable shadow behaviour.
+This work remains evidence-driven: a provider is not advertised as supported until its lifecycle and output path have actually been qualified. Provider-specific failures should stay distinguishable from MCD2 host-integration failures.
+
+### 4. Ray Reconstruction — conditional
+
+Ray Reconstruction follows the broader-provider work if the existing renderer exposes a genuinely useful pre-denoised lighting/reflection boundary and the material/geometry guides needed to use RR correctly.
+
+The project will not add RR merely as a label or rebuild a large ray-traced renderer solely to claim support. If a real replaceable denoiser boundary exists, RR becomes a high-value quality feature; if not, it remains deferred.
+
+### 5. Shadows / lighting
+
+After the higher-priority feature work, continue investigating the game's shadow and lighting artifacts. Any replacement should preserve Minecraft Dungeons II's visual identity while improving clearly broken or unstable shadow behaviour.
 
 ## Parallel / non-blocking work
 
 - Public ReShade/native interoperability improvements.
-- OptiScaler compatibility and alternative reconstruction providers.
 - Windows qualification.
 - Physical-controller qualification.
 - Long-session and wider lifecycle testing.
