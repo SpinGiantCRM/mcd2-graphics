@@ -1,0 +1,508 @@
+{
+  "scope": "Application presentation intervals; stationary hub; not end-to-end latency or physical scanout",
+  "results": [
+    {
+      "mode": "native",
+      "runs": 6,
+      "intervalsPerRun": 1199,
+      "meanPresentationFPS": 102.54173534172823,
+      "minimumRunFPS": 102.29383822272996,
+      "maximumRunFPS": 102.71194485607272,
+      "meanIntervalMs": 9.752143591882124,
+      "meanRunP95Ms": 11.1113,
+      "meanRunP99Ms": 11.618083333333333
+    },
+    {
+      "mode": "dlaa",
+      "runs": 3,
+      "intervalsPerRun": 1199,
+      "meanPresentationFPS": 89.90489567003523,
+      "minimumRunFPS": 89.75677359148808,
+      "maximumRunFPS": 90.02746408304013,
+      "meanIntervalMs": 11.122882068390325,
+      "meanRunP95Ms": 12.6932,
+      "meanRunP99Ms": 13.398266666666666
+    },
+    {
+      "mode": "quality",
+      "runs": 3,
+      "intervalsPerRun": 1199,
+      "meanPresentationFPS": 129.32947143353886,
+      "minimumRunFPS": 129.0261276832444,
+      "maximumRunFPS": 129.58557301659607,
+      "meanIntervalMs": 7.7322142896858495,
+      "meanRunP95Ms": 8.942933333333333,
+      "meanRunP99Ms": 9.510966666666667
+    },
+    {
+      "mode": "balanced",
+      "runs": 3,
+      "intervalsPerRun": 1199,
+      "meanPresentationFPS": 139.6989102983013,
+      "minimumRunFPS": 139.47911263644465,
+      "maximumRunFPS": 140.11997846195825,
+      "meanIntervalMs": 7.1582844592716155,
+      "meanRunP95Ms": 8.2491,
+      "meanRunP99Ms": 8.5688
+    },
+    {
+      "mode": "performance",
+      "runs": 3,
+      "intervalsPerRun": 1199,
+      "meanPresentationFPS": 139.28685060768825,
+      "minimumRunFPS": 139.1865919315541,
+      "maximumRunFPS": 139.34780624365104,
+      "meanIntervalMs": 7.179430497636919,
+      "meanRunP95Ms": 8.3488,
+      "meanRunP99Ms": 8.919333333333334
+    }
+  ],
+  "runDetails": {
+    "dlaa": [
+      {
+        "mode": "dlaa",
+        "run": 0,
+        "intervals": 1199,
+        "durationSeconds": 13.3583233,
+        "meanMs": 11.141220433694746,
+        "medianMs": 11.0004,
+        "p95Ms": 12.7007,
+        "p99Ms": 13.4232,
+        "applicationPresentFPS": 89.75677359148808,
+        "input": [
+          3840,
+          2160
+        ],
+        "output": [
+          3840,
+          2160
+        ],
+        "phase": 2,
+        "nativeIntentMode": 1,
+        "modeVerifiedBy": "DLAA UI selection and full-resolution feature-created receipt matching applied revision 1459"
+      },
+      {
+        "mode": "dlaa",
+        "run": 1,
+        "intervals": 1199,
+        "durationSeconds": 13.3181581,
+        "meanMs": 11.10772151793161,
+        "medianMs": 10.975,
+        "p95Ms": 12.6915,
+        "p99Ms": 13.3209,
+        "applicationPresentFPS": 90.02746408304013,
+        "input": [
+          3840,
+          2160
+        ],
+        "output": [
+          3840,
+          2160
+        ],
+        "phase": 2,
+        "nativeIntentMode": 1,
+        "modeVerifiedBy": "DLAA UI selection and full-resolution feature-created receipt matching applied revision 1459"
+      },
+      {
+        "mode": "dlaa",
+        "run": 2,
+        "intervals": 1199,
+        "durationSeconds": 13.3325254,
+        "meanMs": 11.11970425354462,
+        "medianMs": 10.9713,
+        "p95Ms": 12.6874,
+        "p99Ms": 13.4507,
+        "applicationPresentFPS": 89.93044933557749,
+        "input": [
+          3840,
+          2160
+        ],
+        "output": [
+          3840,
+          2160
+        ],
+        "phase": 2,
+        "nativeIntentMode": 1,
+        "modeVerifiedBy": "DLAA UI selection and full-resolution feature-created receipt matching applied revision 1459"
+      }
+    ],
+    "quality": [
+      {
+        "mode": "quality",
+        "run": 0,
+        "intervals": 1199,
+        "durationSeconds": 9.2525732,
+        "meanMs": 7.716908423686405,
+        "medianMs": 7.5463,
+        "p95Ms": 8.93,
+        "p99Ms": 9.453,
+        "applicationPresentFPS": 129.58557301659607,
+        "input": [
+          2560,
+          1440
+        ],
+        "nativeIntentMode": 2,
+        "output": [
+          3840,
+          2160
+        ],
+        "phase": 2
+      },
+      {
+        "mode": "quality",
+        "run": 1,
+        "intervals": 1199,
+        "durationSeconds": 9.267510099999999,
+        "meanMs": 7.729366221851543,
+        "medianMs": 7.5381,
+        "p95Ms": 8.9481,
+        "p99Ms": 9.583,
+        "applicationPresentFPS": 129.3767136007761,
+        "input": [
+          2560,
+          1440
+        ],
+        "nativeIntentMode": 2,
+        "output": [
+          3840,
+          2160
+        ],
+        "phase": 2
+      },
+      {
+        "mode": "quality",
+        "run": 2,
+        "intervals": 1199,
+        "durationSeconds": 9.2926915,
+        "meanMs": 7.7503682235196,
+        "medianMs": 7.5499,
+        "p95Ms": 8.9507,
+        "p99Ms": 9.4969,
+        "applicationPresentFPS": 129.0261276832444,
+        "input": [
+          2560,
+          1440
+        ],
+        "nativeIntentMode": 2,
+        "output": [
+          3840,
+          2160
+        ],
+        "phase": 2
+      }
+    ],
+    "balanced": [
+      {
+        "mode": "balanced",
+        "run": 0,
+        "intervals": 1199,
+        "durationSeconds": 8.5569525,
+        "meanMs": 7.136741034195163,
+        "medianMs": 6.9521,
+        "p95Ms": 8.2329,
+        "p99Ms": 8.5536,
+        "applicationPresentFPS": 140.11997846195825,
+        "input": [
+          2228,
+          1256
+        ],
+        "nativeIntentMode": 2,
+        "output": [
+          3840,
+          2160
+        ],
+        "phase": 2
+      },
+      {
+        "mode": "balanced",
+        "run": 1,
+        "intervals": 1199,
+        "durationSeconds": 8.5951275,
+        "meanMs": 7.168580066722268,
+        "medianMs": 6.981,
+        "p95Ms": 8.2548,
+        "p99Ms": 8.5762,
+        "applicationPresentFPS": 139.497639796501,
+        "input": [
+          2228,
+          1256
+        ],
+        "nativeIntentMode": 2,
+        "output": [
+          3840,
+          2160
+        ],
+        "phase": 2
+      },
+      {
+        "mode": "balanced",
+        "run": 2,
+        "intervals": 1199,
+        "durationSeconds": 8.5962692,
+        "meanMs": 7.169532276897415,
+        "medianMs": 6.9798,
+        "p95Ms": 8.2596,
+        "p99Ms": 8.5766,
+        "applicationPresentFPS": 139.47911263644465,
+        "input": [
+          2228,
+          1256
+        ],
+        "nativeIntentMode": 2,
+        "output": [
+          3840,
+          2160
+        ],
+        "phase": 2
+      }
+    ],
+    "performance": [
+      {
+        "mode": "performance",
+        "run": 0,
+        "intervals": 1199,
+        "durationSeconds": 8.6057066,
+        "meanMs": 7.177403336113428,
+        "medianMs": 7.008,
+        "p95Ms": 8.2901,
+        "p99Ms": 8.8038,
+        "applicationPresentFPS": 139.32615364785966,
+        "input": [
+          1920,
+          1080
+        ],
+        "nativeIntentMode": 2,
+        "output": [
+          3840,
+          2160
+        ],
+        "phase": 2
+      },
+      {
+        "mode": "performance",
+        "run": 1,
+        "intervals": 1199,
+        "durationSeconds": 8.6143355,
+        "meanMs": 7.184600083402835,
+        "medianMs": 6.9988,
+        "p95Ms": 8.4474,
+        "p99Ms": 9.0326,
+        "applicationPresentFPS": 139.1865919315541,
+        "input": [
+          1920,
+          1080
+        ],
+        "nativeIntentMode": 2,
+        "output": [
+          3840,
+          2160
+        ],
+        "phase": 2
+      },
+      {
+        "mode": "performance",
+        "run": 2,
+        "intervals": 1199,
+        "durationSeconds": 8.6043694,
+        "meanMs": 7.176288073394495,
+        "medianMs": 6.9824,
+        "p95Ms": 8.3089,
+        "p99Ms": 8.9216,
+        "applicationPresentFPS": 139.34780624365104,
+        "input": [
+          1920,
+          1080
+        ],
+        "nativeIntentMode": 2,
+        "output": [
+          3840,
+          2160
+        ],
+        "phase": 2
+      }
+    ],
+    "native": [
+      {
+        "mode": "native-a",
+        "run": 0,
+        "intervals": 1199,
+        "durationSeconds": 11.6825635,
+        "meanMs": 9.743589241034195,
+        "medianMs": 9.6323,
+        "p95Ms": 10.9966,
+        "p99Ms": 11.4938,
+        "applicationPresentFPS": 102.6315842409074,
+        "input": [
+          3840,
+          2160
+        ],
+        "output": [
+          3840,
+          2160
+        ],
+        "phase": 2,
+        "nativeIntentMode": 0,
+        "modeVerifiedBy": "Native UI screenshot and matching runtime intent/ack revision 1460"
+      },
+      {
+        "mode": "native-a",
+        "run": 1,
+        "intervals": 1199,
+        "durationSeconds": 11.6839792,
+        "meanMs": 9.74476997497915,
+        "medianMs": 9.6391,
+        "p95Ms": 11.0806,
+        "p99Ms": 11.6586,
+        "applicationPresentFPS": 102.61914879136381,
+        "input": [
+          3840,
+          2160
+        ],
+        "output": [
+          3840,
+          2160
+        ],
+        "phase": 2,
+        "nativeIntentMode": 0,
+        "modeVerifiedBy": "Native UI screenshot and matching runtime intent/ack revision 1460"
+      },
+      {
+        "mode": "native-a",
+        "run": 2,
+        "intervals": 1199,
+        "durationSeconds": 11.6994714,
+        "meanMs": 9.75769090909091,
+        "medianMs": 9.6625,
+        "p95Ms": 11.1534,
+        "p99Ms": 11.6004,
+        "applicationPresentFPS": 102.48326261988213,
+        "input": [
+          3840,
+          2160
+        ],
+        "output": [
+          3840,
+          2160
+        ],
+        "phase": 2,
+        "nativeIntentMode": 0,
+        "modeVerifiedBy": "Native UI screenshot and matching runtime intent/ack revision 1460"
+      },
+      {
+        "mode": "native-b",
+        "run": 0,
+        "intervals": 1199,
+        "durationSeconds": 11.673423199999998,
+        "meanMs": 9.735965971643036,
+        "medianMs": 9.5924,
+        "p95Ms": 11.1965,
+        "p99Ms": 11.6494,
+        "applicationPresentFPS": 102.71194485607272,
+        "input": [
+          3840,
+          2160
+        ],
+        "nativeIntentMode": 0,
+        "output": [
+          3840,
+          2160
+        ],
+        "phase": 2
+      },
+      {
+        "mode": "native-b",
+        "run": 1,
+        "intervals": 1199,
+        "durationSeconds": 11.721136099999999,
+        "meanMs": 9.77575988323603,
+        "medianMs": 9.6542,
+        "p95Ms": 11.1512,
+        "p99Ms": 11.694,
+        "applicationPresentFPS": 102.29383822272996,
+        "input": [
+          3840,
+          2160
+        ],
+        "nativeIntentMode": 0,
+        "output": [
+          3840,
+          2160
+        ],
+        "phase": 2
+      },
+      {
+        "mode": "native-b",
+        "run": 2,
+        "intervals": 1199,
+        "durationSeconds": 11.6963476,
+        "meanMs": 9.755085571309424,
+        "medianMs": 9.6394,
+        "p95Ms": 11.0895,
+        "p99Ms": 11.6123,
+        "applicationPresentFPS": 102.51063331941333,
+        "input": [
+          3840,
+          2160
+        ],
+        "nativeIntentMode": 0,
+        "output": [
+          3840,
+          2160
+        ],
+        "phase": 2
+      }
+    ]
+  },
+  "configuration": {
+    "date": "2026-10-04",
+    "GPU": "NVIDIA GeForce RTX 4080 SUPER",
+    "driver": "615.71.09",
+    "platform": "CachyOS KDE Wayland; Proton Experimental; Gamescope HDR enabled; inverse tone mapping disabled",
+    "kernel": "7.2.8-1-cachyos-bore",
+    "cpu": "AMD Ryzen 7 7800X3D 8-Core Processor",
+    "gameBuild": "25647713",
+    "modVersion": "0.1.0-preview.1",
+    "graphicsQuality": "Custom (existing shadow/HDR research settings; not stock Ultra)",
+    "rendererOverrides": {
+      "SystemSettings": {
+        "r.Lumen.ScreenProbeGather.ShortRangeAO": "0",
+        "r.AntiAliasingMethod": "2",
+        "r.ScreenPercentage": "100",
+        "r.AllowHDR": "1",
+        "r.HDR.EnableHDROutput": "1",
+        "r.HDR.Display.OutputDevice": "3",
+        "r.HDR.Display.ColorGamut": "2",
+        "r.HDR.UI.CompositeMode": "1"
+      }
+    },
+    "scalability": {
+      "sg.ResolutionQuality": "100",
+      "sg.ViewDistanceQuality": "3",
+      "sg.AntiAliasingQuality": "3",
+      "sg.ShadowQuality": "2",
+      "sg.GlobalIlluminationQuality": "3",
+      "sg.ReflectionQuality": "3",
+      "sg.PostProcessQuality": "3",
+      "sg.TextureQuality": "3",
+      "sg.EffectsQuality": "2",
+      "sg.FoliageQuality": "3",
+      "sg.ShadingQuality": "3",
+      "sg.LandscapeQuality": "3"
+    },
+    "video": {
+      "/Script/Engine.GameUserSettings": {
+        "bUseVSync": "False",
+        "ResolutionSizeX": "3840",
+        "ResolutionSizeY": "2160",
+        "LastUserConfirmedResolutionSizeX": "3200",
+        "LastUserConfirmedResolutionSizeY": "1800",
+        "FullscreenMode": "1",
+        "FrameRateLimit": "0.000000",
+        "bUseHDRDisplayOutput": "True",
+        "HDRDisplayOutputNits": "410"
+      }
+    },
+    "scope": "Stationary solo hub scene; CPU finish_present intervals; 3 x 1199 intervals per mode; no GPU queries, pixel readbacks, video recording or Reflex/FG observer during timing",
+    "samplerSHA256": "d89fe5f3733d3be72172afc0c2ca680ba71597229af68a3754696aff6389fe60"
+  }
+}
