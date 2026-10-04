@@ -8,7 +8,7 @@ for k in ('ReShade','RenoDXUEExtended'):
  d=lock['dependencies'][k];baseline[d['file']]=d['sha256']
 baseline.update(lock['dependencies']['BlueprintLoader']['files']);checks=[]
 with tempfile.TemporaryDirectory(prefix='mcd2-install-gate-') as td:
- root=Path(td)
+ root=Path(td).resolve()
  try:m.install(root,a.dlss_runtime);raise AssertionError('Missing dependency accepted')
  except ValueError:checks.append('missing dependency refused before writes')
  for n,sha in baseline.items():

@@ -107,7 +107,9 @@ with Steam exit code 0 (approximately 12 minutes 56 seconds).
 
 Raw local process probes, build logs, UI screenshot and mod-state snapshots are
 under `dist/validation/` and excluded from Git. Account/character saves and raw
-private logs are not included in the candidate archive. Remote CI has not run.
+private logs are not included in the candidate archive. Remote CI results are
+available in the GitHub pull request. The Windows CI fixture resolves temporary
+paths like the real installer CLI, including the runner's Windows 8.3 aliases.
 
 The fixed addon SHA-256 is
 `645de6fcba098eeaaef4b571323f8fbd63a0c5a5b355288fac642c5b3028b112`.

@@ -14,7 +14,8 @@ class InstallerFilesystemTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix='mcd2-installer-')
         self.addCleanup(self.temp.cleanup)
-        base = Path(self.temp.name)
+        # Match the CLI's resolved-root contract, including Windows 8.3 aliases.
+        base = Path(self.temp.name).resolve()
         self.source = base / 'release'
         self.root = base / 'game'
         self.source.mkdir()
