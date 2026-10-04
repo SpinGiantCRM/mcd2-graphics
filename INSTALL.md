@@ -18,6 +18,11 @@ The installer verifies the package, game executable and dependencies, refuses ov
 
 Launch once: a fresh mod profile defaults to **Native**, remembering **Quality / 67%**. Open Settings → Video and choose NVIDIA DLSS. The main menu stays Native; your saved DLSS selection activates in gameplay. Check the help panel for active/pending/fallback status. At 4K the slider cannot request less than 17%.
 
+The Windows fix candidate detects unsupported rendering adapters before reducing
+source resolution. On AMD, the help panel reports **DLSS unavailable; native
+anti-aliasing is active.** Your DLSS preference remains saved. Close ReShade's
+first-run overlay before testing game keyboard shortcuts.
+
 ## HDR
 
 See [HDR setup](docs/HDR.md). HDR is a separate opt-in configuration; install alone does not enable OS HDR or change your display settings.

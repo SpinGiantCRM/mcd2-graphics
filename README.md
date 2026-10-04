@@ -28,7 +28,7 @@ The package includes only this mod's UI, native addon and motion/exposure conver
 
 ## Scope and limitations
 
-This is a preview, not an official RenoDX, NVIDIA, Mojang or Microsoft release. The renderer uses a version-pinned ReShade adapter and game-specific resource layouts. Output is limited to 640×360 through 3840×2160. Split-screen, arbitrary aspect ratios, device recreation and long sessions are not qualified. Windows testing is still needed; local development tests used Proton Experimental on an RTX 4080 SUPER. Resolution changes can fall back to Native; select DLSS again after the new resolution settles.
+This is a preview, not an official RenoDX, NVIDIA, Mojang or Microsoft release. The renderer uses a version-pinned ReShade adapter and game-specific resource layouts. Output is limited to 640×360 through 3840×2160. Split-screen, arbitrary aspect ratios, device recreation and long sessions are not qualified. The Windows fix candidate passed bounded startup and AMD Radeon 860M native fallback checks; see [Windows validation](docs/WINDOWS_VALIDATION_2026-10-05.md). NVIDIA DLSS execution with the rebuilt addon still needs qualification. Original development tests used Proton Experimental on an RTX 4080 SUPER. Resolution changes can fall back to Native; select DLSS again after the new resolution settles.
 
 Mouse and keyboard controls have been exercised. Controller input follows the game's normal focus/navigation and D-pad actions; a physical controller qualification remains outstanding. Changing input devices can move selection back to the first native setting. Native graphics-reset integration currently recognizes the English confirmation text.
 

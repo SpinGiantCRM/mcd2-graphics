@@ -1,7 +1,7 @@
 """Run filesystem installation gates against an isolated fixture supplied by developer."""
 from pathlib import Path
-import argparse, tempfile, json, subprocess, importlib.util
-p=argparse.ArgumentParser();p.add_argument('--reference-game',required=True,type=Path);p.add_argument('--dlss-runtime',required=True,type=Path);a=p.parse_args()
+import argparse, tempfile, json, shutil, importlib.util
+p=argparse.ArgumentParser();p.add_argument('--reference-game',required=True,type=Path);p.add_argument('--dlss-runtime',required=True,type=Path);p.add_argument('--output',type=Path,default=Path(__file__).parent/'docs/install-validation.json');a=p.parse_args()
 spec=importlib.util.spec_from_file_location('installer',Path(__file__).with_name('install.py'));m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
 lock=json.loads((m.HERE/'dependencies.lock.json').read_text());baseline={'Dungeons/Binaries/Win64/Dungeons-Win64-Shipping.exe':lock['game']['exeSHA256']}
 for k in ('ReShade','RenoDXUEExtended'):
@@ -12,7 +12,7 @@ with tempfile.TemporaryDirectory(prefix='mcd2-install-gate-') as td:
  try:m.install(root,a.dlss_runtime);raise AssertionError('Missing dependency accepted')
  except ValueError:checks.append('missing dependency refused before writes')
  for n,sha in baseline.items():
-  dest=root/n;dest.parent.mkdir(parents=True,exist_ok=True);subprocess.run(['cp','--reflink=auto',str(a.reference_game/n),str(dest)],check=True)
+  dest=root/n;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(a.reference_game/n,dest)
  protected=root/'Dungeons/Content/Paks/~mods/Unrelated/readme.txt';protected.parent.mkdir(parents=True);protected.write_text('unrelated mod')
  m.install(root,a.dlss_runtime);checks.append('fresh install and copied hashes verified')
  try:m.install(root,a.dlss_runtime);raise AssertionError('Duplicate install accepted')
@@ -29,5 +29,5 @@ with tempfile.TemporaryDirectory(prefix='mcd2-install-gate-') as td:
   try:m.target(root,name);raise AssertionError('Unsafe path accepted')
   except ValueError:pass
  checks.append('unsafe paths rejected')
-(m.HERE/'docs/install-validation.json').write_text(json.dumps({'isolatedFixture':True,'checks':checks},indent=2)+'\n')
+a.output.write_text(json.dumps({'isolatedFixture':True,'checks':checks},indent=2)+'\n')
 print('All '+str(len(checks))+' filesystem gates passed')

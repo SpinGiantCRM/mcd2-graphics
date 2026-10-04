@@ -1,10 +1,10 @@
 {
-  "version": "0.1.0-preview.1",
+  "version": "0.1.0-preview.1-windows-fix.1",
   "files": {
     "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.utoc": "bbf4058e5ee3be5e0d87a3374b577ebd9f324c2e4202d19c6c09cb6e29e01f04",
     "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.ucas": "833f841817d846e11d4b9205b6095a1aa1dd39ffdf3b06b40cd53a3d09d2e927",
     "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.pak": "50ed8584ab79e37b177f48af5bc0bca1251e3a30899d509693945972b79e209e",
-    "Dungeons/Binaries/Win64/mcd2-graphics.addon64": "55865c4d6bf179f0f19a7d47194be709a79f54f566407798b67aa325cd3d8218",
+    "Dungeons/Binaries/Win64/mcd2-graphics.addon64": "645de6fcba098eeaaef4b571323f8fbd63a0c5a5b355288fac642c5b3028b112",
     "Dungeons/Binaries/Win64/MCD2Graphics/live_dense.cso": "1f7df8df67dce0f2edc106ff709855ec00794b2879d59522731f98636feb72d3"
   }
 }

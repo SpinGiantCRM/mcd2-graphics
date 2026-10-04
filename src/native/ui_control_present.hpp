@@ -1,4 +1,16 @@
 #pragma once
+#include "upscaler_support.hpp"
+static bool ui_dlss_adapter_candidate(a::command_queue *queue,unsigned &vendor){
+ auto *device=reinterpret_cast<ID3D12Device*>(queue->get_device()->get_native());
+ IDXGIFactory4 *factory=nullptr;IDXGIAdapter1 *adapter=nullptr;DXGI_ADAPTER_DESC1 desc{};
+ if(FAILED(CreateDXGIFactory1(IID_PPV_ARGS(&factory))))return false;
+ auto result=factory->EnumAdapterByLuid(device->GetAdapterLuid(),IID_PPV_ARGS(&adapter));
+ factory->Release();
+ if(FAILED(result))return false;
+ result=adapter->GetDesc1(&desc);adapter->Release();
+ if(FAILED(result))return false;
+ vendor=desc.VendorId;return mcd2ui::dlss_adapter_candidate(vendor);
+}
 static std::vector<uint8_t> ui_read_file(const fs::path &p){
  std::ifstream in(p,std::ios::binary|std::ios::ate);if(!in)return {};auto n=in.tellg();if(n<64||n>8192)return {};
  std::vector<uint8_t> b(size_t(n),0);in.seekg(0);in.read(reinterpret_cast<char*>(b.data()),n);if(!in)return {};return b;
@@ -18,10 +30,13 @@ static bool ui_runtime_ack(unsigned phase,unsigned error=0){
 }
 static bool ui_poll_intent(){
  if(ui_control.saves.empty()){
-  wchar_t local[32768];auto n=GetEnvironmentVariableW(L"LOCALAPPDATA",local,32768);if(!n||n>=32768)return false;
+  // UE render threads can have a small Windows stack. Keep the 64 KiB path
+  // buffer on the heap; even an initialization-only local reserves its frame
+  // on every call to this present callback.
+  std::vector<wchar_t> local(32768);auto n=GetEnvironmentVariableW(L"LOCALAPPDATA",local.data(),DWORD(local.size()));if(!n||n>=local.size())return false;
   ui_control.session=uint32_t((GetTickCount64() ^ (uint64_t(GetCurrentProcessId())<<12)) & 0x7fffffff);if(!ui_control.session)ui_control.session=1;
-  ui_control.saves=fs::path(local)/L"Dungeons2"/L"Saved"/L"SaveGames";
-  root=fs::path(local)/L"Dungeons2"/L"Saved"/L"MCD2Graphics";
+  ui_control.saves=fs::path(local.data())/L"Dungeons2"/L"Saved"/L"SaveGames";
+  root=fs::path(local.data())/L"Dungeons2"/L"Saved"/L"MCD2Graphics";
   std::error_code directory_error;fs::create_directories(root,directory_error);if(directory_error){ui_control.saves.clear();return false;}
   ui_control.receipt.open(root/L"MCD2GraphicsNativeReceipt.jsonl",std::ios::app);
  }
@@ -59,10 +74,21 @@ static void ui_apply_queued(a::command_queue *q,std::unique_lock<std::recursive_
   lean.wanted=false;lean.rebuild=false;
   // Existing gate restores native history; cleanup checks recordings and a fresh GPU fence.
   if(live_fixture){if(lean.pending || lean.history_dirty || !lean.borrow.recordings.empty() || lean.borrow.blocked)return;if(!lean_cleanup(q,guard))return;lean_write_status();}
+  // Decline unsupported rendering adapters before asking the game to reduce
+  // source resolution. Shader observations may never arrive on these systems.
+  unsigned vendor=0;
+  if(!ui_control.fallback && ui_control.desired.mode!=0 && !ui_dlss_adapter_candidate(q,vendor)){
+   ui_control.fallback=true;ui_control.fallback_error=1;
+   ui_control.receipt<<"{\"event\":\"adapter_declined\",\"revision\":"<<ui_control.desired.revision<<",\"vendor\":"<<vendor<<"}\n";ui_control.receipt.flush();
+  }
   if(ui_control.fallback){if(!ui_runtime_ack(3,ui_control.fallback_error))return;ui_control.pending=false;ui_control.observing=false;return;}
-  if(!ui_runtime_ack(1))return;ui_control.phase=1;ui_control.observing=true;return;
+  if(!ui_runtime_ack(1))return;ui_control.phase=1;ui_control.observing=true;ui_control.queued_at=GetTickCount64();return;
  }
  if(ui_control.phase==1){
+  if(ui_control.desired.mode!=0 && mcd2ui::source_wait_expired(GetTickCount64()-ui_control.queued_at)){
+   ui_control.fallback=true;ui_control.fallback_error=1;ui_control.phase=0;
+   ui_control.receipt<<"{\"event\":\"source_wait_timeout\",\"revision\":"<<ui_control.desired.revision<<"}\n";ui_control.receipt.flush();return;
+  }
   if(ui_control.desired.sourceRevision!=ui_control.desired.revision || ui_control.desired.sourceSession!=ui_control.session)return;
   if(ui_control.desired.mode==0){if(!ui_runtime_ack(2))return;ui_control.applied_revision=ui_control.desired.revision;ui_control.pending=false;ui_control.observing=false;ui_control.phase=2;return;}
   auto &c=ui_control;
