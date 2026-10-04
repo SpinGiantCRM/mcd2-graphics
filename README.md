@@ -36,6 +36,10 @@ HDR uses the separately maintained UE Extended addon. Peak brightness must be ca
 
 See [validation](docs/VALIDATION.md) for release gates and [build notes](docs/BUILD.md) for source/dependency details. Report game build, GPU/driver, output resolution, preset and reproduction steps. Remove account information, party codes, local paths and authentication data from reports.
 
+## Local benchmark
+
+At 4K output on an RTX 4080 SUPER, the short stationary hub sample averaged 102.54 presentation FPS Native and 129.33 Quality. Custom graphics were held fixed; this is not stock Ultra or a latency benchmark. [Method, all presets and sanitised data](docs/BENCHMARK_2026-10-04.md).
+
 ## Credits
 
 ReShade, RenoDX/UE Extended, NeoRune and Blueprint Loader contributors, and NVIDIA. See [third-party notices](THIRD_PARTY_NOTICES.md). Development used AI assistance with local build and runtime checks.
