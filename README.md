@@ -1,6 +1,6 @@
 # MCD2 Graphics — experimental preview
 
-[Download](https://github.com/SpinGiantCRM/mcd2-graphics/releases) · [Nexus page](https://www.nexusmods.com/minecraftdungeons2/mods/87)
+[Download](https://github.com/SpinGiantCRM/mcd2-graphics/releases) · [Nexus page](https://www.nexusmods.com/minecraftdungeons2/mods/87) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md) · [Validation](docs/VALIDATION.md)
 
 DLAA and DLSS Super Resolution in Minecraft Dungeons II's own Video menu, alongside a documented RenoDX UE Extended HDR setup.
 
