@@ -1,0 +1,120 @@
+name: Compatibility / test report
+description: Report a successful or unsuccessful hardware/platform test
+title: "[Compatibility] "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Compatibility reports are useful even when everything works. Please describe the exact environment and what you actually tested.
+
+        **Remove account information, party codes, authentication data, private local paths and unrelated logs/screenshots before posting.**
+
+  - type: dropdown
+    id: result
+    attributes:
+      label: Overall result
+      options:
+        - Passed for the tested scope
+        - Passed with minor issues
+        - Failed
+        - Mixed / needs more testing
+    validations:
+      required: true
+
+  - type: input
+    id: mod_version
+    attributes:
+      label: MCD2 Graphics version
+      placeholder: v0.1.0-preview.1
+    validations:
+      required: true
+
+  - type: input
+    id: game_build
+    attributes:
+      label: Minecraft Dungeons II build
+      placeholder: 25647713
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - Windows
+        - Proton / Linux
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: platform_details
+    attributes:
+      label: Platform details
+      description: Windows version, or Linux distribution and Proton version.
+    validations:
+      required: true
+
+  - type: input
+    id: gpu_driver
+    attributes:
+      label: GPU and driver
+    validations:
+      required: true
+
+  - type: input
+    id: display
+    attributes:
+      label: Display / output mode
+      description: Resolution, aspect ratio, refresh rate and HDR state if relevant.
+      placeholder: 3840x2160, 16:9, 240 Hz, HDR on
+    validations:
+      required: true
+
+  - type: input
+    id: controller
+    attributes:
+      label: Controller / input hardware
+      description: Optional. Include exact physical controller model if you tested one.
+      placeholder: Xbox Series controller over USB
+
+  - type: input
+    id: dependencies
+    attributes:
+      label: ReShade and dependency versions
+      placeholder: ReShade 6.8.0; Blueprint Loader 1.1; UE Extended nightly-20260928
+    validations:
+      required: true
+
+  - type: textarea
+    id: tested
+    attributes:
+      label: What you tested
+      description: List the modes, transitions and approximate duration actually exercised.
+      placeholder: |
+        - Native -> Quality -> Native
+        - DLAA -> Quality
+        - Main menu -> gameplay -> pause menu -> gameplay
+        - Played for about 2 hours
+    validations:
+      required: true
+
+  - type: textarea
+    id: issues
+    attributes:
+      label: Problems observed
+      description: Write "None observed" if nothing failed. Do not generalize beyond the scope you tested.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Confirmation
+      options:
+        - label: This report only claims compatibility for the environment and test scope described above.
+          required: true
+        - label: I removed account information, party codes, authentication data and private local paths from anything attached.
+          required: true
