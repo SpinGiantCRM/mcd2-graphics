@@ -18,6 +18,9 @@ The shipped converter is the originally qualified bytecode. Rebuilding with a di
 
 ## Windows native addon build
 
+Preserve the [Windows compatibility requirements](WINDOWS_COMPATIBILITY.md)
+when changing either platform's build or native code.
+
 The native-only build was executed on Windows with LLVM MinGW
 20260922 (UCRT x64). Supply the pinned headers and explicit compiler paths:
 

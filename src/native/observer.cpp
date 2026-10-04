@@ -638,6 +638,8 @@ extern "C" __declspec(dllexport) const char *DESCRIPTION="Native graphics-menu r
 #define REMOVE(ev,fn) reshade::unregister_event<reshade::addon_event::ev>(fn)
 BOOL WINAPI DllMain(HMODULE module,DWORD reason,LPVOID) {
  if(reason==DLL_PROCESS_ATTACH) {
+  // Keep this 64 KiB Windows path buffer off the DLL-loading thread's stack.
+  // See docs/WINDOWS_COMPATIBILITY.md before replacing it with a fixed array.
   std::vector<wchar_t> module_path(32768);auto path_size=GetModuleFileNameW(module,module_path.data(),DWORD(module_path.size()));
   if(!path_size || path_size>=module_path.size())return FALSE;
   asset_root=fs::path(module_path.data()).parent_path()/L"MCD2Graphics";
