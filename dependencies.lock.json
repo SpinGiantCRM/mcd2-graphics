@@ -1,0 +1,43 @@
+{
+  "game": {
+    "steamBuildID": "25647713",
+    "exeSHA256": "231147bd0c655a4ae73f90873675d42917f2bfb3a9ee164fc64f217d6d6bd4ef"
+  },
+  "dependencies": {
+    "ReShade": {
+      "version": "6.8.0.2155 full addon support",
+      "file": "Dungeons/Binaries/Win64/dxgi.dll",
+      "sha256": "0cee63f9c9f13f3ac909c5b4903f4dbb4b719a7ab3b4f13b0deaf83c814b94f7",
+      "url": "https://reshade.me/downloads/ReShade_Setup_6.8.0_Addon.exe",
+      "installerSHA256": "afe4c8f13048306307983b8b3d41d5bf00a86820440b0e57dea10950e1176445"
+    },
+    "RenoDXUEExtended": {
+      "file": "Dungeons/Binaries/Win64/renodx-ue-extended.addon64",
+      "sha256": "7941e06607c90f187688382fd259d483cde78f54ccb72099b239e8d45f5f87ac",
+      "url": "https://github.com/marat569/renodx/releases/download/nightly-20260928/renodx-ue-extended.addon64",
+      "releaseTag": "nightly-20260928"
+    },
+    "BlueprintLoader": {
+      "version": "1.1",
+      "files": {
+        "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.ucas": "ea54c0f1b7614d0bc19d672b42b771324638b04b7a1a987e8445307fe1549a4f",
+        "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.utoc": "d51cb0005bbfcc8e506f403b388f6b731c08e7df5b8bb0f51a1018e733462110",
+        "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.pak": "75e7144577253917f6da7312ef5e585b12fb728226a22b0938323751a6b555cd"
+      },
+      "url": "https://www.nexusmods.com/minecraftdungeons2/mods/2"
+    },
+    "DLSSRuntime": {
+      "sdkCommit": "374959484e79a640feaba44c93ac8cfb0a03f5b5",
+      "sha256": "3975567b8943c53acce397f2b72380092f84f162d00b0d2c7d08a1025c563983",
+      "url": "https://raw.githubusercontent.com/NVIDIA/DLSS/374959484e79a640feaba44c93ac8cfb0a03f5b5/lib/Windows_x86_64/rel/nvngx_dlss.dll",
+      "bundled": false
+    }
+  },
+  "buildDependencies": {
+    "NeoRuneSDK": "0.1.2",
+    "NeoRuneTool": "0.1.2",
+    "dotnetSDK": "10.0.401",
+    "ReShadeSDK": "v6.8.0 API20",
+    "NVIDIASDKCommit": "374959484e79a640feaba44c93ac8cfb0a03f5b5"
+  }
+}

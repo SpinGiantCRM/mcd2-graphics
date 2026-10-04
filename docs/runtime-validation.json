@@ -1,0 +1,47 @@
+{
+  "previewVersion": "0.1.0-preview.1",
+  "output": [
+    3840,
+    2160
+  ],
+  "platform": "Proton Experimental",
+  "gpu": "NVIDIA RTX 4080 SUPER",
+  "archivedUEExtended": "nightly-20260928",
+  "sampledRuns": {
+    "quality": {
+      "evaluations": 8146,
+      "failures": 0,
+      "transientFallbacks": 2,
+      "peakBundles": 5,
+      "nativeResets": 3
+    },
+    "dlaa": {
+      "evaluations": 3331,
+      "failures": 0,
+      "transientFallbacks": 0,
+      "peakBundles": 5,
+      "nativeResets": 1
+    },
+    "quality_return": {
+      "evaluations": 7009,
+      "failures": 0,
+      "transientFallbacks": 0,
+      "peakBundles": 5,
+      "nativeResets": 1
+    },
+    "minimum_17_percent": {
+      "evaluations": 16728,
+      "failures": 0,
+      "transientFallbacks": 0,
+      "peakBundles": 6,
+      "nativeResets": 1
+    },
+    "quality_after_minimum": {
+      "evaluations": 998,
+      "failures": 0,
+      "transientFallbacks": 0,
+      "peakBundles": 5,
+      "nativeResets": 1
+    }
+  }
+}

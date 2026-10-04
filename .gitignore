@@ -1,0 +1,10 @@
+package/
+dist/
+__pycache__/
+*.obj
+*.dll
+*.addon64
+*.sav
+*.dmp
+*.log
+vendor/

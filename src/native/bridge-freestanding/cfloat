@@ -1,0 +1,2 @@
+// Clang target floating-point constants; no CRT declarations.
+#include <float.h>

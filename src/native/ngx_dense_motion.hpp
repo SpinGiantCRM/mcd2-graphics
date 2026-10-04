@@ -1,0 +1,34 @@
+// Owned GPU conversion pass. Live game pipeline integration is a later step.
+static ID3D12Resource *dense_host_buffer(ID3D12Device *device,EvalOwned &owned,const fs::path &path) {
+ std::ifstream input(path,std::ios::binary|std::ios::ate);if(!input)return nullptr;auto bytes=static_cast<uint64_t>(input.tellg());if(!bytes || bytes>16384)return nullptr;
+ auto *buffer=eval_buffer(device,owned,(bytes+255)&~255ull,D3D12_HEAP_TYPE_UPLOAD,D3D12_RESOURCE_STATE_GENERIC_READ);if(!buffer)return nullptr;
+ void *data=nullptr;D3D12_RANGE empty{0,0};if(FAILED(buffer->Map(0,&empty,&data)))return nullptr;std::memset(data,0,(bytes+255)&~255ull);input.seekg(0);input.read(static_cast<char*>(data),bytes);buffer->Unmap(0,nullptr);return input?buffer:nullptr;
+}
+static bool dense_gpu(ID3D12Device *resources,ID3D12Device *wrapped,EvalOwned &owned,ID3D12GraphicsCommandList *cmd,ID3D12Resource *depth,ID3D12Resource *motion,ID3D12Resource *exposure,const fs::path &base,const std::string &prefix,std::ofstream &log) {
+ auto desc_input=depth->GetDesc();auto *packed=eval_texture(resources,owned,static_cast<unsigned>(desc_input.Width),desc_input.Height,DXGI_FORMAT_R16G16B16A16_UNORM,false);if(!packed || !eval_upload(resources,owned,cmd,packed,base/(prefix+"-packed-motion.bin")))return false;
+ auto *pass=dense_host_buffer(resources,owned,base/(prefix+"-pass.bin"));auto *view=dense_host_buffer(resources,owned,base/(prefix+"-view.bin"));auto *exp=dense_host_buffer(resources,owned,base/(prefix+"-exposure-buffer.bin"));if(!pass || !view || !exp)return false;
+ std::ifstream shaderfile(root/"dense_motion.cso",std::ios::binary|std::ios::ate);if(!shaderfile)return false;std::vector<char> code(static_cast<size_t>(shaderfile.tellg()));shaderfile.seekg(0);shaderfile.read(code.data(),code.size());if(!shaderfile)return false;
+ D3D12_DESCRIPTOR_RANGE ranges[2]{};ranges[0]={D3D12_DESCRIPTOR_RANGE_TYPE_SRV,2,0,0,0};ranges[1]={D3D12_DESCRIPTOR_RANGE_TYPE_UAV,2,0,0,0};
+ D3D12_ROOT_PARAMETER params[5]{};params[0].ParameterType=D3D12_ROOT_PARAMETER_TYPE_CBV;params[0].Descriptor={0,0};params[1].ParameterType=D3D12_ROOT_PARAMETER_TYPE_CBV;params[1].Descriptor={1,0};params[2].ParameterType=D3D12_ROOT_PARAMETER_TYPE_SRV;params[2].Descriptor={2,0};params[3].ParameterType=params[4].ParameterType=D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;params[3].DescriptorTable={1,&ranges[0]};params[4].DescriptorTable={1,&ranges[1]};
+ D3D12_ROOT_SIGNATURE_DESC desc{5,params,0,nullptr,D3D12_ROOT_SIGNATURE_FLAG_NONE};ID3DBlob *blob=nullptr,*errors=nullptr;auto hr=D3D12SerializeRootSignature(&desc,D3D_ROOT_SIGNATURE_VERSION_1,&blob,&errors);owned.keep(blob);owned.keep(errors);if(FAILED(hr))return false;
+ ID3D12RootSignature *signature=nullptr;hr=wrapped->CreateRootSignature(0,blob->GetBufferPointer(),blob->GetBufferSize(),IID_PPV_ARGS(&signature));owned.keep(signature);if(FAILED(hr))return false;
+ D3D12_COMPUTE_PIPELINE_STATE_DESC pipeline{};pipeline.pRootSignature=signature;pipeline.CS={code.data(),code.size()};ID3D12PipelineState *pso=nullptr;hr=wrapped->CreateComputePipelineState(&pipeline,IID_PPV_ARGS(&pso));owned.keep(pso);if(FAILED(hr))return false;
+ D3D12_DESCRIPTOR_HEAP_DESC hd{};hd.Type=D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;hd.NumDescriptors=4;hd.Flags=D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;ID3D12DescriptorHeap *heap=nullptr;hr=wrapped->CreateDescriptorHeap(&hd,IID_PPV_ARGS(&heap));owned.keep(heap);if(FAILED(hr))return false;
+ auto cpu=heap->GetCPUDescriptorHandleForHeapStart();auto gpu=heap->GetGPUDescriptorHandleForHeapStart();auto increment=wrapped->GetDescriptorHandleIncrementSize(hd.Type);
+ D3D12_SHADER_RESOURCE_VIEW_DESC srv{};srv.Format=DXGI_FORMAT_R16G16B16A16_UNORM;srv.ViewDimension=D3D12_SRV_DIMENSION_TEXTURE2D;srv.Shader4ComponentMapping=D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;srv.Texture2D.MipLevels=1;
+ wrapped->CreateShaderResourceView(packed,&srv,cpu);cpu.ptr+=increment;srv.Format=DXGI_FORMAT_R32_FLOAT;wrapped->CreateShaderResourceView(depth,&srv,cpu);cpu.ptr+=increment;
+ D3D12_UNORDERED_ACCESS_VIEW_DESC uav{};uav.Format=DXGI_FORMAT_R16G16_FLOAT;uav.ViewDimension=D3D12_UAV_DIMENSION_TEXTURE2D;wrapped->CreateUnorderedAccessView(motion,nullptr,&uav,cpu);cpu.ptr+=increment;uav.Format=DXGI_FORMAT_R32_FLOAT;wrapped->CreateUnorderedAccessView(exposure,nullptr,&uav,cpu);
+ cmd->SetComputeRootSignature(signature);cmd->SetPipelineState(pso);cmd->SetDescriptorHeaps(1,&heap);cmd->SetComputeRootConstantBufferView(0,pass->GetGPUVirtualAddress());cmd->SetComputeRootConstantBufferView(1,view->GetGPUVirtualAddress());cmd->SetComputeRootShaderResourceView(2,exp->GetGPUVirtualAddress());cmd->SetComputeRootDescriptorTable(3,gpu);gpu.ptr+=2*increment;cmd->SetComputeRootDescriptorTable(4,gpu);cmd->Dispatch(static_cast<UINT>((desc_input.Width+7)/8),(desc_input.Height+7)/8,1);
+ D3D12_RESOURCE_BARRIER barriers[2]{};for(unsigned i=0;i<2;i++){barriers[i].Type=D3D12_RESOURCE_BARRIER_TYPE_UAV;barriers[i].UAV.pResource=i?exposure:motion;}cmd->ResourceBarrier(2,barriers);
+ eval_transition(cmd,motion,D3D12_RESOURCE_STATE_UNORDERED_ACCESS,D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);eval_transition(cmd,exposure,D3D12_RESOURCE_STATE_UNORDERED_ACCESS,D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+ log<<"{\"stage\":\"gpu_dense_motion_recorded\",\"width\":"<<desc_input.Width<<",\"height\":"<<desc_input.Height<<"}\n";return true;
+}
+struct DenseReadback {ID3D12Resource *buffer;D3D12_PLACED_SUBRESOURCE_FOOTPRINT fp;UINT rows;UINT64 rowbytes,total;fs::path path;};
+static DenseReadback dense_readback(ID3D12Device *device,EvalOwned &owned,ID3D12GraphicsCommandList *cmd,ID3D12Resource *texture,const fs::path &path) {
+ auto desc=texture->GetDesc();DenseReadback out{};out.path=path;device->GetCopyableFootprints(&desc,0,1,0,&out.fp,&out.rows,&out.rowbytes,&out.total);out.buffer=eval_buffer(device,owned,out.total,D3D12_HEAP_TYPE_READBACK,D3D12_RESOURCE_STATE_COPY_DEST);if(!out.buffer)return out;
+ eval_transition(cmd,texture,D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,D3D12_RESOURCE_STATE_COPY_SOURCE);D3D12_TEXTURE_COPY_LOCATION src{},dst{};src.pResource=texture;src.Type=D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;dst.pResource=out.buffer;dst.Type=D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;dst.PlacedFootprint=out.fp;cmd->CopyTextureRegion(&dst,0,0,0,&src,nullptr);eval_transition(cmd,texture,D3D12_RESOURCE_STATE_COPY_SOURCE,D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);return out;
+}
+static void dense_save(const DenseReadback &readback) {
+ if(!readback.buffer)return;void *data=nullptr;D3D12_RANGE range{0,static_cast<SIZE_T>(readback.total)};if(FAILED(readback.buffer->Map(0,&range,&data)))return;
+ std::ofstream out(readback.path,std::ios::binary);for(UINT y=0;y<readback.rows;y++)out.write(static_cast<const char*>(data)+readback.fp.Offset+y*readback.fp.Footprint.RowPitch,readback.rowbytes);out.close();D3D12_RANGE empty{0,0};readback.buffer->Unmap(0,&empty);
+}

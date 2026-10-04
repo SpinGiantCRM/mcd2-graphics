@@ -1,0 +1,11 @@
+{
+  "realGameFolder": true,
+  "freshOwnProfileDefaults": "Native; Quality/67%; remembered Custom77%",
+  "freshLaunchAndGameplay": true,
+  "normalQuit": true,
+  "uninstallRemovedOwnPayload": true,
+  "protectedFilesPreserved": 10,
+  "dependenciesConfigurationAndOwnSavesPreserved": true,
+  "reinstallAndSixHashesVerified": true,
+  "originalUserPreferencesRestored": true
+}

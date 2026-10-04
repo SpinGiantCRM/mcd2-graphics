@@ -1,0 +1,12 @@
+{
+  "isolatedFixture": true,
+  "checks": [
+    "missing dependency refused before writes",
+    "fresh install and copied hashes verified",
+    "duplicate install refused",
+    "modified owned file retained",
+    "uninstall preserved every dependency and unrelated mod",
+    "reinstall after uninstall passed",
+    "unsafe paths rejected"
+  ]
+}
