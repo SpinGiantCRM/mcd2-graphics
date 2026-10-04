@@ -1,0 +1,127 @@
+name: Bug report
+description: Report a reproducible problem with MCD2 Graphics
+title: "[Bug] "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a problem. Please provide only information relevant to the graphics mod.
+
+        **Remove account information, party codes, authentication data, private local paths and unrelated logs/screenshots before posting.**
+
+  - type: input
+    id: mod_version
+    attributes:
+      label: MCD2 Graphics version
+      description: Release tag or commit SHA.
+      placeholder: v0.1.0-preview.1
+    validations:
+      required: true
+
+  - type: input
+    id: game_build
+    attributes:
+      label: Minecraft Dungeons II build
+      description: Steam/game build if known.
+      placeholder: 25647713
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - Windows
+        - Proton / Linux
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: platform_details
+    attributes:
+      label: Platform details
+      description: Windows version, or Linux distribution and Proton version.
+      placeholder: Proton Experimental on CachyOS
+    validations:
+      required: true
+
+  - type: input
+    id: gpu_driver
+    attributes:
+      label: GPU and driver
+      placeholder: RTX 4080 SUPER / 615.71.09
+    validations:
+      required: true
+
+  - type: input
+    id: output
+    attributes:
+      label: Output resolution / aspect ratio
+      placeholder: 3840x2160 / 16:9
+    validations:
+      required: true
+
+  - type: input
+    id: mode
+    attributes:
+      label: Reconstruction settings
+      description: Upscaler, preset and custom render scale if relevant.
+      placeholder: NVIDIA DLSS / Quality / 67%
+    validations:
+      required: true
+
+  - type: input
+    id: dependencies
+    attributes:
+      label: ReShade and dependency versions
+      description: Include the relevant pinned dependency versions if available.
+      placeholder: ReShade 6.8.0; Blueprint Loader 1.1; UE Extended nightly-20260928
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: Give the shortest sequence that reproduces the problem.
+      placeholder: |
+        1. Launch the game.
+        2. Load a level.
+        3. Select ...
+        4. Observe ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+    validations:
+      required: true
+
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed behaviour
+      description: Include whether the mod recovered to Native rendering or remained failed.
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional sanitized evidence
+      description: Optional sanitized log excerpts, screenshots, timing data or other evidence. Do not upload private/authentication data.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Confirmation
+      options:
+        - label: I checked the current README, INSTALL.md and validation/limitations before filing this report.
+          required: true
+        - label: I removed account information, party codes, authentication data and private local paths from anything attached.
+          required: true

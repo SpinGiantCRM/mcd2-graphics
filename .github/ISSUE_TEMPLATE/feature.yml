@@ -1,0 +1,61 @@
+name: Feature request
+description: Suggest a graphics, UI, compatibility or tooling improvement
+title: "[Feature] "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please describe the user-visible problem first. A proposed implementation is useful, but it is not required.
+
+        Check `ROADMAP.md` before filing requests for Reflex, Frame Generation, Ray Reconstruction, alternative reconstruction providers or shadow work.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / use case
+      description: What is missing or difficult today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behaviour
+      description: Describe what you would like the mod to do.
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Relevant evidence or references
+      description: Optional links to official SDK documentation, upstream issues, measurements or comparable implementations. Do not attach proprietary game assets/shaders or private data.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Rendering / reconstruction
+        - Reflex / latency
+        - Frame Generation
+        - Ray Reconstruction
+        - Shadows / lighting
+        - UI / settings
+        - Compatibility / provider support
+        - Installer / packaging
+        - Documentation / tooling
+        - Other
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Confirmation
+      options:
+        - label: I checked the current roadmap and existing issues first.
+          required: true
+        - label: This request does not include proprietary game assets/shaders, authentication material or private user data.
+          required: true
