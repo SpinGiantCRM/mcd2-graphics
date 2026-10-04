@@ -1,6 +1,6 @@
 """Install/remove only MCD2 Graphics files; dependencies and saves remain owned by users."""
 from pathlib import Path
-import argparse, hashlib, json, os, shutil, subprocess, sys
+import argparse, csv, hashlib, io, json, os, shutil, subprocess, sys
 HERE=Path(__file__).resolve().parent
 
 def digest(p): return hashlib.sha256(p.read_bytes()).hexdigest()
@@ -12,7 +12,9 @@ def target(root, name):
 
 def require_closed():
     if os.name=='nt':
-        if 'Dungeons-Win64-Shipping.exe' in subprocess.check_output(['tasklist','/FI','IMAGENAME eq Dungeons-Win64-Shipping.exe'],text=True):
+        # The default table truncates the executable name, defeating this guard.
+        output=subprocess.check_output(['tasklist','/FI','IMAGENAME eq Dungeons-Win64-Shipping.exe','/FO','CSV','/NH'],text=True)
+        if any(row and row[0].casefold()=='dungeons-win64-shipping.exe' for row in csv.reader(io.StringIO(output))):
             raise ValueError('Close Minecraft Dungeons II before changing files.')
     else:
         for p in Path('/proc').glob('[0-9]*/cmdline'):
@@ -23,7 +25,8 @@ def require_closed():
 
 def install(root, runtime):
     lock=json.loads((HERE/'dependencies.lock.json').read_text())
-    expected=json.loads((HERE/'manifest.json').read_text())['files']
+    manifest=json.loads((HERE/'manifest.json').read_text())
+    expected=manifest['files']
     required={'Dungeons/Binaries/Win64/Dungeons-Win64-Shipping.exe':lock['game']['exeSHA256']}
     for name in ('ReShade','RenoDXUEExtended'):
         d=lock['dependencies'][name];required[d['file']]=d['sha256']
@@ -52,7 +55,7 @@ def install(root, runtime):
             with dest.open('xb') as out:out.write(p.read_bytes())
             created.append(dest)
             if digest(dest)!=expected[n]:raise ValueError('Copy verification failed: '+n)
-        with marker.open('x') as out:json.dump({'version':'0.1.0-preview.1','files':expected},out,indent=2)
+        with marker.open('x') as out:json.dump({'version':manifest['version'],'files':expected},out,indent=2)
     except Exception:
         for p in reversed(created):p.unlink(missing_ok=True)
         raise

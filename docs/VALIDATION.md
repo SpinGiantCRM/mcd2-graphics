@@ -1,5 +1,7 @@
 # Preview validation — 4 October 2026
 
+For the subsequent Windows/AMD investigation and fixed local candidate, see [Windows validation](WINDOWS_VALIDATION_2026-10-05.md). The results below apply to the original preview.1 payload.
+
 ## Qualified release gates
 
 - UI and native builds completed with developer file controls disabled. Both stable interop adapters remained unchanged.

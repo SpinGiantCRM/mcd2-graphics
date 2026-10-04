@@ -2,8 +2,9 @@
 // ReShade SDK v6.8.0; native D3D12 readbacks retain the original source state.
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
-#include <Windows.h>
+#include <windows.h>
 #include <d3d12.h>
+#include <dxgi1_4.h>
 #include <reshade.hpp>
 #include "ngx-research/nvsdk_ngx.h"
 #include <algorithm>
@@ -637,9 +638,11 @@ extern "C" __declspec(dllexport) const char *DESCRIPTION="Native graphics-menu r
 #define REMOVE(ev,fn) reshade::unregister_event<reshade::addon_event::ev>(fn)
 BOOL WINAPI DllMain(HMODULE module,DWORD reason,LPVOID) {
  if(reason==DLL_PROCESS_ATTACH) {
-  wchar_t module_path[32768];auto path_size=GetModuleFileNameW(module,module_path,32768);
-  if(!path_size || path_size>=32768)return FALSE;
-  asset_root=fs::path(module_path).parent_path()/L"MCD2Graphics";
+  // Keep this 64 KiB Windows path buffer off the DLL-loading thread's stack.
+  // See docs/WINDOWS_COMPATIBILITY.md before replacing it with a fixed array.
+  std::vector<wchar_t> module_path(32768);auto path_size=GetModuleFileNameW(module,module_path.data(),DWORD(module_path.size()));
+  if(!path_size || path_size>=module_path.size())return FALSE;
+  asset_root=fs::path(module_path.data()).parent_path()/L"MCD2Graphics";
   if(!public_bridge_layout_matches())return FALSE;
   if(!reshade::register_addon(module))return FALSE;
   EVENT(init_device,init_device);EVENT(destroy_device,destroy_device);EVENT(init_command_queue,init_queue);EVENT(destroy_command_queue,destroy_queue);EVENT(init_pipeline_layout,init_layout);EVENT(init_pipeline,init_pipe);EVENT(bind_pipeline,bind_pipe);

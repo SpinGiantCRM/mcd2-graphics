@@ -1,3 +1,18 @@
+# 0.1.0-preview.1-windows-fix.1 — Windows candidate
+
+- Fix Windows startup stack overflow by moving two 64 KiB path buffers to heap storage.
+- Detect unsupported rendering adapters before reducing source resolution; AMD falls back to native anti-aliasing with a visible status message.
+- Bound pending DLSS source requests to 15 seconds.
+- Fix Windows running-game detection and make the installer test harness portable.
+- Add a reproducible Windows native build with a 16 KiB stack-frame limit.
+
+Real Windows installation/removal, bounded startup, AMD Quality/DLAA fallback,
+return to Native and normal shutdown passed. NVIDIA DLSS execution with this
+rebuilt addon remains unqualified. See [Windows validation](WINDOWS_VALIDATION_2026-10-05.md).
+This candidate is a separate GitHub prerelease. The original preview.1 tag and
+assets remain unchanged; Nexus has not been updated. Linux / NVIDIA regression
+testing is still required before replacing the original preview.
+
 # 0.1.0-preview.1
 
 First experimental public preview.
