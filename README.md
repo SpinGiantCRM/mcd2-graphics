@@ -4,6 +4,10 @@
 
 DLAA and DLSS Super Resolution in Minecraft Dungeons II's own Video menu, alongside a documented RenoDX UE Extended HDR setup.
 
+**Offline single-player only for this preview. Online/co-op permission and anti-cheat compatibility are unverified. This restriction does not guarantee compliance or account safety.** See [publisher rules and online use](docs/ONLINE_USE.md).
+
+**NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.**
+
 ## Controls
 
 **Settings → Video → Reconstruction** is available from the main menu and pause menu.
