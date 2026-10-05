@@ -1,0 +1,17 @@
+{
+  "candidateVersion": "0.2.0-rc.1",
+  "rid": "linux-x64",
+  "installer": "mcd2-graphics-installer",
+  "sha256": "30dabd440783032b6a1cc58d7c957676dc8ca72a23fe086944409107d7f34fdc",
+  "payloadArchiveSHA256": "62b9e42f162f13423858cdfa19d3d90173666f45ba0b53c8249474f94af27116",
+  "payload": {
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.utoc": "89a197a7731c372c0119a5dc55ab4275806d094162fa7faa3f97e79c207cedd7",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.ucas": "59bc7a913a43d57a7ba51f8e17ef6200a758ab43188766631c413c569de7ad05",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.pak": "63ff88b83117270069b19d3036cdcb03dc35b9d242bbd7dd9735434ff9180863",
+    "Dungeons/Binaries/Win64/mcd2-graphics.addon64": "611b49abee32db2705d47e5a9e08dd676cd7e892cb7da7e563eab4c18e733240",
+    "Dungeons/Binaries/Win64/MCD2Graphics/live_dense.cso": "1f7df8df67dce0f2edc106ff709855ec00794b2879d59522731f98636feb72d3",
+    "Dungeons/Binaries/Win64/mcd2-display-latency.addon64": "082bd1dcffa4b7b6c94a9a9316a43d8fc1ba96cba79cca61dcbfaf56fd88a1ad",
+    "Dungeons/Binaries/Win64/MCD2Graphics/streamline/mcd2-streamline-bridge.dll": "4f2afea295bf3211bf992021e3fa975dfb1a6c38dc2e2a729dc5119d86192b55"
+  },
+  "windowsRuntimeQualified": false
+}

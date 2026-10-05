@@ -1,17 +1,20 @@
 # Update 2 qualification and release gate
 
-Update 2 is the upcoming guided-installer / native HDR / Blueprint Loader 2.0 /
+Update 2 is the guided-installer / native HDR / Blueprint Loader 2.0 /
 Streamline Reflex release. It is distinct from published `v0.1.0-preview.2`.
-The working candidate uses `0.2.0-rc.1`; this is not a published release.
+The release uses `0.2.0-rc.1`, an experimental prerelease.
 
-**Do not publish Update 2 until required Windows parity and regression checks pass
-against the exact final candidate.** Missing, unrun or failing checks block release.
-The preview.2 decision accepting known Windows limitations does not carry over.
-A Linux pass or portable CI pass is not Windows runtime qualification.
+## Publication decision — 5 October 2026
+
+The maintainer completed the available AMD Windows testing and explicitly requested GitHub/Nexus publication. This supersedes the earlier instruction to wait for complete Windows parity **for this experimental prerelease only**. The exact qualified Windows CI and Linux local GUI installers are reused without a runtime rebuild. Missing checks remain unqualified and are disclosed in the release notes; no AMD result is treated as Windows NVIDIA/HDR qualification. Preview.1 and preview.2 remain frozen.
+
+## Remaining qualification before a broader/stable claim
+
+The original checklist below remains the qualification target. A Linux/CI pass is not Windows runtime qualification. Preserve the original partial evidence and unknown shutdown causes.
 
 PR7's bounded Windows/AMD installation, fallback and shutdown results are in
 [the Windows report](UPDATE_2_WINDOWS_VALIDATION_2026-10-05.md). Several required
-checks remain unqualified; that report is not release approval. Use
+checks remain unqualified; that report does not qualify the missing paths. Use
 `-RequireDisplayLatency` with the Windows runtime probe for Update 2.
 
 Required Windows evidence, tied to commit and every candidate/installer hash:
@@ -43,5 +46,4 @@ native HDR/layout/persistence/restart, Blueprint 2.0 integration and non-Windows
 installer checks. Notify the user when those are complete and Windows is the
 sole remaining gate. This scope ends there; FG/providers/RR/shadows are later work.
 
-Released preview.1 and preview.2 tags/assets remain unchanged. No new publication
-is authorized merely by this checklist or by building a candidate.
+Released preview.1 and preview.2 tags/assets remain unchanged. Publication was separately authorized by the maintainer; this checklist and future builds alone do not authorize another release.

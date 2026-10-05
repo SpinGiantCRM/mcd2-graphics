@@ -1,4 +1,4 @@
-# Native HDR controls — Update 2 candidate
+# Native HDR controls — 0.2.0-rc.1
 
 HDR uses the separately acquired, pinned RenoDX UE Extended addon. This is game HDR output and HDR scene processing, not an SDR conversion filter. No official HDR mastering reference is claimed.
 
@@ -28,4 +28,4 @@ Peak calibration is display-specific. The local True Black display was tested at
 - Native and advanced values differ: apply the four values through Video and restart normally.
 - Installer refuses an edited HDR startup key: your edit is retained; resolve it deliberately before repair. Uninstall restores only unchanged owned keys.
 
-Windows HDR, supported Windows NVIDIA Reflex and AMD fallback remain required qualification gates for this candidate. See [Update 2 gate](UPDATE_2_RELEASE_GATE.md).
+Windows AMD unavailable-HDR behavior passed; native HDR output/calibration on a Windows HDR display remains unqualified. The tested HDR path is Linux/NVIDIA. See [qualification scope](UPDATE_2_RELEASE_GATE.md).

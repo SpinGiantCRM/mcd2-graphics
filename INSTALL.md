@@ -1,6 +1,6 @@
-# Guided installation — Update 2 candidate
+# Guided installation — 0.2.0-rc.1
 
-Update 2 (`0.2.0-rc.1`) is a test candidate. Published preview.1 and preview.2 remain unchanged. Do not publish this candidate until [Windows qualification](docs/UPDATE_2_RELEASE_GATE.md) passes.
+Download the compiled Windows or Linux installer archive from the [0.2.0-rc.1 release](https://github.com/SpinGiantCRM/mcd2-graphics/releases/tag/v0.2.0-rc.1), then extract it. GitHub's automatic source archives do not contain the ready-to-run installer. This is an experimental prerelease with [documented qualification limits](docs/UPDATE_2_RELEASE_GATE.md). Published preview.1 and preview.2 remain unchanged.
 
 ## Install
 
@@ -17,7 +17,7 @@ On Linux the official ReShade setup is launched using the game's detected Proton
 
 ## Update, repair and verify
 
-Close the game. For a hash-matching preview.2 installation (including its recorded Linux-regression receipt alias), choose **Repair / Verify** to migrate its receipt and owned payload. If files differ, back them up and resolve the conflict first. Other versions require their original uninstall workflow before installing this candidate.
+Close the game. For a hash-matching preview.2 installation (including its recorded Linux-regression receipt alias), choose **Repair / Verify** to migrate its receipt and owned payload. If files differ, back them up and resolve the conflict first. Other versions require their original uninstall workflow before installing this release.
 
 Repair checks ownership before replacing missing files. Modified files are retained. Verify checks the payload, receipt, dependencies, supported executable and owned HDR startup setting. It reports missing or unsupported versions instead of quietly accepting them.
 
@@ -33,4 +33,4 @@ Close the game and choose **Uninstall**. Only hash-matching files recorded by th
 
 **Support → Create diagnostic report** exports a small allowlisted report: mod/game version, platform, GPU/driver and file checks/hashes. It excludes usernames, private paths, account data, tokens, party codes, player saves, raw logs and unrelated ReShade configuration. Review it before sharing it in an issue.
 
-Use offline. Online/co-op compatibility is unqualified; see [online use](docs/ONLINE_USE.md). The legacy Python CLI is retained for historical preview checks and refuses this Update 2 payload. The qualification branch includes only the hash-pinned own payload under `qualification/update2`; it excludes vendor runtimes. Use the CI candidate installer artifact for testing, never treat it as a published release.
+Use offline. Online/co-op compatibility is unqualified; see [online use](docs/ONLINE_USE.md). The legacy Python CLI is retained for historical preview checks and refuses this Update 2 payload. The qualification branch includes only the hash-pinned own payload under `qualification/update2`; it excludes vendor runtimes. Release downloads contain the exact qualified Windows CI installer and local Linux GUI installer. See [artifact provenance](qualification/update2/release-artifacts.json); unrelated CI builds are not automatically runtime-qualified.

@@ -1,6 +1,6 @@
-# Update 2 candidate Windows follow-up — 5 October 2026
+# 0.2.0-rc.1 qualification — 5 October 2026
 
-PR7's exact-artifact Windows/AMD results are in [the Update 2 Windows report](UPDATE_2_WINDOWS_VALIDATION_2026-10-05.md) and [aggregate record](../qualification/update2/windows-checks.json). Installation, AMD fallback and three bounded clean exits passed. Required NVIDIA, HDR-output and input checks remain outstanding; Update 2 is still unpublished and release-blocked. These results do not revise the historical preview evidence below.
+PR7's exact-artifact Windows/AMD results are in [the Update 2 Windows report](UPDATE_2_WINDOWS_VALIDATION_2026-10-05.md) and [aggregate record](../qualification/update2/windows-checks.json). Installation, AMD fallback and three bounded clean exits passed. Windows NVIDIA, Windows HDR-output and input checks remain outstanding. The maintainer authorized an experimental prerelease on 5 October 2026 with these limits disclosed; this does not mark missing checks as passed. See [the decision and remaining gates](UPDATE_2_RELEASE_GATE.md). These results do not revise the historical preview evidence below.
 
 # Preview.2 qualification update — 5 October 2026
 
