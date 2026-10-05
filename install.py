@@ -84,6 +84,8 @@ if __name__=='__main__':
     a=argparse.ArgumentParser(description=__doc__);a.add_argument('action',choices=['install','uninstall','check']);a.add_argument('--game',required=True,type=Path);a.add_argument('--dlss-runtime',type=Path)
     args=a.parse_args()
     try:
+        if "Dungeons/Binaries/Win64/mcd2-display-latency.addon64" in json.loads((HERE/"manifest.json").read_text())["files"]:
+            raise ValueError("This candidate uses the standalone guided installer for HDR ownership and Reflex dependencies. The Python CLI is retained only for historical preview checks.")
         root=args.game.resolve()
         if args.action=='check':
             expected=json.loads((HERE/'manifest.json').read_text())['files']

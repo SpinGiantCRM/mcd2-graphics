@@ -47,4 +47,6 @@ rsp=o/'ui-build.rsp';rsp.write_text('\n'.join(args)+'\n')
 c=subprocess.run([str(a.dotnet),str(a.neorune_sdk/'tools/neorune.dll'),'@'+str(rsp)],capture_output=True,text=True)
 (o/'ui-build.log').write_text(c.stdout+c.stderr)
 assert c.returncode==0 and not re.search(r'\berror\s+\w+\d+:',c.stdout+c.stderr,re.I),'NeoRune build diagnostic failure'
+subprocess.run([str(a.dotnet),'build',str(r/'tools/ModInfoBuilder/ModInfoBuilder.csproj'),'-p:NeoRuneSdk='+str(a.neorune_sdk.resolve()),'-c','Release','--nologo'],check=True)
+subprocess.run([str(a.dotnet),str(r/'tools/ModInfoBuilder/bin/Release/net10.0/ModInfoBuilder.dll'),str(o/'ui/Assets'),str(a.pack_tools.resolve()),str(o/'ui/Pak'),str(r/'manifest.json')],check=True)
 print('Build completed. Rebuilt artifacts require gameplay qualification before replacing the published payload.')

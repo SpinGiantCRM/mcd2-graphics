@@ -1,0 +1,44 @@
+# Update 2 Linux qualification — 5 October 2026
+
+Candidate: `0.2.0-rc.1`; source branch `development/guided-install-native-settings`, based on preview.2 commit `5160fc06344ef8002be586eeadb6a1de8715e198`. The PR commit identifies the final source. Payload hashes are in manifest.json and qualification/update2/build-receipts.json. Published tags/assets are unchanged.
+
+## Environment
+
+CachyOS KDE/Wayland, NVIDIA RTX 4080 SUPER, driver 615.71.09, 3840×2160 HDR output, monitor DisplayHDR True Black mode at the previously measured 410-nit calibration. Steam game build 25647713, CachyOS Proton SLR 11.0-20261005-slr, native WineWayland, normal Steam sign-in. Launch options: `PROTON_ENABLE_WAYLAND=1 PROTON_ENABLE_HDR=1 %command%`.
+
+Pinned dependencies: Blueprint Loader 2.0, ReShade 6.8.0.2155 full addon support/API20, RenoDX UE Extended nightly-20260928, official DLSS runtime at the locked NVIDIA commit, Streamline 2.14.1 production x64. DLL/archive hashes and official download URLs are in dependencies.lock.json. .NET SDK 10.0.401 / Avalonia 11.3.22 build the self-contained installers.
+
+## Checks and results
+
+| Area | Procedure and observed result |
+| --- | --- |
+| Loader metadata | The actual Mods page displayed project name, description, version and author. Controls remain in native Video; no duplicate settings page. |
+| Native layout | Existing ordering preserved. HDR Output/Peak/Paper White/UI follow Brightness; Reflex follows FPS Limit; SR controls retain Native/DLSS, presets and scale. Main-menu and pause-menu access worked. |
+| HDR | Off disabled the three visible calibration rows. On/410/203/203 persisted through normal exit/relaunch; native settings and selected RenoDX preset agreed, and the restart warning cleared. Paper white 203→204→203 worked through mouse clicks and virtual Xbox D-pad input. A change correctly retained a restart warning for the current process. Earlier Off/On restart checks also passed. Advanced RenoDX values outside the four owned keys were preserved. |
+| Reflex | Actual Streamline execution, Off/On/On + Boost. Current reports contained all six nonzero marker timestamps in each of the 64 SDK report slots. Frame IDs advanced; coordinator/SDK marker errors remained zero. Sleep occurs before simulation even in Off; PCL continues in every mode. Registered PCL diagnostic messages were seen and attributed to a simulation token. No per-frame validation copies or diagnostic dispatches were added. |
+| SR coexistence | The unchanged SR addon created Quality at 2560×1440→3840×2160 and DLAA at 3840×2160→3840×2160 while Reflex ran. A request held in the pause menu exceeded the existing 15-second deadline and fell back safely. A later missing temporal-AA configuration also caused safe source-wait fallback. After restoring `r.AntiAliasingMethod=2`, Quality and DLAA both succeeded. Native fallback and menu/world transitions were retained. |
+| Standalone installer | Linux GUI opened without a separate .NET runtime. Detected a non-default Steam library and verified the shipping fingerprint. Browse and downloaded-file selection worked. Official DLSS selection was verified and placed correctly during a fresh install. Verified the seven owned payload hashes and receipt. |
+| Maintenance | Qualified old receipt migrated to the candidate. Missing owned addon repaired. Modified addon refused by Repair and Uninstall before mutation. Clean uninstall removed owned payload/private DLSS copy; shared dependency and preference hashes remained identical. Fresh install and Verify passed afterwards. |
+| Support | Actual GUI report save worked. Report contained only version/build/platform/GPU-driver/file-check hashes; no private paths, saves, accounts or raw logs. Third-party notices opened. |
+| Shutdown | An earlier long trial quit crashed with a native access violation. The restored-config run and project-scoped startup-config run subsequently exited normally. The exact final GUI-installed candidate then ran Quality and DLAA, exited normally with no new crash report, retained its startup-file hash, and passed GUI Verify. A second final relaunch reached gameplay with DLAA/Reflex/HDR, exited normally, and retained the same startup-file hash. The final GUI uninstall removed the newly created project startup file and owned payload/private runtime. Numeric evidence is in qualification/update2/linux-checks.json. These bounded clean runs do not erase the earlier unexplained crash or certify long sessions. |
+| Portable checks | 39 guided installer safety checks, 31 token coordinator checks, 14 display protocol checks, 8 legacy CLI/installer checks, 6 compiler recipe checks, 2,502 parser truncations, 2,312 settings/runtime semantic checks and adapter/deadline assertions passed. Both installer target builds succeeded. Hosted CI results are reported by the PR. |
+
+## Defects found and changes made
+
+A paused/menu frame can finish rendering while the game thread has not yet emitted SimulationEnd. The previous coordinator incorrectly required SimulationEnd before RenderEnd and recycled the frame at PresentEnd. It now validates each interval and presentation order independently, retains actual timestamps, and waits for **all six** markers before completing/reusing a token. Missing SimulationEnd still blocks the next simulation; duplicate/stale identities still stop Reflex. Regression tests cover the captured ordering. This does not claim that SDK nonzero timestamps alone establish latency accuracy.
+
+Diagnostic launches through Proton setup were deleting Steam's `s:` game-library mapping when the helper lacked the normal game-library environment. This was directly observed and explains ReShade's configuration-write failure; it is also a plausible cause of the contemporaneous native menu/asset VM crashes, not a proven attribution of every earlier crash. The final PCL probe used the same Proton's Wine binary directly, checked the mapping before/after, and retained it. The guided official ReShade launch supplies game/library variables and only runs while the game is closed. Do not invoke prefix setup against a running game.
+
+UI refreshes now guard visible/live panels, avoid native-name calls on owned rows, and avoid recreating already-matching native HDR output for unrelated Reflex/calibration revisions. A Reflex row already present remains disabled on a runtime fault rather than being removed beneath focus. Initially unavailable Reflex remains hidden with saved intent retained.
+
+The host's desktop portal timed out during a file-picker check. The Linux installer now uses Avalonia's documented direct GTK picker; browsing, selection and report saving were repeated successfully. GTK/desktop libraries are still platform prerequisites; self-contained means players need neither Python nor separately installed .NET.
+
+## Limits and next gate
+
+This is bounded Linux qualification, not Windows parity, a long-session certification or proof of a latency reduction/FPS-impact target. Physical-controller input, system-HDR-unavailable behavior, complete resolution/device-failure coverage, Windows NVIDIA Streamline QA (including timing/PCL/normal-On performance) and Windows AMD fallback remain in the mandatory Windows checklist. A virtual controller exercised the actual game path; removing it produced the game's normal controller-disconnected prompt, which was dismissed with the mouse.
+
+The final source/payload are staged for that Windows gate. No Update 2 publication, FG work or new provider work is included. Vendor runtimes and private diagnostic evidence remain outside the repository.
+
+The guided installer now owns two narrowly scoped startup keys: `r.AllowHDR=1` and `r.AntiAliasingMethod=2`. The latter provides the temporal-AA boundary used by the unchanged SR addon; default/TSR rendering does not provide it. Both previous values are recorded, restored on uninstall if still owned, and retained if the user edits them. Fresh/default-AA and edited-AA refusal/restoration have dedicated portable checks. This does not prove the earlier shutdown crash was caused solely by configuration loss.
+
+Further configuration isolation: after a successful game run, the game itself rewrote/generated Saved Engine.ini and removed the custom sections. A narrow SectionsToSave experiment did not preserve them. The project-scoped `Dungeons/Config/UserEngine.ini` layer supplied both HDR permission and the required TAA boundary, and remained byte-identical after normal world shutdown. Its hierarchy position is documented by [Epic](https://dev.epicgames.com/documentation/en-us/unreal-engine/configuration-files-in-unreal-engine). The installer now owns only its two startup keys in that layer, without global Unreal overrides or read-only file permissions.

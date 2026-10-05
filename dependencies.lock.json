@@ -18,18 +18,43 @@
       "releaseTag": "nightly-20260928"
     },
     "BlueprintLoader": {
-      "version": "1.1",
+      "version": "2.0",
       "files": {
+        "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.ucas": "7eae0158199637ea3dfe25996f16328dbac8bb67ef44a08d9c08052a39a28f5c",
+        "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.utoc": "e4d888db70ea0138c033569fbc410907a29bf8a90508b9f854d61f3d4fbeaad3",
+        "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.pak": "75e7144577253917f6da7312ef5e585b12fb728226a22b0938323751a6b555cd"
+      },
+      "url": "https://www.nexusmods.com/minecraftdungeons2/mods/2",
+      "archiveSHA256": "4c734597a5bfc21c7ca7b9a4f19738601b2c71f94a7c6e36b496c305a83a2937",
+      "upgradeFromFiles": {
         "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.ucas": "ea54c0f1b7614d0bc19d672b42b771324638b04b7a1a987e8445307fe1549a4f",
         "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.utoc": "d51cb0005bbfcc8e506f403b388f6b731c08e7df5b8bb0f51a1018e733462110",
         "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.pak": "75e7144577253917f6da7312ef5e585b12fb728226a22b0938323751a6b555cd"
-      },
-      "url": "https://www.nexusmods.com/minecraftdungeons2/mods/2"
+      }
     },
     "DLSSRuntime": {
       "sdkCommit": "374959484e79a640feaba44c93ac8cfb0a03f5b5",
       "sha256": "3975567b8943c53acce397f2b72380092f84f162d00b0d2c7d08a1025c563983",
       "url": "https://raw.githubusercontent.com/NVIDIA/DLSS/374959484e79a640feaba44c93ac8cfb0a03f5b5/lib/Windows_x86_64/rel/nvngx_dlss.dll",
+      "bundled": false,
+      "file": "Dungeons/Binaries/Win64/MCD2Graphics/ngx-runtime/nvngx_dlss.dll"
+    },
+    "Streamline": {
+      "version": "2.14.1 production x64",
+      "url": "https://github.com/NVIDIA-RTX/Streamline/releases/download/v2.14.1/streamline-sdk-v2.14.1.zip",
+      "archiveSHA256": "92c4d954631a1710da86ca3fa8d5034f2b9503838c95fc4ae977ae149319781b",
+      "archiveMembers": {
+        "Dungeons/Binaries/Win64/MCD2Graphics/streamline/sl.interposer.dll": "bin/x64/sl.interposer.dll",
+        "Dungeons/Binaries/Win64/MCD2Graphics/streamline/sl.common.dll": "bin/x64/sl.common.dll",
+        "Dungeons/Binaries/Win64/MCD2Graphics/streamline/sl.pcl.dll": "bin/x64/sl.pcl.dll",
+        "Dungeons/Binaries/Win64/MCD2Graphics/streamline/sl.reflex.dll": "bin/x64/sl.reflex.dll"
+      },
+      "files": {
+        "Dungeons/Binaries/Win64/MCD2Graphics/streamline/sl.interposer.dll": "8c87c9499461da561edd529aa9bf7831d67d7b94ebb1c1a5ed54ef4934e1ea4c",
+        "Dungeons/Binaries/Win64/MCD2Graphics/streamline/sl.common.dll": "82924a8954dd671e09351c5de0eb87ad0eb25b944cc9f9ab955ca1d9950de15d",
+        "Dungeons/Binaries/Win64/MCD2Graphics/streamline/sl.pcl.dll": "f13d51cfa05f4cd514df2026049e2db8adf359221713170ad386fd499915b582",
+        "Dungeons/Binaries/Win64/MCD2Graphics/streamline/sl.reflex.dll": "0ce9725e3e03ea9e7f81d008b57f33ee365973d2e349131c8b1c3e3378fe2db0"
+      },
       "bundled": false
     }
   },
@@ -38,6 +63,8 @@
     "NeoRuneTool": "0.1.2",
     "dotnetSDK": "10.0.401",
     "ReShadeSDK": "v6.8.0 API20",
-    "NVIDIASDKCommit": "374959484e79a640feaba44c93ac8cfb0a03f5b5"
+    "NVIDIASDKCommit": "374959484e79a640feaba44c93ac8cfb0a03f5b5",
+    "StreamlineSDK": "2.14.1",
+    "Avalonia": "11.3.22"
   }
 }

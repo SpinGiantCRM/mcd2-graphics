@@ -1,50 +1,36 @@
-# Installation / removal
+# Guided installation — Update 2 candidate
 
-Use a legally obtained game installation that already launches and signs in successfully. Close the game before changing files.
+Update 2 (`0.2.0-rc.1`) is a test candidate. Published preview.1 and preview.2 remain unchanged. Do not publish this candidate until [Windows qualification](docs/UPDATE_2_RELEASE_GATE.md) passes.
 
-This preview deliberately checks the exact locally tested game/dependency files. A different version is refused; do not rename an unrelated DLL to bypass a check. Hashes and official source links are in `dependencies.lock.json`.
+## Install
 
-1. Install the **full addon support** build of ReShade 6.8.0.2155 for the game's D3D12 executable in `Dungeons/Binaries/Win64`. Obtain it from [official ReShade full-addon installer](https://reshade.me/downloads/ReShade_Setup_6.8.0_Addon.exe).
-2. Install [Blueprint Loader 1.1](https://www.nexusmods.com/minecraftdungeons2/mods/2), placing its three package files in `Dungeons/Content/Paks/~mods/BlueprintLoader`.
-3. Install the pinned [RenoDX UE Extended nightly-20260928 addon](https://github.com/marat569/renodx/releases/download/nightly-20260928/renodx-ue-extended.addon64) beside the game executable. The pinned binary SHA-256 is in the lock file; use this archived download rather than a changing snapshot.
-4. Obtain the pinned official `nvngx_dlss.dll` from the NVIDIA repository URL in the lock file, subject to [NVIDIA's SDK terms](https://github.com/NVIDIA/DLSS/blob/374959484e79a640feaba44c93ac8cfb0a03f5b5/LICENSE.txt). The installer never downloads or accepts terms for you. This DLL is not included in the mod archive.
-5. Extract this archive somewhere outside the game folder. Install Python 3 if needed. Run:
+1. Use a legally obtained game that already launches and signs in normally. Launch it through Steam once, then close it.
+2. Run **MCD2-Graphics-Installer.exe** on Windows or **mcd2-graphics-installer** on Linux. No Python or separate .NET installation is needed.
+3. **Game:** select the detected Steam installation or use Browse. The supported executable and build are verified.
+4. **Requirements:** open each official download and select the downloaded file/archive. The installer verifies the pinned hashes and places Blueprint Loader, RenoDX and NVIDIA runtimes correctly. They are not bundled. A known Blueprint Loader 1.1 installation can upgrade to 2.0; its original bytes are retained in a recovery folder. Unknown or modified dependencies are retained.
+5. **ReShade:** run the official full addon-support installer for `Dungeons/Binaries/Win64/Dungeons-Win64-Shipping.exe`, selecting DirectX 10/11/12. Complete its own workflow and any agreement yourself, then Check again. A normal or unsupported build is refused.
+6. **Install:** install the mod. Launch normally through Steam and open **Settings → Video**. The Mods page identifies the mod and links to help.
 
-```text
-python install.py install --game "PATH TO Minecraft Dungeons II" --dlss-runtime "PATH TO nvngx_dlss.dll"
-```
+The installer contains only this project's seven payload files plus its own application/runtime. Vendor graphics runtimes, game assets, authentication replacements and player data are excluded. Downloads and license acceptance remain under the player's control. Required versions and official links are in [dependencies.lock.json](dependencies.lock.json).
 
-The installer verifies the package, game executable and dependencies, refuses overwrites, and records only its six installed files. It leaves Steam options, existing configuration, dependencies and saved games intact. Earlier private trial installations must be removed first; do not load both addon filenames.
+On Linux the official ReShade setup is launched using the game's detected Proton prefix/tool. This requires an existing Steam prefix. If that cannot be detected, use the official setup in that game prefix and Check again. The installer does not change Steam launch options or solve platform sign-in.
 
-Launch once: a fresh mod profile defaults to **Native**, remembering **Quality / 67%**. Open Settings → Video and choose NVIDIA DLSS. The main menu stays Native; your saved DLSS selection activates in gameplay. Check the help panel for active/pending/fallback status. At 4K the slider cannot request less than 17%.
+## Update, repair and verify
 
-This preview detects unsupported rendering adapters before reducing
-source resolution. On AMD, the help panel reports **DLSS unavailable; native
-anti-aliasing is active.** Your DLSS preference remains saved. Close ReShade's
-first-run overlay before testing game keyboard shortcuts.
+Close the game. For a hash-matching preview.2 installation (including its recorded Linux-regression receipt alias), choose **Repair / Verify** to migrate its receipt and owned payload. If files differ, back them up and resolve the conflict first. Other versions require their original uninstall workflow before installing this candidate.
 
-## Updating from an earlier preview
-
-Close the game. Use the earlier archive's `install.py uninstall` command first, then run this archive's install command with your existing official DLSS DLL. The installer refuses to overwrite an existing installation. ReShade, Blueprint Loader, RenoDX, game saves and mod preferences are retained. If files were installed manually, remove only the six files listed in that version's manifest; do not delete the whole game or Saved directory.
-
-If a file was modified, uninstall retains it and reports its path. Back it up and resolve that reported conflict before installing the new version. GitHub's automatic source ZIP has no compiled payloads: download **MCD2-Graphics-0.1.0-preview.2.zip** from the release Assets.
+Repair checks ownership before replacing missing files. Modified files are retained. Verify checks the payload, receipt, dependencies, supported executable and owned HDR startup setting. It reports missing or unsupported versions instead of quietly accepting them.
 
 ## HDR
 
-See [HDR setup](docs/HDR.md). HDR is a separate opt-in configuration; install alone does not enable OS HDR or change your display settings.
-
-## Verify installed payload
-
-```text
-python install.py check --game "PATH TO Minecraft Dungeons II"
-```
+The installer owns only `[SystemSettings] r.AllowHDR=1` and `r.AntiAliasingMethod=2` (the temporal-AA boundary required by SR) in Dungeons/Config/UserEngine.ini and records both previous values. It preserves other configuration. Enable system HDR yourself, then use **HDR Output**, **HDR Peak Brightness**, **HDR Paper White** and **HDR UI Brightness** in Video. Calibration changes require a game restart with the pinned RenoDX addon; the help panel says so. See [HDR](docs/HDR.md).
 
 ## Uninstall
 
-Close the game, then run:
+Close the game and choose **Uninstall**. Only hash-matching files recorded by the installer are removed. Modified payload blocks removal before mutation. Shared dependencies, other mods, saves and preferences remain. The mod’s private DLSS runtime copy is removed with its owned payload. Each owned startup key is restored to its previous value only if it remains unchanged; player edits are retained.
 
-```text
-python install.py uninstall --game "PATH TO Minecraft Dungeons II"
-```
+## Support
 
-Only files recorded by this installer are removed. Modified files are retained and reported, rather than deleted. Blueprint Loader, ReShade, RenoDX UE Extended, game configuration and all save files remain. If you manually added HDR configuration, restore your own pre-HDR configuration backup separately. To reset just the mod preferences, back up and remove `MCD2GraphicsSettings.sav` and `MCD2GraphicsRuntime.sav` in the game's local `Saved/SaveGames` directory; never remove the whole directory.
+**Support → Create diagnostic report** exports a small allowlisted report: mod/game version, platform, GPU/driver and file checks/hashes. It excludes usernames, private paths, account data, tokens, party codes, player saves, raw logs and unrelated ReShade configuration. Review it before sharing it in an issue.
+
+Use offline. Online/co-op compatibility is unqualified; see [online use](docs/ONLINE_USE.md). The legacy Python CLI is retained for historical preview checks and refuses this Update 2 payload. The qualification branch includes only the hash-pinned own payload under `qualification/update2`; it excludes vendor runtimes. Use the CI candidate installer artifact for testing, never treat it as a published release.
