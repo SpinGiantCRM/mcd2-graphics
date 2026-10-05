@@ -60,3 +60,26 @@ payloads. The changed binary needs fresh Windows qualification. Test the exact
 packaged addon first; rebuilding with LLVM MinGW produces a different artifact
 and requires its own NVIDIA regression checks. See
 [regression handoff](LINUX_REGRESSION_HANDOFF_2026-10-05.md).
+
+## Update 2 display addon and guided installer
+
+Build the UI using `build.py` and the separately acquired NeoRune SDK/tool and package tools. The build includes `tools/ModInfoBuilder`, which packages the Blueprint Loader 2.0 ModInfo using the loader's public template class. No extracted game assets or vendor runtime files are included.
+
+Build the independent display/latency addon with `build_latency.py --streamline-sdk PATH --windows-sysroot PATH --reshade-include PATH --output PATH`. Streamline SDK **2.14.1** and the Microsoft C++/Windows SDK sysroot are acquired separately under their own terms. It builds the MSVC ABI bridge and MinGW addon with the preserved frame-size guard; it does not rebuild or alter the released SR renderer. Compiler paths can be supplied explicitly. This Linux-hosted recipe is not a Windows source-build qualification.
+
+Stage the seven own payload files with exactly the hashes in manifest.json. Build each standalone installer using .NET SDK **10.0.401**, Avalonia **11.3.22** and its committed package lock:
+
+```text
+python build_installer.py --dotnet PATH --payload PATH --rid linux-x64 --output PATH
+python build_installer.py --dotnet PATH --payload PATH --rid win-x64 --output PATH
+```
+
+The script packages only manifest-owned files and embeds them in a self-contained executable. It excludes NVIDIA runtime DLLs and records the installer/payload hashes. Windows cross-compilation establishes a build, not Windows runtime behavior. Developer builds without the qualified payload explicitly refuse installation. A build receipt never grants publication approval.
+
+Run `dotnet run --project tests/installer-core/InstallerCore.Tests.csproj -c Release`, the existing Python portable tests and the C++ display/token tests. Linux and Windows CI remain in place. Exact final candidate runtime evidence must satisfy [the Update 2 gate](UPDATE_2_RELEASE_GATE.md). FG needs additional early device/interposer integration and is not implemented by this Reflex bootstrap.
+
+The Linux installer uses GTK file pickers directly rather than depending on a desktop portal. See [Avalonia file picker documentation](https://docs.avaloniaui.net/docs/services/storage/file-picker-options). Linux still needs its normal graphical desktop libraries; self-contained refers to the .NET application/runtime.
+
+The qualification workflow packages the checked-in own payload ZIP after verifying every manifest hash and refusing vendor DLLs. Its output is a test artifact, not a GitHub release. Qualify the exact installer hash downloaded from that run on Windows; rebuilding changes the installer identity and requires recording the new hash.
+
+Do not launch helper tools with `proton run` against a running game prefix: Proton setup can remove Steam's `s:` drive when game-library environment variables are absent. The PCL helper must use the same Proton's Wine binary directly and retain the mapping. The guided ReShade launch is allowed only with the game closed and supplies the selected game/library variables.

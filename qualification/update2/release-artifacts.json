@@ -1,0 +1,31 @@
+{
+  "version": "0.2.0-rc.1",
+  "payloadSourceCommit": "f032d00b23669720ee58f6d130f41cc6ea6586bb",
+  "publicationDecision": "Maintainer explicitly authorized prerelease publication after available AMD Windows testing on 2026-10-05. Unqualified checks remain unqualified.",
+  "runtimeRebuiltForPublication": false,
+  "installers": {
+    "windows": {
+      "sha256": "19f520a6e5c76bb53d1f8affe77a84b4b1880c3363127e2136409153542f2a1d",
+      "source": "GitHub Actions 37284816608 artifact 11333163224",
+      "qualification": "Bounded Windows 11 AMD Radeon 860M; see Windows report",
+      "receipt": "windows-ci-installer-build.json",
+      "downloadArchive": "MCD2-Graphics-0.2.0-rc.1-Windows.zip",
+      "archiveSHA256": "4b5819eb518ac74c3df12cf015d41ac826446cf985c6a19524d815af9f7a809f"
+    },
+    "linux": {
+      "sha256": "30dabd440783032b6a1cc58d7c957676dc8ca72a23fe086944409107d7f34fdc",
+      "source": "Qualified local linux-x64 guided GUI build",
+      "qualification": "Bounded Linux NVIDIA RTX 4080 SUPER; see Linux report",
+      "receipt": "linux-installer-build.json",
+      "downloadArchive": "MCD2-Graphics-0.2.0-rc.1-Linux.zip",
+      "archiveSHA256": "440c7da19e4a7e3d3f2e957a6f86f739c6a7d50402dbbbd9a2c8a9acbc8c4d9f"
+    }
+  },
+  "limits": [
+    "Windows NVIDIA execution unqualified",
+    "Windows HDR-capable display output unqualified",
+    "Physical controller unqualified",
+    "Long sessions and device loss unqualified"
+  ],
+  "previousReleaseArtifactsUnchanged": true
+}

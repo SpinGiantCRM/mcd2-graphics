@@ -4,6 +4,14 @@ This roadmap describes current priorities, not release dates or guarantees. Item
 
 ## Released
 
+### 0.2.0-rc.1 — experimental prerelease
+
+- Guided Windows/Linux installer with verified official dependencies and safe repair/removal.
+- Native Video-menu HDR output and calibration with RenoDX restart coordination.
+- Streamline Reflex Off / On / On + Boost where supported.
+- Blueprint Loader 2.0 metadata.
+- Bounded Linux/NVIDIA and Windows/AMD qualification; Windows NVIDIA/HDR and physical-controller coverage remain open.
+
 ### 0.1.0-preview.1
 
 - DLSS Super Resolution and DLAA.
@@ -20,7 +28,7 @@ See [`docs/VALIDATION.md`](docs/VALIDATION.md) for the exact qualified and unqua
 
 ### 1. NVIDIA Reflex
 
-Investigate and integrate Reflex first. It should remain useful with Native, DLAA and DLSS SR rendering modes where supported, and it provides the latency foundation needed before Frame Generation is treated as release-ready.
+Streamline Reflex is implemented in 0.2.0-rc.1 and exercised on Linux/NVIDIA with Native, DLAA and DLSS SR. Finish Windows NVIDIA, wider lifecycle, PCL/latency and performance qualification before claiming broad support or a measured benefit. Its shared frame identity prepares later Frame Generation work; FG is not included.
 
 ### 2. Frame Generation
 

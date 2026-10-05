@@ -60,3 +60,9 @@ results and this AMD result cannot qualify NVIDIA teardown in another binary.
 The later clean Steam / CachyOS Proton SLR / native WineWayland run passed two normal shutdowns; see [the latest Linux report](LINUX_CACHYOS_REGRESSION_2026-10-05.md). This qualifies that Linux environment, rather than erasing the older environment's lingering-process observation.
 
 Preview.2 retains the exact tested GCC addon, UI and shader. The maintainer elected to publish with the single unexplained Windows `0xc0000005` exit disclosed and further Windows isolation deferred to Reflex qualification. Two clean candidate exits do not establish the crash's cause. Windows NVIDIA remains untested. No native changes were made to guess at a fix.
+
+## Update 2 / PR7 Windows follow-up
+
+The [PR7 Windows report](UPDATE_2_WINDOWS_VALIDATION_2026-10-05.md) records the exact downloaded installer, real repair/removal/fresh install, AMD Quality/DLAA/Custom fallback before source reduction, native HDR Off/restart and three clean exits. It retains the historical exit exception and outstanding NVIDIA/HDR/input gates. No rendering or installer behavior changed during this follow-up.
+
+The runtime probe now records the independently loaded display/latency addon and accepts `-RequireDisplayLatency` for Update 2. Keep this opt-in check: on Windows, a live process with only the SR addon loaded cannot establish HDR/Reflex startup. Legacy SR-only checks remain usable. This is an evidence correction, not an OS-specific rendering fix. Preserve the candidate-specific aggregate record and both Linux/Windows CI jobs; do not apply these results to a rebuilt installer.

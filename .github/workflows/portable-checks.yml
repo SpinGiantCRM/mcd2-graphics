@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Check Python syntax and public JSON
         run: |
-          python3 -m py_compile install.py build.py build_toolchain.py test_install.py tests/make_synthetic_saves.py
+          python3 -m py_compile install.py build.py build_latency.py build_installer.py build_toolchain.py test_install.py tests/make_synthetic_saves.py
           python3 -m json.tool manifest.json > /dev/null
           python3 -m json.tool dependencies.lock.json > /dev/null
       - name: Installer regressions
@@ -32,6 +32,12 @@ jobs:
         run: |
           g++ -std=c++20 -Isrc/native tests/upscaler_support_test.cpp -o /tmp/upscaler-support
           /tmp/upscaler-support
+      - name: Display protocol and Reflex frame identity
+        run: |
+          g++ -std=c++20 -pthread tests/reflex_tokens_test.cpp -o /tmp/reflex-tokens
+          /tmp/reflex-tokens
+          g++ -std=c++20 tests/display_protocol_test.cpp -o /tmp/display-protocol
+          /tmp/display-protocol /tmp/mcd2-fixtures/display-settings.sav /tmp/mcd2-fixtures/display-runtime.sav
       - name: Check frozen release reference
         run: |
           test "$(git ls-remote origin refs/tags/v0.1.0-preview.1 | cut -f1)" = 0e77429cf47eea672056986f8550ef3073937446
@@ -44,3 +50,20 @@ jobs:
         run: python -m unittest discover -s tests -p "test_installer_*.py" -v
       - name: Native build recipe regressions
         run: python -m unittest discover -s tests -p "test_build_toolchain.py" -v
+
+  guided-installer-checks:
+    name: Guided installer (${{ matrix.os }})
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Install pinned .NET SDK
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9
+        with:
+          dotnet-version: '10.0.401'
+      - name: Guided installer file-safety checks
+        run: dotnet run --project tests/installer-core/InstallerCore.Tests.csproj -c Release
+      - name: Compile standalone GUI
+        run: dotnet build src/installer/MCD2.Installer.csproj -c Release -p:SelfContained=false -p:RestoreLockedMode=true --nologo

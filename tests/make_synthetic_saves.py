@@ -22,6 +22,11 @@ def save(class_name, fields):
 def main():
     output = Path(sys.argv[1])
     output.mkdir(parents=True, exist_ok=True)
+    (output / 'display-settings.sav').write_bytes(save('DisplaySettingsSave', {
+        'SchemaVersion': 1, 'Revision': 3, 'HDROutput': 1, 'PeakNits': 1000,
+        'PaperWhiteNits': 203, 'UINits': 203, 'ReflexMode': 1,
+    }))
+    (output / 'display-runtime.sav').write_bytes(save('DisplayRuntimeSave', {'SchemaVersion': 1}))
     (output / 'settings.sav').write_bytes(save('GraphicsSettingsSave', {
         'SchemaVersion': 4, 'Revision': 22, 'ReconstructionMode': 2,
         'RenderScaleBasisPoints': 6667, 'SRPreset': 0, 'CustomScaleBasisPoints': 6700,

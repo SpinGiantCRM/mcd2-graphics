@@ -1,0 +1,139 @@
+{
+  "candidateVersion": "0.2.0-rc.1",
+  "testedPayloadCommit": "f032d00b23669720ee58f6d130f41cc6ea6586bb",
+  "ciRun": 37284816608,
+  "installerSHA256": "19f520a6e5c76bb53d1f8affe77a84b4b1880c3363127e2136409153542f2a1d",
+  "embeddedPayloadArchiveSHA256": "978c2609d6e63ecab4ed79ae4caa0390efb340756f46b9b65c7ecaf33ce0f85d",
+  "qualificationInputSHA256": "62b9e42f162f13423858cdfa19d3d90173666f45ba0b53c8249474f94af27116",
+  "payloadSHA256": {
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.utoc": "89a197a7731c372c0119a5dc55ab4275806d094162fa7faa3f97e79c207cedd7",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.ucas": "59bc7a913a43d57a7ba51f8e17ef6200a758ab43188766631c413c569de7ad05",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.pak": "63ff88b83117270069b19d3036cdcb03dc35b9d242bbd7dd9735434ff9180863",
+    "Dungeons/Binaries/Win64/mcd2-graphics.addon64": "611b49abee32db2705d47e5a9e08dd676cd7e892cb7da7e563eab4c18e733240",
+    "Dungeons/Binaries/Win64/MCD2Graphics/live_dense.cso": "1f7df8df67dce0f2edc106ff709855ec00794b2879d59522731f98636feb72d3",
+    "Dungeons/Binaries/Win64/mcd2-display-latency.addon64": "082bd1dcffa4b7b6c94a9a9316a43d8fc1ba96cba79cca61dcbfaf56fd88a1ad",
+    "Dungeons/Binaries/Win64/MCD2Graphics/streamline/mcd2-streamline-bridge.dll": "4f2afea295bf3211bf992021e3fa975dfb1a6c38dc2e2a729dc5119d86192b55"
+  },
+  "environment": {
+    "os": "Windows 11 Pro 10.0.26200",
+    "gpu": "AMD Radeon 860M",
+    "driver": "32.0.31041.1004",
+    "display": "1920x1200",
+    "gameSteamBuild": 25647713,
+    "gameExeSHA256": "231147bd0c655a4ae73f90873675d42917f2bfb3a9ee164fc64f217d6d6bd4ef",
+    "timeZone": "Australia/Adelaide UTC+10:30"
+  },
+  "installation": {
+    "allEightReceiptHashesVerified": true,
+    "guiUpgradeVerify": true,
+    "guiMissingOwnedRepair": true,
+    "guiModifiedOwnedRefusal": true,
+    "dependencyRecoveryCopiesVerified": 2,
+    "maintenance": {
+      "removedOwnedPayloads": 8,
+      "removedReceipt": true,
+      "removedCreatedStartupConfig": true,
+      "retainedFilesUnchanged": 42,
+      "freshInstallExactRestore": true,
+      "unmodifiedCoreRealWindowsGuard": true
+    },
+    "diagnosticPrivacy": "allowlisted fields; no private paths, saves or raw logs"
+  },
+  "probes": [
+    {
+      "label": "run1-startup",
+      "observationSeconds": 70.0,
+      "firstAgeSeconds": 42.7,
+      "lastAgeSeconds": 112.6,
+      "allSamplesResponding": true,
+      "srLoaded": true,
+      "renoDXLoaded": true,
+      "displayLatencyLoaded": null
+    },
+    {
+      "label": "run1-current",
+      "observationSeconds": 70.5,
+      "firstAgeSeconds": 798.0,
+      "lastAgeSeconds": 868.5,
+      "allSamplesResponding": true,
+      "srLoaded": true,
+      "renoDXLoaded": true,
+      "displayLatencyLoaded": true
+    },
+    {
+      "label": "run2-startup",
+      "observationSeconds": 25.5,
+      "firstAgeSeconds": 7.8,
+      "lastAgeSeconds": 33.2,
+      "allSamplesResponding": true,
+      "srLoaded": true,
+      "renoDXLoaded": true,
+      "displayLatencyLoaded": true
+    },
+    {
+      "label": "run3-startup",
+      "observationSeconds": 26.2,
+      "firstAgeSeconds": 11.2,
+      "lastAgeSeconds": 37.3,
+      "allSamplesResponding": true,
+      "srLoaded": true,
+      "renoDXLoaded": true,
+      "displayLatencyLoaded": true
+    }
+  ],
+  "runs": [
+    {
+      "launchLocal": "2026-10-05 19:43:21",
+      "exitLocal": "2026-10-05 20:04:58",
+      "durationSeconds": 1297,
+      "exitMethod": "gameplay-save-and-quit",
+      "shippingExitCode": 0
+    },
+    {
+      "launchLocal": "2026-10-05 20:05:47",
+      "exitLocal": "2026-10-05 20:10:10",
+      "durationSeconds": 263,
+      "exitMethod": "gameplay-normal-window-close",
+      "shippingExitCode": 0
+    },
+    {
+      "launchLocal": "2026-10-05 20:11:36",
+      "exitLocal": "2026-10-05 20:16:14",
+      "durationSeconds": 278,
+      "exitMethod": "main-menu-quit",
+      "shippingExitCode": 0
+    }
+  ],
+  "runtime": {
+    "amdQualityFallback": true,
+    "amdDLAAFallback": true,
+    "amdCustom85Fallback": true,
+    "reducedSourceNotAcknowledged": true,
+    "nativeRestartCurrentAck": true,
+    "reflexAvailable": false,
+    "savedReflexMode": 1,
+    "hdrEnabled": false,
+    "hdrRestartAfterRelaunch": false,
+    "systemHDRUnavailableRefusal": true,
+    "calibrationDisabledWhenOff": true,
+    "resetCancelAndConfirm": true,
+    "mainAndPauseMenuMouse": true,
+    "levelTravel": true,
+    "blueprint2ModInfo": true,
+    "temporaryBindingsRestored": true,
+    "stockVideoPreferencesRestored": true
+  },
+  "runtimeProductChanges": false,
+  "windowsAMDPartialQualification": true,
+  "releaseQualified": false,
+  "unqualified": [
+    "Windows NVIDIA Streamline execution/timing/PCL/performance/failure lifecycle",
+    "HDR On/calibration on HDR display",
+    "physical controller and complete keyboard navigation",
+    "independently confirmed movement/combat",
+    "GUI Browse and fresh Install/Uninstall button workflows",
+    "fresh official ReShade installation",
+    "Intel runtime and device-loss/long-session coverage"
+  ],
+  "historicalExitExceptionResolved": false
+}

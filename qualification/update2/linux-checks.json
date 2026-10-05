@@ -1,0 +1,341 @@
+{
+  "candidate": "0.2.0-rc.1",
+  "publicationAllowed": false,
+  "earlierFailedTrialRetained": {
+    "samples": 92,
+    "allFaultFree": true,
+    "modes": {
+      "0": [
+        {
+          "reflexAvailable": 1,
+          "reflexFault": 0,
+          "mode": 0,
+          "completedFrames": 680230,
+          "coordinatorError": 0,
+          "sdkMarkerError": 0,
+          "faultFrame": 0,
+          "faultLastFrame": 0,
+          "faultMarker": 0,
+          "faultSent": 0,
+          "faultRequired": 0,
+          "faultFound": 0,
+          "faultReady": 0,
+          "faultComplete": 0,
+          "faultIdentity": 0,
+          "sdkResult": 0,
+          "sdkReportsAvailable": 1,
+          "sdkCompleteReports": 64,
+          "pingsSeen": 3,
+          "pingsSent": 3,
+          "hdrRevision": 29,
+          "hdrRestart": 1
+        }
+      ],
+      "1": [
+        {
+          "reflexAvailable": 1,
+          "reflexFault": 0,
+          "mode": 1,
+          "completedFrames": 563657,
+          "coordinatorError": 0,
+          "sdkMarkerError": 0,
+          "faultFrame": 0,
+          "faultLastFrame": 0,
+          "faultMarker": 0,
+          "faultSent": 0,
+          "faultRequired": 0,
+          "faultFound": 0,
+          "faultReady": 0,
+          "faultComplete": 0,
+          "faultIdentity": 0,
+          "sdkResult": 0,
+          "sdkReportsAvailable": 1,
+          "sdkCompleteReports": 64,
+          "pingsSeen": 1,
+          "pingsSent": 1,
+          "hdrRevision": 27,
+          "hdrRestart": 1
+        }
+      ],
+      "2": [
+        {
+          "reflexAvailable": 1,
+          "reflexFault": 0,
+          "mode": 2,
+          "completedFrames": 634291,
+          "coordinatorError": 0,
+          "sdkMarkerError": 0,
+          "faultFrame": 0,
+          "faultLastFrame": 0,
+          "faultMarker": 0,
+          "faultSent": 0,
+          "faultRequired": 0,
+          "faultFound": 0,
+          "faultReady": 0,
+          "faultComplete": 0,
+          "faultIdentity": 0,
+          "sdkResult": 0,
+          "sdkReportsAvailable": 1,
+          "sdkCompleteReports": 64,
+          "pingsSeen": 2,
+          "pingsSent": 2,
+          "hdrRevision": 28,
+          "hdrRestart": 1
+        }
+      ]
+    },
+    "publicationAllowed": false,
+    "shutdown": "FAILED - native game access violation during normal quit",
+    "maximumCompletedFramesLowerBound": 680230
+  },
+  "restoredConfigRun": {
+    "run": "linux-restored-config",
+    "lastStatus": {
+      "reflexAvailable": 1,
+      "reflexFault": 0,
+      "mode": 1,
+      "completedFrames": 149763,
+      "coordinatorError": 0,
+      "sdkMarkerError": 0,
+      "faultFrame": 0,
+      "faultLastFrame": 0,
+      "faultMarker": 0,
+      "faultSent": 0,
+      "faultRequired": 0,
+      "faultFound": 0,
+      "faultReady": 0,
+      "faultComplete": 0,
+      "faultIdentity": 0,
+      "sdkResult": 0,
+      "sdkReportsAvailable": 1,
+      "sdkCompleteReports": 64,
+      "pingsSeen": 0,
+      "pingsSent": 0,
+      "hdrRevision": 30,
+      "hdrRestart": 0
+    },
+    "allFaultFree": true,
+    "sr": [
+      {
+        "event": "intent_queued",
+        "revision": 1611,
+        "mode": 1,
+        "frame": 77090
+      },
+      {
+        "event": "runtime_ack",
+        "revision": 1611,
+        "phase": 1,
+        "error": 0,
+        "frame": 77090
+      },
+      {
+        "event": "feature_created",
+        "revision": 1611,
+        "input": [
+          3840,
+          2160
+        ],
+        "output": [
+          3840,
+          2160
+        ]
+      },
+      {
+        "event": "runtime_ack",
+        "revision": 1611,
+        "phase": 4,
+        "error": 0,
+        "frame": 78896
+      },
+      {
+        "event": "runtime_ack",
+        "revision": 1611,
+        "phase": 2,
+        "error": 0,
+        "frame": 78897
+      },
+      {
+        "event": "intent_queued",
+        "revision": 1612,
+        "mode": 2,
+        "frame": 92520
+      },
+      {
+        "event": "runtime_ack",
+        "revision": 1612,
+        "phase": 1,
+        "error": 0,
+        "frame": 93854
+      },
+      {
+        "event": "feature_created",
+        "revision": 1612,
+        "input": [
+          2560,
+          1440
+        ],
+        "output": [
+          3840,
+          2160
+        ]
+      },
+      {
+        "event": "runtime_ack",
+        "revision": 1612,
+        "phase": 4,
+        "error": 0,
+        "frame": 93865
+      },
+      {
+        "event": "runtime_ack",
+        "revision": 1612,
+        "phase": 2,
+        "error": 0,
+        "frame": 93866
+      }
+    ],
+    "shutdown": "normal quit completed; no new crash report"
+  },
+  "finalGuiInstalledRun": {
+    "run": "final-guided-fresh-install",
+    "samples": 69,
+    "lastStatus": {
+      "mode": 1,
+      "completedFrames": 328798,
+      "coordinatorError": 0,
+      "sdkMarkerError": 0,
+      "sdkCompleteReports": 64,
+      "hdrRestart": 0,
+      "reflexAvailable": 1,
+      "reflexFault": 0
+    },
+    "allFaultFree": true,
+    "sr": [
+      {
+        "event": "intent_queued",
+        "revision": 1624
+      },
+      {
+        "event": "runtime_ack",
+        "revision": 1624,
+        "phase": 1,
+        "error": 0
+      },
+      {
+        "event": "feature_created",
+        "revision": 1624,
+        "input": [
+          2560,
+          1440
+        ],
+        "output": [
+          3840,
+          2160
+        ]
+      },
+      {
+        "event": "runtime_ack",
+        "revision": 1624,
+        "phase": 4,
+        "error": 0
+      },
+      {
+        "event": "runtime_ack",
+        "revision": 1624,
+        "phase": 2,
+        "error": 0
+      },
+      {
+        "event": "intent_queued",
+        "revision": 1625
+      },
+      {
+        "event": "runtime_ack",
+        "revision": 1625,
+        "phase": 1,
+        "error": 0
+      },
+      {
+        "event": "feature_created",
+        "revision": 1625,
+        "input": [
+          3840,
+          2160
+        ],
+        "output": [
+          3840,
+          2160
+        ]
+      },
+      {
+        "event": "runtime_ack",
+        "revision": 1625,
+        "phase": 4,
+        "error": 0
+      },
+      {
+        "event": "runtime_ack",
+        "revision": 1625,
+        "phase": 2,
+        "error": 0
+      }
+    ],
+    "shutdown": "normal quit completed; no new crash report",
+    "projectStartupRetained": true
+  },
+  "physicalControllerQualified": false,
+  "windowsRuntimeQualified": false,
+  "latencyReductionMeasured": false,
+  "secondFinalRelaunch": {
+    "lastStatus": {
+      "mode": 1,
+      "completedFrames": 61402,
+      "coordinatorError": 0,
+      "sdkMarkerError": 0,
+      "sdkCompleteReports": 64,
+      "hdrRestart": 0,
+      "reflexAvailable": 1,
+      "reflexFault": 0
+    },
+    "sr": [
+      {
+        "event": "feature_created",
+        "input": [
+          3840,
+          2160
+        ],
+        "output": [
+          3840,
+          2160
+        ]
+      },
+      {
+        "event": "runtime_ack",
+        "phase": 4,
+        "error": 0
+      },
+      {
+        "event": "runtime_ack",
+        "phase": 2,
+        "error": 0
+      }
+    ],
+    "shutdown": "normal quit completed; no new crash report",
+    "projectStartupRetained": true
+  },
+  "finalGuiUninstall": {
+    "createdProjectStartupRemoved": true,
+    "ownedReceiptRemoved": true,
+    "privateDlssRemoved": true
+  },
+  "hostRestoration": {
+    "publishedPayloadRestored": true,
+    "priorBlueprintLoaderRestored": true,
+    "trialStreamlineRemoved": true,
+    "startupOverrideRemoved": true,
+    "backedUpModPreferencesRestored": true,
+    "gameplayAndNormalExitPassed": true,
+    "newCrashReport": false
+  }
+}

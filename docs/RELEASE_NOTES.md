@@ -1,3 +1,38 @@
+# 0.2.0-rc.1 — guided installation, native HDR and Reflex
+
+Experimental prerelease, published after the maintainer accepted the available Windows/AMD qualification on 5 October 2026. Linux/NVIDIA and Windows/AMD results are separate; Windows NVIDIA Reflex and Windows HDR output remain untested.
+
+- Standalone Windows and Linux guided installers: Steam detection, official dependency selection and verification, repair, verify, safe uninstall and sanitized support reports. No Python or separate .NET installation needed.
+- Native Video-menu HDR Output, Peak Brightness, Paper White and UI Brightness controls, coordinated with the pinned RenoDX UE Extended addon. Calibration requires the restart indicated by the help panel. System HDR must already work.
+- NVIDIA Reflex Off / On / On + Boost beside FPS Limit when low-latency support is reported. Streamline frame tokens, pre-input sleep and continuous measurement markers prepare the integration for later FG work. No latency reduction or performance percentage is claimed.
+- Blueprint Loader 2.0 metadata: name, description, version, author and help. Controls remain in the game's native Video menu.
+- Existing DLSS SR and DLAA renderer/shader binaries remain byte-identical to preview.2. Frame Generation, other upscalers and Ray Reconstruction are not included.
+
+## Download and update
+
+Download the compiled **Windows** or **Linux** installer archive from Assets; GitHub's automatic source archives are for developers. Extract it, close the game, run the installer and follow [INSTALL.md](../INSTALL.md). Use Repair / Verify to migrate a hash-matching preview.2 installation. Unknown/modified files are retained and reported. Earlier versions need their original uninstall workflow.
+
+Official game/platform sign-in must already work. Vendor dependencies are separate official downloads, verified by hash; their licenses are accepted by the player. No game assets, authentication workarounds, player data or vendor graphics DLLs are redistributed.
+
+## Qualification and limits
+
+Linux / RTX 4080 SUPER: guided install/repair/uninstall, native HDR persistence/restart, supported Reflex modes and current reports, Native/Quality/DLAA coexistence and normal relaunch/exit checks. Windows 11 / Radeon 860M: official dependency file selection, repair, real fresh install/uninstall through the unchanged core, sanitized diagnostics, Blueprint metadata, native fallback before source reduction, unsupported HDR/Reflex behavior, resolution/level travel and three clean exits (21m37s, 4m23s, 4m38s).
+
+Windows NVIDIA execution, HDR on a Windows HDR display, physical controllers, complete Windows keyboard/combat qualification, fresh GUI Install/Uninstall/Browse and a fresh full-ReShade setup remain unqualified. Device loss, long sessions and wider configurations also remain unqualified. Earlier unexplained Windows PR6 and Linux candidate shutdown exceptions are retained in the evidence; these bounded clean runs do not establish their cause or guarantee a fix.
+
+Output support remains 640×360–3840×2160. Main-menu rendering remains Native, with saved DLSS selection activated in gameplay. Resolution changes may fall back to Native; reselect DLSS once stable. Offline single-player only; online/co-op permission and anti-cheat compatibility are unverified.
+
+[Linux report](UPDATE_2_LINUX_VALIDATION_2026-10-05.md) · [Windows report](UPDATE_2_WINDOWS_VALIDATION_2026-10-05.md) · [artifact provenance](../qualification/update2/release-artifacts.json) · [remaining qualification](UPDATE_2_RELEASE_GATE.md).
+
+## Exact published artifacts
+
+Payload/installer source: `f032d00b23669720ee58f6d130f41cc6ea6586bb`; subsequent PR7 changes record evidence and publication documentation only. No runtime rebuild for publication.
+
+- Windows installer from [tested CI run 37284816608](https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/37284816608): SHA-256 `19f520a6e5c76bb53d1f8affe77a84b4b1880c3363127e2136409153542f2a1d`.
+- Linux installer from the qualified local GUI build: SHA-256 `30dabd440783032b6a1cc58d7c957676dc8ca72a23fe086944409107d7f34fdc`.
+
+Both embed the same seven owned payload files. Different ZIP-container hashes are recorded rather than treated as different payloads. Preview.1 and preview.2 tags/assets remain frozen. The published preview.1 benchmark has not been rerun for this release and does not measure Reflex.
+
 # 0.1.0-preview.2 — startup and compatibility fixes
 
 - Fix the Windows render-thread stack overflow caused by large path buffers.
