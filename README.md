@@ -1,3 +1,7 @@
+# LOCAL REGRESSION CANDIDATE — NOT PUBLISHED
+
+This branch/package is `0.1.0-preview.1-linux-regression.1`. Windows results for earlier binaries do not qualify it. Read [the handoff](docs/LINUX_REGRESSION_HANDOFF_2026-10-05.md) before testing. Publication is held for Windows regression checks.
+
 # MCD2 Graphics — experimental preview
 
 [Download](https://github.com/SpinGiantCRM/mcd2-graphics/releases) · [Nexus page](https://www.nexusmods.com/minecraftdungeons2/mods/87) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md) · [Validation](docs/VALIDATION.md)

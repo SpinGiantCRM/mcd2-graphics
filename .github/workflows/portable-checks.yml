@@ -13,11 +13,13 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Check Python syntax and public JSON
         run: |
-          python3 -m py_compile install.py build.py test_install.py tests/make_synthetic_saves.py
+          python3 -m py_compile install.py build.py build_toolchain.py test_install.py tests/make_synthetic_saves.py
           python3 -m json.tool manifest.json > /dev/null
           python3 -m json.tool dependencies.lock.json > /dev/null
       - name: Installer regressions
         run: python3 -m unittest discover -s tests -p "test_installer_*.py" -v
+      - name: Native build recipe regressions
+        run: python3 -m unittest discover -s tests -p "test_build_toolchain.py" -v
       - name: Generate synthetic parser fixtures
         run: python3 tests/make_synthetic_saves.py /tmp/mcd2-fixtures
       - name: Settings framing and semantic checks
@@ -40,3 +42,5 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Installer regressions
         run: python -m unittest discover -s tests -p "test_installer_*.py" -v
+      - name: Native build recipe regressions
+        run: python -m unittest discover -s tests -p "test_build_toolchain.py" -v

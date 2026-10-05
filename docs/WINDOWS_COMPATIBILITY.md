@@ -36,3 +36,15 @@ Verify the LUID check admits the actual NVIDIA rendering adapter and NGX still
 decides feature support. Preserve the Windows requirements above while fixing
 Linux regressions. A rebuilt artifact needs its own hash and qualification;
 Windows results for this binary do not qualify a different Linux-hosted build.
+
+### Build recipe follow-up
+
+The local Linux regression candidate selects compiler-specific frame-error
+flags and normalizes the Windows include in generated ReShade header copies.
+This retains the Clang guard and avoids restoring the recursive Windows.h
+shim. Both Windows and Linux CI retain installer checks and now include the
+build-recipe unit checks. Windows CI has not run for these local changes.
+The GCC-produced addon preserves all native PR5 source fixes but is a new
+binary: Windows/AMD startup, fallback and shutdown must be retested against
+its exact hash before publication. The prior LLVM MinGW candidate's Windows
+results do not qualify this artifact.
