@@ -50,10 +50,12 @@ public sealed class InstallerWindow:Window {
     void Draw() {
         content.Children.Clear();message.Text="";
         if(page==0) {
-            Text("Locate your game",22);Text("Steam libraries are detected automatically. You can choose a different Minecraft Dungeons II folder.");
+            Text("Locate your game",22);Text("This release supports the verified Steam Win64 build. Xbox / Game Pass (WinGDK) is not supported yet.");
+            Text("Steam libraries are detected automatically. Choose the installation folder or the game's executable.");
             var games=InstallerEngine.DetectGames().ToList();if(games.Count>1){var choice=new ComboBox{ItemsSource=games,SelectedItem=engine.GameRoot,HorizontalAlignment=HorizontalAlignment.Stretch};choice.SelectionChanged+=(_,_)=>{if(choice.SelectedItem is string p){engine.SetGame(p);Draw();}};content.Children.Add(choice);}
             Text(engine.GameRoot??"Game not found");
-            content.Children.Add(AsyncButton("Browse…",async()=>{var folders=await StorageProvider.OpenFolderPickerAsync(new(){Title="Choose Minecraft Dungeons II",AllowMultiple=false});var p=folders.SingleOrDefault()?.TryGetLocalPath();if(p!=null){engine.SetGame(p);Draw();}}));
+            content.Children.Add(AsyncButton("Browse folder…",async()=>{var folders=await StorageProvider.OpenFolderPickerAsync(new(){Title="Choose the Steam game folder",AllowMultiple=false});var p=folders.SingleOrDefault()?.TryGetLocalPath();if(p!=null){engine.SetGame(p);Draw();}}));
+            content.Children.Add(AsyncButton("Choose game executable…",async()=>{var files=await StorageProvider.OpenFilePickerAsync(new(){Title="Choose the Steam game executable",AllowMultiple=false,FileTypeFilter=new[]{new FilePickerFileType("Windows executable"){Patterns=new[]{"*.exe"}}}});var p=files.SingleOrDefault()?.TryGetLocalPath();if(p!=null){engine.SetGame(p);Draw();}}));
             if(engine.GameRoot!=null){Text("Game build: "+engine.GameBuild());var check=engine.Scan()[0];Text("Status: "+(check.State=="OK"?"Supported":"Unsupported — installation is blocked"));}
             content.Children.Add(Button("Check requirements",()=>{page=1;Draw();}));
         }else if(page==1) {

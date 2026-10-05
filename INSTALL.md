@@ -6,7 +6,7 @@ Download the compiled Windows or Linux installer archive from the [0.2.0-rc.1 re
 
 1. Use a legally obtained game that already launches and signs in normally. Launch it through Steam once, then close it.
 2. Run **MCD2-Graphics-Installer.exe** on Windows or **mcd2-graphics-installer** on Linux. No Python or separate .NET installation is needed.
-3. **Game:** select the detected Steam installation or use Browse. The supported executable and build are verified.
+3. **Game:** select the detected Steam installation or browse to its installation folder. The current release has a folder picker; the upcoming installer also accepts the `Dungeons/Binaries/Win64` folder or the game's executable. The executable fingerprint is still verified. **Xbox / Game Pass (WinGDK) is not supported by this release.**
 4. **Requirements:** open each official download and select the downloaded file/archive. The installer verifies the pinned hashes and places Blueprint Loader, RenoDX and NVIDIA runtimes correctly. They are not bundled. A known Blueprint Loader 1.1 installation can upgrade to 2.0; its original bytes are retained in a recovery folder. Unknown or modified dependencies are retained.
 5. **ReShade:** run the official full addon-support installer for `Dungeons/Binaries/Win64/Dungeons-Win64-Shipping.exe`, selecting DirectX 10/11/12. Complete its own workflow and any agreement yourself, then Check again. A normal or unsupported build is refused.
 6. **Install:** install the mod. Launch normally through Steam and open **Settings → Video**. The Mods page identifies the mod and links to help.

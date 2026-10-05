@@ -26,7 +26,7 @@ NVIDIA Reflex appears beside FPS Limit only when the integration reports low-lat
 
 ## Requirements and installation
 
-The pinned game build, full-addon ReShade, Blueprint Loader 2.0, RenoDX UE Extended and the pinned official NVIDIA runtimes. DLSS and Reflex require supported NVIDIA hardware; AMD uses Native fallback and hides unavailable Reflex. Dependencies are external downloads and are checked by hash. See [INSTALL.md](INSTALL.md) and [dependencies.lock.json](dependencies.lock.json). HDR requires an HDR-capable display and a working OS HDR output path; this mod does not convert SDR to HDR.
+The pinned **Steam Win64** game build, full-addon ReShade, Blueprint Loader 2.0, RenoDX UE Extended and the pinned official NVIDIA runtimes. **Xbox / Game Pass (WinGDK) is not supported by this release.** DLSS and Reflex require supported NVIDIA hardware; AMD uses Native fallback and hides unavailable Reflex. Dependencies are external downloads and are checked by hash. See [INSTALL.md](INSTALL.md) and [dependencies.lock.json](dependencies.lock.json). HDR requires an HDR-capable display and a working OS HDR output path; this mod does not convert SDR to HDR.
 
 The payload includes only this mod's UI/metadata, native graphics and display/latency addons, own ABI bridge and motion/exposure conversion shader. The standalone installer also includes its permitted application framework/runtime. It contains no game assets, extracted game shader binaries, authentication replacements or third-party runtime DLLs. It does not solve platform sign-in or Gaming Services problems.
 

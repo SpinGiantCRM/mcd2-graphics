@@ -50,9 +50,8 @@ public sealed partial class InstallerEngine {
     static Dictionary<string,string> ReadHashes(JsonElement e)=>e.EnumerateObject().ToDictionary(x=>x.Name,x=>x.Value.GetString()!);
     static string OfficialUrl(string id)=>id switch {"BlueprintLoader"=>"https://www.nexusmods.com/minecraftdungeons2/mods/2?tab=files", "ReShade"=>"https://reshade.me/", "RenoDXUEExtended"=>"https://github.com/marat569/renodx/releases/tag/nightly-20260928", "DLSSRuntime"=>"https://github.com/NVIDIA/DLSS", _=>throw new InvalidDataException("Unknown requirement")};
     public void SetGame(string path) {
-        var root=Path.GetFullPath(path);
-        if(!File.Exists(Target(root,Shipping)))throw new InvalidDataException("Select the Minecraft Dungeons II folder containing Dungeons.");
-        GameRoot=root;
+        GameRoot=null;
+        GameRoot=LocateGame(path);
     }
     public string GameBuild() {
         if(GameRoot==null)return "Not selected";
@@ -209,6 +208,7 @@ public sealed partial class InstallerEngine {
     public string DiagnosticReport() {
         // Positive allowlist, never read logs, saves, tokens, configs or arbitrary error text.
         var report=new StringBuilder("MCD2 Graphics diagnostics\n");
+        report.AppendLine("Supported edition: "+SupportedEdition);
         report.AppendLine("Mod: "+Version);report.AppendLine("Game build: "+GameBuild());report.AppendLine("Platform: "+(OperatingSystem.IsWindows()?"Windows ":"Linux ")+Environment.OSVersion.Version);
         foreach(var s in HardwareFacts())report.AppendLine(s);
         foreach(var c in Scan()) {report.AppendLine($"{c.Name}: {c.State} ({c.Version})");report.AppendLine("Expected SHA-256: "+c.Expected);report.AppendLine("Found SHA-256: "+c.Found);}

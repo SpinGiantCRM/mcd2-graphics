@@ -66,3 +66,13 @@ Preview.2 retains the exact tested GCC addon, UI and shader. The maintainer elec
 The [PR7 Windows report](UPDATE_2_WINDOWS_VALIDATION_2026-10-05.md) records the exact downloaded installer, real repair/removal/fresh install, AMD Quality/DLAA/Custom fallback before source reduction, native HDR Off/restart and three clean exits. It retains the historical exit exception and outstanding NVIDIA/HDR/input gates. No rendering or installer behavior changed during this follow-up.
 
 The runtime probe now records the independently loaded display/latency addon and accepts `-RequireDisplayLatency` for Update 2. Keep this opt-in check: on Windows, a live process with only the SR addon loaded cannot establish HDR/Reflex startup. Legacy SR-only checks remain usable. This is an evidence correction, not an OS-specific rendering fix. Preserve the candidate-specific aggregate record and both Linux/Windows CI jobs; do not apply these results to a rebuilt installer.
+
+## Installer selection follow-up — 6 October 2026
+
+[Issue #8's selection correction](INSTALLER_STORE_DIAGNOSTICS_2026-10-06.md)
+adds an executable picker, bounded known-folder normalization and an explicit
+unsupported WinGDK message. Keep the executable hash gate and path/link checks.
+The published rc.1 installer is unchanged. Linux core checks and GUI compilation
+do not qualify Windows picker behavior; test both folder and executable choices,
+an unsupported WinGDK selection and an incorrect executable hash before releasing
+a rebuilt Windows installer. This correction does not enable Xbox support.
