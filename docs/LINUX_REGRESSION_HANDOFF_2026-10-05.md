@@ -105,3 +105,7 @@ See [Linux follow-up](LINUX_CACHYOS_REGRESSION_2026-10-05.md). The Windows
 access violation remains a release blocker; use the
 [isolation plan](WINDOWS_SHUTDOWN_ISOLATION_2026-10-05.md) on the exact
 existing artifact before promotion.
+
+## Publication follow-up
+
+Preview.2 reuses this exact candidate addon and unchanged UI/shader. Package metadata and documentation identify the new version. Following the clean CachyOS Linux regression, the maintainer elected to retain the Windows shutdown exception as a disclosed qualification limit and defer additional Windows checks to the separate Reflex candidate. Earlier hold statements describe the decision before that follow-up; the exception remains unresolved.

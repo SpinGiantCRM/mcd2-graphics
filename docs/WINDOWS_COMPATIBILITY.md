@@ -54,3 +54,9 @@ clean runs do not erase the crash or establish its cause.
 Windows NVIDIA runtime and the separately recorded Linux exit limitation remain
 outstanding. The prior LLVM candidate's
 results and this AMD result cannot qualify NVIDIA teardown in another binary.
+
+## Preview.2 publication decision — 5 October 2026
+
+The later clean Steam / CachyOS Proton SLR / native WineWayland run passed two normal shutdowns; see [the latest Linux report](LINUX_CACHYOS_REGRESSION_2026-10-05.md). This qualifies that Linux environment, rather than erasing the older environment's lingering-process observation.
+
+Preview.2 retains the exact tested GCC addon, UI and shader. The maintainer elected to publish with the single unexplained Windows `0xc0000005` exit disclosed and further Windows isolation deferred to Reflex qualification. Two clean candidate exits do not establish the crash's cause. Windows NVIDIA remains untested. No native changes were made to guess at a fix.

@@ -1,8 +1,4 @@
-# LOCAL REGRESSION CANDIDATE — NOT PUBLISHED
-
-This branch/package is `0.1.0-preview.1-linux-regression.1`. Windows results for earlier binaries do not qualify it. Read [the handoff](docs/LINUX_REGRESSION_HANDOFF_2026-10-05.md) before testing. Publication is held for Windows regression checks.
-
-# MCD2 Graphics — experimental preview
+# MCD2 Graphics — 0.1.0-preview.2
 
 [Download](https://github.com/SpinGiantCRM/mcd2-graphics/releases) · [Nexus page](https://www.nexusmods.com/minecraftdungeons2/mods/87) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md) · [Validation](docs/VALIDATION.md)
 
@@ -32,7 +28,7 @@ The package includes only this mod's UI, native addon and motion/exposure conver
 
 ## Scope and limitations
 
-This is a preview, not an official RenoDX, NVIDIA, Mojang or Microsoft release. The renderer uses a version-pinned ReShade adapter and game-specific resource layouts. Output is limited to 640×360 through 3840×2160. Split-screen, arbitrary aspect ratios, device recreation and long sessions are not qualified. The Windows fix candidate passed bounded startup and AMD Radeon 860M native fallback checks; see [Windows validation](docs/WINDOWS_VALIDATION_2026-10-05.md). NVIDIA DLSS execution with the rebuilt addon still needs qualification. Original development tests used Proton Experimental on an RTX 4080 SUPER. Resolution changes can fall back to Native; select DLSS again after the new resolution settles.
+This is a preview, not an official RenoDX, NVIDIA, Mojang or Microsoft release. The renderer uses a version-pinned ReShade adapter and game-specific resource layouts. Output is limited to 640×360 through 3840×2160. Split-screen, arbitrary aspect ratios, device recreation and long sessions are not qualified. The exact released addon passed Windows 11 / Radeon 860M startup and native fallback checks, and Linux / RTX 4080 SUPER Quality, DLAA, Native, menu travel and reinstall checks. The latest Linux run used CachyOS Proton SLR with native WineWayland and normal Steam sign-in. See [latest Linux evidence](docs/LINUX_CACHYOS_REGRESSION_2026-10-05.md) and [Windows regression](docs/WINDOWS_REGRESSION_PR6_2026-10-05.md). One Windows shutdown crashed with `0xc0000005`; two other candidate exits were clean. Its cause remains unknown, and Windows NVIDIA execution remains untested. Further Windows qualification is planned with the separate Reflex candidate. Resolution changes can fall back to Native; select DLSS again after the new resolution settles.
 
 Mouse and keyboard controls have been exercised. Controller input follows the game's normal focus/navigation and D-pad actions; a physical controller qualification remains outstanding. Changing input devices can move selection back to the first native setting. Native graphics-reset integration currently recognizes the English confirmation text.
 

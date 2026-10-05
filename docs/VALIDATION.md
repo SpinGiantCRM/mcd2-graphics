@@ -1,3 +1,9 @@
+# Preview.2 qualification update — 5 October 2026
+
+Preview.2 uses the exact PR6 addon and unchanged preview.1 UI/shader. Latest Linux runtime and install/removal evidence is in [the CachyOS report](LINUX_CACHYOS_REGRESSION_2026-10-05.md). Exact-artifact Windows AMD evidence, including the unexplained shutdown exception, is in [the Windows report](WINDOWS_REGRESSION_PR6_2026-10-05.md). Windows shutdown is not fully qualified. Additional Windows isolation has been deferred to the upcoming separate Reflex qualification; it is not reported as passed.
+
+The earlier records below describe their specific artifacts and environments. They do not supersede these latest results. The original preview.1 tag and archive are unchanged.
+
 # Preview validation — 4 October 2026
 
 For the subsequent Windows/AMD investigation and fixed local candidate, see [Windows validation](WINDOWS_VALIDATION_2026-10-05.md). The results below apply to the original preview.1 payload.
