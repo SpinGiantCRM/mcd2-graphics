@@ -96,3 +96,12 @@ needs those checks independently; do not replace the tested payload by name.
 
 All private saves, SDK headers, vendor runtime DLLs, screenshots, debugger
 output, logs and authentication material are excluded from this handoff.
+
+## Updated Steam / native Wayland follow-up
+
+The unchanged candidate passed Quality/DLAA/Native transitions and normal
+shutdown on CachyOS Proton SLR using the updated game's Steam sign-in path.
+See [Linux follow-up](LINUX_CACHYOS_REGRESSION_2026-10-05.md). The Windows
+access violation remains a release blocker; use the
+[isolation plan](WINDOWS_SHUTDOWN_ISOLATION_2026-10-05.md) on the exact
+existing artifact before promotion.
