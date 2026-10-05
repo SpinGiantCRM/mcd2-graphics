@@ -328,5 +328,14 @@
     "createdProjectStartupRemoved": true,
     "ownedReceiptRemoved": true,
     "privateDlssRemoved": true
+  },
+  "hostRestoration": {
+    "publishedPayloadRestored": true,
+    "priorBlueprintLoaderRestored": true,
+    "trialStreamlineRemoved": true,
+    "startupOverrideRemoved": true,
+    "backedUpModPreferencesRestored": true,
+    "gameplayAndNormalExitPassed": true,
+    "newCrashReport": false
   }
 }

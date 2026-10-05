@@ -4,6 +4,7 @@ on:
     paths:
       - 'qualification/update2/**'
       - 'src/installer/**'
+      - 'tests/installer-core/**'
       - 'build_installer.py'
       - 'manifest.json'
       - 'dependencies.lock.json'
