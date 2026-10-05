@@ -1,8 +1,16 @@
-# Linux regression candidate — Windows qualification required
+# Linux regression candidate and Windows qualification
 
-Status: local testing candidate, not a public release. Do not promote it to
-GitHub releases or Nexus until the user completes Windows regression checks.
-Original `0.1.0-preview.1` remains frozen.
+Status: PR6 testing candidate, not a public release. Exact-artifact Windows AMD
+checks are recorded in [Windows regression results](WINDOWS_REGRESSION_PR6_2026-10-05.md)
+and its [sanitized record](windows-regression-pr6-2026-10-05.json). Installation,
+startup, fallback, travel and reinstall passed. The first Windows exit returned
+0 after a roughly two-minute delay; the second quit crashed with `0xc0000005`,
+so Windows shutdown is not qualified. A third PR6 run and one previous-candidate
+control exited 0 without establishing the crash's cause. The exact PR6 payload
+remains installed with Native saved. Windows NVIDIA teardown remains untested,
+and the Linux exit limitation below is unchanged. Do not merge or promote this
+candidate without the user's release decision. Original `0.1.0-preview.1`
+remains frozen.
 
 ## What was repaired
 
@@ -56,7 +64,12 @@ This is a smoke test, not a long-session, complete dungeon/lifecycle, Windows
 or physical-controller qualification. Existing HDR dependencies were retained;
 no fresh HDR calibration or benchmark was performed.
 
-## Windows checks to run next
+## Windows checklist and remaining NVIDIA checks
+
+The AMD run exercised the checklist below with the supplied payload; the report
+distinguishes completed checks from unmeasured source dimensions, continuous
+active play, controller use and prompt shutdown. Keep these requirements for
+future candidates.
 
 Test the supplied exact binary before rebuilding it:
 

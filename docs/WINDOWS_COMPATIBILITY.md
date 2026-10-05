@@ -43,8 +43,14 @@ The local Linux regression candidate selects compiler-specific frame-error
 flags and normalizes the Windows include in generated ReShade header copies.
 This retains the Clang guard and avoids restoring the recursive Windows.h
 shim. Both Windows and Linux CI retain installer checks and now include the
-build-recipe unit checks. Windows CI has not run for these local changes.
-The GCC-produced addon preserves all native PR5 source fixes but is a new
-binary: Windows/AMD startup, fallback and shutdown must be retested against
-its exact hash before publication. The prior LLVM MinGW candidate's Windows
-results do not qualify this artifact.
+build-recipe unit checks. Both CI jobs passed for PR6's tested source.
+The GCC-produced addon preserves all native PR5 source fixes. Its
+[Windows AMD regression](WINDOWS_REGRESSION_PR6_2026-10-05.md) passed installation,
+1,027.5 seconds of survival, fallback, menu travel and reinstall.
+The first quit eventually returned exit code 0 after a roughly two-minute delay;
+the second quit crashed with `0xc0000005`. Windows shutdown is not qualified.
+A third PR6 run and one previous-candidate control exited with code 0; these
+clean runs do not erase the crash or establish its cause.
+Windows NVIDIA runtime and the separately recorded Linux exit limitation remain
+outstanding. The prior LLVM candidate's
+results and this AMD result cannot qualify NVIDIA teardown in another binary.
