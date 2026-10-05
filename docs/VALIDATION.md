@@ -1,3 +1,7 @@
+# Update 2 candidate Windows follow-up — 5 October 2026
+
+PR7's exact-artifact Windows/AMD results are in [the Update 2 Windows report](UPDATE_2_WINDOWS_VALIDATION_2026-10-05.md) and [aggregate record](../qualification/update2/windows-checks.json). Installation, AMD fallback and three bounded clean exits passed. Required NVIDIA, HDR-output and input checks remain outstanding; Update 2 is still unpublished and release-blocked. These results do not revise the historical preview evidence below.
+
 # Preview.2 qualification update — 5 October 2026
 
 Preview.2 uses the exact PR6 addon and unchanged preview.1 UI/shader. Latest Linux runtime and install/removal evidence is in [the CachyOS report](LINUX_CACHYOS_REGRESSION_2026-10-05.md). Exact-artifact Windows AMD evidence, including the unexplained shutdown exception, is in [the Windows report](WINDOWS_REGRESSION_PR6_2026-10-05.md). Windows shutdown is not fully qualified. Additional Windows isolation has been deferred to the upcoming separate Reflex qualification; it is not reported as passed.

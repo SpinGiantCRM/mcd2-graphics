@@ -9,6 +9,11 @@ against the exact final candidate.** Missing, unrun or failing checks block rele
 The preview.2 decision accepting known Windows limitations does not carry over.
 A Linux pass or portable CI pass is not Windows runtime qualification.
 
+PR7's bounded Windows/AMD installation, fallback and shutdown results are in
+[the Windows report](UPDATE_2_WINDOWS_VALIDATION_2026-10-05.md). Several required
+checks remain unqualified; that report is not release approval. Use
+`-RequireDisplayLatency` with the Windows runtime probe for Update 2.
+
 Required Windows evidence, tied to commit and every candidate/installer hash:
 
 - Fresh install, repair / verify, safe uninstall and sanitised diagnostics.

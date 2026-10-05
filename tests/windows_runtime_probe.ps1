@@ -1,6 +1,8 @@
 param(
     [int]$Seconds = 60,
     [int]$WaitForLaunchSeconds = 120,
+    # Update 2 has a second independently loaded addon. Keep legacy SR-only probes usable.
+    [switch]$RequireDisplayLatency,
     [Parameter(Mandatory = $true)][string]$Output
 )
 $ErrorActionPreference = 'Stop'
@@ -39,10 +41,12 @@ $result = [ordered]@{
     observationSeconds = [math]::Round(((Get-Date)-$observed).TotalSeconds, 1)
     exitedDuringObservation = $exited
     mcd2AddonLoaded = $modules -contains 'mcd2-graphics.addon64'
+    displayLatencyAddonLoaded = $modules -contains 'mcd2-display-latency.addon64'
     renoDXLoaded = $modules -contains 'renodx-ue-extended.addon64'
     samples = $samples
 }
 $result | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $Output
 if ($exited) { throw 'Game exited during observation; inspect crash and ReShade logs.' }
 if (-not $result.mcd2AddonLoaded) { throw 'Game stayed alive, but MCD2 Graphics was not loaded.' }
+if ($RequireDisplayLatency -and -not $result.displayLatencyAddonLoaded) { throw 'Game stayed alive, but the Update 2 display/latency addon was not loaded.' }
 Write-Output 'MCD2 Graphics loaded and the game stayed alive throughout the observation. Verify menu/gameplay and fallback separately.'
