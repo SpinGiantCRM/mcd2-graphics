@@ -15,6 +15,29 @@ try {
  InstallerEngine Engine(Func<Stream?>? payload=null){var e=new InstallerEngine(lockJson,manifest,payload??(()=>new MemoryStream(Payload())));e.RequireClosed=()=>{};e.ConfigRootOverride=Path.Combine(temp,"Config");e.SetGame(temp);return e;}
  void Put(string path,byte[]? bytes=null){var p=Path.Combine(temp,path);Directory.CreateDirectory(Path.GetDirectoryName(p)!);File.WriteAllBytes(p,bytes??file);}
  Put(InstallerEngine.Shipping);Put("Dungeons/Binaries/Win64/dxgi.dll");Put("Dungeons/Binaries/Win64/renodx-ue-extended.addon64");
+ // Folder and executable selection normalize only known game paths. Store
+ // recognition must not bypass the pinned Win64 executable or its fingerprint.
+ var location=new InstallerEngine(lockJson,manifest,()=>new MemoryStream(Payload())){RequireClosed=()=>{}};
+ foreach(var selection in new[]{temp,Path.Combine(temp,"Dungeons"),Path.Combine(temp,"Dungeons/Binaries"),Path.Combine(temp,"Dungeons/Binaries/Win64"),Path.Combine(temp,InstallerEngine.Shipping)}) {
+  location.SetGame(selection);Check(location.GameRoot==Path.GetFullPath(temp),"Known folder/executable resolves to game root");
+ }
+ var wrapper=Path.Combine(temp,"wrapper");var contentRoot=Path.Combine(wrapper,"Content");Directory.CreateDirectory(Path.GetDirectoryName(Path.Combine(contentRoot,InstallerEngine.Shipping))!);File.WriteAllBytes(Path.Combine(contentRoot,InstallerEngine.Shipping),file);
+ location.SetGame(wrapper);Check(location.GameRoot==contentRoot,"Content wrapper resolves only when qualified layout exists");
+ var badHash=Path.Combine(temp,"unsupported-build");Directory.CreateDirectory(Path.GetDirectoryName(Path.Combine(badHash,InstallerEngine.Shipping))!);File.WriteAllText(Path.Combine(badHash,InstallerEngine.Shipping),"unqualified executable");
+ location.SetGame(badHash);Check(location.Scan()[0].State=="Unsupported version"&&!location.Ready,"Path normalization keeps executable hash gate");
+ var xbox=Path.Combine(temp,"Xbox Games/Test Game");var gdk=Path.Combine(xbox,"Content/Dungeons/Binaries/WinGDK");Directory.CreateDirectory(gdk);var gdkExe=Path.Combine(gdk,"store-test.exe");File.WriteAllBytes(gdkExe,file);
+ foreach(var selection in new[]{xbox,Path.Combine(xbox,"Content"),gdk,gdkExe}) {
+  string error="";try{location.SetGame(selection);}catch(InvalidDataException ex){error=ex.Message;}
+  Check(error.Contains("Xbox / Game Pass (WinGDK)")&&location.GameRoot==null&&!location.Ready,"GDK selection explains unsupported edition and clears old selection");
+ }
+ Check(!File.Exists(Path.Combine(xbox,"Content",InstallerEngine.Marker)),"GDK detection writes no receipt or mod files");
+ var unrelated=Path.Combine(temp,"unrelated");Directory.CreateDirectory(unrelated);Throws(()=>location.SetGame(unrelated),"Unrelated child does not select a parent game");
+ Throws(()=>location.SetGame(Path.Combine(temp,"absent")),"Missing selection has actionable error");
+ var textSelection=Path.Combine(temp,"not-a-game.txt");File.WriteAllText(textSelection,"fixture");Throws(()=>location.SetGame(textSelection),"Non-executable file selection refused");
+ if(!OperatingSystem.IsWindows()) {
+  var linkedFolder=Path.Combine(temp,"linked-game");Directory.CreateSymbolicLink(linkedFolder,contentRoot);Throws(()=>location.SetGame(linkedFolder),"Linked game root refused");Directory.Delete(linkedFolder);
+  var linkedExe=Path.Combine(temp,"linked-game.exe");File.CreateSymbolicLink(linkedExe,Path.Combine(contentRoot,InstallerEngine.Shipping));Throws(()=>location.SetGame(linkedExe),"Linked executable selection refused");File.Delete(linkedExe);
+ }
  var runtime=Path.Combine(temp,"download.dll");File.WriteAllBytes(runtime,file);
  var e=Engine();Check(!e.Ready,"Missing runtime prevents installation");e.SelectDependency("DLSSRuntime",runtime);Check(e.Ready,"Selected hash verified runtime makes install ready");
  e.Install();Check(InstallerEngine.DigestFile(Path.Combine(temp,own.Keys.Single()))==hash,"Payload installed and hashed");
