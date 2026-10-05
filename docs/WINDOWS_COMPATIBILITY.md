@@ -36,3 +36,27 @@ Verify the LUID check admits the actual NVIDIA rendering adapter and NGX still
 decides feature support. Preserve the Windows requirements above while fixing
 Linux regressions. A rebuilt artifact needs its own hash and qualification;
 Windows results for this binary do not qualify a different Linux-hosted build.
+
+### Build recipe follow-up
+
+The local Linux regression candidate selects compiler-specific frame-error
+flags and normalizes the Windows include in generated ReShade header copies.
+This retains the Clang guard and avoids restoring the recursive Windows.h
+shim. Both Windows and Linux CI retain installer checks and now include the
+build-recipe unit checks. Both CI jobs passed for PR6's tested source.
+The GCC-produced addon preserves all native PR5 source fixes. Its
+[Windows AMD regression](WINDOWS_REGRESSION_PR6_2026-10-05.md) passed installation,
+1,027.5 seconds of survival, fallback, menu travel and reinstall.
+The first quit eventually returned exit code 0 after a roughly two-minute delay;
+the second quit crashed with `0xc0000005`. Windows shutdown is not qualified.
+A third PR6 run and one previous-candidate control exited with code 0; these
+clean runs do not erase the crash or establish its cause.
+Windows NVIDIA runtime and the separately recorded Linux exit limitation remain
+outstanding. The prior LLVM candidate's
+results and this AMD result cannot qualify NVIDIA teardown in another binary.
+
+## Preview.2 publication decision — 5 October 2026
+
+The later clean Steam / CachyOS Proton SLR / native WineWayland run passed two normal shutdowns; see [the latest Linux report](LINUX_CACHYOS_REGRESSION_2026-10-05.md). This qualifies that Linux environment, rather than erasing the older environment's lingering-process observation.
+
+Preview.2 retains the exact tested GCC addon, UI and shader. The maintainer elected to publish with the single unexplained Windows `0xc0000005` exit disclosed and further Windows isolation deferred to Reflex qualification. Two clean candidate exits do not establish the crash's cause. Windows NVIDIA remains untested. No native changes were made to guess at a fix.

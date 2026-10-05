@@ -1,0 +1,75 @@
+{
+  "date": "2026-10-05",
+  "version": "0.1.0-preview.1-linux-regression.1",
+  "baseSource": "2cc97532c1cf5f359b6d803e7e7ef1949b3aad2d",
+  "addonSHA256": "611b49abee32db2705d47e5a9e08dd676cd7e892cb7da7e563eab4c18e733240",
+  "mainCompiler": "MinGW GCC 16.2.0",
+  "bridgeCompiler": "Clang 23.1.1 (MSVC target)",
+  "nativeRendererSourceChanged": false,
+  "linuxNvidia": {
+    "startup": true,
+    "qualityApplied": true,
+    "dlaaApplied": true,
+    "nativeApplied": true,
+    "qualityDlaaSwitches": true,
+    "nativeQualitySwitches": true,
+    "worldMainMenuWorld": true,
+    "mouseMovement": true,
+    "sessionSurvivalSecondsMinimum": 779,
+    "completedNgxGenerations": 4,
+    "normalProcessExit": false,
+    "finalActiveGenerationCleanupObserved": false,
+    "exitLimitation": "Window closed; Shipping process lingered. Same symptom seen in frozen control. Cause not established."
+  },
+  "windowsQualification": "pending exact-artifact regression",
+  "published": false,
+  "portableChecks": [
+    {
+      "test": "settings-framing",
+      "output": "valid revision=22 mode=2 scale=6667\nrejected truncations=2502; latest-valid mailbox PASS",
+      "exitCode": 0
+    },
+    {
+      "test": "settings-semantics",
+      "output": "Settings/runtime semantic and truncation checks PASS: 2312",
+      "exitCode": 0
+    },
+    {
+      "test": "upscaler-support",
+      "output": "",
+      "exitCode": 0
+    }
+  ],
+  "unitTestsPassed": 13,
+  "fixtureInstall": {
+    "isolatedFixture": true,
+    "checks": [
+      "missing dependency refused before writes",
+      "fresh install and copied hashes verified",
+      "duplicate install refused",
+      "modified owned file retained",
+      "uninstall preserved every dependency and unrelated mod",
+      "reinstall after uninstall passed",
+      "unsafe paths rejected"
+    ]
+  },
+  "realReplacement": {
+    "protectedFiles": 69,
+    "changedFiles": 0,
+    "payloadVerified": true,
+    "realUninstallAndInstall": true
+  },
+  "installedRestart": {
+    "ownedHashesVerified": 6,
+    "version": "0.1.0-preview.1-linux-regression.1",
+    "currentRevision": 1501,
+    "sourceRevision": 1501,
+    "runtimeRevision": 1501,
+    "phase": 2,
+    "error": 0,
+    "contextReady": 1,
+    "sessionsMatch": true,
+    "qualityApplied": true,
+    "runningUninstallRefused": true
+  }
+}

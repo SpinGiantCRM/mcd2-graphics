@@ -1,0 +1,332 @@
+{
+  "date": "2026-10-05",
+  "platform": "Windows 11 Pro 10.0.26200 x64",
+  "gpu": "AMD Radeon 860M",
+  "driver": "32.0.31041.1004",
+  "steamBuild": 25647713,
+  "output": [
+    1920,
+    1200
+  ],
+  "version": "0.1.0-preview.1-linux-regression.1",
+  "testedPRSource": "eed6924b6b1a27835f7cf4df6c79fae295ec3ccc",
+  "zipSHA256": "6ec967e049341daaf94b3e70b47deec27ed1cf2d75a9164f0749d057fb66542b",
+  "addonSHA256": "611b49abee32db2705d47e5a9e08dd676cd7e892cb7da7e563eab4c18e733240",
+  "nativeRendererSourceChanged": false,
+  "sourceMatchesPR": true,
+  "initialReplacement": {
+    "version": "0.1.0-preview.1-linux-regression.1",
+    "addonSHA256": "611b49abee32db2705d47e5a9e08dd676cd7e892cb7da7e563eab4c18e733240",
+    "exactArchiveSourceMatchesPR": true,
+    "protectedFiles": 31,
+    "preservedByteForByte": true,
+    "installedVersionMatches": true,
+    "allSixInstalledHashesVerified": true
+  },
+  "finalInstallCycle": {
+    "protectedFiles": 32,
+    "preservedByteForByte": true,
+    "duplicateInstallRefused": true,
+    "allSixFilesRemoved": true,
+    "uninstallReinstallCheckPassed": true,
+    "allSixInstalledHashesVerified": true,
+    "installedMarkerVersion": "0.1.0-preview.1-linux-regression.1",
+    "rootPackageMatchesCandidate": true
+  },
+  "fixtureChecks": [
+    "missing dependency refused before writes",
+    "fresh install and copied hashes verified",
+    "duplicate install refused",
+    "modified owned file retained",
+    "uninstall preserved every dependency and unrelated mod",
+    "reinstall after uninstall passed",
+    "unsafe paths rejected"
+  ],
+  "startup": {
+    "observationSeconds": 138.2,
+    "samples": 121,
+    "allResponding": false,
+    "exitedDuringObservation": false,
+    "mcd2AddonLoaded": true,
+    "renoDXLoaded": true
+  },
+  "extendedSession": {
+    "observationSeconds": 1027.5,
+    "samples": 901,
+    "allResponding": true,
+    "exitedDuringObservation": false,
+    "mcd2AddonLoaded": true,
+    "renoDXLoaded": true
+  },
+  "restart": {
+    "observationSeconds": 71.1,
+    "samples": 61,
+    "allResponding": true,
+    "exitedDuringObservation": false,
+    "mcd2AddonLoaded": true,
+    "renoDXLoaded": true
+  },
+  "currentRequests": {
+    "quality": {
+      "revision": 38,
+      "mode": 2,
+      "scale": 6667,
+      "preset": 0,
+      "contextReady": 1,
+      "sourceRevision": 37,
+      "contextSessionMatches": true,
+      "sourceSessionMatches": true,
+      "runtimeRevision": 38,
+      "phase": 3,
+      "error": 1
+    },
+    "dlaa": {
+      "revision": 39,
+      "mode": 1,
+      "scale": 10000,
+      "preset": 5,
+      "contextReady": 1,
+      "sourceRevision": 37,
+      "contextSessionMatches": true,
+      "sourceSessionMatches": true,
+      "runtimeRevision": 39,
+      "phase": 3,
+      "error": 1
+    },
+    "qualityReturn": {
+      "revision": 40,
+      "mode": 2,
+      "scale": 6667,
+      "preset": 0,
+      "contextReady": 1,
+      "sourceRevision": 37,
+      "contextSessionMatches": true,
+      "sourceSessionMatches": true,
+      "runtimeRevision": 40,
+      "phase": 3,
+      "error": 1
+    },
+    "custom77": {
+      "revision": 41,
+      "mode": 2,
+      "scale": 7700,
+      "preset": 4,
+      "contextReady": 1,
+      "sourceRevision": 37,
+      "contextSessionMatches": true,
+      "sourceSessionMatches": true,
+      "runtimeRevision": 41,
+      "phase": 3,
+      "error": 1
+    },
+    "native": {
+      "revision": 45,
+      "mode": 0,
+      "scale": 10000,
+      "preset": 0,
+      "contextReady": 1,
+      "sourceRevision": 45,
+      "contextSessionMatches": true,
+      "sourceSessionMatches": true,
+      "runtimeRevision": 45,
+      "phase": 2,
+      "error": 0
+    },
+    "mainMenu": {
+      "revision": 51,
+      "mode": 2,
+      "scale": 6667,
+      "preset": 0,
+      "contextReady": 0,
+      "sourceRevision": 51,
+      "contextSessionMatches": true,
+      "sourceSessionMatches": true,
+      "runtimeRevision": 51,
+      "phase": 2,
+      "error": 0
+    },
+    "worldReentry": {
+      "revision": 53,
+      "mode": 2,
+      "scale": 6667,
+      "preset": 0,
+      "contextReady": 1,
+      "sourceRevision": 51,
+      "contextSessionMatches": true,
+      "sourceSessionMatches": true,
+      "runtimeRevision": 53,
+      "phase": 3,
+      "error": 1
+    },
+    "reinstalledWorld": {
+      "revision": 58,
+      "mode": 2,
+      "scale": 6667,
+      "preset": 0,
+      "contextReady": 1,
+      "sourceRevision": 56,
+      "contextSessionMatches": true,
+      "sourceSessionMatches": true,
+      "runtimeRevision": 58,
+      "phase": 3,
+      "error": 1
+    },
+    "finalNative": {
+      "revision": 59,
+      "mode": 0,
+      "scale": 10000,
+      "preset": 0,
+      "contextReady": 1,
+      "sourceRevision": 59,
+      "contextSessionMatches": true,
+      "sourceSessionMatches": true,
+      "runtimeRevision": 59,
+      "phase": 2,
+      "error": 0
+    }
+  },
+  "unsupportedFallbackMessageObserved": true,
+  "reducedSourceAcknowledgementObserved": false,
+  "sourceDimensionsIndependentlyMeasured": false,
+  "realRunningUninstallRefused": true,
+  "shutdown": {
+    "qualified": false,
+    "firstExitCode": 0,
+    "firstQuitDelay": "roughly two minutes; not precisely timed",
+    "secondExitCode": -1073741819,
+    "secondException": "0xc0000005",
+    "secondQuitToSteamExitSecondsApproximate": 9.7,
+    "forcedTermination": false,
+    "causeEstablished": false
+  },
+  "checks": {
+    "unitTestsPassed": 13,
+    "settingsTruncationsRejected": 2502,
+    "settingsSemanticChecksPassed": 2312,
+    "adapterDeadlineAssertionsPassed": 8,
+    "filesystemGatesPassed": 7,
+    "windowsNativeOnlyBuildPassed": true,
+    "windowsAndLinuxCIPassedAtTestedSource": true
+  },
+  "uninstalledLLVMBuildSHA256": "4a4033d03fda10a7e2013c6e2916fab20976fcdc16197d7c25db0c3c8cf3f1b5",
+  "limits": [
+    "Windows NVIDIA creation/evaluation/NGX teardown not tested",
+    "GPU source dimensions not independently measured",
+    "Continuous active 15-minute dungeon play not performed",
+    "No controller, HDR recalibration, complete dungeon, long-session or device-recreation qualification",
+    "Pending-source timeout not deliberately induced in runtime",
+    "Linux lingering-process exit remains separately unqualified"
+  ],
+  "publishedRelease": false,
+  "originalPreview1Frozen": true,
+  "controlReplacement": {
+    "protectedFiles": 33,
+    "preservedByteForByte": true,
+    "targetVersion": "0.1.0-preview.1-windows-fix.1"
+  },
+  "controlShutdown": {
+    "addonSHA256": "645de6fcba098eeaaef4b571323f8fbd63a0c5a5b355288fac642c5b3028b112",
+    "normalProcessExit": true,
+    "steamExitCode": 0,
+    "processStillListed": false,
+    "observationSeconds": 20.4,
+    "forcedTermination": false
+  },
+  "candidateRestoration": {
+    "protectedFiles": 34,
+    "preservedByteForByte": true,
+    "targetVersion": "0.1.0-preview.1-linux-regression.1"
+  },
+  "candidateRepeatShutdown": {
+    "addonSHA256": "611b49abee32db2705d47e5a9e08dd676cd7e892cb7da7e563eab4c18e733240",
+    "normalProcessExit": true,
+    "steamExitCode": 0,
+    "processStillListed": false,
+    "observationSeconds": 17.8,
+    "forcedTermination": false
+  },
+  "controlRequests": {
+    "quality": {
+      "revision": 65,
+      "mode": 2,
+      "scale": 6667,
+      "preset": 0,
+      "contextReady": 1,
+      "sourceRevision": 64,
+      "contextSessionMatches": true,
+      "sourceSessionMatches": true,
+      "runtimeRevision": 65,
+      "phase": 3,
+      "error": 1
+    },
+    "native": {
+      "revision": 66,
+      "mode": 0,
+      "scale": 10000,
+      "preset": 0,
+      "contextReady": 1,
+      "sourceRevision": 66,
+      "contextSessionMatches": true,
+      "sourceSessionMatches": true,
+      "runtimeRevision": 66,
+      "phase": 2,
+      "error": 0
+    }
+  },
+  "candidateRepeat": {
+    "observationSeconds": 71.4,
+    "samples": 61,
+    "allResponding": true,
+    "exitedDuringObservation": false,
+    "mcd2AddonLoaded": true,
+    "renoDXLoaded": true
+  },
+  "candidateRepeatRequests": {
+    "quality": {
+      "revision": 72,
+      "mode": 2,
+      "scale": 6667,
+      "preset": 0,
+      "contextReady": 1,
+      "sourceRevision": 71,
+      "contextSessionMatches": true,
+      "sourceSessionMatches": true,
+      "runtimeRevision": 72,
+      "phase": 3,
+      "error": 1
+    },
+    "native": {
+      "revision": 73,
+      "mode": 0,
+      "scale": 10000,
+      "preset": 0,
+      "contextReady": 1,
+      "sourceRevision": 73,
+      "contextSessionMatches": true,
+      "sourceSessionMatches": true,
+      "runtimeRevision": 73,
+      "phase": 2,
+      "error": 0
+    }
+  },
+  "finalInstalledState": {
+    "version": "0.1.0-preview.1-linux-regression.1",
+    "addonSHA256": "611b49abee32db2705d47e5a9e08dd676cd7e892cb7da7e563eab4c18e733240",
+    "allSixHashesVerified": true,
+    "gameClosed": true,
+    "savedNative": true,
+    "state": {
+      "revision": 74,
+      "mode": 0,
+      "scale": 10000,
+      "preset": 0,
+      "contextReady": 0,
+      "sourceRevision": 73,
+      "contextSessionMatches": false,
+      "sourceSessionMatches": true,
+      "runtimeRevision": 73,
+      "phase": 2,
+      "error": 0
+    }
+  }
+}

@@ -1,6 +1,7 @@
 """Build using separately acquired, pinned SDKs. No vendor downloads or license acceptance."""
 from pathlib import Path
 import argparse, subprocess, re, json, hashlib, sys
+from build_toolchain import native_frame_guard, normalize_windows_header
 r=Path(__file__).resolve().parent
 p=argparse.ArgumentParser(description=__doc__)
 p.add_argument('--dotnet',type=Path);p.add_argument('--neorune-sdk',type=Path);p.add_argument('--pack-tools',type=Path)
@@ -17,13 +18,16 @@ assert '#define RESHADE_API_VERSION 20' in (a.reshade_include/'reshade.hpp').rea
 # windows.h directly: a case-only shim recursively includes itself on Windows.
 inc=o/'include';inc.mkdir(exist_ok=True)
 (inc/'Windows.h').unlink(missing_ok=True)
-for f in a.reshade_include.glob('reshade*.hpp'):(inc/f.name).write_bytes(f.read_bytes())
+for f in a.reshade_include.glob('reshade*.hpp'):
+ # Upstream ReShade also spells this Windows.h. Normalize the generated
+ # include copy instead of adding a case-only shim that recurses on Windows.
+ (inc/f.name).write_bytes(normalize_windows_header(f.read_bytes()))
 ngx=o/'ngx-research';ngx.mkdir(exist_ok=True)
 for f in a.ngx_include.glob('nvsdk_ngx*.h'):(ngx/f.name).write_bytes(f.read_bytes())
 commands=[
  [a.clang_cxx,'--target=x86_64-pc-windows-msvc','-std=c++20','-O2','-fno-exceptions','-fno-rtti','-I'+str(ngx),'-c',str(native/'ngx_parameter_bridge.cpp'),'-o',str(o/'ngx_parameter_bridge.obj')],
  [a.clang_cxx,'--target=x86_64-pc-windows-msvc','-ffreestanding','-std=c++20','-O2','-fno-exceptions','-fno-rtti','-nostdinc++','-I'+str(native/'bridge-freestanding'),'-I'+str(inc),'-c',str(native/'reshade_public_bridge.cpp'),'-o',str(o/'reshade_public_bridge.obj')],
- [a.mingw_cxx,'-DMCD2_ENABLE_DIAGNOSTICS=0','-std=c++20','-O2','-Wframe-larger-than=16384','-Werror=frame-larger-than','-shared','-static','-I'+str(inc),'-I'+str(o),str(native/'observer.cpp'),str(o/'ngx_parameter_bridge.obj'),str(o/'reshade_public_bridge.obj'),'-o',str(o/'mcd2-graphics.addon64'),'-ld3d12','-ldxgi','-ld3dcompiler','-lole32','-luuid']
+ [a.mingw_cxx,'-DMCD2_ENABLE_DIAGNOSTICS=0','-std=c++20','-O2',*native_frame_guard(a.mingw_cxx),'-shared','-static','-I'+str(inc),'-I'+str(o),str(native/'observer.cpp'),str(o/'ngx_parameter_bridge.obj'),str(o/'reshade_public_bridge.obj'),'-o',str(o/'mcd2-graphics.addon64'),'-ld3d12','-ldxgi','-ld3dcompiler','-lole32','-luuid']
 ]
 for cmd in commands:subprocess.run(cmd,check=True)
 if a.native_only:

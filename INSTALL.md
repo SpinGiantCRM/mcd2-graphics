@@ -18,10 +18,16 @@ The installer verifies the package, game executable and dependencies, refuses ov
 
 Launch once: a fresh mod profile defaults to **Native**, remembering **Quality / 67%**. Open Settings → Video and choose NVIDIA DLSS. The main menu stays Native; your saved DLSS selection activates in gameplay. Check the help panel for active/pending/fallback status. At 4K the slider cannot request less than 17%.
 
-The Windows fix candidate detects unsupported rendering adapters before reducing
+This preview detects unsupported rendering adapters before reducing
 source resolution. On AMD, the help panel reports **DLSS unavailable; native
 anti-aliasing is active.** Your DLSS preference remains saved. Close ReShade's
 first-run overlay before testing game keyboard shortcuts.
+
+## Updating from an earlier preview
+
+Close the game. Use the earlier archive's `install.py uninstall` command first, then run this archive's install command with your existing official DLSS DLL. The installer refuses to overwrite an existing installation. ReShade, Blueprint Loader, RenoDX, game saves and mod preferences are retained. If files were installed manually, remove only the six files listed in that version's manifest; do not delete the whole game or Saved directory.
+
+If a file was modified, uninstall retains it and reports its path. Back it up and resolve that reported conflict before installing the new version. GitHub's automatic source ZIP has no compiled payloads: download **MCD2-Graphics-0.1.0-preview.2.zip** from the release Assets.
 
 ## HDR
 

@@ -38,3 +38,25 @@ MSVC floating-point CRT marker required by LLVM MinGW.
 candidate reuses their hash-verified preview.1 payloads. The complete UI/shader
 source build remains unqualified on Windows. See the
 [Windows validation report](WINDOWS_VALIDATION_2026-10-05.md) for runtime scope.
+
+## Linux NVIDIA regression candidate (not published)
+
+The Windows-produced PR5 addon failed Quality-to-DLAA teardown on the Linux
+NVIDIA host. The same native source built with MinGW GCC 16.2.0 and MSVC-target
+Clang 23.1.1 bridges passed that transition and subsequent Native/Quality
+switches. This isolates a build/artifact difference, not a proven compiler or
+driver defect. LLVM MinGW NVIDIA runtime compatibility remains unqualified.
+
+`build.py` now selects the 16 KiB frame-error spelling for GCC or Clang and
+refuses an unidentified compiler. GCC needs `-Werror=frame-larger-than=16384`;
+Clang retains `-Wframe-larger-than=16384 -Werror=frame-larger-than`. Both guards
+were checked with small and deliberately oversized functions. The copied
+ReShade headers normalize `<Windows.h>` to `<windows.h>` without a case-only
+alias or modifying the separately acquired SDK.
+
+The local candidate retains PR5's native source, Windows heap path buffers,
+ABI bridges, adapter policy, deadline, installer fixes and frozen UI/shader
+payloads. The changed binary needs fresh Windows qualification. Test the exact
+packaged addon first; rebuilding with LLVM MinGW produces a different artifact
+and requires its own NVIDIA regression checks. See
+[regression handoff](LINUX_REGRESSION_HANDOFF_2026-10-05.md).
