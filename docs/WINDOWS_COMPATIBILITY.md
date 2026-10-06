@@ -137,3 +137,21 @@ The reversible transaction restored the prior installation and preferences.
 These results qualify only the recorded Windows/AMD binaries and checks, not
 NVIDIA HDR/active FG, shared NGX teardown, a rebuilt artifact or the expanded GUI
 installer. The historical shutdown exception remains unresolved.
+
+### Successful Reset confirmation — 7 October 2026
+
+A Linux FG-Off Quality-to-DLAA transition reproduced a stuck request with a
+dormant reset command list retaining one old SR recording. The framework's Reset
+event precedes the native call, so the event alone cannot release that recording.
+The opt-in patch now advances a private command-list epoch only after native
+Reset succeeds; SR confirms the changed epoch before invalidating the old
+recording. Resource release still waits for a subsequent signal and completed
+GPU fence. Failed Reset, unknown metadata and missing proof retain the lease.
+
+Keep the existing pre-call event contract, recording-operation alternative,
+unsupported-adapter policy and frame guards. The Windows recipe builds the same
+pinned PR435 base plus the recorded patch, verifies no other source modification,
+and reports the checkout as patched rather than clean. This is a new framework
+and SR binary pair: older Windows results do not qualify it. The separate
+render-thread hang has not been established as the same defect. See the
+[qualification handoff](../experiments/fg-streamline/RESET_CONFIRMATION_2026-10-07.md).

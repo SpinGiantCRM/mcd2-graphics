@@ -7,6 +7,7 @@ on:
       - 'src/native/**'
       - 'src/latency/**'
       - 'src/ui/ModActor.cs'
+      - 'qualification/fg-release/reshade-reset-epoch.patch'
   workflow_dispatch:
 permissions:
   contents: read

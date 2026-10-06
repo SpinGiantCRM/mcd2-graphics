@@ -3,6 +3,7 @@ from pathlib import Path
 import argparse, hashlib, json, shutil, sys
 sys.path.insert(0,str(Path(__file__).resolve().parents[2]))
 from install import require_closed
+from framework_provenance import source_matches
 
 p=argparse.ArgumentParser(description=__doc__)
 p.add_argument('action',choices=['install','restore'])
@@ -28,12 +29,14 @@ if a.action=='install':
     assert not record.exists(),'A trial transaction already exists'
     lock=json.loads((Path(__file__).resolve().parents[2]/'dependencies.lock.json').read_text())
     assert sha(game/'Dungeons-Win64-Shipping.exe')==lock['game']['exeSHA256']
-    assert sha(game/'dxgi.dll')==lock['dependencies']['ReShade']['sha256']
+    framework_lock=lock['dependencies']['ReShade']
+    assert sha(game/'dxgi.dll')==framework_lock.get('bootstrapPreviousSHA256',framework_lock['sha256'])
     assert bool(a.experimental_reshade)==bool(a.experimental_reshade_receipt)
     framework=game/'dxgi.dll';framework_receipt=None
     if a.experimental_reshade:
         framework_receipt=json.loads(a.experimental_reshade_receipt.read_text())
-        assert framework_receipt.get('sourceClean') and framework_receipt.get('commit')
+        patch=Path(__file__).resolve().parents[2]/'qualification/fg-release/reshade-reset-epoch.patch'
+        assert source_matches(framework_receipt,sha(patch) if patch.is_file() else None)
         assert sha(a.experimental_reshade)==framework_receipt['binarySHA256']
         framework=a.experimental_reshade
     pr=json.loads((a.probe/'build-receipt.json').read_text())

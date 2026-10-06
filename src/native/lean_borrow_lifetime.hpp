@@ -13,6 +13,7 @@ struct LeanBorrowCache {
  std::map<LeanBorrowKey,LeanBorrowEntry> entries;
  std::map<a::command_list*,std::set<LeanBorrowKey>> recordings;
  std::set<a::command_list*> reset_pending;
+ std::map<a::command_list*,uint64_t> reset_epochs;
  std::vector<LeanBorrowEntry> ready_to_release;
  ID3D12Fence *fence=nullptr;
  uint64_t next_fence=0,completed_fence=0,retired=0,peak_entries=0,signals=0;
@@ -34,7 +35,20 @@ struct LeanBorrowCache {
  // This includes barrier-only lists, which may never bind a pipeline.
  bool begin_recording(a::command_list *cmd){
   if(reset_pending.empty() || !reset_pending.erase(cmd))return false;
+  reset_epochs.erase(cmd);
   forget(cmd);return true;
+ }
+ void note_reset(a::command_list *cmd,bool known,uint64_t epoch){
+  reset_pending.insert(cmd);
+  if(known)reset_epochs.emplace(cmd,epoch);
+ }
+ // The framework stamps only successful native Reset calls. A later stamp
+ // proves that the old recording cannot be replayed, even for a dormant list.
+ // Invalidation still requires a subsequent queue fence before GPU release.
+ bool confirm_reset(a::command_list *cmd,uint64_t epoch){
+  auto previous=reset_epochs.find(cmd);
+  if(!reset_pending.contains(cmd)||previous==reset_epochs.end()||previous->second==epoch)return false;
+  reset_pending.erase(cmd);reset_epochs.erase(previous);forget(cmd);return true;
  }
  void record(a::command_list *cmd,const LeanBorrowKey &key,uint64_t frame_number) {
   auto &entry=entries.at(key);
@@ -57,7 +71,7 @@ struct LeanBorrowCache {
  }
  void clear_after_idle() {
   for(auto &[key,entry]:entries)ready_to_release.push_back(entry);
-  entries.clear();recordings.clear();reset_pending.clear();
+  entries.clear();recordings.clear();reset_pending.clear();reset_epochs.clear();
   if(fence)fence->Release();fence=nullptr;
   next_fence=completed_fence=0;blocked=false;
  }

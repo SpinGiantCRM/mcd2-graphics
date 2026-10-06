@@ -9,9 +9,9 @@ import subprocess
 import sys
 import urllib.request
 import zipfile
+from framework_provenance import RESHADE_COMMIT
 
 REPO = Path(__file__).resolve().parents[2]
-RESHADE_COMMIT = '4eb9056c76016aad6f98495d3bbda2d721106104'
 
 
 def run(*args):
@@ -76,18 +76,26 @@ def main():
     run('git', 'clone', '--no-checkout', 'https://github.com/JoeyDelp/reshade.git', reshade)
     run('git', '-C', reshade, 'checkout', RESHADE_COMMIT)
     run('git', '-C', reshade, 'submodule', 'update', '--init', '--recursive')
+    patch = REPO / 'qualification/fg-release/reshade-reset-epoch.patch'
+    if subprocess.check_output(['git', '-C', str(reshade), 'status', '--porcelain']).strip():
+        raise RuntimeError('Framework base checkout is not clean')
+    run('git', '-C', reshade, 'apply', '--index', patch)
+    approved_diff = subprocess.check_output(['git', '-C', str(reshade), 'diff', '--cached', '--binary'])
+    approved_status = subprocess.check_output(['git', '-C', str(reshade), 'status', '--porcelain'])
     # The upstream solution supplies SolutionDir used by dependency includes.
     # Building the vcxproj directly leaves those Windows include paths empty.
     run('msbuild', reshade / 'ReShade.sln', '/p:Configuration=Release', '/p:Platform=64-bit', '/m:2', '/verbosity:minimal')
     binary = reshade / 'bin/x64/Release/ReShade64.dll'
     clean = not subprocess.check_output(['git', '-C', str(reshade), 'status', '--porcelain']).strip()
-    if not clean:
-        raise RuntimeError('ReShade source changed during build')
+    if subprocess.check_output(['git', '-C', str(reshade), 'status', '--porcelain']) != approved_status or subprocess.check_output(['git', '-C', str(reshade), 'diff', '--cached', '--binary']) != approved_diff:
+        raise RuntimeError('Framework source differs from the approved reset patch')
+    run('git', '-C', reshade, 'diff', '--quiet')
     framework = artifact / 'experimental-reshade'
     framework.mkdir()
     shutil.copyfile(binary, framework / binary.name)
     (framework / 'build-receipt.json').write_text(json.dumps({
         'commit': RESHADE_COMMIT, 'sourceClean': clean, 'binarySHA256': sha(binary),
+        'baseCleanBeforePatch': True, 'approvedPatchOnly': True, 'patchSHA256': sha(patch),
         'configuration': 'Release x64 full addon support', 'WindowsQualified': False,
     }, indent=2) + '\n')
     vswhere = Path(os.environ['ProgramFiles(x86)']) / 'Microsoft Visual Studio/Installer/vswhere.exe'

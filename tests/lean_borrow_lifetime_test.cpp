@@ -43,4 +43,17 @@ int main() {
  cache.retire_ready(UINT64_MAX,10);assert(cache.ready_to_release.empty());
  cache.retire_ready(101,10);assert(cache.entries.empty() && cache.retired==1);
  assert(cache.ready_to_release.size()==1);
+ // A failed Reset leaves the original recording replayable and retained.
+ cache.ready_to_release.clear();cache.entries.emplace(key,LeanBorrowEntry{});cache.record(&list,key,20);
+ cache.note_reset(&list,true,10);assert(!cache.confirm_reset(&list,10));assert(cache.recordings.size()==1);
+ // A successful reset of a dormant list needs no subsequent PSO/barrier call.
+ assert(cache.confirm_reset(&list,11));assert(cache.recordings.empty());assert(cache.entries.at(key).awaiting_signal);
+ assert(!cache.confirm_reset(&list,12));assert(cache.entries.at(key).recordings==0&&!cache.blocked);
+ cache.retire_ready(200,30);assert(cache.ready_to_release.empty());
+ cache.entries.at(key).awaiting_signal=false;cache.entries.at(key).retirement_fence=201;
+ cache.retire_ready(200,30);assert(cache.ready_to_release.empty());cache.retire_ready(201,30);assert(cache.ready_to_release.size()==1);
+ // Repeated pre-call notifications must not discard earlier successful proof.
+ cache.entries.emplace(key,LeanBorrowEntry{});cache.record(&second,key,40);cache.note_reset(&second,true,20);cache.note_reset(&second,true,21);assert(cache.confirm_reset(&second,21));
+ cache.record(&second,key,41);cache.note_reset(&second,false,0);assert(!cache.confirm_reset(&second,22));assert(cache.recordings.contains(&second));assert(cache.begin_recording(&second));assert(!cache.reset_epochs.contains(&second));
+
 }
