@@ -36,6 +36,16 @@ def junction(target, source):
     run('cmd', '/c', 'mklink', '/J', target, source)
 
 
+def latest_version(parent, required):
+    """Windows Kits also contains unversioned components such as wdf."""
+    candidates = [path for path in parent.iterdir()
+                  if path.is_dir() and all(part.isdecimal() for part in path.name.split('.'))
+                  and all((path / name).exists() for name in required)]
+    if not candidates:
+        raise RuntimeError('No complete versioned toolchain in ' + str(parent))
+    return max(candidates, key=lambda path: tuple(map(int, path.name.split('.'))))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
@@ -82,9 +92,9 @@ def main():
     }, indent=2) + '\n')
     vswhere = Path(os.environ['ProgramFiles(x86)']) / 'Microsoft Visual Studio/Installer/vswhere.exe'
     vs = Path(subprocess.check_output([str(vswhere), '-latest', '-products', '*', '-requires', 'Microsoft.VisualStudio.Component.VC.Tools.x86.x64', '-property', 'installationPath'], text=True).strip())
-    crt = max((vs / 'VC/Tools/MSVC').iterdir(), key=lambda path: tuple(map(int, path.name.split('.'))))
+    crt = latest_version(vs / 'VC/Tools/MSVC', ['include', 'lib/x64'])
     kits = Path(os.environ['ProgramFiles(x86)']) / 'Windows Kits/10'
-    sdk_version = max((kits / 'Include').iterdir(), key=lambda path: tuple(map(int, path.name.split('.')))).name
+    sdk_version = latest_version(kits / 'Include', ['ucrt', 'shared', 'um', 'winrt']).name
     sysroot = out / 'sysroot'
     junction(sysroot / 'crt/include', crt / 'include')
     junction(sysroot / 'crt/lib/x86_64', crt / 'lib/x64')
