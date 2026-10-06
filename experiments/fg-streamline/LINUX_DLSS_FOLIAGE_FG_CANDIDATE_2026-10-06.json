@@ -1,0 +1,171 @@
+{
+  "date": "2026-10-06",
+  "scope": "Steam build, Linux/Proton bounded candidate evidence; not Windows or release qualification",
+  "environment": {
+    "OS": "CachyOS / KDE Wayland",
+    "GPU": "NVIDIA GeForce RTX 4080 SUPER",
+    "driver": "615.71.09",
+    "compatibilityTool": "proton-cachyos-slr",
+    "output": [
+      3840,
+      2160
+    ],
+    "SRInput": [
+      2560,
+      1440
+    ],
+    "preset": "Quality",
+    "HDR": true,
+    "scene": "Stationary foliage and doorway scene; same camera position"
+  },
+  "benchmark": {
+    "baseline": {
+      "samples": [
+        {
+          "renderedFPS": 126.25883693392157,
+          "SDKPresentationFPS": 126.25883693392157,
+          "durationSeconds": 9.496364999999999,
+          "statusCodes": [
+            0
+          ]
+        },
+        {
+          "renderedFPS": 124.25952361157911,
+          "SDKPresentationFPS": 124.25952361157911,
+          "durationSeconds": 9.6491598,
+          "statusCodes": [
+            0
+          ]
+        },
+        {
+          "renderedFPS": 120.11235383708981,
+          "SDKPresentationFPS": 120.11235383708981,
+          "durationSeconds": 9.9823204,
+          "statusCodes": [
+            0
+          ]
+        }
+      ],
+      "medianRenderedFPS": 124.25952361157911,
+      "medianSDKPresentationFPS": 124.25952361157911
+    },
+    "candidateFGOff": {
+      "samples": [
+        {
+          "renderedFPS": 124.7965355898851,
+          "SDKPresentationFPS": 124.7965355898851,
+          "durationSeconds": 9.607638499999998,
+          "statusCodes": [
+            0
+          ]
+        },
+        {
+          "renderedFPS": 116.96988450818948,
+          "SDKPresentationFPS": 116.96988450818948,
+          "durationSeconds": 10.250501700000001,
+          "statusCodes": [
+            0
+          ]
+        },
+        {
+          "renderedFPS": 123.63419530874326,
+          "SDKPresentationFPS": 123.63419530874326,
+          "durationSeconds": 9.6979642,
+          "statusCodes": [
+            0
+          ]
+        }
+      ],
+      "medianRenderedFPS": 123.63419530874326,
+      "medianSDKPresentationFPS": 123.63419530874326,
+      "renderedDeltaPercent": -0.503243763263217
+    },
+    "candidateFGOn": {
+      "samples": [
+        {
+          "renderedFPS": 85.59890699548107,
+          "SDKPresentationFPS": 171.19781399096215,
+          "durationSeconds": 14.0071882,
+          "statusCodes": [
+            0
+          ]
+        },
+        {
+          "renderedFPS": 86.05621094086942,
+          "SDKPresentationFPS": 172.11242188173884,
+          "durationSeconds": 13.9327538,
+          "statusCodes": [
+            0
+          ]
+        },
+        {
+          "renderedFPS": 82.01967435138342,
+          "SDKPresentationFPS": 164.03934870276683,
+          "durationSeconds": 14.618443800000001,
+          "statusCodes": [
+            0
+          ]
+        }
+      ],
+      "medianRenderedFPS": 85.59890699548107,
+      "medianSDKPresentationFPS": 171.19781399096215,
+      "renderedDeltaPercent": -31.11279964097291,
+      "presentationDeltaPercent": 37.77440071805418
+    }
+  },
+  "method": "Three 1200-source-frame captures per mode; same temporary sampler in every build. No inspection readbacks or recording. SR request/source/runtime identity verified before and after each sample.",
+  "limitations": [
+    "Animated foliage and scene lighting differ between samples.",
+    "SDK presentation counts do not measure physical monitor cadence, input latency or frame pacing.",
+    "FG On costs about 31 percent rendered FPS in this scene; broader performance acceptance remains open.",
+    "No Windows GPU, long-session, resolution-change or full travel qualification is implied."
+  ],
+  "foliagePolicy": {
+    "checksPassed": 31,
+    "CVar": "r.Velocity.EnableVertexDeformation",
+    "qualifiedVelocityOutputPass": 2,
+    "observedDLSSOnlyValue": 1,
+    "observedNativeRestoredValue": 2,
+    "ForceOutputUnchanged": 0,
+    "observedSRReacquisition": true,
+    "observationMethod": "Temporary read-only probe UI using the same ownership methods; clean UI used for timing"
+  },
+  "lifecycle": {
+    "freshFGOff": "passed",
+    "freshFGOn": "passed",
+    "menuSuspensionAndResume": "passed; accepted 2560x1440 guides retained",
+    "fullRelease": "SDK success",
+    "sameProcessReenable": "inactive in gameplay; restart required",
+    "normalProcessExitFGOn": true,
+    "normalProcessExitFGOff": true
+  },
+  "builds": {
+    "probe": {
+      "fg-probe.exe": "95392aca02df87debdeeb82f6f00f3360e153b7bb4b9b5f56cdacfda13aa8463",
+      "fg-chain-observer.addon64": "91e82beac42154c85b9a9a9b524843123ec74a1d1b435609c0bb8e39757fa007",
+      "fg-sdk-bridge.dll": "c3be144a4bbbbabe4657abb990499f487f2f7f845c6d3383b713a7efe45d03ed",
+      "dxgi.dll": "1bc152e20ffed9fad867e88585356a7a4c81d71a74a1df63d08b651578a7940a",
+      "mcd2-fg-guide-recon.addon64": "4f47b048d1c3ea04e0f4ccedb01dabb2ddafdda6b57fc125fd8926a0b525aac7",
+      "FG_UI_ALPHA.cso": "fce79e558c20bfafd859f37e397b8a04b5d820670f6aa0214522cef276cca8c1"
+    },
+    "latency": {
+      "addonSHA256": "7bfd71d488193a1233c3ba4046250c70933b9d49a2fec4c1a050ad651a75ccf6"
+    },
+    "SR": {
+      "addonSHA256": "4dc3616723486a59082b94a8d382bc697719dea55f1c4182a8d3dd7ac778f598"
+    },
+    "UI": {
+      "MCD2Graphics_P.utoc": "9fa45d99a13622e16d51271cef2afcaf08c1c5f70bc10bc89cd6f88fbf168de3",
+      "MCD2Graphics_P.ucas": "cfa09ccb0d1401f3bca81bd0d279bfd162ae264263ed0652a559c751b8feb440",
+      "MCD2Graphics_P.pak": "eec103ddba05020a38965b25da078a6dea3f4c985ab7c09744ca4d004ae4f2c4"
+    }
+  },
+  "WindowsQualified": false,
+  "releaseQualified": false,
+  "restoration": {
+    "binaryAndUIHashesMatchBackup": true,
+    "samplerRemoved": true,
+    "privateProbeSlotsRemoved": true,
+    "temporaryInputDeviceRemoved": true
+  }
+}

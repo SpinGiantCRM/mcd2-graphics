@@ -1,9 +1,16 @@
 # Bounded DLSS Frame Generation experiment
 
 This is an opt-in development experiment, **not a release or normal installer**.
-FG starts Off and automatically stops after 600 generated-frame source frames.
-It currently uses the Steam build, NVIDIA DLSS SR guides and native HDR output.
-It has no native FG menu control. Do not replace a published release with it.
+FG has an Off / On control in Settings → Video and requires a restart after
+changing modes. The UI path has no activation timer. The legacy command-driven
+trial remains capped at 600 source frames. This candidate requires the Steam
+build, supported NVIDIA FG hardware, NVIDIA DLSS SR/DLAA and native HDR output.
+Do not replace a published release with it.
+
+DLSS SR and DLAA enable vertex-deformation motion vectors in verified gameplay,
+independently of FG and HDR. Native selection, unsupported-GPU fallback and level
+teardown restore the original value. Existing external overrides are respected.
+Only velocity output pass 2 is qualified for this correction.
 
 ## Architecture
 
@@ -25,6 +32,11 @@ a fresh GPU fence before releasing alpha resources. SR releases its NGX feature,
 parameters and device ownership before notifying the shared Streamline owner
 outside the SR mutex. Streamline shutdown results are recorded. A failed shutdown
 retains provider ownership and does not detach the factory routes as if it passed.
+
+Temporary menus retain FG resources and their accepted guide dimensions. A full
+FG release retires that process’s FG session; re-enabling requires a restart.
+An Off request may retire resources only after the UI binds to the current
+process; default or previous-session startup state does not retire an On route.
 
 ## Required separate prerequisites
 
@@ -72,7 +84,7 @@ refuses a different shipping executable, framework or pre-existing trial files.
 The backup folder must be new. It retains original files and exact hashes.
 
 ```text
-python experiments/fg-streamline/game_trial.py install --game GAME_WIN64 --backup NEW_BACKUP --probe PROBE --candidate LATENCY --sr-candidate SR --experimental-reshade PR435_DLL --experimental-reshade-receipt PR435_RECEIPT
+python experiments/fg-streamline/game_trial.py install --game GAME_WIN64 --backup NEW_BACKUP --probe PROBE --candidate LATENCY --sr-candidate SR --ui-candidate UI/Pak --experimental-reshade PR435_DLL --experimental-reshade-receipt PR435_RECEIPT
 ```
 
 Create `FGGuideCapture.ini` beside the game executable, then launch normally:
@@ -84,10 +96,14 @@ GuideTags=1
 ImageTags=1
 EnableFG=0
 TrialRevision=1
+NativeUIToggle=1
 ```
 
-Enter gameplay with DLSS Quality and HDR On. Stay in solo gameplay. Use the
-bounded trial below with a **new revision each time**; move normally during the
+Enter gameplay with DLSS Quality and HDR On. Use the Video menu to select FG;
+restart after changing modes. Follow [the Windows checklist](WINDOWS_FG_CLEARANCE_2026-10-06.md).
+
+For the separate legacy command-driven trial, set `NativeUIToggle=0` before
+launching. Stay in solo gameplay. Use the bounded trial below with a **new revision each time**; move normally during the
 second run. Its output omits identifiers, paths and addresses. Raw game/SDK logs
 and screenshots stay private. The Python controller forces Off in its finally
 handler; the addon independently enforces the 600-frame cap.
@@ -116,8 +132,7 @@ is insufficient: verify the trial's bootstrap and addons were loaded.
 
 **Supported NVIDIA GPU:** native Windows 10 20H1+ or Windows 11, current driver,
 RTX 40/50-class FG-capable GPU, HAGS enabled and SDK support check successful.
-Run the synthetic gate first, then stationary and movement game gates, a second
-Off/On cycle, existing SR/HDR/Reflex checks and three normal shutdowns. Record
+Run the synthetic gate first, then stationary and movement game gates, Off/On transitions with their required restarts, existing SR/HDR/Reflex checks and three normal shutdowns. Record
 Windows/driver/GPU, game build and executable hash, every own binary hash and
 framework hash. AMD fallback cannot qualify active NVIDIA FG.
 
@@ -129,7 +144,7 @@ does not prove that all native COM references retired.
 
 ## Outstanding release gates
 
-- Native menu control, persistence and supported mode labels.
+- Native menu mouse/keyboard/controller qualification and persistence across restart.
 - Independent Native-upscaler guides and SDR path.
 - Explicit menu/pause/loading suppression and travel/cutscene reset coverage.
 - Resolution/window/swapchain/device recreation and repeated long sessions.
@@ -141,3 +156,11 @@ Linux gameplay can establish a bounded implementation milestone. It cannot
 qualify these Windows or release gates. See
 [NVIDIA FG guidance](https://github.com/NVIDIA-RTX/Streamline/blob/main/docs/ProgrammingGuideDLSS_G.md)
 and [Reflex guidance](https://github.com/NVIDIA-RTX/Streamline/blob/main/docs/ProgrammingGuideReflex.md).
+
+## Current Windows candidate
+
+The packaged candidate, archive hash and install/checklist links are in
+[`qualification/fg-v23`](../../qualification/fg-v23/README.md).
+The matching bounded Linux measurements are in
+[`LINUX_DLSS_FOLIAGE_FG_CANDIDATE_2026-10-06.json`](LINUX_DLSS_FOLIAGE_FG_CANDIDATE_2026-10-06.json).
+These measurements do not qualify Windows execution or a release.

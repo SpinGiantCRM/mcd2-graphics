@@ -16,6 +16,8 @@
 #include <cstring>
 #include <intrin.h>
 #include "fg_bridge_contract.h"
+#include "fg_ui_protocol.hpp"
+#include <fstream>
 extern "C" __declspec(dllimport) int mcd2_sl_init(const wchar_t*,const wchar_t*,const wchar_t*);
 extern "C" __declspec(dllimport) int mcd2_fg_initialized();
 extern "C" __declspec(dllimport) int mcd2_fg_upgrade(void**);
@@ -28,6 +30,14 @@ HMODULE self=nullptr,systemDxgi=nullptr,reshade=nullptr;
 INIT_ONCE once=INIT_ONCE_STATIC_INIT,systemOnce=INIT_ONCE_STATIC_INIT;
 thread_local bool initializing=false;
 bool sdkReady=false,routeEnabled=true;FILE* receipt=nullptr;
+unsigned fgSessionMode=1;
+unsigned saved_fg_mode(){
+ auto local=std::make_unique<wchar_t[]>(32768);auto n=GetEnvironmentVariableW(L"LOCALAPPDATA",local.get(),32768);if(!n||n>=32768)return 0;
+ auto path=std::filesystem::path(local.get())/L"Dungeons2"/L"Saved"/L"SaveGames"/L"MCD2GraphicsFGSettings.sav";
+ std::ifstream file(path,std::ios::binary|std::ios::ate);if(!file)return 0;auto size=file.tellg();if(size<64||size>8192)return 0;
+ std::vector<uint8_t> bytes(static_cast<size_t>(size));file.seekg(0);if(!file.read(reinterpret_cast<char*>(bytes.data()),bytes.size()))return 0;
+ mcd2::fgui::Intent intent{};return mcd2::fgui::decode(bytes,intent)?intent.mode:0;
+}
 void event(const char* stage,long result){if(receipt){fprintf(receipt,"{\"stage\":\"%s\",\"result\":%ld}\n",stage,result);fflush(receipt);}}
 BOOL CALLBACK system_init(PINIT_ONCE,void*,void**){
  auto path=std::make_unique<wchar_t[]>(32768);auto n=GetSystemDirectoryW(path.get(),32768);
@@ -108,6 +118,12 @@ BOOL CALLBACK initialize(PINIT_ONCE,void*,void**){
   SetEnvironmentVariableW(L"DXVK_NVAPI_LOG_PATH",folder.c_str());
  }
  routeEnabled=GetPrivateProfileIntW(L"Experiment",L"FactoryRouting",1,policy.c_str())!=0;
+ // An Off startup must create the normal swapchain. A retained FG proxy still
+ // copies/paces frames while generation is Off. Until engine-owned recreation
+ // is qualified, the native toggle saves the next-launch presentation mode.
+ auto uiPolicy=(folder/L"FGGuideCapture.ini").wstring();
+ if(GetPrivateProfileIntW(L"Capture",L"NativeUIToggle",0,uiPolicy.c_str())==1){fgSessionMode=saved_fg_mode();routeEnabled=routeEnabled&&fgSessionMode==1;}
+ event("FG-session-mode",fgSessionMode);
  auto enableSdk=GetPrivateProfileIntW(L"Experiment",L"EnableSDK",1,policy.c_str())!=0;
  auto result=!enableSdk?-100:(mcd2_fg_initialized()?0:mcd2_sl_init((folder/L"sl.interposer.dll").c_str(),folder.c_str(),folder.c_str()));
  sdkReady=result==0;event("early-SDK-init",result);
@@ -140,4 +156,5 @@ extern "C" HRESULT WINAPI CreateDXGIFactory2(UINT flags,REFIID iid,void** out){a
 extern "C" HRESULT WINAPI DXGIDeclareAdapterRemovalSupport(){auto f=reinterpret_cast<HRESULT(WINAPI*)()>(native("DXGIDeclareAdapterRemovalSupport"));return f?f():E_NOINTERFACE;}
 extern "C" HRESULT WINAPI DXGIGetDebugInterface1(UINT flags,REFIID iid,void** out){auto f=reinterpret_cast<HRESULT(WINAPI*)(UINT,REFIID,void**)>(native("DXGIGetDebugInterface1"));return f?f(flags,iid,out):E_NOINTERFACE;}
 extern "C" __declspec(dllexport) void mcd2_bootstrap_detach(){std::lock_guard guard(routesMutex);for(auto& r:routes)r.detach();event("factory-routes-detached",0);if(receipt){fclose(receipt);receipt=nullptr;}}
+extern "C" __declspec(dllexport) unsigned mcd2_bootstrap_fg_session_mode(){return fgSessionMode;}
 BOOL APIENTRY DllMain(HMODULE module,DWORD reason,LPVOID){if(reason==DLL_PROCESS_ATTACH)self=module;return TRUE;}

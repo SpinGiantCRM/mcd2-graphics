@@ -39,7 +39,7 @@ for folder in ['crt/lib/x86_64','sdk/lib/ucrt/x86_64','sdk/lib/um/x86_64']:
 commands.append(link)
 if a.early_bootstrap:
     assert a.probe=='owned','Early bootstrap requires the owned-input host'
-    exports=['mcd2_sl_'+x for x in ['verify','init','set_device','mode_limit','mode','begin','index','sleep','marker','state','report_range','pcl_message','shutdown']]+['mcd2_fg_'+x for x in ['initialized','support','upgrade','state','unload','api_error','mode','inputs','configure','configured','game_guides','game_images']]
+    exports=['mcd2_sl_'+x for x in ['verify','init','set_device','mode_limit','mode','begin','index','sleep','marker','state','report_range','pcl_message','shutdown']]+['mcd2_fg_'+x for x in ['initialized','support','upgrade','state','unload','api_error','mode','inputs','configure','configured','last_config','release','game_guides','game_images']]
     bridge=['lld-link','/dll','/out:'+str(out/'fg-sdk-bridge.dll'),'/implib:'+str(out/'fg-sdk-bridge.lib'),objects[0],*['/export:'+x for x in exports],*[x for x in link[3:] if not x.endswith('.obj')]]
     shimobj=out/'bootstrap_dxgi.obj'
     compile_shim=[*commands[1 if a.guide_recon else 0], '/I'+str(a.sdk.resolve()/'external/nvapi')]
@@ -67,8 +67,8 @@ files={}
 with zipfile.ZipFile(a.runtime_archive) as archive:
     for name in ['sl.interposer.dll','sl.common.dll','sl.pcl.dll','sl.reflex.dll','sl.dlss_g.dll','nvngx_dlssg.dll','NvLowLatencyVk.dll']:
         data=archive.read('bin/x64/'+name);(out/name).write_bytes(data);files[name]=hashlib.sha256(data).hexdigest()
-sources=['streamline_probe_bridge.cpp','fg_bridge_contract.h','fg_camera_contract.h',host]+(['factory_route.hpp'] if a.probe=='owned' else [])+(['chain_observer.cpp'] if a.reshade_headers else [])+(['bootstrap_dxgi.cpp'] if a.early_bootstrap else [])
+sources=['streamline_probe_bridge.cpp','fg_bridge_contract.h','fg_camera_contract.h','fg_configuration.hpp',host]+(['factory_route.hpp'] if a.probe=='owned' else [])+(['chain_observer.cpp'] if a.reshade_headers else [])+(['bootstrap_dxgi.cpp','fg_ui_protocol.hpp'] if a.early_bootstrap else [])
 own=['fg-probe.exe']+(['fg-chain-observer.addon64'] if a.reshade_headers else [])+(['fg-sdk-bridge.dll','dxgi.dll'] if a.early_bootstrap else [])
-if a.guide_recon:sources+=['guide_recon.cpp','fg_alpha_copy.h','fg_ui_alpha.hlsl'];own+=['mcd2-fg-guide-recon.addon64','FG_UI_ALPHA.cso']
+if a.guide_recon:sources+=['guide_recon.cpp','fg_alpha_copy.h','fg_ui_alpha.hlsl','fg_controls.hpp','fg_ui_protocol.hpp'];own+=['mcd2-fg-guide-recon.addon64','FG_UI_ALPHA.cso']
 (out/'build-receipt.json').write_text(json.dumps({'sdk':'2.14.1','archiveSHA256':archive_hash,'probe':a.probe,'earlyBootstrap':a.early_bootstrap,'files':files,'dxcSHA256':hashlib.sha256(a.dxc.read_bytes()).hexdigest() if a.guide_recon else None,'sourceSHA256':{name:hashlib.sha256((src/name).read_bytes()).hexdigest() for name in sources},'ownBinariesSHA256':{name:hashlib.sha256((out/name).read_bytes()).hexdigest() for name in own},'executableSHA256':hashlib.sha256((out/'fg-probe.exe').read_bytes()).hexdigest()},indent=2))
 print('Isolated '+a.probe+' FG probe built; production runtime archive verified. No game files changed.')

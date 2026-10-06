@@ -11,10 +11,11 @@ p.add_argument('--backup',required=True,type=Path)
 p.add_argument('--probe',type=Path)
 p.add_argument('--candidate',type=Path)
 p.add_argument('--sr-candidate',type=Path,help='Optional temporary SR guide-notification build; backed up and restored separately')
+p.add_argument('--ui-candidate',type=Path,help='Optional experimental UI Pak directory; all three containers backed up and restored')
 p.add_argument('--experimental-reshade',type=Path)
 p.add_argument('--experimental-reshade-receipt',type=Path)
 a=p.parse_args()
-game=a.game.resolve();backup=a.backup.resolve();record=backup/'transaction-private.json'
+game=a.game.resolve();ui_game=game.parents[1]/'Content/Paks/~mods/MCD2Graphics';backup=a.backup.resolve();record=backup/'transaction-private.json'
 def sha(path):
     with path.open('rb') as f:return hashlib.file_digest(f,'sha256').hexdigest()
 require_closed()
@@ -58,20 +59,31 @@ if a.action=='install':
     for name in ['dxgi.dll','fg-sdk-bridge.dll']:assert sha(sources[name])==pr['ownBinariesSHA256'][name]
     for name in sources:
         if name not in ['dxgi.dll','mcd2-display-latency.addon64','mcd2-graphics.addon64']:assert not (game/name).exists(),f'Existing file: {name}'
+    ui_entries={}
+    if a.ui_candidate:
+        for ext in ('pak','utoc','ucas'):
+            name='MCD2Graphics_P.'+ext
+            assert (ui_game/name).is_file() and (a.ui_candidate/name).is_file()
+            ui_entries[name]={'before':sha(ui_game/name),'installed':sha(a.ui_candidate/name)}
     backup.mkdir(parents=True)
+    if ui_entries:
+        (backup/'ui').mkdir()
+        for name in ui_entries:shutil.copyfile(ui_game/name,backup/'ui'/name)
     entries={}
     for name in list(sources)+['ReShade.ini','bootstrap.jsonl','sl.log','nvapi64.log','nvapi.log','FGGuideCapture.ini']:
         old=game/name
         entries[name]={'before':sha(old) if old.exists() else None,'installed':sha(sources[name]) if name in sources else None}
         if old.exists():shutil.copy2(old,backup/name)
     protected={name:sha(game/name) for name in ['mcd2-graphics.addon64','renodx-ue-extended.addon64'] if name not in sources}
-    state={'game':str(game),'entries':entries,'protected':protected,'restored':False,'experimentalReShade':framework_receipt,'releaseQualified':False}
+    state={'game':str(game),'uiEntries':ui_entries,'entries':entries,'protected':protected,'restored':False,'experimentalReShade':framework_receipt,'releaseQualified':False}
     record.write_text(json.dumps(state,indent=2)+'\n')
     # Copy from backups when the original path is itself a replacement target.
     for name,source in sources.items():shutil.copyfile(backup/'dxgi.dll' if name=='d3d12.asi' and not a.experimental_reshade else source,game/name)
+    for name in ui_entries:shutil.copyfile(a.ui_candidate/name,ui_game/name)
     print('FG-Off trial staged with a complete recovery transaction; RenoDX unchanged.'+(' Temporary SR observer installed.' if a.sr_candidate else ' SR unchanged.'))
 else:
     state=json.loads(record.read_text());assert state['game']==str(game) and not state['restored']
+    for name,entry in state.get('uiEntries',{}).items():assert sha(ui_game/name)==entry['installed'],f'Trial UI was changed: {name}'
     for name,entry in state['entries'].items():
         target=game/name
         if entry['installed'] is not None:assert target.exists() and sha(target)==entry['installed'],f'Trial file was changed: {name}'
@@ -80,6 +92,8 @@ else:
         target=game/name
         if entry['before'] is not None:shutil.copyfile(backup/name,target);assert sha(target)==entry['before']
         elif target.exists():target.unlink()
+    for name,entry in state.get('uiEntries',{}).items():
+        shutil.copyfile(backup/'ui'/name,ui_game/name);assert sha(ui_game/name)==entry['before']
     for name,expected in state['protected'].items():assert sha(game/name)==expected
     state['restored']=True;record.write_text(json.dumps(state,indent=2)+'\n')
     print('Working bootstrap/latency/config restored byte for byte; trial DLLs removed.')

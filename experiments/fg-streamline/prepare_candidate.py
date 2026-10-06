@@ -12,7 +12,7 @@ def digest(path):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    for name in ('probe', 'candidate', 'sr', 'output', 'framework-receipt'):
+    for name in ('probe', 'candidate', 'sr', 'ui', 'output', 'framework-receipt'):
         parser.add_argument('--' + name, required=True, type=Path)
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[2]
@@ -26,6 +26,11 @@ def main():
         raise ValueError('Latency receipt references a different probe build')
     if not framework.get('sourceClean') or not framework.get('commit'):
         raise ValueError('A clean experimental framework receipt is required')
+    if sr.get('privateGuideInspection', False):
+        raise ValueError('Private guide inspection builds cannot be packaged')
+    ui = json.loads((args.ui / 'build-receipt.json').read_text())
+    if ui.get('privateProbe') is not False:
+        raise ValueError('Expected a clean UI with no private probe')
     files = {}
     for name, expected in probe['ownBinariesSHA256'].items():
         if Path(name).name != name:
@@ -41,16 +46,27 @@ def main():
         key = 'latency' if folder == args.candidate else 'sr'
         files[key + '/' + name] = folder / name
         files[key + '/build-receipt.json'] = folder / 'build-receipt.json'
+    for name, expected in ui['payloadSHA256'].items():
+        if name not in ('MCD2Graphics_P.pak', 'MCD2Graphics_P.utoc', 'MCD2Graphics_P.ucas'):
+            raise ValueError('Unexpected UI payload')
+        path = args.ui / 'Pak' / name
+        if digest(path) != expected:
+            raise ValueError('UI payload mismatch: ' + name)
+        files['ui/Pak/' + name] = path
+    if len(ui['payloadSHA256']) != 3:
+        raise ValueError('Expected all three UI containers')
+    files['ui/build-receipt.json'] = args.ui / 'build-receipt.json'
     files['probe/build-receipt.json'] = args.probe / 'build-receipt.json'
     files['latency/FGBootstrap.ini'] = args.candidate / 'FGBootstrap.ini'
     for name in ('install.py', 'dependencies.lock.json'):
         files[name] = root / name
     for name in ('game_trial.py', 'bounded_trial.py', 'hydrate_runtime.py', 'store_probe.py',
-                 'STORE_INVESTIGATION_2026-10-06.md', 'LINUX_BOUNDED_VALIDATION_2026-10-06.json', 'README.md'):
+                 'STORE_INVESTIGATION_2026-10-06.md', 'LINUX_BOUNDED_VALIDATION_2026-10-06.json', 'LINUX_DLSS_FOLIAGE_FG_CANDIDATE_2026-10-06.json', 'WINDOWS_FG_CLEARANCE_2026-10-06.md', 'README.md'):
         files['experiments/fg-streamline/' + name] = Path(__file__).parent / name
     manifest = {
-        'purpose': 'bounded FG Windows test candidate; not a release',
-        'FGDefault': 'Off', 'maximumFGFrames': 600,
+        'purpose': 'FG and DLSS foliage Windows test candidate; not a release',
+        'FGDefault': 'Off', 'nativeUIToggle': True, 'restartAfterModeChange': True,
+        'legacyMaximumFGFrames': 600, 'nativeUIToggleHasExpiry': False,
         'WindowsQualified': False, 'releaseQualified': False,
         'framework': {'commit': framework['commit'], 'binarySHA256': framework['binarySHA256']},
         'requiredSeparateRuntimeFiles': probe['files'],

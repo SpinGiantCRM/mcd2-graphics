@@ -13,10 +13,12 @@
 #include <filesystem>
 #include "fg_bridge_contract.h"
 #include "fg_camera_contract.h"
+#include "fg_configuration.hpp"
 namespace {
 HMODULE dll=nullptr;bool initialized=false;
 void* boundDevice=nullptr;
 bool fgConfigured=false;
+mcd2::fg::Configuration fgConfiguration;
 PFun_slInit*init=nullptr;PFun_slShutdown*shutdown=nullptr;
 PFun_slGetFeatureFunction*feature=nullptr;PFun_slSetD3DDevice*setDevice=nullptr;PFun_slGetNewFrameToken*newToken=nullptr;
 PFun_slReflexGetState*getState=nullptr;PFun_slReflexSetOptions*setOptions=nullptr;PFun_slReflexSleep*sleepFrame=nullptr;PFun_slPCLSetMarker*markFrame=nullptr;
@@ -79,7 +81,7 @@ int mcd2_sl_report_range(uint64_t*first,uint64_t*last,uint64_t*sim,uint64_t*pres
  }return 0;
 }
 int mcd2_sl_pcl_message(unsigned*message){if(!getPclState||!message)return -1;sl::PCLState s{};auto r=getPclState(s);*message=s.statsWindowMessage;return int(r);}
-int mcd2_sl_shutdown(){int r=initialized?int(shutdown()):0;if(r)return r;initialized=false;boundDevice=nullptr;fgConfigured=false;getState=nullptr;getPclState=nullptr;setOptions=nullptr;sleepFrame=nullptr;markFrame=nullptr;init=nullptr;shutdown=nullptr;feature=nullptr;setDevice=nullptr;newToken=nullptr;return r;}
+int mcd2_sl_shutdown(){int r=initialized?int(shutdown()):0;if(r)return r;initialized=false;boundDevice=nullptr;fgConfigured=false;fgConfiguration.clear();getState=nullptr;getPclState=nullptr;setOptions=nullptr;sleepFrame=nullptr;markFrame=nullptr;init=nullptr;shutdown=nullptr;feature=nullptr;setDevice=nullptr;newToken=nullptr;return r;}
 }
 
 // Isolated presentation experiment only. Never linked into the released addon.
@@ -113,15 +115,27 @@ void identity(sl::float4x4& m){for(unsigned i=0;i<4;++i)m[i]=sl::float4(i==0?1.f
 }
 extern "C" long mcd2_fg_api_error(){return lastApiError.load();}
 extern "C" int mcd2_fg_configured(){return fgConfigured?1:0;}
+extern "C" int mcd2_fg_last_config(MCD2FGConfig* out){if(!out||!fgConfiguration.last.size)return -1;*out=fgConfiguration.last;return 0;}
 extern "C" int mcd2_fg_configure(const MCD2FGConfig* config){
  if(!initialized||!config||config->size!=sizeof(*config)||config->mode>1||!config->width||!config->height||!config->motionWidth||!config->motionHeight||!config->backBuffers||config->backBuffers>16||config->generatedFrames!=1)return -1;
  PFun_slDLSSGSetOptions* set=nullptr;auto r=bindFeature(set,sl::kFeatureDLSS_G,"slDLSSGSetOptions");if(r||!set)return r?r:-1;
+ const auto normalized=fgConfiguration.prepare(*config);config=&normalized;
  sl::DLSSGOptions o{};o.mode=config->mode?sl::DLSSGMode::eOn:sl::DLSSGMode::eOff;o.numFramesToGenerate=config->generatedFrames;
  o.numBackBuffers=config->backBuffers;o.colorWidth=config->width;o.colorHeight=config->height;o.mvecDepthWidth=config->motionWidth;o.mvecDepthHeight=config->motionHeight;
  o.colorBufferFormat=o.hudLessBufferFormat=config->colorFormat;o.uiBufferFormat=config->uiFormat;
  o.depthBufferFormat=config->depthFormat;o.mvecBufferFormat=config->motionFormat;
+ // Menus/loading are temporary suspensions. Permanent Off explicitly frees
+ // below, after eOff has been accepted by the SDK.
+ o.flags=sl::DLSSGFlags::eRetainResourcesWhenOff;
  o.onErrorCallback=apiError;
- auto result=set(sl::ViewportHandle(0),o);if(result==sl::Result::eOk)fgConfigured=true;return int(result);
+ auto result=set(sl::ViewportHandle(0),o);if(result==sl::Result::eOk){fgConfigured=true;fgConfiguration.accepted(*config);}return int(result);
+}
+extern "C" int mcd2_fg_release(){
+ if(!fgConfigured)return 0;
+ if(!initialized)return -1;
+ if(fgConfiguration.last.mode)return -2;
+ PFun_slFreeResources* release=nullptr;if(!bind(release,"slFreeResources"))return -3;
+ auto result=release(sl::kFeatureDLSS_G,sl::ViewportHandle(0));if(result==sl::Result::eOk)fgConfigured=false;return int(result);
 }
 extern "C" int mcd2_fg_mode(unsigned mode,unsigned width,unsigned height){
  const bool hdr=GetEnvironmentVariableW(L"MCD2_FG_HDR",nullptr,0)!=0;
