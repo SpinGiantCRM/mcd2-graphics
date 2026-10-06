@@ -1,2 +1,5 @@
 # Preserve verbatim upstream notices, including their original whitespace.
 third-party/** -whitespace
+
+# Keep patch context and provenance hashes identical on Windows and Linux.
+qualification/fg-release/*.patch text eol=lf

@@ -3,6 +3,7 @@ import importlib.util
 from pathlib import Path
 import tempfile
 import unittest
+import subprocess
 
 spec = importlib.util.spec_from_file_location('windows_candidate', Path(__file__).with_name('build_windows_candidate.py'))
 candidate = importlib.util.module_from_spec(spec)
@@ -10,6 +11,13 @@ spec.loader.exec_module(candidate)
 
 
 class WindowsBuildChecks(unittest.TestCase):
+    def test_framework_patch_has_canonical_checkout_and_hash_bytes(self):
+        relative = 'qualification/fg-release/reshade-reset-epoch.patch'
+        self.assertNotIn(b'\r', (candidate.REPO / relative).read_bytes())
+        attributes = subprocess.check_output(
+            ['git', '-C', str(candidate.REPO), 'check-attr', 'eol', relative], text=True)
+        self.assertEqual(attributes.strip(), relative + ': eol: lf')
+
     def test_unversioned_components_and_incomplete_versions_are_ignored(self):
         with tempfile.TemporaryDirectory() as temporary:
             parent = Path(temporary)
