@@ -159,9 +159,13 @@ and [Reflex guidance](https://github.com/NVIDIA-RTX/Streamline/blob/main/docs/Pr
 
 ## Current Windows candidate
 
-The packaged candidate, archive hash and install/checklist links are in
-[`qualification/fg-v23`](../../qualification/fg-v23/README.md).
-The matching bounded Linux measurements are in
+The current source is [v31](../../qualification/fg-v31/README.md). The separate
+[Windows / AMD trial report](../../docs/FG_WINDOWS_AMD_VALIDATION_2026-10-06.md)
+records exact Windows build hashes, reversible installation, two clean exits and
+unsupported fallback with FG Off and persisted On. Active NVIDIA FG/HDR and
+shared NGX teardown remain outstanding. Historical v23 assets in
+[`qualification/fg-v23`](../../qualification/fg-v23/README.md) remain frozen.
+The historical bounded Linux measurements are in
 [`LINUX_DLSS_FOLIAGE_FG_CANDIDATE_2026-10-06.json`](LINUX_DLSS_FOLIAGE_FG_CANDIDATE_2026-10-06.json).
 These measurements do not qualify Windows execution or a release.
 

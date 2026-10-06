@@ -116,3 +116,24 @@ only when its receipt matches the current git source blob (Windows checkout
 line endings must not invalidate that comparison). Do not replace this check
 with a Linux build pass or apply the result to the historical v27 archive.
 Both existing Windows and Linux CI jobs remain required.
+
+The Windows runner builds the upstream ReShade solution because its includes
+depend on `SolutionDir`. SDK discovery must ignore unversioned Windows Kits
+components such as `wdf` and incomplete version folders; retain the two
+`test_windows_build.py` fixtures. Microsoft ABI/sysroot adaptation must remain
+isolated from installed tools and from the Linux build path.
+
+### Windows / AMD FG fallback check — 6 October 2026
+
+The [exact-binary Windows report](FG_WINDOWS_AMD_VALIDATION_2026-10-06.md) records
+two clean exits and unsupported fallback with FG Off and a persisted FG On
+preference. Preserve the opt-in runtime probe's six loaded game-directory module
+hashes: a live process or system DXGI alone cannot establish FG-chain startup.
+The actual rendering adapter must decline FG before device binding/swapchain
+routing and decline DLSS before source reduction; unsupported fallback must not
+apply the foliage lease. No native rendering fix was needed in this trial.
+
+The reversible transaction restored the prior installation and preferences.
+These results qualify only the recorded Windows/AMD binaries and checks, not
+NVIDIA HDR/active FG, shared NGX teardown, a rebuilt artifact or the expanded GUI
+installer. The historical shutdown exception remains unresolved.
