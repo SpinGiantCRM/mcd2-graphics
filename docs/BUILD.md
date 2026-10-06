@@ -74,7 +74,7 @@ python build_installer.py --dotnet PATH --payload PATH --rid linux-x64 --output 
 python build_installer.py --dotnet PATH --payload PATH --rid win-x64 --output PATH
 ```
 
-The script packages only manifest-owned files and embeds them in a self-contained executable. It excludes NVIDIA runtime DLLs and records the installer/payload hashes. Windows cross-compilation establishes a build, not Windows runtime behavior. Developer builds without the qualified payload explicitly refuse installation. A build receipt never grants publication approval.
+The script copies only manifest-owned files into a visible `payload/` folder beside a self-contained folder-deployed installer. Keep the complete folder together when making the outer ZIP. There is no embedded payload archive or native self-extraction. NVIDIA graphics runtime DLLs remain separate; the build receipt records every deployed file hash. Use an empty output directory. Windows cross-compilation establishes a build, not Windows runtime behavior. Developer builds without the qualified payload explicitly refuse installation. A build receipt never grants publication approval.
 
 Run `dotnet run --project tests/installer-core/InstallerCore.Tests.csproj -c Release`, the existing Python portable tests and the C++ display/token tests. Linux and Windows CI remain in place. Exact final candidate runtime evidence must satisfy [the Update 2 gate](UPDATE_2_RELEASE_GATE.md). FG needs additional early device/interposer integration and is not implemented by this Reflex bootstrap.
 

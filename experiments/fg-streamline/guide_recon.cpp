@@ -41,6 +41,11 @@ struct FrameData{MCD2FGCamera camera{};bool guides=false,images=false;};
 std::map<uint32_t,FrameData> gameFrames;
 unsigned imageSamples=0,fgTrialFrames=0;std::atomic<unsigned> activeFGMode{0};uint32_t presentedFrame=UINT32_MAX;
 bool releasedWhileOff=false;
+// Keep one SDK status query per host present. Diagnostic consumers read this
+// receipt instead of querying the SDK's presentation counter a second time.
+uint64_t outcomeSample=0;
+int outcomeResult=-1;
+unsigned outcomeStatus=0,outcomePresents=0;
 std::atomic<unsigned> guideSamples{0};unsigned trialRevision=0;
 unsigned outputWidth=0,outputHeight=0,outputBuffers=0,outputFormat=0;HWND outputWindow=nullptr;
 thread_local bool internalGPU=false;
@@ -213,7 +218,9 @@ void finish(a::command_queue*,a::swapchain*){
  auto bridge=GetModuleHandleW(L"fg-sdk-bridge.dll");using State=int(*)(unsigned*,unsigned*,unsigned*,unsigned*);auto state=bridge?reinterpret_cast<State>(GetProcAddress(bridge,"mcd2_fg_state")):nullptr;
  unsigned max=0,status=0,min=0,presents=0;int result=activeFGMode&&state?state(&max,&status,&min,&presents):-1;
  if(fg_controls::enabled && activeFGMode && (result!=0||status!=0))fg_controls::fault=1;
- std::lock_guard lock(mutex);if(activeFGMode && (!fg_controls::enabled||fgTrialFrames<120||fgTrialFrames%60==0)){privateLog<<"{\"kind\":\"fg_present_outcome\",\"frameStamp\":"<<presentedFrame<<",\"SDKResult\":"<<result<<",\"status\":"<<status<<",\"actualPresents\":"<<presents<<"}\n";privateLog.flush();}++frame;
+ std::lock_guard lock(mutex);++outcomeSample;
+ outcomeResult=activeFGMode?result:0;outcomeStatus=activeFGMode?status:0;outcomePresents=activeFGMode?presents:1;
+ if(activeFGMode && (!fg_controls::enabled||fgTrialFrames<120||fgTrialFrames%60==0)){privateLog<<"{\"kind\":\"fg_present_outcome\",\"frameStamp\":"<<presentedFrame<<",\"SDKResult\":"<<result<<",\"status\":"<<status<<",\"actualPresents\":"<<presents<<"}\n";privateLog.flush();}++frame;
 }
 void present(a::command_queue*q,a::swapchain*swap,const a::rect*,const a::rect*,unsigned,const a::rect*){
  poll_policy();fg_controls::poll(swap->get_device(),capturePolicy,activeFGMode);
@@ -226,10 +233,15 @@ void present(a::command_queue*q,a::swapchain*swap,const a::rect*,const a::rect*,
   wanted=fg_controls::enabled?fg_controls::wanted.load()&&GetForegroundWindow()==outputWindow:legacyEnable.load()&&fgTrialFrames<600&&GetForegroundWindow()==outputWindow;
  }
  const unsigned mode=ready&&wanted&&fg_alpha::submission_queue(q)?1:0;
- if(mode!=activeFGMode){auto bridge=GetModuleHandleW(L"fg-sdk-bridge.dll");using Configure=int(*)(const MCD2FGConfig*);auto configure=bridge?reinterpret_cast<Configure>(GetProcAddress(bridge,"mcd2_fg_configure")):nullptr;
-  MCD2FGConfig config{sizeof(MCD2FGConfig),mode,outputWidth,outputHeight,data.camera.width?data.camera.width:outputWidth,data.camera.height?data.camera.height:outputHeight,outputFormat,61,41,34,outputBuffers,1};auto result=configure?configure(&config):-1;
-  using LastConfig=int(*)(MCD2FGConfig*);auto last=bridge?reinterpret_cast<LastConfig>(GetProcAddress(bridge,"mcd2_fg_last_config")):nullptr;MCD2FGConfig effective{};if(last)last(&effective);
-  std::lock_guard lock(mutex);privateLog<<"{\"kind\":\"game_fg_mode\",\"frameStamp\":"<<id<<",\"requestedMode\":"<<mode<<",\"SDKResult\":"<<result<<",\"matchingInputs\":"<<(ready?"true":"false")<<",\"guideWidth\":"<<effective.motionWidth<<",\"guideHeight\":"<<effective.motionHeight<<"}\n";privateLog.flush();if(!result){activeFGMode=mode;if(mode)releasedWhileOff=false;}else if(fg_controls::enabled)fg_controls::fault=1;
+ auto bridge=GetModuleHandleW(L"fg-sdk-bridge.dll");using LastConfig=int(*)(MCD2FGConfig*);
+ auto last=bridge?reinterpret_cast<LastConfig>(GetProcAddress(bridge,"mcd2_fg_last_config")):nullptr;
+ MCD2FGConfig effective{};if(last)last(&effective);
+ const MCD2FGConfig requested{sizeof(MCD2FGConfig),mode,outputWidth,outputHeight,data.camera.width?data.camera.width:outputWidth,data.camera.height?data.camera.height:outputHeight,outputFormat,61,41,34,outputBuffers,1};
+ const auto config=mcd2::fg::configurationForPresent(requested,effective);
+ if((mode||activeFGMode) && !mcd2::fg::sameConfiguration(config,effective)){using Configure=int(*)(const MCD2FGConfig*);auto configure=bridge?reinterpret_cast<Configure>(GetProcAddress(bridge,"mcd2_fg_configure")):nullptr;
+  auto result=configure?configure(&config):-1;
+  if(last)last(&effective);
+  std::lock_guard lock(mutex);privateLog<<"{\"kind\":\"game_fg_mode\",\"frameStamp\":"<<id<<",\"requestedMode\":"<<config.mode<<",\"SDKResult\":"<<result<<",\"matchingInputs\":"<<(ready?"true":"false")<<",\"guideWidth\":"<<effective.motionWidth<<",\"guideHeight\":"<<effective.motionHeight<<"}\n";privateLog.flush();if(!result){activeFGMode=config.mode;if(config.mode)releasedWhileOff=false;}else if(fg_controls::enabled)fg_controls::fault=1;
  }
  const bool permanentOff=fg_controls::enabled?mcd2::fg::permanentOff(fg_controls::intent.mode,fg_controls::intent.session==fg_controls::session,fg_controls::fault.load()):(!legacyEnable.load()||fgTrialFrames>=600);
  if(!activeFGMode && permanentOff && !releasedWhileOff){
@@ -245,6 +257,10 @@ void present(a::command_queue*q,a::swapchain*swap,const a::rect*,const a::rect*,
 }
 }
 extern "C" __declspec(dllexport) int mcd2_fg_active(){return activeFGMode.load()?1:0;}
+extern "C" __declspec(dllexport) int mcd2_fg_last_present(uint64_t* sample,unsigned* status,unsigned* presents){
+ if(!sample||!status||!presents)return -1;
+ std::lock_guard lock(mutex);*sample=outcomeSample;*status=outcomeStatus;*presents=outcomePresents;return outcomeResult;
+}
 extern "C" __declspec(dllexport) int mcd2_fg_inputs_wanted(){return tracking()?1:0;}
 extern "C" __declspec(dllexport) void mcd2_fg_observe_sr(void*cmd,void*depth,void*motion,const MCD2FGCamera*camera){
  if(!camera||camera->size!=sizeof(*camera)||!cmd||!depth||!motion)return;

@@ -66,3 +66,21 @@ Preview.2 retains the exact tested GCC addon, UI and shader. The maintainer elec
 The [PR7 Windows report](UPDATE_2_WINDOWS_VALIDATION_2026-10-05.md) records the exact downloaded installer, real repair/removal/fresh install, AMD Quality/DLAA/Custom fallback before source reduction, native HDR Off/restart and three clean exits. It retains the historical exit exception and outstanding NVIDIA/HDR/input gates. No rendering or installer behavior changed during this follow-up.
 
 The runtime probe now records the independently loaded display/latency addon and accepts `-RequireDisplayLatency` for Update 2. Keep this opt-in check: on Windows, a live process with only the SR addon loaded cannot establish HDR/Reflex startup. Legacy SR-only checks remain usable. This is an evidence correction, not an OS-specific rendering fix. Preserve the candidate-specific aggregate record and both Linux/Windows CI jobs; do not apply these results to a rebuilt installer.
+
+## FG candidate and transparent installer follow-up — 6 October 2026
+
+Command-list Reset is a pre-call notification and may fail. The FG candidate
+retains old recording references until a later recording command establishes a
+replacement, including barrier-only and root-state lists. A cancelled, pending
+SR evaluation clears its CPU sentinel only at that proven replacement. GPU
+retirement still requires the existing post-invalidation signal and completed
+fence. The stack guard and adapter/deadline policy remain unchanged.
+
+The guided installer now reads a visible, expanded `payload/` folder, verifies
+all expected hashes before any game write, and preserves the existing ownership,
+repair, rollback and dependency rules. Both platforms use self-contained folder
+deployment. Extract the entire package; launching a lone copied executable is
+unsupported. Legacy stream callers remain available for compatibility tests,
+but the GUI has no embedded payload archive. Windows CI and real Windows
+fresh-install, repair and removal are required for this new package layout.
+Neither Linux measurements nor older installer qualification qualify it.

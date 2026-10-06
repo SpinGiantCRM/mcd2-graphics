@@ -19,6 +19,7 @@ public sealed partial class InstallerEngine {
     readonly string gameHash;
     readonly string supportedBuild;
     readonly Func<Stream?> payload;
+    readonly string? expandedPayloadRoot;
     readonly Dictionary<string,string> own;
     readonly Dictionary<string,Dictionary<string,string>> previousInstalls = new();
     readonly Dictionary<string,byte[]> selections = new();
@@ -46,6 +47,34 @@ public sealed partial class InstallerEngine {
                 d.TryGetProperty("archiveSHA256",out var a)?a.GetString():null, d.TryGetProperty("archiveMembers",out var members)?ReadHashes(members):null, d.TryGetProperty("upgradeFromFiles",out var prior)?ReadHashes(prior):null));
         }
         Dependencies=deps;
+    }
+    // Normal packages contain visible, hash-pinned files beside the executable.
+    public InstallerEngine(string dependencyJson, string manifestJson, string payloadDirectory)
+        : this(dependencyJson,manifestJson,()=>null) {
+        expandedPayloadRoot=Path.GetFullPath(payloadDirectory);
+    }
+    Dictionary<string,byte[]> ReadPayload() {
+        var source=new Dictionary<string,byte[]>();
+        if(expandedPayloadRoot!=null) {
+            if(!Directory.Exists(expandedPayloadRoot))throw new InvalidDataException("Payload folder missing. Extract the complete installer ZIP before running it.");
+            foreach(var item in own) {
+                var path=Target(expandedPayloadRoot,item.Key);
+                using var input=new FileStream(path,FileMode.Open,FileAccess.Read,FileShare.Read);
+                if(input.Length>MaximumFile)throw new InvalidDataException("Package integrity failure.");
+                using var memory=new MemoryStream();input.CopyTo(memory);
+                var bytes=memory.ToArray();if(bytes.LongLength>MaximumFile||Digest(bytes)!=item.Value)throw new InvalidDataException("Package hash mismatch.");
+                source.Add(item.Key,bytes);
+            }
+        } else {
+            // Legacy stream callers remain supported; the GUI does not embed an archive.
+            using var stream=payload()??throw new InvalidDataException("No qualified mod payload.");
+            using var zip=new ZipArchive(stream,ZipArchiveMode.Read);
+            foreach(var item in own) {
+                var matches=zip.Entries.Where(x=>x.FullName==item.Key).ToList();if(matches.Count!=1||matches[0].Length>MaximumFile)throw new InvalidDataException("Package integrity failure.");
+                using var input=matches[0].Open();using var memory=new MemoryStream();input.CopyTo(memory);var bytes=memory.ToArray();if(bytes.LongLength>MaximumFile||Digest(bytes)!=item.Value)throw new InvalidDataException("Package hash mismatch.");source.Add(item.Key,bytes);
+            }
+        }
+        return source;
     }
     static Dictionary<string,string> ReadHashes(JsonElement e)=>e.EnumerateObject().ToDictionary(x=>x.Name,x=>x.Value.GetString()!);
     static string OfficialUrl(string id)=>id switch {"BlueprintLoader"=>"https://www.nexusmods.com/minecraftdungeons2/mods/2?tab=files", "ReShade"=>"https://reshade.me/", "RenoDXUEExtended"=>"https://github.com/marat569/renodx/releases/tag/nightly-20260928", "DLSSRuntime"=>"https://github.com/NVIDIA/DLSS", _=>throw new InvalidDataException("Unknown requirement")};
@@ -143,14 +172,7 @@ public sealed partial class InstallerEngine {
         RequireClosed();if(!Ready)throw new InvalidDataException("Resolve the requirements before installing.");
         var root=GameRoot!;var marker=Target(root,Marker);Receipt? old=null;
         if(File.Exists(marker)) {old=ReadReceipt(marker);if(!repair)throw new InvalidDataException("Already installed. Choose Repair / Verify.");ValidateOwnership(old);}
-        var source=new Dictionary<string,byte[]>();
-        using(var stream=payload()??throw new InvalidDataException("This development installer has no qualified mod payload. Build the candidate package first."))
-        using(var zip=new ZipArchive(stream,ZipArchiveMode.Read)) {
-            foreach(var item in own) {
-                var matches=zip.Entries.Where(x=>x.FullName==item.Key).ToList();if(matches.Count!=1||matches[0].Length>MaximumFile)throw new InvalidDataException("Package integrity failure.");
-                using var input=matches[0].Open();using var memory=new MemoryStream();input.CopyTo(memory);var b=memory.ToArray();if(Digest(b)!=item.Value)throw new InvalidDataException("Package hash mismatch.");source.Add(item.Key,b);
-            }
-        }
+        var source=ReadPayload(); // Complete source validation before any game write.
         // Validate every destination before the first write, including repair ownership.
         var modFiles=new Dictionary<string,string>(own);
         foreach(var dependency in Dependencies)foreach(var f in dependency.Files) {

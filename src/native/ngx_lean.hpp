@@ -17,7 +17,12 @@ static bool read_upload(const Slot &slot,size_t bytes,void *dest);
 static LeanBorrowCache native_reset_borrows;
 static a::command_queue *native_reset_queue=nullptr;
 static void lean_reset_recording(a::command_list *cmd){if(lean.borrow.recordings.contains(cmd))lean.borrow.reset_pending.insert(cmd);if(native_reset_borrows.recordings.contains(cmd))native_reset_borrows.reset_pending.insert(cmd);}
-static void lean_begin_recording(a::command_list *cmd){lean.borrow.begin_recording(cmd);native_reset_borrows.begin_recording(cmd);}
+static void lean_begin_recording(a::command_list *cmd){
+ // Reset can cancel an evaluation before submission. Clear its CPU sentinel
+ // only after replacement recording is observed; references still retire by fence.
+ if(lean.borrow.begin_recording(cmd) && lean.pending==cmd)lean.pending=nullptr;
+ native_reset_borrows.begin_recording(cmd);
+}
 static void lean_forget_recording(a::command_list *cmd){lean.borrow.reset_pending.erase(cmd);lean.borrow.forget(cmd);native_reset_borrows.reset_pending.erase(cmd);native_reset_borrows.forget(cmd);if(lean.pending==cmd)lean.pending=nullptr;}
 static bool lean_cleanup(a::command_queue *q,std::unique_lock<std::recursive_mutex> &guard,bool terminal=false){
  if(!live_fixture || lean.cleanup_in_progress || (!terminal && lean.history_dirty) || !lean.borrow.recordings.empty() || lean.borrow.blocked)return false;
@@ -251,7 +256,7 @@ static void lean_queue_probe(a::command_queue *host,std::unique_lock<std::recurs
 }
 // Terminal receipts must reflect completed cleanup, not pre-cleanup ownership.
 static void lean_write_status(){
- std::ofstream(root/label/"lean-status.json")<<"{\"evaluations\":"<<lean.evaluations<<",\"transientFallbacks\":"<<lean.transient_fallbacks<<",\"nativeDispatches\":"<<lean.native_dispatches<<",\"nativeResets\":"<<lean.native_resets<<",\"failures\":"<<lean.failures<<",\"missingTAAFrames\":"<<lean.missing<<",\"immutableHeaps\":"<<lean.borrow.entries.size()<<",\"recordedLists\":"<<lean.borrow.recordings.size()<<",\"retiredBundles\":"<<lean.borrow.retired<<",\"peakBundles\":"<<lean.borrow.peak_entries<<",\"fenceSignals\":"<<lean.borrow.signals<<",\"fenceCompleted\":"<<lean.borrow.completed_fence<<",\"retirementBlocked\":"<<(lean.borrow.blocked?"true":"false")<<",\"featurePresent\":"<<(live_fixture?"true":"false")<<",\"nativeResetBuffers\":"<<native_reset_borrows.entries.size()<<",\"nativeResetRecordedLists\":"<<native_reset_borrows.recordings.size()<<",\"nativeResetRetired\":"<<native_reset_borrows.retired<<",\"nativeResetBlocked\":"<<(native_reset_borrows.blocked?"true":"false")<<",\"on\":"<<(lean.wanted?"true":"false")<<",\"historyDirty\":"<<(lean.history_dirty?"true":"false")<<"}\n";lean.log.flush();
+ std::ofstream(root/label/"lean-status.json")<<"{\"evaluations\":"<<lean.evaluations<<",\"transientFallbacks\":"<<lean.transient_fallbacks<<",\"nativeDispatches\":"<<lean.native_dispatches<<",\"nativeResets\":"<<lean.native_resets<<",\"failures\":"<<lean.failures<<",\"missingTAAFrames\":"<<lean.missing<<",\"immutableHeaps\":"<<lean.borrow.entries.size()<<",\"recordedLists\":"<<lean.borrow.recordings.size()<<",\"resetPendingLists\":"<<lean.borrow.reset_pending.size()<<",\"retiredBundles\":"<<lean.borrow.retired<<",\"peakBundles\":"<<lean.borrow.peak_entries<<",\"fenceSignals\":"<<lean.borrow.signals<<",\"fenceCompleted\":"<<lean.borrow.completed_fence<<",\"retirementBlocked\":"<<(lean.borrow.blocked?"true":"false")<<",\"featurePresent\":"<<(live_fixture?"true":"false")<<",\"nativeResetBuffers\":"<<native_reset_borrows.entries.size()<<",\"nativeResetRecordedLists\":"<<native_reset_borrows.recordings.size()<<",\"nativeResetRetired\":"<<native_reset_borrows.retired<<",\"nativeResetBlocked\":"<<(native_reset_borrows.blocked?"true":"false")<<",\"on\":"<<(lean.wanted?"true":"false")<<",\"historyDirty\":"<<(lean.history_dirty?"true":"false")<<"}\n";lean.log.flush();
 }
 #include "ui_control_present.hpp"
 static void lean_present(a::command_queue *q,std::unique_lock<std::recursive_mutex> &guard) {

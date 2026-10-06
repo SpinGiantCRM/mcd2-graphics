@@ -61,7 +61,7 @@ def main():
     for name in ('install.py', 'dependencies.lock.json'):
         files[name] = root / name
     for name in ('game_trial.py', 'bounded_trial.py', 'hydrate_runtime.py', 'store_probe.py',
-                 'STORE_INVESTIGATION_2026-10-06.md', 'LINUX_BOUNDED_VALIDATION_2026-10-06.json', 'LINUX_DLSS_FOLIAGE_FG_CANDIDATE_2026-10-06.json', 'WINDOWS_FG_CLEARANCE_2026-10-06.md', 'README.md'):
+                 'STORE_INVESTIGATION_2026-10-06.md', 'LINUX_BOUNDED_VALIDATION_2026-10-06.json', 'LINUX_DLSS_FOLIAGE_FG_CANDIDATE_2026-10-06.json', 'WINDOWS_FG_CLEARANCE_2026-10-06.md', 'LINUX_FG_PERFORMANCE_2026-10-06.json', 'LINUX_FG_PERFORMANCE_2026-10-06.md', 'README.md'):
         files['experiments/fg-streamline/' + name] = Path(__file__).parent / name
     manifest = {
         'purpose': 'FG and DLSS foliage Windows test candidate; not a release',

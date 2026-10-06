@@ -164,3 +164,11 @@ The packaged candidate, archive hash and install/checklist links are in
 The matching bounded Linux measurements are in
 [`LINUX_DLSS_FOLIAGE_FG_CANDIDATE_2026-10-06.json`](LINUX_DLSS_FOLIAGE_FG_CANDIDATE_2026-10-06.json).
 These measurements do not qualify Windows execution or a release.
+
+## v27 performance and preset transitions
+
+The [6 October comparison](LINUX_FG_PERFORMANCE_2026-10-06.md) covers exact
+release versus fresh FG Off and FG On at 4K HDR in one stationary hub scene.
+Five Quality/DLAA transitions resumed FG; both candidate processes exited
+normally. Fresh-start DLAA and returned DLAA have different measured costs and
+are reported separately. Windows and long-session qualification remain required.

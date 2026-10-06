@@ -40,6 +40,8 @@ jobs:
         run: |
           g++ -std=c++20 -Isrc/native tests/upscaler_support_test.cpp -o /tmp/upscaler-support
           /tmp/upscaler-support
+          g++ -std=c++20 -Isrc/native tests/lean_borrow_lifetime_test.cpp -o /tmp/lean-borrow-lifetime
+          /tmp/lean-borrow-lifetime
       - name: Display protocol and Reflex frame identity
         run: |
           g++ -std=c++20 -pthread tests/reflex_tokens_test.cpp -o /tmp/reflex-tokens

@@ -1,0 +1,209 @@
+{
+  "date": "2026-10-06",
+  "purpose": "Short Linux FG candidate performance comparison, not release qualification",
+  "baselineTag": "v0.2.0-rc.1",
+  "baselinePayload": "All seven owned files hash matched to tag",
+  "candidateComponents": {
+    "FG": {
+      "fg-probe.exe": "573610f428f64780739ab8b82cc4f2f97ef20012e2630cba78a0ebc0fa0dff60",
+      "fg-chain-observer.addon64": "c505cac559fc769d25ca5e7dd4c30aaee65d5f7cdbe4f637e35bd8b31d7620d8",
+      "fg-sdk-bridge.dll": "e37f71be1d0f02291f5e209d80312b107ccfe0e30db7d4546539c7500ab4c497",
+      "dxgi.dll": "30e8c0787e9614d0ebcaf0535d16de9fc58f54ca2a137f910d73fd491c699024",
+      "mcd2-fg-guide-recon.addon64": "e857cb1c4b08d3601bbd3ebe7ea5969ad15bbf5fba12c0a4a169c14536b837af",
+      "FG_UI_ALPHA.cso": "fce79e558c20bfafd859f37e397b8a04b5d820670f6aa0214522cef276cca8c1"
+    },
+    "latency": {
+      "addonSHA256": "1ab26d7ace1285316cd3bf69c4562d36faa93780811b155300d797f714ce3d0c"
+    },
+    "SR": {
+      "addonSHA256": "6079b2d0a24dc1e1437d2e985ddb785e1bf10dc5ecebf2e4873f1e45469d9f00"
+    },
+    "UI": {
+      "MCD2Graphics_P.utoc": "9fa45d99a13622e16d51271cef2afcaf08c1c5f70bc10bc89cd6f88fbf168de3",
+      "MCD2Graphics_P.ucas": "cfa09ccb0d1401f3bca81bd0d279bfd162ae264263ed0652a559c751b8feb440",
+      "MCD2Graphics_P.pak": "eec103ddba05020a38965b25da078a6dea3f4c985ab7c09744ca4d004ae4f2c4"
+    }
+  },
+  "GPU": "RTX 4080 SUPER",
+  "driver": "615.71.09",
+  "compatibilityTool": "CachyOS Proton SLR",
+  "presentation": "native WineWayland HDR",
+  "scene": "Stationary outdoor hub; same camera/character position; animated NPCs and lighting remain uncontrolled",
+  "measurement": "CPU finish_present intervals; one runtime SDK status query per present; sampler reads cached outcome",
+  "warmup": "DLAA fresh baseline/Off/On and Quality baseline/On discard one 1200-frame sample; all six final Quality Off samples included",
+  "physicalDisplayCadenceMeasured": false,
+  "rows": {
+    "releasedDLAA": {
+      "samples": 3,
+      "intervalsPerSample": 1199,
+      "medianRenderedFPS": 84.59443719398544,
+      "medianSDKPresentationFPS": 84.59443719398544,
+      "medianP95Milliseconds": 13.2008,
+      "renderedFPSRange": [
+        84.54655822772588,
+        84.80307050770587
+      ],
+      "totalSampleSeconds": 42.4936831,
+      "SDKStatus": 0,
+      "input": [
+        3840,
+        2160
+      ],
+      "output": [
+        3840,
+        2160
+      ]
+    },
+    "releasedQuality": {
+      "samples": 3,
+      "intervalsPerSample": 1199,
+      "medianRenderedFPS": 126.49486680349,
+      "medianSDKPresentationFPS": 126.49486680349,
+      "medianP95Milliseconds": 9.0097,
+      "renderedFPSRange": [
+        126.19239446121689,
+        127.11913508861427
+      ],
+      "totalSampleSeconds": 28.412107400000004,
+      "SDKStatus": 0,
+      "input": [
+        2560,
+        1440
+      ],
+      "output": [
+        3840,
+        2160
+      ]
+    },
+    "candidateOffDLAA": {
+      "samples": 3,
+      "intervalsPerSample": 1199,
+      "medianRenderedFPS": 83.77539937004533,
+      "medianSDKPresentationFPS": 83.77539937004533,
+      "medianP95Milliseconds": 13.3954,
+      "renderedFPSRange": [
+        83.66247084373357,
+        83.90901167109268
+      ],
+      "totalSampleSeconds": 42.932761,
+      "SDKStatus": 0,
+      "input": [
+        3840,
+        2160
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "percentVsRelease": -0.9681934783276058
+    },
+    "candidateOffQuality": {
+      "samples": 6,
+      "intervalsPerSample": 1199,
+      "medianRenderedFPS": 125.24260447686778,
+      "medianSDKPresentationFPS": 125.24260447686778,
+      "medianP95Milliseconds": 9.38175,
+      "renderedFPSRange": [
+        121.28326106189574,
+        126.60094630986912
+      ],
+      "totalSampleSeconds": 57.7237061,
+      "SDKStatus": 0,
+      "input": [
+        2560,
+        1440
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "percentVsRelease": -0.9899708646419647
+    },
+    "candidateOnDLAAFresh": {
+      "samples": 3,
+      "intervalsPerSample": 1199,
+      "medianRenderedFPS": 65.24202959236987,
+      "medianSDKPresentationFPS": 130.48405918473975,
+      "medianP95Milliseconds": 16.9715,
+      "renderedFPSRange": [
+        65.1455731349958,
+        65.5190061019233
+      ],
+      "totalSampleSeconds": 55.0826916,
+      "SDKStatus": 0,
+      "input": [
+        3840,
+        2160
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "renderedPercentVsRelease": -22.876690528997923,
+      "SDKPresentationPercentVsRelease": 54.246618942004154
+    },
+    "candidateOnDLAAReturn": {
+      "samples": 3,
+      "intervalsPerSample": 1199,
+      "medianRenderedFPS": 76.07126518543288,
+      "medianSDKPresentationFPS": 152.14253037086576,
+      "medianP95Milliseconds": 14.4751,
+      "renderedFPSRange": [
+        76.04733866281201,
+        76.08543326802382
+      ],
+      "totalSampleSeconds": 47.2866326,
+      "SDKStatus": 0,
+      "input": [
+        3840,
+        2160
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "renderedPercentVsRelease": -10.075333900511552,
+      "SDKPresentationPercentVsRelease": 79.8493321989769
+    },
+    "candidateOnQuality": {
+      "samples": 3,
+      "intervalsPerSample": 1199,
+      "medianRenderedFPS": 106.2676943133817,
+      "medianSDKPresentationFPS": 212.5353886267634,
+      "medianP95Milliseconds": 10.4087,
+      "renderedFPSRange": [
+        106.07207890587827,
+        106.40702146477224
+      ],
+      "totalSampleSeconds": 33.8545147,
+      "SDKStatus": 0,
+      "input": [
+        2560,
+        1440
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "renderedPercentVsRelease": -15.990508548881477,
+      "SDKPresentationPercentVsRelease": 68.01898290223704
+    }
+  },
+  "presetTransitionsWithFGOn": 5,
+  "normalExits": {
+    "candidateOn": true,
+    "candidateOff": true
+  },
+  "generationCleanup": {
+    "candidateOn": true,
+    "candidateOff": true
+  },
+  "WindowsQualified": false,
+  "publishedReleaseChanged": false,
+  "limits": [
+    "Short stationary scene only; no latency or long-session conclusion",
+    "Cold-start DLAA costs more than DLAA after a Quality transition; cause not established",
+    "SDK counts are not physical monitor cadence",
+    "Visual quality needs separate assessment"
+  ]
+}

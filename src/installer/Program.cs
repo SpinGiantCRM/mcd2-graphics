@@ -28,7 +28,7 @@ public sealed class InstallerWindow:Window {
     int page;bool busy;
     public InstallerWindow() {
         Title="Minecraft Dungeons II Graphics";Width=820;Height=690;MinWidth=700;MinHeight=550;
-        engine=new(ReadResource("dependencies.lock.json"),ReadResource("manifest.json"),()=>Assembly.GetExecutingAssembly().GetManifestResourceStream("payload.zip"));
+        engine=new(ReadResource("dependencies.lock.json"),ReadResource("manifest.json"),Path.Combine(AppContext.BaseDirectory,"payload"));
         var root=new Grid{RowDefinitions=new RowDefinitions("Auto,*,Auto"),Margin=new Thickness(28)};
         var header=new StackPanel{Spacing=8};header.Children.Add(new TextBlock{Text="MCD2 Graphics",FontSize=28,FontWeight=FontWeight.SemiBold});
         header.Children.Add(new TextBlock{Text="Install • Repair / Verify • Uninstall",Opacity=.7});

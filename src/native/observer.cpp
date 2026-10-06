@@ -179,18 +179,18 @@ static void set_layout(Cmd &c,bool cs,uint64_t layout) {
  if(active!=layout) { (cs?c.ct:c.gt).clear();(cs?c.cp:c.gp).clear();(cs?c.cc:c.gc).clear();active=layout; }
 }
 static void push_desc(a::command_list *cmd,a::shader_stage s,a::pipeline_layout l,uint32_t param,const a::descriptor_table_update &u) {
- std::lock_guard guard(lock);auto &c=commands[cmd];bool cs=compute(s);set_layout(c,cs,l.handle);auto &m=cs?c.cp:c.gp;
+ std::lock_guard guard(lock);lean_begin_recording(cmd);auto &c=commands[cmd];bool cs=compute(s);set_layout(c,cs,l.handle);auto &m=cs?c.cp:c.gp;
  if(u.type==a::descriptor_type::acceleration_structure){rt_descriptor_updates+=u.count;if(remaining)frame_api_counts["AS_descriptors_pushed"]+=u.count;}
  (cs?c.ct:c.gt).erase(param);
  for(uint32_t i=0;i<u.count;i++)m[param][u.binding+i]=unpack(u,i);
 }
 static void bind_tables(a::command_list *cmd,a::shader_stage s,a::pipeline_layout l,uint32_t first,uint32_t n,const a::descriptor_table *t,uint32_t dynamic_count,const uint32_t*) {
- std::lock_guard guard(lock);auto &c=commands[cmd];bool cs=compute(s);set_layout(c,cs,l.handle);auto &m=cs?c.ct:c.gt;
+ std::lock_guard guard(lock);lean_begin_recording(cmd);auto &c=commands[cmd];bool cs=compute(s);set_layout(c,cs,l.handle);auto &m=cs?c.ct:c.gt;
  if(dynamic_count)c.dynamic_offsets=true;
  for(uint32_t i=0;i<n;i++){m[first+i]=t[i].handle;(cs?c.cp:c.gp).erase(first+i);}
 }
 static void push_constants(a::command_list *cmd,a::shader_stage s,a::pipeline_layout l,uint32_t p,uint32_t first,uint32_t n,const void *values) {
- std::lock_guard guard(lock);auto &c=commands[cmd];bool cs=compute(s);set_layout(c,cs,l.handle);auto &v=(cs?c.cc:c.gc)[p];
+ std::lock_guard guard(lock);lean_begin_recording(cmd);auto &c=commands[cmd];bool cs=compute(s);set_layout(c,cs,l.handle);auto &v=(cs?c.cc:c.gc)[p];
  if(first+n>4096)return;v.resize(std::max<size_t>(v.size(),first+n));std::memcpy(v.data()+first,values,n*4);
 }
 static bool update_desc(a::device *d,uint32_t n,const a::descriptor_table_update *u) {
@@ -212,7 +212,7 @@ static bool copy_desc(a::device *d,uint32_t n,const a::descriptor_table_copy *x)
 }
 static void init_resource(a::device*,const a::resource_desc &d,const a::subresource_data*,a::resource_usage s,a::resource r) {std::lock_guard guard(lock);initial_states[r.handle]=s;live_resources[r.handle]=d;}
 static void destroy_resource(a::device*,a::resource r) {std::lock_guard guard(lock);initial_states.erase(r.handle);live_resources.erase(r.handle);submitted_states.erase(r.handle);for(auto &[cmd,c]:commands)c.states.erase(r.handle);}
-static void barrier(a::command_list *cmd,uint32_t n,const a::resource *r,const a::resource_usage*,const a::resource_usage *s) {std::lock_guard guard(lock);timer_begin(cmd);if(remaining){++frame_api_counts["barrier_event_calls"];frame_api_counts["barrier_event_resources"]+=n;}for(uint32_t i=0;i<n;i++)commands[cmd].states[r[i].handle]=s[i];}
+static void barrier(a::command_list *cmd,uint32_t n,const a::resource *r,const a::resource_usage*,const a::resource_usage *s) {std::lock_guard guard(lock);lean_begin_recording(cmd);timer_begin(cmd);if(remaining){++frame_api_counts["barrier_event_calls"];frame_api_counts["barrier_event_resources"]+=n;}for(uint32_t i=0;i<n;i++)commands[cmd].states[r[i].handle]=s[i];}
 static void reset_cmd(a::command_list *cmd) {std::lock_guard guard(lock);timer_reset(cmd);lean_reset_recording(cmd);commands.erase(cmd);}
 struct Slot {uint32_t reg,space;Binding binding;uint32_t param,rangebinding;};
 static std::vector<Slot> resolve(a::command_list *cmd,bool cs) {
@@ -388,7 +388,7 @@ static bool state_gate(a::command_list *cmd,uint32_t shader,uint32_t x,uint32_t 
 }
 static bool dispatch(a::command_list *cmd,uint32_t x,uint32_t y,uint32_t z) {
  if(internal_evaluation)return false;
- std::lock_guard guard(lock);auto shader=commands[cmd].cs;bool first_taa=!seen_taa;
+ std::lock_guard guard(lock);lean_begin_recording(cmd);auto shader=commands[cmd].cs;bool first_taa=!seen_taa;
  if(is_taa(shader) && first_taa){seen_taa=true;return lean_gate(cmd,shader,x,y,z);}
  return false;
  // Historical diagnostic dispatch routes below are inactive in the lean build.
@@ -437,7 +437,7 @@ static bool indirect(a::command_list *cmd,a::indirect_command type,a::resource,u
  else frame_pixel_counts[commands[cmd].ps]+=count;
  return false;
 }
-static bool draw(a::command_list *cmd,uint32_t,uint32_t,uint32_t,uint32_t) {std::lock_guard guard(lock);auto shader=commands[cmd].ps;if(remaining)++frame_pixel_counts[shader];if(shader==UI)observe(cmd,UI,false);return false;}
+static bool draw(a::command_list *cmd,uint32_t,uint32_t,uint32_t,uint32_t) {std::lock_guard guard(lock);lean_begin_recording(cmd);auto shader=commands[cmd].ps;if(remaining)++frame_pixel_counts[shader];if(shader==UI)observe(cmd,UI,false);return false;}
 static bool draw_indexed(a::command_list *cmd,uint32_t,uint32_t,uint32_t,int32_t,uint32_t) {return draw(cmd,0,0,0,0);}
 static void execute(a::command_queue *q,a::command_list *cmd) {std::lock_guard guard(lock);
  timer_execute(q,cmd);lean_submission(q,cmd);

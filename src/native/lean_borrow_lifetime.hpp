@@ -30,8 +30,12 @@ struct LeanBorrowCache {
   recordings.erase(it);
  }
  // Reset is a pre-call event and can fail. Keep the old recording until a
- // subsequent pipeline bind demonstrates legal recording of its replacement.
- void begin_recording(a::command_list *cmd){if(reset_pending.erase(cmd))forget(cmd);}
+ // subsequent recording operation demonstrates legal recording of its replacement.
+ // This includes barrier-only lists, which may never bind a pipeline.
+ bool begin_recording(a::command_list *cmd){
+  if(reset_pending.empty() || !reset_pending.erase(cmd))return false;
+  forget(cmd);return true;
+ }
  void record(a::command_list *cmd,const LeanBorrowKey &key,uint64_t frame_number) {
   auto &entry=entries.at(key);
   if(recordings[cmd].insert(key).second)++entry.recordings;

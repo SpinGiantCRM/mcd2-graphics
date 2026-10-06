@@ -37,3 +37,21 @@ Record OS, GPU/driver, game build, candidate archive/payload hashes and results.
 Report crashes/hangs, incorrect fallback, visual corruption or material FG-Off
 cost before accepting the candidate. SDK presentation counts alone do not prove
 physical monitor cadence. Windows/AMD results cannot qualify NVIDIA FG.
+
+## v27 follow-up
+
+Use the v27 candidate, not the older v23 archive. Its SR addon also handles
+replacement command recordings which never bind a pipeline and cancelled
+pending evaluations. GPU references still require proven fence completion.
+
+Repeat Quality → DLAA → Quality → DLAA while FG stays On. Confirm the active
+source dimensions and generated-frame counts after every return to gameplay.
+Start a separate process directly in DLAA: the Linux fresh-start case costs
+more than returning to DLAA from Quality. Record these cases separately. See
+[the Linux comparison](LINUX_FG_PERFORMANCE_2026-10-06.md).
+
+The separate guided-installer layout candidate deploys the existing rc.1 payload,
+not FG. Extract its entire folder, then check fresh installation, repair,
+modified-file refusal, uninstall/dependency retention and running-game refusal.
+Its Windows compilation is not a Windows execution result. The candidate is
+unsigned and is not a release; signing/final-scan/Nexus gates remain outstanding.
