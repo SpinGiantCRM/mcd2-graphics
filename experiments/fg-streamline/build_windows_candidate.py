@@ -66,7 +66,9 @@ def main():
     run('git', 'clone', '--no-checkout', 'https://github.com/JoeyDelp/reshade.git', reshade)
     run('git', '-C', reshade, 'checkout', RESHADE_COMMIT)
     run('git', '-C', reshade, 'submodule', 'update', '--init', '--recursive')
-    run('msbuild', reshade / 'ReShade.vcxproj', '/p:Configuration=Release', '/p:Platform=x64', '/m:2', '/verbosity:minimal')
+    # The upstream solution supplies SolutionDir used by dependency includes.
+    # Building the vcxproj directly leaves those Windows include paths empty.
+    run('msbuild', reshade / 'ReShade.sln', '/p:Configuration=Release', '/p:Platform=64-bit', '/m:2', '/verbosity:minimal')
     binary = reshade / 'bin/x64/Release/ReShade64.dll'
     clean = not subprocess.check_output(['git', '-C', str(reshade), 'status', '--porcelain']).strip()
     if not clean:
@@ -138,4 +140,14 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except subprocess.CalledProcessError:
+        # Child recipes save compiler errors instead of printing them. Surface
+        # build diagnostics in CI; no game/private runtime logs are collected.
+        parser = argparse.ArgumentParser()
+        parser.add_argument('--output', type=Path, required=True)
+        args = parser.parse_args()
+        for log in args.output.rglob('build-private.log'):
+            print(log.read_text(errors='replace'))
+        raise
