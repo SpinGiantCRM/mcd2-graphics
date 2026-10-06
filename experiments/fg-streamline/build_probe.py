@@ -39,7 +39,7 @@ for folder in ['crt/lib/x86_64','sdk/lib/ucrt/x86_64','sdk/lib/um/x86_64']:
 commands.append(link)
 if a.early_bootstrap:
     assert a.probe=='owned','Early bootstrap requires the owned-input host'
-    exports=['mcd2_sl_'+x for x in ['verify','init','set_device','mode_limit','mode','begin','index','sleep','marker','state','report_range','pcl_message','shutdown']]+['mcd2_fg_'+x for x in ['initialized','support','upgrade','state','unload','api_error','mode','inputs','configure','configured','last_config','release','game_guides','game_images']]
+    exports=['mcd2_sl_'+x for x in ['verify','init','set_device','mode_limit','mode','begin','index','sleep','marker','state','report_range','pcl_message','shutdown']]+['mcd2_fg_'+x for x in ['initialized','support','upgrade','state','unload','api_error','mode','inputs','configure','configured','last_config','release','game_guides','game_images','ngx_owner_v1']]
     bridge=['lld-link','/dll','/out:'+str(out/'fg-sdk-bridge.dll'),'/implib:'+str(out/'fg-sdk-bridge.lib'),objects[0],*['/export:'+x for x in exports],*[x for x in link[3:] if not x.endswith('.obj')]]
     shimobj=out/'bootstrap_dxgi.obj'
     compile_shim=[*commands[1 if a.guide_recon else 0], '/I'+str(a.sdk.resolve()/'external/nvapi')]

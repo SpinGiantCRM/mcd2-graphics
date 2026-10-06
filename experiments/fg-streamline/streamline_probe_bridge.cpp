@@ -28,6 +28,15 @@ template<class T>int bindFeature(T*&out,sl::Feature id,const char*name){void*p=n
 }
 extern "C" {
 int mcd2_fg_initialized(){return initialized?1:0;}
+// Versioned plain-C ownership query. A loaded FG plugin owns NGX until slShutdown,
+// including temporary Off. SR may release its feature but must leave NGX alive.
+int mcd2_fg_ngx_owner_v1(void* device){
+ if(!initialized||!boundDevice)return 0;
+ if(!device||boundDevice!=device)return -1;
+ PFun_slDLSSGGetState* get=nullptr;
+ return bindFeature(get,sl::kFeatureDLSS_G,"slDLSSGGetState")==0&&get?1:-1;
+}
+
 long mcd2_sl_verify(const wchar_t*path){
  WINTRUST_FILE_INFO file{};file.cbStruct=sizeof(file);file.pcwszFilePath=path;
  WINTRUST_DATA trust{};trust.cbStruct=sizeof(trust);trust.dwUIChoice=WTD_UI_NONE;trust.fdwRevocationChecks=WTD_REVOKE_NONE;trust.dwUnionChoice=WTD_CHOICE_FILE;trust.pFile=&file;trust.dwStateAction=WTD_STATEACTION_VERIFY;trust.dwProvFlags=WTD_CACHE_ONLY_URL_RETRIEVAL;

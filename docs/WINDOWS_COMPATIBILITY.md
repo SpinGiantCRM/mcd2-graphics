@@ -84,3 +84,18 @@ unsupported. Legacy stream callers remain available for compatibility tests,
 but the GUI has no embedded payload archive. Windows CI and real Windows
 fresh-install, repair and removal are required for this new package layout.
 Neither Linux measurements nor older installer qualification qualify it.
+
+## Shared NGX ownership — FG candidate v31
+
+SR preset retirement releases only its own feature and parameters when the
+versioned FG bridge verifies that Streamline owns the same wrapper device's NGX
+instance. Streamline performs final NGX shutdown after SR retirement. Missing
+or mismatched ownership confirmation retains the generation rather than shutting
+down a potentially shared instance. Without an initialized FG bridge, SR keeps
+its existing device shutdown path.
+
+Preserve this distinction across preset changes, Native transitions, temporary
+menus and normal exit. FG SDK status 0 and two reported presents are insufficient
+qualification: also inspect Streamline's internal NGX evaluation errors. Windows
+NVIDIA must verify this shared path; AMD/Intel fallback exercises the unshared
+path. Linux runtime measurements do not qualify either Windows path.

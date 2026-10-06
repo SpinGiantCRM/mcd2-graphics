@@ -163,7 +163,8 @@
         2160
       ],
       "renderedPercentVsRelease": -10.075333900511552,
-      "SDKPresentationPercentVsRelease": 79.8493321989769
+      "SDKPresentationPercentVsRelease": 79.8493321989769,
+      "validFGPerformance": false
     },
     "candidateOnQuality": {
       "samples": 3,
@@ -186,7 +187,8 @@
         2160
       ],
       "renderedPercentVsRelease": -15.990508548881477,
-      "SDKPresentationPercentVsRelease": 68.01898290223704
+      "SDKPresentationPercentVsRelease": 68.01898290223704,
+      "validFGPerformance": false
     }
   },
   "presetTransitionsWithFGOn": 5,
@@ -202,8 +204,10 @@
   "publishedReleaseChanged": false,
   "limits": [
     "Short stationary scene only; no latency or long-session conclusion",
-    "Cold-start DLAA costs more than DLAA after a Quality transition; cause not established",
     "SDK counts are not physical monitor cadence",
-    "Visual quality needs separate assessment"
-  ]
+    "Visual quality needs separate assessment",
+    "Public SDK status and presentation counts failed to expose invalidated NGX FG features"
+  ],
+  "supersededBy": "LINUX_FG_NGX_LIFECYCLE_2026-10-06.json",
+  "qualification": "Historical v27 record: post-transition FG On rates invalidated by internal NGX evaluation failures"
 }

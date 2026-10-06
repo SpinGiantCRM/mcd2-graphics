@@ -52,12 +52,23 @@ static bool live_wait_generation(a::command_queue *q,LiveFixture &c) {
  c.log<<"{\"stage\":\"cleanup_gpu_completion\",\"signalHRESULT\":"<<unsigned(hr)<<",\"completed\":"<<(done?"true":"false")<<",\"outsideObserverLock\":true}\n";c.log.flush();fence->Release();return done;
 }
 // Called only after GPU completion, with the observer lock released. Keep both
-// device references alive through Shutdown and retain the generation on error.
+// device references alive through feature release and any unshared Shutdown.
 static bool cleanup_detached_live(LiveFixture &c) {
  auto result=[&](const char *stage,NVSDK_NGX_Result value){c.log<<"{\"stage\":\""<<stage<<"\",\"result\":"<<static_cast<uint32_t>(value)<<"}\n";c.log.flush();return NVSDK_NGX_SUCCEED(value);};
  if(c.feature){using F=NVSDK_NGX_Result(*)(NVSDK_NGX_Handle*);auto fn=reinterpret_cast<F>(GetProcAddress(c.module,"NVSDK_NGX_D3D12_ReleaseFeature"));if(!fn || !result("release_feature",fn(c.feature)))return false;c.feature=nullptr;}
  if(c.params){using F=NVSDK_NGX_Result(*)(NVSDK_NGX_Parameter*);auto fn=reinterpret_cast<F>(GetProcAddress(c.module,"NVSDK_NGX_D3D12_DestroyParameters"));if(!fn || !result("destroy_parameters",fn(c.params)))return false;c.params=nullptr;}
- if(c.initialized){using F=NVSDK_NGX_Result(*)(ID3D12Device*);auto fn=reinterpret_cast<F>(GetProcAddress(c.module,"NVSDK_NGX_D3D12_Shutdown1"));c.log<<"{\"stage\":\"shutdown_device_begin\",\"deviceKind\":\"underlying\",\"ownedDeviceReferencesAlive\":true}\n";c.log.flush();if(!fn || !result("shutdown_device",fn(c.resource_device)))return false;c.initialized=false;}
+ if(c.initialized){
+  auto bridge=GetModuleHandleW(L"fg-sdk-bridge.dll");
+  using Initialized=int(*)();using Owner=int(*)(void*);
+  auto active=bridge?reinterpret_cast<Initialized>(GetProcAddress(bridge,"mcd2_fg_initialized")):nullptr;
+  auto owner=bridge?reinterpret_cast<Owner>(GetProcAddress(bridge,"mcd2_fg_ngx_owner_v1")):nullptr;
+  const bool shared=active&&active()!=0;
+  const int ownership=shared&&owner?owner(c.proxy_device):shared?-1:0;
+  if(ownership<0){c.log<<"{\"stage\":\"shared_ngx_owner_unverified\",\"generationRetained\":true}\n";c.log.flush();return false;}
+  if(ownership==1){c.log<<"{\"stage\":\"shutdown_deferred_to_streamline\",\"deviceMatched\":true,\"finalOwner\":\"Streamline\"}\n";c.log.flush();}
+  else {using F=NVSDK_NGX_Result(*)(ID3D12Device*);auto fn=reinterpret_cast<F>(GetProcAddress(c.module,"NVSDK_NGX_D3D12_Shutdown1"));if(!fn||!result("shutdown_device",fn(c.resource_device)))return false;}
+  c.initialized=false;
+ }
  // Device references were inserted first; reverse release drops them last.
  for(auto it=c.owned.resources.rbegin();it!=c.owned.resources.rend();++it)if(*it)(*it)->Release();c.owned.resources.clear();
  c.log<<"{\"stage\":\"owned_release\",\"afterShutdown\":true,\"outsideObserverLock\":true}\n";c.log.flush();

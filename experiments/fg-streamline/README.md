@@ -165,10 +165,14 @@ The matching bounded Linux measurements are in
 [`LINUX_DLSS_FOLIAGE_FG_CANDIDATE_2026-10-06.json`](LINUX_DLSS_FOLIAGE_FG_CANDIDATE_2026-10-06.json).
 These measurements do not qualify Windows execution or a release.
 
-## v27 performance and preset transitions
+## v31 shared NGX lifecycle
 
-The [6 October comparison](LINUX_FG_PERFORMANCE_2026-10-06.md) covers exact
-release versus fresh FG Off and FG On at 4K HDR in one stationary hub scene.
-Five Quality/DLAA transitions resumed FG; both candidate processes exited
-normally. Fresh-start DLAA and returned DLAA have different measured costs and
-are reported separately. Windows and long-session qualification remain required.
+[Candidate v31](../../qualification/fg-v31/README.md) replaces v27 for testing.
+SR preset changes preserve Streamline's device-level NGX instance; SR releases
+its own feature and Streamline shuts NGX down at final retirement. The
+[Linux diagnosis and corrected measurements](LINUX_FG_NGX_LIFECYCLE_2026-10-06.md)
+explain why the earlier returned-DLAA performance result was invalid.
+
+Verify internal FG evaluation errors as well as input dimensions and SDK counts
+through Quality/DLAA transitions. Windows and long-session qualification remain
+required. No published release changed.
