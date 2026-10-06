@@ -17,6 +17,7 @@
 #include <intrin.h>
 #include "fg_bridge_contract.h"
 #include "fg_ui_protocol.hpp"
+#include "wine_reflex_pacing.hpp"
 #include <fstream>
 extern "C" __declspec(dllimport) int mcd2_sl_init(const wchar_t*,const wchar_t*,const wchar_t*);
 extern "C" __declspec(dllimport) int mcd2_fg_initialized();
@@ -45,6 +46,27 @@ BOOL CALLBACK system_init(PINIT_ONCE,void*,void**){
  systemDxgi=LoadLibraryExW(path.get(),nullptr,LOAD_LIBRARY_SEARCH_SYSTEM32);return systemDxgi!=nullptr;
 }
 FARPROC native(const char* name){if(!InitOnceExecuteOnce(&systemOnce,system_init,nullptr,nullptr))return nullptr;return GetProcAddress(systemDxgi,name);}
+void configure_wine_reflex_pacing(const wchar_t* policy){
+ // Windows never enters this path. NVAPI has already been initialized by SL;
+ // adapter enumeration does not create a D3D12 device. Apply before the CuBIN
+ // capability probe or game device creation, when VKD3D reads its extensions.
+ if(!GetProcAddress(GetModuleHandleW(L"ntdll.dll"),"wine_get_version")||
+    !GetPrivateProfileIntW(L"Compatibility",L"WineReflexPacing",1,policy))return;
+ auto module=GetModuleHandleW(L"nvapi64.dll");if(!module)return;
+ auto query=reinterpret_cast<void*(__cdecl*)(unsigned)>(GetProcAddress(module,"nvapi_QueryInterface"));if(!query)return;
+ auto enumerate=reinterpret_cast<decltype(&NvAPI_EnumPhysicalGPUs)>(query(0xe5ac921f));
+ NvPhysicalGpuHandle adapters[NVAPI_MAX_PHYSICAL_GPUS]{};NvU32 count=0;
+ if(!enumerate||enumerate(adapters,&count)!=NVAPI_OK||!count)return;
+ constexpr DWORD capacity=8192;
+ auto existing=std::make_unique<wchar_t[]>(capacity);
+ auto length=GetEnvironmentVariableW(L"VKD3D_DISABLE_EXTENSIONS",existing.get(),capacity);
+ if(length>=capacity){event("wine-reflex-pacing",ERROR_INSUFFICIENT_BUFFER);return;}
+ auto extensions=mcd2::compat::reflex_disabled_extensions({existing.get(),length});
+ // Avoid the FIFO-created/dynamically-unlocked path that destabilizes Reflex
+ // on the tested NVIDIA Wine driver. VSync still selects FIFO normally;
+ // neither the present mode nor the user's frame limit is forced here.
+ event("wine-reflex-pacing",SetEnvironmentVariableW(L"VKD3D_DISABLE_EXTENSIONS",extensions.c_str())?0:GetLastError());
+}
 long prime_wine_cubin_capability(){
  // DXVK-NVAPI discovers 64-bit CuBIN support by creating a temporary device.
  // Run the real query before ReShade's non-recursive D3D12 creation lock exists.
@@ -127,6 +149,7 @@ BOOL CALLBACK initialize(PINIT_ONCE,void*,void**){
  auto enableSdk=GetPrivateProfileIntW(L"Experiment",L"EnableSDK",1,policy.c_str())!=0;
  auto result=!enableSdk?-100:(mcd2_fg_initialized()?0:mcd2_sl_init((folder/L"sl.interposer.dll").c_str(),folder.c_str(),folder.c_str()));
  sdkReady=result==0;event("early-SDK-init",result);
+ if(sdkReady)configure_wine_reflex_pacing(policy.c_str());
  if(sdkReady&&GetPrivateProfileIntW(L"Experiment",L"PrimeWineCubin",1,policy.c_str()))event("wine-cubin-capability-prime",prime_wine_cubin_capability());
  // Resolve system DXGI before ReShade registers its hooks, including when the
  // SDK is disabled. The Direct3D stem avoids implicit OpenGL hooks.

@@ -132,6 +132,14 @@ static bool init_live_saved(a::command_queue *queue,std::unique_lock<std::recurs
  c.width=lean_width;c.height=lean_height;c.outwidth=lean_outwidth;c.outheight=lean_outheight;
  ui(c.params,NVSDK_NGX_Parameter_CreationNodeMask,1);ui(c.params,NVSDK_NGX_Parameter_VisibilityNodeMask,1);ui(c.params,NVSDK_NGX_Parameter_Width,c.width);ui(c.params,NVSDK_NGX_Parameter_Height,c.height);ui(c.params,NVSDK_NGX_Parameter_OutWidth,c.outwidth);ui(c.params,NVSDK_NGX_Parameter_OutHeight,c.outheight);
  integer(c.params,NVSDK_NGX_Parameter_PerfQualityValue,c.width==c.outwidth?NVSDK_NGX_PerfQuality_Value_DLAA:(c.width*100<=c.outwidth*40?NVSDK_NGX_PerfQuality_Value_UltraPerformance:(c.width*100<=c.outwidth*51?NVSDK_NGX_PerfQuality_Value_MaxPerf:(c.width*100<=c.outwidth*60?NVSDK_NGX_PerfQuality_Value_Balanced:NVSDK_NGX_PerfQuality_Value_MaxQuality))));
+ // Optional restart-only model hint; absent/invalid input preserves runtime defaults.
+ wchar_t wideModel[64]{};char modelText[64]{};const auto overrideFile=(asset_root/L"DependencyOverrides.ini").wstring();
+ const auto modelLength=GetPrivateProfileStringW(L"DLSS",L"ModelPreset",L"0",wideModel,64,overrideFile.c_str());
+ bool validModelText=modelLength<63;for(unsigned i=0;i<modelLength;++i){if(wideModel[i]>127)validModelText=false;modelText[i]=char(wideModel[i]&127);}
+ if(!validModelText)modelText[0]=0;
+ const unsigned model=mcd2::dlss::model_hint(modelText);
+ if(model){for(const char*key:{NVSDK_NGX_Parameter_DLSS_Hint_Render_Preset_DLAA,NVSDK_NGX_Parameter_DLSS_Hint_Render_Preset_Quality,NVSDK_NGX_Parameter_DLSS_Hint_Render_Preset_Balanced,NVSDK_NGX_Parameter_DLSS_Hint_Render_Preset_Performance,NVSDK_NGX_Parameter_DLSS_Hint_Render_Preset_UltraPerformance,NVSDK_NGX_Parameter_DLSS_Hint_Render_Preset_UltraQuality})ui(c.params,key,model);}
+ c.log<<"{\"stage\":\"model_preset_hint\",\"value\":"<<model<<"}\n";
  integer(c.params,NVSDK_NGX_Parameter_DLSS_Feature_Create_Flags,NVSDK_NGX_DLSS_Feature_Flags_IsHDR|NVSDK_NGX_DLSS_Feature_Flags_MVLowRes|NVSDK_NGX_DLSS_Feature_Flags_DepthInverted);integer(c.params,NVSDK_NGX_Parameter_DLSS_Enable_Output_Subrects,0);
  ID3D12CommandAllocator *allocator=nullptr;ID3D12GraphicsCommandList *cmd=nullptr;
  auto hr=c.proxy_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,IID_PPV_ARGS(&allocator));c.owned.keep(allocator);

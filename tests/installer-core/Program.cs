@@ -48,6 +48,15 @@ try {
  // Older qualified receipts upgrade through repair; arbitrary receipt hashes do not grant ownership.
  var oldManifest=new Dictionary<string,string>(own){{InstallerEngine.Runtime,hash}};Put(own.Keys.Single());Put(InstallerEngine.Runtime);Put(InstallerEngine.Marker,Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new{version="previous.test",files=oldManifest})));var withOld=JsonSerializer.Serialize(new{version="candidate.test",files=own,upgradeFrom=new Dictionary<string,Dictionary<string,string>>{{"previous.test",oldManifest}}});var migration=new InstallerEngine(lockJson,withOld,()=>new MemoryStream(Payload())){RequireClosed=()=>{},ConfigRootOverride=Path.Combine(temp,"Config")};migration.SetGame(temp);migration.Install(true);Check(File.ReadAllText(Path.Combine(temp,InstallerEngine.Marker)).Contains("candidate.test"),"Qualified previous receipt migrated");migration.Uninstall();Put(InstallerEngine.Marker,Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new{version="candidate.test",files=new Dictionary<string,string>{{own.Keys.Single(),oldHash},{InstallerEngine.Runtime,hash}}})));Throws(()=>migration.Uninstall(),"Unqualified receipt hash does not grant ownership");Check(migration.Scan().Single(x=>x.Name=="Graphics mod payload").State!="OK","Verify rejects unqualified receipt");
 
+ // Retired owned files are validated, then removed transactionally on repair.
+ var retired="Dungeons/Binaries/Win64/MCD2Graphics/streamline/retired.dll";
+ var retirementFiles=new Dictionary<string,string>(oldManifest){{retired,oldHash}};
+ var retirementManifest=JsonSerializer.Serialize(new{version="candidate.test",files=own,upgradeFrom=new Dictionary<string,Dictionary<string,string>>{{"previous.test",retirementFiles}}});
+ Put(own.Keys.Single());Put(InstallerEngine.Runtime);Put(retired,oldBytes);
+ var retirementReceipt=Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new{version="previous.test",files=retirementFiles}));Put(InstallerEngine.Marker,retirementReceipt);
+ var retireEngine=new InstallerEngine(lockJson,retirementManifest,()=>new MemoryStream(Payload())){RequireClosed=()=>{},ConfigRootOverride=Path.Combine(temp,"Config")};retireEngine.SetGame(temp);
+ Put(retired,Encoding.UTF8.GetBytes("modified retired file"));Throws(()=>retireEngine.Install(true),"Modified retired owned file blocks entire upgrade");Check(File.ReadAllBytes(InstallerEngine.Target(temp,InstallerEngine.Marker)).SequenceEqual(retirementReceipt),"Retirement preflight preserves old receipt");
+ Put(retired,oldBytes);retireEngine.Install(true);Check(!File.Exists(InstallerEngine.Target(temp,retired)),"Qualified retired owned file removed on upgrade");retireEngine.Uninstall();
  // Expanded deployment: source validation completes before any game mutation.
  foreach(var ownedPath in new[]{InstallerEngine.Marker,own.Keys.Single(),InstallerEngine.Runtime}){var existing=InstallerEngine.Target(temp,ownedPath);if(File.Exists(existing))File.Delete(existing);}
  var payloadRoot=Path.Combine(temp,"ExtractedInstaller/payload");var sourceFile=Path.Combine(payloadRoot,own.Keys.Single());Directory.CreateDirectory(Path.GetDirectoryName(sourceFile)!);File.WriteAllBytes(sourceFile,file);
@@ -60,5 +69,70 @@ try {
  var runningFolder=FolderEngine();runningFolder.RequireClosed=()=>throw new InvalidOperationException("Running game");Throws(()=>runningFolder.Install(),"Running game blocks expanded install");
  if(!OperatingSystem.IsWindows()) {File.Delete(sourceFile);File.CreateSymbolicLink(sourceFile,runtime);Throws(()=>FolderEngine().Install(),"Linked expanded source rejected");File.Delete(sourceFile);File.WriteAllBytes(sourceFile,file);}
 
+
+ // FG bootstrap ownership: only a pinned former framework may be replaced.
+ foreach(var path in new[]{InstallerEngine.Marker,InstallerEngine.Runtime,InstallerEngine.FrameworkProxy}){var f=InstallerEngine.Target(temp,path);if(File.Exists(f))File.Delete(f);}
+ var fgOwn=new Dictionary<string,string>(own){{InstallerEngine.FrameworkProxy,hash}};
+ var fgDeps=new Dictionary<string,object>(dependencies){["ReShade"]=new{version="PR435",file="Dungeons/Binaries/Win64/d3d12.asi",sha256=hash,url="https://example.test/framework",bootstrapPreviousSHA256=oldHash}};
+ var fgLock=JsonSerializer.Serialize(new{game=new{steamBuildID="123",exeSHA256=hash},dependencies=fgDeps});
+ var fgManifest=JsonSerializer.Serialize(new{version="fg.test",files=fgOwn});
+ byte[] FgPayload(){using var memory=new MemoryStream();using(var z=new ZipArchive(memory,ZipArchiveMode.Create,true))foreach(var f in fgOwn){using var w=z.CreateEntry(f.Key).Open();w.Write(file);}return memory.ToArray();}
+ InstallerEngine FG(){var e=new InstallerEngine(fgLock,fgManifest,()=>new MemoryStream(FgPayload())){RequireClosed=()=>{},ConfigRootOverride=Path.Combine(temp,"FGConfig")};e.SetGame(temp);e.SelectDependency("DLSSRuntime",runtime);e.SelectDependency("ReShade",runtime);return e;}
+ var proxy=InstallerEngine.Target(temp,InstallerEngine.FrameworkProxy);Directory.CreateDirectory(Path.GetDirectoryName(proxy)!);File.WriteAllBytes(proxy,oldBytes);
+ var fg=FG();fg.Install();Check(InstallerEngine.DigestFile(proxy)==hash,"Pinned old graphics proxy upgraded");
+ var recovery=InstallerEngine.Target(temp,"Dungeons/Binaries/Win64/MCD2GraphicsDependencyBackups/"+oldHash+".bak");Check(InstallerEngine.DigestFile(recovery)==oldHash,"Original graphics proxy recovery preserved");
+ var frameworkZip=MakeZip("ReShade64.dll");var frameworkFile=Path.Combine(temp,"framework.zip");File.WriteAllBytes(frameworkFile,frameworkZip);
+ var zipDeps=new Dictionary<string,object>(fgDeps){["ReShade"]=new{version="PR435",file="Dungeons/Binaries/Win64/d3d12.asi",sha256=hash,download="https://example.test/framework.zip",archiveSHA256=InstallerEngine.Digest(frameworkZip),archiveMembers=new Dictionary<string,string>{{"Dungeons/Binaries/Win64/d3d12.asi","ReShade64.dll"}},bootstrapPreviousSHA256=oldHash}};
+ var zipLock=JsonSerializer.Serialize(new{game=new{steamBuildID="123",exeSHA256=hash},dependencies=zipDeps});
+ var zipEngine=new InstallerEngine(zipLock,fgManifest,()=>new MemoryStream(FgPayload())){RequireClosed=()=>{}};zipEngine.SetGame(temp);zipEngine.SelectDependency("ReShade",frameworkFile);Check(zipEngine.Dependencies.Single(x=>x.Id=="ReShade").Url.EndsWith("framework.zip"),"Pinned single-file framework ZIP accepted");
+ File.WriteAllText(frameworkFile,"wrong archive");Throws(()=>zipEngine.SelectDependency("ReShade",frameworkFile),"Wrong single-file framework archive refused");
+ var fgMarker=InstallerEngine.Target(temp,InstallerEngine.Marker);var fgReceipt=File.ReadAllBytes(fgMarker);using(var parsed=JsonDocument.Parse(fgReceipt))File.WriteAllText(fgMarker,JsonSerializer.Serialize(new{version="fg.test",files=parsed.RootElement.GetProperty("files")}));
+ Throws(()=>fg.Uninstall(),"Missing bootstrap ownership blocks removal");File.WriteAllBytes(fgMarker,fgReceipt);
+ fg.Install(true);Check(InstallerEngine.DigestFile(recovery)==oldHash,"Repair preserves original bootstrap ownership");fg.Uninstall();Check(InstallerEngine.DigestFile(proxy)==oldHash,"Uninstall restores original graphics proxy");
+ File.WriteAllText(proxy,"unknown");Throws(()=>FG().Install(),"Unknown graphics proxy refused");Check(File.ReadAllText(proxy)=="unknown"&&!File.Exists(InstallerEngine.Target(temp,InstallerEngine.Marker)),"Unknown proxy is unchanged");
+ File.WriteAllBytes(proxy,oldBytes);fg=FG();fg.Install();File.WriteAllText(recovery,"edited");Throws(()=>fg.Uninstall(),"Modified bootstrap recovery prevents removal");Check(InstallerEngine.DigestFile(proxy)==hash,"Bootstrap retained on recovery failure");
+ File.WriteAllBytes(recovery,oldBytes);fg.Uninstall();File.Delete(proxy);fg=FG();fg.Install();fg.Uninstall();Check(!File.Exists(proxy),"Fresh bootstrap removed when no original existed");
+ // Overrides are explicit, scoped and cannot grant ownership of arbitrary paths.
+ Put("Dungeons/Binaries/Win64/dxgi.dll");
+ File.WriteAllBytes(runtime,Encoding.UTF8.GetBytes("new dependency"));var untested=Engine();
+ Throws(()=>untested.SelectDependency("DLSSRuntime",runtime),"Strict default refuses newer DLSS");
+ untested.SetDependencyOverride("DLSSRuntime",true);untested.SelectDependency("DLSSRuntime",runtime);
+ Check(untested.Scan().Single(x=>x.Name=="NVIDIA DLSS runtime").State=="Untested override"&&untested.Ready,"Explicit newer DLSS is untested and installable");
+ untested.Install();var actual=InstallerEngine.DigestFile(InstallerEngine.Target(temp,InstallerEngine.Runtime));
+ Check(actual==InstallerEngine.DigestFile(runtime),"Override installs exactly selected DLSS bytes");
+ var removal=Engine();removal.Uninstall();Check(!File.Exists(InstallerEngine.Target(temp,InstallerEngine.Runtime)),"Fresh installer can remove recorded private override safely");
+ untested=Engine();untested.SetDependencyOverride("RenoDXUEExtended",true);untested.UseInstalledDependency("RenoDXUEExtended");
+ Check(untested.Scan().Single(x=>x.Name=="RenoDX HDR support").State=="Untested override","Installed dependency explicitly acknowledged");
+ Put("Dungeons/Binaries/Win64/renodx-ue-extended.addon64",Encoding.UTF8.GetBytes("changed after approval"));
+ Check(!untested.Ready,"Changed dependency invalidates prior acknowledgement");
+ untested.SetDependencyOverride("RenoDXUEExtended",false);Check(!untested.OverrideEnabled("RenoDXUEExtended"),"Turning override off restores strict pins");Put("Dungeons/Binaries/Win64/renodx-ue-extended.addon64");
+ untested.SetDependencyOverride("DLSSRuntime",true);untested.SelectDependency("DLSSRuntime",runtime);untested.SetGame(game);Check(!untested.OverrideEnabled("DLSSRuntime"),"Changing game clears overrides and selections");
+ blocked=Engine();blocked.RequireClosed=()=>throw new InvalidOperationException("Running game");Throws(()=>blocked.SetDependencyOverride("DLSSRuntime",true),"Running game blocks override changes");
+ var archiveOverride=new InstallerEngine(unsafeLock,manifest,()=>new MemoryStream(Payload())){RequireClosed=()=>{}};archiveOverride.SetGame(temp);archiveOverride.SetDependencyOverride("BlueprintLoader",true);
+ File.WriteAllBytes(zipFile,unsafeZip);Throws(()=>archiveOverride.SelectDependency("BlueprintLoader",zipFile),"Override retains archive traversal rejection");
+ // Multi-file overrides still require one coherent set of every required member.
+ var loaderFiles=new Dictionary<string,string>{{"Dungeons/Content/Paks/~mods/BlueprintLoader/a.pak",hash},{"Dungeons/Content/Paks/~mods/BlueprintLoader/a.ucas",hash},{"Dungeons/Content/Paks/~mods/BlueprintLoader/a.utoc",hash}};
+ var loaderDeps=new Dictionary<string,object>(dependencies){["BlueprintLoader"]=new{version="2.2",files=loaderFiles,archiveSHA256=hash,url="https://www.nexusmods.com/minecraftdungeons2/mods/2",upgradeFromFileSets=new[]{loaderFiles}}};
+ var loaderLock=JsonSerializer.Serialize(new{game=new{steamBuildID="123",exeSHA256=hash},dependencies=loaderDeps});
+ InstallerEngine Loader(){var x=new InstallerEngine(loaderLock,manifest,()=>new MemoryStream(Payload())){RequireClosed=()=>{},ConfigRootOverride=Path.Combine(temp,"Config")};x.SetGame(temp);return x;}
+ byte[] LoaderZip(bool missing=false,bool duplicate=false,bool linked=false){using var m=new MemoryStream();using(var z=new ZipArchive(m,ZipArchiveMode.Create,true)){foreach(var name in loaderFiles.Keys){if(missing&&name.EndsWith("utoc"))continue;var a=z.CreateEntry("Loader/"+Path.GetFileName(name));if(linked)a.ExternalAttributes=unchecked((int)0xa0000000);using(var t=a.Open())t.Write(Encoding.UTF8.GetBytes("new loader"));}if(duplicate){using var t=z.CreateEntry("Other/a.pak").Open();t.Write(file);}}return m.ToArray();}
+ foreach(var name in loaderFiles.Keys)Put(name);
+ var loader=Loader();File.WriteAllBytes(zipFile,LoaderZip());Throws(()=>loader.SelectDependency("BlueprintLoader",zipFile),"Newer multi-file dependency requires explicit override");loader.SetDependencyOverride("BlueprintLoader",true);loader.SelectDependency("BlueprintLoader",zipFile);Check(loader.Scan().Single(x=>x.Name=="Blueprint Loader").State=="Untested override","Complete newer loader archive acknowledged");
+ File.WriteAllBytes(zipFile,LoaderZip(missing:true));Throws(()=>loader.SelectDependency("BlueprintLoader",zipFile),"Override refuses missing required archive member");
+ File.WriteAllBytes(zipFile,LoaderZip(duplicate:true));Throws(()=>loader.SelectDependency("BlueprintLoader",zipFile),"Override refuses ambiguous archive member");
+ File.WriteAllBytes(zipFile,LoaderZip(linked:true));Throws(()=>loader.SelectDependency("BlueprintLoader",zipFile),"Override refuses archive symbolic links");
+ File.Delete(InstallerEngine.Target(temp,loaderFiles.Keys.Last()));var installedLoader=Loader();installedLoader.SetDependencyOverride("BlueprintLoader",true);Throws(()=>installedLoader.UseInstalledDependency("BlueprintLoader"),"Installed override refuses an incomplete dependency set");
+ // Shared replacements keep a recovery copy and remain after removal.
+ Put("Dungeons/Binaries/Win64/renodx-ue-extended.addon64");var shared=Engine();shared.SetDependencyOverride("RenoDXUEExtended",true);shared.SelectDependency("RenoDXUEExtended",runtime);
+ File.WriteAllBytes(runtime,file);shared.SelectDependency("DLSSRuntime",runtime);shared.Install();Check(InstallerEngine.DigestFile(InstallerEngine.Target(temp,"Dungeons/Binaries/Win64/renodx-ue-extended.addon64"))==actual,"Shared override placed exactly");
+ shared.Uninstall();Check(File.Exists(InstallerEngine.Target(temp,"Dungeons/Binaries/Win64/renodx-ue-extended.addon64")),"Shared override retained on uninstall");Put("Dungeons/Binaries/Win64/renodx-ue-extended.addon64");
+ // Acknowledgements never bypass the game or owned payload checks.
+ var integrity=Engine(()=>new MemoryStream(Encoding.UTF8.GetBytes("invalid payload")));integrity.SetDependencyOverride("DLSSRuntime",true);integrity.SelectDependency("DLSSRuntime",runtime);Throws(()=>integrity.Install(),"Override cannot bypass mod payload integrity");
+ var gameGuard=Engine();gameGuard.SetDependencyOverride("DLSSRuntime",true);gameGuard.SelectDependency("DLSSRuntime",runtime);Put(InstallerEngine.Shipping,Encoding.UTF8.GetBytes("other build"));Check(!gameGuard.Ready,"Override cannot bypass supported game build");Put(InstallerEngine.Shipping);
+ var tamper=Engine();tamper.SelectDependency("DLSSRuntime",runtime);tamper.Install();using(var parsed=JsonDocument.Parse(File.ReadAllBytes(InstallerEngine.Target(temp,InstallerEngine.Marker)))) {
+ Put(InstallerEngine.Marker,Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new{version="candidate.test",files=parsed.RootElement.GetProperty("files"),dependencyOverrides=new Dictionary<string,string>{{own.Keys.Single(),hash}}})));
+ }
+ Throws(()=>tamper.Uninstall(),"Override receipt cannot grant ownership of own payload");File.Delete(InstallerEngine.Target(temp,InstallerEngine.Marker));File.Delete(InstallerEngine.Target(temp,own.Keys.Single()));File.Delete(InstallerEngine.Target(temp,InstallerEngine.Runtime));
+ File.WriteAllBytes(runtime,file);
 }finally{Directory.Delete(temp,true);}
 Console.WriteLine($"{cases} checks passed");

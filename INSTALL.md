@@ -7,13 +7,20 @@ Download the compiled Windows or Linux installer archive from the [0.2.0-rc.1 re
 1. Use a legally obtained game that already launches and signs in normally. Launch it through Steam once, then close it.
 2. Run **MCD2-Graphics-Installer.exe** on Windows or **mcd2-graphics-installer** on Linux. No Python or separate .NET installation is needed.
 3. **Game:** select the detected Steam installation or use Browse. The supported executable and build are verified.
-4. **Requirements:** open each official download and select the downloaded file/archive. The installer verifies the pinned hashes and places Blueprint Loader, RenoDX and NVIDIA runtimes correctly. They are not bundled. A known Blueprint Loader 1.1 installation can upgrade to 2.0; its original bytes are retained in a recovery folder. Unknown or modified dependencies are retained.
+4. **Requirements:** open each official download and select the downloaded file/archive. The installer verifies the pinned hashes and places Blueprint Loader, RenoDX and NVIDIA runtimes correctly. They are not bundled. Known Blueprint Loader 1.1 and 2.0 installations can upgrade to the candidate’s pinned 2.2; its original bytes are retained in a recovery folder. Unknown or modified dependencies are retained.
 5. **ReShade:** run the official full addon-support installer for `Dungeons/Binaries/Win64/Dungeons-Win64-Shipping.exe`, selecting DirectX 10/11/12. Complete its own workflow and any agreement yourself, then Check again. A normal or unsupported build is refused.
 6. **Install:** install the mod. Launch normally through Steam and open **Settings → Video**. The Mods page identifies the mod and links to help.
 
 The installer contains only this project's seven payload files plus its own application/runtime. Vendor graphics runtimes, game assets, authentication replacements and player data are excluded. Downloads and license acceptance remain under the player's control. Required versions and official links are in [dependencies.lock.json](dependencies.lock.json).
 
 On Linux the official ReShade setup is launched using the game's detected Proton prefix/tool. This requires an existing Steam prefix. If that cannot be detected, use the official setup in that game prefix and Check again. The installer does not change Steam launch options or solve platform sign-in.
+
+## Development candidate dependency overrides
+
+The held FG candidate targets Blueprint Loader 2.2 and provides explicit
+per-dependency overrides for testing other versions. Published releases retain
+their original requirements. See [dependency overrides](docs/DEPENDENCY_OVERRIDES.md)
+for the candidate controls and optional DLSS model hint.
 
 ## Update, repair and verify
 

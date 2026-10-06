@@ -1,13 +1,18 @@
 {
-  "version": "0.2.0-rc.1",
+  "version": "0.3.0-preview.1",
   "files": {
-    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.utoc": "89a197a7731c372c0119a5dc55ab4275806d094162fa7faa3f97e79c207cedd7",
-    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.ucas": "59bc7a913a43d57a7ba51f8e17ef6200a758ab43188766631c413c569de7ad05",
-    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.pak": "63ff88b83117270069b19d3036cdcb03dc35b9d242bbd7dd9735434ff9180863",
-    "Dungeons/Binaries/Win64/mcd2-graphics.addon64": "611b49abee32db2705d47e5a9e08dd676cd7e892cb7da7e563eab4c18e733240",
+    "Dungeons/Binaries/Win64/FGBootstrap.ini": "bd44ca93301b57e358688aaf4eb6df7076784e22cc9200d9a119c7158e776721",
+    "Dungeons/Binaries/Win64/FGGuideCapture.ini": "5fb23ccf3916c8cb0d2c560395204590da098da0e8fcf9f74d8db8d40becc25a",
+    "Dungeons/Binaries/Win64/FG_UI_ALPHA.cso": "fce79e558c20bfafd859f37e397b8a04b5d820670f6aa0214522cef276cca8c1",
     "Dungeons/Binaries/Win64/MCD2Graphics/live_dense.cso": "1f7df8df67dce0f2edc106ff709855ec00794b2879d59522731f98636feb72d3",
-    "Dungeons/Binaries/Win64/mcd2-display-latency.addon64": "082bd1dcffa4b7b6c94a9a9316a43d8fc1ba96cba79cca61dcbfaf56fd88a1ad",
-    "Dungeons/Binaries/Win64/MCD2Graphics/streamline/mcd2-streamline-bridge.dll": "4f2afea295bf3211bf992021e3fa975dfb1a6c38dc2e2a729dc5119d86192b55"
+    "Dungeons/Binaries/Win64/dxgi.dll": "ecfd1949118deec0e60a81733a9b733c2bbf4c78ff4733816216ebf04940a9bb",
+    "Dungeons/Binaries/Win64/fg-sdk-bridge.dll": "9915c32d334ca8baa8dc49d362e9a4343c1c796c75ce9f0adc34c8d4d66717ef",
+    "Dungeons/Binaries/Win64/mcd2-display-latency.addon64": "72594fdee0697702022c986b504b433d3d0e8ee68edb2cd522ac96d5be6900fe",
+    "Dungeons/Binaries/Win64/mcd2-fg-guide-recon.addon64": "fe3feb329d0ad1b504e8a77299e17815244e292ceeafab0a17c2d9c5cbc0f3b8",
+    "Dungeons/Binaries/Win64/mcd2-graphics.addon64": "dac1238e931bb01f1bc77c8af6b0cc42896aea7f074a781d7cc575a9cdf79c9d",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.pak": "eec103ddba05020a38965b25da078a6dea3f4c985ab7c09744ca4d004ae4f2c4",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.ucas": "cfa09ccb0d1401f3bca81bd0d279bfd162ae264263ed0652a559c751b8feb440",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.utoc": "9fa45d99a13622e16d51271cef2afcaf08c1c5f70bc10bc89cd6f88fbf168de3"
   },
   "upgradeFrom": {
     "0.1.0-preview.2": {
@@ -24,6 +29,16 @@
       "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.pak": "50ed8584ab79e37b177f48af5bc0bca1251e3a30899d509693945972b79e209e",
       "Dungeons/Binaries/Win64/mcd2-graphics.addon64": "611b49abee32db2705d47e5a9e08dd676cd7e892cb7da7e563eab4c18e733240",
       "Dungeons/Binaries/Win64/MCD2Graphics/live_dense.cso": "1f7df8df67dce0f2edc106ff709855ec00794b2879d59522731f98636feb72d3",
+      "Dungeons/Binaries/Win64/MCD2Graphics/ngx-runtime/nvngx_dlss.dll": "3975567b8943c53acce397f2b72380092f84f162d00b0d2c7d08a1025c563983"
+    },
+    "0.2.0-rc.1": {
+      "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.utoc": "89a197a7731c372c0119a5dc55ab4275806d094162fa7faa3f97e79c207cedd7",
+      "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.ucas": "59bc7a913a43d57a7ba51f8e17ef6200a758ab43188766631c413c569de7ad05",
+      "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.pak": "63ff88b83117270069b19d3036cdcb03dc35b9d242bbd7dd9735434ff9180863",
+      "Dungeons/Binaries/Win64/mcd2-graphics.addon64": "611b49abee32db2705d47e5a9e08dd676cd7e892cb7da7e563eab4c18e733240",
+      "Dungeons/Binaries/Win64/MCD2Graphics/live_dense.cso": "1f7df8df67dce0f2edc106ff709855ec00794b2879d59522731f98636feb72d3",
+      "Dungeons/Binaries/Win64/mcd2-display-latency.addon64": "082bd1dcffa4b7b6c94a9a9316a43d8fc1ba96cba79cca61dcbfaf56fd88a1ad",
+      "Dungeons/Binaries/Win64/MCD2Graphics/streamline/mcd2-streamline-bridge.dll": "4f2afea295bf3211bf992021e3fa975dfb1a6c38dc2e2a729dc5119d86192b55",
       "Dungeons/Binaries/Win64/MCD2Graphics/ngx-runtime/nvngx_dlss.dll": "3975567b8943c53acce397f2b72380092f84f162d00b0d2c7d08a1025c563983"
     }
   }

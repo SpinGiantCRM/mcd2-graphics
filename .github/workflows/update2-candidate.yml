@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'qualification/update2/**'
+      - 'qualification/fg-release/**'
       - 'src/installer/**'
       - 'tests/installer-core/**'
       - 'build_installer.py'

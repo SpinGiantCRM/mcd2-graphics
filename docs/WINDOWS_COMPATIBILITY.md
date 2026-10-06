@@ -155,3 +155,38 @@ and reports the checkout as patched rather than clean. This is a new framework
 and SR binary pair: older Windows results do not qualify it. The separate
 render-thread hang has not been established as the same defect. See the
 [qualification handoff](../experiments/fg-streamline/RESET_CONFIRMATION_2026-10-07.md).
+
+## Dependency overrides and Loader 2.2 candidate
+
+Overrides relax only external dependency version pins after explicit selection.
+Keep supported executable checks, own-payload hashes, required archive members,
+link/traversal/size rejection, changed-file refusal and receipt ownership checks.
+The private DLSS DLL's actual selected hash is recorded for safe removal; shared
+dependencies remain shared. An override receipt must never authorize an arbitrary
+project file or game executable. Overrides start disabled on every GUI launch.
+
+The optional DLSS model hint reads a Unicode-path INI only when creating a
+feature; absent, invalid or out-of-range values preserve the runtime default.
+No extra per-frame work is added. This native change and the new installer UI
+require Windows regression. Prior AMD qualification does not qualify them or
+Blueprint Loader 2.2.
+
+### Held dependency and Reflex candidate — 7 October 2026
+
+The candidate pins Blueprint Loader 2.2 and adds explicit per-dependency
+experimentation for Loader, ReShade, RenoDX, DLSS and Streamline. Preserve
+default strict hashes, game validation, private payload integrity, extraction
+bounds, required-file completeness, closed-game checks and ownership checks.
+An acknowledgement permits only the selected external dependency hashes.
+
+A restart-only DLSS model hint defaults to zero; absent/invalid input leaves
+NGX preset hints unset. Test the default and an explicit supported hint on
+Windows NVIDIA, plus unsupported-adapter fallback on AMD/Intel.
+
+The NVIDIA Wine bootstrap disables dynamic Vulkan swapchain-mode switching
+before device creation to stabilize the tested Reflex/VSync-Off combination.
+Windows must skip this path before querying NVAPI or setting environment
+variables. Existing extension overrides are preserved; an explicit opt-out is
+available. Recheck Windows startup/exit and normal Reflex modes with the rebuilt
+binaries. The prior Windows qualification does not cover these new artifacts
+or Loader 2.2. Release remains held.

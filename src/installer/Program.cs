@@ -62,18 +62,25 @@ public sealed class InstallerWindow:Window {
             var dependencyChecks=engine.Scan();
             foreach(var dep in engine.Dependencies) {
                 var status=dependencyChecks.Single(x=>x.Name==dep.Name);var box=new StackPanel{Spacing=8};
-                box.Children.Add(new TextBlock{Text=dep.Name+" — "+status.State,FontWeight=FontWeight.SemiBold});box.Children.Add(new TextBlock{Text="Required: "+dep.Version,Opacity=.75});
+                box.Children.Add(new TextBlock{Text=dep.Name+" — "+status.State,FontWeight=FontWeight.SemiBold});box.Children.Add(new TextBlock{Text="Tested version: "+dep.Version,Opacity=.75});
                 var buttons=new StackPanel{Orientation=Orientation.Horizontal,Spacing=8};buttons.Children.Add(Button("Open official download",()=>OpenLink(dep.Url)));
-                if(dep.Id=="ReShade") {
+                if(dep.Id=="ReShade"&&dep.Files.Keys.Any(x=>x.EndsWith("/dxgi.dll",StringComparison.Ordinal))) {
                     box.Children.Add(new TextBlock{Text="Install the full addon-support build for:\n"+Path.Combine(engine.GameRoot,InstallerEngine.Shipping)+"\nChoose DirectX 10/11/12. Complete the official installer, then Check again.",TextWrapping=TextWrapping.Wrap});
                     buttons.Children.Add(AsyncButton("Run downloaded installer…",async()=>{var selected=await SelectFile("Choose the official full-addon ReShade installer");if(selected==null)return;var lockJson=System.Text.Json.JsonDocument.Parse(ReadResource("dependencies.lock.json"));var expected=lockJson.RootElement.GetProperty("dependencies").GetProperty("ReShade").GetProperty("installerSHA256").GetString();if(InstallerEngine.DigestFile(selected)!=expected)throw new InvalidDataException("This is not the required official full-addon ReShade installer. Get it from the official link.");InstallerEngine.EnsureGameClosed();RunReShade(selected);message.Text="Finish the official ReShade installer, then choose Check again. Any license agreement remains yours to accept.";}));
-                }else buttons.Children.Add(AsyncButton(dep.Files.Count>1?"Select downloaded archive…":"Select downloaded file…",async()=>{var f=await SelectFile("Select "+dep.Name+" download");if(f!=null){await Task.Run(()=>engine.SelectDependency(dep.Id,f));Draw();message.Text="Download verified. It will be placed correctly when you install.";}}));
+                }else buttons.Children.Add(AsyncButton(dep.Files.Count>1?"Select downloaded archive…":"Select downloaded file…",async()=>{var f=await SelectFile("Select "+dep.Name+" download");if(f!=null){await Task.Run(()=>engine.SelectDependency(dep.Id,f));Draw();message.Text=engine.OverrideEnabled(dep.Id)?"Untested download selected. Compatibility is not verified.":"Download verified. It will be placed correctly when you install.";}}));
+                var overrideBox=new CheckBox{Content="Try an untested dependency version",IsChecked=engine.OverrideEnabled(dep.Id)};
+                overrideBox.IsCheckedChanged+=(_,_)=>{try{engine.SetDependencyOverride(dep.Id,overrideBox.IsChecked==true);Draw();}catch(Exception e){message.Text=e.Message;}};
+                box.Children.Add(overrideBox);
+                if(engine.OverrideEnabled(dep.Id)) {
+                    box.Children.Add(new TextBlock{Text="Compatibility is not verified. Required files, hardware checks and mod integrity checks still apply. ReShade must support the mod's patched API.",TextWrapping=TextWrapping.Wrap});
+                    buttons.Children.Add(AsyncButton("Use installed version",async()=>{await Task.Run(()=>engine.UseInstalledDependency(dep.Id));Draw();message.Text="Untested dependency hashes recorded for this installation.";}));
+                }
                 box.Children.Add(buttons);content.Children.Add(new Border{Child=box,Padding=new Thickness(12),BorderThickness=new Thickness(1),BorderBrush=Brushes.Gray,CornerRadius=new CornerRadius(6)});
             }
             var actions=new StackPanel{Orientation=Orientation.Horizontal,Spacing=12};actions.Children.Add(AsyncButton("Check again",async()=>{await Task.Run(()=>engine.Scan());Draw();message.Text=engine.Ready?"All requirements are ready.":"Resolve the missing or unsupported requirements above.";}));actions.Children.Add(Button("Continue",()=>{page=2;Draw();}));content.Children.Add(actions);
         }else if(page==2) {
             Text("Install or maintain",22);Text("Version: "+engine.Version);
-            Text("Core graphics addon\nNative Video settings\nDLSS Super Resolution and DLAA\nHDR support\nReflex appears only when the rendering GPU and integration support it.");
+            Text("Core graphics addon\nNative Video settings\nDLSS Super Resolution and DLAA\nFrame Generation preview (DLSS/DLAA + native HDR)\nHDR support\nReflex appears only when the rendering GPU and integration support it.");
             Text(engine.Ready?"Requirements ready":"Some requirements still need attention. Go back to Requirements.");
             content.Children.Add(AsyncButton("Install",async()=>{await Task.Run(()=>engine.Install());Draw();message.Text="Installed and verified. Launch normally through Steam. Open Settings → Video.";}));
             content.Children.Add(AsyncButton("Repair / Verify",async()=>{var checks=await Task.Run(()=>engine.Scan());if(checks.All(x=>x.State=="OK")){message.Text="Installation and dependencies verified.";return;}await Task.Run(()=>engine.Install(true));Draw();message.Text="Repair complete. Modified or unowned files were not overwritten.";}));

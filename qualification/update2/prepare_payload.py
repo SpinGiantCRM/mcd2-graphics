@@ -4,7 +4,8 @@ from pathlib import Path
 root=Path(__file__).resolve().parents[2]
 manifest=json.loads((root/'manifest.json').read_text())
 expected=manifest['files'];output=root/'dist/qualified-own'
-with zipfile.ZipFile(root/'qualification/update2/own-payload.zip') as z:
+archive = root/('qualification/fg-release/own-payload.zip' if manifest['version']=='0.3.0-preview.1' else 'qualification/update2/own-payload.zip')
+with zipfile.ZipFile(archive) as z:
     if len(z.infolist())!=len(expected) or set(z.namelist())!=set(expected):
         raise ValueError('Qualification archive members differ from the manifest')
     data={}
@@ -21,4 +22,4 @@ with zipfile.ZipFile(root/'qualification/update2/own-payload.zip') as z:
         data[p]=b
     for p,b in data.items():
         f=output/p;f.parent.mkdir(parents=True,exist_ok=True);f.write_bytes(b)
-print('Seven own payload files verified. No vendor runtimes or private data included.')
+print(f'{len(expected)} own payload files verified. No vendor runtimes or private data included.')

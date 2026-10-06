@@ -1,0 +1,143 @@
+{
+  "status": "Held candidate; Windows runtime requalification required",
+  "host": {
+    "OS": "CachyOS KDE Wayland",
+    "GPU": "RTX 4080 SUPER",
+    "driver": "615.71.09",
+    "Proton": "cachyos-11.0-20261005-slr",
+    "vkd3dCommit": "44cf7c2042168f3",
+    "output": [
+      3840,
+      2160
+    ],
+    "HDR": "native PQ/BT.2020",
+    "VSync": false,
+    "frameLimit": 0
+  },
+  "measurement": "1200 CPU finish-present samples per run; 1199 intervals; not scanout or input latency",
+  "reflexRuns": [
+    {
+      "configuration": "reversal-off-a",
+      "reflexMode": 0,
+      "compatibilityFix": false,
+      "FPS": 105.54970024193241,
+      "meanMs": 9.474209758131776,
+      "p95Ms": 10.2834,
+      "p99Ms": 10.7311,
+      "stdMs": 0.3902919622190712,
+      "maxMs": 11.2678
+    },
+    {
+      "configuration": "reversal-on-a",
+      "reflexMode": 1,
+      "compatibilityFix": false,
+      "FPS": 102.84743899969568,
+      "meanMs": 9.72313953294412,
+      "p95Ms": 16.2097,
+      "p99Ms": 20.6771,
+      "stdMs": 4.338105922261432,
+      "maxMs": 33.013
+    },
+    {
+      "configuration": "clean-off-a",
+      "reflexMode": 0,
+      "compatibilityFix": true,
+      "FPS": 106.4687963178668,
+      "meanMs": 9.39242326939116,
+      "p95Ms": 9.7661,
+      "p99Ms": 10.0546,
+      "stdMs": 0.2566005205812938,
+      "maxMs": 11.1981
+    },
+    {
+      "configuration": "clean-on-a",
+      "reflexMode": 1,
+      "compatibilityFix": true,
+      "FPS": 106.33646017808208,
+      "meanMs": 9.404112176814012,
+      "p95Ms": 9.9468,
+      "p99Ms": 10.7719,
+      "stdMs": 0.42253041214073783,
+      "maxMs": 11.8479
+    },
+    {
+      "configuration": "clean-on-b",
+      "reflexMode": 1,
+      "compatibilityFix": true,
+      "FPS": 106.15549311338151,
+      "meanMs": 9.420143703085905,
+      "p95Ms": 10.0346,
+      "p99Ms": 11.1357,
+      "stdMs": 0.40190350575504513,
+      "maxMs": 11.8159
+    },
+    {
+      "configuration": "clean-boost-a",
+      "reflexMode": 2,
+      "compatibilityFix": true,
+      "FPS": 106.22312472995715,
+      "meanMs": 9.41414595496247,
+      "p95Ms": 9.9581,
+      "p99Ms": 10.8159,
+      "stdMs": 0.4002790229226205,
+      "maxMs": 13.1313
+    }
+  ],
+  "fgSmokeRuns": [
+    {
+      "label": "foliage-clean-default-on",
+      "intervals": 1199,
+      "seconds": 17.2018244,
+      "renderedFPS": 69.70190906029711,
+      "presentedFPS": 139.40381812059422,
+      "meanMs": 14.346809341117599,
+      "p95Ms": 15.1097,
+      "SDKStatuses": [
+        0
+      ],
+      "source": [
+        3840,
+        2160
+      ],
+      "output": [
+        3840,
+        2160
+      ]
+    },
+    {
+      "label": "foliage-clean-default-quality-on",
+      "intervals": 1199,
+      "seconds": 12.6732213,
+      "renderedFPS": 94.60893735044301,
+      "presentedFPS": 189.21787470088603,
+      "meanMs": 10.569825938281902,
+      "p95Ms": 11.2977,
+      "SDKStatuses": [
+        0
+      ],
+      "source": [
+        2560,
+        1440
+      ],
+      "output": [
+        3840,
+        2160
+      ]
+    }
+  ],
+  "runtimeHashes": {
+    "dxgi.dll": "ecfd1949118deec0e60a81733a9b733c2bbf4c78ff4733816216ebf04940a9bb",
+    "mcd2-graphics.addon64": "dac1238e931bb01f1bc77c8af6b0cc42896aea7f074a781d7cc575a9cdf79c9d",
+    "fg-sdk-bridge.dll": "9915c32d334ca8baa8dc49d362e9a4343c1c796c75ce9f0adc34c8d4d66717ef",
+    "mcd2-display-latency.addon64": "72594fdee0697702022c986b504b433d3d0e8ee68edb2cd522ac96d5be6900fe"
+  },
+  "frameworkSHA256": "16c05f65b47b1a1f7b21eaa9a89cfbb7868b72894aab58610763c0e4014656b1",
+  "blueprintLoaderVersion": "2.2",
+  "installerCoreChecks": 86,
+  "limits": [
+    "Original reported 20 FPS reduction was not reproduced in this stationary scene; large interval variance was reproduced.",
+    "VSync On retained larger interval variance on the tested Wine/driver.",
+    "Short samples do not qualify long sessions, all scenes, physical controller or Windows runtime.",
+    "Existing separate render-hang release hold remains; one earlier isolation shutdown exception is not attributed to this fix."
+  ]
+}

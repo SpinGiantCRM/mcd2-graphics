@@ -23,6 +23,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include "dlss_model_override.hpp"
 
 namespace a = reshade::api;
 namespace fs = std::filesystem;

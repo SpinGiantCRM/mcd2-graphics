@@ -40,10 +40,14 @@ jobs:
         run: |
           g++ -std=c++20 -Isrc/native tests/upscaler_support_test.cpp -o /tmp/upscaler-support
           /tmp/upscaler-support
+          g++ -std=c++20 -Isrc/native tests/dlss_model_override_test.cpp -o /tmp/dlss-model-override
+          /tmp/dlss-model-override
           g++ -std=c++20 -Isrc/native tests/lean_borrow_lifetime_test.cpp -o /tmp/lean-borrow-lifetime
           /tmp/lean-borrow-lifetime
       - name: Display protocol and Reflex frame identity
         run: |
+          g++ -std=c++20 -Wall -Wextra -Werror tests/wine_reflex_pacing_test.cpp -o /tmp/wine-reflex-pacing
+          /tmp/wine-reflex-pacing
           g++ -std=c++20 -pthread tests/reflex_tokens_test.cpp -o /tmp/reflex-tokens
           /tmp/reflex-tokens
           g++ -std=c++20 tests/display_protocol_test.cpp -o /tmp/display-protocol
