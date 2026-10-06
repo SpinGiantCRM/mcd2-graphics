@@ -99,3 +99,20 @@ menus and normal exit. FG SDK status 0 and two reported presents are insufficien
 qualification: also inspect Streamline's internal NGX evaluation errors. Windows
 NVIDIA must verify this shared path; AMD/Intel fallback exercises the unshared
 path. Linux runtime measurements do not qualify either Windows path.
+
+### Building the FG trial on Windows
+
+The `FG Windows candidate` CI job builds the current bridge, bootstrap, guide
+observer, latency addon and SR addon on Windows. Windows FG needs the Microsoft
+C++ ABI and CRT headers/libraries; the LLVM MinGW SR toolchain alone cannot build
+the Streamline bridge. A private junction-based sysroot adapts Visual Studio's
+installed layout to the existing recipe without changing the installed tools.
+The pinned ReShade PR435 source is built separately with full addon support.
+
+The test artifact contains binary hashes and source provenance, with runtime
+qualification explicitly false. Streamline runtime DLLs are acquired and checked
+separately; they are excluded from the artifact. The historical UI is reused
+only when its receipt matches the current git source blob (Windows checkout
+line endings must not invalidate that comparison). Do not replace this check
+with a Linux build pass or apply the result to the historical v27 archive.
+Both existing Windows and Linux CI jobs remain required.

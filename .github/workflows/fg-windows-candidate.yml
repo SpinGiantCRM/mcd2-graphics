@@ -1,0 +1,27 @@
+name: FG Windows candidate
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/fg-windows-candidate.yml'
+      - 'experiments/fg-streamline/**'
+      - 'src/native/**'
+      - 'src/latency/**'
+      - 'src/ui/ModActor.cs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: microsoft/setup-msbuild@6fb02220983dee41ce7ae257b6f4d8f9bf5ed4ce
+      - name: Build pinned experimental dependencies and current FG source
+        run: python experiments/fg-streamline/build_windows_candidate.py --output "$env:RUNNER_TEMP/fg-windows"
+      - name: Upload test binaries and build receipts only
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: fg-windows-candidate
+          path: ${{ runner.temp }}/fg-windows/artifact/
+          retention-days: 7
