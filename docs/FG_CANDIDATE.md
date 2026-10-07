@@ -34,6 +34,6 @@ The mod does not force offline mode. Online/co-op compatibility is unverified; o
 
 Final installers come from [CI run 37602995068](https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/37602995068), source `e421e57e7667f0e9ec71e1940c6daa352a39f0c7`, with final Mods version 0.3.0-preview.1. Publication changes docs and ZIP containers only. [Frozen hashes](../qualification/fg-release/release-artifacts-2026-10-07.json).
 
-Linux/NVIDIA active FG/SR/HDR and Windows/AMD installer/fallback checks have separate scopes. Native Windows NVIDIA active features/HDR, physical controllers, device loss and long sessions remain unqualified. Packages are unsigned; a Nexus review may delay availability. GitHub provides the exact files while review is pending.
+Linux/NVIDIA active FG/SR/HDR and Windows/AMD installer/fallback checks have separate scopes. Native Windows NVIDIA active features/HDR, physical controllers, device loss and long sessions remain unqualified. Packages are unsigned; a Nexus review may delay availability. Quarantined Nexus files must await staff clearance; external download links must not be used to bypass that review.
 
 Private earlier candidates can share the version number but have different UI/dependency hashes. Use their original installer to uninstall before fresh installation; do not edit receipts. Published rc.1 migration is supported by Repair / Verify. Historical tags and dependency archives remain unchanged.
