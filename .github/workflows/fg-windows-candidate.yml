@@ -7,10 +7,21 @@ on:
       - 'src/native/**'
       - 'src/latency/**'
       - 'src/ui/ModActor.cs'
+      - 'tools/ModInfoBuilder/**'
+      - 'build.py'
+      - 'build_latency.py'
+      - 'build_toolchain.py'
+      - 'dependencies.lock.json'
+      - 'manifest.json'
+      - 'qualification/fg-release/own-payload.zip'
+      - 'qualification/fg-release/ui-build-receipt.json'
       - 'qualification/fg-release/reshade-reset-epoch.patch'
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   build:
     runs-on: windows-2022
