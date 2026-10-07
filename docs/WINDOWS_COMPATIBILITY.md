@@ -1,5 +1,10 @@
 # Windows fixes: reasons and preservation requirements
 
+For the held FG candidate, follow the pinned
+[Windows qualification checklist](WINDOWS_QUALIFICATION_CHECKLIST.md) before
+claiming public-installer or Loader 2.3 qualification. It separates the exact
+installer payload from the separately compiled developer trial.
+
 These changes were tested on Windows 11 / Radeon 860M on 5 October 2026.
 The original addon crashed at approximately 29 seconds; the fixed candidate
 completed gameplay and normal shutdown after nearly 13 minutes. Exact evidence
