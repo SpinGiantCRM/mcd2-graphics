@@ -5,10 +5,14 @@ on:
   pull_request:
 permissions:
   contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   portable-checks:
-    name: Portable checks
+    name: Linux portable checks
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Check Python syntax and public JSON
@@ -58,6 +62,7 @@ jobs:
   windows-installer-checks:
     name: Windows installer checks
     runs-on: windows-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Installer regressions
@@ -69,6 +74,7 @@ jobs:
 
   guided-installer-checks:
     name: Guided installer (${{ matrix.os }})
+    timeout-minutes: 20
     strategy:
       matrix:
         os: [ubuntu-24.04, windows-latest]
@@ -85,3 +91,24 @@ jobs:
         run: dotnet run --project tests/installer-core/InstallerCore.Tests.csproj -c Release
       - name: Compile standalone GUI
         run: dotnet build src/installer/MCD2.Installer.csproj -c Release -p:SelfContained=false -p:RestoreLockedMode=true --nologo
+
+  ci-gate:
+    # Keep the protected check name stable and require every platform job.
+    name: Portable checks
+    needs: [portable-checks, windows-installer-checks, guided-installer-checks]
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Require all checks to succeed
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: |
+          python3 - <<'PY'
+          import json, os
+          results = {name: job['result'] for name, job in json.loads(os.environ['NEEDS_JSON']).items()}
+          for name, result in results.items():
+              print(f'{name}: {result}')
+          if not results or any(result != 'success' for result in results.values()):
+              raise SystemExit('All Linux, Windows and guided installer checks must pass.')
+          PY
