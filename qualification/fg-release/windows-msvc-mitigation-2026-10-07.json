@@ -1,0 +1,461 @@
+{
+  "schemaVersion": 1,
+  "status": "HELD_MITIGATION_FULL_QUALIFICATION_INCOMPLETE",
+  "testDate": "2026-10-07",
+  "sourceBaseCommit": "69a7bfe18ff098c985af9f6f8b8acfce1eba17d8",
+  "sourceMatchedRemoteBeforeTests": true,
+  "sourceChangesDuringTesting": "Framework dependency pin, separate archive/provenance/packaging inputs and regression checks; no native/UI/shader/NVIDIA payload change",
+  "originalFrozenPublicInstallerQualification": "FAIL",
+  "preciseCrashCauseEstablished": false,
+  "universalCrashRepairEstablished": false,
+  "boundedMitigationObservations": "MSVC A full-package and exact installer-core installation exited cleanly; original framework reproduced matching AV again",
+  "candidateVersion": "0.3.0-preview.1",
+  "ownPayloadSHA256": {
+    "Dungeons/Binaries/Win64/FGBootstrap.ini": "bd44ca93301b57e358688aaf4eb6df7076784e22cc9200d9a119c7158e776721",
+    "Dungeons/Binaries/Win64/FGGuideCapture.ini": "5fb23ccf3916c8cb0d2c560395204590da098da0e8fcf9f74d8db8d40becc25a",
+    "Dungeons/Binaries/Win64/FG_UI_ALPHA.cso": "fce79e558c20bfafd859f37e397b8a04b5d820670f6aa0214522cef276cca8c1",
+    "Dungeons/Binaries/Win64/MCD2Graphics/live_dense.cso": "1f7df8df67dce0f2edc106ff709855ec00794b2879d59522731f98636feb72d3",
+    "Dungeons/Binaries/Win64/dxgi.dll": "ecfd1949118deec0e60a81733a9b733c2bbf4c78ff4733816216ebf04940a9bb",
+    "Dungeons/Binaries/Win64/fg-sdk-bridge.dll": "9915c32d334ca8baa8dc49d362e9a4343c1c796c75ce9f0adc34c8d4d66717ef",
+    "Dungeons/Binaries/Win64/mcd2-display-latency.addon64": "72594fdee0697702022c986b504b433d3d0e8ee68edb2cd522ac96d5be6900fe",
+    "Dungeons/Binaries/Win64/mcd2-fg-guide-recon.addon64": "fe3feb329d0ad1b504e8a77299e17815244e292ceeafab0a17c2d9c5cbc0f3b8",
+    "Dungeons/Binaries/Win64/mcd2-graphics.addon64": "dac1238e931bb01f1bc77c8af6b0cc42896aea7f074a781d7cc575a9cdf79c9d",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.pak": "9647e28e8d2372b5cf5f8afc06ad0d81c5fd5fbf73f4100c33b344a02597fea4",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.ucas": "e7d57528a2f281000685debaac94a5321cc58d85fc5e5454e71cc5e49ebf37b7",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.utoc": "dceb189aa1d8ee9ca6673667d5e41a0268bb0c92bb992a4339aafd839af491d7"
+  },
+  "installer": {
+    "workflowArtifact": null,
+    "localBuild": true,
+    "deployment": "self-contained-folder",
+    "executableSHA256": "c5f37d9f40098cc312b1c3cdaef2d635bd2e6783e78e200996f663c4ed44ed9d",
+    "coreSHA256": "0ffa0a496315bf670896b1088aa05bcccadffdf28feef26267af39a37327c88c",
+    "filesIndependentlyVerified": 235,
+    "buildReceipt": "msvc-mitigation-installer-build.json",
+    "buildReceiptSHA256": "d96e7f3f83e7f4ef1d8549056c37b452450c34741434ea83a59688ca2c090f86",
+    "allOverridesOff": true,
+    "actualCoreActionsPassed": [
+      "recognized 0.2.0-rc.1 upgrade",
+      "repair",
+      "uninstall with original proxy restored",
+      "fresh reinstall",
+      "final post-runtime uninstall"
+    ],
+    "GUIQualified": false
+  },
+  "framework": {
+    "version": "PR435 / 4eb9056c7601 + successful-reset lifetime patch / MSVC Windows candidate",
+    "file": "Dungeons/Binaries/Win64/d3d12.asi",
+    "sha256": "ce808bb1494415586cfb2ec5638a3ab0f0cea3879e45146a34976740b59fcf48",
+    "url": "https://github.com/SpinGiantCRM/mcd2-graphics/pull/10",
+    "bootstrapPreviousSHA256": "0cee63f9c9f13f3ac909c5b4903f4dbb4b719a7ab3b4f13b0deaf83c814b94f7",
+    "source": "https://github.com/JoeyDelp/reshade/tree/4eb9056c76016aad6f98495d3bbda2d721106104",
+    "download": "https://raw.githubusercontent.com/SpinGiantCRM/mcd2-graphics/development/fg-bounded-windows/qualification/fg-release/dependencies/ReShade-PR435-4eb9056-reset-epoch-msvc-x64.zip",
+    "archiveSHA256": "610314d160a28f743cd2cfdc593c83b818bb2ead8576671d870c8f8652e95168",
+    "archiveMembers": {
+      "Dungeons/Binaries/Win64/d3d12.asi": "ReShade64.dll"
+    },
+    "patchSHA256": "109e99a0b160e2d2b1baf260b51bff461333aaf328554838ce994dac9abcfbc7",
+    "compatibilityNote": "PR435 native D3D12 access + successful-Reset lifetime API, built with the tested MSVC recipe. The earlier cross-built framework reproduced Windows shutdown access violations; a stock version number or different build hash is insufficient.",
+    "buildReceiptSHA256": "6b42c841e31917a39edba215d5cd01f773709ce6148c8afa36cb2ef4e2cfde4f"
+  },
+  "host": {
+    "windows": "Windows 11 Pro 10.0.26200.9457",
+    "renderingGPU": "AMD Radeon 860M",
+    "driver": "32.0.31041.1004",
+    "store": "Steam",
+    "appID": 1912410,
+    "buildID": "25647713",
+    "shippingSHA256": "231147bd0c655a4ae73f90873675d42917f2bfb3a9ee164fc64f217d6d6bd4ef",
+    "resolution": [
+      1920,
+      1200
+    ],
+    "displayMode": "Windowed Fullscreen",
+    "HDR": false,
+    "VSync": false,
+    "frameLimit": null
+  },
+  "dependencies": {
+    "Loader": "2.3",
+    "LoaderArchiveSHA256": "982ccc00b25a83da7fb3081739651b0e1a16d62ca990696ba64d89e8617c3374",
+    "RenoDX": "nightly-20260928",
+    "DLSS": "310.9.1",
+    "Streamline": "2.14.1"
+  },
+  "runs": [
+    {
+      "name": "resume-pinned-1",
+      "installationMethod": "private hash-guarded comparison staging",
+      "fixture": "FG On / Reflex Boost / DLSS Quality 67%",
+      "observedGameplaySeconds": 318.8,
+      "processLifetimeSeconds": 651.35,
+      "closeToExitSeconds": 14.51,
+      "shippingExitCode": "0xc0000005",
+      "heldShippingHandleBeforeExit": true,
+      "forceKilled": false,
+      "closeRoute": "normal Alt+F4 from gameplay",
+      "startupObservationSeconds": 13.0,
+      "gameplayProbeSeconds": 68.6,
+      "loadedModuleSHA256": {
+        "mcd2-graphics.addon64": "dac1238e931bb01f1bc77c8af6b0cc42896aea7f074a781d7cc575a9cdf79c9d",
+        "mcd2-fg-guide-recon.addon64": "fe3feb329d0ad1b504e8a77299e17815244e292ceeafab0a17c2d9c5cbc0f3b8",
+        "fg-sdk-bridge.dll": "9915c32d334ca8baa8dc49d362e9a4343c1c796c75ce9f0adc34c8d4d66717ef",
+        "d3d12.asi": "16c05f65b47b1a1f7b21eaa9a89cfbb7868b72894aab58610763c0e4014656b1",
+        "mcd2-display-latency.addon64": "72594fdee0697702022c986b504b433d3d0e8ee68edb2cd522ac96d5be6900fe",
+        "dxgi.dll": "ecfd1949118deec0e60a81733a9b733c2bbf4c78ff4733816216ebf04940a9bb"
+      },
+      "renoDXLoaded": true,
+      "runtimeState": {
+        "sr": {
+          "revision": 100,
+          "mode": 2,
+          "scale": 6667,
+          "preset": 0,
+          "contextReady": 1,
+          "sourceRevision": 98,
+          "contextSessionMatches": true,
+          "sourceSessionMatches": true,
+          "runtimeRevision": 100,
+          "phase": 3,
+          "error": 1
+        },
+        "fg": {
+          "requestedMode": 1,
+          "contextReady": 1,
+          "revision": 19,
+          "runtimeRevision": 19,
+          "sessionMatches": true,
+          "available": 0,
+          "active": 0,
+          "phase": 2,
+          "restartRequired": 0
+        },
+        "display": {
+          "revision": 4,
+          "requestedReflexMode": 2,
+          "hdr": 0,
+          "runtimeRevision": 4,
+          "reflexAvailable": 0,
+          "activeReflexMode": 0,
+          "reflexFault": 0,
+          "hdrRevision": 4,
+          "hdrRestartRequired": 0
+        }
+      }
+    },
+    {
+      "name": "resume-msvc-2",
+      "installationMethod": "private hash-guarded comparison staging",
+      "fixture": "FG On / Reflex Boost / DLSS Quality 67%",
+      "observedGameplaySeconds": 317.72,
+      "processLifetimeSeconds": 600.49,
+      "closeToExitSeconds": 87.83,
+      "shippingExitCode": "0x0",
+      "heldShippingHandleBeforeExit": true,
+      "forceKilled": false,
+      "closeRoute": "normal Alt+F4 from gameplay",
+      "startupObservationSeconds": 14.9,
+      "gameplayProbeSeconds": 68.4,
+      "loadedModuleSHA256": {
+        "fg-sdk-bridge.dll": "9915c32d334ca8baa8dc49d362e9a4343c1c796c75ce9f0adc34c8d4d66717ef",
+        "dxgi.dll": "ecfd1949118deec0e60a81733a9b733c2bbf4c78ff4733816216ebf04940a9bb",
+        "mcd2-fg-guide-recon.addon64": "fe3feb329d0ad1b504e8a77299e17815244e292ceeafab0a17c2d9c5cbc0f3b8",
+        "mcd2-graphics.addon64": "dac1238e931bb01f1bc77c8af6b0cc42896aea7f074a781d7cc575a9cdf79c9d",
+        "mcd2-display-latency.addon64": "72594fdee0697702022c986b504b433d3d0e8ee68edb2cd522ac96d5be6900fe",
+        "d3d12.asi": "ce808bb1494415586cfb2ec5638a3ab0f0cea3879e45146a34976740b59fcf48"
+      },
+      "renoDXLoaded": true,
+      "runtimeState": {
+        "sr": {
+          "revision": 100,
+          "mode": 2,
+          "scale": 6667,
+          "preset": 0,
+          "contextReady": 1,
+          "sourceRevision": 98,
+          "contextSessionMatches": true,
+          "sourceSessionMatches": true,
+          "runtimeRevision": 100,
+          "phase": 3,
+          "error": 1
+        },
+        "fg": {
+          "requestedMode": 1,
+          "contextReady": 1,
+          "revision": 19,
+          "runtimeRevision": 19,
+          "sessionMatches": true,
+          "available": 0,
+          "active": 0,
+          "phase": 2,
+          "restartRequired": 0
+        },
+        "display": {
+          "revision": 3,
+          "requestedReflexMode": 2,
+          "hdr": 0,
+          "runtimeRevision": 3,
+          "reflexAvailable": 0,
+          "activeReflexMode": 0,
+          "reflexFault": 0,
+          "hdrRevision": 3,
+          "hdrRestartRequired": 0
+        }
+      }
+    },
+    {
+      "name": "msvc-installed-1",
+      "installationMethod": "exact shipped Installer.Core API fresh reinstall",
+      "fixture": "FG On / Reflex Boost / DLSS Quality 67%",
+      "observedGameplaySeconds": 380.17,
+      "processLifetimeSeconds": 1266.79,
+      "closeToExitSeconds": 4.09,
+      "shippingExitCode": "0x0",
+      "heldShippingHandleBeforeExit": true,
+      "forceKilled": false,
+      "closeRoute": "normal Alt+F4 from hub",
+      "startupObservationSeconds": 13.2,
+      "gameplayProbeSeconds": 69.3,
+      "loadedModuleSHA256": {
+        "mcd2-fg-guide-recon.addon64": "fe3feb329d0ad1b504e8a77299e17815244e292ceeafab0a17c2d9c5cbc0f3b8",
+        "d3d12.asi": "ce808bb1494415586cfb2ec5638a3ab0f0cea3879e45146a34976740b59fcf48",
+        "dxgi.dll": "ecfd1949118deec0e60a81733a9b733c2bbf4c78ff4733816216ebf04940a9bb",
+        "fg-sdk-bridge.dll": "9915c32d334ca8baa8dc49d362e9a4343c1c796c75ce9f0adc34c8d4d66717ef",
+        "mcd2-display-latency.addon64": "72594fdee0697702022c986b504b433d3d0e8ee68edb2cd522ac96d5be6900fe",
+        "mcd2-graphics.addon64": "dac1238e931bb01f1bc77c8af6b0cc42896aea7f074a781d7cc575a9cdf79c9d"
+      },
+      "renoDXLoaded": true,
+      "runtimeState": {
+        "sr": {
+          "revision": 100,
+          "mode": 2,
+          "scale": 6667,
+          "preset": 0,
+          "contextReady": 1,
+          "sourceRevision": 98,
+          "contextSessionMatches": true,
+          "sourceSessionMatches": true,
+          "runtimeRevision": 100,
+          "phase": 3,
+          "error": 1
+        },
+        "fg": {
+          "requestedMode": 1,
+          "contextReady": 1,
+          "revision": 19,
+          "runtimeRevision": 19,
+          "sessionMatches": true,
+          "available": 0,
+          "active": 0,
+          "phase": 2,
+          "restartRequired": 0
+        },
+        "display": {
+          "revision": 3,
+          "requestedReflexMode": 2,
+          "hdr": 0,
+          "runtimeRevision": 3,
+          "reflexAvailable": 0,
+          "activeReflexMode": 0,
+          "reflexFault": 0,
+          "hdrRevision": 3,
+          "hdrRestartRequired": 0
+        }
+      }
+    }
+  ],
+  "earlierSameBinaryFullPackageCleanRuns": [
+    {
+      "name": "FG Off / Reflex On",
+      "observedGameplaySeconds": 306.7,
+      "closeToExitSeconds": 4.11,
+      "shippingExitCode": "0x0"
+    },
+    {
+      "name": "FG On / Reflex Boost",
+      "observedGameplaySeconds": 331.08,
+      "closeToExitSeconds": 4.02,
+      "shippingExitCode": "0x0"
+    }
+  ],
+  "originalFault": {
+    "matchingEventsIncludingResumedControl": 7,
+    "exceptionCode": "0xc0000005",
+    "access": "read address 0x10",
+    "R15": "0x10",
+    "faultInstructionBytes": "4d3927",
+    "nextJumpShippingRVA": "0x8bdcb86",
+    "objectTypeAndCauseIdentified": false
+  },
+  "installedRunPower": {
+    "battery": {
+      "BatteryStatus": 2,
+      "EstimatedChargeRemaining": 100
+    },
+    "powerTransitions": []
+  },
+  "checks": {
+    "B1": {
+      "status": "PASS",
+      "observation": "Recorded host; shipping closed; exact baseline snapshot, actual uninstall/reinstall and restoration verified."
+    },
+    "B2": {
+      "status": "PASS",
+      "observation": "Recorded host; shipping closed; exact baseline snapshot, actual uninstall/reinstall and restoration verified."
+    },
+    "B3": {
+      "status": "PASS",
+      "observation": "Recorded host; shipping closed; exact baseline snapshot, actual uninstall/reinstall and restoration verified."
+    },
+    "B4": {
+      "status": "NOT RUN",
+      "observation": "Path with spaces used, but standalone GUI without SDK/runtime not exercised."
+    },
+    "I1": {
+      "status": "NOT RUN",
+      "observation": "Required GUI route not repeated. Actual shipped-core upgrade/repair/uninstall/reinstall and hashes passed; safety fixtures passed separately."
+    },
+    "I2": {
+      "status": "NOT RUN",
+      "observation": "Required GUI route not repeated. Actual shipped-core upgrade/repair/uninstall/reinstall and hashes passed; safety fixtures passed separately."
+    },
+    "I3": {
+      "status": "NOT RUN",
+      "observation": "Required GUI route not repeated. Actual shipped-core upgrade/repair/uninstall/reinstall and hashes passed; safety fixtures passed separately."
+    },
+    "I4": {
+      "status": "NOT RUN",
+      "observation": "Required GUI route not repeated. Actual shipped-core upgrade/repair/uninstall/reinstall and hashes passed; safety fixtures passed separately."
+    },
+    "I5": {
+      "status": "NOT RUN",
+      "observation": "Required GUI route not repeated. Actual shipped-core upgrade/repair/uninstall/reinstall and hashes passed; safety fixtures passed separately."
+    },
+    "I6": {
+      "status": "NOT RUN",
+      "observation": "Required GUI route not repeated. Actual shipped-core upgrade/repair/uninstall/reinstall and hashes passed; safety fixtures passed separately."
+    },
+    "I7": {
+      "status": "NOT RUN",
+      "observation": "Required GUI route not repeated. Actual shipped-core upgrade/repair/uninstall/reinstall and hashes passed; safety fixtures passed separately."
+    },
+    "I9": {
+      "status": "NOT RUN",
+      "observation": "Required GUI route not repeated. Actual shipped-core upgrade/repair/uninstall/reinstall and hashes passed; safety fixtures passed separately."
+    },
+    "I10": {
+      "status": "NOT RUN",
+      "observation": "Required GUI route not repeated. Actual shipped-core upgrade/repair/uninstall/reinstall and hashes passed; safety fixtures passed separately."
+    },
+    "I8": {
+      "status": "PASS",
+      "observation": "118 disposable installer-core regressions, including exact framework acceptance/refusal and ownership/process/extraction safeguards."
+    },
+    "U1": {
+      "status": "NOT RUN",
+      "observation": "Main-menu Loader 2.3 and Quality controls observed; both-menu metadata and complete slider matrix not repeated; gameplay shortcuts ignored injected input."
+    },
+    "U2": {
+      "status": "NOT RUN",
+      "observation": "Main-menu Loader 2.3 and Quality controls observed; both-menu metadata and complete slider matrix not repeated; gameplay shortcuts ignored injected input."
+    },
+    "U3": {
+      "status": "NOT RUN",
+      "observation": "Main-menu Loader 2.3 and Quality controls observed; both-menu metadata and complete slider matrix not repeated; gameplay shortcuts ignored injected input."
+    },
+    "U4": {
+      "status": "PASS",
+      "observation": "Closed mod-slot FG On/Reflex Boost fixture returned with matching current-session acknowledgement. Quality requested from main menu."
+    },
+    "U5": {
+      "status": "NOT RUN",
+      "observation": "Responsive hub play >5 minutes passed; dungeon round trip not exercised."
+    },
+    "U6": {
+      "status": "NOT AVAILABLE",
+      "observation": "No physical controller used."
+    },
+    "A1": {
+      "status": "NOT RUN",
+      "observation": "Exact loaded chain and Quality unsupported fallback passed; all-Off and complete gameplay DLAA/Custom/source-resolution matrix not repeated."
+    },
+    "A2": {
+      "status": "NOT RUN",
+      "observation": "Exact loaded chain and Quality unsupported fallback passed; all-Off and complete gameplay DLAA/Custom/source-resolution matrix not repeated."
+    },
+    "A3": {
+      "status": "PASS",
+      "observation": "Mod-only closed-game fixture: FG On/Reflex Boost requested, unavailable/inactive, current session matched, no Reflex fault or restart requirement."
+    },
+    "A4": {
+      "status": "NOT RUN",
+      "observation": "Existing native-Windows guards retained; dedicated status-event/model-hint checks not repeated."
+    },
+    "A5": {
+      "status": "NOT RUN",
+      "observation": "Existing native-Windows guards retained; dedicated status-event/model-hint checks not repeated."
+    },
+    "N1": {
+      "status": "NOT AVAILABLE",
+      "observation": "AMD/SDR host; supported NVIDIA, active FG/Reflex, performance and native HDR unavailable."
+    },
+    "N2": {
+      "status": "NOT AVAILABLE",
+      "observation": "AMD/SDR host; supported NVIDIA, active FG/Reflex, performance and native HDR unavailable."
+    },
+    "N3": {
+      "status": "NOT AVAILABLE",
+      "observation": "AMD/SDR host; supported NVIDIA, active FG/Reflex, performance and native HDR unavailable."
+    },
+    "N4": {
+      "status": "NOT AVAILABLE",
+      "observation": "AMD/SDR host; supported NVIDIA, active FG/Reflex, performance and native HDR unavailable."
+    },
+    "N5": {
+      "status": "NOT AVAILABLE",
+      "observation": "AMD/SDR host; supported NVIDIA, active FG/Reflex, performance and native HDR unavailable."
+    },
+    "E1": {
+      "status": "NOT RUN",
+      "observation": "Normal Alt+F4 exits held shipping handle; Save and quit route not reached through injected gameplay controls."
+    },
+    "E2": {
+      "status": "PASS",
+      "observation": "Actual exits within 120 seconds; delayed clean exit separately disclosed, no force kills."
+    },
+    "E3": {
+      "status": "PASS",
+      "observation": "Actual final uninstall and all 39 baseline hashes restored; bindings unchanged; no player/account restoration."
+    },
+    "E4": {
+      "status": "PASS",
+      "observation": "Separate sanitized record and report; original failed qualification preserved."
+    }
+  },
+  "localChecks": {
+    "installerPython": 17,
+    "installerCore": 118,
+    "boundedFGPython": 16,
+    "buildToolchain": 6,
+    "allPassed": true
+  },
+  "CI": "Both Windows and Ubuntu jobs retained; see PR checks for pushed revision",
+  "linuxGameplayRuntime": "NOT RUN on this host",
+  "restoration": {
+    "baselineEntriesVerified": 39,
+    "videoPreferencesRestored": [],
+    "enhancedInputUnchanged": true,
+    "playerAccountSavesReadOrRestored": false,
+    "gameClosed": true
+  },
+  "testRecovery": {
+    "interruptedPrivateStagingJournal": "Recovered by exact target/input/receipt hashes before restoration",
+    "partialLayoutGameLaunched": false,
+    "baselineEntriesVerified": 39,
+    "productionInstallerDefectEstablished": false
+  },
+  "frozenPreviewTagAssetsChanged": false,
+  "rawLogsPlayerAccountDataVendorRuntimesPublished": false,
+  "report": "docs/WINDOWS_MSVC_MITIGATION_2026-10-07.md"
+}

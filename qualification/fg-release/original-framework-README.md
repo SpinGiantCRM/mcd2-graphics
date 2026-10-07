@@ -9,22 +9,12 @@ Patch: https://github.com/SpinGiantCRM/mcd2-graphics/blob/development/fg-bounded
 Patch SHA-256: 109e99a0b160e2d2b1baf260b51bff461333aaf328554838ce994dac9abcfbc7
 
 This candidate adds successful-command-list-reset lifetime confirmation. It is
-not the unpatched framework from build 37454118859. This separate candidate uses
-the upstream MSVC solution instead of the failing Clang-cl/CMake cross-build.
-The enclosed receipt pins the binary, toolchain, approved source diff and eleven
-submodules. It does not include the separately investigated descriptor-heap fix.
-
-To rebuild, check out the source commit above with its pinned submodules, verify a
-clean tree, apply reshade-reset-epoch.patch with git apply --index, then build:
-
-    msbuild ReShade.sln /t:ReShade /p:Configuration=Release /p:Platform=64-bit /m:2
-
-The tested binary used MSVC 14.44.35207, MSBuild 17.14.51.32402 and Windows SDK
-10.0.26100.0. Compiler, recipe and flags changed together. This is a Windows
-shutdown mitigation candidate; clean bounded observations do not establish the
-precise cause or guarantee all machines. Each rebuild requires its own binary
-hash and runtime qualification. The build-time WindowsQualified field is false;
-runtime evidence is recorded separately in docs/WINDOWS_MSVC_MITIGATION_2026-10-07.md.
+not the unpatched framework from build 37454118859. The enclosed receipt identifies
+the exact binary and toolchain: Release x64 full addon support, cross-built using
+Clang-cl, Microsoft C++/Windows SDK libraries and the CMake harness in
+qualification/fg-release/cross-build. Windows runtime qualification is pending.
+The Windows build recipe linked above applies the same source patch using MSBuild;
+its output has a different hash and requires its own qualification.
 
 Select this ZIP in the MCD2 Graphics installer under ReShade. It verifies the
 archive and binary hashes and stages the framework as d3d12.asi. Do not rename

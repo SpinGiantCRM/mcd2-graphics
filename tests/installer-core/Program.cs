@@ -171,6 +171,12 @@ try {
   var policyJson=JsonSerializer.Serialize(new{game=new{steamBuildID="123",exeSHA256=hash},dependencies=actualPolicy.RootElement.GetProperty("dependencies")});
   InstallerEngine ActualPolicy(){var x=new InstallerEngine(policyJson,manifest,()=>new MemoryStream(Payload())){RequireClosed=()=>{}};x.SetGame(temp);return x;}
   var actualEngine=ActualPolicy();Check(actualEngine.Dependencies.Count==5&&actualEngine.Dependencies.Single(x=>x.Id=="BlueprintLoader").MinimumVersion=="2.0","Shipped policy has five dependencies and Loader 2.0 minimum");
+  var frameworkDependency=actualEngine.Dependencies.Single(x=>x.Id=="ReShade");
+  var dependencyFolder=Path.Combine("qualification","fg-release","dependencies");
+  File.Delete(InstallerEngine.Target(temp,frameworkDependency.Files.Keys.Single())); // Retire the earlier synthetic fixture in this temporary game.
+  actualEngine.SelectDependency("ReShade",Path.Combine(dependencyFolder,Path.GetFileName(new Uri(frameworkDependency.Url).LocalPath)));
+  Check(actualEngine.Scan().Single(x=>x.Name=="ReShade full addon support").State=="Ready to install"&&!actualEngine.OverrideEnabled("ReShade"),"Exact MSVC framework archive accepted without override");
+  Throws(()=>actualEngine.SelectDependency("ReShade",Path.Combine(dependencyFolder,"ReShade-PR435-4eb9056-reset-epoch-x64.zip")),"Historical crashing framework archive refused by current candidate pin");
   foreach(var dep in actualEngine.Dependencies){actualEngine.SetDependencyOverride(dep.Id,true);Check(actualEngine.OverrideEnabled(dep.Id),dep.Id+" shipped override available");actualEngine.SetDependencyOverride(dep.Id,false);}
   foreach(var archivePath in args) {
    actualEngine.SelectDependency("BlueprintLoader",archivePath);var status=actualEngine.Scan().Single(x=>x.Name=="Blueprint Loader");Check(status.State=="Ready to install"&&!actualEngine.OverrideEnabled("BlueprintLoader"),"Official Loader "+status.Version+" archive matches shipped complete set");

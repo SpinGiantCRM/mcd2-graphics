@@ -1,0 +1,27 @@
+diff --git a/source/d3d12/d3d12_command_list.cpp b/source/d3d12/d3d12_command_list.cpp
+index 44f3d734..0ba11213 100644
+--- a/source/d3d12/d3d12_command_list.cpp
++++ b/source/d3d12/d3d12_command_list.cpp
+@@ -176,6 +176,22 @@ HRESULT STDMETHODCALLTYPE D3D12GraphicsCommandList::Reset(ID3D12CommandAllocator
+ #endif
+ 
+ 	const HRESULT hr = _orig->Reset(pAllocator, pInitialState);
++#if RESHADE_ADDON
++	if (SUCCEEDED(hr))
++	{
++		// Optional recording-lifetime proof; the existing pre-call event is unchanged.
++		// A successful Reset invalidates the old recording even when the new list
++		// stays dormant. This metadata does not imply completion of GPU execution.
++		static constexpr GUID reset_epoch_guid = {0x15a8089f, 0x7fcb, 0x4f6a, {0xa4, 0x03, 0x90, 0x7d, 0x5c, 0x66, 0x29, 0x81}};
++		uint64_t epoch = 0; UINT size = sizeof(epoch);
++		const HRESULT read = _orig->GetPrivateData(reset_epoch_guid, &size, &epoch);
++		if (SUCCEEDED(read) && size == sizeof(epoch))
++		{
++			++epoch;
++			_orig->SetPrivateData(reset_epoch_guid, sizeof(epoch), &epoch);
++		}
++	}
++#endif
+ #if RESHADE_ADDON >= 2
+ 	if (SUCCEEDED(hr))
+ 	{

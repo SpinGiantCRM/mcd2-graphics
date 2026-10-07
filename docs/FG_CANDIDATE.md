@@ -13,7 +13,7 @@ The [release notes](RELEASE_NOTES.md) describe the additions; the
    Microsoft Store PC remains unverified; a version override cannot bypass the
    supported executable check.
 3. Under Requirements, choose official dependencies and the separate credited
-   `ReShade-PR435-4eb9056-reset-epoch-x64.zip`. The framework is staged as
+   `ReShade-PR435-4eb9056-reset-epoch-msvc-x64.zip`. The framework is staged as
    `d3d12.asi`; the project's `dxgi.dll` supplies the FG bootstrap. Do not manually
    replace graphics proxies or substitute a stock ReShade version.
 4. Select Install, then launch normally through Steam. Settings are in Video;
@@ -41,13 +41,20 @@ transitions with FG Off. A newer stock ReShade version may not contain them.
 The untested-version override permits trying another build, but cannot add
 missing interfaces or establish compatibility.
 
-Download the [exact tested framework ZIP](https://raw.githubusercontent.com/SpinGiantCRM/mcd2-graphics/1200608712d05bf487dbc9e381969909f63908bc/qualification/fg-release/dependencies/ReShade-PR435-4eb9056-reset-epoch-x64.zip)
+Download the [exact MSVC mitigation candidate ZIP](https://raw.githubusercontent.com/SpinGiantCRM/mcd2-graphics/development/fg-bounded-windows/qualification/fg-release/dependencies/ReShade-PR435-4eb9056-reset-epoch-msvc-x64.zip)
 and select it under ReShade in the installer. No account or local compilation is
 needed. The archive includes its license, source/build references and receipt;
 the installer verifies its archive and DLL hashes. It is distributed separately
 from the mod installer and is not an official ReShade release. ReShade is by
 crosire and contributors; PR435 is by JoeyDelp, with the additional lifetime
 patch recorded in this repository.
+
+The current dependency pin replaces the cross-built framework after matching
+Windows shutdown access violations were reproduced with that framework alone.
+See the [MSVC mitigation record](WINDOWS_MSVC_MITIGATION_2026-10-07.md) for exact
+inputs, bounded passes and remaining checks. The older installer qualification
+remains FAIL. This candidate is held; its precise defect and final Linux runtime
+compatibility remain unproven.
 
 ## Settings
 
@@ -102,7 +109,8 @@ ownership checks. Published rc.1 migration remains a separate supported path.
 - Freeze final archives/hashes, record signing/scan results and follow the
   [Nexus review checks](NEXUS_RELEASE_GATE.md). No release is authorized by this guide.
 
-The framework has a [direct ZIP download](https://raw.githubusercontent.com/SpinGiantCRM/mcd2-graphics/1200608712d05bf487dbc9e381969909f63908bc/qualification/fg-release/dependencies/ReShade-PR435-4eb9056-reset-epoch-x64.zip)
-that needs no sign-in. The installer link now resolves to the separate archive
-in the qualification branch. Its pinned hash remains unchanged; the old test
-installer accepts this same ZIP. This fixes distribution, not a rendering defect.
+The [historical cross-built ZIP](https://raw.githubusercontent.com/SpinGiantCRM/mcd2-graphics/1200608712d05bf487dbc9e381969909f63908bc/qualification/fg-release/dependencies/ReShade-PR435-4eb9056-reset-epoch-x64.zip)
+remains frozen for the old test installer and failure evidence. Current candidate
+installers pin the separate MSVC ZIP above and reject the historical ZIP unless
+the user explicitly enables an untested-version override. Do not replace either
+archive in place or silently reuse the old installer qualification.

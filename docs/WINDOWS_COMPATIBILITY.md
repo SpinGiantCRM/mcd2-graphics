@@ -311,3 +311,28 @@ and public installer qualification. Compiler, recipe and flags changed together;
 these clean intermittent observations do not establish a causal crash repair or
 replace the original FAIL. Snapshot all staging inputs before removing older
 receipt-owned files, which can also include shared runtime sources.
+
+## MSVC framework mitigation candidate — 7 October 2026
+
+The maintainer resumed testing after the historical investigation stop. The
+[new mitigation record](WINDOWS_MSVC_MITIGATION_2026-10-07.md) preserves that
+history and qualifies changed inputs separately. Another matched full-package
+cross-build control reproduced the same shutdown AV; the same-source MSVC A
+comparison exited 0, with the earlier clean A observations retained. This
+supports selecting the tested build as a bounded mitigation, not naming a
+compiler defect or retroactively changing the original FAIL.
+
+| Change | Why | Windows requirement to preserve |
+| --- | --- | --- |
+| Pin MSVC A's DLL and a separately named dependency ZIP in `dependencies.lock.json`. | The prior exact cross-built framework repeatedly reproduced the shutdown AV, including without our mod. | Framework source/version alone does not identify the runtime build; verify actual loaded hashes and held shipping exits. Keep PR435 and successful-Reset metadata. |
+| Publish sanitized MSVC toolchain, eleven submodule pins and the exact approved source diff beside the separate dependency. | A clean different build must be independently reproducible and reviewable. | Compiler, recipe and flags changed together; do not attribute the result to the investigated heap patch, which A does not contain. Rebuilds need new hashes and qualification. |
+| Package the new ZIP with stored members and explicit LF byte inputs. | Deflate implementations produced different compressed bytes for identical historical inputs; Windows CRLF checkouts also change text bytes. | Both platforms must reproduce the new archive hash without normalizing runtime/source evidence or replacing the frozen historical archive. |
+| Add explicit lock/readme/layout inputs and a pinned extended build receipt to the dependency packager. | Current and historical framework candidates must keep distinct provenance. | Do not silently substitute framework binaries or accept unpinned extra receipt data. Historical compressed reproduction still requires its original compressor; preserve the original ZIP directly. |
+| Add archive integrity/provenance/reproduction tests and actual installer-core selection/refusal checks. | A default dependency switch must install the exact tested framework without an override and reject the prior ZIP. | Keep hash checks, process guards, old proxy recovery, shared dependencies and both Windows/Linux CI jobs. |
+| Update candidate instructions and retain a separate mitigation validation record. | The install link must match the new pin, and prior failures must remain visible. | Distinguish shipped-core API checks from GUI checks, requested AMD fallback from activation, and bounded clean exits from a universal crash repair. |
+
+No mod native, UI, shader or NVIDIA runtime binary changed for this mitigation.
+Player/account saves and raw diagnostics remain private. The separate framework
+dependency follows the maintainer's 6 October exception and is never embedded in
+the mod installer. Final Linux runtime and Windows NVIDIA/HDR checks remain
+separate; do not erase these limits during subsequent Linux work.

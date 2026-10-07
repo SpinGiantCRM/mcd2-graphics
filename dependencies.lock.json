@@ -5,19 +5,20 @@
   },
   "dependencies": {
     "ReShade": {
-      "version": "PR435 / 4eb9056c7601 + successful-reset lifetime patch",
+      "version": "PR435 / 4eb9056c7601 + successful-reset lifetime patch / MSVC Windows candidate",
       "file": "Dungeons/Binaries/Win64/d3d12.asi",
-      "sha256": "16c05f65b47b1a1f7b21eaa9a89cfbb7868b72894aab58610763c0e4014656b1",
+      "sha256": "ce808bb1494415586cfb2ec5638a3ab0f0cea3879e45146a34976740b59fcf48",
       "url": "https://github.com/SpinGiantCRM/mcd2-graphics/pull/10",
       "bootstrapPreviousSHA256": "0cee63f9c9f13f3ac909c5b4903f4dbb4b719a7ab3b4f13b0deaf83c814b94f7",
       "source": "https://github.com/JoeyDelp/reshade/tree/4eb9056c76016aad6f98495d3bbda2d721106104",
-      "download": "https://raw.githubusercontent.com/SpinGiantCRM/mcd2-graphics/development/fg-bounded-windows/qualification/fg-release/dependencies/ReShade-PR435-4eb9056-reset-epoch-x64.zip",
-      "archiveSHA256": "38b1affa05445a0801372f1f17be76f87e0ab5777c769a09031cd4e23dee7cb2",
+      "download": "https://raw.githubusercontent.com/SpinGiantCRM/mcd2-graphics/development/fg-bounded-windows/qualification/fg-release/dependencies/ReShade-PR435-4eb9056-reset-epoch-msvc-x64.zip",
+      "archiveSHA256": "610314d160a28f743cd2cfdc593c83b818bb2ead8576671d870c8f8652e95168",
       "archiveMembers": {
         "Dungeons/Binaries/Win64/d3d12.asi": "ReShade64.dll"
       },
       "patchSHA256": "109e99a0b160e2d2b1baf260b51bff461333aaf328554838ce994dac9abcfbc7",
-      "compatibilityNote": "PR435 native D3D12 access + successful-Reset lifetime API; a stock version number is insufficient."
+      "compatibilityNote": "PR435 native D3D12 access + successful-Reset lifetime API, built with the tested MSVC recipe. The earlier cross-built framework reproduced Windows shutdown access violations; a stock version number or different build hash is insufficient.",
+      "buildReceiptSHA256": "6b42c841e31917a39edba215d5cd01f773709ce6148c8afa36cb2ef4e2cfde4f"
     },
     "RenoDXUEExtended": {
       "file": "Dungeons/Binaries/Win64/renodx-ue-extended.addon64",

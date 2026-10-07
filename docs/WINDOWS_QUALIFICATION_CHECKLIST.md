@@ -1,5 +1,10 @@
 # Windows qualification: held 0.3.0-preview.1 candidate
 
+This input table is the frozen original qualification, whose result remains
+FAIL. For the separately pinned MSVC mitigation candidate and repeated checks,
+see [the new record](WINDOWS_MSVC_MITIGATION_2026-10-07.md). Do not mix its
+dependency ZIP or installer rebuild with this historical artifact.
+
 Follow this order. Record **PASS / FAIL / NOT RUN / NOT AVAILABLE** for every
 check below, with a short observation. This is a test procedure, not a claim
 that qualification has passed. Do not publish, merge, replace release files or
