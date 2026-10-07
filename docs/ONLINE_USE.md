@@ -2,7 +2,7 @@
 
 Checked 4 October 2026.
 
-**This preview is supported for offline single-player use only. Do not use it in online/co-op sessions.** This is a project restriction, not a finding that offline injection is publisher-approved or legally compliant.
+The mod does not force offline mode or block online/co-op selection. Online compatibility and account safety are unverified. Offline play is safer; follow the terms applicable to your game and services.
 
 No explicit Minecraft Dungeons II permission for this graphics-injection mod was found in the reviewed official rules. [Xbox Community Standards](https://www.xbox.com/en-US/legal/community-standards), section 7, prohibit using mods in games that do not allow modded content. Graphics-only intent does not establish an exemption. Anti-cheat compatibility and account safety have not been verified.
 
@@ -12,4 +12,4 @@ The preview does not alter authentication, entitlement, online gameplay rules or
 
 **NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.** Also not an official NVIDIA or RenoDX release. Public screenshots/videos are project demonstrations under the [Minecraft Usage Guidelines](https://www.minecraft.net/en-us/usage-guidelines), not evidence of publisher endorsement.
 
-If the publisher provides game-specific mod guidance, open an issue with the primary source so this restriction can be reassessed. Do not test enforcement by joining online sessions with the mod installed.
+If the publisher provides game-specific mod guidance, open an issue with the primary source so compatibility guidance can be updated.

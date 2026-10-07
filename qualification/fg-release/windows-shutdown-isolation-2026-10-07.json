@@ -1,0 +1,218 @@
+{
+  "schemaVersion": 1,
+  "status": "UNRESOLVED",
+  "sourceCommit": "9201e27fea2a2c8ab80ba1b898e0ed0a4c611e83",
+  "host": {
+    "os": "Windows 11 Pro 10.0.26200.9457",
+    "gpu": "AMD Radeon 860M",
+    "driver": "32.0.31041.1004"
+  },
+  "game": {
+    "steamBuild": 25647713,
+    "shippingSHA256": "231147bd0c655a4ae73f90873675d42917f2bfb3a9ee164fc64f217d6d6bd4ef"
+  },
+  "runs": [
+    {
+      "name": "vanilla-steam-control",
+      "frameworkSHA256": null,
+      "launchRoute": "Steam Library Play",
+      "closeRoute": "normal Alt+F4",
+      "observedGameplaySeconds": 316.98,
+      "processLifetimeSeconds": 676.73,
+      "closeToExitSeconds": 91.48,
+      "shippingExitCode": "0x0",
+      "heldShippingHandleBeforeExit": true,
+      "forceKilled": false,
+      "modules": {
+        "frameworkLoaded": false,
+        "modAddonsAndVendorRuntimeLoaded": false,
+        "systemDxgiLoaded": true
+      }
+    },
+    {
+      "name": "framework-only-control",
+      "frameworkSHA256": "16c05f65b47b1a1f7b21eaa9a89cfbb7868b72894aab58610763c0e4014656b1",
+      "launchRoute": "Steam Library Play",
+      "closeRoute": "normal Alt+F4",
+      "observedGameplaySeconds": 332.71,
+      "processLifetimeSeconds": 511.67,
+      "closeToExitSeconds": 9.43,
+      "shippingExitCode": "0xc0000005",
+      "heldShippingHandleBeforeExit": true,
+      "forceKilled": false,
+      "modules": {
+        "exactFrameworkLoaded": true,
+        "d3d12RuntimeInitialized": true,
+        "modAddonsAndVendorRuntimeLoaded": false,
+        "loaderAndModContainersAbsent": true
+      }
+    },
+    {
+      "name": "framework-msvc-A",
+      "frameworkSHA256": "ce808bb1494415586cfb2ec5638a3ab0f0cea3879e45146a34976740b59fcf48",
+      "launchRoute": "Steam Library Play",
+      "closeRoute": "normal Alt+F4",
+      "observedGameplaySeconds": 311.88,
+      "processLifetimeSeconds": 528.23,
+      "closeToExitSeconds": 10.0,
+      "shippingExitCode": "0x0",
+      "heldShippingHandleBeforeExit": true,
+      "forceKilled": false,
+      "modules": {
+        "exactFrameworkLoaded": true,
+        "d3d12RuntimeInitialized": true,
+        "modAddonsAndVendorRuntimeLoaded": false,
+        "loaderAndModContainersAbsent": true
+      }
+    },
+    {
+      "name": "framework-msvc-B-repeat",
+      "frameworkSHA256": "14e5ba131d32ee1a1902d20c3ce73484377fb60994d5a3976c3c0d9d78abb10d",
+      "launchRoute": "Steam Library Play",
+      "closeRoute": "Alt+F4 from main menu after observed gameplay",
+      "processLifetimeSeconds": 1854.41,
+      "closeToExitSeconds": 85.93,
+      "shippingExitCode": "0x0",
+      "heldShippingHandleBeforeExit": true,
+      "forceKilled": false,
+      "modules": {
+        "exactFrameworkLoaded": true,
+        "d3d12RuntimeInitialized": true,
+        "modAddonsAndVendorRuntimeLoaded": false,
+        "loaderAndModContainersAbsent": true
+      },
+      "elapsedAfterFirstGameplayObservationSeconds": 1246.21,
+      "continuousGameplayIntervalEstablished": false,
+      "utilityFocusInterruption": true,
+      "matchedABGameplayShutdownComparison": false
+    }
+  ],
+  "matchingCrashFingerprint": {
+    "matchingDumpCount": 5,
+    "exception": "0xc0000005",
+    "readAddress": "0x10",
+    "faultBytes": "4d3927",
+    "instruction": "cmp qword ptr [r15], r12",
+    "r15": "0x10",
+    "instructionOutsideNamedModules": true,
+    "followingJumpShippingRVA": "0x8bdcb86",
+    "unwoundCallChainEstablished": false,
+    "allocationOwnerEstablished": false
+  },
+  "candidateBuilds": {
+    "A": {
+      "baseSource": "4eb9056c76016aad6f98495d3bbda2d721106104",
+      "resetEpochPatchSHA256": "109e99a0b160e2d2b1baf260b51bff461333aaf328554838ce994dac9abcfbc7",
+      "upstreamFix": null,
+      "sourceDiffSHA256": "401d7b1507edf80b974520b3804494be2fcfb22f7103cfd41076bff25feba220",
+      "sha256": "ce808bb1494415586cfb2ec5638a3ab0f0cea3879e45146a34976740b59fcf48",
+      "compiler": "MSVC 14.44.35207; MSBuild 17.14.51.32402; Windows SDK 10.0.26100.0",
+      "configuration": "Release x64 full addon support; ReShade.sln /t:ReShade /p:Platform=64-bit /m:2"
+    },
+    "B": {
+      "baseSource": "4eb9056c76016aad6f98495d3bbda2d721106104",
+      "resetEpochPatchSHA256": "109e99a0b160e2d2b1baf260b51bff461333aaf328554838ce994dac9abcfbc7",
+      "upstreamFix": "64017f98cc1393db51d9f5b1307c64350680f41c",
+      "sourceDiffSHA256": "1c8b964ffc88cbd229257495ea32f6d1bceee423617b719f77d7ef76952dd69f",
+      "sha256": "14e5ba131d32ee1a1902d20c3ce73484377fb60994d5a3976c3c0d9d78abb10d",
+      "compiler": "MSVC 14.44.35207; MSBuild 17.14.51.32402; Windows SDK 10.0.26100.0",
+      "configuration": "Release x64 full addon support; ReShade.sln /t:ReShade /p:Platform=64-bit /m:2"
+    }
+  },
+  "productionSourceChanged": false,
+  "fixEstablished": false,
+  "newBinaryPublished": false,
+  "publicInstallerQualificationRemains": "FAIL",
+  "restoration": {
+    "baselineEntriesVerified": 39,
+    "videoPreferencesRestored": [
+      "saved/Config/Windows/GameUserSettings.ini",
+      "saved/Config/Windows/Engine.ini"
+    ],
+    "enhancedInputUnchanged": true,
+    "playerAccountSavesReadOrRestored": false,
+    "gameClosed": true
+  },
+  "limits": [
+    "One clean unmodified run does not establish the base game never crashes.",
+    "Baseline A clean without the heap patch; a clean B does not prove a causal repair.",
+    "Save and quit gameplay menu route not exercised.",
+    "No supported NVIDIA, HDR, controller or Linux runtime qualification.",
+    "No exact new full mod/framework pair qualified."
+  ],
+  "report": "docs/WINDOWS_SHUTDOWN_ISOLATION_2026-10-07.md",
+  "excludedTimingRun": {
+    "name": "framework-msvc-B",
+    "frameworkSHA256": "14e5ba131d32ee1a1902d20c3ce73484377fb60994d5a3976c3c0d9d78abb10d",
+    "shippingExitCode": "0x0",
+    "heldShippingHandleBeforeExit": true,
+    "forceKilled": false,
+    "normalShutdownTimingQualified": false,
+    "reason": "Critical-battery sleep and later Modern Standby resume interrupted the close measurement; measured wall-clock duration includes power transitions."
+  },
+  "fullMemoryFollowUp": {
+    "sourceCommit": "369865490a586692c2329228a11771b62d3d7380",
+    "sourceMatchedRemoteBeforeTests": true,
+    "automaticUnwindThroughFaultRegionAvailable": false,
+    "jumpAnchoredReconstruction": {
+      "originalDumpsUnchanged": true,
+      "matchingOriginalDumps": 5,
+      "anchorShippingRVA": "0x8bdcb86",
+      "normalizedShippingReturns": [
+        "0x8bdcf5a",
+        "0x8af4f47",
+        "0x8ad1ae5",
+        "0x8ad438f"
+      ],
+      "stopAtOSThreadRoot": true,
+      "causalFunctionIdentified": false
+    },
+    "processSnapshot": {
+      "tool": "Microsoft signed ProcDump 12.01",
+      "bytes": 4748453489,
+      "faultContext": false,
+      "privateOnly": true
+    },
+    "attachedMonitor": {
+      "shippingExitCode": "0x3e8",
+      "normalCloseRequested": false,
+      "unhandledDumpWritten": false,
+      "qualificationResult": false
+    },
+    "matchingFaultCapture": {
+      "frameworkSHA256": "16c05f65b47b1a1f7b21eaa9a89cfbb7868b72894aab58610763c0e4014656b1",
+      "diagnosticAddonSHA256": "db92eaa00136d8b1ebb27d3b0c83c0f1a0d7333caad0b3c47d5eaab947be7ae6",
+      "attachedDebugger": false,
+      "diagnosticOnly": true,
+      "ownGraphicsAddonsLoaderAndVendorSDKAbsent": true,
+      "observedGameplaySeconds": 520.73,
+      "shippingExitCode": "0xc0000005",
+      "heldShippingHandleBeforeExit": true,
+      "forceKilled": false,
+      "closeToExitSecondsIncludesCapture": 18.07,
+      "fullDumpBytes": 2544704879,
+      "fullAndOriginalMiniFaultContextMatch": true,
+      "fingerprint": {
+        "exceptionCode": "0xc0000005",
+        "access": "read",
+        "accessAddress": "0x10",
+        "r15": "0x10",
+        "faultBytes": "4d3927",
+        "followingJumpShippingRVA": "0x8bdcb86"
+      },
+      "gameThreadInCRTExitCallbackWait": true,
+      "objectSourceTypeIdentified": false,
+      "captureSelectionHarnessPassed": true,
+      "exceptionContextHarnessPassed": true,
+      "privateOnly": true
+    },
+    "restoration": {
+      "gameClosed": true,
+      "diagnosticAddonRemovedByHash": true,
+      "baselineEntriesVerified": 39,
+      "playerAccountSavesReadOrRestored": false
+    },
+    "productionFixEstablished": false,
+    "qualificationStill": "FAIL"
+  }
+}

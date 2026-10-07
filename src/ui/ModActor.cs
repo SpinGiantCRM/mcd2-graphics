@@ -41,6 +41,19 @@ public class ReconstructionHeaderRow : UGameSettingListEntryBase {
  public void Refresh(){if(Skin!=null && Skin.Text_SettingName!=null)Skin.Text_SettingName.SetText("RECONSTRUCTION");}
  protected override UWidget? GetPrimaryGamepadFocusWidget(){return null;}
 }
+public class FGHeaderSetting : UGameSettingCollection {}
+public class FGHeaderRow : UGameSettingListEntryBase {
+ public UAS_SettingsEntry_Header? Skin;
+ public override void OnInitialized(){
+  Skin=UWidgetBlueprintLibrary.Create(this,Unreal.ClassAt<UAS_SettingsEntry_Header>("/SpicewoodSettings/Spicewood/UI/SettingsScreen/Editors/W_SettingsEntry_Header.W_SettingsEntry_Header_C"),UGameplayStatics.GetPlayerController(this,0)) as UAS_SettingsEntry_Header;
+  if(Skin==null || Skin.WidgetTree==null || Skin.WidgetTree.RootWidget==null || WidgetTree==null){Log.Write("FRAME GENERATION HEADER TREE FAILED");return;}
+  WidgetTree.RootWidget=Skin.WidgetTree.RootWidget;bIsFocusable=false;Skin.bIsFocusable=false;
+  WidgetTree.RootWidget.SetVisibility(ESlateVisibility.HitTestInvisible);Refresh();
+ }
+ public override void Construct(){Refresh();}
+ public void Refresh(){if(Skin!=null && Skin.Text_SettingName!=null)Skin.Text_SettingName.SetText("FRAME GENERATION");}
+ protected override UWidget? GetPrimaryGamepadFocusWidget(){return null;}
+}
 public class ReconstructionSetting : UGameSetting {
  public string OwnedDisplayName;
  public string OwnedHelpText;
@@ -163,6 +176,8 @@ public class ScaleRow : UGameSettingListEntryBase {
 }
 
 // Separate display/latency intent leaves the released SR schema unchanged.
+public class FGSettingsSave : USaveGame {public int SchemaVersion;public int Revision;public int Mode;public int ContextReady;public int SessionId;}
+public class FGRuntimeSave : USaveGame {public int SchemaVersion;public int Revision;public int SessionId;public int Available;public int Active;public int Phase;public int RestartRequired;}
 public class DisplaySettingsSave : USaveGame {
  public int SchemaVersion;public int Revision;public int HDROutput;public int PeakNits;public int PaperWhiteNits;public int UINits;public int ReflexMode;
 }
@@ -184,12 +199,12 @@ public class DisplayRow : UGameSettingListEntryBase {
  public override void Construct(){Refresh();}
  public void Refresh(){var model=Setting as DisplaySetting;if(model==null || Skin==null || Manager==null || Manager.DisplaySaved==null)return;int id=model.ControlId;
   if(configured!=id){configured=id;if(Skin.Text_SettingName!=null)Skin.Text_SettingName.SetText(Manager.DisplayLabel(id));
-   var choices=new List<FText>();if(id==0){choices.Add("Off");choices.Add("On");}else if(id==4){choices.Add("Off");choices.Add("On");choices.Add("On + Boost");}else {int max=id==1?10000:500;int step=id==1?10:1;for(int n=id==1?100:48;n<=max;n+=step)choices.Add(n+" nits");}
+   var choices=new List<FText>();if(id==0 || id==5){choices.Add("Off");choices.Add("On");}else if(id==4){choices.Add("Off");choices.Add("On");choices.Add("On + Boost");}else {int max=id==1?10000:500;int step=id==1?10:1;for(int n=id==1?100:48;n<=max;n+=step)choices.Add(n+" nits");}
    if(Skin.Rotator_SettingValue!=null)Skin.Rotator_SettingValue.PopulateTextLabels(choices);
   }
   int value=Manager.DisplayValue(id);int index=id==1?(value-100)/10:(id==2 || id==3?value-48:value);
   if(Skin.Rotator_SettingValue!=null)Skin.Rotator_SettingValue.SetSelectedItem(index);
-  SetIsEnabled(id==0 || (id==4?(Manager.DisplayRuntime!=null && Manager.DisplayRuntime.ReflexAvailable==1 && Manager.DisplayRuntime.ReflexFault==0):Manager.DisplaySaved.HDROutput==1));
+  SetIsEnabled(id==5?(Manager.FGRuntime!=null && Manager.FGRuntime.Available==1):id==0 || (id==4?(Manager.DisplayRuntime!=null && Manager.DisplayRuntime.ReflexAvailable==1 && Manager.DisplayRuntime.ReflexFault==0):Manager.DisplaySaved.HDROutput==1));
  }
  void Change(int direction){var model=Setting as DisplaySetting;if(model==null || Manager==null)return;Manager.ChangeDisplay(model.ControlId,direction);Refresh();Manager.ShowDisplayHelp(model.ControlId);SetUserFocus(UGameplayStatics.GetPlayerController(this,0));}
  protected override UWidget? GetPrimaryGamepadFocusWidget(){return this;}
@@ -208,6 +223,11 @@ public class DisplayRow : UGameSettingListEntryBase {
 }
 
 public class ModActor : AActor {
+ // Keep our recommendation in the game's native footer, separate from status.
+ public List<UGameSettingDetailView> HelpFooterPanels=new List<UGameSettingDetailView>();
+ public List<UGameSettingDetailExtension_DefaultValue> HelpFooters=new List<UGameSettingDetailExtension_DefaultValue>();
+ public FGSettingsSave? FGSaved;public FGRuntimeSave? FGRuntime;public FGHeaderSetting? FGHeaderModel;
+ bool foliageVelocityOwned;bool foliageVelocityBlocked;int foliageVelocityOriginal;int foliageRestoreAttempts;
  public DisplaySettingsSave? DisplaySaved;public DisplayRuntimeSave? DisplayRuntime;public List<DisplaySetting> DisplayModels=new List<DisplaySetting>();int displayAppliedRevision;bool displayHDRSupported;int displayHelp=-1;
  public GraphicsSettingsSave? Saved;
  public GraphicsRuntimeStateSave? Runtime;
@@ -243,7 +263,7 @@ public class ModActor : AActor {
   if(Saved!=null)Log.Write("SETTINGS version="+Saved.SchemaVersion+" revision="+Saved.Revision+" mode="+Saved.ReconstructionMode);
   Runtime=UGameplayStatics.LoadGameFromSlot("MCD2GraphicsRuntime",0) as GraphicsRuntimeStateSave;
   if(Runtime==null){Runtime=UGameplayStatics.CreateSaveGameObject(Unreal.ClassOf<GraphicsRuntimeStateSave>()) as GraphicsRuntimeStateSave;if(Runtime!=null){Runtime.SchemaVersion=1;UGameplayStatics.SaveGameToSlot(Runtime,"MCD2GraphicsRuntime",0);}}
-  InitializeDisplay();Timer.Start(this,"PollDisplay",0.5f,true);
+  InitializeFG();Timer.Start(this,"PollFG",0.5f,true);InitializeDisplay();Timer.Start(this,"PollDisplay",0.5f,true);
   Timer.Start(this,"PollRenderer",0.25f,true);
   Discover();if(LifecycleWidgets.Count==0)Timer.Start(this,"Discover",0.1f,true);
  }
@@ -309,30 +329,71 @@ public class ModActor : AActor {
  public void EntriesGenerated(int count){Log.Write("LIST GENERATED count="+count);SyncLists();}
  public void SelectionChanged(UObject? item,bool selected){if(selected)Timer.Start(this,"SyncLists",0.01f,false);if(selected && item is DisplaySetting){var ds=item as DisplaySetting;if(ds!=null)ShowDisplayHelp(ds.ControlId);}else if(selected && item==Model)ShowReconstructionHelp();else if(selected && item==PresetModel)ShowPresetHelp();else if(selected && item==ScaleModel)ShowScaleHelp();else if(selected)RestoreExtensions();}
  public void HoverChanged(UObject? item,bool hovered){if(hovered && item is DisplaySetting){var ds=item as DisplaySetting;if(ds!=null)ShowDisplayHelp(ds.ControlId);}else if(hovered && item==Model)ShowReconstructionHelp();else if(hovered && item==PresetModel)ShowPresetHelp();else if(hovered && item==ScaleModel)ShowScaleHelp();else if(hovered)RestoreExtensions();}
- public void RestoreExtensions(){displayHelp=-1;OwnHelpVisible=false;foreach(var p in Panels)if(p.Details_Settings!=null && p.Details_Settings.Box_DetailsExtension!=null)p.Details_Settings.Box_DetailsExtension.SetVisibility(ESlateVisibility.SelfHitTestInvisible);}
+ public void RestoreExtensions(){displayHelp=-1;OwnHelpVisible=false;foreach(var footer in HelpFooters)if(UKismetSystemLibrary.IsValid(footer))footer.RemoveFromParent();foreach(var p in Panels)if(p.Details_Settings!=null && p.Details_Settings.Box_DetailsExtension!=null)p.Details_Settings.Box_DetailsExtension.SetVisibility(ESlateVisibility.SelfHitTestInvisible);}
+ public string UpscalerHelpBody(){return "Choose how the image is rendered.\n\n• Native\nUses the game's anti-aliasing.\n\n• NVIDIA DLSS\nImproves performance or uses DLAA at full resolution. Requires an RTX GPU.";}
+ public string PresetHelpBody(){return "Balance image quality and performance.\n\n• DLAA — native resolution\n• Quality — best upscaled detail\n• Balanced — more performance\n• Performance — higher frame rates\n• Ultra Performance — lowest render resolution\n• Custom — your chosen scale";}
+ public string ScaleHelpBody(){return "Lower render resolution for more performance. Higher values preserve more detail.\n\n• 100% selects DLAA.\n• Other values match a preset or select Custom.";}
+ public void SetRecommendationLabel(UWidget? widget){
+  if(widget==null)return;
+  var label=widget as UTextBlock;
+  if(label!=null && UKismetTextLibrary.Conv_TextToString(label.GetText()).Contains("Default"))label.SetText("Recommended:");
+  var panel=widget as UPanelWidget;
+  if(panel!=null)for(int i=0;i<panel.GetChildrenCount();i++)SetRecommendationLabel(panel.GetChildAt(i));
+ }
+ public void ShowRecommendation(UGameSettingDetailView details,string text){
+  if(details.Box_DetailsExtension==null)return;
+  UGameSettingDetailExtension_DefaultValue? footer=null;
+  for(int i=0;i<HelpFooterPanels.Count;i++)if(HelpFooterPanels[i]==details && UKismetSystemLibrary.IsValid(HelpFooters[i]))footer=HelpFooters[i];
+  if(footer==null && details.VisualData!=null){
+   var kinds=new List<TSubclassOf<UGameSetting>>();kinds.Add(Unreal.ClassOf<UGameSettingValue>());kinds.Add(Unreal.ClassOf<UGameSettingValueDiscrete>());kinds.Add(Unreal.ClassOf<UGameSettingValueScalar>());kinds.Add(Unreal.ClassOf<UGameSetting>());
+   var extensions=details.VisualData.ExtensionsForClasses;
+   foreach(var kind in kinds){
+    if(!extensions.ContainsKey(kind))continue;
+    foreach(var soft in extensions[kind].Extensions){
+     var type=UKismetSystemLibrary.LoadClassAsset_Blocking(soft);
+     if(!UKismetMathLibrary.ClassIsChildOf(type,Unreal.ClassOf<UGameSettingDetailExtension_DefaultValue>()))continue;
+     footer=UWidgetBlueprintLibrary.Create(this,(TSubclassOf<UUserWidget>)type,UGameplayStatics.GetPlayerController(this,0)) as UGameSettingDetailExtension_DefaultValue;
+     if(footer!=null && footer.RichText_DefaultValueDetails!=null)break;
+    }
+    if(footer!=null && footer.RichText_DefaultValueDetails!=null)break;
+   }
+   if(footer!=null && footer.RichText_DefaultValueDetails!=null){HelpFooterPanels.Add(details);HelpFooters.Add(footer);}
+  }
+  if(footer==null || footer.RichText_DefaultValueDetails==null){details.Box_DetailsExtension.SetVisibility(ESlateVisibility.Collapsed);return;}
+  if(footer.GetParent()!=details.Box_DetailsExtension)details.Box_DetailsExtension.AddChild(footer);
+  footer.SetVisibility(ESlateVisibility.SelfHitTestInvisible);
+  if(footer.WidgetTree!=null)SetRecommendationLabel(footer.WidgetTree.RootWidget);
+  footer.RichText_DefaultValueDetails.SetText(text);
+  details.Box_DetailsExtension.SetVisibility(ESlateVisibility.SelfHitTestInvisible);
+ }
  public void SyncLists(){
   if(syncing)return;syncing=true;
   foreach(var p in Panels){
    if(!UKismetSystemLibrary.IsValid(p) || !p.IsVisible() || p.ListView_Settings==null)continue;var r=p.Registry as USpicewoodGameSettingRegistry_PrimaryPlayer;if(r==null || r.GfxSettings==null)continue;
    bool graphics=false;
    foreach(var setting in p.VisibleSettings){var current=setting;int depth=0;while(current!=null && depth<4){if(current==r.GfxSettings)graphics=true;current=current.SettingParent;depth++;}}
-   if(!graphics){if(Model!=null && p.ListView_Settings.GetListItems().Contains(Model)){p.ListView_Settings.RemoveItem(Model);if(HeaderModel!=null)p.ListView_Settings.RemoveItem(HeaderModel);if(PresetModel!=null)p.ListView_Settings.RemoveItem(PresetModel);if(ScaleModel!=null)p.ListView_Settings.RemoveItem(ScaleModel);Log.Write("MOD ROWS REMOVED FROM OTHER PAGE");}continue;}
+   if(!graphics){if(Model!=null && p.ListView_Settings.GetListItems().Contains(Model)){p.ListView_Settings.RemoveItem(Model);if(HeaderModel!=null)p.ListView_Settings.RemoveItem(HeaderModel);if(PresetModel!=null)p.ListView_Settings.RemoveItem(PresetModel);if(ScaleModel!=null)p.ListView_Settings.RemoveItem(ScaleModel);if(FGHeaderModel!=null)p.ListView_Settings.RemoveItem(FGHeaderModel);foreach(var ds in DisplayModels)if(ds.ControlId==5)p.ListView_Settings.RemoveItem(ds);Log.Write("MOD ROWS REMOVED FROM OTHER PAGE");}continue;}
    if(Model==null){
     Probe=UWidgetBlueprintLibrary.Create(this,Unreal.ClassOf<ReconstructionRow>(),UGameplayStatics.GetPlayerController(this,0)) as ReconstructionRow;
     if(Probe==null || Probe.Skin==null || Probe.WidgetTree==null || Probe.WidgetTree.RootWidget==null){Log.Write("PROBE FAILED");continue;}
     Model=UGameplayStatics.SpawnObject(Unreal.ClassOf<ReconstructionSetting>(),r) as ReconstructionSetting;
     if(Model==null)continue;Model.LocalPlayer=r.OwningLocalPlayer;Model.OwningRegistry=r;Model.SettingParent=r.GfxSettings;
-    Model.OwnedDisplayName="Upscaler";Model.OwnedHelpText="Native uses the game's temporal anti-aliasing. NVIDIA DLSS uses the preset and render scale below, including DLAA at 100%. Changes apply after a safe history reset.";
+    Model.OwnedDisplayName="Upscaler";Model.OwnedHelpText=UpscalerHelpBody();
    }
    if(HeaderModel==null){HeaderModel=UGameplayStatics.SpawnObject(Unreal.ClassOf<ReconstructionHeaderSetting>(),r) as ReconstructionHeaderSetting;if(HeaderModel!=null){HeaderModel.LocalPlayer=r.OwningLocalPlayer;HeaderModel.OwningRegistry=r;HeaderModel.SettingParent=r.GfxSettings;}}
-   if(PresetModel==null){PresetModel=UGameplayStatics.SpawnObject(Unreal.ClassOf<PresetSetting>(),r) as PresetSetting;if(PresetModel!=null){PresetModel.LocalPlayer=r.OwningLocalPlayer;PresetModel.OwningRegistry=r;PresetModel.SettingParent=r.GfxSettings;PresetModel.OwnedDisplayName="DLSS Preset";PresetModel.OwnedHelpText="DLAA: 100%. Quality: about 67%. Balanced: 58%. Performance: 50%. Ultra Performance: about 33%. Custom uses any other scale. Choosing a preset updates the slider and enables NVIDIA DLSS. Presets below the supported minimum are skipped. Quality and Ultra Performance use exact two-thirds and one-third internally.";}}
-   if(ScaleModel==null){ScaleModel=UGameplayStatics.SpawnObject(Unreal.ClassOf<ScaleSetting>(),r) as ScaleSetting;if(ScaleModel!=null){ScaleModel.LocalPlayer=r.OwningLocalPlayer;ScaleModel.OwningRegistry=r;ScaleModel.SettingParent=r.GfxSettings;ScaleModel.OwnedDisplayName="Render Scale";ScaleModel.OwnedHelpText="Set internal render resolution in 1% steps. 100% selects DLAA; preset values select the matching preset, and other values select Custom. The minimum follows output resolution (17% at 4K). Display resolution and interface size stay unchanged.";}}
-   if(p.ListView_Settings.VisualData==null)continue;var map=p.ListView_Settings.VisualData.EntryWidgetForClass;map[Unreal.ClassOf<ReconstructionHeaderSetting>()]=Unreal.ClassOf<ReconstructionHeaderRow>();map[Unreal.ClassOf<ReconstructionSetting>()]=Unreal.ClassOf<ReconstructionRow>();map[Unreal.ClassOf<PresetSetting>()]=Unreal.ClassOf<PresetRow>();map[Unreal.ClassOf<ScaleSetting>()]=Unreal.ClassOf<ScaleRow>();map[Unreal.ClassOf<DisplaySetting>()]=Unreal.ClassOf<DisplayRow>();p.ListView_Settings.VisualData.EntryWidgetForClass=map;
+   if(PresetModel==null){PresetModel=UGameplayStatics.SpawnObject(Unreal.ClassOf<PresetSetting>(),r) as PresetSetting;if(PresetModel!=null){PresetModel.LocalPlayer=r.OwningLocalPlayer;PresetModel.OwningRegistry=r;PresetModel.SettingParent=r.GfxSettings;PresetModel.OwnedDisplayName="DLSS Preset";PresetModel.OwnedHelpText=PresetHelpBody();}}
+   if(ScaleModel==null){ScaleModel=UGameplayStatics.SpawnObject(Unreal.ClassOf<ScaleSetting>(),r) as ScaleSetting;if(ScaleModel!=null){ScaleModel.LocalPlayer=r.OwningLocalPlayer;ScaleModel.OwningRegistry=r;ScaleModel.SettingParent=r.GfxSettings;ScaleModel.OwnedDisplayName="Render Scale";ScaleModel.OwnedHelpText=ScaleHelpBody();}}
+   if(FGHeaderModel==null){FGHeaderModel=UGameplayStatics.SpawnObject(Unreal.ClassOf<FGHeaderSetting>(),r) as FGHeaderSetting;if(FGHeaderModel!=null){FGHeaderModel.LocalPlayer=r.OwningLocalPlayer;FGHeaderModel.OwningRegistry=r;FGHeaderModel.SettingParent=r.GfxSettings;}}
+   if(p.ListView_Settings.VisualData==null)continue;var map=p.ListView_Settings.VisualData.EntryWidgetForClass;map[Unreal.ClassOf<ReconstructionHeaderSetting>()]=Unreal.ClassOf<ReconstructionHeaderRow>();map[Unreal.ClassOf<ReconstructionSetting>()]=Unreal.ClassOf<ReconstructionRow>();map[Unreal.ClassOf<PresetSetting>()]=Unreal.ClassOf<PresetRow>();map[Unreal.ClassOf<ScaleSetting>()]=Unreal.ClassOf<ScaleRow>();map[Unreal.ClassOf<FGHeaderSetting>()]=Unreal.ClassOf<FGHeaderRow>();map[Unreal.ClassOf<DisplaySetting>()]=Unreal.ClassOf<DisplayRow>();p.ListView_Settings.VisualData.EntryWidgetForClass=map;
    InsertDisplayRows(p,r);
    if(HeaderModel!=null && !p.ListView_Settings.GetListItems().Contains(HeaderModel))p.ListView_Settings.AddItem(HeaderModel);
    if(!p.ListView_Settings.GetListItems().Contains(Model)){p.ListView_Settings.AddItem(Model);Log.Write("RECONSTRUCTION APPENDED FROM EVENT");}
    if(PresetModel!=null && !p.ListView_Settings.GetListItems().Contains(PresetModel))p.ListView_Settings.AddItem(PresetModel);if(ScaleModel!=null && !p.ListView_Settings.GetListItems().Contains(ScaleModel))p.ListView_Settings.AddItem(ScaleModel);
   }
+   foreach(var p in Panels){if(!UKismetSystemLibrary.IsValid(p) || !p.IsVisible() || p.ListView_Settings==null || Model==null || !p.ListView_Settings.GetListItems().Contains(Model))continue;
+    if(FGRuntime!=null && FGRuntime.Available==1){if(FGHeaderModel!=null && !p.ListView_Settings.GetListItems().Contains(FGHeaderModel))p.ListView_Settings.AddItem(FGHeaderModel);foreach(var model in DisplayModels)if(model.ControlId==5 && !p.ListView_Settings.GetListItems().Contains(model))p.ListView_Settings.AddItem(model);}
+    else {if(FGHeaderModel!=null)p.ListView_Settings.RemoveItem(FGHeaderModel);foreach(var model in DisplayModels)if(model.ControlId==5)p.ListView_Settings.RemoveItem(model);}
+   }
   syncing=false;
  }
  public void SelectOwned(UObject? item){if(item==null)return;PendingFocus=item;foreach(var p in Panels)if(p.ListView_Settings!=null && p.ListView_Settings.GetListItems().Contains(item))p.ListView_Settings.BP_NavigateToItem(item);Timer.Start(this,"RestoreOwnedFocus",0.1f,false);}
@@ -342,13 +403,17 @@ public class ModActor : AActor {
  public void ShowScaleHelp(){displayHelp=-1;HelpKind=2;OwnHelpVisible=true;ShowHelp();}
  public void ShowHelp(){
   if(displayHelp>=0){ShowDisplayHelp(displayHelp);return;}
-  if(Model==null || !OwnHelpVisible)return;string title="Upscaler";string help="Native uses the game temporal anti-aliasing. NVIDIA DLSS uses the preset and render scale below, including DLAA at 100%. Resume gameplay to apply changes after a safe history reset.";if(HelpKind==1 && PresetModel!=null){title="DLSS Preset";help="DLAA: 100%. Quality: about 67%. Balanced: 58%. Performance: 50%. Ultra Performance: about 33%. Custom uses any other scale. Choosing a preset updates the slider and enables NVIDIA DLSS. Presets below the supported minimum are skipped. Quality and Ultra Performance use exact two-thirds and one-third internally.";}if(HelpKind==2 && ScaleModel!=null){title="Render Scale";help="Set internal render resolution in 1% steps. 100% selects DLAA; preset values select the matching preset, and other values select Custom. The minimum follows output resolution (17% at 4K). Display resolution and interface size stay unchanged.";}
+  if(Model==null || !OwnHelpVisible)return;string title="Upscaler";string help=UpscalerHelpBody();if(HelpKind==1 && PresetModel!=null){title="DLSS Preset";help=PresetHelpBody();}if(HelpKind==2 && ScaleModel!=null){title="Render Scale";help=ScaleHelpBody();}
   if(HelpKind==2)help+="\nCurrent minimum: "+MinimumScalePercent+"%.";if(outputWidth>3840 || outputHeight>2160 || (outputWidth>0 && !ScaleSupported(10000)))help+="\nDLSS is unavailable at this output resolution. Supported output: 640 x 360 to 3840 x 2160.";
   foreach(var p in Panels){if(p.Details_Settings==null || p.ListView_Settings==null || !p.ListView_Settings.GetListItems().Contains(Model))continue;
    var d=p.Details_Settings;if(d.Text_SettingName!=null)d.Text_SettingName.SetText(title);
    
-   if(d.RichText_DynamicDetails!=null){string status="Saved. Resume gameplay to apply safely.";if(Runtime!=null && Saved!=null && Runtime.RequestedRevision==Saved.Revision){if(Runtime.Phase==1 || Runtime.Phase==4)status="Applying upscaler change...";if(Runtime.Phase==2)status=Saved.RenderContextReady==0 && Saved.ReconstructionMode!=0?"DLSS selection saved. It activates in gameplay.":"Upscaler setting is active.";if(Runtime.Phase==3)status=Runtime.ErrorCode==2?"This render scale is unsupported; native anti-aliasing is active.":"DLSS unavailable; native anti-aliasing is active.";}d.RichText_DynamicDetails.SetText(HelpKind==0?"Default: Native.":(HelpKind==1?"Default: Quality.":"Default: 67%."));if(d.RichText_Description!=null)d.RichText_Description.SetText(help+"\n\n"+status);}if(d.RichText_WarningDetails!=null)d.RichText_WarningDetails.SetText("");if(d.RichText_DisabledDetails!=null)d.RichText_DisabledDetails.SetText("");
-   if(d.Box_DetailsExtension!=null)d.Box_DetailsExtension.SetVisibility(ESlateVisibility.Collapsed);
+   if(d.RichText_DynamicDetails!=null){string status="Resume gameplay to apply.";if(Runtime!=null && Saved!=null && Runtime.RequestedRevision==Saved.Revision){if(Runtime.Phase==1 || Runtime.Phase==4)status="Applying upscaler change...";if(Runtime.Phase==2)status=Saved.RenderContextReady==0 && Saved.ReconstructionMode!=0?"DLSS activates in gameplay.":"";if(Runtime.Phase==3)status=Runtime.ErrorCode==2?"This render scale is unsupported; native anti-aliasing is active.":"DLSS unavailable; native anti-aliasing is active.";}d.RichText_DynamicDetails.SetText("");if(d.RichText_Description!=null)d.RichText_Description.SetText(help+(status==""?"":"\n\n"+status));}if(d.RichText_WarningDetails!=null)d.RichText_WarningDetails.SetText("");if(d.RichText_DisabledDetails!=null)d.RichText_DisabledDetails.SetText("");
+   string recommendation=HelpKind==0?"NVIDIA DLSS":(HelpKind==1?"Quality":"67%");
+   if(HelpKind!=0 && MinimumScalePercent>67)recommendation="DLAA";
+   if(outputWidth>3840 || outputHeight>2160 || (outputWidth>0 && !ScaleSupported(10000)))recommendation="Native at this output resolution";
+   if(Runtime!=null && Runtime.RequestedRevision==(Saved==null?0:Saved.Revision) && Runtime.Phase==3)recommendation="Native while DLSS is unavailable";
+   ShowRecommendation(d,recommendation);
   }
  }
  // Preset IDs 0-4 retain their saved meanings; DLAA is appended as 5.
@@ -388,7 +453,7 @@ public class ModActor : AActor {
  public void UpdateScale(){if(Saved==null)return;int scale=10000;if(Saved.ReconstructionMode==2){scale=6667;if(Saved.SRPreset==1)scale=5800;if(Saved.SRPreset==2)scale=5000;if(Saved.SRPreset==3)scale=3333;if(Saved.SRPreset==4)scale=Saved.CustomScaleBasisPoints;}Saved.RenderScaleBasisPoints=scale;}
  public void ChangePreset(int direction){if(Saved==null || Saved.SchemaVersion!=4)return;int index=(Saved.SRPreset==5?0:Saved.SRPreset+1)+direction;if(index<0)index=5;if(index>5)index=0;int p=index==0?5:index-1;for(int attempt=0;attempt<6;attempt++){int candidate=p==4?ClampScale(Saved.LastCustomScaleBasisPoints):PresetSliderScale(p);if(ScaleSupported(candidate))break;index+=direction;if(index<0)index=5;if(index>5)index=0;p=index==0?5:index-1;}if(!ScaleSupported(10000))return;Saved.CustomScaleBasisPoints=p==4?ClampScale(Saved.LastCustomScaleBasisPoints):PresetSliderScale(p);p=PresetAtScale(Saved.CustomScaleBasisPoints);Saved.SRPreset=p;Saved.ReconstructionMode=p==5?1:2;UpdateScale();Saved.Revision++;Persist();RefreshRows();}
  public void ChangeScale(int scale){if(Saved==null || Saved.SchemaVersion!=4)return;if(!ScaleSupported(10000))return;scale=ClampScale(scale);int p=PresetAtScale(scale);int mode=p==5?1:2;if(Saved.CustomScaleBasisPoints==scale && Saved.ReconstructionMode==mode && Saved.SRPreset==p)return;Saved.CustomScaleBasisPoints=scale;if(p==4)Saved.LastCustomScaleBasisPoints=scale;Saved.SRPreset=p;Saved.ReconstructionMode=mode;UpdateScale();Saved.Revision++;Persist();RefreshRows();}
- public void ResetOwned(){if(Saved==null || Saved.SchemaVersion!=4)return;Saved.ReconstructionMode=0;Saved.SRPreset=0;Saved.CustomScaleBasisPoints=6700;Saved.LastCustomScaleBasisPoints=7700;Saved.RenderScaleBasisPoints=10000;Saved.NativeFallback=true;Saved.Revision++;Persist();if(DisplaySaved!=null){DisplaySaved.HDROutput=0;DisplaySaved.PeakNits=1000;DisplaySaved.PaperWhiteNits=203;DisplaySaved.UINits=203;DisplaySaved.ReflexMode=1;DisplaySaved.Revision++;PersistDisplay();}RefreshRows();Log.Write("OWNED RESET");}
+ public void ResetOwned(){if(FGSaved!=null){FGSaved.Mode=0;FGSaved.Revision++;PersistFG();}if(Saved==null || Saved.SchemaVersion!=4)return;Saved.ReconstructionMode=0;Saved.SRPreset=0;Saved.CustomScaleBasisPoints=6700;Saved.LastCustomScaleBasisPoints=7700;Saved.RenderScaleBasisPoints=10000;Saved.NativeFallback=true;Saved.Revision++;Persist();if(DisplaySaved!=null){DisplaySaved.HDROutput=0;DisplaySaved.PeakNits=1000;DisplaySaved.PaperWhiteNits=203;DisplaySaved.UINits=203;DisplaySaved.ReflexMode=1;DisplaySaved.Revision++;PersistDisplay();}RefreshRows();Log.Write("OWNED RESET");}
  public void Persist(){if(Saved!=null)Log.Write("SAVE="+UGameplayStatics.SaveGameToSlot(Saved,"MCD2GraphicsSettings",0)+" revision="+Saved.Revision+" mode="+Saved.ReconstructionMode);}
  public void RefreshRows(){RefreshDisplayRows();UWidgetBlueprintLibrary.GetAllWidgetsOfClass(this,out List<UUserWidget> rows,Unreal.ClassOf<ReconstructionRow>(),false);foreach(var w in rows){var row=w as ReconstructionRow;if(row!=null)row.Refresh();}UWidgetBlueprintLibrary.GetAllWidgetsOfClass(this,out List<UUserWidget> presets,Unreal.ClassOf<PresetRow>(),false);foreach(var w in presets){var row=w as PresetRow;if(row!=null)row.Refresh();}UWidgetBlueprintLibrary.GetAllWidgetsOfClass(this,out List<UUserWidget> scales,Unreal.ClassOf<ScaleRow>(),false);foreach(var w in scales){var row=w as ScaleRow;if(row!=null)row.Refresh();}}
 
@@ -401,9 +466,10 @@ public class ModActor : AActor {
   {DisplayRuntime=UGameplayStatics.CreateSaveGameObject(Unreal.ClassOf<DisplayRuntimeSave>()) as DisplayRuntimeSave;if(DisplayRuntime!=null){DisplayRuntime.SchemaVersion=1;UGameplayStatics.SaveGameToSlot(DisplayRuntime,"MCD2GraphicsDisplayRuntime",0);}}
  }
  public void PersistDisplay(){if(DisplaySaved!=null)UGameplayStatics.SaveGameToSlot(DisplaySaved,"MCD2GraphicsDisplaySettings",0);}
- public int DisplayValue(int id){if(DisplaySaved==null)return 0;if(id==0)return DisplaySaved.HDROutput;if(id==1)return DisplaySaved.PeakNits;if(id==2)return DisplaySaved.PaperWhiteNits;if(id==3)return DisplaySaved.UINits;return DisplaySaved.ReflexMode;}
- public string DisplayLabel(int id){if(id==0)return "HDR Output";if(id==1)return "HDR Peak Brightness";if(id==2)return "HDR Paper White";if(id==3)return "HDR UI Brightness";return "NVIDIA Reflex";}
+ public int DisplayValue(int id){if(DisplaySaved==null)return 0;if(id==5)return FGSaved==null?0:FGSaved.Mode;if(id==0)return DisplaySaved.HDROutput;if(id==1)return DisplaySaved.PeakNits;if(id==2)return DisplaySaved.PaperWhiteNits;if(id==3)return DisplaySaved.UINits;return DisplaySaved.ReflexMode;}
+ public string DisplayLabel(int id){if(id==5)return "Frame Generation";if(id==0)return "HDR Output";if(id==1)return "HDR Peak Brightness";if(id==2)return "HDR Paper White";if(id==3)return "HDR UI Brightness";return "NVIDIA Reflex";}
  public void ChangeDisplay(int id,int direction){if(DisplaySaved==null || DisplaySaved.SchemaVersion!=1 || direction==0)return;
+  if(id==5){if(FGSaved==null || FGRuntime==null || FGRuntime.Available!=1)return;FGSaved.Mode=FGSaved.Mode==0?1:0;FGSaved.Revision++;PersistFG();RefreshDisplayRows();return;}
   if(id==0){if(!displayHDRSupported && DisplaySaved.HDROutput==0)return;DisplaySaved.HDROutput=DisplaySaved.HDROutput==0?1:0;}
   else if(id==4){if(DisplayRuntime==null || DisplayRuntime.ReflexAvailable!=1 || DisplayRuntime.ReflexFault!=0)return;int n=DisplaySaved.ReflexMode+direction;if(n<0)n=2;if(n>2)n=0;DisplaySaved.ReflexMode=n;}
   else {if(DisplaySaved.HDROutput==0)return;int n=DisplayValue(id)+direction*(id==1?10:1);int min=id==1?100:48;int max=id==1?10000:500;if(n<min)n=min;if(n>max)n=max;if(id==1)DisplaySaved.PeakNits=n;if(id==2)DisplaySaved.PaperWhiteNits=n;if(id==3)DisplaySaved.UINits=n;}
@@ -425,9 +491,9 @@ public class ModActor : AActor {
  }
  public void InsertDisplayRows(USpicewoodGameSettingPanel panel,USpicewoodGameSettingRegistry_PrimaryPlayer registry){
   if(panel.ListView_Settings==null || registry.GfxSettings==null)return;
-  if(DisplayModels.Count==0){for(int id=0;id<5;id++){var model=UGameplayStatics.SpawnObject(Unreal.ClassOf<DisplaySetting>(),registry) as DisplaySetting;if(model!=null){model.ControlId=id;model.LocalPlayer=registry.OwningLocalPlayer;model.OwningRegistry=registry;model.SettingParent=registry.GfxSettings;DisplayModels.Add(model);}}}
+  if(DisplayModels.Count==0){for(int id=0;id<6;id++){var model=UGameplayStatics.SpawnObject(Unreal.ClassOf<DisplaySetting>(),registry) as DisplaySetting;if(model!=null){model.ControlId=id;model.LocalPlayer=registry.OwningLocalPlayer;model.OwningRegistry=registry;model.SettingParent=registry.GfxSettings;DisplayModels.Add(model);}}}
   var list=panel.ListView_Settings.GetListItems();var result=new List<UObject>();bool hdrInserted=false;bool reflexInserted=false;
-  foreach(var item in list){if(item is DisplaySetting)continue;result.Add(item);if(item==Model || item==HeaderModel || item==PresetModel || item==ScaleModel)continue;var setting=item as UGameSetting;if(setting==null)continue;string label=UKismetTextLibrary.Conv_TextToString(setting.GetDisplayName());string name=UKismetSystemLibrary.GetObjectName(setting);
+  foreach(var item in list){if(item is DisplaySetting){var own=item as DisplaySetting;if(own!=null && own.ControlId==5 && FGRuntime!=null && FGRuntime.Available==1)result.Add(item);continue;}result.Add(item);if(item==Model || item==HeaderModel || item==PresetModel || item==ScaleModel)continue;var setting=item as UGameSetting;if(setting==null)continue;string label=UKismetTextLibrary.Conv_TextToString(setting.GetDisplayName());string name=UKismetSystemLibrary.GetObjectName(setting);
    if(!hdrInserted && (label=="Brightness" || name.Contains("Brightness"))){foreach(var model in DisplayModels)if(model.ControlId<4)result.Add(model);hdrInserted=true;}
    if(!reflexInserted && (label=="FPS Limit" || label.Contains("Frame Rate Limit") || name.Contains("FrameRateLimit") || name.Contains("FPSLimit"))){foreach(var model in DisplayModels)if(model.ControlId==4 && ((DisplayRuntime!=null && DisplayRuntime.ReflexAvailable==1 && DisplayRuntime.ReflexFault==0) || list.Contains(model)))result.Add(model);reflexInserted=true;}
   }
@@ -436,19 +502,78 @@ public class ModActor : AActor {
   if(changed)panel.ListView_Settings.BP_SetListItems(result);RefreshDisplayRows();
  }
  public void RefreshDisplayRows(){UWidgetBlueprintLibrary.GetAllWidgetsOfClass(this,out List<UUserWidget> rows,Unreal.ClassOf<DisplayRow>(),false);foreach(var w in rows){var row=w as DisplayRow;if(row!=null && UKismetSystemLibrary.IsValid(row) && row.IsVisible())row.Refresh();}}
+ public void InitializeFG(){
+  FGSaved=UGameplayStatics.LoadGameFromSlot("MCD2GraphicsFGSettings",0) as FGSettingsSave;
+  if(FGSaved==null)FGSaved=UGameplayStatics.CreateSaveGameObject(Unreal.ClassOf<FGSettingsSave>()) as FGSettingsSave;
+  if(FGSaved!=null){if(FGSaved.SchemaVersion!=1 || FGSaved.Mode<0 || FGSaved.Mode>1)FGSaved.Mode=0;FGSaved.SchemaVersion=1;FGSaved.ContextReady=0;FGSaved.SessionId=0;FGSaved.Revision++;PersistFG();}
+  FGRuntime=UGameplayStatics.CreateSaveGameObject(Unreal.ClassOf<FGRuntimeSave>()) as FGRuntimeSave;
+  if(FGRuntime!=null){FGRuntime.SchemaVersion=1;UGameplayStatics.SaveGameToSlot(FGRuntime,"MCD2GraphicsFGRuntime",0);}
+ }
+ public void PersistFG(){if(FGSaved!=null)UGameplayStatics.SaveGameToSlot(FGSaved,"MCD2GraphicsFGSettings",0);}
+ public void PollFG(){
+  if(FGSaved==null)return;
+  var state=UGameplayStatics.LoadGameFromSlot("MCD2GraphicsFGRuntime",0) as FGRuntimeSave;
+  bool changed=state!=null && (FGRuntime==null || state.Available!=FGRuntime.Available || state.SessionId!=FGRuntime.SessionId);
+  if(state!=null && state.SchemaVersion==1)FGRuntime=state;
+  int ready=Saved!=null && Saved.RenderContextReady==1 && !UGameplayStatics.IsGamePaused(this)?1:0;
+  foreach(var layer in Layers){if(!UKismetSystemLibrary.IsValid(layer))continue;if(UKismetSystemLibrary.GetObjectName(layer)=="Activity_Stack")continue;var active=layer.DisplayedWidget;if(active==null || !UKismetSystemLibrary.IsValid(active) || !active.IsActivated())continue;string name=UKismetSystemLibrary.GetObjectName(active);if(!name.StartsWith("W_PlayerHUD_Activatable_C_") && !name.StartsWith("W_HotbarContainer_Activatable_C_") && !name.StartsWith("W_InGameNavigation_Activatable_C_")){ready=0;}}
+  // The navigation root stays active around its Inventory/System children.
+  // Check those children's activation too; a root-only gate admits menus.
+  foreach(var active in LifecycleWidgets){if(!UKismetSystemLibrary.IsValid(active) || !active.IsActivated())continue;string name=UKismetSystemLibrary.GetObjectName(active);if(name=="Hotbar" || name=="MiniInventory" || name.StartsWith("W_ActivityLayer_Activatable_C_") || name.StartsWith("W_PlayerHUD_Activatable_C_") || name.StartsWith("W_HotbarContainer_Activatable_C_") || name.StartsWith("W_InGameNavigation_Activatable_C_") || name.Contains("Notification_Activatable_C_"))continue;ready=0;}
+  int session=FGRuntime==null?0:FGRuntime.SessionId;
+  bool intentChanged=FGSaved.ContextReady!=ready || FGSaved.SessionId!=session;
+  if(intentChanged){FGSaved.ContextReady=ready;FGSaved.SessionId=session;FGSaved.Revision++;Log.Write("FG CONTEXT ready="+ready);}
+  // A current-process heartbeat prevents stale gameplay intent after travel or UI failure.
+  if(FGSaved.Mode==1 || intentChanged)PersistFG();UpdateFoliageVelocity(ready);if(changed)SyncLists();if(displayHelp==5 && GraphicsPageOpen())ShowDisplayHelp(5);
+ }
+ public void RestoreFoliageVelocity(){
+  if(!foliageVelocityOwned || foliageRestoreAttempts>=3)return;
+  // Restore only our value; a later console/user/mod change takes precedence.
+  if(UKismetSystemLibrary.GetConsoleVariableStringValue("r.Velocity.EnableVertexDeformation")!="" && UKismetSystemLibrary.GetConsoleVariableIntValue("r.Velocity.EnableVertexDeformation")==1){
+   foliageRestoreAttempts++;UKismetSystemLibrary.ExecuteConsoleCommand(this,"r.Velocity.EnableVertexDeformation "+foliageVelocityOriginal,UGameplayStatics.GetPlayerController(this,0));
+   if(UKismetSystemLibrary.GetConsoleVariableIntValue("r.Velocity.EnableVertexDeformation")!=foliageVelocityOriginal){Log.Write("DLSS FOLIAGE RESTORE FAILED");return;}
+   Log.Write("DLSS FOLIAGE RESTORED");
+  }
+  foliageVelocityOwned=false;
+ }
+ public void UpdateFoliageVelocity(int ready){
+  // Vertex deformation velocities benefit DLSS SR and DLAA, independently of FG/HDR.
+  // Only a current renderer acknowledgement may acquire or retain the override.
+  bool eligible=Saved!=null && Saved.SchemaVersion==4 && Saved.RenderContextReady==1 && Saved.ReconstructionMode>0 && Runtime!=null && Runtime.SchemaVersion==1 && Runtime.SessionId>0 && Saved.RenderContextSessionId==Runtime.SessionId && Runtime.RequestedRevision==Saved.Revision && Runtime.ErrorCode==0 && Runtime.Phase!=3;
+  if(!eligible){RestoreFoliageVelocity();foliageVelocityBlocked=false;return;}
+  if(foliageVelocityOwned){
+   if(UKismetSystemLibrary.GetConsoleVariableStringValue("r.Velocity.EnableVertexDeformation")=="" || UKismetSystemLibrary.GetConsoleVariableIntValue("r.Velocity.EnableVertexDeformation")!=1){foliageVelocityOwned=false;foliageVelocityBlocked=true;}
+   return;
+  }
+  // Acquire in verified gameplay only. Keep the lease through temporary menus.
+  if(foliageVelocityBlocked || ready!=1 || Runtime==null || Runtime.Phase!=2)return;
+  if(UKismetSystemLibrary.GetConsoleVariableStringValue("r.Velocity.EnableVertexDeformation")=="" || UKismetSystemLibrary.GetConsoleVariableIntValue("r.VelocityOutputPass")!=2){foliageVelocityBlocked=true;return;}
+  int original=UKismetSystemLibrary.GetConsoleVariableIntValue("r.Velocity.EnableVertexDeformation");
+  if(original==1)return;
+  if(original!=0 && original!=2){foliageVelocityBlocked=true;return;}
+  UKismetSystemLibrary.ExecuteConsoleCommand(this,"r.Velocity.EnableVertexDeformation 1",UGameplayStatics.GetPlayerController(this,0));
+  if(UKismetSystemLibrary.GetConsoleVariableIntValue("r.Velocity.EnableVertexDeformation")==1){foliageVelocityOriginal=original;foliageRestoreAttempts=0;foliageVelocityOwned=true;Log.Write("DLSS FOLIAGE VELOCITY ENABLED");}else{foliageVelocityBlocked=true;Log.Write("DLSS FOLIAGE APPLY FAILED");}
+ }
  public void ShowDisplayHelp(int id){displayHelp=id;OwnHelpVisible=true;string help="";
-  if(id==0)help="Enables the game's HDR output path and RenoDX HDR processing. System HDR must also be enabled.";
-  if(id==1)help="Set to the approximate peak luminance of the display's HDR mode. Use your display's specification or measured clipping point.";
-  if(id==2)help="Controls the brightness of ordinary scene white. Default: 203 nits.";
-  if(id==3)help="Controls interface brightness in HDR. Default: 203 nits.";
-  if(id==4)help="Reduces the render queue using NVIDIA Reflex. On + Boost also requests higher GPU clocks. Off retains measurement markers. Default: On.";
-  if(id==4 && (DisplayRuntime==null || DisplayRuntime.ReflexAvailable!=1 || DisplayRuntime.ReflexFault!=0))help+="\n\nReflex is unavailable in this session. Your saved choice is retained. Restart the game and check the installation if this persists.";
-  if(id<4){if(!displayHDRSupported)help+="\n\nHDR output is unavailable. Enable system HDR and check your display/Proton setup.";if(DisplayRuntime!=null && DisplayRuntime.HDRRestartRequired==1)help+="\n\nRestart the game to apply RenoDX calibration. Advanced controls remain in the ReShade panel.";}
-  foreach(var p in Panels){if(!UKismetSystemLibrary.IsValid(p) || !p.IsVisible() || p.Details_Settings==null || p.ListView_Settings==null || Model==null || !p.ListView_Settings.GetListItems().Contains(Model))continue;var d=p.Details_Settings;if(d.Text_SettingName!=null)d.Text_SettingName.SetText(DisplayLabel(id));if(d.RichText_Description!=null)d.RichText_Description.SetText(help);if(d.RichText_DynamicDetails!=null)d.RichText_DynamicDetails.SetText(id==4 && DisplayRuntime!=null?"Active mode: "+(DisplayRuntime.ReflexMode==0?"Off":DisplayRuntime.ReflexMode==1?"On":"On + Boost"):"");if(d.RichText_WarningDetails!=null)d.RichText_WarningDetails.SetText("");if(d.RichText_DisabledDetails!=null)d.RichText_DisabledDetails.SetText("");if(d.Box_DetailsExtension!=null)d.Box_DetailsExtension.SetVisibility(ESlateVisibility.Collapsed);}
+  if(id==5)help="Generate an extra frame between rendered frames for smoother motion.\n\n• Off — rendered frames only\n• On — rendered and generated frames\n\nRestart after changing modes.";
+  if(id==0)help="Enable HDR for a compatible display with system HDR turned on.\n\n• Off — standard dynamic range\n• On — HDR output";
+  if(id==1)help="Match the peak brightness of your display’s HDR mode. Use its calibrated value.";
+  if(id==2)help="Adjust the brightness of ordinary scene white in HDR. Raise it for a brighter room.";
+  if(id==3)help="Adjust menu and text brightness in HDR without changing the scene.";
+  if(id==4)help="Reduce input latency on supported NVIDIA GPUs.\n\n• Off — disabled\n• On — lower latency\n• On + Boost — lower latency and higher GPU clocks; uses more power";
+  if(id==4 && (DisplayRuntime==null || DisplayRuntime.ReflexAvailable!=1 || DisplayRuntime.ReflexFault!=0))help+="\n\nUnavailable in this session.";
+  if(id<4){if(!displayHDRSupported)help+="\n\nEnable system HDR to use this setting.";if(DisplayRuntime!=null && DisplayRuntime.HDRRestartRequired==1)help+="\n\nRestart to apply.";}
+  string recommendation=id==5?"Off":id==0?(displayHDRSupported?"On":"Off"):(id==1?"Display peak":(id==2 || id==3?"203 nits":"On"));
+  if(id==4 && (DisplayRuntime==null || DisplayRuntime.ReflexAvailable!=1 || DisplayRuntime.ReflexFault!=0))recommendation="Unavailable";
+  foreach(var p in Panels){if(!UKismetSystemLibrary.IsValid(p) || !p.IsVisible() || p.Details_Settings==null || p.ListView_Settings==null || Model==null || !p.ListView_Settings.GetListItems().Contains(Model))continue;var d=p.Details_Settings;if(d.Text_SettingName!=null)d.Text_SettingName.SetText(DisplayLabel(id));if(d.RichText_Description!=null)d.RichText_Description.SetText(help);if(d.RichText_DynamicDetails!=null)d.RichText_DynamicDetails.SetText(id==5?FGStatus():id==4 && DisplayRuntime!=null?"Active mode: "+(DisplayRuntime.ReflexMode==0?"Off":DisplayRuntime.ReflexMode==1?"On":"On + Boost"):"");if(d.RichText_WarningDetails!=null)d.RichText_WarningDetails.SetText("");if(d.RichText_DisabledDetails!=null)d.RichText_DisabledDetails.SetText("");ShowRecommendation(d,recommendation);}
  }
 
+ public string FGStatus(){if(FGRuntime==null || FGRuntime.Available!=1)return "Unavailable in this session.";if(FGRuntime.RestartRequired==1)return "Restart to apply.";if(FGSaved==null || FGSaved.Mode==0)return "Off.";if(FGRuntime.Phase==6)return "Frame generation stopped after a runtime error.";if(Saved==null || Saved.ReconstructionMode==0)return "Select NVIDIA DLSS to use frame generation.";if(DisplaySaved==null || DisplaySaved.HDROutput==0)return "This preview requires HDR.";return FGRuntime.Active==1?"Active: 2× presentation.":"Resumes during gameplay.";}
  protected override void ReceiveEndPlay(EEndPlayReason reason){
+  RestoreFoliageVelocity();
+  foreach(var footer in HelpFooters)if(UKismetSystemLibrary.IsValid(footer))footer.RemoveFromParent();HelpFooters.Clear();HelpFooterPanels.Clear();
   if(Saved!=null && Saved.SchemaVersion==4 && Saved.RenderContextReady!=0){Saved.RenderContextReady=0;Saved.RenderContextSessionId=0;Saved.Revision++;Persist();}
-  Timer.Stop(this,"Discover");Timer.Stop(this,"SyncLists");Timer.Stop(this,"PollRenderer");Timer.Stop(this,"PollDisplay");Timer.Stop(this,"RestoreOwnedFocus");foreach(var button in ResetButtons)button.OnButtonBaseClicked-=ResetConfirmed;foreach(var active in LifecycleWidgets){active.BP_OnWidgetActivated-=LifecycleChanged;active.BP_OnWidgetDeactivated-=LifecycleChanged;}foreach(var p in Panels){if(p.ListView_Settings==null)continue;p.ListView_Settings.BP_OnEntriesGenerated-=EntriesGenerated;p.ListView_Settings.BP_OnEntryReleased-=EntryReleased;p.ListView_Settings.BP_OnItemSelectionChanged-=SelectionChanged;p.ListView_Settings.BP_OnItemIsHoveredChanged-=HoverChanged;if(Model!=null)p.ListView_Settings.RemoveItem(Model);if(HeaderModel!=null)p.ListView_Settings.RemoveItem(HeaderModel);if(PresetModel!=null)p.ListView_Settings.RemoveItem(PresetModel);if(ScaleModel!=null)p.ListView_Settings.RemoveItem(ScaleModel);foreach(var ds in DisplayModels)p.ListView_Settings.RemoveItem(ds);}Log.Write("LIST EVENTS UNBOUND");
+  if(FGSaved!=null){FGSaved.ContextReady=0;FGSaved.SessionId=0;FGSaved.Revision++;PersistFG();}Timer.Stop(this,"PollFG");
+  Timer.Stop(this,"Discover");Timer.Stop(this,"SyncLists");Timer.Stop(this,"PollRenderer");Timer.Stop(this,"PollDisplay");Timer.Stop(this,"RestoreOwnedFocus");foreach(var button in ResetButtons)button.OnButtonBaseClicked-=ResetConfirmed;foreach(var active in LifecycleWidgets){active.BP_OnWidgetActivated-=LifecycleChanged;active.BP_OnWidgetDeactivated-=LifecycleChanged;}foreach(var p in Panels){if(p.ListView_Settings==null)continue;p.ListView_Settings.BP_OnEntriesGenerated-=EntriesGenerated;p.ListView_Settings.BP_OnEntryReleased-=EntryReleased;p.ListView_Settings.BP_OnItemSelectionChanged-=SelectionChanged;p.ListView_Settings.BP_OnItemIsHoveredChanged-=HoverChanged;if(Model!=null)p.ListView_Settings.RemoveItem(Model);if(HeaderModel!=null)p.ListView_Settings.RemoveItem(HeaderModel);if(PresetModel!=null)p.ListView_Settings.RemoveItem(PresetModel);if(ScaleModel!=null)p.ListView_Settings.RemoveItem(ScaleModel);if(FGHeaderModel!=null)p.ListView_Settings.RemoveItem(FGHeaderModel);foreach(var ds in DisplayModels)p.ListView_Settings.RemoveItem(ds);}Log.Write("LIST EVENTS UNBOUND");
  }
 }

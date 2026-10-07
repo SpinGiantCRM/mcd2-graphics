@@ -1,0 +1,250 @@
+{
+  "date": "2026-10-07",
+  "GPU": "RTX 4080 SUPER",
+  "driver": "615.71.09",
+  "output": [
+    3840,
+    2160
+  ],
+  "API": "D3D12 through CachyOS Proton SLR, native WineWayland HDR",
+  "method": "Three consecutive 1200-callback CPU finish_present samples per condition. Stationary character/camera; animated scene. FG outcomes are cached SDK counters, not measured panel scanout. No GPU readbacks/queries. Matching current-process SR acknowledgements required; accepted FG On samples require zero internal NGX errors and continuous successful SDK outcomes. One transient FG-off sampler sequence was rejected and retained privately.",
+  "rows": [
+    {
+      "preset": "DLAA",
+      "baseline": {
+        "renderedFPS": 86.5980853647235,
+        "SDKPresentedFPS": 86.5980853647235,
+        "rangeFPS": [
+          86.36670451314725,
+          86.83669421758147
+        ],
+        "runs": [
+          {
+            "renderedFPS": 86.83669421758147,
+            "SDKPresentedFPS": 86.83669421758147,
+            "seconds": 13.807527,
+            "p95Ms": 12.7149,
+            "SDKStatuses": [
+              0
+            ]
+          },
+          {
+            "renderedFPS": 86.5980853647235,
+            "SDKPresentedFPS": 86.5980853647235,
+            "seconds": 13.8455717,
+            "p95Ms": 12.7515,
+            "SDKStatuses": [
+              0
+            ]
+          },
+          {
+            "renderedFPS": 86.36670451314725,
+            "SDKPresentedFPS": 86.36670451314725,
+            "seconds": 13.8826647,
+            "p95Ms": 12.7151,
+            "SDKStatuses": [
+              0
+            ]
+          }
+        ]
+      },
+      "fgOff": {
+        "renderedFPS": 86.30778402417869,
+        "SDKPresentedFPS": 86.30778402417869,
+        "rangeFPS": [
+          85.52497684548563,
+          86.85316279052012
+        ],
+        "runs": [
+          {
+            "renderedFPS": 85.52497684548563,
+            "SDKPresentedFPS": 85.52497684548563,
+            "seconds": 14.0192964,
+            "p95Ms": 12.826,
+            "SDKStatuses": [
+              0
+            ]
+          },
+          {
+            "renderedFPS": 86.30778402417869,
+            "SDKPresentedFPS": 86.30778402417869,
+            "seconds": 13.8921421,
+            "p95Ms": 12.5357,
+            "SDKStatuses": [
+              0
+            ]
+          },
+          {
+            "renderedFPS": 86.85316279052012,
+            "SDKPresentedFPS": 86.85316279052012,
+            "seconds": 13.804908900000001,
+            "p95Ms": 12.476,
+            "SDKStatuses": [
+              0
+            ]
+          }
+        ]
+      },
+      "fgOn": {
+        "renderedFPS": 66.4302529022998,
+        "SDKPresentedFPS": 132.8605058045996,
+        "rangeFPS": [
+          65.97138439756179,
+          66.53435375390293
+        ],
+        "runs": [
+          {
+            "renderedFPS": 66.53435375390293,
+            "SDKPresentedFPS": 133.06870750780587,
+            "seconds": 18.0207657,
+            "p95Ms": 16.5573,
+            "SDKStatuses": [
+              0
+            ]
+          },
+          {
+            "renderedFPS": 65.97138439756179,
+            "SDKPresentedFPS": 131.94276879512358,
+            "seconds": 18.174546600000003,
+            "p95Ms": 16.9726,
+            "SDKStatuses": [
+              0
+            ]
+          },
+          {
+            "renderedFPS": 66.4302529022998,
+            "SDKPresentedFPS": 132.8605058045996,
+            "seconds": 18.0490055,
+            "p95Ms": 16.5919,
+            "SDKStatuses": [
+              0
+            ]
+          }
+        ]
+      },
+      "offVsBaselinePercent": -0.3352283590591587,
+      "fgBaseReductionPercent": 23.030983064413167,
+      "SDKPresentationGainPercent": 53.938033871173666
+    },
+    {
+      "preset": "Quality",
+      "baseline": {
+        "renderedFPS": 128.73536284829706,
+        "SDKPresentedFPS": 128.73536284829706,
+        "rangeFPS": [
+          128.15139812587503,
+          128.75141378233522
+        ],
+        "runs": [
+          {
+            "renderedFPS": 128.15139812587503,
+            "SDKPresentedFPS": 128.15139812587503,
+            "seconds": 9.356121100000001,
+            "p95Ms": 8.9059,
+            "SDKStatuses": [
+              0
+            ]
+          },
+          {
+            "renderedFPS": 128.73536284829706,
+            "SDKPresentedFPS": 128.73536284829706,
+            "seconds": 9.3136802,
+            "p95Ms": 8.8253,
+            "SDKStatuses": [
+              0
+            ]
+          },
+          {
+            "renderedFPS": 128.75141378233522,
+            "SDKPresentedFPS": 128.75141378233522,
+            "seconds": 9.3125191,
+            "p95Ms": 8.8565,
+            "SDKStatuses": [
+              0
+            ]
+          }
+        ]
+      },
+      "fgOff": {
+        "renderedFPS": 129.4832509203219,
+        "SDKPresentedFPS": 129.4832509203219,
+        "rangeFPS": [
+          128.90382520004846,
+          129.54313388761517
+        ],
+        "runs": [
+          {
+            "renderedFPS": 129.54313388761517,
+            "SDKPresentedFPS": 129.54313388761517,
+            "seconds": 9.2556044,
+            "p95Ms": 8.5596,
+            "SDKStatuses": [
+              0
+            ]
+          },
+          {
+            "renderedFPS": 128.90382520004846,
+            "SDKPresentedFPS": 128.90382520004846,
+            "seconds": 9.3015083,
+            "p95Ms": 8.6074,
+            "SDKStatuses": [
+              0
+            ]
+          },
+          {
+            "renderedFPS": 129.4832509203219,
+            "SDKPresentedFPS": 129.4832509203219,
+            "seconds": 9.259884900000001,
+            "p95Ms": 8.6256,
+            "SDKStatuses": [
+              0
+            ]
+          }
+        ]
+      },
+      "fgOn": {
+        "renderedFPS": 88.85984964483592,
+        "SDKPresentedFPS": 177.71969928967184,
+        "rangeFPS": [
+          88.06576783859899,
+          89.0057420209767
+        ],
+        "runs": [
+          {
+            "renderedFPS": 88.06576783859899,
+            "SDKPresentedFPS": 176.13153567719797,
+            "seconds": 13.614824800000001,
+            "p95Ms": 12.9479,
+            "SDKStatuses": [
+              0
+            ]
+          },
+          {
+            "renderedFPS": 89.0057420209767,
+            "SDKPresentedFPS": 178.0114840419534,
+            "seconds": 13.471041,
+            "p95Ms": 12.4504,
+            "SDKStatuses": [
+              0
+            ]
+          },
+          {
+            "renderedFPS": 88.85984964483592,
+            "SDKPresentedFPS": 177.71969928967184,
+            "seconds": 13.4931581,
+            "p95Ms": 12.6935,
+            "SDKStatuses": [
+              0
+            ]
+          }
+        ]
+      },
+      "offVsBaselinePercent": 0.5809499856742173,
+      "fgBaseReductionPercent": 31.373479571102038,
+      "SDKPresentationGainPercent": 37.253040857795924
+    }
+  ],
+  "releaseQualified": false,
+  "limitation": "One earlier render-thread hang remains unresolved; later clean sessions do not establish a fix.",
+  "status": "Historical v31 record; superseded held candidate requires requalification"
+}

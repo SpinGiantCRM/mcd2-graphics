@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'qualification/update2/**'
+      - 'qualification/fg-release/**'
       - 'src/installer/**'
       - 'tests/installer-core/**'
       - 'build_installer.py'
@@ -35,7 +36,5 @@ jobs:
           retention-days: 30
           if-no-files-found: error
           path: |
-            dist/guided/linux/mcd2-graphics-installer
-            dist/guided/linux/installer-build.json
-            dist/guided/windows/MCD2-Graphics-Installer.exe
-            dist/guided/windows/installer-build.json
+            dist/guided/linux/**
+            dist/guided/windows/**

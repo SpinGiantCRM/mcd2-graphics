@@ -1,2 +1,13 @@
 # Preserve verbatim upstream notices, including their original whitespace.
 third-party/** -whitespace
+
+# Keep patch context and provenance hashes identical on Windows and Linux.
+qualification/fg-release/*.patch text eol=lf
+# Preserve the exact upstream diff, including its context prefixes and indentation.
+qualification/fg-release/msvc-framework-source.patch -whitespace
+# These files are byte inputs to separately hash-pinned dependency ZIPs.
+qualification/fg-release/ReShade-dependency-README.md text eol=lf
+qualification/fg-release/original-framework-README.md text eol=lf
+qualification/fg-release/msvc-framework-build-receipt.json text eol=lf
+qualification/fg-release/msvc-mitigation-installer-build.json text eol=lf
+qualification/fg-release/windows-msvc-mitigation-2026-10-07.json text eol=lf

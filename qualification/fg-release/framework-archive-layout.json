@@ -1,0 +1,54 @@
+{
+  "LICENSE.md": {
+    "date_time": [
+      2026,
+      10,
+      7,
+      7,
+      21,
+      56
+    ],
+    "external_attr": 2175008768,
+    "create_system": 3,
+    "compress_type": 8
+  },
+  "README.md": {
+    "date_time": [
+      2026,
+      10,
+      7,
+      7,
+      21,
+      56
+    ],
+    "external_attr": 2175008768,
+    "create_system": 3,
+    "compress_type": 8
+  },
+  "ReShade64.dll": {
+    "date_time": [
+      2026,
+      10,
+      7,
+      7,
+      21,
+      56
+    ],
+    "external_attr": 2175008768,
+    "create_system": 3,
+    "compress_type": 8
+  },
+  "build-receipt.json": {
+    "date_time": [
+      2026,
+      10,
+      7,
+      7,
+      21,
+      56
+    ],
+    "external_attr": 2175008768,
+    "create_system": 3,
+    "compress_type": 8
+  }
+}

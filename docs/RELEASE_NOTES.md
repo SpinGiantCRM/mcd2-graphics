@@ -1,3 +1,83 @@
+# 0.3.0-preview.1 — Frame Generation preview
+
+Experimental prerelease. Uses the exact Windows-qualified installer source and payload; Linux qualification and fresh benchmarks passed without runtime or installer code changes for publication.
+
+## Frame Generation
+
+- Adds **Off / On** to the native Video menu. On generates one extra frame
+  between rendered frames and enables Reflex on supported NVIDIA hardware.
+  This preview requires active NVIDIA DLSS/DLAA, native HDR and the patched
+  ReShade framework; restart when requested.
+- Supports full-resolution DLAA and reduced-resolution DLSS inputs. Foliage
+  motion-vector changes address the severe shimmering reported during testing;
+  some interpolation artifacts remain possible.
+- Coordinates shared NVIDIA runtime ownership so changing SR presets does not
+  shut down a runtime still used by FG. Internal evaluation failures are checked
+  separately from reported presentation counts.
+
+## Reflex and DLSS fixes
+
+- **Linux/Proton Reflex pacing:** stabilizes the tested VSync-Off presentation
+  path by disabling dynamic Vulkan swapchain-mode switching before graphics
+  startup. Existing extension exclusions, VSync choice and frame limit are
+  preserved. Native Windows skips this compatibility setting.
+- In the recorded stationary 4K Linux check with DLSS and FG Off, Reflex On
+  averaged about **0.2% below Off**, with substantially steadier frame intervals
+  than the old path. The full reported 100→80 FPS drop was not reproduced in
+  that scene. VSync On remains a separate limitation; these measurements do not
+  establish input-latency reduction. See the [measured result](../experiments/fg-streamline/REFLEX_PACING_2026-10-07.md).
+- **DLSS SR / DLAA foliage:** enables vertex-deformation motion vectors during
+  acknowledged gameplay, including FG Off. This gives reconstruction information
+  about animated foliage instead of treating its deformation as stationary.
+  Native fallback restores the previous value where the mod still owns it;
+  later user/mod changes take precedence. It does not promise to remove every
+  foliage or shadow artifact.
+- **Preset transitions:** adds successful-reset confirmation for dormant command
+  lists, addressing the reproduced Quality→DLAA request that stayed Applying.
+  Resource release still requires completed GPU work. This is a specific
+  lifetime fix, not a claim that every historical hang or exit issue is resolved.
+
+## Settings and dependencies
+
+- Shortens setting descriptions, adds bullets where useful and places
+  recommendations in the separate native footer. FG help describes generated
+  frames directly; the old 15-minute preview wording is removed.
+- Updates Mods-page version, feature description, author/help information and
+  online wording. Settings remain in **Settings → Video**.
+- Supports the Blueprint Loader **2.0+** metadata/settings API without using the
+  2.2 popup API. Complete official 2.0, 2.2 and 2.3 sets are recognized without
+  forced upgrades.
+- Adds explicit, default-Off untested-version overrides for **Loader, ReShade,
+  RenoDX, DLSS and Streamline**. A minimum API/version is not a guarantee about
+  every future release. Overrides preserve game identity, own-payload hashes,
+  required-file completeness, archive safety and file ownership checks.
+- Adds an optional restart-only DLSS model hint. Default/absent configuration
+  keeps NVIDIA's model selection; it does not change render-scale presets.
+  See [dependency overrides](DEPENDENCY_OVERRIDES.md).
+
+## Installation and availability
+
+- Uses a normal ZIP with self-contained installer files and an expanded visible
+  payload. No embedded payload archive, self-extraction or background downloader.
+  Repair/uninstall preserve shared dependencies, saves and modified files.
+- Provides the exact credited ReShade framework as a separate direct download,
+  fixing the missing download during Windows qualification. Its device/queue
+  access and successful-reset interfaces are runtime requirements; a newer stock
+  build may lack them. See [the explanation and download](FG_CANDIDATE.md#why-this-reshade-build-is-required).
+- The mod does not force offline mode. Online compatibility is unverified;
+  offline play is safer. Xbox app / Microsoft Store PC compatibility remains
+  unverified. NVIDIA runtime DLLs remain external official dependencies.
+
+At 4K on RTX 4080 SUPER, DLAA measured **81.80 FPS Off → 61.06 rendered / 122.11 SDK presentation FPS On**; Quality measured **122.74 Off → 83.76 / 167.52 On**. Three 30-second samples per mode; fresh rc.1 controls were within about 2%. [Method and per-run numbers](BENCHMARK_2026-10-07.md). Earlier tables remain historical.
+
+[Final Linux qualification](LINUX_FINAL_QUALIFICATION_2026-10-07.md) and [Windows AMD GUI/fallback qualification](WINDOWS_FULL_QUALIFICATION_2026-10-07.md) cover the exact shipping files. Windows clean exits sometimes took 85–86 seconds; historical framework failures remain documented. No universal shutdown repair is claimed. Windows
+AMD fallback results do not qualify active Windows NVIDIA FG/Reflex or HDR.
+Packages are unsigned; transparent packaging does not guarantee Nexus clearance.
+
+See [candidate installation and limits](FG_CANDIDATE.md),
+[Windows qualification](WINDOWS_FULL_QUALIFICATION_2026-10-07.md) and
+[packaging/review checks](NEXUS_RELEASE_GATE.md). Published tags remain unchanged.
+
 # 0.2.0-rc.1 — guided installation, native HDR and Reflex
 
 Experimental prerelease, published after the maintainer accepted the available Windows/AMD qualification on 5 October 2026. Linux/NVIDIA and Windows/AMD results are separate; Windows NVIDIA Reflex and Windows HDR output remain untested.

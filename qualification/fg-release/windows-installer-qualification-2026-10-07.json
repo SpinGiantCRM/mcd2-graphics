@@ -1,0 +1,654 @@
+{
+  "schemaVersion": 1,
+  "testDate": "2026-10-07",
+  "decision": "FAIL",
+  "scope": "Exact public Windows installer and bounded metadata follow-up on Radeon 860M; incomplete checklist is not full qualification",
+  "repository": "SpinGiantCRM/mcd2-graphics",
+  "pullRequest": 10,
+  "sourceHeadChecked": "205776dcde8c7ef80f4360c1f193e677769818cd",
+  "hardware": {
+    "windows": "11 Pro 10.0.26200.9457",
+    "renderingGPU": "AMD Radeon 860M",
+    "driver": "32.0.31041.1004",
+    "store": "Steam",
+    "gameBuild": "25647713",
+    "shippingSHA256": "231147bd0c655a4ae73f90873675d42917f2bfb3a9ee164fc64f217d6d6bd4ef",
+    "resolution": [
+      1920,
+      1200
+    ],
+    "displayMode": "Windowed Full Screen",
+    "HDR": false,
+    "VSync": false,
+    "frameLimit": "None"
+  },
+  "packages": [
+    {
+      "role": "original pinned",
+      "source": "38c348b953641946483fc28ec5722eb10e5dbd60",
+      "workflow": 37554384729,
+      "artifact": 11454227703,
+      "archiveSHA256": "397363ffb383a45dc1230f927542168c7a890ca5277b9955038b25190304db48",
+      "installerSHA256": "12485112d875a8c5f3472204fe2651cc8e9be14a770edf47af28cab6a73086eb",
+      "receiptFilesVerified": 235,
+      "canonicalManifestAndLockMatch": true,
+      "version": "0.3.0-preview.1",
+      "manifestFiles": {
+        "Dungeons/Binaries/Win64/FGBootstrap.ini": "bd44ca93301b57e358688aaf4eb6df7076784e22cc9200d9a119c7158e776721",
+        "Dungeons/Binaries/Win64/FGGuideCapture.ini": "5fb23ccf3916c8cb0d2c560395204590da098da0e8fcf9f74d8db8d40becc25a",
+        "Dungeons/Binaries/Win64/FG_UI_ALPHA.cso": "fce79e558c20bfafd859f37e397b8a04b5d820670f6aa0214522cef276cca8c1",
+        "Dungeons/Binaries/Win64/MCD2Graphics/live_dense.cso": "1f7df8df67dce0f2edc106ff709855ec00794b2879d59522731f98636feb72d3",
+        "Dungeons/Binaries/Win64/dxgi.dll": "ecfd1949118deec0e60a81733a9b733c2bbf4c78ff4733816216ebf04940a9bb",
+        "Dungeons/Binaries/Win64/fg-sdk-bridge.dll": "9915c32d334ca8baa8dc49d362e9a4343c1c796c75ce9f0adc34c8d4d66717ef",
+        "Dungeons/Binaries/Win64/mcd2-display-latency.addon64": "72594fdee0697702022c986b504b433d3d0e8ee68edb2cd522ac96d5be6900fe",
+        "Dungeons/Binaries/Win64/mcd2-fg-guide-recon.addon64": "fe3feb329d0ad1b504e8a77299e17815244e292ceeafab0a17c2d9c5cbc0f3b8",
+        "Dungeons/Binaries/Win64/mcd2-graphics.addon64": "dac1238e931bb01f1bc77c8af6b0cc42896aea7f074a781d7cc575a9cdf79c9d",
+        "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.pak": "eec103ddba05020a38965b25da078a6dea3f4c985ab7c09744ca4d004ae4f2c4",
+        "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.ucas": "cfa09ccb0d1401f3bca81bd0d279bfd162ae264263ed0652a559c751b8feb440",
+        "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.utoc": "9fa45d99a13622e16d51271cef2afcaf08c1c5f70bc10bc89cd6f88fbf168de3"
+      },
+      "manifestFilesVerified": 12,
+      "installedReceiptOwnedFilesVerified": 13,
+      "recognizedDependencies": {
+        "ReShade": "PR435 / 4eb9056c7601 + successful-reset lifetime patch",
+        "RenoDXUEExtended": "nightly-20260928",
+        "BlueprintLoader": "2.3",
+        "DLSSRuntime": "310.9.1",
+        "Streamline": "2.14.1"
+      }
+    },
+    {
+      "role": "metadata follow-up",
+      "source": "3d97982edcbf56ff9cec7ad501f9132f5bb671f0",
+      "workflow": 37556991330,
+      "artifact": 11455501936,
+      "archiveSHA256": "2d4e5668b1cbf08c6be7ec5b4a4cbf9148910f922137856eb280b823be8dec5c",
+      "installerSHA256": "2febe682427ba5bf6e85eece970639c63af93eb86784f880fcff6dd051115d92",
+      "receiptFilesVerified": 235,
+      "canonicalManifestAndLockMatch": true,
+      "version": "0.3.0-preview.1",
+      "manifestFiles": {
+        "Dungeons/Binaries/Win64/FGBootstrap.ini": "bd44ca93301b57e358688aaf4eb6df7076784e22cc9200d9a119c7158e776721",
+        "Dungeons/Binaries/Win64/FGGuideCapture.ini": "5fb23ccf3916c8cb0d2c560395204590da098da0e8fcf9f74d8db8d40becc25a",
+        "Dungeons/Binaries/Win64/FG_UI_ALPHA.cso": "fce79e558c20bfafd859f37e397b8a04b5d820670f6aa0214522cef276cca8c1",
+        "Dungeons/Binaries/Win64/MCD2Graphics/live_dense.cso": "1f7df8df67dce0f2edc106ff709855ec00794b2879d59522731f98636feb72d3",
+        "Dungeons/Binaries/Win64/dxgi.dll": "ecfd1949118deec0e60a81733a9b733c2bbf4c78ff4733816216ebf04940a9bb",
+        "Dungeons/Binaries/Win64/fg-sdk-bridge.dll": "9915c32d334ca8baa8dc49d362e9a4343c1c796c75ce9f0adc34c8d4d66717ef",
+        "Dungeons/Binaries/Win64/mcd2-display-latency.addon64": "72594fdee0697702022c986b504b433d3d0e8ee68edb2cd522ac96d5be6900fe",
+        "Dungeons/Binaries/Win64/mcd2-fg-guide-recon.addon64": "fe3feb329d0ad1b504e8a77299e17815244e292ceeafab0a17c2d9c5cbc0f3b8",
+        "Dungeons/Binaries/Win64/mcd2-graphics.addon64": "dac1238e931bb01f1bc77c8af6b0cc42896aea7f074a781d7cc575a9cdf79c9d",
+        "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.pak": "9647e28e8d2372b5cf5f8afc06ad0d81c5fd5fbf73f4100c33b344a02597fea4",
+        "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.ucas": "e7d57528a2f281000685debaac94a5321cc58d85fc5e5454e71cc5e49ebf37b7",
+        "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.utoc": "dceb189aa1d8ee9ca6673667d5e41a0268bb0c92bb992a4339aafd839af491d7"
+      },
+      "manifestFilesVerified": 12,
+      "installedReceiptOwnedFilesVerified": 13,
+      "recognizedDependencies": {
+        "ReShade": "PR435 / 4eb9056c7601 + successful-reset lifetime patch",
+        "RenoDXUEExtended": "nightly-20260928",
+        "BlueprintLoader": "2.3",
+        "DLSSRuntime": "310.9.1",
+        "Streamline": "2.14.1"
+      }
+    }
+  ],
+  "dependencies": {
+    "ReShade": {
+      "version": "PR435 / 4eb9056c7601 + successful-reset lifetime patch",
+      "files": {
+        "Dungeons/Binaries/Win64/d3d12.asi": "16c05f65b47b1a1f7b21eaa9a89cfbb7868b72894aab58610763c0e4014656b1"
+      },
+      "override": false,
+      "archiveSHA256": "38b1affa05445a0801372f1f17be76f87e0ab5777c769a09031cd4e23dee7cb2"
+    },
+    "RenoDXUEExtended": {
+      "version": "nightly-20260928",
+      "files": {
+        "Dungeons/Binaries/Win64/renodx-ue-extended.addon64": "7941e06607c90f187688382fd259d483cde78f54ccb72099b239e8d45f5f87ac"
+      },
+      "override": false
+    },
+    "BlueprintLoader": {
+      "version": "2.3",
+      "files": {
+        "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.pak": "75e7144577253917f6da7312ef5e585b12fb728226a22b0938323751a6b555cd",
+        "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.ucas": "3283f1c77672fed0bc0b279088df94e6646009345c2cff8d69d7208cdbc69098",
+        "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.utoc": "81a7cf3fd8cf8276d57fe8c4afcead2ff5bd847875b871d12ae105bc9b12274e"
+      },
+      "override": false,
+      "archiveSHA256": "982ccc00b25a83da7fb3081739651b0e1a16d62ca990696ba64d89e8617c3374"
+    },
+    "DLSSRuntime": {
+      "version": "310.9.1",
+      "files": {
+        "Dungeons/Binaries/Win64/MCD2Graphics/ngx-runtime/nvngx_dlss.dll": "3975567b8943c53acce397f2b72380092f84f162d00b0d2c7d08a1025c563983"
+      },
+      "override": false
+    },
+    "Streamline": {
+      "version": "2.14.1",
+      "files": {
+        "Dungeons/Binaries/Win64/sl.interposer.dll": "8c87c9499461da561edd529aa9bf7831d67d7b94ebb1c1a5ed54ef4934e1ea4c",
+        "Dungeons/Binaries/Win64/sl.common.dll": "82924a8954dd671e09351c5de0eb87ad0eb25b944cc9f9ab955ca1d9950de15d",
+        "Dungeons/Binaries/Win64/sl.pcl.dll": "f13d51cfa05f4cd514df2026049e2db8adf359221713170ad386fd499915b582",
+        "Dungeons/Binaries/Win64/sl.reflex.dll": "0ce9725e3e03ea9e7f81d008b57f33ee365973d2e349131c8b1c3e3378fe2db0",
+        "Dungeons/Binaries/Win64/sl.dlss_g.dll": "f4a6b2b14dcc0b1485989e430d3b4e3a44ac1800b92ba1ad74f476e64fb2b09c",
+        "Dungeons/Binaries/Win64/nvngx_dlssg.dll": "ff6e90eb78b827927dff5b4ecc6b1c870c2e9bca29ed9f48c7d348cc9e170b82",
+        "Dungeons/Binaries/Win64/NvLowLatencyVk.dll": "2a77dc3e1c724b7eea5755be0ae7423752e79a2459fae72181a9f00e3507e5d6"
+      },
+      "override": false,
+      "archiveSHA256": "92c4d954631a1710da86ca3fa8d5034f2b9503838c95fc4ae977ae149319781b"
+    }
+  },
+  "checks": {
+    "B1": {
+      "status": "PASS",
+      "observation": "Windows 11 Pro 10.0.26200.9457; Radeon 860M driver 32.0.31041.1004; Steam build 25647713. 1920x1200 Windowed Full Screen, HDR Off, VSync Off, FPS limit None."
+    },
+    "B2": {
+      "status": "PASS",
+      "observation": "Closed-game baseline captured 16 existing game files and seven mod/video preferences. Original private bridge omitted from initial inventory was recovered from the prior local baseline and verified against the original receipt before restoration. No player/account saves read."
+    },
+    "B3": {
+      "status": "PASS",
+      "observation": "Previous rc.1 normal GUI uninstall completed; shared dependencies retained. No ownership receipt rewritten to bypass a refusal."
+    },
+    "B4": {
+      "status": "PASS",
+      "observation": "Full self-contained package ran from a normal path containing spaces without installing Python/.NET. No SmartScreen/antivirus warning observed; unsigned build is not certified."
+    },
+    "I1": {
+      "status": "NOT RUN",
+      "observation": "Supported Steam identity and five cards passed; wrong folder refused without writes. Unsupported-executable GUI fixture not run; core fixtures cover rejection. Xbox PC not qualified."
+    },
+    "I2": {
+      "status": "PASS",
+      "observation": "Fresh original GUI install, every override Off: all 12 manifest and 13 receipt-owned files verified; complete recognized Loader 2.3 retained. Exact separate framework used."
+    },
+    "I3": {
+      "status": "NOT RUN",
+      "observation": "While running, intact Repair / Verify completed read-only with unchanged hashes; Uninstall refused and files/config remained unchanged. Missing-file write-producing Repair while running not exercised."
+    },
+    "I4": {
+      "status": "PASS",
+      "observation": "Closed intact GUI Repair / Verify succeeded without changing correct owned/shared files."
+    },
+    "I5": {
+      "status": "PASS",
+      "observation": "Closed, backed up and removed only owned live_dense.cso. GUI Repair restored exact manifest hash; unrelated files unchanged."
+    },
+    "I6": {
+      "status": "PASS",
+      "observation": "Closed one-byte shader fixture: GUI Repair and Uninstall both refused without mutation. Exact backup restored and Verify passed. Corrupt fixture never launched."
+    },
+    "I7": {
+      "status": "PASS",
+      "observation": "All five override controls separately checked: checkbox plus explicit acknowledgement text and Use installed version selected only that complete dependency set and displayed Untested override/hashes. Reopening reset all five Off. No vendor bytes changed."
+    },
+    "I8": {
+      "status": "PASS",
+      "observation": "116 installer-core checks passed locally and Windows CI, including unknown complete sets, mixed releases, incomplete sets and extraction safety. No fake vendor DLL entered the real installation."
+    },
+    "I9": {
+      "status": "PASS",
+      "observation": "Normal original GUI uninstall removed 13 candidate-owned/private files, removed receipt and restored previous DXGI. Twelve shared paths stayed hash-identical. Only owned startup values restored; no player/account save comparison claimed."
+    },
+    "I10": {
+      "status": "PASS",
+      "observation": "Fresh original GUI reinstall and Verify: same 12/13 hashes and five strict recognized sets. Relaunch survived 67.5-second module probe and gameplay; then normal original uninstall before metadata package."
+    },
+    "U1": {
+      "status": "FAIL",
+      "observation": "Original main-menu Loader 2.3/name/author/description present, but displayed version 0.2.0-rc.1 despite installed manifest 0.3.0-preview.1. Known metadata defect. Pause-menu check not run; later metadata main-menu version fixed separately."
+    },
+    "U2": {
+      "status": "NOT RUN",
+      "observation": "Main-menu Video mouse checks passed: help and separate recommendation footer, no overlap. Unsupported FG/Reflex rows hidden. Pause-menu and keyboard navigation incomplete: injected gameplay I/Escape input did not open menus; cause not established."
+    },
+    "U3": {
+      "status": "PASS",
+      "observation": "Main-menu preset/slider/fill matched DLAA 100%, Quality 67%, Custom 77%, and clamped Ultra Performance 33%. Help explicitly showed current minimum 33%."
+    },
+    "U4": {
+      "status": "PASS",
+      "observation": "Native and Quality returned on original restarts; Custom 77% returned across fresh metadata installation with current-session menu acknowledgement. Original gameplay Quality/Custom fallback acknowledged. No saved preference counted as activation."
+    },
+    "U5": {
+      "status": "NOT RUN",
+      "observation": "Original second run observed 305.53 seconds of responsive hub gameplay; movement verified. No startup/gameplay crash in that interval. Dungeon entry/return and pause menus not completed because automated gameplay-menu input failed."
+    },
+    "U6": {
+      "status": "NOT AVAILABLE",
+      "observation": "No physical controller available for both-menu navigation."
+    },
+    "A1": {
+      "status": "PASS",
+      "observation": "Original Native/FG Off/Reflex Off survived 72.5-second probe; six actual game-directory modules and RenoDX loaded. Six module hashes independently matched package/lock, including d3d12.asi and bootstrap DXGI."
+    },
+    "A2": {
+      "status": "NOT RUN",
+      "observation": "Original Quality 67% and Custom 77% gameplay requests resolved phase 3/error 1 unsupported fallback at current request/session, before any new gameplay source acknowledgement. Original DLAA gameplay not run; DLAA completed separately with metadata package and identical native hashes."
+    },
+    "A3": {
+      "status": "NOT RUN",
+      "observation": "Closed strict mod-slot fixtures seeded FG On plus Reflex On and Boost in separate launches; only mod preference classes changed. Current-session gameplay status unavailable/inactive, no Reflex fault or restart required. Bootstrap declined actual adapter before binding/configuration/swapchain upgrade. No direct runtime foliage CVar/lease measurement obtained; source guard and 31 foliage tests pass, which does not replace that measurement."
+    },
+    "A4": {
+      "status": "PASS",
+      "observation": "Relevant native Windows bootstrap/display status contained no Wine-only Reflex pacing event; Wine-only prime path skipped. Existing native-Windows guard tests passed. No public raw log dump."
+    },
+    "A5": {
+      "status": "PASS",
+      "observation": "ModelPreset absent from installed INIs; no explicit model-hint fixture or NGX model-quality claim."
+    },
+    "N1": {
+      "status": "NOT AVAILABLE",
+      "observation": "AMD laptop; supported Windows NVIDIA activation/performance/shared-NGX teardown unavailable."
+    },
+    "N2": {
+      "status": "NOT AVAILABLE",
+      "observation": "AMD laptop; supported Windows NVIDIA activation/performance/shared-NGX teardown unavailable."
+    },
+    "N3": {
+      "status": "NOT AVAILABLE",
+      "observation": "AMD laptop; supported Windows NVIDIA activation/performance/shared-NGX teardown unavailable."
+    },
+    "N4": {
+      "status": "NOT AVAILABLE",
+      "observation": "AMD laptop; supported Windows NVIDIA activation/performance/shared-NGX teardown unavailable."
+    },
+    "N5": {
+      "status": "NOT AVAILABLE",
+      "observation": "SDR panel; native HDR output/calibration not qualified."
+    },
+    "E1": {
+      "status": "FAIL",
+      "observation": "Actual shipping handles held before all exits. First two original normal window closes returned 0xc0000005; third original and both metadata closes returned 0. Save and quit route not run; launcher exit codes not recorded."
+    },
+    "E2": {
+      "status": "PASS",
+      "observation": "All five normal closes ended within the 120-second observation bound, without force killing. Clean closes do not erase crashes or establish a fix."
+    },
+    "E3": {
+      "status": "PASS",
+      "observation": "I9/I10 complete; final metadata GUI uninstall then closed-game baseline recovery. 39 baseline entries verified, including 17 existing game files and seven existing preferences; all eight rc.1 owned hashes match original receipt. Test dependency presence restored; EnhancedInput unchanged. No player/account save rollback."
+    },
+    "E4": {
+      "status": "PASS",
+      "observation": "Sanitized report/aggregate written with all 34 checklist IDs, exact inputs, timings and limits. Raw evidence, runtime DLLs, game executable and player/account data excluded."
+    }
+  },
+  "metadataFollowUpChecks": {
+    "I2": {
+      "status": "PASS",
+      "observation": "Fresh GUI install after original normal uninstall; 235 package receipt files and canonical manifest/lock source bytes verified, then 12 manifest/13 owned installed hashes and five strict recognized sets."
+    },
+    "U1": {
+      "status": "NOT RUN",
+      "observation": "Main-menu metadata PASS: Loader 2.3; MCD2 Graphics, SpinGiantCRM, version 0.3.0-preview.1, concise feature/help and online wording. Pause-menu metadata not run."
+    },
+    "U2": {
+      "status": "NOT RUN",
+      "observation": "Main-menu mouse layout/help/footer PASS. Pause-menu and keyboard navigation not completed; injected I again ignored in gameplay."
+    },
+    "U3": {
+      "status": "PASS",
+      "observation": "Repeated Custom 77%, DLAA 100%, Quality 67%, minimum 33% with synchronized thumb/fill/preset and explicit minimum help."
+    },
+    "U4": {
+      "status": "PASS",
+      "observation": "Custom 77% returned on first launch; changed DLAA 100% returned after restart with current-session menu revision/source/runtime 135, contextReady 0, phase 2/error 0. Earlier DLAA gameplay revision 132 resolved unsupported phase 3/error 1; not an activation claim."
+    },
+    "A2_DLAA": {
+      "status": "PASS",
+      "observation": "Separate metadata gameplay DLAA 100% revision/runtime 132, phase 3/error 1, current sessions matched; source revision remained prior menu 130. No new gameplay source ACK preceded decline."
+    },
+    "normal_exit": {
+      "status": "PASS",
+      "observation": "Gameplay normal window close 0 in 5.69 seconds; restarted main-menu close 0 in 7.03 seconds. Save and quit not run."
+    }
+  },
+  "probes": [
+    {
+      "run": "original-off",
+      "observationSeconds": 72.5,
+      "exitedDuringObservation": false,
+      "moduleSHA256": {
+        "mcd2-graphics.addon64": "dac1238e931bb01f1bc77c8af6b0cc42896aea7f074a781d7cc575a9cdf79c9d",
+        "fg-sdk-bridge.dll": "9915c32d334ca8baa8dc49d362e9a4343c1c796c75ce9f0adc34c8d4d66717ef",
+        "mcd2-fg-guide-recon.addon64": "fe3feb329d0ad1b504e8a77299e17815244e292ceeafab0a17c2d9c5cbc0f3b8",
+        "mcd2-display-latency.addon64": "72594fdee0697702022c986b504b433d3d0e8ee68edb2cd522ac96d5be6900fe",
+        "d3d12.asi": "16c05f65b47b1a1f7b21eaa9a89cfbb7868b72894aab58610763c0e4014656b1",
+        "dxgi.dll": "ecfd1949118deec0e60a81733a9b733c2bbf4c78ff4733816216ebf04940a9bb"
+      },
+      "renoDXLoaded": true
+    },
+    {
+      "run": "original-boost",
+      "observationSeconds": 72.4,
+      "exitedDuringObservation": false,
+      "moduleSHA256": {
+        "mcd2-fg-guide-recon.addon64": "fe3feb329d0ad1b504e8a77299e17815244e292ceeafab0a17c2d9c5cbc0f3b8",
+        "fg-sdk-bridge.dll": "9915c32d334ca8baa8dc49d362e9a4343c1c796c75ce9f0adc34c8d4d66717ef",
+        "mcd2-display-latency.addon64": "72594fdee0697702022c986b504b433d3d0e8ee68edb2cd522ac96d5be6900fe",
+        "d3d12.asi": "16c05f65b47b1a1f7b21eaa9a89cfbb7868b72894aab58610763c0e4014656b1",
+        "dxgi.dll": "ecfd1949118deec0e60a81733a9b733c2bbf4c78ff4733816216ebf04940a9bb",
+        "mcd2-graphics.addon64": "dac1238e931bb01f1bc77c8af6b0cc42896aea7f074a781d7cc575a9cdf79c9d"
+      },
+      "renoDXLoaded": true
+    },
+    {
+      "run": "original-reinstall",
+      "observationSeconds": 67.5,
+      "exitedDuringObservation": false,
+      "moduleSHA256": {
+        "d3d12.asi": "16c05f65b47b1a1f7b21eaa9a89cfbb7868b72894aab58610763c0e4014656b1",
+        "mcd2-graphics.addon64": "dac1238e931bb01f1bc77c8af6b0cc42896aea7f074a781d7cc575a9cdf79c9d",
+        "mcd2-fg-guide-recon.addon64": "fe3feb329d0ad1b504e8a77299e17815244e292ceeafab0a17c2d9c5cbc0f3b8",
+        "mcd2-display-latency.addon64": "72594fdee0697702022c986b504b433d3d0e8ee68edb2cd522ac96d5be6900fe",
+        "dxgi.dll": "ecfd1949118deec0e60a81733a9b733c2bbf4c78ff4733816216ebf04940a9bb",
+        "fg-sdk-bridge.dll": "9915c32d334ca8baa8dc49d362e9a4343c1c796c75ce9f0adc34c8d4d66717ef"
+      },
+      "renoDXLoaded": true
+    },
+    {
+      "run": "metadata",
+      "observationSeconds": 67.5,
+      "exitedDuringObservation": false,
+      "moduleSHA256": {
+        "dxgi.dll": "ecfd1949118deec0e60a81733a9b733c2bbf4c78ff4733816216ebf04940a9bb",
+        "mcd2-display-latency.addon64": "72594fdee0697702022c986b504b433d3d0e8ee68edb2cd522ac96d5be6900fe",
+        "fg-sdk-bridge.dll": "9915c32d334ca8baa8dc49d362e9a4343c1c796c75ce9f0adc34c8d4d66717ef",
+        "mcd2-graphics.addon64": "dac1238e931bb01f1bc77c8af6b0cc42896aea7f074a781d7cc575a9cdf79c9d",
+        "d3d12.asi": "16c05f65b47b1a1f7b21eaa9a89cfbb7868b72894aab58610763c0e4014656b1",
+        "mcd2-fg-guide-recon.addon64": "fe3feb329d0ad1b504e8a77299e17815244e292ceeafab0a17c2d9c5cbc0f3b8"
+      },
+      "renoDXLoaded": true
+    }
+  ],
+  "currentSessionStates": {
+    "originalQuality": {
+      "sr": {
+        "revision": 105,
+        "mode": 2,
+        "scale": 6667,
+        "preset": 0,
+        "contextReady": 1,
+        "sourceRevision": 103,
+        "contextSessionMatches": true,
+        "sourceSessionMatches": true,
+        "runtimeRevision": 105,
+        "phase": 3,
+        "error": 1
+      },
+      "fg": {
+        "requestedMode": 1,
+        "contextReady": 1,
+        "revision": 12,
+        "runtimeRevision": 12,
+        "sessionMatches": true,
+        "available": 0,
+        "active": 0,
+        "phase": 2,
+        "restartRequired": 0
+      },
+      "display": {
+        "revision": 4,
+        "requestedReflexMode": 2,
+        "hdr": 0,
+        "runtimeRevision": 4,
+        "reflexAvailable": 0,
+        "activeReflexMode": 0,
+        "reflexFault": 0,
+        "hdrRevision": 4,
+        "hdrRestartRequired": 0
+      }
+    },
+    "originalCustom": {
+      "sr": {
+        "revision": 121,
+        "mode": 2,
+        "scale": 7700,
+        "preset": 4,
+        "contextReady": 1,
+        "sourceRevision": 119,
+        "contextSessionMatches": true,
+        "sourceSessionMatches": true,
+        "runtimeRevision": 121,
+        "phase": 3,
+        "error": 1
+      },
+      "fg": {
+        "requestedMode": 1,
+        "contextReady": 1,
+        "revision": 19,
+        "runtimeRevision": 19,
+        "sessionMatches": true,
+        "available": 0,
+        "active": 0,
+        "phase": 2,
+        "restartRequired": 0
+      },
+      "display": {
+        "revision": 5,
+        "requestedReflexMode": 1,
+        "hdr": 0,
+        "runtimeRevision": 5,
+        "reflexAvailable": 0,
+        "activeReflexMode": 0,
+        "reflexFault": 0,
+        "hdrRevision": 5,
+        "hdrRestartRequired": 0
+      }
+    },
+    "metadataDLAA": {
+      "sr": {
+        "revision": 132,
+        "mode": 1,
+        "scale": 10000,
+        "preset": 5,
+        "contextReady": 1,
+        "sourceRevision": 130,
+        "contextSessionMatches": true,
+        "sourceSessionMatches": true,
+        "runtimeRevision": 132,
+        "phase": 3,
+        "error": 1
+      },
+      "fg": {
+        "requestedMode": 1,
+        "contextReady": 1,
+        "revision": 25,
+        "runtimeRevision": 25,
+        "sessionMatches": true,
+        "available": 0,
+        "active": 0,
+        "phase": 2,
+        "restartRequired": 0
+      },
+      "display": {
+        "revision": 5,
+        "requestedReflexMode": 1,
+        "hdr": 0,
+        "runtimeRevision": 5,
+        "reflexAvailable": 0,
+        "activeReflexMode": 0,
+        "reflexFault": 0,
+        "hdrRevision": 5,
+        "hdrRestartRequired": 0
+      }
+    },
+    "metadataRestartMenu": {
+      "sr": {
+        "revision": 135,
+        "mode": 1,
+        "scale": 10000,
+        "preset": 5,
+        "contextReady": 0,
+        "sourceRevision": 135,
+        "contextSessionMatches": true,
+        "sourceSessionMatches": true,
+        "runtimeRevision": 135,
+        "phase": 2,
+        "error": 0
+      },
+      "fg": {
+        "requestedMode": 1,
+        "contextReady": 0,
+        "revision": 28,
+        "runtimeRevision": 28,
+        "sessionMatches": true,
+        "available": 0,
+        "active": 0,
+        "phase": 1,
+        "restartRequired": 0
+      },
+      "display": {
+        "revision": 5,
+        "requestedReflexMode": 1,
+        "hdr": 0,
+        "runtimeRevision": 5,
+        "reflexAvailable": 0,
+        "activeReflexMode": 0,
+        "reflexFault": 0,
+        "hdrRevision": 5,
+        "hdrRestartRequired": 0
+      }
+    }
+  },
+  "normalExits": [
+    {
+      "run": "original-off",
+      "route": "normal window close Alt+F4",
+      "durationSeconds": 517.74,
+      "exitRequestToProcessSeconds": 9.11,
+      "shippingExitCode": 3221225477,
+      "shippingExitCodeHex": "0xc0000005",
+      "launcherExitCode": null,
+      "shippingHandleHeldBeforeExit": true,
+      "forceKilled": false
+    },
+    {
+      "run": "original-boost",
+      "route": "normal window close Alt+F4",
+      "durationSeconds": 741.62,
+      "exitRequestToProcessSeconds": 8.71,
+      "shippingExitCode": 3221225477,
+      "shippingExitCodeHex": "0xc0000005",
+      "launcherExitCode": null,
+      "shippingHandleHeldBeforeExit": true,
+      "forceKilled": false
+    },
+    {
+      "run": "original-reinstall",
+      "route": "normal window close Alt+F4",
+      "durationSeconds": 260.14,
+      "exitRequestToProcessSeconds": 6.37,
+      "shippingExitCode": 0,
+      "shippingExitCodeHex": "0x0",
+      "launcherExitCode": null,
+      "shippingHandleHeldBeforeExit": true,
+      "forceKilled": false
+    },
+    {
+      "run": "metadata",
+      "route": "normal window close Alt+F4",
+      "durationSeconds": 485.94,
+      "exitRequestToProcessSeconds": 5.69,
+      "shippingExitCode": 0,
+      "shippingExitCodeHex": "0x0",
+      "launcherExitCode": null,
+      "shippingHandleHeldBeforeExit": true,
+      "forceKilled": false
+    },
+    {
+      "run": "metadata-restart",
+      "route": "normal window close Alt+F4",
+      "durationSeconds": 117.4,
+      "exitRequestToProcessSeconds": 7.03,
+      "shippingExitCode": 0,
+      "shippingExitCodeHex": "0x0",
+      "launcherExitCode": null,
+      "shippingHandleHeldBeforeExit": true,
+      "forceKilled": false
+    }
+  ],
+  "exitTimingBoundary": "UTC request marker immediately before UI action to held shipping handle completion; includes tool handoff. Window disappearance not used as exit-code proof. Launcher codes unavailable.",
+  "hubObservationSeconds": 305.53,
+  "restoration": {
+    "gameClosed": true,
+    "baselineEntriesVerified": 39,
+    "existingGameFilesVerified": 17,
+    "existingPreferencesVerified": 7,
+    "originalReceiptVersion": "0.2.0-rc.1",
+    "originalOwnedFilesVerified": 8,
+    "previousBridgeRecoveredByReceiptHash": true,
+    "enhancedInputUnchanged": true,
+    "playerAccountSavesReadOrRestored": false,
+    "sharedTestDependenciesRestoredToBaselinePresence": true
+  },
+  "localChecks": {
+    "installerPython": 13,
+    "buildRecipePython": 6,
+    "FGPython": 16,
+    "installerCore": 116,
+    "foliagePolicy": 31,
+    "wineReflexPacing": "PASS"
+  },
+  "CI": {
+    "portableAndWindowsInstaller": {
+      "run": 37557512321,
+      "conclusion": "success",
+      "jobs": [
+        "Portable checks",
+        "Windows installer checks",
+        "Guided installer (windows-latest)",
+        "Guided installer (ubuntu-24.04)"
+      ]
+    },
+    "candidateInstaller": {
+      "run": 37557512324,
+      "conclusion": "success"
+    },
+    "FGWindows": {
+      "run": 37557512353,
+      "conclusion": "success"
+    }
+  },
+  "changesDuringQualification": [
+    {
+      "commit": "205776dcde8c7ef80f4360c1f193e677769818cd",
+      "files": [
+        "experiments/fg-streamline/test_windows_build.py",
+        "docs/WINDOWS_COMPATIBILITY.md"
+      ],
+      "change": "Exercise canonical Git source bytes in metadata provenance regression; retain stale-source rejection.",
+      "why": "Windows CRLF working-tree conversion made a test mock falsely reject unchanged UI provenance. Production already reads canonical Git bytes.",
+      "windowsQuirk": "CRLF checkout conversion differs from canonical Git blobs; Linux LF checkouts concealed the mock mismatch.",
+      "productionPayloadChanged": false
+    },
+    {
+      "files": [
+        "docs/WINDOWS_INSTALLER_QUALIFICATION_2026-10-07.md",
+        "qualification/fg-release/windows-installer-qualification-2026-10-07.json",
+        "docs/WINDOWS_COMPATIBILITY.md",
+        "docs/FG_CANDIDATE.md"
+      ],
+      "change": "Record actual public-installer checks and metadata follow-up; supersede earlier dependency blocker without deleting its history.",
+      "why": "Framework download is now available; actual shutdown results fail required E1.",
+      "windowsQuirk": "Disappearing Windows game window does not establish shipping exit code 0; retained handles revealed two access-violation exits.",
+      "productionPayloadChanged": false
+    }
+  ],
+  "remaining": [
+    "Two unexplained original normal-close access violations; event module unknown; no causal diagnosis or rendering fix.",
+    "Save and quit, pause-menu/keyboard checks and dungeon round trip not completed.",
+    "Original DLAA gameplay not run; separate metadata DLAA checked with independently unchanged native hashes.",
+    "Direct foliage CVar/lease measurement unavailable; guard/tests support expected behavior, not runtime proof.",
+    "Windows NVIDIA active DLSS/FG/Reflex, HDR and physical controller unavailable.",
+    "Unsupported-executable GUI and running missing-file Repair fixtures not completed."
+  ],
+  "privateEvidencePublished": false,
+  "thirdPartyRuntimeDLLsIncluded": false,
+  "releaseAuthorized": false
+}

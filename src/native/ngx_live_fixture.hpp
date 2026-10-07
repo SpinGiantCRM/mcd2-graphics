@@ -52,12 +52,23 @@ static bool live_wait_generation(a::command_queue *q,LiveFixture &c) {
  c.log<<"{\"stage\":\"cleanup_gpu_completion\",\"signalHRESULT\":"<<unsigned(hr)<<",\"completed\":"<<(done?"true":"false")<<",\"outsideObserverLock\":true}\n";c.log.flush();fence->Release();return done;
 }
 // Called only after GPU completion, with the observer lock released. Keep both
-// device references alive through Shutdown and retain the generation on error.
+// device references alive through feature release and any unshared Shutdown.
 static bool cleanup_detached_live(LiveFixture &c) {
  auto result=[&](const char *stage,NVSDK_NGX_Result value){c.log<<"{\"stage\":\""<<stage<<"\",\"result\":"<<static_cast<uint32_t>(value)<<"}\n";c.log.flush();return NVSDK_NGX_SUCCEED(value);};
  if(c.feature){using F=NVSDK_NGX_Result(*)(NVSDK_NGX_Handle*);auto fn=reinterpret_cast<F>(GetProcAddress(c.module,"NVSDK_NGX_D3D12_ReleaseFeature"));if(!fn || !result("release_feature",fn(c.feature)))return false;c.feature=nullptr;}
  if(c.params){using F=NVSDK_NGX_Result(*)(NVSDK_NGX_Parameter*);auto fn=reinterpret_cast<F>(GetProcAddress(c.module,"NVSDK_NGX_D3D12_DestroyParameters"));if(!fn || !result("destroy_parameters",fn(c.params)))return false;c.params=nullptr;}
- if(c.initialized){using F=NVSDK_NGX_Result(*)(ID3D12Device*);auto fn=reinterpret_cast<F>(GetProcAddress(c.module,"NVSDK_NGX_D3D12_Shutdown1"));c.log<<"{\"stage\":\"shutdown_device_begin\",\"deviceKind\":\"underlying\",\"ownedDeviceReferencesAlive\":true}\n";c.log.flush();if(!fn || !result("shutdown_device",fn(c.resource_device)))return false;c.initialized=false;}
+ if(c.initialized){
+  auto bridge=GetModuleHandleW(L"fg-sdk-bridge.dll");
+  using Initialized=int(*)();using Owner=int(*)(void*);
+  auto active=bridge?reinterpret_cast<Initialized>(GetProcAddress(bridge,"mcd2_fg_initialized")):nullptr;
+  auto owner=bridge?reinterpret_cast<Owner>(GetProcAddress(bridge,"mcd2_fg_ngx_owner_v1")):nullptr;
+  const bool shared=active&&active()!=0;
+  const int ownership=shared&&owner?owner(c.proxy_device):shared?-1:0;
+  if(ownership<0){c.log<<"{\"stage\":\"shared_ngx_owner_unverified\",\"generationRetained\":true}\n";c.log.flush();return false;}
+  if(ownership==1){c.log<<"{\"stage\":\"shutdown_deferred_to_streamline\",\"deviceMatched\":true,\"finalOwner\":\"Streamline\"}\n";c.log.flush();}
+  else {using F=NVSDK_NGX_Result(*)(ID3D12Device*);auto fn=reinterpret_cast<F>(GetProcAddress(c.module,"NVSDK_NGX_D3D12_Shutdown1"));if(!fn||!result("shutdown_device",fn(c.resource_device)))return false;}
+  c.initialized=false;
+ }
  // Device references were inserted first; reverse release drops them last.
  for(auto it=c.owned.resources.rbegin();it!=c.owned.resources.rend();++it)if(*it)(*it)->Release();c.owned.resources.clear();
  c.log<<"{\"stage\":\"owned_release\",\"afterShutdown\":true,\"outsideObserverLock\":true}\n";c.log.flush();
@@ -121,6 +132,14 @@ static bool init_live_saved(a::command_queue *queue,std::unique_lock<std::recurs
  c.width=lean_width;c.height=lean_height;c.outwidth=lean_outwidth;c.outheight=lean_outheight;
  ui(c.params,NVSDK_NGX_Parameter_CreationNodeMask,1);ui(c.params,NVSDK_NGX_Parameter_VisibilityNodeMask,1);ui(c.params,NVSDK_NGX_Parameter_Width,c.width);ui(c.params,NVSDK_NGX_Parameter_Height,c.height);ui(c.params,NVSDK_NGX_Parameter_OutWidth,c.outwidth);ui(c.params,NVSDK_NGX_Parameter_OutHeight,c.outheight);
  integer(c.params,NVSDK_NGX_Parameter_PerfQualityValue,c.width==c.outwidth?NVSDK_NGX_PerfQuality_Value_DLAA:(c.width*100<=c.outwidth*40?NVSDK_NGX_PerfQuality_Value_UltraPerformance:(c.width*100<=c.outwidth*51?NVSDK_NGX_PerfQuality_Value_MaxPerf:(c.width*100<=c.outwidth*60?NVSDK_NGX_PerfQuality_Value_Balanced:NVSDK_NGX_PerfQuality_Value_MaxQuality))));
+ // Optional restart-only model hint; absent/invalid input preserves runtime defaults.
+ wchar_t wideModel[64]{};char modelText[64]{};const auto overrideFile=(asset_root/L"DependencyOverrides.ini").wstring();
+ const auto modelLength=GetPrivateProfileStringW(L"DLSS",L"ModelPreset",L"0",wideModel,64,overrideFile.c_str());
+ bool validModelText=modelLength<63;for(unsigned i=0;i<modelLength;++i){if(wideModel[i]>127)validModelText=false;modelText[i]=char(wideModel[i]&127);}
+ if(!validModelText)modelText[0]=0;
+ const unsigned model=mcd2::dlss::model_hint(modelText);
+ if(model){for(const char*key:{NVSDK_NGX_Parameter_DLSS_Hint_Render_Preset_DLAA,NVSDK_NGX_Parameter_DLSS_Hint_Render_Preset_Quality,NVSDK_NGX_Parameter_DLSS_Hint_Render_Preset_Balanced,NVSDK_NGX_Parameter_DLSS_Hint_Render_Preset_Performance,NVSDK_NGX_Parameter_DLSS_Hint_Render_Preset_UltraPerformance,NVSDK_NGX_Parameter_DLSS_Hint_Render_Preset_UltraQuality})ui(c.params,key,model);}
+ c.log<<"{\"stage\":\"model_preset_hint\",\"value\":"<<model<<"}\n";
  integer(c.params,NVSDK_NGX_Parameter_DLSS_Feature_Create_Flags,NVSDK_NGX_DLSS_Feature_Flags_IsHDR|NVSDK_NGX_DLSS_Feature_Flags_MVLowRes|NVSDK_NGX_DLSS_Feature_Flags_DepthInverted);integer(c.params,NVSDK_NGX_Parameter_DLSS_Enable_Output_Subrects,0);
  ID3D12CommandAllocator *allocator=nullptr;ID3D12GraphicsCommandList *cmd=nullptr;
  auto hr=c.proxy_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,IID_PPV_ARGS(&allocator));c.owned.keep(allocator);

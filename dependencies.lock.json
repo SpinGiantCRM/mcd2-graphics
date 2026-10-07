@@ -5,64 +5,119 @@
   },
   "dependencies": {
     "ReShade": {
-      "version": "6.8.0.2155 full addon support",
-      "file": "Dungeons/Binaries/Win64/dxgi.dll",
-      "sha256": "0cee63f9c9f13f3ac909c5b4903f4dbb4b719a7ab3b4f13b0deaf83c814b94f7",
-      "url": "https://reshade.me/downloads/ReShade_Setup_6.8.0_Addon.exe",
-      "installerSHA256": "afe4c8f13048306307983b8b3d41d5bf00a86820440b0e57dea10950e1176445"
+      "version": "PR435 / 4eb9056c7601 + successful-reset lifetime patch / MSVC Windows candidate",
+      "file": "Dungeons/Binaries/Win64/d3d12.asi",
+      "sha256": "ce808bb1494415586cfb2ec5638a3ab0f0cea3879e45146a34976740b59fcf48",
+      "url": "https://github.com/SpinGiantCRM/mcd2-graphics/pull/10",
+      "bootstrapPreviousSHA256": "0cee63f9c9f13f3ac909c5b4903f4dbb4b719a7ab3b4f13b0deaf83c814b94f7",
+      "source": "https://github.com/JoeyDelp/reshade/tree/4eb9056c76016aad6f98495d3bbda2d721106104",
+      "download": "https://raw.githubusercontent.com/SpinGiantCRM/mcd2-graphics/development/fg-bounded-windows/qualification/fg-release/dependencies/ReShade-PR435-4eb9056-reset-epoch-msvc-x64.zip",
+      "archiveSHA256": "610314d160a28f743cd2cfdc593c83b818bb2ead8576671d870c8f8652e95168",
+      "archiveMembers": {
+        "Dungeons/Binaries/Win64/d3d12.asi": "ReShade64.dll"
+      },
+      "patchSHA256": "109e99a0b160e2d2b1baf260b51bff461333aaf328554838ce994dac9abcfbc7",
+      "compatibilityNote": "PR435 native D3D12 access + successful-Reset lifetime API, built with the tested MSVC recipe. The earlier cross-built framework reproduced Windows shutdown access violations; a stock version number or different build hash is insufficient.",
+      "buildReceiptSHA256": "6b42c841e31917a39edba215d5cd01f773709ce6148c8afa36cb2ef4e2cfde4f"
     },
     "RenoDXUEExtended": {
       "file": "Dungeons/Binaries/Win64/renodx-ue-extended.addon64",
       "sha256": "7941e06607c90f187688382fd259d483cde78f54ccb72099b239e8d45f5f87ac",
       "url": "https://github.com/marat569/renodx/releases/download/nightly-20260928/renodx-ue-extended.addon64",
-      "releaseTag": "nightly-20260928"
+      "releaseTag": "nightly-20260928",
+      "compatibilityNote": "UE Extended addon with the required game shader/configuration layout; newer nightlies require the override."
     },
     "BlueprintLoader": {
-      "version": "2.0",
+      "version": "2.2",
       "files": {
-        "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.ucas": "7eae0158199637ea3dfe25996f16328dbac8bb67ef44a08d9c08052a39a28f5c",
-        "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.utoc": "e4d888db70ea0138c033569fbc410907a29bf8a90508b9f854d61f3d4fbeaad3",
-        "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.pak": "75e7144577253917f6da7312ef5e585b12fb728226a22b0938323751a6b555cd"
+        "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.pak": "75e7144577253917f6da7312ef5e585b12fb728226a22b0938323751a6b555cd",
+        "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.ucas": "3bc5cfd49d73030255234469d4529252d867111979ec47667dd357e9034df857",
+        "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.utoc": "0a4d1ac264091690f7efa8030104218dbbe2d32c0f2d053d4752b1a686ecb2ed"
       },
-      "url": "https://www.nexusmods.com/minecraftdungeons2/mods/2",
-      "archiveSHA256": "4c734597a5bfc21c7ca7b9a4f19738601b2c71f94a7c6e36b496c305a83a2937",
+      "url": "https://www.nexusmods.com/minecraftdungeons2/mods/2?tab=files",
+      "archiveSHA256": "cfadee0563c17684c1a3055c41bab7d5ca12f772a856bca6cb6bbea44744dc28",
       "upgradeFromFiles": {
         "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.ucas": "ea54c0f1b7614d0bc19d672b42b771324638b04b7a1a987e8445307fe1549a4f",
         "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.utoc": "d51cb0005bbfcc8e506f403b388f6b731c08e7df5b8bb0f51a1018e733462110",
         "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.pak": "75e7144577253917f6da7312ef5e585b12fb728226a22b0938323751a6b555cd"
-      }
+      },
+      "upgradeFromFileSets": [
+        {
+          "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.ucas": "7eae0158199637ea3dfe25996f16328dbac8bb67ef44a08d9c08052a39a28f5c",
+          "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.utoc": "e4d888db70ea0138c033569fbc410907a29bf8a90508b9f854d61f3d4fbeaad3",
+          "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.pak": "75e7144577253917f6da7312ef5e585b12fb728226a22b0938323751a6b555cd"
+        },
+        {
+          "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.ucas": "ea54c0f1b7614d0bc19d672b42b771324638b04b7a1a987e8445307fe1549a4f",
+          "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.utoc": "d51cb0005bbfcc8e506f403b388f6b731c08e7df5b8bb0f51a1018e733462110",
+          "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.pak": "75e7144577253917f6da7312ef5e585b12fb728226a22b0938323751a6b555cd"
+        }
+      ],
+      "minimumVersion": "2.0",
+      "compatibilityNote": "ModInfo/settings API from 2.0; popup API is not used.",
+      "compatibleReleases": [
+        {
+          "version": "2.0",
+          "files": {
+            "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.pak": "75e7144577253917f6da7312ef5e585b12fb728226a22b0938323751a6b555cd",
+            "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.ucas": "7eae0158199637ea3dfe25996f16328dbac8bb67ef44a08d9c08052a39a28f5c",
+            "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.utoc": "e4d888db70ea0138c033569fbc410907a29bf8a90508b9f854d61f3d4fbeaad3"
+          },
+          "archiveSHA256": "4c734597a5bfc21c7ca7b9a4f19738601b2c71f94a7c6e36b496c305a83a2937"
+        },
+        {
+          "version": "2.3",
+          "files": {
+            "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.pak": "75e7144577253917f6da7312ef5e585b12fb728226a22b0938323751a6b555cd",
+            "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.ucas": "3283f1c77672fed0bc0b279088df94e6646009345c2cff8d69d7208cdbc69098",
+            "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.utoc": "81a7cf3fd8cf8276d57fe8c4afcead2ff5bd847875b871d12ae105bc9b12274e"
+          },
+          "archiveSHA256": "982ccc00b25a83da7fb3081739651b0e1a16d62ca990696ba64d89e8617c3374"
+        }
+      ]
     },
     "DLSSRuntime": {
       "sdkCommit": "374959484e79a640feaba44c93ac8cfb0a03f5b5",
       "sha256": "3975567b8943c53acce397f2b72380092f84f162d00b0d2c7d08a1025c563983",
       "url": "https://raw.githubusercontent.com/NVIDIA/DLSS/374959484e79a640feaba44c93ac8cfb0a03f5b5/lib/Windows_x86_64/rel/nvngx_dlss.dll",
       "bundled": false,
-      "file": "Dungeons/Binaries/Win64/MCD2Graphics/ngx-runtime/nvngx_dlss.dll"
+      "file": "Dungeons/Binaries/Win64/MCD2Graphics/ngx-runtime/nvngx_dlss.dll",
+      "version": "310.9.1",
+      "minimumVersion": "310.9.1",
+      "compatibilityNote": "NGX SR runtime; newer models can be requested with ModelPreset. Untested files require the override."
     },
     "Streamline": {
-      "version": "2.14.1 production x64",
+      "version": "2.14.1",
       "url": "https://github.com/NVIDIA-RTX/Streamline/releases/download/v2.14.1/streamline-sdk-v2.14.1.zip",
       "archiveSHA256": "92c4d954631a1710da86ca3fa8d5034f2b9503838c95fc4ae977ae149319781b",
       "archiveMembers": {
-        "Dungeons/Binaries/Win64/MCD2Graphics/streamline/sl.interposer.dll": "bin/x64/sl.interposer.dll",
-        "Dungeons/Binaries/Win64/MCD2Graphics/streamline/sl.common.dll": "bin/x64/sl.common.dll",
-        "Dungeons/Binaries/Win64/MCD2Graphics/streamline/sl.pcl.dll": "bin/x64/sl.pcl.dll",
-        "Dungeons/Binaries/Win64/MCD2Graphics/streamline/sl.reflex.dll": "bin/x64/sl.reflex.dll"
+        "Dungeons/Binaries/Win64/sl.interposer.dll": "bin/x64/sl.interposer.dll",
+        "Dungeons/Binaries/Win64/sl.common.dll": "bin/x64/sl.common.dll",
+        "Dungeons/Binaries/Win64/sl.pcl.dll": "bin/x64/sl.pcl.dll",
+        "Dungeons/Binaries/Win64/sl.reflex.dll": "bin/x64/sl.reflex.dll",
+        "Dungeons/Binaries/Win64/sl.dlss_g.dll": "bin/x64/sl.dlss_g.dll",
+        "Dungeons/Binaries/Win64/nvngx_dlssg.dll": "bin/x64/nvngx_dlssg.dll",
+        "Dungeons/Binaries/Win64/NvLowLatencyVk.dll": "bin/x64/NvLowLatencyVk.dll"
       },
       "files": {
-        "Dungeons/Binaries/Win64/MCD2Graphics/streamline/sl.interposer.dll": "8c87c9499461da561edd529aa9bf7831d67d7b94ebb1c1a5ed54ef4934e1ea4c",
-        "Dungeons/Binaries/Win64/MCD2Graphics/streamline/sl.common.dll": "82924a8954dd671e09351c5de0eb87ad0eb25b944cc9f9ab955ca1d9950de15d",
-        "Dungeons/Binaries/Win64/MCD2Graphics/streamline/sl.pcl.dll": "f13d51cfa05f4cd514df2026049e2db8adf359221713170ad386fd499915b582",
-        "Dungeons/Binaries/Win64/MCD2Graphics/streamline/sl.reflex.dll": "0ce9725e3e03ea9e7f81d008b57f33ee365973d2e349131c8b1c3e3378fe2db0"
+        "Dungeons/Binaries/Win64/sl.interposer.dll": "8c87c9499461da561edd529aa9bf7831d67d7b94ebb1c1a5ed54ef4934e1ea4c",
+        "Dungeons/Binaries/Win64/sl.common.dll": "82924a8954dd671e09351c5de0eb87ad0eb25b944cc9f9ab955ca1d9950de15d",
+        "Dungeons/Binaries/Win64/sl.pcl.dll": "f13d51cfa05f4cd514df2026049e2db8adf359221713170ad386fd499915b582",
+        "Dungeons/Binaries/Win64/sl.reflex.dll": "0ce9725e3e03ea9e7f81d008b57f33ee365973d2e349131c8b1c3e3378fe2db0",
+        "Dungeons/Binaries/Win64/sl.dlss_g.dll": "f4a6b2b14dcc0b1485989e430d3b4e3a44ac1800b92ba1ad74f476e64fb2b09c",
+        "Dungeons/Binaries/Win64/nvngx_dlssg.dll": "ff6e90eb78b827927dff5b4ecc6b1c870c2e9bca29ed9f48c7d348cc9e170b82",
+        "Dungeons/Binaries/Win64/NvLowLatencyVk.dll": "2a77dc3e1c724b7eea5755be0ae7423752e79a2459fae72181a9f00e3507e5d6"
       },
-      "bundled": false
+      "bundled": false,
+      "minimumVersion": "2.14.1",
+      "compatibilityNote": "Production x64 Reflex/FG module set; newer untested sets require the override."
     }
   },
   "buildDependencies": {
     "NeoRuneSDK": "0.1.2",
     "NeoRuneTool": "0.1.2",
     "dotnetSDK": "10.0.401",
-    "ReShadeSDK": "v6.8.0 API20",
+    "ReShadeSDK": "PR435 4eb9056c76016aad6f98495d3bbda2d721106104",
     "NVIDIASDKCommit": "374959484e79a640feaba44c93ac8cfb0a03f5b5",
     "StreamlineSDK": "2.14.1",
     "Avalonia": "11.3.22"

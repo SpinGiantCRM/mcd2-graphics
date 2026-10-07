@@ -1,0 +1,223 @@
+{
+  "date": "2026-10-06",
+  "candidate": "v31 shared NGX owner correction",
+  "GPU": "RTX 4080 SUPER",
+  "driver": "615.71.09",
+  "output": [
+    3840,
+    2160
+  ],
+  "HDR": true,
+  "compatibilityTool": "CachyOS Proton SLR",
+  "presentation": "native WineWayland HDR",
+  "scene": "Stationary outdoor hub; animated NPCs and lighting",
+  "baseline": "exact seven-file v0.2.0-rc.1 payload",
+  "components": {
+    "FG": {
+      "fg-probe.exe": "573610f428f64780739ab8b82cc4f2f97ef20012e2630cba78a0ebc0fa0dff60",
+      "fg-chain-observer.addon64": "c505cac559fc769d25ca5e7dd4c30aaee65d5f7cdbe4f637e35bd8b31d7620d8",
+      "fg-sdk-bridge.dll": "c1abcdce59af13196953c4dae0ff566af9640dcf81f603d755477020ecb851c6",
+      "dxgi.dll": "30e8c0787e9614d0ebcaf0535d16de9fc58f54ca2a137f910d73fd491c699024",
+      "mcd2-fg-guide-recon.addon64": "e857cb1c4b08d3601bbd3ebe7ea5969ad15bbf5fba12c0a4a169c14536b837af",
+      "FG_UI_ALPHA.cso": "fce79e558c20bfafd859f37e397b8a04b5d820670f6aa0214522cef276cca8c1"
+    },
+    "SR": "4b5924ccbafa3c06b5eca43c9d01e291ce947d946ef89ff878220a5ce25da0a1"
+  },
+  "rows": {
+    "releaseDLAA": {
+      "samples": 2,
+      "intervalsPerSample": 1199,
+      "medianRenderedFPS": 84.75916426789819,
+      "medianSDKPresentationFPS": 84.75916426789819,
+      "medianP95Ms": 13.1365,
+      "renderedFPSRange": [
+        84.68234641885348,
+        84.83598211694289
+      ],
+      "input": [
+        3840,
+        2160
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "SDKStatuses": [
+        0
+      ]
+    },
+    "releaseQuality": {
+      "samples": 2,
+      "intervalsPerSample": 1199,
+      "medianRenderedFPS": 126.01789921685469,
+      "medianSDKPresentationFPS": 126.01789921685469,
+      "medianP95Ms": 9.06855,
+      "renderedFPSRange": [
+        125.60258863268709,
+        126.43320980102227
+      ],
+      "input": [
+        2560,
+        1440
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "SDKStatuses": [
+        0
+      ]
+    },
+    "candidateOffDLAAFirst": {
+      "samples": 4,
+      "intervalsPerSample": 1199,
+      "medianRenderedFPS": 82.72126099313343,
+      "medianSDKPresentationFPS": 82.72126099313343,
+      "medianP95Ms": 13.5018,
+      "renderedFPSRange": [
+        82.24953563826074,
+        82.87303949189247
+      ],
+      "input": [
+        3840,
+        2160
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "SDKStatuses": [
+        0
+      ]
+    },
+    "candidateOffDLAAReturn": {
+      "samples": 2,
+      "intervalsPerSample": 1199,
+      "medianRenderedFPS": 83.36691616381634,
+      "medianSDKPresentationFPS": 83.36691616381634,
+      "medianP95Ms": 13.5462,
+      "renderedFPSRange": [
+        83.07471219271754,
+        83.65912013491516
+      ],
+      "input": [
+        3840,
+        2160
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "SDKStatuses": [
+        0
+      ]
+    },
+    "candidateOnDLAAFresh": {
+      "samples": 2,
+      "intervalsPerSample": 1199,
+      "medianRenderedFPS": 64.92812438326017,
+      "medianSDKPresentationFPS": 129.85624876652034,
+      "medianP95Ms": 17.1465,
+      "renderedFPSRange": [
+        64.58203123426183,
+        65.2742175322585
+      ],
+      "input": [
+        3840,
+        2160
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "SDKStatuses": [
+        0
+      ]
+    },
+    "candidateOnDLAAReturn": {
+      "samples": 2,
+      "intervalsPerSample": 1199,
+      "medianRenderedFPS": 65.58242765439607,
+      "medianSDKPresentationFPS": 131.16485530879214,
+      "medianP95Ms": 16.8214,
+      "renderedFPSRange": [
+        65.54543877409584,
+        65.6194165346963
+      ],
+      "input": [
+        3840,
+        2160
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "SDKStatuses": [
+        0
+      ]
+    },
+    "candidateOffQuality": {
+      "samples": 2,
+      "intervalsPerSample": 1199,
+      "medianRenderedFPS": 125.67136807005505,
+      "medianSDKPresentationFPS": 125.67136807005505,
+      "medianP95Ms": 9.1642,
+      "renderedFPSRange": [
+        125.26323562271624,
+        126.07950051739388
+      ],
+      "input": [
+        2560,
+        1440
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "SDKStatuses": [
+        0
+      ]
+    },
+    "candidateOnQuality": {
+      "samples": 2,
+      "intervalsPerSample": 1199,
+      "medianRenderedFPS": 87.20940525657804,
+      "medianSDKPresentationFPS": 174.41881051315607,
+      "medianP95Ms": 12.69805,
+      "renderedFPSRange": [
+        87.14065752909781,
+        87.27815298405825
+      ],
+      "input": [
+        2560,
+        1440
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "SDKStatuses": [
+        0
+      ]
+    }
+  },
+  "diagnosis": {
+    "deviceShutdownInvalidatedFG": true,
+    "internalError": "0xbad00004 / FeatureNotFound",
+    "SDKStateStillReportedSuccess": true,
+    "SDKCountsNotSufficientForQualification": true
+  },
+  "correctedFGInternalEvaluationErrors": 0,
+  "correctedNormalExit": true,
+  "SRRetiredBeforeFinalStreamlineShutdown": true,
+  "FGOffDLAAParityPassed": false,
+  "WindowsQualified": false,
+  "publishedReleaseChanged": false,
+  "physicalCadenceMeasured": false,
+  "limits": [
+    "Two samples per main condition; four fresh-start DLAA Off samples across two processes",
+    "DLAA FG Off remains about two percent below release; no Windows clearance",
+    "SDK total is not physical display cadence or measured input latency",
+    "Short stationary scene only; no long-session or image-quality qualification"
+  ]
+}

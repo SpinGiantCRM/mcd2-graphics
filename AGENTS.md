@@ -13,3 +13,8 @@ update the compatibility note to explain how it preserves the same requirement.
 Keep the original preview.1 tag/assets frozen. Rebuilt payload hashes belong to
 their own candidate manifest and validation record. Never include player saves,
 account data, private runtime logs or third-party runtime DLLs in releases.
+
+The maintainer authorized one exception on 6 October 2026: the exact tested,
+source-built PR435 ReShade framework may be offered as a separate dependency
+download, with its source, build provenance and license. Keep it outside the
+mod installer archives. NVIDIA runtimes remain external dependencies.

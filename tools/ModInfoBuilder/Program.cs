@@ -12,7 +12,7 @@ const string type="/Game/Mods/BlueprintLoader/BP_ModInfo.BP_ModInfo_C";
 var e=new NormalExport { ObjectName=p.Name("ModInfo"), ClassIndex=p.ImportClass(type), TemplateIndex=p.ImportDefaultObject(type), ObjectFlags=EObjectFlags.RF_Public|EObjectFlags.RF_Standalone, bIsAsset=true, Data=new(), Extras=Array.Empty<byte>() };
 foreach(var pair in new Dictionary<string,string> {
  ["ModName"]="MCD2 Graphics", ["Version"]=version, ["Author"]="SpinGiantCRM", ["AuthorUrl"]="https://github.com/SpinGiantCRM/mcd2-graphics",
- ["Description"]="DLSS Super Resolution, DLAA, native HDR controls and supported NVIDIA Reflex. Graphics settings are in Settings → Video. Advanced HDR processing remains in the RenoDX ReShade panel. Experimental features remain hidden until supported.\n\nInstallation, requirements and support: https://github.com/SpinGiantCRM/mcd2-graphics\nUse offline; online compatibility is not established."
+ ["Description"]="DLSS Super Resolution, DLAA, Frame Generation, HDR controls and NVIDIA Reflex on supported hardware. Settings: Settings → Video.\n\nHelp: https://github.com/SpinGiantCRM/mcd2-graphics\nOnline compatibility is unverified. Offline play is safer; follow the publisher’s terms."
 })e.Data.Add(new StrPropertyData(p.Name(pair.Key)){Value=new FString(pair.Value),PropertyTypeName=p.TypeName(("StrProperty",0))});
 p.AddExport(e);p.Write(args[0],"ModInfo");
 var temporary=Path.Combine(args[2],"MetadataTemp");

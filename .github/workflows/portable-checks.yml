@@ -20,6 +20,14 @@ jobs:
         run: python3 -m unittest discover -s tests -p "test_installer_*.py" -v
       - name: Native build recipe regressions
         run: python3 -m unittest discover -s tests -p "test_build_toolchain.py" -v
+      - name: Bounded FG controller and camera checks
+        run: |
+          python3 -m unittest discover -s experiments/fg-streamline -p "test_*.py" -v
+          python3 -m py_compile experiments/fg-streamline/*.py
+          g++ -std=c++20 -Wall -Wextra -Werror experiments/fg-streamline/fg_camera_test.cpp -o /tmp/fg-camera
+          /tmp/fg-camera
+          g++ -std=c++20 -Wall -Wextra -Werror experiments/fg-streamline/fg_configuration_test.cpp -o /tmp/fg-configuration
+          /tmp/fg-configuration
       - name: Generate synthetic parser fixtures
         run: python3 tests/make_synthetic_saves.py /tmp/mcd2-fixtures
       - name: Settings framing and semantic checks
@@ -32,8 +40,14 @@ jobs:
         run: |
           g++ -std=c++20 -Isrc/native tests/upscaler_support_test.cpp -o /tmp/upscaler-support
           /tmp/upscaler-support
+          g++ -std=c++20 -Isrc/native tests/dlss_model_override_test.cpp -o /tmp/dlss-model-override
+          /tmp/dlss-model-override
+          g++ -std=c++20 -Isrc/native tests/lean_borrow_lifetime_test.cpp -o /tmp/lean-borrow-lifetime
+          /tmp/lean-borrow-lifetime
       - name: Display protocol and Reflex frame identity
         run: |
+          g++ -std=c++20 -Wall -Wextra -Werror tests/wine_reflex_pacing_test.cpp -o /tmp/wine-reflex-pacing
+          /tmp/wine-reflex-pacing
           g++ -std=c++20 -pthread tests/reflex_tokens_test.cpp -o /tmp/reflex-tokens
           /tmp/reflex-tokens
           g++ -std=c++20 tests/display_protocol_test.cpp -o /tmp/display-protocol
@@ -50,6 +64,8 @@ jobs:
         run: python -m unittest discover -s tests -p "test_installer_*.py" -v
       - name: Native build recipe regressions
         run: python -m unittest discover -s tests -p "test_build_toolchain.py" -v
+      - name: Bounded FG controller checks
+        run: python -m unittest discover -s experiments/fg-streamline -p "test_*.py" -v
 
   guided-installer-checks:
     name: Guided installer (${{ matrix.os }})
@@ -63,6 +79,8 @@ jobs:
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9
         with:
           dotnet-version: '10.0.401'
+      - name: DLSS foliage ownership checks
+        run: python tests/test_fg_foliage_policy.py
       - name: Guided installer file-safety checks
         run: dotnet run --project tests/installer-core/InstallerCore.Tests.csproj -c Release
       - name: Compile standalone GUI

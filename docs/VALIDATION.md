@@ -1,3 +1,11 @@
+# 0.3.0-preview.1 qualification — 7 October 2026
+
+The exact installer source `e421e57e7667f0e9ec71e1940c6daa352a39f0c7` and twelve owned files have bounded [Linux/NVIDIA qualification](LINUX_FINAL_QUALIFICATION_2026-10-07.md) and [Windows/AMD GUI/fallback qualification](WINDOWS_FULL_QUALIFICATION_2026-10-07.md). Publication changes documentation and archive containers only; native/UI/shader/installer bytes remain the tested inputs.
+
+[Fresh FG benchmarks](BENCHMARK_2026-10-07.md) replace old final-performance claims. [Artifact hashes and scan/signing status](../qualification/fg-release/release-artifacts-2026-10-07.json) identify the downloads. Windows NVIDIA active features/HDR, physical controller, long sessions and device loss remain unqualified; historical failures and delayed Windows exits remain disclosed.
+
+The [Reflex pacing record](../experiments/fg-streamline/REFLEX_PACING_2026-10-07.md) measures frame intervals, not input latency. Earlier reports below retain their original scope.
+
 # 0.2.0-rc.1 qualification — 5 October 2026
 
 PR7's exact-artifact Windows/AMD results are in [the Update 2 Windows report](UPDATE_2_WINDOWS_VALIDATION_2026-10-05.md) and [aggregate record](../qualification/update2/windows-checks.json). Installation, AMD fallback and three bounded clean exits passed. Windows NVIDIA, Windows HDR-output and input checks remain outstanding. The maintainer authorized an experimental prerelease on 5 October 2026 with these limits disclosed; this does not mark missing checks as passed. See [the decision and remaining gates](UPDATE_2_RELEASE_GATE.md). These results do not revise the historical preview evidence below.

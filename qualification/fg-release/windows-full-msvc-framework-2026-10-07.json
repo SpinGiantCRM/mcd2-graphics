@@ -1,0 +1,185 @@
+{
+  "schemaVersion": 1,
+  "status": "INVESTIGATION_ENDED_NO_MOD_FIX_IDENTIFIED",
+  "sourceCommit": "10f143e4b412f1f216ea2dd7a96508d174025e41",
+  "sourceMatchedRemoteBeforeTests": true,
+  "publicInstallerQualificationRemains": "FAIL",
+  "crashFixEstablished": false,
+  "installationMethod": "Private hash-guarded full-package runtime staging; not the pinned installer qualification",
+  "ownPayloadSHA256": {
+    "Dungeons/Binaries/Win64/FGBootstrap.ini": "bd44ca93301b57e358688aaf4eb6df7076784e22cc9200d9a119c7158e776721",
+    "Dungeons/Binaries/Win64/FGGuideCapture.ini": "5fb23ccf3916c8cb0d2c560395204590da098da0e8fcf9f74d8db8d40becc25a",
+    "Dungeons/Binaries/Win64/FG_UI_ALPHA.cso": "fce79e558c20bfafd859f37e397b8a04b5d820670f6aa0214522cef276cca8c1",
+    "Dungeons/Binaries/Win64/MCD2Graphics/live_dense.cso": "1f7df8df67dce0f2edc106ff709855ec00794b2879d59522731f98636feb72d3",
+    "Dungeons/Binaries/Win64/dxgi.dll": "ecfd1949118deec0e60a81733a9b733c2bbf4c78ff4733816216ebf04940a9bb",
+    "Dungeons/Binaries/Win64/fg-sdk-bridge.dll": "9915c32d334ca8baa8dc49d362e9a4343c1c796c75ce9f0adc34c8d4d66717ef",
+    "Dungeons/Binaries/Win64/mcd2-display-latency.addon64": "72594fdee0697702022c986b504b433d3d0e8ee68edb2cd522ac96d5be6900fe",
+    "Dungeons/Binaries/Win64/mcd2-fg-guide-recon.addon64": "fe3feb329d0ad1b504e8a77299e17815244e292ceeafab0a17c2d9c5cbc0f3b8",
+    "Dungeons/Binaries/Win64/mcd2-graphics.addon64": "dac1238e931bb01f1bc77c8af6b0cc42896aea7f074a781d7cc575a9cdf79c9d",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.pak": "9647e28e8d2372b5cf5f8afc06ad0d81c5fd5fbf73f4100c33b344a02597fea4",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.ucas": "e7d57528a2f281000685debaac94a5321cc58d85fc5e5454e71cc5e49ebf37b7",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.utoc": "dceb189aa1d8ee9ca6673667d5e41a0268bb0c92bb992a4339aafd839af491d7"
+  },
+  "frameworkCandidate": {
+    "baseSource": "4eb9056c76016aad6f98495d3bbda2d721106104",
+    "resetEpochPatchSHA256": "109e99a0b160e2d2b1baf260b51bff461333aaf328554838ce994dac9abcfbc7",
+    "upstreamFix": null,
+    "sourceDiffSHA256": "401d7b1507edf80b974520b3804494be2fcfb22f7103cfd41076bff25feba220",
+    "sha256": "ce808bb1494415586cfb2ec5638a3ab0f0cea3879e45146a34976740b59fcf48",
+    "compiler": "MSVC 14.44.35207; MSBuild 17.14.51.32402; Windows SDK 10.0.26100.0",
+    "configuration": "Release x64 full addon support; ReShade.sln /t:ReShade /p:Platform=64-bit /m:2",
+    "submodules": [
+      " 9e393d6d8a3b30dcc6f2806ef604ec16a27b0d7e deps/d3d12 (v1.608.2b-150-g9e393d6)",
+      " 925796543b9d26b8edfcdcecd94c1dac280f29fc deps/fpng (1.0.5-23-g9257965)",
+      " 27bed1181560211b55e39a9b132fef8c5846aae5 deps/glad (v0.1.11a-307-g27bed11)",
+      " 3912b3d9a9c1b3f17431aebafd86d2f40ee6e59c deps/imgui (v1.92.5-docking)",
+      " 8dc970fc771e35239db55dfbce8f46f83f8e9b73 deps/jxl_simple_lossless (remotes/origin/headers-and-color-profile)",
+      " 8fda4f5481fed5797dc2651cd91e238e9b3928c6 deps/minhook (v1.3.3-1-g8fda4f5)",
+      " 288d3a7ebc1ad959f62d51da75baa3d27438c499 deps/openxr (release-1.0.34)",
+      " 7845730cab6ebbdeb621e7349b7dc1a59c3377be deps/spirv (1.5.4)",
+      " 28d546d5eb77d4585506a20480f4de2e706dff4c deps/stb (28d546d)",
+      " 819011bb01628fe1aa2f1da9f2c842a48fd5680b deps/utfcpp (v2.3.4-149-g819011b)",
+      " 1076b348abd17859a116f4b111c43d58a588a086 deps/vma (v2.1.0-989-g1076b34)"
+    ],
+    "runtimeQualification": "Bounded startup, AMD fallback and Alt+F4 observations only"
+  },
+  "loaderVersion": "2.3",
+  "runs": [
+    {
+      "name": "FG Off / Reflex On",
+      "launchRoute": "Steam Library Play",
+      "closeRoute": "normal Alt+F4 from gameplay",
+      "observedGameplaySeconds": 306.7,
+      "processLifetimeSeconds": 1012.09,
+      "closeToExitSeconds": 4.11,
+      "shippingExitCode": "0x0",
+      "heldShippingHandleBeforeExit": true,
+      "forceKilled": false,
+      "loadedModuleSHA256": {
+        "mcd2-graphics.addon64": "dac1238e931bb01f1bc77c8af6b0cc42896aea7f074a781d7cc575a9cdf79c9d",
+        "dxgi.dll": "ecfd1949118deec0e60a81733a9b733c2bbf4c78ff4733816216ebf04940a9bb",
+        "mcd2-fg-guide-recon.addon64": "fe3feb329d0ad1b504e8a77299e17815244e292ceeafab0a17c2d9c5cbc0f3b8",
+        "fg-sdk-bridge.dll": "9915c32d334ca8baa8dc49d362e9a4343c1c796c75ce9f0adc34c8d4d66717ef",
+        "mcd2-display-latency.addon64": "72594fdee0697702022c986b504b433d3d0e8ee68edb2cd522ac96d5be6900fe",
+        "d3d12.asi": "ce808bb1494415586cfb2ec5638a3ab0f0cea3879e45146a34976740b59fcf48"
+      },
+      "startupObservationSeconds": 12.1,
+      "runtimeState": {
+        "sr": {
+          "revision": 100,
+          "mode": 2,
+          "scale": 6667,
+          "preset": 0,
+          "contextReady": 1,
+          "sourceRevision": 98,
+          "contextSessionMatches": true,
+          "sourceSessionMatches": true,
+          "runtimeRevision": 100,
+          "phase": 3,
+          "error": 1
+        },
+        "fg": {
+          "requestedMode": 0,
+          "contextReady": 1,
+          "revision": 5,
+          "runtimeRevision": 5,
+          "sessionMatches": true,
+          "available": 0,
+          "active": 0,
+          "phase": 0,
+          "restartRequired": 0
+        },
+        "display": {
+          "revision": 2,
+          "requestedReflexMode": 1,
+          "hdr": 0,
+          "runtimeRevision": 2,
+          "reflexAvailable": 0,
+          "activeReflexMode": 0,
+          "reflexFault": 0,
+          "hdrRevision": 2,
+          "hdrRestartRequired": 0
+        }
+      }
+    },
+    {
+      "name": "FG On / Reflex Boost",
+      "launchRoute": "Steam Library Play",
+      "closeRoute": "normal Alt+F4 from gameplay",
+      "observedGameplaySeconds": 331.08,
+      "processLifetimeSeconds": 489.52,
+      "closeToExitSeconds": 4.02,
+      "shippingExitCode": "0x0",
+      "heldShippingHandleBeforeExit": true,
+      "forceKilled": false,
+      "loadedModuleSHA256": {
+        "mcd2-fg-guide-recon.addon64": "fe3feb329d0ad1b504e8a77299e17815244e292ceeafab0a17c2d9c5cbc0f3b8",
+        "dxgi.dll": "ecfd1949118deec0e60a81733a9b733c2bbf4c78ff4733816216ebf04940a9bb",
+        "d3d12.asi": "ce808bb1494415586cfb2ec5638a3ab0f0cea3879e45146a34976740b59fcf48",
+        "fg-sdk-bridge.dll": "9915c32d334ca8baa8dc49d362e9a4343c1c796c75ce9f0adc34c8d4d66717ef",
+        "mcd2-graphics.addon64": "dac1238e931bb01f1bc77c8af6b0cc42896aea7f074a781d7cc575a9cdf79c9d",
+        "mcd2-display-latency.addon64": "72594fdee0697702022c986b504b433d3d0e8ee68edb2cd522ac96d5be6900fe"
+      },
+      "startupObservationSeconds": 13.2,
+      "runtimeState": {
+        "sr": {
+          "revision": 105,
+          "mode": 2,
+          "scale": 6667,
+          "preset": 0,
+          "contextReady": 1,
+          "sourceRevision": 103,
+          "contextSessionMatches": true,
+          "sourceSessionMatches": true,
+          "runtimeRevision": 105,
+          "phase": 3,
+          "error": 1
+        },
+        "fg": {
+          "requestedMode": 1,
+          "contextReady": 1,
+          "revision": 12,
+          "runtimeRevision": 12,
+          "sessionMatches": true,
+          "available": 0,
+          "active": 0,
+          "phase": 2,
+          "restartRequired": 0
+        },
+        "display": {
+          "revision": 3,
+          "requestedReflexMode": 2,
+          "hdr": 0,
+          "runtimeRevision": 3,
+          "reflexAvailable": 0,
+          "activeReflexMode": 0,
+          "reflexFault": 0,
+          "hdrRevision": 3,
+          "hdrRestartRequired": 0
+        }
+      }
+    }
+  ],
+  "restoration": {
+    "baselineEntriesVerified": 39,
+    "videoPreferencesRestored": [],
+    "enhancedInputUnchanged": true,
+    "playerAccountSavesReadOrRestored": false,
+    "gameClosed": true
+  },
+  "productionSourceDependencyPinsAndFrozenAssetsChanged": false,
+  "limits": [
+    "Intermittent failure: clean runs do not establish a causal repair.",
+    "Framework compiler, build recipe and flags differ from the pinned cross-built framework.",
+    "Save and quit, gameplay Video menu transitions, supported NVIDIA, active FG, HDR, controller and Linux runtime not qualified.",
+    "Successful Reset patch retained by source provenance; active NVIDIA resource retirement not exercised.",
+    "New MSVC dependency archive and public installer flows not qualified."
+  ],
+  "prelaunchStagingRecovery": {
+    "partialLayoutGameLaunched": false,
+    "baselineEntriesVerified": 39,
+    "inputsFrozenBeforeOldReceiptRemovalAfterCorrection": true
+  },
+  "report": "docs/WINDOWS_SHUTDOWN_ISOLATION_2026-10-07.md",
+  "investigationDisposition": "Ended at maintainer request after matching framework-only reproduction; precise ReShade/Windows defect remains unproven."
+}

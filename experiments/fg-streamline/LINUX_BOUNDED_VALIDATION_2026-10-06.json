@@ -1,0 +1,87 @@
+{
+  "date": "2026-10-06",
+  "purpose": "bounded FG candidate ready for Windows testing, not release qualification",
+  "platform": "CachyOS Proton 11.0-20261005-SLR / WineWayland HDR",
+  "GPU": "RTX 4080 SUPER",
+  "driver": "615.71.09",
+  "gameSteamBuild": 25647713,
+  "HDRPeakNits": 420,
+  "HDRPaperNits": 203,
+  "SR": "DLSS Quality, 2560x1440 to 3840x2160",
+  "trials": [
+    {
+      "revision": 10,
+      "motionClick": true,
+      "renderedFrames": 600,
+      "actualPresents": 1198,
+      "presentErrors": 0,
+      "guideErrors": 0,
+      "modes": [
+        {
+          "requestedMode": 1,
+          "SDKResult": 0,
+          "matchingInputs": true
+        },
+        {
+          "requestedMode": 0,
+          "SDKResult": 0,
+          "matchingInputs": true
+        }
+      ],
+      "WindowsQualified": false,
+      "imageQualityQualified": false
+    },
+    {
+      "renderedFrames": 600,
+      "actualPresents": 1200,
+      "presentErrors": 0,
+      "inputErrors": 0,
+      "modes": [
+        {
+          "requestedMode": 1,
+          "SDKResult": 0,
+          "matchingInputs": true
+        },
+        {
+          "requestedMode": 0,
+          "SDKResult": 0,
+          "matchingInputs": true
+        }
+      ],
+      "boundedGatePassed": true,
+      "WindowsQualified": false,
+      "releaseQualified": false
+    }
+  ],
+  "retirement": {
+    "normalProcessExit": true,
+    "crashReporter": false,
+    "SRFeatureReleaseResult": 1,
+    "NGXShutdownResult": 1,
+    "SRGPUCompletionVerified": true,
+    "SRGenerationRetained": false,
+    "alphaRecordedCommandLeases": 0,
+    "alphaGPUCompletionVerified": true,
+    "StreamlineShutdownResult": 0,
+    "fullNativeCOMRetirementQualified": false
+  },
+  "Reflex": {
+    "reflexAvailable": 1,
+    "reflexFault": 0,
+    "completedFrames": 12634,
+    "coordinatorError": 0,
+    "sdkMarkerError": 0,
+    "sdkCompleteReports": 64
+  },
+  "workingSetupRestoredByteForByte": true,
+  "WindowsQualified": false,
+  "releaseQualified": false,
+  "limits": [
+    "600-frame cap; no native FG control",
+    "No SDR or independent Native-upscaler guides",
+    "Menu/travel/window/device lifecycle not qualified",
+    "Remaining framework native COM reference warnings",
+    "Wine RSYNC/Reflex backend warnings",
+    "No image-quality or latency benchmark claim"
+  ]
+}

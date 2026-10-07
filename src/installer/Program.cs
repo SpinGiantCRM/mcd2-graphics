@@ -28,7 +28,7 @@ public sealed class InstallerWindow:Window {
     int page;bool busy;
     public InstallerWindow() {
         Title="Minecraft Dungeons II Graphics";Width=820;Height=690;MinWidth=700;MinHeight=550;
-        engine=new(ReadResource("dependencies.lock.json"),ReadResource("manifest.json"),()=>Assembly.GetExecutingAssembly().GetManifestResourceStream("payload.zip"));
+        engine=new(ReadResource("dependencies.lock.json"),ReadResource("manifest.json"),Path.Combine(AppContext.BaseDirectory,"payload"));
         var root=new Grid{RowDefinitions=new RowDefinitions("Auto,*,Auto"),Margin=new Thickness(28)};
         var header=new StackPanel{Spacing=8};header.Children.Add(new TextBlock{Text="MCD2 Graphics",FontSize=28,FontWeight=FontWeight.SemiBold});
         header.Children.Add(new TextBlock{Text="Install • Repair / Verify • Uninstall",Opacity=.7});
@@ -57,23 +57,32 @@ public sealed class InstallerWindow:Window {
             if(engine.GameRoot!=null){Text("Game build: "+engine.GameBuild());var check=engine.Scan()[0];Text("Status: "+(check.State=="OK"?"Supported":"Unsupported — installation is blocked"));}
             content.Children.Add(Button("Check requirements",()=>{page=1;Draw();}));
         }else if(page==1) {
-            Text("Requirements",22);Text("Dependencies come from their official publishers. They are not bundled. Use the required version, then select your download or run its official installer.");
+            Text("Requirements",22);Text("Dependencies come from their official publishers. They are not bundled. Choose a recognized release, or enable the override to try another official version.");
             if(engine.GameRoot==null){Text("Choose the game first.");return;}
             var dependencyChecks=engine.Scan();
             foreach(var dep in engine.Dependencies) {
                 var status=dependencyChecks.Single(x=>x.Name==dep.Name);var box=new StackPanel{Spacing=8};
-                box.Children.Add(new TextBlock{Text=dep.Name+" — "+status.State,FontWeight=FontWeight.SemiBold});box.Children.Add(new TextBlock{Text="Required: "+dep.Version,Opacity=.75});
+                box.Children.Add(new TextBlock{Text=dep.Name+" — "+status.State,FontWeight=FontWeight.SemiBold});box.Children.Add(new TextBlock{Text="Required: "+dep.Requirement+" • Tested: "+dep.Version,Opacity=.75,TextWrapping=TextWrapping.Wrap});
+                if(dep.MinimumVersion!=null&&dep.CompatibilityNote!=null)box.Children.Add(new TextBlock{Text=dep.CompatibilityNote,Opacity=.75,TextWrapping=TextWrapping.Wrap});
+                if(status.State is "OK" or "Ready to install")box.Children.Add(new TextBlock{Text="Selected / installed: "+status.Version,Opacity=.75});
                 var buttons=new StackPanel{Orientation=Orientation.Horizontal,Spacing=8};buttons.Children.Add(Button("Open official download",()=>OpenLink(dep.Url)));
-                if(dep.Id=="ReShade") {
+                if(dep.Id=="ReShade"&&dep.Files.Keys.Any(x=>x.EndsWith("/dxgi.dll",StringComparison.Ordinal))) {
                     box.Children.Add(new TextBlock{Text="Install the full addon-support build for:\n"+Path.Combine(engine.GameRoot,InstallerEngine.Shipping)+"\nChoose DirectX 10/11/12. Complete the official installer, then Check again.",TextWrapping=TextWrapping.Wrap});
                     buttons.Children.Add(AsyncButton("Run downloaded installer…",async()=>{var selected=await SelectFile("Choose the official full-addon ReShade installer");if(selected==null)return;var lockJson=System.Text.Json.JsonDocument.Parse(ReadResource("dependencies.lock.json"));var expected=lockJson.RootElement.GetProperty("dependencies").GetProperty("ReShade").GetProperty("installerSHA256").GetString();if(InstallerEngine.DigestFile(selected)!=expected)throw new InvalidDataException("This is not the required official full-addon ReShade installer. Get it from the official link.");InstallerEngine.EnsureGameClosed();RunReShade(selected);message.Text="Finish the official ReShade installer, then choose Check again. Any license agreement remains yours to accept.";}));
-                }else buttons.Children.Add(AsyncButton(dep.Files.Count>1?"Select downloaded archive…":"Select downloaded file…",async()=>{var f=await SelectFile("Select "+dep.Name+" download");if(f!=null){await Task.Run(()=>engine.SelectDependency(dep.Id,f));Draw();message.Text="Download verified. It will be placed correctly when you install.";}}));
+                }else buttons.Children.Add(AsyncButton(dep.Files.Count>1?"Select downloaded archive…":"Select downloaded file…",async()=>{var f=await SelectFile("Select "+dep.Name+" download");if(f!=null){await Task.Run(()=>engine.SelectDependency(dep.Id,f));Draw();message.Text=engine.OverrideEnabled(dep.Id)?"Untested download selected. Compatibility is not verified.":"Download verified. It will be placed correctly when you install.";}}));
+                var overrideBox=new CheckBox{Content="Try an untested dependency version",IsChecked=engine.OverrideEnabled(dep.Id)};
+                overrideBox.IsCheckedChanged+=(_,_)=>{try{engine.SetDependencyOverride(dep.Id,overrideBox.IsChecked==true);Draw();}catch(Exception e){message.Text=e.Message;}};
+                box.Children.Add(overrideBox);
+                if(engine.OverrideEnabled(dep.Id)) {
+                    box.Children.Add(new TextBlock{Text="Compatibility is not verified. Required files, hardware checks and mod integrity checks still apply. ReShade must support the mod's patched API.",TextWrapping=TextWrapping.Wrap});
+                    buttons.Children.Add(AsyncButton("Use installed version",async()=>{await Task.Run(()=>engine.UseInstalledDependency(dep.Id));Draw();message.Text="Untested dependency hashes recorded for this installation.";}));
+                }
                 box.Children.Add(buttons);content.Children.Add(new Border{Child=box,Padding=new Thickness(12),BorderThickness=new Thickness(1),BorderBrush=Brushes.Gray,CornerRadius=new CornerRadius(6)});
             }
             var actions=new StackPanel{Orientation=Orientation.Horizontal,Spacing=12};actions.Children.Add(AsyncButton("Check again",async()=>{await Task.Run(()=>engine.Scan());Draw();message.Text=engine.Ready?"All requirements are ready.":"Resolve the missing or unsupported requirements above.";}));actions.Children.Add(Button("Continue",()=>{page=2;Draw();}));content.Children.Add(actions);
         }else if(page==2) {
             Text("Install or maintain",22);Text("Version: "+engine.Version);
-            Text("Core graphics addon\nNative Video settings\nDLSS Super Resolution and DLAA\nHDR support\nReflex appears only when the rendering GPU and integration support it.");
+            Text("Core graphics addon\nNative Video settings\nDLSS Super Resolution and DLAA\nFrame Generation preview (DLSS/DLAA + native HDR)\nHDR support\nReflex appears only when the rendering GPU and integration support it.");
             Text(engine.Ready?"Requirements ready":"Some requirements still need attention. Go back to Requirements.");
             content.Children.Add(AsyncButton("Install",async()=>{await Task.Run(()=>engine.Install());Draw();message.Text="Installed and verified. Launch normally through Steam. Open Settings → Video.";}));
             content.Children.Add(AsyncButton("Repair / Verify",async()=>{var checks=await Task.Run(()=>engine.Scan());if(checks.All(x=>x.State=="OK")){message.Text="Installation and dependencies verified.";return;}await Task.Run(()=>engine.Install(true));Draw();message.Text="Repair complete. Modified or unowned files were not overwritten.";}));
@@ -86,7 +95,7 @@ public sealed class InstallerWindow:Window {
             content.Children.Add(Button("Third-party notices",()=>{var w=new Window{Title="Third-party notices",Width=760,Height=580};w.Content=new ScrollViewer{Content=new TextBlock{Text=ReadResource("notices.txt"),TextWrapping=TextWrapping.Wrap,Margin=new Thickness(20)}};w.Show(this);}));
             content.Children.Add(Button("Installation help",()=>OpenLink("https://github.com/SpinGiantCRM/mcd2-graphics/blob/main/INSTALL.md")));
             content.Children.Add(Button("Report a problem",()=>OpenLink("https://github.com/SpinGiantCRM/mcd2-graphics/issues/new/choose")));
-            Text("Offline use only. Online compatibility has not been established. Advanced RenoDX settings remain in ReShade.");
+            Text("Online compatibility is unverified. Offline play is safer; follow the publisher’s terms. Advanced RenoDX settings remain in ReShade.");
         }
     }
     async Task<string?> SelectFile(string title) {var selected=await StorageProvider.OpenFilePickerAsync(new(){Title=title,AllowMultiple=false});return selected.SingleOrDefault()?.TryGetLocalPath();}
