@@ -165,3 +165,105 @@ was run for these Windows framework controls.
 
 The original public qualification remains FAIL. Supported NVIDIA, HDR,
 controller and Linux runtime checks are not provided by these AMD controls.
+
+## Follow-up: caller reconstruction and full-memory diagnostics
+
+Source was fetched again and matched remote
+`369865490a586692c2329228a11771b62d3d7380` before this follow-up.
+The five original access-violation dumps remain unchanged. Using Microsoft's
+debugger with the original exception stack pointer and an explicit instruction
+anchor at the decoded following-jump target, shipping RVA `0x8bdcb86`, produces
+the same normalized return chain in all five:
+
+`0x8bdcf5a` → `0x8af4f47` → `0x8ad1ae5` → `0x8ad438f` →
+`kernel32!BaseThreadInitThunk` → `ntdll!RtlUserThreadStart`.
+
+This is a reconstruction using shipping unwind metadata at the jump target,
+not an original automatic unwind through the unnamed fault region. The fault
+instruction and following jump do not change the stack pointer; using that
+anchor assumes the stack state is compatible with its unwind metadata. The
+matching results strengthen the fingerprint but do not identify a source
+function or prove the corrupting caller. Stop at the OS thread root; apparent
+frames beyond it and the nearest exported `AK` name are not evidence of an
+audio failure. One preliminary analysis-only copy changed its context for
+inspection; the independently repeated explicit-anchor commands use the
+unmodified originals. Neither operation changes a live game or a saved dump.
+
+A signed Microsoft ProcDump 12.01 process-snapshot capture succeeded for the
+exact pinned framework alone. Its 4,748,453,489-byte full-memory dump remains
+private. It was captured while entering the world; the hub was subsequently
+observed. It has no fault context and does not identify the failed object.
+Runtime code inspection still lacks usable game symbols and a validated
+instruction sequence for the reconstructed callers.
+
+Attaching ProcDump's unhandled-exception monitor to that same live process
+produced two reported illegal-instruction notifications followed by shipping
+exit code `1000`, four seconds after attachment. No unhandled-exception dump
+was written, and no normal close had been requested. This is a separate
+instrumentation failure, not the recorded shutdown access violation, a clean
+exit, or evidence of a particular protection mechanism. Do not use it as a
+qualification result or attach a debugger again just to repeat this observation.
+
+Full Windows Error Reporting dumps require an administrator-configured
+per-application registry setting; this session has read-only access to that
+location. No registry setting, security permission or elevation was changed.
+The original 39-entry baseline was restored and independently verified after
+the instrumentation exit before the next experiment was staged.
+
+A private diagnostic addon and external memory-copy helper were then built.
+The addon selects only the known read-from-`0x10` exception, `r15 = 0x10`, exact
+fault bytes and following jump to the version-pinned shipping RVA. It waits
+briefly for the helper to record the original remote exception context, then
+returns `EXCEPTION_CONTINUE_SEARCH`; it does not change registers, bypass the
+fault or terminate the game. A standalone harness verified full-memory capture
+and exception-context preservation. Selection checks verified unrelated
+exceptions are ignored and capture is one-shot. The helper's dump request uses
+the Windows SDK's four-byte structure packing; default x64 pointer alignment
+otherwise produced an invalid-memory error in the harness.
+
+This instrumented framework run adds a variable and is diagnostic only.
+Source, binaries, raw memory and runtime logs are kept outside release payloads.
+It must be removed by its recorded hash after the shipping process closes,
+before original-file restoration. No production fix is established by building
+this capture tool. The final run and restoration result is recorded below.
+
+| Diagnostic change | Why | Windows behavior to preserve |
+| --- | --- | --- |
+| Explicit jump-target unwind anchor on original dumps | The unnamed execution region prevents automatic unwinding; raw stack values alone were inconclusive. | Keep original exception context and stack pointer, disclose the reconstruction assumption, and never label a nearby exported symbol as the failing function. |
+| Process snapshot, then narrow exception capture without debugger attachment | The ordinary attached monitor caused a distinct exit before normal shutdown; administrator crash-recorder configuration was unavailable. | Separate instrumented evidence from qualification, preserve the original exception, and keep all dumps private. |
+| Four-byte packed dump request and harness | Windows SDK dump structures differ from default x64 pointer alignment. | Retain the SDK ABI layout and verify captured exception registers, rather than trusting a successful file write alone. |
+
+Production addon, build recipe, installer, dependency pins, frozen assets and
+both Windows/Linux CI jobs are unchanged. These diagnostics provide no new
+Linux, supported-NVIDIA, HDR or controller qualification.
+
+The instrumented run completed 520.73 seconds of observed hub gameplay before
+normal Alt+F4. The held shipping handle returned `0xc0000005` after 18.07 seconds;
+that interval includes memory capture and must not be compared as ordinary
+shutdown latency. The external helper wrote a 2,544,704,879-byte full dump.
+Independent parsing confirmed that its original exception context and the
+subsequent ordinary Windows minidump match on thread, exception, access address,
+`r15`, fault bytes and decoded jump target. The same return reconstruction was
+also obtained from this sixth crash event. These are two captures of one event,
+not two independent reproductions.
+
+The full dump shows GameThread waiting from the game's own frames inside
+`ucrtbase!execute_onexit_table` / `common_exit`. The worker's nearby data and
+saved caller pointers can now be read, but their source type and the operation
+that invalidated the pointer remain unidentified. This does not establish a
+ReShade descriptor-heap destructor, AMD Reflex marker or audio function as the
+cause. No register edits or fault suppression were made in the live process.
+
+After actual process exit, the diagnostic addon was moved out of the game load
+path only after its SHA-256 matched the recorded test binary. Framework and
+original-file recovery then completed; all 39 baseline entries were independently
+reverified. Both known video configurations were restored, EnhancedInput was
+unchanged, and no player/account saves were read or rolled back. No capture
+helper or instrumented game remains running. Raw dumps, logs and diagnostic
+binaries remain private. The crash remains unresolved and public qualification
+remains FAIL.
+
+Primary tool references:
+[Microsoft debugger explicit stack/instruction anchors](https://learn.microsoft.com/en-us/windows-hardware/drivers/debuggercmds/k--kb--kc--kd--kp--kv--display-stack-backtrace-),
+[ProcDump capture modes](https://learn.microsoft.com/en-us/sysinternals/downloads/procdump),
+[Windows local full-dump configuration](https://learn.microsoft.com/en-us/windows/win32/wer/collecting-user-mode-dumps).

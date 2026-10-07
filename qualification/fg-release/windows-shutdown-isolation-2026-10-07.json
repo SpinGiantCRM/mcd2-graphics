@@ -149,5 +149,70 @@
     "forceKilled": false,
     "normalShutdownTimingQualified": false,
     "reason": "Critical-battery sleep and later Modern Standby resume interrupted the close measurement; measured wall-clock duration includes power transitions."
+  },
+  "fullMemoryFollowUp": {
+    "sourceCommit": "369865490a586692c2329228a11771b62d3d7380",
+    "sourceMatchedRemoteBeforeTests": true,
+    "automaticUnwindThroughFaultRegionAvailable": false,
+    "jumpAnchoredReconstruction": {
+      "originalDumpsUnchanged": true,
+      "matchingOriginalDumps": 5,
+      "anchorShippingRVA": "0x8bdcb86",
+      "normalizedShippingReturns": [
+        "0x8bdcf5a",
+        "0x8af4f47",
+        "0x8ad1ae5",
+        "0x8ad438f"
+      ],
+      "stopAtOSThreadRoot": true,
+      "causalFunctionIdentified": false
+    },
+    "processSnapshot": {
+      "tool": "Microsoft signed ProcDump 12.01",
+      "bytes": 4748453489,
+      "faultContext": false,
+      "privateOnly": true
+    },
+    "attachedMonitor": {
+      "shippingExitCode": "0x3e8",
+      "normalCloseRequested": false,
+      "unhandledDumpWritten": false,
+      "qualificationResult": false
+    },
+    "matchingFaultCapture": {
+      "frameworkSHA256": "16c05f65b47b1a1f7b21eaa9a89cfbb7868b72894aab58610763c0e4014656b1",
+      "diagnosticAddonSHA256": "db92eaa00136d8b1ebb27d3b0c83c0f1a0d7333caad0b3c47d5eaab947be7ae6",
+      "attachedDebugger": false,
+      "diagnosticOnly": true,
+      "ownGraphicsAddonsLoaderAndVendorSDKAbsent": true,
+      "observedGameplaySeconds": 520.73,
+      "shippingExitCode": "0xc0000005",
+      "heldShippingHandleBeforeExit": true,
+      "forceKilled": false,
+      "closeToExitSecondsIncludesCapture": 18.07,
+      "fullDumpBytes": 2544704879,
+      "fullAndOriginalMiniFaultContextMatch": true,
+      "fingerprint": {
+        "exceptionCode": "0xc0000005",
+        "access": "read",
+        "accessAddress": "0x10",
+        "r15": "0x10",
+        "faultBytes": "4d3927",
+        "followingJumpShippingRVA": "0x8bdcb86"
+      },
+      "gameThreadInCRTExitCallbackWait": true,
+      "objectSourceTypeIdentified": false,
+      "captureSelectionHarnessPassed": true,
+      "exceptionContextHarnessPassed": true,
+      "privateOnly": true
+    },
+    "restoration": {
+      "gameClosed": true,
+      "diagnosticAddonRemovedByHash": true,
+      "baselineEntriesVerified": 39,
+      "playerAccountSavesReadOrRestored": false
+    },
+    "productionFixEstablished": false,
+    "qualificationStill": "FAIL"
   }
 }

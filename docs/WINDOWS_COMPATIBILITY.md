@@ -291,3 +291,13 @@ causal repair. Keep exact binary, toolchain and source provenance, successful
 Reset metadata, shipping process-handle measurements, and both CI platforms.
 Exclude sleep/hibernation-interrupted wall-clock timings from normal shutdown
 comparisons. The original public qualification remains FAIL.
+
+The full-memory follow-up in that report preserves the original exception and
+confirms the same fault in a sixth event, with GameThread waiting in the game's
+C runtime exit callbacks. An attached debugger instead caused a distinct exit
+code 1000 before normal close. Keep these observations separate: the diagnostic
+capture addon does not repair the fault, and neither the nearest exported
+symbol nor an explicitly anchored unwind names its cause. Windows dump-request
+structures use the SDK's four-byte packing; verify exception-context preservation
+in a harness if replacing this evidence method. Restore the hash-guarded test
+installation after the actual shipping exit and keep raw memory private.
