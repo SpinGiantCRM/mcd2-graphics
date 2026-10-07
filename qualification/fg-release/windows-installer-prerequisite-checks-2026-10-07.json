@@ -1,0 +1,198 @@
+{
+  "testDate": "2026-10-07",
+  "decision": "BLOCKED",
+  "blocker": "Missing pinned framework archive",
+  "pulledPRHead": "4d875e105ff1a46f1e028a7d963f57f8c716d912",
+  "methodology": "docs/WINDOWS_QUALIFICATION_CHECKLIST.md",
+  "inputs": {
+    "source": "38c348b953641946483fc28ec5722eb10e5dbd60",
+    "installerSHA256": "12485112d875a8c5f3472204fe2651cc8e9be14a770edf47af28cab6a73086eb",
+    "installerReceiptFiles": 235,
+    "manifestVersion": "0.3.0-preview.1",
+    "ownPayloadFiles": 12,
+    "independentSourceBytesMatch": true,
+    "loaderArchiveSHA256": "982ccc00b25a83da7fb3081739651b0e1a16d62ca990696ba64d89e8617c3374",
+    "loaderFilesMatch": true,
+    "workflow": 37554384729,
+    "artifactID": 11454227703,
+    "artifactZIP_SHA256": "397363ffb383a45dc1230f927542168c7a890ca5277b9955038b25190304db48",
+    "frameworkArchive": "ReShade-PR435-4eb9056-reset-epoch-x64.zip",
+    "frameworkArchiveExpectedSHA256": "38b1affa05445a0801372f1f17be76f87e0ab5777c769a09031cd4e23dee7cb2",
+    "frameworkBinaryExpectedSHA256": "16c05f65b47b1a1f7b21eaa9a89cfbb7868b72894aab58610763c0e4014656b1",
+    "frameworkAvailable": false
+  },
+  "environment": {
+    "windows": "Windows 11 Pro 10.0.26200.9457",
+    "gpu": "AMD Radeon 860M",
+    "driver": "32.0.31041.1004",
+    "store": "Steam",
+    "build": "25647713",
+    "shippingSHA256": "231147bd0c655a4ae73f90873675d42917f2bfb3a9ee164fc64f217d6d6bd4ef"
+  },
+  "localChecks": {
+    "installerPython": 13,
+    "buildRecipePython": 6,
+    "fgPython": 14,
+    "installerCore": 116,
+    "windowsWinePacingPolicy": "PASS"
+  },
+  "CI": {
+    "latestHeadPortableWindowsAndGUI": 37555758248,
+    "pinnedSourcePortableWindowsAndGUI": 37554384574,
+    "allFourJobsPassedInBothRuns": true
+  },
+  "checks": {
+    "B1": {
+      "status": "NOT RUN",
+      "observation": "Windows 11 Pro 10.0.26200.9457, Radeon 860M driver 32.0.31041.1004, Steam build 25647713 and executable hash recorded. Current output/HDR/VSync/frame limit not observed in game."
+    },
+    "B2": {
+      "status": "PASS",
+      "observation": "Closed-game guard passed. Recovery copies and hashes captured for 16 existing game/mod/dependency/configuration files and seven mod/video preferences. No character/account saves read."
+    },
+    "B3": {
+      "status": "NOT RUN",
+      "observation": "Pinned framework prerequisite missing; installer and game not launched, no installation or runtime pass claimed."
+    },
+    "B4": {
+      "status": "NOT RUN",
+      "observation": "Pinned framework prerequisite missing; installer and game not launched, no installation or runtime pass claimed."
+    },
+    "I1": {
+      "status": "NOT RUN",
+      "observation": "Pinned framework prerequisite missing; installer and game not launched, no installation or runtime pass claimed."
+    },
+    "I2": {
+      "status": "NOT RUN",
+      "observation": "Pinned framework prerequisite missing; installer and game not launched, no installation or runtime pass claimed."
+    },
+    "I3": {
+      "status": "NOT RUN",
+      "observation": "Pinned framework prerequisite missing; installer and game not launched, no installation or runtime pass claimed."
+    },
+    "I4": {
+      "status": "NOT RUN",
+      "observation": "Pinned framework prerequisite missing; installer and game not launched, no installation or runtime pass claimed."
+    },
+    "I5": {
+      "status": "NOT RUN",
+      "observation": "Pinned framework prerequisite missing; installer and game not launched, no installation or runtime pass claimed."
+    },
+    "I6": {
+      "status": "NOT RUN",
+      "observation": "Pinned framework prerequisite missing; installer and game not launched, no installation or runtime pass claimed."
+    },
+    "I7": {
+      "status": "NOT RUN",
+      "observation": "Pinned framework prerequisite missing; installer and game not launched, no installation or runtime pass claimed."
+    },
+    "I9": {
+      "status": "NOT RUN",
+      "observation": "Pinned framework prerequisite missing; installer and game not launched, no installation or runtime pass claimed."
+    },
+    "I10": {
+      "status": "NOT RUN",
+      "observation": "Pinned framework prerequisite missing; installer and game not launched, no installation or runtime pass claimed."
+    },
+    "U1": {
+      "status": "NOT RUN",
+      "observation": "Pinned framework prerequisite missing; installer and game not launched, no installation or runtime pass claimed."
+    },
+    "U2": {
+      "status": "NOT RUN",
+      "observation": "Pinned framework prerequisite missing; installer and game not launched, no installation or runtime pass claimed."
+    },
+    "U3": {
+      "status": "NOT RUN",
+      "observation": "Pinned framework prerequisite missing; installer and game not launched, no installation or runtime pass claimed."
+    },
+    "U4": {
+      "status": "NOT RUN",
+      "observation": "Pinned framework prerequisite missing; installer and game not launched, no installation or runtime pass claimed."
+    },
+    "U5": {
+      "status": "NOT RUN",
+      "observation": "Pinned framework prerequisite missing; installer and game not launched, no installation or runtime pass claimed."
+    },
+    "U6": {
+      "status": "NOT RUN",
+      "observation": "Pinned framework prerequisite missing; installer and game not launched, no installation or runtime pass claimed."
+    },
+    "A1": {
+      "status": "NOT RUN",
+      "observation": "Pinned framework prerequisite missing; installer and game not launched, no installation or runtime pass claimed."
+    },
+    "A2": {
+      "status": "NOT RUN",
+      "observation": "Pinned framework prerequisite missing; installer and game not launched, no installation or runtime pass claimed."
+    },
+    "A3": {
+      "status": "NOT RUN",
+      "observation": "Pinned framework prerequisite missing; installer and game not launched, no installation or runtime pass claimed."
+    },
+    "A4": {
+      "status": "NOT RUN",
+      "observation": "Pinned framework prerequisite missing; installer and game not launched, no installation or runtime pass claimed."
+    },
+    "A5": {
+      "status": "NOT RUN",
+      "observation": "Pinned framework prerequisite missing; installer and game not launched, no installation or runtime pass claimed."
+    },
+    "E1": {
+      "status": "NOT RUN",
+      "observation": "Pinned framework prerequisite missing; installer and game not launched, no installation or runtime pass claimed."
+    },
+    "E2": {
+      "status": "NOT RUN",
+      "observation": "Pinned framework prerequisite missing; installer and game not launched, no installation or runtime pass claimed."
+    },
+    "I8": {
+      "status": "PASS",
+      "observation": "116 Windows installer-core checks passed in disposable fixtures, including all five dependency policies, unknown complete sets, mixed releases, missing members, unsafe paths and ownership. No fixture installed into the game."
+    },
+    "N1": {
+      "status": "NOT AVAILABLE",
+      "observation": "This laptop uses AMD Radeon 860M; supported NVIDIA FG/Reflex/SR execution cannot be qualified."
+    },
+    "N2": {
+      "status": "NOT AVAILABLE",
+      "observation": "This laptop uses AMD Radeon 860M; supported NVIDIA FG/Reflex/SR execution cannot be qualified."
+    },
+    "N3": {
+      "status": "NOT AVAILABLE",
+      "observation": "This laptop uses AMD Radeon 860M; supported NVIDIA FG/Reflex/SR execution cannot be qualified."
+    },
+    "N4": {
+      "status": "NOT AVAILABLE",
+      "observation": "This laptop uses AMD Radeon 860M; supported NVIDIA FG/Reflex/SR execution cannot be qualified."
+    },
+    "N5": {
+      "status": "NOT RUN",
+      "observation": "No current HDR-capable output validation performed."
+    },
+    "E3": {
+      "status": "PASS",
+      "observation": "No test installation or preference fixtures applied. All 23 captured existing files still match; absent tracked paths remain absent. No restoration required, no player progress rolled back."
+    },
+    "E4": {
+      "status": "PASS",
+      "observation": "Sanitized report and aggregate prepared; private baseline copies, raw outputs and dependency binaries remain ignored/local."
+    }
+  },
+  "normalExits": [],
+  "gameOrPreferencesChanged": false,
+  "renderingOrInstallerCodeChanged": false,
+  "olderRuntimeResultsReused": false,
+  "searchScope": [
+    "project files including ignored candidate archives",
+    "Downloads and top-level Desktop/Documents matching archives",
+    "GitHub releases",
+    "repository workflow artifact inventory",
+    "PR10 body and comments"
+  ],
+  "remainingDefects": [
+    "Known ModInfo version metadata gap not retested",
+    "Historical shutdown crash/delay and render-thread hang remain unresolved",
+    "Public GUI installation and Loader 2.3 gameplay unqualified"
+  ]
+}

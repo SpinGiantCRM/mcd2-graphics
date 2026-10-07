@@ -234,6 +234,14 @@ not qualify Loader 2.3 or this rebuilt public GUI installer. Release remains hel
 The mod has no runtime restriction forcing offline mode. The installer now says
 online compatibility is unverified rather than directing offline-only use.
 
+The subsequent [pinned Windows installer attempt](WINDOWS_INSTALLER_PREREQUISITES_2026-10-07.md)
+verified the specified installer, all 12 payload hashes and Loader 2.3 archive,
+but stopped before installation because the exact separate framework archive
+was unavailable. This is a distribution blocker, not a runtime pass or a Windows
+rendering fix. Preserve the pinned dependency requirement: the differently hashed
+Windows developer framework cannot qualify the public installer by substitution.
+The report records every checklist gate and leaves prior runtime results separate.
+
 A Linux Loader 2.3 smoke check reached the main-menu Mods page (reported version
 2.3), mod metadata, Video controls and offline gameplay. Current-session DLAA at
 100% and FG On acknowledged successfully; SR error, Reflex fault and coordinator
