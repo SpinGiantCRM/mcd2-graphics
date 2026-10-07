@@ -29,7 +29,10 @@ Before a new public release:
    to disable security protection. No local scanner is configured in this run.
 5. Upload only after the maintainer's release hold is lifted. Record Nexus's
    security status, retain quarantined files and request manual review when
-   necessary. GitHub is the download fallback while Nexus clearance is pending.
+   necessary. Await staff clearance; do not direct Nexus users to off-site copies
+   of quarantined files. Keep source/build links available for staff review.
+   Apply AI-Generated Content and AI Media tags where required, and hide obsolete
+   benchmark cards that could misrepresent the current release.
 
 Nexus's green badge records both internal checks and VirusTotal; blue records
 internal checks without a VirusTotal result. Neither is an independent runtime
