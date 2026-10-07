@@ -1,93 +1,53 @@
 # MCD2 Graphics roadmap
 
-This roadmap describes current priorities, not release dates or guarantees. Items can move as implementation and testing uncover new constraints.
+Planned work, in priority order. Release dates and hardware support depend on implementation and testing.
 
-## Released
-
-### 0.3.0-preview.1 — Frame Generation preview
-
-- Frame Generation Off / On for the tested NVIDIA DLSS/DLAA + native-HDR path.
-- Improved foliage motion vectors for DLSS/DLAA with FG Off or On.
-- Linux Reflex pacing compatibility fix; no measured latency claim.
-- Dependency overrides, Loader 2.0+ API policy and recognized 2.3.
-- Exact-artifact Linux/NVIDIA and Windows/AMD installer/fallback qualification.
-- Separate credited patched ReShade download and visible folder packaging.
-
-### 0.2.0-rc.1 — experimental prerelease
-
-- Guided Windows/Linux installer with verified official dependencies and safe repair/removal.
-- Native Video-menu HDR output and calibration with RenoDX restart coordination.
-- Streamline Reflex Off / On / On + Boost where supported.
-- Blueprint Loader 2.0 metadata.
-- Bounded Linux/NVIDIA and Windows/AMD qualification; Windows NVIDIA/HDR and physical-controller coverage remain open.
-
-### 0.1.0-preview.1
-
-- DLSS Super Resolution and DLAA.
-- Native / NVIDIA DLSS selection in the game's Video menu.
-- NVIDIA-style presets plus linked custom render scale.
-- Output-dependent minimum render scale; 17% at 3840×2160 in the current qualified configuration.
-- Safe fallback to the game's native temporal path when the DLSS path cannot be used.
-- Documented RenoDX UE Extended HDR setup.
-- Fresh install, uninstall and reinstall checks for the preview package.
-
-See [`docs/VALIDATION.md`](docs/VALIDATION.md) for the exact qualified and unqualified scope.
+Release history is in the [changelog](docs/RELEASE_NOTES.md). See [validation](docs/VALIDATION.md) for current tested support.
 
 ## Priority order
 
-### 1. NVIDIA Reflex
+### 1. FSR parity with DLSS
 
-Streamline Reflex is implemented in 0.2.0-rc.1 and exercised on Linux/NVIDIA with Native, DLAA and DLSS SR. Finish Windows NVIDIA, wider lifecycle, PCL/latency and performance qualification before claiming broad support or a measured benefit. Its shared frame identity is reused by the 0.3.0-preview.1 FG path.
+Add native FSR Super Resolution, Native AA, Frame Generation and compatible Radeon Anti-Lag 2 support. Keep SR and FG independently selectable, including DLSS SR + FSR FG and FSR SR + DLSS FG where supported.
 
-### 2. Frame Generation
+Prepare shared provider interfaces and frame inputs while preserving existing DLSS, FG, Reflex, HDR, saved settings and Native fallback. Qualify analytical paths first; enable ML paths only when their runtime and hardware requirements are met.
 
-The first bounded FG preview is implemented. Continue Windows NVIDIA, wider lifecycle, presentation-pacing and artifact qualification before broadening support.
+### 2. Multi Frame Generation
 
-### 3. OptiScaler / broader provider support
+Add supported native multipliers, then investigate hybrid MFG that can mix and match frame-generation providers. Keep one final presentation owner and a compatible latency solution.
 
-After Reflex and Frame Generation, investigate complete FSR/XeSS provider support, including their supported Frame Generation paths, through OptiScaler or native integration. Choose the route with the best compatibility and maintenance cost after the provider tests.
+Expose only combinations with verified frame inputs, output access and stable pacing. Reserve the same interfaces for later XeSS SR, FG/MFG and XeLL support.
 
-The goal is to make the existing game integration usable with alternative providers such as FSR- and XeSS-family reconstruction where OptiScaler supports them, and to leave room for provider-specific Frame Generation / Multi Frame Generation paths where those providers and the user's hardware support them.
+### 3. Ray Reconstruction and further technology
 
-This work remains evidence-driven: a provider is not advertised as supported until its lifecycle and output path have actually been qualified. Provider-specific failures should stay distinguishable from MCD2 host-integration failures.
+Investigate DLSS Ray Reconstruction, FSR Ray Regeneration and independent denoisers after FSR and MFG. Proceed only where the game provides usable noisy lighting signals, matching guides and a replaceable rendering stage.
 
-### 4. Ray Reconstruction — conditional
+Keep joint denoising/reconstruction distinct from independent denoisers. Investigate late camera reprojection separately when actual camera inputs and presentation compatibility can be established.
 
-Ray Reconstruction follows the broader-provider work if the existing renderer exposes a genuinely useful pre-denoised lighting/reflection boundary and the material/geometry guides needed to use RR correctly.
+### 4. Shadows / lighting
 
-The project will not add RR merely as a label or rebuild a large ray-traced renderer solely to claim support. If a real replaceable denoiser boundary exists, RR becomes a high-value quality feature; if not, it remains deferred.
+Investigate remaining shadow shimmer and lighting instability while preserving the game's visual identity.
 
-### 5. Shadows / lighting
+## Parallel work
 
-After the higher-priority feature work, continue investigating the game's shadow and lighting artifacts. Any replacement should preserve Minecraft Dungeons II's visual identity while improving clearly broken or unstable shadow behaviour.
-
-## Parallel / non-blocking work
-
-- Public ReShade/native interoperability improvements.
-- Windows qualification.
-- Physical-controller qualification.
-- Long-session and wider lifecycle testing.
-- Additional GPU / driver / resolution coverage from community reports.
+- Microsoft Store / Xbox PC version qualification and compatibility.
+- Wider Windows and Linux qualification, including active NVIDIA paths.
+- Physical-controller, long-session and lifecycle testing.
+- Additional GPU, driver, resolution and aspect-ratio coverage.
+- ReShade/native interoperability and dependency maintenance.
 
 ## Project principles
 
 - Preserve Minecraft Dungeons II's visual identity.
-- Prefer the game's own Video menu for user-facing controls.
-- Keep unsupported or unqualified features hidden rather than exposing placeholders.
-- Treat Native rendering as the fallback when a modded reconstruction path is invalid or unavailable.
-- Keep third-party provider/runtime failures separate from game-integration failures when evidence allows that distinction.
-- Do not bundle game assets, extracted game shader binaries, authentication-workaround components or private user data.
-- Do not claim support or compatibility that has not been tested or otherwise established.
+- Use the game's own settings menu for controls.
+- Preserve Native rendering as a safe fallback.
+- Keep unavailable features hidden and distinguish saved choices from active support.
+- Measure rendered FPS, generated frames, presentation pacing and latency separately.
+- Publish only support claims backed by evidence.
+- Keep game assets, extracted shaders, authentication workarounds and private user data out of releases.
 
 ## Testing wanted
 
-The current preview still benefits from reports covering:
+Reports from Microsoft Store / Xbox PC users, additional hardware and physical controllers are welcome. Include your store, game build, mod version, platform, GPU/driver, selected settings and reproduction steps through the GitHub issue forms.
 
-- Windows.
-- Physical controllers.
-- Long sessions.
-- Other RTX GPU generations and drivers.
-- Additional output resolutions and aspect ratios.
-- Device recreation/removal and unusual lifecycle cases.
-
-Use the GitHub issue forms and include the game build, mod version, platform, GPU/driver, output resolution, selected preset/render scale and reproduction steps. Remove account information, party codes, authentication data and private local paths before posting logs or screenshots.
+Redact personal details. Do not upload game executables, saves or authentication data.
