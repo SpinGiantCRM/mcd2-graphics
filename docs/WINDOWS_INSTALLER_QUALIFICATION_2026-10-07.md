@@ -60,6 +60,11 @@ A composite check is NOT RUN where required subchecks are incomplete, even when 
 
 ## Runtime evidence and shutdown
 
+The subsequent [shutdown isolation](WINDOWS_SHUTDOWN_ISOLATION_2026-10-07.md)
+reproduces the matching fault with the exact framework alone and tests separate
+MSVC controls. It does not change this public-package qualification or establish
+a production crash fix.
+
 Bounded six-module probes survived 72.5 s (original-off), 72.4 s (original-boost), 67.5 s (original-reinstall), 67.5 s (metadata). Actual game-directory SR addon, FG bridge, guide, latency addon, framework and bootstrap hashes matched; RenoDX also loaded. Original second run included a 305.53-second hub interval with observed movement. No dungeon round trip is claimed.
 
 Quality request 105 (67%) and Custom request 121 (77%) resolved unsupported in their current gameplay sessions: phase 3/error 1, matching runtime revisions, prior source revisions 103/119 retained. Private receipt events place decline before a new gameplay source acknowledgement. A prior menu source acknowledgement at Custom 77% is not evidence of reduced gameplay rendering. FG On remained unavailable/inactive for both Reflex On and Boost; adapter support was declined before FG binding/configuration/swapchain upgrade. Foliage eligibility requires current error-free runtime; unsupported phase/error cannot acquire it. This is source/test-backed inference because a direct runtime CVar/lease measurement was not collected.

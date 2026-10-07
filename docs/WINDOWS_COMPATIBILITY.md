@@ -273,3 +273,21 @@ A Linux Loader 2.3 smoke check reached the main-menu Mods page (reported version
 100% and FG On acknowledged successfully; SR error, Reflex fault and coordinator
 error were zero. Native graphics/UI payload hashes were unchanged. This was a
 short compatibility smoke check, not a new benchmark or Windows 2.3 test.
+
+## Shutdown isolation follow-up — 7 October 2026
+
+The [shutdown isolation report](WINDOWS_SHUTDOWN_ISOLATION_2026-10-07.md)
+reproduced the same access violation with the exact pinned framework alone,
+without MCD2 addons, FG/Reflex plugins, RenoDX or Loader. The unmodified control
+exited cleanly but also showed a delayed process exit. This narrows the failure;
+it does not prove a precise framework defect or establish a fix. Keep this
+control evidence separate from full installer and mod/framework qualification.
+
+Do not remove valid AMD PCL markers merely because Reflex low latency is
+unavailable: statistics and low-latency support have different vendor gates.
+The same-source MSVC baseline exited cleanly without the investigated upstream
+descriptor-heap lifetime patch, so a clean patched build alone cannot prove a
+causal repair. Keep exact binary, toolchain and source provenance, successful
+Reset metadata, shipping process-handle measurements, and both CI platforms.
+Exclude sleep/hibernation-interrupted wall-clock timings from normal shutdown
+comparisons. The original public qualification remains FAIL.
