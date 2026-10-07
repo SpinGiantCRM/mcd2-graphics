@@ -6,7 +6,8 @@ It does not convert that qualification to PASS or qualify another framework by
 substitution. Repository source was refreshed and verified at
 `9201e27fea2a2c8ab80ba1b898e0ed0a4c611e83` before these controls.
 
-**Status: crash fix unresolved; diagnostic controls and restoration complete.**
+**Status: investigation ended at the maintainer's request; crash cause unresolved;
+diagnostic controls and restoration complete.**
 The [sanitized aggregate](../qualification/fg-release/windows-shutdown-isolation-2026-10-07.json)
 keeps the matched controls, power-interrupted run and supplemental repeat
 separate. No production fix is established by this report.
@@ -267,3 +268,89 @@ Primary tool references:
 [Microsoft debugger explicit stack/instruction anchors](https://learn.microsoft.com/en-us/windows-hardware/drivers/debuggercmds/k--kb--kc--kd--kp--kv--display-stack-backtrace-),
 [ProcDump capture modes](https://learn.microsoft.com/en-us/sysinternals/downloads/procdump),
 [Windows local full-dump configuration](https://learn.microsoft.com/en-us/windows/win32/wer/collecting-user-mode-dumps).
+
+## Follow-up: MSVC A with the full package
+
+Source was refreshed and matched remote
+`10f143e4b412f1f216ea2dd7a96508d174025e41` before these tests. The
+[separate exact-pair record](../qualification/fg-release/windows-full-msvc-framework-2026-10-07.json)
+identifies all 12 own payload hashes, six loaded module hashes, framework source,
+patch, toolchain, runtime states and held-handle exit measurements.
+
+This private runtime layout uses the metadata-corrected `0.3.0-preview.1` package,
+recognized Loader 2.3, locked vendor runtimes and RenoDX, with framework A
+`ce808bb1494415586cfb2ec5638a3ab0f0cea3879e45146a34976740b59fcf48`
+replacing the pinned framework. It is not a new public-installer qualification.
+All 12 own payload files and all 25 staged input hashes were verified. Both
+shipping processes loaded the same six graphics-chain hashes and RenoDX and
+survived startup beyond ten seconds. No diagnostic capture addon, attached
+debugger, keyboard utility or Task Manager participated in these runs.
+
+| Full-package request | Observed hub interval | Process lifetime | Close to exit | Shipping result |
+| --- | --- | --- | --- | --- |
+| DLSS Quality, FG Off, Reflex On | 306.70 s | 1012.09 s | 4.11 s | `0x0` |
+| Persisted DLSS Quality, FG On, Reflex Boost | 331.08 s | 489.52 s | 4.02 s | `0x0` |
+
+Both launches used Steam Library Play and both closes used normal Alt+F4 from
+the hub, with the shipping handle held before close. Movement and continuing
+rendering were observed. The laptop was charging; no sleep/resume power event
+was found during either run. The first process's longer lifetime includes time
+spent in the Video menu before entering gameplay; it is not a 1,012-second hub
+observation. Gameplay duration is measured from the first observed hub screenshot
+to the close-request timestamp.
+
+The first Quality request was made through the main-menu Video controls. For
+the second run, the game was closed before the strict mod-save fixture set FG
+On and Reflex Boost. The fixture validates the exact mod class, schema and
+integer properties, increments revisions and clears FG context/session fields.
+It does not read or alter player/account saves. This exercises persisted intent;
+it does not qualify in-game FG/Reflex menu controls.
+
+Both current gameplay sessions declined Quality with matching runtime revision,
+phase 3 and error 1, before acknowledging a reduced source: source revisions
+remained at the prior Native frontend acknowledgements. The second FG On request
+had matching current session/revision, available 0, active 0, phase 2 and no
+restart requirement. Reflex On and Boost had matching request/runtime revisions,
+available 0, active mode 0 and fault 0. No active NVIDIA SR, FG or low latency was
+allocated. Direct CVar/foliage-lease measurement was not added by this follow-up.
+
+| Change / experiment | Why | Windows behavior to preserve |
+| --- | --- | --- |
+| Private full-package layout using same-source MSVC A | Check whether the alternative framework also starts and exits with the actual mod, after its isolated clean exit. | Qualify the exact framework/native pair and real shipping exit; compiler, recipe and build flags differ from the failing cross-build, so do not claim a compiler defect or causal repair. |
+| Closed-game FG On / Reflex Boost fixture and current-session readers | Exercise unsupported persisted requests, which may be hidden in the AMD UI. | Decline unsupported features without activating routing, reducing SR source or treating unavailable low latency as a fault. Do not remove valid cross-vendor PCL markers. |
+| Frozen input copies before removing old receipt-owned files | An older receipt also owned the private DLSS dependency used as a staging input. | Snapshot and verify all sources before any removal. Do not launch partial layouts, weaken closed-game checks, or infer safe recovery from a window disappearing. |
+| Separate exact-pair aggregate and guarded recovery | Retain the public failures while recording the alternative fairly. | Restore the original receipt, dependencies and known preferences only after actual process exit; keep player/account data and private runtime material outside Git and releases. |
+
+One initial staging attempt stopped because that older receipt-owned runtime was
+removed before it was copied. No game launched in the partial layout. The original
+39-entry baseline and unchanged EnhancedInput were recovered and independently
+verified. The private helper then froze and hash-verified every input before
+removal, and completed staging successfully. This is a private harness correction,
+not a shipped installer or rendering change.
+
+After the second actual process exit, the private transaction restored all 39
+baseline entries and independently verified them, including the original receipt,
+private bridge and mod/video preferences. EnhancedInput was unchanged and no
+player/account save was read or rolled back. No test game or capture helper remains
+running.
+
+These two clean exits are promising bounded observations, not an established
+crash repair. The failure is intermittent; the invalid object and corrupting
+operation remain unidentified. A retains the successful-Reset source patch and
+does not contain B's descriptor-heap fix. The results cannot credit that fix or
+prove compiler causation. Production source, dependency pins, build recipes,
+original frozen assets and both Windows/Linux CI jobs remain unchanged.
+
+The original public qualification remains **FAIL**. A new MSVC dependency archive
+and public installer flow are not qualified. Save and quit, gameplay Video/menu
+transitions, supported NVIDIA, active GPU retirement/FG, HDR, controller and Linux
+runtime checks remain open. Checks for this report parsed and cross-checked the
+aggregate against private module, request, exit and restored-transaction records;
+documentation links and `git diff --check` passed.
+
+The maintainer ended further investigation on 7 October after the matching crash
+was reproduced with the pinned framework alone and all mod components absent.
+The evidence supports investigating this ReShade/Windows combination if the issue
+is revisited; it does not establish the precise defect or prove that Windows alone
+is responsible. No MCD2 source repair was identified or applied. The two clean
+MSVC full-package observations remain separate from the failed public pair.

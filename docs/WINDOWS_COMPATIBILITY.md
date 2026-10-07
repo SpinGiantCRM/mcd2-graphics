@@ -301,3 +301,13 @@ symbol nor an explicitly anchored unwind names its cause. Windows dump-request
 structures use the SDK's four-byte packing; verify exception-context preservation
 in a harness if replacing this evidence method. Restore the hash-guarded test
 installation after the actual shipping exit and keep raw memory private.
+
+The separate full-package MSVC A follow-up in the same report records two clean
+normal Alt+F4 exits after more than five minutes of observed hub gameplay each,
+with Loader 2.3 and matching AMD Quality/FG On/Reflex Boost fallback. It retains
+the successful-Reset patch without B's heap fix. Preserve exact loaded module
+hashes, closed-game fixtures and the distinction between private runtime staging
+and public installer qualification. Compiler, recipe and flags changed together;
+these clean intermittent observations do not establish a causal crash repair or
+replace the original FAIL. Snapshot all staging inputs before removing older
+receipt-owned files, which can also include shared runtime sources.
