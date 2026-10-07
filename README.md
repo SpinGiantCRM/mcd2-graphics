@@ -6,7 +6,9 @@ DLAA, DLSS Super Resolution, native HDR controls and supported NVIDIA Reflex in 
 
 **Experimental prerelease: [`0.2.0-rc.1`](https://github.com/SpinGiantCRM/mcd2-graphics/releases/tag/v0.2.0-rc.1). Guided Windows/Linux installation, native HDR controls and supported Reflex. Windows/AMD qualification is bounded; Windows NVIDIA and Windows HDR output remain untested. [Release notes](docs/RELEASE_NOTES.md). Earlier preview tags and assets remain frozen.**
 
-**Offline single-player only for this preview. Online/co-op permission and anti-cheat compatibility are unverified. This restriction does not guarantee compliance or account safety.** See [publisher rules and online use](docs/ONLINE_USE.md).
+**Development branch:** `0.3.0-preview.1` adds Frame Generation and dependency overrides. It is held for qualification, not released. See the [candidate guide](docs/FG_CANDIDATE.md) and [Windows checklist](docs/WINDOWS_QUALIFICATION_CHECKLIST.md). The controls and release results below describe published `0.2.0-rc.1`.
+
+The mod does not force offline mode. Online/co-op compatibility is unverified; offline play is safer. Follow the publisher's terms. See [online use](docs/ONLINE_USE.md).
 
 **NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.**
 

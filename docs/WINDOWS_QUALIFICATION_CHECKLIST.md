@@ -23,10 +23,11 @@ change rendering code as part of this run. Report failures to the maintainer.
 | Loader 2.3 ZIP SHA-256 | `982ccc00b25a83da7fb3081739651b0e1a16d62ca990696ba64d89e8617c3374` |
 | Other dependencies | Exact recognized sets from the package's `dependencies.lock.json`; overrides Off for the main run |
 
-The separate framework archive must be supplied by the maintainer while the
-release is held. If it is unavailable, report **BLOCKED: missing pinned
-framework**. Do not substitute the Windows developer artifact or bypass its
-hash check to obtain an apparent pass. Dependency licenses remain applicable.
+Download the separate framework from this
+[verified direct ZIP link](https://raw.githubusercontent.com/SpinGiantCRM/mcd2-graphics/1200608712d05bf487dbc9e381969909f63908bc/qualification/fg-release/dependencies/ReShade-PR435-4eb9056-reset-epoch-x64.zip).
+It requires no signed-in session and has the archive/binary hashes above.
+Select it under ReShade in the pinned installer; do not substitute the Windows
+developer artifact or bypass its hash check. Dependency licenses remain applicable.
 
 Use these PowerShell commands to verify each downloaded ZIP and the expanded
 Windows folder. Run them before opening the installer; use your own local paths.
@@ -106,10 +107,12 @@ record only the useful results.
 | U5 | Play for five minutes; enter a dungeon and return to the hub if available. | Responsive gameplay, intact menus and no new crash/hang. Record actual transitions; unavailable progression is NOT RUN. |
 | U6 | Physical controller, if available. | Navigation and changes work in both menus. No controller available means NOT AVAILABLE, not PASS. |
 
-**Known metadata gap:** the current pinned UI can display `0.2.0-rc.1` in
+**Known metadata gap:** the original pinned UI can display `0.2.0-rc.1` in
 ModInfo despite the installed manifest being `0.3.0-preview.1`. Record it as an
 open metadata defect, not a wrong-native-build diagnosis. A subsequent metadata
-package needs its new UI hashes and U1/U2 checked again before release.
+package needs its new UI hashes checked again before release. The prepared
+metadata-only update and bounded follow-up are described in the
+[candidate guide](FG_CANDIDATE.md); continue the original pinned checks first.
 
 ## 5. Hardware-specific runtime checks
 

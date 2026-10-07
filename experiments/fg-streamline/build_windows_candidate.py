@@ -23,6 +23,42 @@ def sha(path):
         return hashlib.file_digest(stream, 'sha256').hexdigest()
 
 
+def copy_current_ui(repo, artifact):
+    # UI logic and metadata have separate provenance. Never reuse the old v27
+    # metadata just because ModActor.cs still matches its original receipt.
+    receipt_path = repo / 'qualification/fg-release/ui-build-receipt.json'
+    ui = json.loads(receipt_path.read_text())
+    for source_path, field in [('src/ui/ModActor.cs', 'sourceSHA256'),
+                               ('tools/ModInfoBuilder/Program.cs', 'modInfoBuilderSHA256')]:
+        source = subprocess.check_output(['git', '-C', str(repo), 'show', 'HEAD:' + source_path])
+        if hashlib.sha256(source).hexdigest() != ui[field]:
+            raise RuntimeError('UI source changed: rebuild UI/metadata instead of reusing the payload')
+    manifest = json.loads((repo / 'manifest.json').read_text())
+    if ui['version'] != manifest['version']:
+        raise RuntimeError('UI metadata version differs from the manifest')
+    blobs = {}
+    with zipfile.ZipFile(repo / 'qualification/fg-release/own-payload.zip') as archive:
+        for name, expected in ui['payloadSHA256'].items():
+            relative = 'Dungeons/Content/Paks/~mods/MCD2Graphics/' + name
+            if name not in {'MCD2Graphics_P.pak', 'MCD2Graphics_P.ucas', 'MCD2Graphics_P.utoc'}:
+                raise RuntimeError('Unexpected UI payload member')
+            if manifest['files'].get(relative) != expected:
+                raise RuntimeError('UI receipt differs from the package manifest')
+            if archive.namelist().count(relative) != 1:
+                raise RuntimeError('Missing or duplicate UI payload member')
+            blob = archive.read(relative)
+            if hashlib.sha256(blob).hexdigest() != expected:
+                raise RuntimeError('UI payload hash mismatch')
+            blobs[name] = blob
+    if len(blobs) != 3:
+        raise RuntimeError('Incomplete UI receipt')
+    target = artifact / 'ui/Pak'
+    target.mkdir(parents=True)
+    for name, blob in blobs.items():
+        (target / name).write_bytes(blob)
+    shutil.copyfile(receipt_path, artifact / 'ui/build-receipt.json')
+
+
 def download(url, target, expected):
     urllib.request.urlretrieve(url, target)
     if sha(target) != expected:
@@ -139,16 +175,7 @@ def main():
             names = {'mcd2-display-latency.addon64' if folder == latency else 'mcd2-graphics.addon64': ''}
         for name in names:
             shutil.copyfile(folder / name, destination / name)
-    # Reuse the frozen UI only after verifying it describes the current git blob.
-    with zipfile.ZipFile(REPO / 'qualification/fg-v27/mcd2-fg-dlss-windows-candidate-v27.zip') as archive:
-        ui = json.loads(archive.read('ui/build-receipt.json'))
-        source = subprocess.check_output(['git', '-C', str(REPO), 'show', 'HEAD:src/ui/ModActor.cs'])
-        if hashlib.sha256(source).hexdigest() != ui['sourceSHA256']:
-            raise RuntimeError('UI changed: build a new UI instead of reusing v27')
-        for name in ['ui/build-receipt.json', *['ui/Pak/' + name for name in ui['payloadSHA256']]]:
-            target = artifact / name
-            target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_bytes(archive.read(name))
+    copy_current_ui(REPO, artifact)
     files = {path.relative_to(artifact).as_posix(): sha(path) for path in artifact.rglob('*') if path.is_file()}
     (artifact / 'windows-build-receipt.json').write_text(json.dumps({
         'sourceCommit': subprocess.check_output(['git', '-C', str(REPO), 'rev-parse', 'HEAD'], text=True).strip(),

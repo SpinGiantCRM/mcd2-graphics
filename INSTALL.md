@@ -1,5 +1,9 @@
 # Guided installation — 0.2.0-rc.1
 
+These instructions describe the published release. The held `0.3.0-preview.1`
+uses expanded folder deployment and a separate patched ReShade dependency:
+follow the [candidate guide](docs/FG_CANDIDATE.md). Do not mix the two packages.
+
 Download the compiled Windows or Linux installer archive from the [0.2.0-rc.1 release](https://github.com/SpinGiantCRM/mcd2-graphics/releases/tag/v0.2.0-rc.1), then extract it. GitHub's automatic source archives do not contain the ready-to-run installer. This is an experimental prerelease with [documented qualification limits](docs/UPDATE_2_RELEASE_GATE.md). Published preview.1 and preview.2 remain unchanged.
 
 ## Install

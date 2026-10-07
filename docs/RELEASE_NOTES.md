@@ -1,3 +1,26 @@
+# 0.3.0-preview.1 — held candidate
+
+Not released. Qualification and final benchmarks are pending.
+
+- Frame Generation Off / On in the native Video menu; generates one extra frame
+  between rendered frames on supported hardware. This preview requires NVIDIA
+  DLSS/DLAA, native HDR and the patched ReShade framework.
+- Foliage deformation motion vectors apply to active DLSS SR and DLAA, including
+  FG Off; native fallback restores the previous value where still owned.
+- Wine-specific Reflex pacing fix; native Windows skips that compatibility path.
+- Blueprint Loader 2.0+ with recognized official 2.0, 2.2 and 2.3 sets. No popup API.
+- Explicit default-Off overrides for Loader, ReShade, RenoDX, DLSS and Streamline;
+  optional restart-only DLSS model hint. Version overrides do not bypass game,
+  payload, required-file or hardware checks.
+- Expanded installer files and visible payload; no embedded payload archive or
+  self-extraction. ReShade is a separate credited dependency download.
+- Short help, separate recommendations and corrected Mods-page metadata. The
+  mod does not force offline mode; online compatibility remains unverified.
+
+See [candidate installation and limits](FG_CANDIDATE.md),
+[Windows qualification](WINDOWS_QUALIFICATION_CHECKLIST.md) and
+[packaging/review checks](NEXUS_RELEASE_GATE.md). Published tags remain unchanged.
+
 # 0.2.0-rc.1 — guided installation, native HDR and Reflex
 
 Experimental prerelease, published after the maintainer accepted the available Windows/AMD qualification on 5 October 2026. Linux/NVIDIA and Windows/AMD results are separate; Windows NVIDIA Reflex and Windows HDR output remain untested.

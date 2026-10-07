@@ -1,3 +1,19 @@
+# Held 0.3.0-preview.1 candidate — 7 October 2026
+
+Use the [pinned Windows checklist](WINDOWS_QUALIFICATION_CHECKLIST.md) and
+[candidate guide](FG_CANDIDATE.md). Windows qualification is in progress. The
+latest Loader 2.3 Linux smoke passed before the metadata update; final Linux
+installer/runtime checks and matched FG Off/On benchmarks remain pending.
+Metadata changed only the generated ModInfo asset and three UI containers;
+settings logic and all nine non-UI owned files remain unchanged. These are not
+runtime results for the new metadata. See the
+[UI receipt](../qualification/fg-release/ui-build-receipt.json).
+
+The [Reflex pacing measurements](../experiments/fg-streamline/REFLEX_PACING_2026-10-07.md)
+apply to the recorded Linux environment. The older v31 performance table is
+historical and must not be promoted as the final candidate benchmark. No new
+release, compatibility claim or latency measurement is established here.
+
 # 0.2.0-rc.1 qualification — 5 October 2026
 
 PR7's exact-artifact Windows/AMD results are in [the Update 2 Windows report](UPDATE_2_WINDOWS_VALIDATION_2026-10-05.md) and [aggregate record](../qualification/update2/windows-checks.json). Installation, AMD fallback and three bounded clean exits passed. Windows NVIDIA, Windows HDR-output and input checks remain outstanding. The maintainer authorized an experimental prerelease on 5 October 2026 with these limits disclosed; this does not mark missing checks as passed. See [the decision and remaining gates](UPDATE_2_RELEASE_GATE.md). These results do not revise the historical preview evidence below.

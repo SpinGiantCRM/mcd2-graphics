@@ -1,5 +1,11 @@
 # Pinned Windows installer qualification attempt — 7 October 2026
 
+**Distribution follow-up:** the exact framework is now available through a
+[verified direct ZIP link](https://raw.githubusercontent.com/SpinGiantCRM/mcd2-graphics/1200608712d05bf487dbc9e381969909f63908bc/qualification/fg-release/dependencies/ReShade-PR435-4eb9056-reset-epoch-x64.zip).
+An unauthenticated download returned HTTP 200 and matched both hashes below.
+The pinned installer can select that ZIP without an override. The earlier
+blocked attempt remains recorded below; Windows runtime results are still pending.
+
 **BLOCKED: missing pinned framework.** This attempt followed
 [the qualification checklist](WINDOWS_QUALIFICATION_CHECKLIST.md) after pulling
 PR10 head `4d875e105ff1a46f1e028a7d963f57f8c716d912`. No installer or game was

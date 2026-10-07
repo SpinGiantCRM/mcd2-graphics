@@ -10,9 +10,9 @@
     "Dungeons/Binaries/Win64/mcd2-display-latency.addon64": "72594fdee0697702022c986b504b433d3d0e8ee68edb2cd522ac96d5be6900fe",
     "Dungeons/Binaries/Win64/mcd2-fg-guide-recon.addon64": "fe3feb329d0ad1b504e8a77299e17815244e292ceeafab0a17c2d9c5cbc0f3b8",
     "Dungeons/Binaries/Win64/mcd2-graphics.addon64": "dac1238e931bb01f1bc77c8af6b0cc42896aea7f074a781d7cc575a9cdf79c9d",
-    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.pak": "eec103ddba05020a38965b25da078a6dea3f4c985ab7c09744ca4d004ae4f2c4",
-    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.ucas": "cfa09ccb0d1401f3bca81bd0d279bfd162ae264263ed0652a559c751b8feb440",
-    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.utoc": "9fa45d99a13622e16d51271cef2afcaf08c1c5f70bc10bc89cd6f88fbf168de3"
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.pak": "9647e28e8d2372b5cf5f8afc06ad0d81c5fd5fbf73f4100c33b344a02597fea4",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.ucas": "e7d57528a2f281000685debaac94a5321cc58d85fc5e5454e71cc5e49ebf37b7",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.utoc": "dceb189aa1d8ee9ca6673667d5e41a0268bb0c92bb992a4339aafd839af491d7"
   },
   "upgradeFrom": {
     "0.1.0-preview.2": {
