@@ -336,3 +336,19 @@ Player/account saves and raw diagnostics remain private. The separate framework
 dependency follows the maintainer's 6 October exception and is never embedded in
 the mod installer. Final Linux runtime and Windows NVIDIA/HDR checks remain
 separate; do not erase these limits during subsequent Linux work.
+
+## Full GUI qualification of the MSVC candidate - 7 October 2026
+
+The [full Windows AMD report](WINDOWS_FULL_QUALIFICATION_2026-10-07.md) records
+the downloaded `e421e57` CI artifact, GUI upgrade/fresh install, repair and
+ownership refusals, uninstall/reinstall, both menus, AMD SR/FG/Reflex fallback,
+active play and three held shipping-process exits. All exited 0; Save and quit
+took 85.3 seconds and one window close took 86.45 seconds. Keep these delays
+visible even though both completed within the 120-second ceiling.
+
+This qualification changed evidence and documentation only. It does not replace
+the historical framework FAIL or establish a causal crash repair. Preserve the
+exact MSVC framework pin, existing Windows fixes and both CI platforms. The
+report distinguishes maintainer-reported dungeon travel and source/CI foliage
+eligibility evidence from directly captured runtime observations. Windows
+NVIDIA/HDR/controller and Linux gameplay remain separate hardware checks.

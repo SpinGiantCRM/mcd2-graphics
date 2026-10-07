@@ -7,6 +7,13 @@ by the candidate's shipped installer core. The candidate dependency pin now
 selects this exact tested build. This is a bounded mitigation; the precise
 ReShade/game/Windows shutdown defect remains unidentified.
 
+The subsequent [full GUI qualification](WINDOWS_FULL_QUALIFICATION_2026-10-07.md)
+uses the downloaded `e421e57` CI artifact and this exact dependency pin. Its
+per-ID results supersede the incomplete GUI disposition below for those new
+observations, without rewriting this earlier run or the original framework FAIL.
+All three actual shipping exits were 0; the 85.3- and 86.45-second clean delays
+remain material observations requiring maintainer review.
+
 The original [public installer qualification](WINDOWS_INSTALLER_QUALIFICATION_2026-10-07.md)
 remains **FAIL** for its frozen inputs. The new candidate remains **HELD / full
 qualification incomplete**, rather than inheriting that package's qualification.

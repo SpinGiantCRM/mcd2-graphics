@@ -5,6 +5,10 @@ FAIL. For the separately pinned MSVC mitigation candidate and repeated checks,
 see [the new record](WINDOWS_MSVC_MITIGATION_2026-10-07.md). Do not mix its
 dependency ZIP or installer rebuild with this historical artifact.
 
+The completed GUI checks for the separately pinned MSVC candidate are recorded
+in [full Windows AMD qualification](WINDOWS_FULL_QUALIFICATION_2026-10-07.md).
+Its result applies only to its frozen input hashes and disclosed test scope.
+
 Follow this order. Record **PASS / FAIL / NOT RUN / NOT AVAILABLE** for every
 check below, with a short observation. This is a test procedure, not a claim
 that qualification has passed. Do not publish, merge, replace release files or

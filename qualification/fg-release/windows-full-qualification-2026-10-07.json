@@ -1,0 +1,451 @@
+{
+  "date": "2026-10-07",
+  "decision": "PASS for bounded Windows AMD installer and unsupported fallback scope; delayed exit needs review",
+  "repository": "SpinGiantCRM/mcd2-graphics",
+  "pr": 10,
+  "installerSource": "e421e57e7667f0e9ec71e1940c6daa352a39f0c7",
+  "installerWorkflow": 37602995068,
+  "artifactId": 11473108471,
+  "artifactZIP_SHA256": "4e001d34b009661068d691933336937fd97e5c1d7c84b141268f8e32e6f25b10",
+  "installerEXE_SHA256": "ad3bc856d06258abd62745fd5aaff02046c7be3c4b1be74c70391f3bf676eb44",
+  "installerCoreSHA256": "51fefeafeea0ffa682da846eac465fa4c091bd48443bd5a4f278fc58c94f5c37",
+  "artifactReceiptFilesVerified": 235,
+  "manifestVersion": "0.3.0-preview.1",
+  "ownedManifest": {
+    "Dungeons/Binaries/Win64/FGBootstrap.ini": "bd44ca93301b57e358688aaf4eb6df7076784e22cc9200d9a119c7158e776721",
+    "Dungeons/Binaries/Win64/FGGuideCapture.ini": "5fb23ccf3916c8cb0d2c560395204590da098da0e8fcf9f74d8db8d40becc25a",
+    "Dungeons/Binaries/Win64/FG_UI_ALPHA.cso": "fce79e558c20bfafd859f37e397b8a04b5d820670f6aa0214522cef276cca8c1",
+    "Dungeons/Binaries/Win64/MCD2Graphics/live_dense.cso": "1f7df8df67dce0f2edc106ff709855ec00794b2879d59522731f98636feb72d3",
+    "Dungeons/Binaries/Win64/dxgi.dll": "ecfd1949118deec0e60a81733a9b733c2bbf4c78ff4733816216ebf04940a9bb",
+    "Dungeons/Binaries/Win64/fg-sdk-bridge.dll": "9915c32d334ca8baa8dc49d362e9a4343c1c796c75ce9f0adc34c8d4d66717ef",
+    "Dungeons/Binaries/Win64/mcd2-display-latency.addon64": "72594fdee0697702022c986b504b433d3d0e8ee68edb2cd522ac96d5be6900fe",
+    "Dungeons/Binaries/Win64/mcd2-fg-guide-recon.addon64": "fe3feb329d0ad1b504e8a77299e17815244e292ceeafab0a17c2d9c5cbc0f3b8",
+    "Dungeons/Binaries/Win64/mcd2-graphics.addon64": "dac1238e931bb01f1bc77c8af6b0cc42896aea7f074a781d7cc575a9cdf79c9d",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.pak": "9647e28e8d2372b5cf5f8afc06ad0d81c5fd5fbf73f4100c33b344a02597fea4",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.ucas": "e7d57528a2f281000685debaac94a5321cc58d85fc5e5454e71cc5e49ebf37b7",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.utoc": "dceb189aa1d8ee9ca6673667d5e41a0268bb0c92bb992a4339aafd839af491d7"
+  },
+  "frameworkZIP_SHA256": "610314d160a28f743cd2cfdc593c83b818bb2ead8576671d870c8f8652e95168",
+  "frameworkSHA256": "ce808bb1494415586cfb2ec5638a3ab0f0cea3879e45146a34976740b59fcf48",
+  "dependencies": {
+    "BlueprintLoader": "2.3",
+    "ReShade": "PR435 4eb9056 + successful Reset patch, MSVC A",
+    "RenoDX": "UE Extended nightly-20260928",
+    "DLSS": "310.9.1",
+    "Streamline": "2.14.1"
+  },
+  "host": {
+    "windows": "11 Pro 10.0.26200.9457",
+    "gpu": "AMD Radeon 860M",
+    "driver": "32.0.31041.1004",
+    "store": "Steam",
+    "appId": 1912410,
+    "buildId": 25647713,
+    "shippingSHA256": "231147bd0c655a4ae73f90873675d42917f2bfb3a9ee164fc64f217d6d6bd4ef",
+    "resolution": "1920x1200",
+    "HDR": "Off / SDR",
+    "VSync": "Off",
+    "frameLimit": "None",
+    "power": "AC"
+  },
+  "checks": {
+    "B1": {
+      "status": "PASS",
+      "observation": "Windows 11 Pro 26200.9457; Radeon 860M driver 32.0.31041.1004; Steam build 25647713; 1920x1200 SDR, VSync Off, no FPS limit."
+    },
+    "B2": {
+      "status": "PASS",
+      "observation": "Actual shipping process closed before recovery snapshot; 41 known mod/dependency/preferences/input entries and existing recovery backups verified. Player/account saves excluded."
+    },
+    "B3": {
+      "status": "PASS",
+      "observation": "Intact GUI uninstall obtained a fresh mod installation, retaining shared dependencies and restoring the original graphics proxy."
+    },
+    "B4": {
+      "status": "PASS",
+      "observation": "Full 235-file CI artifact verified; ordinary path containing spaces; self-contained GUI loaded its bundled runtime without SDK installation or installer Python invocation. No SmartScreen/antivirus warning observed. This is not unsigned certification or a pristine no-Python host claim."
+    },
+    "I1": {
+      "status": "PASS",
+      "observation": "GUI accepted supported Steam identity and five dependency cards. Disposable unsupported executable refused without writes. Xbox PC not tested."
+    },
+    "I2": {
+      "status": "PASS",
+      "observation": "GUI Repair upgraded original 0.2.0-rc.1 receipt; subsequent fresh GUI Install succeeded. Twelve own files/five complete dependency sets exact, 13 receipt files, version 0.3.0-preview.1, Loader 2.3 retained, overrides Off."
+    },
+    "I3": {
+      "status": "PASS",
+      "observation": "Running-game intact Repair / Verify completed read-only; all 41 entries unchanged. Confirmed GUI Uninstall refused Close Minecraft Dungeons II before changing files; fresh 41-entry snapshot unchanged. Missing-file repair writes while running not attempted; retained core regressions cover write refusal."
+    },
+    "I4": {
+      "status": "PASS",
+      "observation": "Intact GUI Verify completed; all 41 known entries unchanged."
+    },
+    "I5": {
+      "status": "PASS",
+      "observation": "Closed-game owned shader removed; GUI Repair restored exact manifest bytes and all 41 entries matched intact snapshot."
+    },
+    "I6": {
+      "status": "PASS",
+      "observation": "Closed-game one-byte shader change: GUI Repair and confirmed Uninstall refused without changing any of 41 known entries. Exact backup restored and GUI Verify passed before launch."
+    },
+    "I7": {
+      "status": "PASS",
+      "observation": "Each of five override acknowledgements and Use installed version checked individually; selection affected only that dependency. All five defaulted Off after closing/reopening. Recognized-set GUI checks do not qualify future unknown binaries."
+    },
+    "I8": {
+      "status": "PASS",
+      "observation": "Exact-source CI installer-core safety fixtures: 118 Windows / 119 Ubuntu checks. Unknown complete sets, mixed/incomplete releases and unsafe extraction covered. Local 17 installer Python regressions passed. No fake vendor DLL installed in game."
+    },
+    "I9": {
+      "status": "PASS",
+      "observation": "Intact GUI uninstall verified: 13 owned entries removed or original proxy restored; shared dependencies and known preferences unchanged; owned startup restoration validated. Player/account saves never read/restored."
+    },
+    "I10": {
+      "status": "PASS",
+      "observation": "Fresh GUI Install and Verify, exact 12 own/five dependency sets, successful startup/gameplay with six matched loaded module hashes plus RenoDX. Final GUI uninstall completed before baseline restoration."
+    },
+    "U1": {
+      "status": "PASS",
+      "observation": "Loader 2.3; both main/pause Mods pages showed MCD2 Graphics, SpinGiantCRM, description and exact 0.3.0-preview.1 version."
+    },
+    "U2": {
+      "status": "PASS",
+      "observation": "Main/pause Video pages mouse/keyboard navigation; separate help/recommendation footer without overlap. SDR HDR disabled; unsupported AMD FG/Reflex rows hidden as expected."
+    },
+    "U3": {
+      "status": "PASS",
+      "observation": "100 DLAA, 67 Quality, 77 Custom and minimum 33 Ultra Performance: slider/preset/fill synchronized; help explains current minimum."
+    },
+    "U4": {
+      "status": "PASS",
+      "observation": "Custom 77 persisted across restart and matched current-session runtime acknowledgement. Seeded FG On/Reflex On and Boost returned with resolved current acknowledgements; preference alone not counted."
+    },
+    "U5": {
+      "status": "PASS",
+      "observation": "326.4 conservative seconds active play after deducting 120 seconds for foreground installer testing. Movement, stairs, bridge and camera responsive; autonomous Brave Haven to Honeycomb Farm to Howling Woods/Little Howl Hamlet. Maintainer reported requested dungeon entry/return to Brave Haven complete; name/route not autonomously captured. Post-hand-off current fallback still matched. No new crash/hang."
+    },
+    "U6": {
+      "status": "NOT AVAILABLE",
+      "observation": "No physical game controller available; mouse/keyboard checks do not imply controller qualification."
+    },
+    "A1": {
+      "status": "PASS",
+      "observation": "Native/FG Off/Reflex Off startup; all six loaded addon/bootstrap/framework/bridge hashes plus RenoDX independently matched frozen manifest/lock."
+    },
+    "A2": {
+      "status": "PASS",
+      "observation": "Separate gameplay Quality 67, DLAA 100 and Custom 77 resolved current-session Native fallback. AMD vendor 4098; native receipt denies source reduction before feature creation. Quality is 6667 basis points displayed rounded 67."
+    },
+    "A3": {
+      "status": "PASS",
+      "observation": "Closed-game existing fixture tooling seeded only mod slots: FG On/Reflex On run 2 and Boost run 3. Current revisions/sessions matched; FG available/active 0, resolved phase 2, restart 0; Reflex available/active 0, fault 0. Closed logs show no FG swapchain routing. Current SR phase 3/error 1 is ineligible for foliage lease under retained source guard and 31 CI lease checks. Direct live CVar/lease capture unavailable; no direct measurement claimed."
+    },
+    "A4": {
+      "status": "PASS",
+      "observation": "All three closed-run bootstrap logs contain no wine-reflex-pacing; native-Windows guard/CI retained. Unsupported SDK cubin probe did not apply Wine pacing."
+    },
+    "A5": {
+      "status": "PASS",
+      "observation": "Optional model hint absent/default. No AMD model-selection/image-quality claim."
+    },
+    "N1": {
+      "status": "NOT AVAILABLE",
+      "observation": "No supported Windows NVIDIA GPU; active NGX/FG/Reflex, generated presents, NVIDIA performance/latency not qualified."
+    },
+    "N2": {
+      "status": "NOT AVAILABLE",
+      "observation": "No supported Windows NVIDIA GPU; active NGX/FG/Reflex, generated presents, NVIDIA performance/latency not qualified."
+    },
+    "N3": {
+      "status": "NOT AVAILABLE",
+      "observation": "No supported Windows NVIDIA GPU; active NGX/FG/Reflex, generated presents, NVIDIA performance/latency not qualified."
+    },
+    "N4": {
+      "status": "NOT AVAILABLE",
+      "observation": "No supported Windows NVIDIA GPU; active NGX/FG/Reflex, generated presents, NVIDIA performance/latency not qualified."
+    },
+    "N5": {
+      "status": "NOT AVAILABLE",
+      "observation": "SDR output; native HDR/calibration not qualified on this host."
+    },
+    "E1": {
+      "status": "PASS",
+      "observation": "Three normal exits: Save and quit and two window closes. Actual shipping process handles held before requests. No force kill/debugger; launcher codes not measured."
+    },
+    "E2": {
+      "status": "PASS",
+      "observation": "All actual process exits within 120 seconds. The 85.3-second Save and quit and 86.45-second window-close delays are material and retained for maintainer review. Window disappearance was not treated as process exit."
+    },
+    "E3": {
+      "status": "PASS",
+      "observation": "Final intact GUI uninstall, then guarded restoration of 41 baseline entries, original mod/video/input preferences and existing recovery backups. Known test-created files removed; player/account saves never restored."
+    },
+    "E4": {
+      "status": "PASS",
+      "observation": "Separate sanitized per-ID report/aggregate with frozen input hashes, timings and hardware/evidence limits. Historical FAIL remains unchanged; no release publication/merge."
+    }
+  },
+  "probes": [
+    {
+      "run": 1,
+      "phase": "startup",
+      "observationSeconds": 12.8,
+      "survived": true,
+      "sixLoadedModuleHashesVerified": true,
+      "renoDXLoaded": true
+    },
+    {
+      "run": 1,
+      "phase": "world",
+      "observationSeconds": 69.2,
+      "survived": true,
+      "sixLoadedModuleHashesVerified": true,
+      "renoDXLoaded": true
+    },
+    {
+      "run": 2,
+      "phase": "startup",
+      "observationSeconds": 13.3,
+      "survived": true,
+      "sixLoadedModuleHashesVerified": true,
+      "renoDXLoaded": true
+    },
+    {
+      "run": 2,
+      "phase": "world",
+      "observationSeconds": 69.3,
+      "survived": true,
+      "sixLoadedModuleHashesVerified": true,
+      "renoDXLoaded": true
+    },
+    {
+      "run": 3,
+      "phase": "startup",
+      "observationSeconds": 13.2,
+      "survived": true,
+      "sixLoadedModuleHashesVerified": true,
+      "renoDXLoaded": true
+    },
+    {
+      "run": 3,
+      "phase": "world",
+      "observationSeconds": 69.7,
+      "survived": true,
+      "sixLoadedModuleHashesVerified": true,
+      "renoDXLoaded": true
+    }
+  ],
+  "unsupportedSR": {
+    "quality": {
+      "requestedRevision": 110,
+      "runtimeRevision": 110,
+      "requestedScaleBasisPoints": 6667,
+      "currentSessionMatches": true,
+      "resolvedPhase": 3,
+      "error": 1,
+      "renderingVendor": 4098,
+      "sourceReductionAuthorized": false,
+      "featureCreated": false
+    },
+    "dlaa": {
+      "requestedRevision": 111,
+      "runtimeRevision": 111,
+      "requestedScaleBasisPoints": 10000,
+      "currentSessionMatches": true,
+      "resolvedPhase": 3,
+      "error": 1,
+      "renderingVendor": 4098,
+      "sourceReductionAuthorized": false,
+      "featureCreated": false
+    },
+    "custom": {
+      "requestedRevision": 114,
+      "runtimeRevision": 114,
+      "requestedScaleBasisPoints": 7700,
+      "currentSessionMatches": true,
+      "resolvedPhase": 3,
+      "error": 1,
+      "renderingVendor": 4098,
+      "sourceReductionAuthorized": false,
+      "featureCreated": false
+    }
+  },
+  "unsupportedFGReflex": [
+    {
+      "run": 2,
+      "sr": {
+        "revision": 119,
+        "mode": 2,
+        "scale": 7700,
+        "preset": 4,
+        "contextReady": 1,
+        "sourceRevision": 117,
+        "contextSessionMatches": true,
+        "sourceSessionMatches": true,
+        "runtimeRevision": 119,
+        "phase": 3,
+        "error": 1
+      },
+      "fg": {
+        "requestedMode": 1,
+        "contextReady": 1,
+        "revision": 41,
+        "runtimeRevision": 41,
+        "sessionMatches": true,
+        "available": 0,
+        "active": 0,
+        "phase": 2,
+        "restartRequired": 0
+      },
+      "display": {
+        "revision": 4,
+        "requestedReflexMode": 1,
+        "hdr": 0,
+        "runtimeRevision": 4,
+        "reflexAvailable": 0,
+        "activeReflexMode": 0,
+        "reflexFault": 0,
+        "hdrRevision": 4,
+        "hdrRestartRequired": 0
+      }
+    },
+    {
+      "run": 3,
+      "sr": {
+        "revision": 124,
+        "mode": 2,
+        "scale": 7700,
+        "preset": 4,
+        "contextReady": 1,
+        "sourceRevision": 122,
+        "contextSessionMatches": true,
+        "sourceSessionMatches": true,
+        "runtimeRevision": 124,
+        "phase": 3,
+        "error": 1
+      },
+      "fg": {
+        "requestedMode": 1,
+        "contextReady": 1,
+        "revision": 48,
+        "runtimeRevision": 48,
+        "sessionMatches": true,
+        "available": 0,
+        "active": 0,
+        "phase": 2,
+        "restartRequired": 0
+      },
+      "display": {
+        "revision": 5,
+        "requestedReflexMode": 2,
+        "hdr": 0,
+        "runtimeRevision": 5,
+        "reflexAvailable": 0,
+        "activeReflexMode": 0,
+        "reflexFault": 0,
+        "hdrRevision": 5,
+        "hdrRestartRequired": 0
+      }
+    }
+  ],
+  "closedStatus": [
+    {
+      "run": 1,
+      "winePacingApplied": false,
+      "fgSwapchainConfigured": false,
+      "guideGameFGModeEventCount": 0,
+      "reflexAvailableFinal": 0,
+      "reflexFaultFinal": 0
+    },
+    {
+      "run": 2,
+      "winePacingApplied": false,
+      "fgSwapchainConfigured": false,
+      "guideGameFGModeEventCount": 0,
+      "reflexAvailableFinal": 0,
+      "reflexFaultFinal": 0
+    },
+    {
+      "run": 3,
+      "winePacingApplied": false,
+      "fgSwapchainConfigured": false,
+      "guideGameFGModeEventCount": 0,
+      "reflexAvailableFinal": 0,
+      "reflexFaultFinal": 0
+    }
+  ],
+  "exits": [
+    {
+      "run": 1,
+      "route": "Save and quit",
+      "shippingExitCode": 0,
+      "exitRequestToProcessSeconds": 85.3,
+      "processLifetimeSeconds": 1863.2,
+      "actualProcessHandleHeld": true,
+      "launcherExitCode": null,
+      "forceKilled": false
+    },
+    {
+      "run": 2,
+      "route": "Alt+F4",
+      "shippingExitCode": 0,
+      "exitRequestToProcessSeconds": 4.9,
+      "processLifetimeSeconds": 1747.02,
+      "actualProcessHandleHeld": true,
+      "launcherExitCode": null,
+      "forceKilled": false
+    },
+    {
+      "run": 3,
+      "route": "Alt+F4",
+      "shippingExitCode": 0,
+      "exitRequestToProcessSeconds": 86.45,
+      "processLifetimeSeconds": 373.21,
+      "actualProcessHandleHeld": true,
+      "launcherExitCode": null,
+      "forceKilled": false
+    }
+  ],
+  "restoration": {
+    "baselineEntriesVerified": 41,
+    "newRecoveryBackupsRemoved": 0,
+    "enhancedInputRestored": true,
+    "playerAccountSavesReadOrRestored": false,
+    "gameClosed": true
+  },
+  "ci": {
+    "source": "e421e57e7667f0e9ec71e1940c6daa352a39f0c7",
+    "portableAndInstallerRun": 37602995042,
+    "installerCoreWindowsChecks": 118,
+    "installerCoreUbuntuChecks": 119,
+    "foliageLeaseChecksPerPlatform": 31,
+    "fgWindowsRun": 37602994984,
+    "installerBuildRun": 37602995068,
+    "allConclusions": "success"
+  },
+  "runtimeOrInstallerChangesDuringRun": false,
+  "limits": [
+    "Bounded clean exits do not establish universal/causal shutdown repair; historical FAIL preserved.",
+    "85.3- and 86.45-second delayed clean exits need review.",
+    "Dungeon round trip maintainer-reported; no autonomous dungeon-name capture.",
+    "No direct live foliage CVar capture; retained eligibility guard/current state/CI used.",
+    "Windows NVIDIA/HDR/controller and Linux gameplay runtime unavailable.",
+    "No release publication/merge or frozen asset replacement."
+  ],
+  "guiUninstallComparisons": [
+    {
+      "ownedReceiptEntriesRemovedOrOriginalProxyRestored": 13,
+      "sharedDependenciesAndKnownPreferencesUnchanged": true,
+      "playerAccountSavesReadOrRestored": false,
+      "gameClosed": true
+    },
+    {
+      "ownedReceiptEntriesRemovedOrOriginalProxyRestored": 13,
+      "sharedDependenciesAndKnownPreferencesUnchanged": true,
+      "playerAccountSavesReadOrRestored": false,
+      "gameClosed": true
+    }
+  ],
+  "startupRestorationEvidence": "Original upgraded receipt had no preexisting project UserEngine.ini; fresh-install receipt again recorded hadFile=false after first GUI uninstall, confirming removal of the owned startup file. Final baseline was hash restored separately."
+}
