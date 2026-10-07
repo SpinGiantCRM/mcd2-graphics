@@ -72,8 +72,14 @@ checks already in progress. This follow-up changes only ModInfo and its three
 UI containers: correct `0.3.0-preview.1` version, concise feature/help text and
 online wording. Settings logic, all native DLLs/addons, shaders and INIs are
 unchanged. The [UI receipt](../qualification/fg-release/ui-build-receipt.json)
-records source and old/new container hashes. Neither platform's metadata
-runtime check has passed yet.
+records source and old/new container hashes. The
+[Windows public-installer report](WINDOWS_INSTALLER_QUALIFICATION_2026-10-07.md)
+now records a bounded metadata follow-up: correct main-menu version/help,
+synchronized scale controls, persistence/current-session acknowledgement and
+two clean window closes. Pause-menu/keyboard checks remain incomplete. The
+original package had two access-violation exits, so Windows qualification
+remains **FAIL**; unchanged native hashes and later clean exits do not establish
+a shutdown fix. Linux qualification of the final package remains separate.
 
 For the final metadata follow-up, finish the original package's tests and
 uninstall with **that original installer while the game is closed**. Then fresh

@@ -242,6 +242,25 @@ rendering fix. Preserve the pinned dependency requirement: the differently hashe
 Windows developer framework cannot qualify the public installer by substitution.
 The report records every checklist gate and leaves prior runtime results separate.
 
+The exact separate framework was subsequently made available and the
+[public-installer qualification](WINDOWS_INSTALLER_QUALIFICATION_2026-10-07.md)
+supersedes that prerequisite blocker without deleting its history. The original
+pinned package passed installation, repair/removal/reinstall, six-module startup
+and bounded AMD fallback checks with Loader 2.3. Two normal window closes
+returned `0xc0000005`; one later original and two metadata-package closes
+returned 0. Overall qualification is **FAIL**, with omitted menu/transition and
+fixture checks recorded. No rendering fix or causal diagnosis was made.
+
+Preserve the process-handle exit measurement: on Windows, a disappearing game
+window or task-list entry cannot establish shipping exit code 0. Hold the actual
+shipping handle before normal close and keep launcher results separate. Clean
+Linux/NVIDIA exits or a differently hashed framework/native pair do not erase
+these failed public-package exits. The metadata package corrected its displayed
+version and passed bounded main-menu scale/persistence checks; its three changed
+UI hashes and repeated checks are recorded separately. Raw logs, player/account
+data and third-party runtime DLLs remain private; the original installation and
+mod/video preferences were restored and hash-verified after normal GUI removal.
+
 The metadata-provenance regression must read canonical `git show HEAD:` source
 bytes, as `copy_current_ui` does. Its original test mock read working-tree files;
 Windows CRLF checkout conversion falsely rejected the unchanged UI receipt.
