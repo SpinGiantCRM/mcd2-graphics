@@ -190,3 +190,21 @@ variables. Existing extension overrides are preserved; an explicit opt-out is
 available. Recheck Windows startup/exit and normal Reflex modes with the rebuilt
 binaries. The prior Windows qualification does not cover these new artifacts
 or Loader 2.2. Release remains held.
+
+### Exact rebuilt Windows / AMD check — 7 October 2026
+
+The [new exact-binary report](FG_WINDOWS_AMD_VALIDATION_2026-10-07.md) qualifies
+the Windows artifact built from `1389ceb` for the reversible FG trial and
+unsupported AMD fallback with Loader 2.2. Six actual loaded module hashes matched
+in both gameplay runs. Saved Reflex On/Boost and FG On stayed inactive without
+faults; DLSS Quality/Custom requests were declined before source reduction.
+Native Windows recorded no Wine Reflex pacing event. Both processes exited 0,
+although FG-Off Save and quit had an unexplained delayed process exit.
+
+Keep the report's change/quirk mapping, source and artifact receipts, and both CI
+platforms when refactoring. This fresh Windows framework/SR pair is separate from
+the older Windows and cross-built release pairs. AMD did not allocate an active
+SR/FG feature, so the test does not qualify GPU retirement or active NVIDIA Reflex.
+The public GUI runtime flows and historical hang/shutdown exception remain open.
+Unsupported FG/Reflex rows currently disappear while reconstruction stays visible;
+the observed UI inconsistency is recorded, not changed by this qualification.
