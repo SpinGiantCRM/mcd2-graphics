@@ -13,16 +13,12 @@ spec.loader.exec_module(candidate)
 
 
 class WindowsBuildChecks(unittest.TestCase):
-    def copy_ui(self, repo, artifact):
-        def source(command):
-            return (repo / command[-1].removeprefix('HEAD:')).read_bytes()
-        with patch.object(candidate.subprocess, 'check_output', side_effect=source):
-            candidate.copy_current_ui(repo, artifact)
-
     def test_current_package_ui_is_reused_with_metadata_provenance(self):
         with tempfile.TemporaryDirectory() as temporary:
             artifact = Path(temporary) / 'artifact'
-            self.copy_ui(candidate.REPO, artifact)
+            # Exercise git's canonical blobs, as the build does. Windows CRLF
+            # working-tree bytes are not the source bytes recorded by the receipt.
+            candidate.copy_current_ui(candidate.REPO, artifact)
             receipt = json.loads((artifact / 'ui/build-receipt.json').read_text())
             for name, expected in receipt['payloadSHA256'].items():
                 self.assertEqual(candidate.sha(artifact / 'ui/Pak' / name), expected)

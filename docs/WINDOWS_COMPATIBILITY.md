@@ -242,6 +242,13 @@ rendering fix. Preserve the pinned dependency requirement: the differently hashe
 Windows developer framework cannot qualify the public installer by substitution.
 The report records every checklist gate and leaves prior runtime results separate.
 
+The metadata-provenance regression must read canonical `git show HEAD:` source
+bytes, as `copy_current_ui` does. Its original test mock read working-tree files;
+Windows CRLF checkout conversion falsely rejected the unchanged UI receipt.
+The regression now exercises the real Git read while retaining stale-source
+refusal. Do not normalize or weaken the production receipt check to satisfy a
+checkout-dependent test. This changes test evidence only, not shipped payloads.
+
 A Linux Loader 2.3 smoke check reached the main-menu Mods page (reported version
 2.3), mod metadata, Video controls and offline gameplay. Current-session DLAA at
 100% and FG On acknowledged successfully; SR error, Reflex fault and coordinator
