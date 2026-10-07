@@ -11,7 +11,7 @@
       "url": "https://github.com/SpinGiantCRM/mcd2-graphics/pull/10",
       "bootstrapPreviousSHA256": "0cee63f9c9f13f3ac909c5b4903f4dbb4b719a7ab3b4f13b0deaf83c814b94f7",
       "source": "https://github.com/JoeyDelp/reshade/tree/4eb9056c76016aad6f98495d3bbda2d721106104",
-      "download": "https://github.com/SpinGiantCRM/mcd2-graphics/releases/download/v0.3.0-preview.1/ReShade-PR435-4eb9056-reset-epoch-x64.zip",
+      "download": "https://raw.githubusercontent.com/SpinGiantCRM/mcd2-graphics/development/fg-bounded-windows/qualification/fg-release/dependencies/ReShade-PR435-4eb9056-reset-epoch-x64.zip",
       "archiveSHA256": "38b1affa05445a0801372f1f17be76f87e0ab5777c769a09031cd4e23dee7cb2",
       "archiveMembers": {
         "Dungeons/Binaries/Win64/d3d12.asi": "ReShade64.dll"
