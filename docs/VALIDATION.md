@@ -1,18 +1,10 @@
-# Held 0.3.0-preview.1 candidate — 7 October 2026
+# 0.3.0-preview.1 qualification — 7 October 2026
 
-Use the [pinned Windows checklist](WINDOWS_QUALIFICATION_CHECKLIST.md) and
-[candidate guide](FG_CANDIDATE.md). Windows qualification is in progress. The
-latest Loader 2.3 Linux smoke passed before the metadata update; final Linux
-installer/runtime checks and matched FG Off/On benchmarks remain pending.
-Metadata changed only the generated ModInfo asset and three UI containers;
-settings logic and all nine non-UI owned files remain unchanged. These are not
-runtime results for the new metadata. See the
-[UI receipt](../qualification/fg-release/ui-build-receipt.json).
+The exact installer source `e421e57e7667f0e9ec71e1940c6daa352a39f0c7` and twelve owned files have bounded [Linux/NVIDIA qualification](LINUX_FINAL_QUALIFICATION_2026-10-07.md) and [Windows/AMD GUI/fallback qualification](WINDOWS_FULL_QUALIFICATION_2026-10-07.md). Publication changes documentation and archive containers only; native/UI/shader/installer bytes remain the tested inputs.
 
-The [Reflex pacing measurements](../experiments/fg-streamline/REFLEX_PACING_2026-10-07.md)
-apply to the recorded Linux environment. The older v31 performance table is
-historical and must not be promoted as the final candidate benchmark. No new
-release, compatibility claim or latency measurement is established here.
+[Fresh FG benchmarks](BENCHMARK_2026-10-07.md) replace old final-performance claims. [Artifact hashes and scan/signing status](../qualification/fg-release/release-artifacts-2026-10-07.json) identify the downloads. Windows NVIDIA active features/HDR, physical controller, long sessions and device loss remain unqualified; historical failures and delayed Windows exits remain disclosed.
+
+The [Reflex pacing record](../experiments/fg-streamline/REFLEX_PACING_2026-10-07.md) measures frame intervals, not input latency. Earlier reports below retain their original scope.
 
 # 0.2.0-rc.1 qualification — 5 October 2026
 

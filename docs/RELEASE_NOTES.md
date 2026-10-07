@@ -1,6 +1,6 @@
-# 0.3.0-preview.1 — held candidate
+# 0.3.0-preview.1 — Frame Generation preview
 
-Not released. Qualification and final benchmarks are pending.
+Experimental prerelease. Uses the exact Windows-qualified installer source and payload; Linux qualification and fresh benchmarks passed without runtime or installer code changes for publication.
 
 ## Frame Generation
 
@@ -68,13 +68,14 @@ Not released. Qualification and final benchmarks are pending.
   offline play is safer. Xbox app / Microsoft Store PC compatibility remains
   unverified. NVIDIA runtime DLLs remain external official dependencies.
 
-Final package qualification and matched FG Off/On benchmarks are still pending.
-Earlier performance tables are historical, not final-release results. Windows
+At 4K on RTX 4080 SUPER, DLAA measured **81.80 FPS Off → 61.06 rendered / 122.11 SDK presentation FPS On**; Quality measured **122.74 Off → 83.76 / 167.52 On**. Three 30-second samples per mode; fresh rc.1 controls were within about 2%. [Method and per-run numbers](BENCHMARK_2026-10-07.md). Earlier tables remain historical.
+
+[Final Linux qualification](LINUX_FINAL_QUALIFICATION_2026-10-07.md) and [Windows AMD GUI/fallback qualification](WINDOWS_FULL_QUALIFICATION_2026-10-07.md) cover the exact shipping files. Windows clean exits sometimes took 85–86 seconds; historical framework failures remain documented. No universal shutdown repair is claimed. Windows
 AMD fallback results do not qualify active Windows NVIDIA FG/Reflex or HDR.
 Packages are unsigned; transparent packaging does not guarantee Nexus clearance.
 
 See [candidate installation and limits](FG_CANDIDATE.md),
-[Windows qualification](WINDOWS_QUALIFICATION_CHECKLIST.md) and
+[Windows qualification](WINDOWS_FULL_QUALIFICATION_2026-10-07.md) and
 [packaging/review checks](NEXUS_RELEASE_GATE.md). Published tags remain unchanged.
 
 # 0.2.0-rc.1 — guided installation, native HDR and Reflex

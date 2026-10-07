@@ -4,6 +4,15 @@ This roadmap describes current priorities, not release dates or guarantees. Item
 
 ## Released
 
+### 0.3.0-preview.1 — Frame Generation preview
+
+- Frame Generation Off / On for the tested NVIDIA DLSS/DLAA + native-HDR path.
+- Improved foliage motion vectors for DLSS/DLAA with FG Off or On.
+- Linux Reflex pacing compatibility fix; no measured latency claim.
+- Dependency overrides, Loader 2.0+ API policy and recognized 2.3.
+- Exact-artifact Linux/NVIDIA and Windows/AMD installer/fallback qualification.
+- Separate credited patched ReShade download and visible folder packaging.
+
 ### 0.2.0-rc.1 — experimental prerelease
 
 - Guided Windows/Linux installer with verified official dependencies and safe repair/removal.
@@ -28,11 +37,11 @@ See [`docs/VALIDATION.md`](docs/VALIDATION.md) for the exact qualified and unqua
 
 ### 1. NVIDIA Reflex
 
-Streamline Reflex is implemented in 0.2.0-rc.1 and exercised on Linux/NVIDIA with Native, DLAA and DLSS SR. Finish Windows NVIDIA, wider lifecycle, PCL/latency and performance qualification before claiming broad support or a measured benefit. Its shared frame identity prepares later Frame Generation work; FG is not included.
+Streamline Reflex is implemented in 0.2.0-rc.1 and exercised on Linux/NVIDIA with Native, DLAA and DLSS SR. Finish Windows NVIDIA, wider lifecycle, PCL/latency and performance qualification before claiming broad support or a measured benefit. Its shared frame identity is reused by the 0.3.0-preview.1 FG path.
 
 ### 2. Frame Generation
 
-Investigate DLSS Frame Generation after the Reflex path is understood. Important game-specific work includes presentation lifecycle and separating the rendered scene from UI/HUD composition where required.
+The first bounded FG preview is implemented. Continue Windows NVIDIA, wider lifecycle, presentation-pacing and artifact qualification before broadening support.
 
 ### 3. OptiScaler / broader provider support
 

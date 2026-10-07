@@ -1,7 +1,7 @@
 # Trying other dependency versions
 
-The candidate has a minimum API policy and an explicit override for every
-external dependency. Published releases retain their own requirements.
+0.3.0-preview.1 has a minimum API policy and an explicit override for every
+external dependency. Earlier releases retain their own requirements.
 Shared dependencies are downloaded separately.
 
 | Dependency | Requirement | Newer versions |
@@ -23,8 +23,7 @@ recognized-release mechanism also works for single-file dependencies such as DLS
 If popups are adopted later, raise the Loader minimum to **2.2+**. Loader 2.3
 adds immediate settings-page refresh and text/widget indentation according to
 [its official changelog](https://www.nexusmods.com/minecraftdungeons2/mods/2?tab=files).
-These additions do not require a new graphics UI build. The existing Windows
-qualification used Loader 2.2; recognizing 2.3 is not Windows runtime qualification.
+These additions do not require a new graphics UI build. The final Linux/NVIDIA and Windows/AMD qualification used Loader 2.3; future releases still require their own checks.
 
 For Blueprint Loader, ReShade, RenoDX, DLSS or Streamline, select **Try an
 untested dependency version** beside that requirement. Select an official
@@ -68,7 +67,7 @@ It cannot enable an unsupported GPU or an unimplemented feature.
 
 ## Wine Reflex pacing
 
-The candidate applies an NVIDIA Wine presentation compatibility setting before
+This release applies an NVIDIA Wine presentation compatibility setting before
 graphics device creation. It disables Vulkan's dynamic swapchain-mode switching
 without forcing a present mode or changing the game's VSync/frame limit.
 Windows and adapters without an initialized NVIDIA NVAPI are excluded.

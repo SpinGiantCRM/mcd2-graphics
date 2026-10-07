@@ -1,0 +1,263 @@
+{
+  "date": "2026-10-07",
+  "version": "0.3.0-preview.1",
+  "sourceCommit": "e421e57e7667f0e9ec71e1940c6daa352a39f0c7",
+  "method": "Three 30-second CPU finish_present samples per configuration. FG On uses cached successful SDK outcome; no GPU queries/readbacks or renderer mutation.",
+  "host": {
+    "os": "CachyOS KDE Wayland",
+    "kernel": "7.2.9-1-cachyos-bore",
+    "gpu": "RTX 4080 SUPER",
+    "driver": "615.71.09",
+    "proton": "CachyOS Proton SLR",
+    "output": "3840x2160",
+    "VSync": "Off",
+    "limit": "None",
+    "HDR": true,
+    "peakNits": 420,
+    "paperWhiteNits": 203,
+    "UIWhiteNits": 203
+  },
+  "scene": "Same stationary hub position near fire and fountain; custom graphics unchanged. Animated lighting/weather/NPC variation remains.",
+  "configurations": {
+    "DLAA Off": {
+      "renderedFPS": 81.79956848967528,
+      "SDKPresentedFPS": 81.79956848967528,
+      "runs": [
+        {
+          "run": 0,
+          "seconds": 30.0090275,
+          "renderedFPS": 81.57545258672579,
+          "SDKPresentedFPS": 81.57545258672579,
+          "p50Ms": 12.170850000000002,
+          "p95Ms": 13.4038,
+          "p99Ms": 14.1044,
+          "stdMs": 0.7147724992482484,
+          "intervals": 2448
+        },
+        {
+          "run": 1,
+          "seconds": 30.0020127,
+          "renderedFPS": 81.62785692041254,
+          "SDKPresentedFPS": 81.62785692041254,
+          "p50Ms": 12.1355,
+          "p95Ms": 13.5558,
+          "p99Ms": 14.379,
+          "stdMs": 0.7665636992711077,
+          "intervals": 2449
+        },
+        {
+          "run": 2,
+          "seconds": 30.0016804,
+          "renderedFPS": 82.19539596188751,
+          "SDKPresentedFPS": 82.19539596188751,
+          "p50Ms": 12.0842,
+          "p95Ms": 13.3548,
+          "p99Ms": 14.0593,
+          "stdMs": 0.7076146099213622,
+          "intervals": 2466
+        }
+      ]
+    },
+    "DLAA On": {
+      "renderedFPS": 61.05578610041551,
+      "SDKPresentedFPS": 122.11157220083102,
+      "runs": [
+        {
+          "run": 0,
+          "seconds": 30.0107915,
+          "renderedFPS": 62.410883098501415,
+          "SDKPresentedFPS": 124.82176619700283,
+          "p50Ms": 15.9968,
+          "p95Ms": 17.4695,
+          "p99Ms": 18.6811,
+          "stdMs": 0.9515393379580149,
+          "intervals": 1873
+        },
+        {
+          "run": 1,
+          "seconds": 30.0087347,
+          "renderedFPS": 60.8156264582525,
+          "SDKPresentedFPS": 121.631252916505,
+          "p50Ms": 16.4055,
+          "p95Ms": 17.8586,
+          "p99Ms": 19.1125,
+          "stdMs": 0.9399238394720364,
+          "intervals": 1825
+        },
+        {
+          "run": 2,
+          "seconds": 30.0129217,
+          "renderedFPS": 59.94084874449261,
+          "SDKPresentedFPS": 119.88169748898522,
+          "p50Ms": 16.642,
+          "p95Ms": 18.1081,
+          "p99Ms": 19.1219,
+          "stdMs": 0.9026800425206924,
+          "intervals": 1799
+        }
+      ]
+    },
+    "Quality Off": {
+      "renderedFPS": 122.73937227455141,
+      "SDKPresentedFPS": 122.73937227455141,
+      "runs": [
+        {
+          "run": 0,
+          "seconds": 30.0058046,
+          "renderedFPS": 119.87680543650544,
+          "SDKPresentedFPS": 119.87680543650544,
+          "p50Ms": 7.9914,
+          "p95Ms": 11.0833,
+          "p99Ms": 13.3735,
+          "stdMs": 1.3360787552162008,
+          "intervals": 3597
+        },
+        {
+          "run": 1,
+          "seconds": 30.0077347,
+          "renderedFPS": 124.00136288861552,
+          "SDKPresentedFPS": 124.00136288861552,
+          "p50Ms": 7.9463,
+          "p95Ms": 9.3807,
+          "p99Ms": 10.0973,
+          "stdMs": 0.7928773789315513,
+          "intervals": 3721
+        },
+        {
+          "run": 2,
+          "seconds": 30.0064464,
+          "renderedFPS": 124.33994849853329,
+          "SDKPresentedFPS": 124.33994849853329,
+          "p50Ms": 7.9286,
+          "p95Ms": 9.2784,
+          "p99Ms": 9.8468,
+          "stdMs": 0.7253254300518225,
+          "intervals": 3731
+        }
+      ]
+    },
+    "Quality On": {
+      "renderedFPS": 83.76157232884265,
+      "SDKPresentedFPS": 167.5231446576853,
+      "runs": [
+        {
+          "run": 0,
+          "seconds": 30.0076611,
+          "renderedFPS": 82.0790394756891,
+          "SDKPresentedFPS": 164.1580789513782,
+          "p50Ms": 11.8504,
+          "p95Ms": 15.4324,
+          "p99Ms": 18.3989,
+          "stdMs": 1.5873865593574712,
+          "intervals": 2463
+        },
+        {
+          "run": 1,
+          "seconds": 30.0055569,
+          "renderedFPS": 84.95093120567944,
+          "SDKPresentedFPS": 169.90186241135888,
+          "p50Ms": 11.7367,
+          "p95Ms": 13.0986,
+          "p99Ms": 14.0287,
+          "stdMs": 0.8566211359196676,
+          "intervals": 2549
+        },
+        {
+          "run": 2,
+          "seconds": 30.0042444,
+          "renderedFPS": 84.25474630515941,
+          "SDKPresentedFPS": 168.50949261031883,
+          "p50Ms": 11.81495,
+          "p95Ms": 13.2071,
+          "p99Ms": 14.5317,
+          "stdMs": 0.964952715052125,
+          "intervals": 2528
+        }
+      ]
+    },
+    "rc.1 Quality": {
+      "renderedFPS": 125.15039591850659,
+      "SDKPresentedFPS": 125.15039591850659,
+      "runs": [
+        {
+          "run": 0,
+          "seconds": 30.0073548,
+          "renderedFPS": 124.86938702107791,
+          "SDKPresentedFPS": 124.86938702107791,
+          "p50Ms": 7.8701,
+          "p95Ms": 9.1153,
+          "p99Ms": 9.8794,
+          "stdMs": 0.6928690019753364,
+          "intervals": 3747
+        },
+        {
+          "run": 1,
+          "seconds": 30.006895,
+          "renderedFPS": 124.97127743473625,
+          "SDKPresentedFPS": 124.97127743473625,
+          "p50Ms": 7.89365,
+          "p95Ms": 9.009,
+          "p99Ms": 9.5167,
+          "stdMs": 0.5860657222697431,
+          "intervals": 3750
+        },
+        {
+          "run": 2,
+          "seconds": 30.0054478,
+          "renderedFPS": 125.6105232997056,
+          "SDKPresentedFPS": 125.6105232997056,
+          "p50Ms": 7.8241,
+          "p95Ms": 9.0359,
+          "p99Ms": 9.4944,
+          "stdMs": 0.6127505285294799,
+          "intervals": 3769
+        }
+      ]
+    },
+    "rc.1 DLAA": {
+      "renderedFPS": 83.42589287555376,
+      "SDKPresentedFPS": 83.42589287555376,
+      "runs": [
+        {
+          "run": 0,
+          "seconds": 30.0090391,
+          "renderedFPS": 83.60814192147859,
+          "SDKPresentedFPS": 83.60814192147859,
+          "p50Ms": 11.8521,
+          "p95Ms": 13.1563,
+          "p99Ms": 13.7999,
+          "stdMs": 0.6974836684758211,
+          "intervals": 2509
+        },
+        {
+          "run": 1,
+          "seconds": 30.0054243,
+          "renderedFPS": 83.6182143240014,
+          "SDKPresentedFPS": 83.6182143240014,
+          "p50Ms": 11.8644,
+          "p95Ms": 13.1634,
+          "p99Ms": 13.7714,
+          "stdMs": 0.7127099452341478,
+          "intervals": 2509
+        },
+        {
+          "run": 2,
+          "seconds": 30.0055427,
+          "renderedFPS": 83.05132238118127,
+          "SDKPresentedFPS": 83.05132238118127,
+          "p50Ms": 11.95715,
+          "p95Ms": 13.2291,
+          "p99Ms": 13.8971,
+          "stdMs": 0.7240375276532771,
+          "intervals": 2492
+        }
+      ]
+    }
+  },
+  "limits": [
+    "SDK presentation rate is not a physical display-pacing or latency measurement.",
+    "One focus-interrupted On cohort discarded; no browser work during retained measurements.",
+    "rc.1 control uses exact seven-file public payload and original public framework, with current shared Loader 2.3/RenoDX/NVIDIA dependencies and mod preferences retained.",
+    "Windows AMD qualifies fallback only; active Windows NVIDIA/HDR and physical controller unavailable."
+  ]
+}

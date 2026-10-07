@@ -6,10 +6,10 @@ There is no embedded payload ZIP, native runtime self-extraction, updater or
 background dependency downloader. The user still selects official dependency
 downloads; pinned hashes, ownership, process refusal and rollback remain in force.
 
-Build receipts identify the deployed files and explicitly leave signing and
-Windows qualification false. A cross-compiled Windows installer is a build
+Original build receipts identify the deployed files and leave signing and
+Windows qualification false at build time. Later runtime qualification is recorded separately; build receipts are not rewritten. A cross-compiled Windows installer is a build
 artifact, not a qualified release. Test fresh install, repair and uninstall on
-Windows using the complete folder. The held `0.3.0-preview.1` package contains
+Windows using the complete folder. The `0.3.0-preview.1` package contains
 12 owned FG/SR/UI files. The patched ReShade framework is a separate, credited
 dependency archive; NVIDIA runtime libraries remain external downloads.
 
