@@ -208,3 +208,29 @@ SR/FG feature, so the test does not qualify GPU retirement or active NVIDIA Refl
 The public GUI runtime flows and historical hang/shutdown exception remain open.
 Unsupported FG/Reflex rows currently disappear while reconstruction stays visible;
 the observed UI inconsistency is recorded, not changed by this qualification.
+
+## Dependency policy follow-up — 7 October 2026
+
+The installer now separates minimum APIs, complete recognized release sets and
+explicit untested-version overrides. Blueprint Loader requires 2.0+; the mod
+uses no 2.2 popup API. Official 2.0, 2.2 and 2.3 archives and installed sets are
+recognized without forced upgrades. DLSS and Streamline use the current tested
+runtime/API baselines; ReShade and RenoDX use interface/configuration requirements.
+All five dependencies retain an explicit override. A higher version does not
+prove the required patched ReShade interfaces exist.
+
+Preserve whole-set matching, strict own-payload/game validation, dependency
+recovery, archive safety and receipt ownership. Regression fixtures exercise the
+shared policy on every dependency, including alternate private DLSS removal.
+These installer and documentation changes do not change native graphics or the
+UI payload. The previous Windows gameplay result still used Loader 2.2; it does
+not qualify Loader 2.3 or this rebuilt public GUI installer. Release remains held.
+
+The mod has no runtime restriction forcing offline mode. The installer now says
+online compatibility is unverified rather than directing offline-only use.
+
+A Linux Loader 2.3 smoke check reached the main-menu Mods page (reported version
+2.3), mod metadata, Video controls and offline gameplay. Current-session DLAA at
+100% and FG On acknowledged successfully; SR error, Reflex fault and coordinator
+error were zero. Native graphics/UI payload hashes were unchanged. This was a
+short compatibility smoke check, not a new benchmark or Windows 2.3 test.

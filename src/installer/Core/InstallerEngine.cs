@@ -8,7 +8,11 @@ using System.Text.RegularExpressions;
 namespace MCD2.Installer;
 
 public record Check(string Name, string Version, string State, string Expected, string Found);
-public record Dependency(string Id, string Name, string Version, string Url, Dictionary<string,string> Files, string? ArchiveHash = null, Dictionary<string,string>? ArchiveMembers = null, Dictionary<string,string>? UpgradeFromFiles = null, IReadOnlyList<Dictionary<string,string>>? UpgradeFromFileSets = null);
+public record DependencyRelease(string Version, Dictionary<string,string> Files, string? ArchiveHash = null);
+public record Dependency(string Id, string Name, string Version, string Url, Dictionary<string,string> Files, string? ArchiveHash = null, Dictionary<string,string>? ArchiveMembers = null, Dictionary<string,string>? UpgradeFromFiles = null, IReadOnlyList<Dictionary<string,string>>? UpgradeFromFileSets = null, string? MinimumVersion = null, string? CompatibilityNote = null, IReadOnlyList<DependencyRelease>? CompatibleReleases = null) {
+    public string Requirement => MinimumVersion is {} minimum ? minimum+"+" : CompatibilityNote??Version;
+    public IEnumerable<DependencyRelease> Releases => new[]{new DependencyRelease(Version,Files,ArchiveHash)}.Concat(CompatibleReleases??[]);
+}
 public record FrameworkBootstrap(bool HadFile, string? PreviousHash);
 public record Receipt(string Version, Dictionary<string,string> Files, HdrBootstrap? Hdr = null, FrameworkBootstrap? Framework = null, Dictionary<string,string>? DependencyOverrides = null);
 
@@ -36,8 +40,17 @@ public sealed partial class InstallerEngine {
         if(enabled)overrideEnabled.Add(id);else overrideEnabled.Remove(id);
         foreach(var path in d.Files.Keys){selections.Remove(path);overrideHashes.Remove(path);overrideOriginals.Remove(path);}
     }
-    static bool KnownDependencyHash(Dependency d,string path,string hash)=>d.Files.TryGetValue(path,out var pin)&&pin==hash || d.UpgradeFromFiles!=null&&d.UpgradeFromFiles.TryGetValue(path,out var old)&&old==hash || d.UpgradeFromFileSets!=null&&d.UpgradeFromFileSets.Any(set=>set.TryGetValue(path,out var h)&&h==hash);
-    Dictionary<string,string> EffectiveFiles(Dependency d)=>d.Files.ToDictionary(x=>x.Key,x=>overrideEnabled.Contains(d.Id)&&overrideHashes.TryGetValue(x.Key,out var h)?h:x.Value);
+    static bool KnownDependencyHash(Dependency d,string path,string hash)=>d.Releases.Any(release=>release.Files.TryGetValue(path,out var pin)&&pin==hash) || d.UpgradeFromFiles!=null&&d.UpgradeFromFiles.TryGetValue(path,out var old)&&old==hash || d.UpgradeFromFileSets!=null&&d.UpgradeFromFileSets.Any(set=>set.TryGetValue(path,out var h)&&h==hash);
+    DependencyRelease? RecognizedRelease(Dependency d) {
+        if(GameRoot==null)return null;
+        // Match a whole release, never a mixture of individually recognized files.
+        var hashes=d.Files.Keys.ToDictionary(path=>path,path=>selections.TryGetValue(path,out var b)?Digest(b):File.Exists(Target(GameRoot,path))?DigestFile(Target(GameRoot,path)):null);
+        return d.Releases.FirstOrDefault(release=>release.Files.All(f=>hashes[f.Key]==f.Value));
+    }
+    Dictionary<string,string> EffectiveFiles(Dependency d) {
+        if(overrideEnabled.Contains(d.Id)&&d.Files.Keys.All(overrideHashes.ContainsKey))return d.Files.ToDictionary(x=>x.Key,x=>overrideHashes[x.Key]);
+        return RecognizedRelease(d)?.Files??d.Files;
+    }
     public void UseInstalledDependency(string id) {
         var d=Dependencies.Single(x=>x.Id==id);RequireClosed();
         if(!overrideEnabled.Contains(id))throw new InvalidDataException("Enable the untested-version override first.");
@@ -68,7 +81,16 @@ public sealed partial class InstallerEngine {
             deps.Add(new(item.Name,item.Name switch {"BlueprintLoader"=>"Blueprint Loader", "ReShade"=>"ReShade full addon support", "RenoDXUEExtended"=>"RenoDX HDR support", "DLSSRuntime"=>"NVIDIA DLSS runtime", "Streamline"=>"NVIDIA Reflex / Frame Generation runtime", _=>item.Name},
                 d.TryGetProperty("version",out var v)?v.ToString():d.TryGetProperty("releaseTag",out v)?v.ToString():"Pinned", url??OfficialUrl(item.Name), files,
                 d.TryGetProperty("archiveSHA256",out var a)?a.GetString():null, d.TryGetProperty("archiveMembers",out var members)?ReadHashes(members):null, d.TryGetProperty("upgradeFromFiles",out var prior)?ReadHashes(prior):null,
-                d.TryGetProperty("upgradeFromFileSets",out var sets)?sets.EnumerateArray().Select(ReadHashes).ToList():null));
+                d.TryGetProperty("upgradeFromFileSets",out var sets)?sets.EnumerateArray().Select(ReadHashes).ToList():null,
+                d.TryGetProperty("minimumVersion",out var minimum)?minimum.GetString():null,
+                d.TryGetProperty("compatibilityNote",out var note)?note.GetString():null,
+                d.TryGetProperty("compatibleReleases",out var releases)?releases.EnumerateArray().Select(r=>new DependencyRelease(r.GetProperty("version").GetString()!,ReadHashes(r.GetProperty("files")),r.TryGetProperty("archiveSHA256",out var rh)?rh.GetString():null)).ToList():null));
+            var dep=deps[^1];
+            if(dep.MinimumVersion!=null&&(!System.Version.TryParse(dep.MinimumVersion,out var min)||!System.Version.TryParse(dep.Version,out var tested)||tested<min))throw new InvalidDataException("Invalid dependency minimum version.");
+            foreach(var release in dep.CompatibleReleases??[]) {
+                if(release.Files.Count!=dep.Files.Count||release.Files.Keys.Any(path=>!dep.Files.ContainsKey(path))||release.Files.Values.Any(h=>!Regex.IsMatch(h,"^[a-f0-9]{64}$")))throw new InvalidDataException("Invalid compatible dependency file set.");
+                if(dep.MinimumVersion!=null&&(!System.Version.TryParse(release.Version,out var v2)||v2<System.Version.Parse(dep.MinimumVersion)))throw new InvalidDataException("Compatible dependency is below the API minimum.");
+            }
         }
         Dependencies=deps;
     }
@@ -138,7 +160,7 @@ public sealed partial class InstallerEngine {
         if(GameRoot==null)return new[] {new Check("Minecraft Dungeons II",supportedBuild,"Choose game","","")};
         var result=new List<Check> {CheckFiles("Minecraft Dungeons II",supportedBuild,new(){{Shipping,gameHash}},false)};
         foreach(var d in Dependencies) {
-            var check=CheckFiles(d.Name,d.Version,EffectiveFiles(d),true);
+            var check=CheckFiles(d.Name,RecognizedRelease(d)?.Version??d.Version,EffectiveFiles(d),true);
             if(overrideEnabled.Contains(d.Id)&&d.Files.Keys.All(overrideHashes.ContainsKey)&&check.State is "OK" or "Ready to install")check=check with {State="Untested override",Version="Unverified; tested: "+d.Version};
             result.Add(check);
         }
@@ -172,10 +194,12 @@ public sealed partial class InstallerEngine {
         if(id=="ReShade"&&d.Files.Keys.Any(x=>x.EndsWith("/dxgi.dll",StringComparison.Ordinal)))throw new InvalidDataException("Run the official full-addon installer for the shipping executable, then select Check again.");
         RequireClosed();if(new FileInfo(filename).Length>MaximumFile)throw new InvalidDataException("Download is too large.");var data=File.ReadAllBytes(filename);if(data.Length==0||data.Length>MaximumFile)throw new InvalidDataException("Download is too large.");
         var selected=new Dictionary<string,byte[]>();
+        var archiveHash=Digest(data);
+        var release=d.Releases.FirstOrDefault(r=>r.ArchiveHash==archiveHash);
         if(d.Files.Count==1&&(d.ArchiveHash==null||(experimental&&!(data.Length>=4&&data[0]==0x50&&data[1]==0x4b)))) {
-            var f=d.Files.Single();if(!experimental&&Digest(data)!=f.Value)throw WrongDownload(d,Digest(data));selected.Add(f.Key,data);
+            var f=d.Files.Single();if(!experimental&&!d.Releases.Any(r=>r.Files[f.Key]==archiveHash))throw WrongDownload(d,archiveHash);selected.Add(f.Key,data);
         } else {
-            if(!experimental&&(d.ArchiveHash==null||Digest(data)!=d.ArchiveHash))throw WrongDownload(d,Digest(data));
+            if(!experimental&&release==null)throw WrongDownload(d,archiveHash);
             using var zip=new ZipArchive(new MemoryStream(data),ZipArchiveMode.Read);
             long total=0;
             foreach(var e in zip.Entries) {
@@ -186,7 +210,7 @@ public sealed partial class InstallerEngine {
             foreach(var f in d.Files) {
                 var matches=zip.Entries.Where(x=>!x.FullName.EndsWith('/')&&(d.ArchiveMembers!=null?x.FullName==d.ArchiveMembers[f.Key]:Path.GetFileName(x.FullName)==Path.GetFileName(f.Key))).ToList();
                 if(matches.Count!=1)throw new InvalidDataException("Archive must contain exactly one copy of each required file.");
-                using var s=matches[0].Open();using var memory=new MemoryStream();s.CopyTo(memory);var b=memory.ToArray();if(b.Length==0||(!experimental&&Digest(b)!=f.Value))throw WrongDownload(d,Digest(b));selected.Add(f.Key,b);
+                using var s=matches[0].Open();using var memory=new MemoryStream();s.CopyTo(memory);var b=memory.ToArray();if(b.Length==0||(!experimental&&Digest(b)!=release!.Files[f.Key]))throw WrongDownload(d,Digest(b));selected.Add(f.Key,b);
             }
         }
         foreach(var f in selected) {
@@ -195,7 +219,7 @@ public sealed partial class InstallerEngine {
         }
         foreach(var f in selected){selections[f.Key]=f.Value;if(experimental)overrideHashes[f.Key]=Digest(f.Value);}
     }
-    static Exception WrongDownload(Dependency d,string found)=>new InvalidDataException($"Unsupported {d.Name} download. Expected SHA-256: {d.ArchiveHash??string.Join(", ",d.Files.Values)}. Found: {found}. Get the required version from the official link.");
+    static Exception WrongDownload(Dependency d,string found)=>new InvalidDataException($"Unrecognized {d.Name} download. Requirement: {d.Requirement}; tested: {d.Version}. Found SHA-256: {found}. Choose a recognized official release, or use the explicit untested-version override.");
     public bool Ready=>GameRoot!=null&&Scan().Where(x=>x.Name!="Graphics mod payload").All(x=>x.State is "OK" or "Ready to install" or "Untested override");
     public void Install(bool repair=false) {
         RequireClosed();if(!Ready)throw new InvalidDataException("Resolve the requirements before installing.");
@@ -284,6 +308,7 @@ public sealed partial class InstallerEngine {
         var expected=new Dictionary<string,string>(own){{Runtime,Dependencies.Single(x=>x.Id=="DLSSRuntime").Files[Runtime]}};
         if(r.Version!=Version && !previousInstalls.TryGetValue(r.Version,out expected))throw new InvalidDataException("Unknown installation version; no files were changed.");
         expected=new Dictionary<string,string>(expected!);
+        if(r.Version==Version&&r.Files.TryGetValue(Runtime,out var runtimeHash)&&Dependencies.Single(x=>x.Id=="DLSSRuntime").Releases.Any(release=>release.Files[Runtime]==runtimeHash))expected[Runtime]=runtimeHash;
         if(r.DependencyOverrides!=null)foreach(var pair in r.DependencyOverrides) {
             if(own.ContainsKey(pair.Key)||!Dependencies.Any(d=>d.Files.ContainsKey(pair.Key))||!Regex.IsMatch(pair.Value,"^[a-f0-9]{64}$"))throw new InvalidDataException("Invalid dependency override receipt; files retained.");
             if(pair.Key==Runtime&&expected!.ContainsKey(Runtime))expected[Runtime]=pair.Value;

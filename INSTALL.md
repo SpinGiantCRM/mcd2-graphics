@@ -7,7 +7,7 @@ Download the compiled Windows or Linux installer archive from the [0.2.0-rc.1 re
 1. Use a legally obtained game that already launches and signs in normally. Launch it through Steam once, then close it.
 2. Run **MCD2-Graphics-Installer.exe** on Windows or **mcd2-graphics-installer** on Linux. No Python or separate .NET installation is needed.
 3. **Game:** select the detected Steam installation or use Browse. The supported executable and build are verified.
-4. **Requirements:** open each official download and select the downloaded file/archive. The installer verifies the pinned hashes and places Blueprint Loader, RenoDX and NVIDIA runtimes correctly. They are not bundled. Known Blueprint Loader 1.1 and 2.0 installations can upgrade to the candidate’s pinned 2.2; its original bytes are retained in a recovery folder. Unknown or modified dependencies are retained.
+4. **Requirements:** open each official download and select the downloaded file/archive. The installer verifies the pinned hashes and places Blueprint Loader, RenoDX and NVIDIA runtimes correctly. They are not bundled. Unknown or modified dependencies are retained.
 5. **ReShade:** run the official full addon-support installer for `Dungeons/Binaries/Win64/Dungeons-Win64-Shipping.exe`, selecting DirectX 10/11/12. Complete its own workflow and any agreement yourself, then Check again. A normal or unsupported build is refused.
 6. **Install:** install the mod. Launch normally through Steam and open **Settings → Video**. The Mods page identifies the mod and links to help.
 
@@ -17,8 +17,10 @@ On Linux the official ReShade setup is launched using the game's detected Proton
 
 ## Development candidate dependency overrides
 
-The held FG candidate targets Blueprint Loader 2.2 and provides explicit
-per-dependency overrides for testing other versions. Published releases retain
+The held FG candidate requires Blueprint Loader **2.0+** and does not use the
+2.2 popup API. Complete official 2.0, 2.2 and 2.3 file sets are recognized;
+other releases can be tried with the explicit override. The minimum API policy
+and per-dependency overrides apply to all requirements where appropriate. Published releases retain
 their original requirements. See [dependency overrides](docs/DEPENDENCY_OVERRIDES.md)
 for the candidate controls and optional DLSS model hint.
 
@@ -40,4 +42,4 @@ Close the game and choose **Uninstall**. Only hash-matching files recorded by th
 
 **Support → Create diagnostic report** exports a small allowlisted report: mod/game version, platform, GPU/driver and file checks/hashes. It excludes usernames, private paths, account data, tokens, party codes, player saves, raw logs and unrelated ReShade configuration. Review it before sharing it in an issue.
 
-Use offline. Online/co-op compatibility is unqualified; see [online use](docs/ONLINE_USE.md). The legacy Python CLI is retained for historical preview checks and refuses this Update 2 payload. The qualification branch includes only the hash-pinned own payload under `qualification/update2`; it excludes vendor runtimes. Release downloads contain the exact qualified Windows CI installer and local Linux GUI installer. See [artifact provenance](qualification/update2/release-artifacts.json); unrelated CI builds are not automatically runtime-qualified.
+The mod does not force offline mode. Online/co-op compatibility is unqualified; see [online use](docs/ONLINE_USE.md). The legacy Python CLI is retained for historical preview checks and refuses this Update 2 payload. The qualification branch includes only the hash-pinned own payload under `qualification/update2`; it excludes vendor runtimes. Release downloads contain the exact qualified Windows CI installer and local Linux GUI installer. See [artifact provenance](qualification/update2/release-artifacts.json); unrelated CI builds are not automatically runtime-qualified.

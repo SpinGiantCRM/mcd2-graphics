@@ -1,7 +1,30 @@
 # Trying other dependency versions
 
-The candidate installer tests Blueprint Loader 2.2. Published releases retain
-their own dependency pins. Shared dependencies are downloaded separately.
+The candidate has a minimum API policy and an explicit override for every
+external dependency. Published releases retain their own requirements.
+Shared dependencies are downloaded separately.
+
+| Dependency | Requirement | Newer versions |
+| --- | --- | --- |
+| Blueprint Loader | **2.0+**; ModInfo/settings API, no popup API | Official 2.0, 2.2 and 2.3 sets recognized; other sets use the override |
+| NVIDIA DLSS runtime | **310.9.1+** NGX SR baseline | Use the override for an untested DLL; optional model hint below |
+| Streamline | **2.14.1+** production x64 module baseline | Use the override for an untested complete module set |
+| ReShade | Native D3D12 PR435 access and successful-Reset lifetime API | Use the override; a newer stock release may lack required interfaces |
+| RenoDX UE Extended | Required shader/configuration contract | Use the override for an untested nightly |
+
+A minimum states the API baseline, not a guarantee about every future release.
+The default installer recognizes complete, hash-verified release sets. It never
+infers compatibility from an archive filename, accepts mixed versions, or forces
+a recognized installed version to upgrade. All five dependencies support an
+explicit untested-version override. Loader 1.x is below the supported API
+baseline; its known files can be backed up during an upgrade. The generic
+recognized-release mechanism also works for single-file dependencies such as DLSS.
+
+If popups are adopted later, raise the Loader minimum to **2.2+**. Loader 2.3
+adds immediate settings-page refresh and text/widget indentation according to
+[its official changelog](https://www.nexusmods.com/minecraftdungeons2/mods/2?tab=files).
+These additions do not require a new graphics UI build. The existing Windows
+qualification used Loader 2.2; recognizing 2.3 is not Windows runtime qualification.
 
 For Blueprint Loader, ReShade, RenoDX, DLSS or Streamline, select **Try an
 untested dependency version** beside that requirement. Select an official

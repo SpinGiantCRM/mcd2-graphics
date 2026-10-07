@@ -134,5 +134,49 @@ try {
  }
  Throws(()=>tamper.Uninstall(),"Override receipt cannot grant ownership of own payload");File.Delete(InstallerEngine.Target(temp,InstallerEngine.Marker));File.Delete(InstallerEngine.Target(temp,own.Keys.Single()));File.Delete(InstallerEngine.Target(temp,InstallerEngine.Runtime));
  File.WriteAllBytes(runtime,file);
+ // Minimum APIs and complete recognized release sets are shared across dependencies.
+ var compatibleFiles=loaderFiles.ToDictionary(x=>x.Key,x=>oldHash);
+ var compatibleArchive=MakeZip(loaderFiles.Keys.Select(x=>"Loader/"+Path.GetFileName(x)).ToArray());
+ var compatibleDeps=new Dictionary<string,object>(dependencies){["BlueprintLoader"]=new{version="2.2",minimumVersion="2.0",files=compatibleFiles,archiveSHA256="unused",url="https://www.nexusmods.com/minecraftdungeons2/mods/2",compatibleReleases=new[]{new{version="2.3",files=loaderFiles,archiveSHA256=InstallerEngine.Digest(compatibleArchive)}}}};
+ string CompatLock()=>JsonSerializer.Serialize(new{game=new{steamBuildID="123",exeSHA256=hash},dependencies=compatibleDeps});
+ InstallerEngine Compatible(){var x=new InstallerEngine(CompatLock(),manifest,()=>new MemoryStream(Payload())){RequireClosed=()=>{},ConfigRootOverride=Path.Combine(temp,"Config")};x.SetGame(temp);return x;}
+ foreach(var path in loaderFiles.Keys)Put(path);
+ var compatible=Compatible();Check(compatible.Dependencies.Single(x=>x.Id=="BlueprintLoader").Requirement=="2.0+","Loader API minimum displayed with plus policy");
+ Check(compatible.Scan().Single(x=>x.Name=="Blueprint Loader") is {State:"OK",Version:"2.3"},"Recognized installed newer release satisfies requirement without override or upgrade");
+ File.WriteAllBytes(zipFile,compatibleArchive);compatible.SelectDependency("BlueprintLoader",zipFile);
+ Check(!compatible.OverrideEnabled("BlueprintLoader")&&compatible.Scan().Single(x=>x.Name=="Blueprint Loader").Version=="2.3","Recognized newer archive accepted without override");
+ foreach(var path in loaderFiles.Keys)File.Delete(InstallerEngine.Target(temp,path));
+ var freshCompatible=Compatible();freshCompatible.SelectDependency("BlueprintLoader",zipFile);freshCompatible.SelectDependency("DLSSRuntime",runtime);
+ freshCompatible.Install();Check(loaderFiles.All(x=>InstallerEngine.DigestFile(InstallerEngine.Target(temp,x.Key))==x.Value),"Fresh install uses whole recognized release rather than default pins");freshCompatible.Uninstall();
+ var mixed=Compatible();Put(loaderFiles.Keys.Last(),oldBytes);Check(mixed.Scan().Single(x=>x.Name=="Blueprint Loader").State=="Unsupported version","Mixed individually recognized files are not a coherent release");
+ foreach(var path in loaderFiles.Keys)Put(path,Encoding.UTF8.GetBytes("unknown future loader"));
+ var future=Compatible();Check(future.Scan().Single(x=>x.Name=="Blueprint Loader").State=="Unsupported version","Unknown future installed loader requires explicit override");future.SetDependencyOverride("BlueprintLoader",true);future.UseInstalledDependency("BlueprintLoader");Check(future.Scan().Single(x=>x.Name=="Blueprint Loader").State=="Untested override","Future installed loader can be tried explicitly");
+ var belowMinimum=new Dictionary<string,object>(compatibleDeps){["BlueprintLoader"]=new{version="2.2",minimumVersion="2.0",files=loaderFiles,url="https://example.test",compatibleReleases=new[]{new{version="1.1",files=loaderFiles}}}};
+ Throws(()=>new InstallerEngine(JsonSerializer.Serialize(new{game=new{steamBuildID="123",exeSHA256=hash},dependencies=belowMinimum}),manifest,()=>null),"Recognized set below minimum API refused");
+ var incompleteSet=new Dictionary<string,object>(compatibleDeps){["BlueprintLoader"]=new{version="2.2",files=loaderFiles,url="https://example.test",compatibleReleases=new[]{new{version="2.3",files=new Dictionary<string,string>{{loaderFiles.Keys.First(),hash}}}}}};
+ Throws(()=>new InstallerEngine(JsonSerializer.Serialize(new{game=new{steamBuildID="123",exeSHA256=hash},dependencies=incompleteSet}),manifest,()=>null),"Incomplete recognized release declaration refused");
+ foreach(var id in new[]{"ReShade","RenoDXUEExtended","BlueprintLoader","DLSSRuntime","Streamline"}) {
+  var depPath=id=="DLSSRuntime"?InstallerEngine.Runtime:"Dungeons/Binaries/Win64/"+id+"-policy-test.dll";
+  var policyDeps=new Dictionary<string,object>(dependencies){[id]=new{version="2.2",minimumVersion="2.0",file=depPath,sha256=oldHash,url="https://example.test",compatibleReleases=new[]{new{version="2.3",files=new Dictionary<string,string>{{depPath,hash}}}}}};
+  var policyJson=JsonSerializer.Serialize(new{game=new{steamBuildID="123",exeSHA256=hash},dependencies=policyDeps});
+  var policy=new InstallerEngine(policyJson,manifest,()=>new MemoryStream(Payload())){RequireClosed=()=>{},ConfigRootOverride=Path.Combine(temp,"Config")};policy.SetGame(temp);Put(depPath);
+  Check(policy.Scan().Any(x=>x.Version=="2.3"&&x.State=="OK"),id+" shares recognized newer release policy");
+  policy.SetDependencyOverride(id,true);Put(depPath,oldBytes);policy.UseInstalledDependency(id);Check(policy.Scan().Any(x=>x.State=="Untested override"),id+" has explicit installed-version override");
+  policy.SetDependencyOverride(id,false);Put(depPath);File.WriteAllBytes(runtime,file);policy.SelectDependency(id,runtime);
+  Check(!policy.OverrideEnabled(id),id+" recognized single file accepted without override");
+  if(id=="DLSSRuntime"){policy.Install();policy.Uninstall();Check(!File.Exists(InstallerEngine.Target(temp,depPath)),"Recognized alternate private runtime can be removed by receipt");}
+ }
+ // Validate the shipped policy, plus optional official archive fixtures locally.
+ using(var actualPolicy=JsonDocument.Parse(File.ReadAllText("dependencies.lock.json"))) {
+  var policyJson=JsonSerializer.Serialize(new{game=new{steamBuildID="123",exeSHA256=hash},dependencies=actualPolicy.RootElement.GetProperty("dependencies")});
+  InstallerEngine ActualPolicy(){var x=new InstallerEngine(policyJson,manifest,()=>new MemoryStream(Payload())){RequireClosed=()=>{}};x.SetGame(temp);return x;}
+  var actualEngine=ActualPolicy();Check(actualEngine.Dependencies.Count==5&&actualEngine.Dependencies.Single(x=>x.Id=="BlueprintLoader").MinimumVersion=="2.0","Shipped policy has five dependencies and Loader 2.0 minimum");
+  foreach(var dep in actualEngine.Dependencies){actualEngine.SetDependencyOverride(dep.Id,true);Check(actualEngine.OverrideEnabled(dep.Id),dep.Id+" shipped override available");actualEngine.SetDependencyOverride(dep.Id,false);}
+  foreach(var archivePath in args) {
+   actualEngine.SelectDependency("BlueprintLoader",archivePath);var status=actualEngine.Scan().Single(x=>x.Name=="Blueprint Loader");Check(status.State=="Ready to install"&&!actualEngine.OverrideEnabled("BlueprintLoader"),"Official Loader "+status.Version+" archive matches shipped complete set");
+   using(var archiveInput=ZipFile.OpenRead(archivePath))foreach(var entry in archiveInput.Entries.Where(x=>x.Name.EndsWith(".pak")||x.Name.EndsWith(".ucas")||x.Name.EndsWith(".utoc"))){using var input=entry.Open();using var bytes=new MemoryStream();input.CopyTo(bytes);Put("Dungeons/Content/Paks/~mods/BlueprintLoader/"+entry.Name,bytes.ToArray());}
+   Check(ActualPolicy().Scan().Single(x=>x.Name=="Blueprint Loader").State=="OK","Installed official Loader "+status.Version+" recognized without upgrade");
+  }
+ }
 }finally{Directory.Delete(temp,true);}
 Console.WriteLine($"{cases} checks passed");

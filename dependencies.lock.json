@@ -16,13 +16,15 @@
       "archiveMembers": {
         "Dungeons/Binaries/Win64/d3d12.asi": "ReShade64.dll"
       },
-      "patchSHA256": "109e99a0b160e2d2b1baf260b51bff461333aaf328554838ce994dac9abcfbc7"
+      "patchSHA256": "109e99a0b160e2d2b1baf260b51bff461333aaf328554838ce994dac9abcfbc7",
+      "compatibilityNote": "PR435 native D3D12 access + successful-Reset lifetime API; a stock version number is insufficient."
     },
     "RenoDXUEExtended": {
       "file": "Dungeons/Binaries/Win64/renodx-ue-extended.addon64",
       "sha256": "7941e06607c90f187688382fd259d483cde78f54ccb72099b239e8d45f5f87ac",
       "url": "https://github.com/marat569/renodx/releases/download/nightly-20260928/renodx-ue-extended.addon64",
-      "releaseTag": "nightly-20260928"
+      "releaseTag": "nightly-20260928",
+      "compatibilityNote": "UE Extended addon with the required game shader/configuration layout; newer nightlies require the override."
     },
     "BlueprintLoader": {
       "version": "2.2",
@@ -49,6 +51,28 @@
           "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.utoc": "d51cb0005bbfcc8e506f403b388f6b731c08e7df5b8bb0f51a1018e733462110",
           "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.pak": "75e7144577253917f6da7312ef5e585b12fb728226a22b0938323751a6b555cd"
         }
+      ],
+      "minimumVersion": "2.0",
+      "compatibilityNote": "ModInfo/settings API from 2.0; popup API is not used.",
+      "compatibleReleases": [
+        {
+          "version": "2.0",
+          "files": {
+            "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.pak": "75e7144577253917f6da7312ef5e585b12fb728226a22b0938323751a6b555cd",
+            "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.ucas": "7eae0158199637ea3dfe25996f16328dbac8bb67ef44a08d9c08052a39a28f5c",
+            "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.utoc": "e4d888db70ea0138c033569fbc410907a29bf8a90508b9f854d61f3d4fbeaad3"
+          },
+          "archiveSHA256": "4c734597a5bfc21c7ca7b9a4f19738601b2c71f94a7c6e36b496c305a83a2937"
+        },
+        {
+          "version": "2.3",
+          "files": {
+            "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.pak": "75e7144577253917f6da7312ef5e585b12fb728226a22b0938323751a6b555cd",
+            "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.ucas": "3283f1c77672fed0bc0b279088df94e6646009345c2cff8d69d7208cdbc69098",
+            "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.utoc": "81a7cf3fd8cf8276d57fe8c4afcead2ff5bd847875b871d12ae105bc9b12274e"
+          },
+          "archiveSHA256": "982ccc00b25a83da7fb3081739651b0e1a16d62ca990696ba64d89e8617c3374"
+        }
       ]
     },
     "DLSSRuntime": {
@@ -56,10 +80,13 @@
       "sha256": "3975567b8943c53acce397f2b72380092f84f162d00b0d2c7d08a1025c563983",
       "url": "https://raw.githubusercontent.com/NVIDIA/DLSS/374959484e79a640feaba44c93ac8cfb0a03f5b5/lib/Windows_x86_64/rel/nvngx_dlss.dll",
       "bundled": false,
-      "file": "Dungeons/Binaries/Win64/MCD2Graphics/ngx-runtime/nvngx_dlss.dll"
+      "file": "Dungeons/Binaries/Win64/MCD2Graphics/ngx-runtime/nvngx_dlss.dll",
+      "version": "310.9.1",
+      "minimumVersion": "310.9.1",
+      "compatibilityNote": "NGX SR runtime; newer models can be requested with ModelPreset. Untested files require the override."
     },
     "Streamline": {
-      "version": "2.14.1 production x64",
+      "version": "2.14.1",
       "url": "https://github.com/NVIDIA-RTX/Streamline/releases/download/v2.14.1/streamline-sdk-v2.14.1.zip",
       "archiveSHA256": "92c4d954631a1710da86ca3fa8d5034f2b9503838c95fc4ae977ae149319781b",
       "archiveMembers": {
@@ -80,7 +107,9 @@
         "Dungeons/Binaries/Win64/nvngx_dlssg.dll": "ff6e90eb78b827927dff5b4ecc6b1c870c2e9bca29ed9f48c7d348cc9e170b82",
         "Dungeons/Binaries/Win64/NvLowLatencyVk.dll": "2a77dc3e1c724b7eea5755be0ae7423752e79a2459fae72181a9f00e3507e5d6"
       },
-      "bundled": false
+      "bundled": false,
+      "minimumVersion": "2.14.1",
+      "compatibilityNote": "Production x64 Reflex/FG module set; newer untested sets require the override."
     }
   },
   "buildDependencies": {

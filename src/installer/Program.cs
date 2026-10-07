@@ -57,12 +57,14 @@ public sealed class InstallerWindow:Window {
             if(engine.GameRoot!=null){Text("Game build: "+engine.GameBuild());var check=engine.Scan()[0];Text("Status: "+(check.State=="OK"?"Supported":"Unsupported — installation is blocked"));}
             content.Children.Add(Button("Check requirements",()=>{page=1;Draw();}));
         }else if(page==1) {
-            Text("Requirements",22);Text("Dependencies come from their official publishers. They are not bundled. Use the required version, then select your download or run its official installer.");
+            Text("Requirements",22);Text("Dependencies come from their official publishers. They are not bundled. Choose a recognized release, or enable the override to try another official version.");
             if(engine.GameRoot==null){Text("Choose the game first.");return;}
             var dependencyChecks=engine.Scan();
             foreach(var dep in engine.Dependencies) {
                 var status=dependencyChecks.Single(x=>x.Name==dep.Name);var box=new StackPanel{Spacing=8};
-                box.Children.Add(new TextBlock{Text=dep.Name+" — "+status.State,FontWeight=FontWeight.SemiBold});box.Children.Add(new TextBlock{Text="Tested version: "+dep.Version,Opacity=.75});
+                box.Children.Add(new TextBlock{Text=dep.Name+" — "+status.State,FontWeight=FontWeight.SemiBold});box.Children.Add(new TextBlock{Text="Required: "+dep.Requirement+" • Tested: "+dep.Version,Opacity=.75,TextWrapping=TextWrapping.Wrap});
+                if(dep.MinimumVersion!=null&&dep.CompatibilityNote!=null)box.Children.Add(new TextBlock{Text=dep.CompatibilityNote,Opacity=.75,TextWrapping=TextWrapping.Wrap});
+                if(status.State is "OK" or "Ready to install")box.Children.Add(new TextBlock{Text="Selected / installed: "+status.Version,Opacity=.75});
                 var buttons=new StackPanel{Orientation=Orientation.Horizontal,Spacing=8};buttons.Children.Add(Button("Open official download",()=>OpenLink(dep.Url)));
                 if(dep.Id=="ReShade"&&dep.Files.Keys.Any(x=>x.EndsWith("/dxgi.dll",StringComparison.Ordinal))) {
                     box.Children.Add(new TextBlock{Text="Install the full addon-support build for:\n"+Path.Combine(engine.GameRoot,InstallerEngine.Shipping)+"\nChoose DirectX 10/11/12. Complete the official installer, then Check again.",TextWrapping=TextWrapping.Wrap});
@@ -93,7 +95,7 @@ public sealed class InstallerWindow:Window {
             content.Children.Add(Button("Third-party notices",()=>{var w=new Window{Title="Third-party notices",Width=760,Height=580};w.Content=new ScrollViewer{Content=new TextBlock{Text=ReadResource("notices.txt"),TextWrapping=TextWrapping.Wrap,Margin=new Thickness(20)}};w.Show(this);}));
             content.Children.Add(Button("Installation help",()=>OpenLink("https://github.com/SpinGiantCRM/mcd2-graphics/blob/main/INSTALL.md")));
             content.Children.Add(Button("Report a problem",()=>OpenLink("https://github.com/SpinGiantCRM/mcd2-graphics/issues/new/choose")));
-            Text("Offline use only. Online compatibility has not been established. Advanced RenoDX settings remain in ReShade.");
+            Text("Online compatibility is unverified. Offline play is safer; follow the publisher’s terms. Advanced RenoDX settings remain in ReShade.");
         }
     }
     async Task<string?> SelectFile(string title) {var selected=await StorageProvider.OpenFilePickerAsync(new(){Title=title,AllowMultiple=false});return selected.SingleOrDefault()?.TryGetLocalPath();}
