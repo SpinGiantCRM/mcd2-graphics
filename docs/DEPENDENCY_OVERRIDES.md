@@ -43,6 +43,9 @@ ReShade build may not provide it. Streamline still needs its required modules;
 NVIDIA signature and hardware checks remain active. Revert to the tested
 versions if startup or graphics fail.
 
+See [why the patched ReShade framework is required](FG_CANDIDATE.md#why-this-reshade-build-is-required)
+for its device/queue access, reset-lifetime protection and direct ZIP download.
+
 ## DLSS model hint
 
 To request a model from the installed NVIDIA DLSS runtime, create

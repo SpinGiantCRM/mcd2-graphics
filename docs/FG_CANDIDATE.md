@@ -25,6 +25,30 @@ explicit default-Off untested-version override. Newer ReShade must provide the
 required D3D12 and successful-Reset interfaces; a higher version number alone
 does not establish compatibility. See [overrides and model hints](DEPENDENCY_OVERRIDES.md).
 
+## Why this ReShade build is required
+
+The candidate uses a source-built ReShade framework with two additions:
+
+- **Native Direct3D device and queue access (PR435):** lets the integration pass
+  the game's rendering device and command queue to the Frame Generation runtime.
+- **Successful command-list reset confirmation:** tells the mod when an old
+  recording has actually been replaced. This prevents old DLSS resources from
+  being retained indefinitely during preset changes. GPU resources still wait
+  for their completion fence before release; reset success alone is insufficient.
+
+These interfaces support rendering and resource lifetime, including DLSS/DLAA
+transitions with FG Off. A newer stock ReShade version may not contain them.
+The untested-version override permits trying another build, but cannot add
+missing interfaces or establish compatibility.
+
+Download the [exact tested framework ZIP](https://raw.githubusercontent.com/SpinGiantCRM/mcd2-graphics/1200608712d05bf487dbc9e381969909f63908bc/qualification/fg-release/dependencies/ReShade-PR435-4eb9056-reset-epoch-x64.zip)
+and select it under ReShade in the installer. No account or local compilation is
+needed. The archive includes its license, source/build references and receipt;
+the installer verifies its archive and DLL hashes. It is distributed separately
+from the mod installer and is not an official ReShade release. ReShade is by
+crosire and contributors; PR435 is by JoeyDelp, with the additional lifetime
+patch recorded in this repository.
+
 ## Settings
 
 - **Upscaler / DLSS Preset / Render Scale:** Native or NVIDIA DLSS; 100% selects
