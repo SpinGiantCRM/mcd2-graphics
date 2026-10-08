@@ -5,14 +5,42 @@ import tempfile
 import unittest
 import subprocess
 import json
+import re
 from unittest.mock import patch
 
 spec = importlib.util.spec_from_file_location('windows_candidate', Path(__file__).with_name('build_windows_candidate.py'))
 candidate = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(candidate)
+source_spec = importlib.util.spec_from_file_location('sr_source_tree', Path(__file__).with_name('sr_source_tree.py'))
+source_tree = importlib.util.module_from_spec(source_spec)
+source_spec.loader.exec_module(source_tree)
 
 
 class WindowsBuildChecks(unittest.TestCase):
+    def test_isolated_sr_source_contains_its_relative_include_closure(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            source = Path(temporary) / 'source'
+            source_tree.copy_sr_sources(candidate.REPO, source)
+            # Check real relative includes recursively, including FSR's C ABI
+            # and the provider snapshots consumed by the native observer.
+            pending = [source / 'src/native/observer.cpp']
+            visited = set()
+            while pending:
+                path = pending.pop().resolve()
+                if path in visited:
+                    continue
+                visited.add(path)
+                for name in re.findall(r'^\s*#include "([^"]+)"', path.read_text(), re.M):
+                    if name in ('reshade.hpp', 'ngx-research/nvsdk_ngx.h'):
+                        continue  # separately verified external SDK include
+                    dependency = (path.parent / name).resolve()
+                    self.assertTrue(dependency.is_relative_to(source.resolve()), name)
+                    self.assertTrue(dependency.is_file(), str(dependency.relative_to(source)))
+                    pending.append(dependency)
+            self.assertIn((source / 'experiments/providers/fsr_game_bridge.h').resolve(), visited)
+            self.assertIn((source / 'src/providers/sr_runtime_snapshot.h').resolve(), visited)
+            self.assertFalse(list(source.rglob('*.dll')))
+
     def test_current_ui_is_reused_with_metadata_provenance(self):
         with tempfile.TemporaryDirectory() as temporary:
             artifact = Path(temporary) / 'artifact'
