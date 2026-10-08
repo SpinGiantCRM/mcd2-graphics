@@ -171,13 +171,15 @@ Before wiring this into the live UI/bootstrap, implement and qualify:
 
 Linux uses a flushed same-directory rename followed by directory `fsync`.
 Windows uses wide-character handles, `FlushFileBuffers`, and same-directory
-`MoveFileExW` replacement with `WRITE_THROUGH`, without a copy fallback or
-delete-before-move. Readers permit sharing for deletion so an open old reader
-does not block replacement. An already-open old handle remains a valid snapshot
+`SetFileInformationByHandle(FileRenameInfoEx)` with replacement/POSIX flags,
+without a copy fallback or delete-before-move. This requires a filesystem and
+Windows 10+ API supporting that operation; failure retains the old record.
+Readers permit sharing for deletion. An already-open old handle remains a valid snapshot
 after its filename is replaced; the reader accepts zero remaining links while
 continuing to refuse multiple links. See Microsoft's [file sharing contract](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew),
-[flush API](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-flushfilebuffers)
-and [move flags](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-movefileexw).
+[flush API](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-flushfilebuffers),
+[rename API](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-setfileinformationbyhandle)
+and [POSIX replacement semantics](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntifs/ns-ntifs-_file_rename_information).
 
 The transaction targets trusted, local private storage, not a hostile same-user
 writer or arbitrary network filesystem. Reparse points/symlinks, non-files and

@@ -1,6 +1,9 @@
 #pragma once
 #include "graphics_record.hpp"
 #include <filesystem>
+#include <cstddef>
+#include <cstring>
+#include <memory>
 #include <system_error>
 #ifdef _WIN32
 #ifndef NOMINMAX
@@ -168,15 +171,39 @@ inline bool writeFlushed(const std::filesystem::path& path, const GraphicsRecord
 }
 inline bool replace(const std::filesystem::path& pending, const std::filesystem::path& committed) {
 #ifdef _WIN32
-    // Same directory/volume, no COPY_ALLOWED fallback, no delete-before-move.
-    return MoveFileExW(pending.c_str(), committed.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH);
+    // MoveFileEx's legacy replacement can fail while an old reader is open,
+    // even with delete sharing. Windows 10+ POSIX rename semantics explicitly
+    // preserve old handles while subsequent opens see the new file. If the
+    // filesystem/API does not support it, refuse rather than delete or copy.
+    File file(CreateFileW(pending.c_str(), GENERIC_READ | GENERIC_WRITE | DELETE,
+        FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING,
+        FILE_FLAG_OPEN_REPARSE_POINT, nullptr));
+    if (file.handle == badHandle || !regularHandle(file.handle)) return false;
+    const auto filename = committed.native();
+    if (filename.empty() || filename.size() > 32767) return false;
+    // Own spelling of the documented union layout also compiles when an older
+    // header exposes ReplaceIfExists but not the Flags union member. The real
+    // SDK field offsets remain compile-time checked; no private NT API is used.
+    struct RenameRequest { DWORD flags; HANDLE root; DWORD filenameBytes; WCHAR name[1]; };
+    static_assert(offsetof(RenameRequest, root) == offsetof(FILE_RENAME_INFO, RootDirectory));
+    static_assert(offsetof(RenameRequest, filenameBytes) == offsetof(FILE_RENAME_INFO, FileNameLength));
+    static_assert(offsetof(RenameRequest, name) == offsetof(FILE_RENAME_INFO, FileName));
+    constexpr DWORD replaceExisting = 1, posixSemantics = 2;
+    const auto nameBytes = DWORD(filename.size()*sizeof(wchar_t));
+    const auto size = DWORD(sizeof(RenameRequest)+nameBytes);
+    auto storage = std::make_unique<std::uint64_t[]>((size+7)/8);
+    auto info = new (storage.get()) RenameRequest{};
+    info->flags = replaceExisting | posixSemantics;
+    info->filenameBytes = nameBytes;
+    std::memcpy(reinterpret_cast<std::uint8_t*>(info)+offsetof(RenameRequest, name), filename.data(), nameBytes);
+    return SetFileInformationByHandle(file.handle, FileRenameInfoEx, info, size);
 #else
     return !::rename(pending.c_str(), committed.c_str());
 #endif
 }
 inline bool syncDirectory(const std::filesystem::path& root) {
 #ifdef _WIN32
-    (void)root; // MoveFileEx WRITE_THROUGH; no portable Windows directory fsync.
+    (void)root; // File bytes were flushed; no portable Windows directory fsync.
     return true;
 #else
     File directory(::open(root.c_str(), O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW));
