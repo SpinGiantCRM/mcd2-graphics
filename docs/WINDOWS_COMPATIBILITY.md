@@ -352,3 +352,16 @@ exact MSVC framework pin, existing Windows fixes and both CI platforms. The
 report distinguishes maintainer-reported dungeon travel and source/CI foliage
 eligibility evidence from directly captured runtime observations. Windows
 NVIDIA/HDR/controller and Linux gameplay remain separate hardware checks.
+
+## Experimental provider store / SDK-header compatibility — 8 October 2026
+
+The provider mirror uses the documented `FileRenameInfoEx` information class
+(value 22) with replacement and POSIX semantics. LLVM MinGW's default target
+headers hide the enum name; the Windows candidate build exposed that difference
+after the portable g++ fixtures passed. The store now spells the documented
+class value explicitly, preserving the same API and old-reader behavior.
+
+Keep the SDK enum-value assertion when available and the Windows held-reader
+fixtures under both default and older target-header macros. Unsupported runtime
+rename still fails closed; do not substitute delete/copy or legacy replacement.
+The observer remains opt-in and does not modify released payloads.

@@ -196,7 +196,11 @@ inline bool replace(const std::filesystem::path& pending, const std::filesystem:
     info->flags = replaceExisting | posixSemantics;
     info->filenameBytes = nameBytes;
     std::memcpy(reinterpret_cast<std::uint8_t*>(info)+offsetof(RenameRequest, name), filename.data(), nameBytes);
-    return SetFileInformationByHandle(file.handle, FileRenameInfoEx, info, size);
+    // Documented FILE_INFO_BY_HANDLE_CLASS value; some MinGW SDK headers hide
+    // the enum name behind NTDDI_VERSION even when the runtime supports it.
+    // https://learn.microsoft.com/windows/win32/api/minwinbase/ne-minwinbase-file_info_by_handle_class
+    constexpr auto renameInfoEx = static_cast<FILE_INFO_BY_HANDLE_CLASS>(22);
+    return SetFileInformationByHandle(file.handle, renameInfoEx, info, size);
 #else
     return !::rename(pending.c_str(), committed.c_str());
 #endif
