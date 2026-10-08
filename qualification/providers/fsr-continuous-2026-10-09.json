@@ -1,0 +1,131 @@
+{
+  "schema": 1,
+  "purpose": "Opt-in continuous analytical FSR execution and automatic Native rollback",
+  "environment": {
+    "os": "CachyOS",
+    "gpu": "RTX 4080 SUPER",
+    "driver": "615.71.09",
+    "proton": "cachyos-11.0-20261005-slr",
+    "gameBuild": 25754144
+  },
+  "sourceSHA256": {
+    "src/providers/sr_runtime_protocol.hpp": "ba50b8702c0b0a690d5d238962e047d241de4e724eb9e6b232b54b5d86fbbff4",
+    "src/providers/sr_runtime_snapshot.h": "e9f52089fde51c35ef84444416d0c460b211602efdada9d9e41f9bd04a1a8019",
+    "src/providers/sr_runtime_save_transport.hpp": "e91e7e65c7df5d95150b8cd73d173d207371cd5c4f5678f02d449507c9c6eeb1",
+    "src/native/fsr_runtime.hpp": "59da65a3babd641022ec7ed4ed9bc4e3b3c7e505d0fe50fd7b5acad58e12fc9c",
+    "src/ui/ProviderRuntimeWords.cs": "fa5f8626af17474a0f60557050b55fbc470ac549726b0e969a810910d0bb632b",
+    "src/ui/ProviderRuntimeClient.cs": "eafcf5da215b8768b9704005683fcb30c0bffd1eec14319e64cf2c51fabac984",
+    "src/ui/ModActor.cs": "152b81c9813bb919463ba46c8ccd96031f6fc1d5829c6853295bf1b9ca9ea473"
+  },
+  "payloadSHA256": {
+    "sr": "94550fed538a60247248521cba0e24ceaa112a44e7585489d8abc8d2b54b6ab4",
+    "latency": "d3a093ff4bc3265779fc5108239b5cc79d2656b835012a843eeac570f5960cc9",
+    "ui": {
+      "MCD2Graphics_P.pak": "ca9faca9f4ba639496bc3c45f9e286ebeab565da7c3993d257550a97c698b10c",
+      "MCD2Graphics_P.ucas": "f065773cb8d87990655e5436c1cb065193ec4f67befdb7cc129f64852725e91e",
+      "MCD2Graphics_P.utoc": "7a7cfd2b9306f4056d57f71192fa5c38a0601adff6f020aa5f13cd98b48feb02"
+    }
+  },
+  "sdk": {
+    "version": "2.3.0",
+    "provider": "analytical FSR 3.1.5",
+    "sourceCommit": "60f4ea81909200d8542eca14dccb2628b763a9a3",
+    "bridgeSHA256": "f422af2f70f62ca8462c3aff30d05d1db92dd3b1d0e4289750039b8a2a83514b",
+    "frameworkSHA256": "d0dcccc74a43c44ba435b7a369b456e0970d8a4464e4bd683119b374f2c9fb46"
+  },
+  "checks": [
+    {
+      "mode": "Native AA",
+      "input": [
+        3840,
+        2160
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "acceptedFramesAtLeast": 1049,
+      "transientRecovery": true
+    },
+    {
+      "mode": "Quality",
+      "input": [
+        2560,
+        1440
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "acceptedFramesAtLeast": 5142,
+      "sourceCommandPercent": 66.666667,
+      "observedPercent": 66.666664
+    },
+    {
+      "mode": "Balanced",
+      "sdkRequestedInput": [
+        2258,
+        1270
+      ],
+      "acceptedFrames": 0,
+      "validationError": 4,
+      "automaticNativeFallback": true,
+      "observedFallbackPercent": 100
+    },
+    {
+      "mode": "Performance",
+      "input": [
+        1920,
+        1080
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "acceptedFramesAtLeast": 2304,
+      "observedPercent": 50
+    },
+    {
+      "mode": "Ultra Performance",
+      "input": [
+        1280,
+        720
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "acceptedFramesAtLeast": 4357,
+      "sourceCommandPercent": 33.333333,
+      "observedPercent": 33.333332
+    },
+    {
+      "mode": "Native after Ultra Performance",
+      "automaticRetirement": true,
+      "sourceRestoreAck": true,
+      "observedPercent": 100
+    }
+  ],
+  "limits": [
+    "Temporary chooser; normal Video rows not yet connected",
+    "No comparative performance or image-quality qualification",
+    "No Windows or AMD active runtime qualification",
+    "Balanced, Custom, resize/travel, long-session and FG gates remain open",
+    "Process lingered after confirmed menu quit; shutdown not qualified"
+  ],
+  "restoration": {
+    "verified": true,
+    "originalPayloads": 12,
+    "originalModSlots": 6,
+    "temporaryDependenciesRemoved": true
+  },
+  "publishedPayloadChanged": false,
+  "shutdown": {
+    "normalMenuQuitRequested": true,
+    "windowClosed": true,
+    "processRemained": true,
+    "guardedProcessTerminationRequired": true,
+    "causeEstablished": false,
+    "qualified": false
+  }
+}

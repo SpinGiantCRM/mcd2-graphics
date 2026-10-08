@@ -144,8 +144,8 @@ static bool fsr_probe_camera''')
     observer=observer_path.read_text()
     observer=patch(observer,'static void guide_probe_record(a::command_list*);',
                    'static bool guide_probe_record(a::command_list*,uint32_t,uint32_t,uint32_t);')
-    observer=patch(observer,'seen_taa=true;guide_probe_record(cmd);return lean_gate(cmd,shader,x,y,z);',
-                   'seen_taa=true;if(guide_probe_record(cmd,x,y,z))return true;return lean_gate(cmd,shader,x,y,z);')
+    observer=patch(observer,'guide_probe_record(cmd);return lean_gate(cmd,shader,x,y,z);',
+                   'if(guide_probe_record(cmd,x,y,z))return true;return lean_gate(cmd,shader,x,y,z);')
     observer_path.write_text(observer)
     return text
 

@@ -223,6 +223,28 @@ public class DisplayRow : UGameSettingListEntryBase {
 }
 
 public class ModActor : AActor {
+ public ProviderMenuClient? ProviderMenu;
+ public ProviderRuntimeClient? ProviderRuntime;
+ public void PollProviders(){
+  if(ProviderMenu==null || ProviderRuntime==null)return;
+  ProviderMenu.Poll();
+  var level=UGameplayStatics.GetCurrentLevelName(this,true);
+  bool ready=level!="" && level!="Menu_Spicewood" && World.Player(this)!=null;
+  float units=0;var worlds=World.FindAll(this,Unreal.ClassOf<AWorldSettings>());
+  if(worlds.Count>0){var settings=worlds[0] as AWorldSettings;if(settings!=null)units=settings.WorldToMeters;}
+  float percentage=UKismetSystemLibrary.GetConsoleVariableFloatValue("r.ScreenPercentage");
+  if(!(units>0 && units<=1000000)){units=0;ready=false;}
+  if(!(percentage>=1 && percentage<=100)){percentage=0;ready=false;}
+  ProviderRuntime.Poll(ProviderMenu,level,ready,(int)(units*1000),(int)(percentage*1000000));
+  if(ProviderRuntime.NeedsSourceCommand()){
+   var player=UGameplayStatics.GetPlayerController(this,0);if(player==null)return;
+   int target=ProviderRuntime.SourceTarget();string number=""+(target/1000000)+".";
+   int fraction=target%1000000;for(int divisor=100000;divisor>=1;divisor/=10)number+=""+((fraction/divisor)%10);
+   UKismetSystemLibrary.ExecuteConsoleCommand(this,"r.ScreenPercentage "+number,player);
+   float observed=UKismetSystemLibrary.GetConsoleVariableFloatValue("r.ScreenPercentage");
+   if(observed>=1 && observed<=100)ProviderRuntime.SourceObserved((int)(observed*1000000));
+  }
+ }
  // Keep our recommendation in the game's native footer, separate from status.
  public List<UGameSettingDetailView> HelpFooterPanels=new List<UGameSettingDetailView>();
  public List<UGameSettingDetailExtension_DefaultValue> HelpFooters=new List<UGameSettingDetailExtension_DefaultValue>();
@@ -265,9 +287,13 @@ public class ModActor : AActor {
   if(Runtime==null){Runtime=UGameplayStatics.CreateSaveGameObject(Unreal.ClassOf<GraphicsRuntimeStateSave>()) as GraphicsRuntimeStateSave;if(Runtime!=null){Runtime.SchemaVersion=1;UGameplayStatics.SaveGameToSlot(Runtime,"MCD2GraphicsRuntime",0);}}
   InitializeFG();Timer.Start(this,"PollFG",0.5f,true);InitializeDisplay();Timer.Start(this,"PollDisplay",0.5f,true);
   Timer.Start(this,"PollRenderer",0.25f,true);
+  ProviderMenu=UGameplayStatics.CreateSaveGameObject(Unreal.ClassOf<ProviderMenuClient>()) as ProviderMenuClient;
+  ProviderRuntime=UGameplayStatics.CreateSaveGameObject(Unreal.ClassOf<ProviderRuntimeClient>()) as ProviderRuntimeClient;
+  if(ProviderMenu!=null && ProviderRuntime!=null){ProviderMenu.Start();ProviderRuntime.Start();Timer.Start(this,"PollProviders",0.25f,true);}
   Discover();if(LifecycleWidgets.Count==0)Timer.Start(this,"Discover",0.1f,true);
  }
  public void PollRenderer(){
+  if(ProviderRuntime!=null && ProviderRuntime.Enabled && ProviderMenu!=null && ProviderMenu.Value(8)==2)return;
   RefreshResolutionBounds();
   if(Saved==null || Saved.SchemaVersion!=4 || Saved.Revision<1 || Saved.ReconstructionMode<0 || Saved.ReconstructionMode>2)return;
   var runtime=UGameplayStatics.LoadGameFromSlot("MCD2GraphicsRuntime",0) as GraphicsRuntimeStateSave;
@@ -570,6 +596,7 @@ public class ModActor : AActor {
 
  public string FGStatus(){if(FGRuntime==null || FGRuntime.Available!=1)return "Unavailable in this session.";if(FGRuntime.RestartRequired==1)return "Restart to apply.";if(FGSaved==null || FGSaved.Mode==0)return "Off.";if(FGRuntime.Phase==6)return "Frame generation stopped after a runtime error.";if(Saved==null || Saved.ReconstructionMode==0)return "Select NVIDIA DLSS to use frame generation.";if(DisplaySaved==null || DisplaySaved.HDROutput==0)return "This preview requires HDR.";return FGRuntime.Active==1?"Active: 2× presentation.":"Resumes during gameplay.";}
  protected override void ReceiveEndPlay(EEndPlayReason reason){
+  if(ProviderRuntime!=null)ProviderRuntime.Stop();Timer.Stop(this,"PollProviders");
   RestoreFoliageVelocity();
   foreach(var footer in HelpFooters)if(UKismetSystemLibrary.IsValid(footer))footer.RemoveFromParent();HelpFooters.Clear();HelpFooterPanels.Clear();
   if(Saved!=null && Saved.SchemaVersion==4 && Saved.RenderContextReady!=0){Saved.RenderContextReady=0;Saved.RenderContextSessionId=0;Saved.Revision++;Persist();}

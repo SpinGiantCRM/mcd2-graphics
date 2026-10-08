@@ -9,6 +9,9 @@ def patch(text, before, after):
 
 def generate(repo, source):
     shutil.copytree(repo/'src/native', source/'src/native', dirs_exist_ok=True)
+    shutil.copytree(repo/'src/providers', source/'src/providers', dirs_exist_ok=True)
+    (source/'experiments/providers').mkdir(parents=True,exist_ok=True)
+    shutil.copyfile(Path(__file__).with_name('fsr_game_bridge.h'),source/'experiments/providers/fsr_game_bridge.h')
     for name in ['build.py','build_toolchain.py']:
         shutil.copyfile(repo/name,source/name)
     for name in ['fsr_game_bridge.h','fsr_probe_driver.hpp']:

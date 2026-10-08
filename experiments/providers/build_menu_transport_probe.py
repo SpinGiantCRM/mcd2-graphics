@@ -26,7 +26,7 @@ def main():
     args+=['--source='+str(sdk/'src'/name) for name in ('Log.cs','Timer.cs','World.cs')]
     args+=['--ref='+str(path) for path in sorted(refs.glob('*.dll'))]
     args+=['--ref='+str(sdk/'ref'/name) for name in ('NeoRune.Abstractions.dll','NeoRune.Game.dll')]
-    args+=['--source='+str(actor),'--source='+str(REPO/'src/ui/ProviderSaveWords.cs'),'--source='+str(REPO/'src/ui/ProviderMenuClient.cs'),'--source='+str(probe)]
+    args+=['--source='+str(actor),'--source='+str(REPO/'src/ui/ProviderSaveWords.cs'),'--source='+str(REPO/'src/ui/ProviderMenuClient.cs'),'--source='+str(REPO/'src/ui/ProviderRuntimeWords.cs'),'--source='+str(REPO/'src/ui/ProviderRuntimeClient.cs'),'--source='+str(probe)]
     rsp=out/'ui-build.rsp';rsp.write_text('\n'.join(args)+'\n')
     result=subprocess.run([str(a.dotnet),str(sdk/'tools/neorune.dll'),'@'+str(rsp)],capture_output=True,text=True)
     (out/'ui-build-private.log').write_text(result.stdout+result.stderr)
@@ -38,5 +38,5 @@ def main():
              'overlaySHA256':sha(actor),'clientSHA256':sha(probe),'builderSHA256':sha(REPO/'tools/ModInfoBuilder/Program.cs'),
              'payloadSHA256':{path.name:sha(path) for path in sorted((out/'ui/Pak').glob('MCD2Graphics_P.*'))}}
     (out/'trial-ui-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
-    print('Transport-only UI trial compiled; released actor and installer payload unchanged.')
+    print('UI candidate compiled; no game installation or published installer changed.')
 if __name__=='__main__':main()

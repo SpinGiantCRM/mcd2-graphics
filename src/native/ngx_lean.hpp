@@ -25,7 +25,7 @@ static bool lean_reset_epoch(a::command_list *cmd,uint64_t &epoch,bool arm=false
  return SUCCEEDED(result)&&size==sizeof(epoch);
 }
 static void lean_reset_recording(a::command_list *cmd){
- guide_probe_reset(cmd);
+ guide_probe_reset(cmd);fsr_runtime_reset(cmd);
  if(!lean.borrow.recordings.contains(cmd)&&!native_reset_borrows.recordings.contains(cmd))return;
  uint64_t epoch=0;bool known=lean_reset_epoch(cmd,epoch,true);
  if(lean.borrow.recordings.contains(cmd))lean.borrow.note_reset(cmd,known,epoch);
@@ -42,13 +42,13 @@ static void lean_confirm_resets(){
  confirm(lean.borrow,true);confirm(native_reset_borrows,false);
 }
 static void lean_begin_recording(a::command_list *cmd){
- guide_probe_begin(cmd);
+ guide_probe_begin(cmd);fsr_runtime_begin(cmd);
  // Reset can cancel an evaluation before submission. Clear its CPU sentinel
  // only after replacement recording is observed; references still retire by fence.
  if(lean.borrow.begin_recording(cmd) && lean.pending==cmd)lean.pending=nullptr;
  native_reset_borrows.begin_recording(cmd);
 }
-static void lean_forget_recording(a::command_list *cmd){guide_probe_forget(cmd);lean.borrow.reset_pending.erase(cmd);lean.borrow.reset_epochs.erase(cmd);lean.borrow.forget(cmd);native_reset_borrows.reset_pending.erase(cmd);native_reset_borrows.reset_epochs.erase(cmd);native_reset_borrows.forget(cmd);if(lean.pending==cmd)lean.pending=nullptr;}
+static void lean_forget_recording(a::command_list *cmd){guide_probe_forget(cmd);fsr_runtime_forget(cmd);lean.borrow.reset_pending.erase(cmd);lean.borrow.reset_epochs.erase(cmd);lean.borrow.forget(cmd);native_reset_borrows.reset_pending.erase(cmd);native_reset_borrows.reset_epochs.erase(cmd);native_reset_borrows.forget(cmd);if(lean.pending==cmd)lean.pending=nullptr;}
 static bool lean_cleanup(a::command_queue *q,std::unique_lock<std::recursive_mutex> &guard,bool terminal=false){
  if(!live_fixture || lean.cleanup_in_progress || (!terminal && lean.history_dirty) || !lean.borrow.recordings.empty() || lean.borrow.blocked)return false;
  lean.cleanup_in_progress=true;
@@ -265,7 +265,7 @@ static void lean_present(a::command_queue *q,std::unique_lock<std::recursive_mut
  }
  if(live_fixture && !seen_taa){live_fixture->reset_pending=true;++lean.missing;}
  static ULONGLONG poll=0;auto now=GetTickCount64();if(now-poll<100)return;poll=now;
- if(ui_poll_intent())ui_apply_queued(q,guard);
+ if(!fsr_runtime_owns_source() && ui_poll_intent())ui_apply_queued(q,guard);
  if(!live_fixture && developer_file_exists(root/"lean-queue-probe.txt")){lean_queue_probe(q,guard);return;}
  if(!live_fixture && developer_file_exists(root/"lean-start.txt")){
   std::ifstream f(root/"lean-start.txt");std::string next;f>>next;f.close();fs::remove(root/"lean-start.txt");

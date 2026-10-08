@@ -21,6 +21,8 @@
 #include "../providers/menu_save_transport.hpp"
 #include "../providers/display_projection.hpp"
 #include "../providers/menu_snapshot.h"
+#include "../providers/sr_runtime_snapshot.h"
+#include "../providers/sr_runtime_save_transport.hpp"
 #include "engine_layout.hpp"
 #include "amd_latency.hpp"
 #include <condition_variable>
@@ -93,6 +95,7 @@ bool observeProviderSettings=false;
 bool consolidatedMenuTransport=false;
 std::mutex providerSnapshotMutex;
 MCD2MenuSnapshotV1 providerSnapshot{sizeof(MCD2MenuSnapshotV1),0,2,0,{}};
+MCD2SrContextSnapshotV1 srContextSnapshot{};
 struct Feature {void** main;void** modular;};
 std::mutex mutex;std::ofstream log;std::filesystem::path requestPath;unsigned requestId=0,presentCounter=0;uintptr_t base=0;const mcd2::engine::Layout*engineLayout=nullptr;void*registry=nullptr;
 uint64_t latencyName=0,pacingName=0;std::atomic<bool> installed=false;
@@ -160,6 +163,7 @@ void settings_loop(){std::map<std::string,unsigned> last;auto nextStatus=std::ch
   if(!error&&mcd2::providers::store_detail::directoryReady(authorityPath))
    menuTransport=std::make_unique<mcd2::providers::MenuSaveTransport>(savesPath,authorityPath,sessionId);
  }
+ std::uint32_t contextSequence=0;
  while(!workerStop){
   mcd2::providers::MenuAuthority shared;
   if(menuTransport){try{shared=menuTransport->poll();}catch(...){/* A transport failure cannot activate a feature. */}}
@@ -169,7 +173,29 @@ void settings_loop(){std::map<std::string,unsigned> last;auto nextStatus=std::ch
    if(shared.load==mcd2::providers::StoreStatus::Ok && mcd2::providers::encodeGraphicsRecord(shared.current.intent,bytes))
     std::copy(bytes.begin(),bytes.end(),snapshot.record);
    else snapshot.load=unsigned(mcd2::providers::StoreStatus::Invalid);
-   std::lock_guard lock(providerSnapshotMutex);providerSnapshot=snapshot;
+   mcd2::providers::SrRuntimeBytes contextBytes; mcd2::providers::SrContext context;
+   bool validContext=mcd2::providers::readSrContextSave(savesPath/L"MCD2GraphicsProviderSrContext.sav",contextBytes)&&
+       mcd2::providers::decodeSrContext(contextBytes,context)&&context.session==sessionId&&
+       context.intent==shared.current.bootstrap.stamp;
+   {std::lock_guard lock(providerSnapshotMutex);providerSnapshot=snapshot;
+    if(!validContext){srContextSnapshot={};}
+    else if(context.sequence>contextSequence){
+     contextSequence=context.sequence;
+     srContextSnapshot={};srContextSnapshot.size=sizeof(srContextSnapshot);srContextSnapshot.observedAtMs=GetTickCount64();
+     srContextSnapshot.authority=snapshot;std::copy(contextBytes.begin(),contextBytes.end(),srContextSnapshot.context);
+    }
+   }
+   // The worker alone serializes the renderer's volatile response. No save or
+   // SDK call runs on a render callback, and this is not a commit receipt.
+   auto renderer=GetModuleHandleW(L"mcd2-graphics.addon64");
+   auto runtime=renderer?reinterpret_cast<decltype(&mcd2_sr_runtime_v1)>(GetProcAddress(renderer,"mcd2_sr_runtime_v1")):nullptr;
+   MCD2SrRuntimeSnapshotV1 response{};response.size=sizeof(response);
+   if(runtime&&runtime(&response)==0&&response.reserved==0){
+    mcd2::providers::SrRuntimeBytes words;std::copy(std::begin(response.state),std::end(response.state),words.begin());
+    mcd2::providers::SrRuntimeState state;
+    if(mcd2::providers::decodeSrRuntimeState(words,state)&&state.session==sessionId&&state.intent==shared.current.bootstrap.stamp)
+     mcd2::providers::publishSrRuntimeSave(savesPath,words);
+   }
   }
   if(amdLatencyOptIn){mcd2::amd_latency::Request request;
    try{mcd2::providers::DecodedGraphicsRecord record;mcd2::providers::GraphicsStore authority(authorityPath);
@@ -320,6 +346,13 @@ extern "C" __declspec(dllexport) int mcd2_menu_snapshot_v1(MCD2MenuSnapshotV1* s
  std::unique_lock lock(providerSnapshotMutex,std::try_to_lock);if(!lock.owns_lock())return -2;
  if(workerStop || !consolidatedMenuTransport || providerSnapshot.load!=0 || !providerSnapshot.session)return -3;
  *snapshot=providerSnapshot;return 0;
+}
+extern "C" __declspec(dllexport) int mcd2_sr_context_v1(MCD2SrContextSnapshotV1* snapshot){
+ if(!snapshot||snapshot->size!=sizeof(MCD2SrContextSnapshotV1))return -1;
+ std::unique_lock lock(providerSnapshotMutex,std::try_to_lock);if(!lock.owns_lock())return -2;
+ if(workerStop||!consolidatedMenuTransport||srContextSnapshot.size!=sizeof(srContextSnapshot)||
+    GetTickCount64()-srContextSnapshot.observedAtMs>3000)return -3;
+ *snapshot=srContextSnapshot;return 0;
 }
 extern "C" __declspec(dllexport) const char*NAME="MCD2 Graphics display and latency";
 extern "C" __declspec(dllexport) const char*DESCRIPTION="Streamline Reflex and native HDR settings; independent of SR";
