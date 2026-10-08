@@ -75,3 +75,11 @@ and render-reader cutover, full lifecycle/performance coverage and Windows UE
 runtime checks remain required. No FSR/Anti-Lag/FG feature was enabled by this
 transport. Raw logs, saves, screenshots, account information and vendor binaries
 are not attached to this report.
+
+## Restoration
+
+The game closed normally after the final guarded-build gameplay check. The
+original twelve release payload hashes, bootstrap policy and six mod-owned state
+slots matched their backups after restoration. The experimental request,
+authority response, pending/lock files and private authority directory were
+removed. No released tag, installer or dependency was replaced.
