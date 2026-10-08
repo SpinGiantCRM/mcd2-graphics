@@ -66,3 +66,34 @@ MFG, denoising and late reprojection interfaces remain later gated work.
 No new runtime feature, settings migration or installed-game change is performed
 by the baseline tool. Native, UI, shader, installer and dependency files remain
 at the released baseline for this slice.
+
+## Requested-setting contract (PR-B, first slice)
+
+`src/providers/graphics_intent.hpp` introduces portable, SDK-independent types
+for SR selection, per-provider quality preferences, FG provider/strategy/count,
+latency preference and HDR calibration. They describe requests; they do not
+declare availability or create a device, feature, proxy or pacing handler.
+
+The in-memory v4 migration preserves:
+
+- Native versus NVIDIA selection and the preferred NVIDIA preset while Native
+  is selected;
+- current and last-custom values, plus exact NVIDIA Quality `2/3` and Ultra
+  Performance `1/3` ratios rather than rounded UI percentages;
+- FG On/Off as the legacy NVIDIA single-interpolation request;
+- Reflex mode, HDR values, fallback preference and all three save revisions.
+
+Previous runtime/context acknowledgements are deliberately excluded from the
+new requested-setting type. Inputs must first pass the appropriate legacy save
+framing/semantic decoder; the migration additionally validates their combination.
+Failure leaves the destination untouched. It never writes or deletes a save.
+
+The startup helper returns only a **requested** presentation owner. The next
+router must independently approve its SDK/device, inputs, revision and lifetime
+before wrapping a shipping swapchain. Structural bounds on scales and MFG counts
+are format limits, not claims that any provider supports them.
+
+This header is not included by the shipping addons, UI or bootstrap. No v5 wire
+format, persistence transaction, menu control or capability activation is shipped
+in this slice. Those remain separate PR-B work. Linux and Windows CI compile the
+portable test; this does not qualify vendor runtime execution on either system.
