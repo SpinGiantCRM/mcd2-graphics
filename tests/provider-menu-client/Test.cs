@@ -19,7 +19,7 @@ static class Test {
   for(int n=0;n<words.Length;n++)typeof(ProviderAuthoritySave).GetField("W"+n)!.SetValue(a,words[n]);
  }
  static int[] Words(ProviderRequestSave r)=>Enumerable.Range(0,42).Select(r.Word).ToArray();
- static void Main(){
+ static void Main(string[] args){
   var random=new Random(123);var r=new ProviderRequestSave();var a=new ProviderAuthoritySave();
   for(int trial=0;trial<1000;trial++){
    int[] rw=Enumerable.Range(0,42).Select(_=>random.Next(int.MinValue,int.MaxValue)).ToArray();
@@ -46,6 +46,8 @@ static class Test {
   w[6]=1;w[7]=10;w[4]=Crc(w,0,44);Set(a,w);probe.PollTransport();Require(probe.LoggedSequence==1);
   w[5]=124;w[6]=0;w[7]=0;w[4]=Crc(w,0,44);Set(a,w);probe.PollTransport();Require(UGameplayStatics.SaveCount==2&&probe.SentSession==124);
   w[4]^=1;Set(a,w);probe.SentSession=0;probe.PollTransport();Require(UGameplayStatics.SaveCount==2);
+  ControlsTest.Run();
+  if(args.Length==1){byte[] fixture=new byte[168];for(int n=0;n<42;n++)BinaryPrimitives.WriteInt32LittleEndian(fixture.AsSpan(n*4,4),ControlsTest.Fixture![n]);File.WriteAllBytes(args[0],fixture);}
   Console.WriteLine("NeoRune menu client: 4,000 CRC comparisons, signed word preservation, no-op envelope, session/ACK/corruption checks pass");
  }
 }
@@ -54,10 +56,10 @@ namespace UE.CoreUObject { public class UObject{} }
 namespace UE.Engine {
  public class USaveGame:UE.CoreUObject.UObject{}
  public static class UGameplayStatics {
-  public static Dictionary<string,USaveGame> Slots=new();public static int SaveCount;
+  public static Dictionary<string,USaveGame> Slots=new();public static int SaveCount;public static bool FailSave;
   public static USaveGame? LoadGameFromSlot(string name,int user)=>Slots.GetValueOrDefault(name);
   public static USaveGame? CreateSaveGameObject(Type type)=>Activator.CreateInstance(type) as USaveGame;
-  public static bool SaveGameToSlot(USaveGame save,string name,int user){Slots[name]=save;SaveCount++;return true;}
+  public static bool SaveGameToSlot(USaveGame save,string name,int user){if(FailSave)return false;Slots[name]=save;SaveCount++;return true;}
  }
 }
 namespace NeoRune {

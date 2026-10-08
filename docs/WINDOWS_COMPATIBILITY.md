@@ -472,3 +472,13 @@ plain-C bridge rejection after 128 frames. No invalid input reaches the vendor
 SDK. This variant stays separate from installers; Linux execution and both
 platform generation guards do not qualify Windows/AMD execution, device removal
 or source-scale rollback. The later UI transaction must restore source scale.
+
+The [shared menu client](PROVIDER_MENU_CONTROLS.md) preserves the word-slot class
+paths and signed checksum bits. In consolidated mode, display and AMD latency
+must consume the same authority; a legacy save must not overwrite it. Invalid
+authority disables latency without applying a zero HDR calibration. Snapshot
+readers must use the exact 144-byte plain-C ABI, handle a busy worker without
+blocking the render thread, and refuse a stopped settings worker. Preserve both
+platform client/projection checks and include the `.h` ABI source in build
+provenance. The native SR controller and normal Video rows have not switched to
+this client yet; no new Windows runtime qualification is implied.

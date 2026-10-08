@@ -26,7 +26,7 @@ def main():
     args+=['--source='+str(sdk/'src'/name) for name in ('Log.cs','Timer.cs','World.cs')]
     args+=['--ref='+str(path) for path in sorted(refs.glob('*.dll'))]
     args+=['--ref='+str(sdk/'ref'/name) for name in ('NeoRune.Abstractions.dll','NeoRune.Game.dll')]
-    args+=['--source='+str(actor),'--source='+str(probe)]
+    args+=['--source='+str(actor),'--source='+str(REPO/'src/ui/ProviderSaveWords.cs'),'--source='+str(REPO/'src/ui/ProviderMenuClient.cs'),'--source='+str(probe)]
     rsp=out/'ui-build.rsp';rsp.write_text('\n'.join(args)+'\n')
     result=subprocess.run([str(a.dotnet),str(sdk/'tools/neorune.dll'),'@'+str(rsp)],capture_output=True,text=True)
     (out/'ui-build-private.log').write_text(result.stdout+result.stderr)
