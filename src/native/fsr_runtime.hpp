@@ -3,6 +3,7 @@
 #include "../../experiments/providers/fsr_game_bridge.h"
 #include "../providers/sr_runtime_protocol.hpp"
 #include "../providers/sr_runtime_snapshot.h"
+#include "../providers/sr_viewport.hpp"
 #ifndef MCD2_FSR_BRIDGE_SHA256
 #define MCD2_FSR_BRIDGE_SHA256 ""
 #endif
@@ -20,11 +21,13 @@ static std::uint64_t menuReadAt=0;
 struct Generation : SrGuideGeneration {
  LeanBorrowCache borrows;a::command_queue *queue=nullptr;
  HMODULE bridge=nullptr;void *session=nullptr;ID3D12Resource *output=nullptr;
+ ID3D12Resource *cropped_colour=nullptr;bool colour_readable=false;
  decltype(&mcd2_fsr_create_v1) create=nullptr;decltype(&mcd2_fsr_dispatch_v1) dispatch=nullptr;
  decltype(&mcd2_fsr_quality_v1) quality=nullptr;decltype(&mcd2_fsr_destroy_v1) destroy=nullptr;
  decltype(&mcd2_fsr_info_v1) info=nullptr;
  bool busy=false,history_dirty=false,readable=false,observed=false,force_reset=false;
  unsigned observedWidth=0,observedHeight=0,outputWidth=0,outputHeight=0;
+ unsigned allocationWidth=0,allocationHeight=0;
  std::uint64_t started=0;std::uint32_t previousId=0;LARGE_INTEGER previous{},frequency{};
  float delta=0;bool gap=false;
 };
@@ -75,8 +78,6 @@ static bool native_reset(Generation& c,a::command_list *cmd,const Cmd& saved,con
  c.history_dirty=false;return true;
 }
 static bool camera(const std::array<float,84>& pc,const std::array<float,662>& vc){
- std::array<uint32_t,4> rect{};memcpy(rect.data(),pc.data()+40,sizeof(rect));
- if(rect!=std::array<uint32_t,4>{0,0,unsigned(pc[36])-1,unsigned(pc[37])-1})return false;
  for(unsigned i=128;i<144;++i)if(!std::isfinite(vc[i]))return false;
  return vc[128]>0&&vc[133]>0&&std::abs(vc[138])<1e-6&&std::abs(vc[139]-1)<1e-6&&vc[142]>0&&
   std::abs(vc[143])<1e-6&&std::abs(vc[136])<1e-6&&std::abs(vc[137])<1e-6;
@@ -128,7 +129,8 @@ static bool record(a::command_list *cmd,uint32_t x,uint32_t y,uint32_t z){
  if(!colour||!depth||!packed||!exposure||!pass||!view||!out||!saved.pipeline||!saved.compute_layout||saved.dynamic_offsets||
   !root_push_supported(saved.cp)||!root_push_supported(saved.gp)||!read_upload(*pass,sizeof(pc),pc.data())||!read_upload(*view,sizeof(vc),vc.data()))return fail(2);
  for(unsigned i:{36u,37u,44u,45u})if(!std::isfinite(pc[i])||pc[i]<1||pc[i]>7680||pc[i]!=std::floor(pc[i]))return fail(3);
- if(pc[36]<640||pc[37]<360||pc[36]>pc[44]||pc[37]>pc[45]||!camera(pc,vc)||
+ std::array<uint32_t,4> rect{};memcpy(rect.data(),pc.data()+40,sizeof(rect));p::SrViewport viewport;
+ if(!p::srViewport(unsigned(pc[36]),unsigned(pc[37]),rect,viewport)||viewport.width>pc[44]||viewport.height>pc[45]||!camera(pc,vc)||
   !std::isfinite(vc[626])||vc[626]<=0||!std::isfinite(vc[576])||!std::isfinite(vc[577])||!context.worldToMetersMilli)return fail(4);
  auto res=[&](const Slot *s){return reinterpret_cast<ID3D12Resource*>(from_view(cmd->get_device(),s->binding.view).handle);};
  auto *gc=res(colour),*gd=res(depth),*gv=res(packed),*ge=res(exposure),*go=res(out);
@@ -140,16 +142,18 @@ static bool record(a::command_list *cmd,uint32_t x,uint32_t y,uint32_t z){
   static_cast<unsigned>(view_desc(cmd->get_device(),packed->binding.view).format)!=11)return fail(7);
  if(live_fixture)return fail(8); // Two SR owners may never replace this pass.
  if(!bind_device(c,cmd))return fail(9);
- if(state.phase==p::SrPhase::Preflight){c.observedWidth=unsigned(pc[36]);c.observedHeight=unsigned(pc[37]);
+ if(state.phase==p::SrPhase::Preflight){c.observedWidth=viewport.width;c.observedHeight=viewport.height;
   c.outputWidth=unsigned(pc[44]);c.outputHeight=unsigned(pc[45]);c.observed=true;return false;}
  if(state.phase==p::SrPhase::ApplySource){
-  if(p::sourceAcknowledged(state,context)&&unsigned(pc[36])==state.renderWidth&&unsigned(pc[37])==state.renderHeight&&
+  if(p::sourceAcknowledged(state,context)&&p::srViewportMatchesPlan(viewport,state.renderWidth,state.renderHeight)&&
    unsigned(pc[44])==state.outputWidth&&unsigned(pc[45])==state.outputHeight){
-   c.width=unsigned(pc[36]);c.height=unsigned(pc[37]);phase(p::SrPhase::Create);c.started=GetTickCount64();
+   c.width=viewport.width;c.height=viewport.height;c.allocationWidth=viewport.allocationWidth;c.allocationHeight=viewport.allocationHeight;
+   state.renderWidth=c.width;state.renderHeight=c.height;phase(p::SrPhase::Create);c.started=GetTickCount64();
   }return false;
  }
  if(state.phase!=p::SrPhase::Evaluate&&state.phase!=p::SrPhase::Active)return false;
- if(c.width!=pc[36]||c.height!=pc[37]||c.outputWidth!=pc[44]||c.outputHeight!=pc[45]){
+ if(c.width!=viewport.width||c.height!=viewport.height||c.allocationWidth!=viewport.allocationWidth||
+    c.allocationHeight!=viewport.allocationHeight||c.outputWidth!=pc[44]||c.outputHeight!=pc[45]){
   stop(10,false);if(c.history_dirty && native_reset(c,cmd,saved,*pass,pc,x,y,z))return true;return c.history_dirty;
  }
  LARGE_INTEGER now{};if(!QueryPerformanceCounter(&now)||!c.frequency.QuadPart)return fail(11);
@@ -162,13 +166,25 @@ static bool record(a::command_list *cmd,uint32_t x,uint32_t y,uint32_t z){
  ID3D12Device *device=nullptr;bool matched=SUCCEEDED(proxy->GetDevice(IID_PPV_ARGS(&device)))&&device==c.proxy_device;
  if(device)device->Release();if(!matched){proxy->Release();return fail(14);}
  SrGuideInput input{gc,gd,gv,ge,go,*pass,*view,ev,static_cast<unsigned>(view_desc(cmd->get_device(),depth->binding.view).format)};
+ input.converter_asset="fsr_dense.cso";
  const auto *error=record_sr_guides(c,c.borrows,cmd,proxy,saved,input);if(error){proxy->Release();return fail(15);}
  auto *native=reinterpret_cast<ID3D12GraphicsCommandList*>(cmd->get_native());uint32_t nativeReset=0;memcpy(&nativeReset,pc.data()+12,4);
+ auto *sdk_colour=gc;
+ if(c.cropped_colour){
+  if(c.colour_readable)eval_transition(native,c.cropped_colour,D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,D3D12_RESOURCE_STATE_COPY_DEST);
+  eval_transition(native,gc,D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,D3D12_RESOURCE_STATE_COPY_SOURCE);
+  D3D12_TEXTURE_COPY_LOCATION src{},dst{};src.pResource=gc;dst.pResource=c.cropped_colour;
+  src.Type=dst.Type=D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;D3D12_BOX region{0,0,0,c.width,c.height,1};
+  native->CopyTextureRegion(&dst,0,0,0,&src,&region);
+  eval_transition(native,gc,D3D12_RESOURCE_STATE_COPY_SOURCE,D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+  eval_transition(native,c.cropped_colour,D3D12_RESOURCE_STATE_COPY_DEST,D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+  c.colour_readable=true;sdk_colour=c.cropped_colour;
+ }
  MCD2FsrDispatchV1 parameters{sizeof(parameters),c.width,c.height,c.outputWidth,c.outputHeight,
   state.evaluations==0||nativeReset||c.gap||c.force_reset?1u:0u,vc[576]*c.width*.5f,-vc[577]*c.height*.5f,1,1,delta,vc[626],
   vc[142],std::numeric_limits<float>::infinity(),2.f*std::atan(1.f/vc[133]),1000.f/context.worldToMetersMilli};
  if(c.readable)eval_transition(native,c.output,D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
- internal_evaluation=true;int result=c.dispatch(c.session,proxy,gc,c.current_depth,c.motion,c.exposure,c.output,&parameters);internal_evaluation=false;proxy->Release();
+ internal_evaluation=true;int result=c.dispatch(c.session,proxy,sdk_colour,c.current_depth,c.motion,c.exposure,c.output,&parameters);internal_evaluation=false;proxy->Release();
  D3D12_RESOURCE_BARRIER order{};order.Type=D3D12_RESOURCE_BARRIER_TYPE_UAV;order.UAV.pResource=c.output;native->ResourceBarrier(1,&order);
  eval_transition(native,c.output,D3D12_RESOURCE_STATE_UNORDERED_ACCESS,D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);c.readable=true;
  restore_root(cmd,saved,false,true);restore_root(cmd,saved,true,true);cmd->bind_pipeline(a::pipeline_stage::all_compute,{saved.pipeline});commands[cmd]=saved;
@@ -278,6 +294,10 @@ static void present(a::command_queue *q,std::unique_lock<std::recursive_mutex>& 
   if(!result){c.motion=eval_texture(c.resource_device,c.owned,c.width,c.height,DXGI_FORMAT_R16G16_FLOAT,true);
    c.exposure=eval_texture(c.resource_device,c.owned,1,1,DXGI_FORMAT_R32_FLOAT,true);
    c.output=eval_texture(c.resource_device,c.owned,c.outputWidth,c.outputHeight,DXGI_FORMAT_R16G16B16A16_FLOAT,true);
+   if(c.width!=c.allocationWidth||c.height!=c.allocationHeight){
+    c.cropped_colour=eval_texture(c.resource_device,c.owned,c.width,c.height,DXGI_FORMAT_R11G11B10_FLOAT,false);
+    if(!c.cropped_colour)result=-1;
+   }
    if(!c.motion||!c.exposure||!c.output||!QueryPerformanceFrequency(&c.frequency)||c.frequency.QuadPart<=0)result=-1;}
   guard.lock();c.busy=false;if(result){stop(26);return;}
   phase(p::SrPhase::Evaluate);c.started=GetTickCount64();

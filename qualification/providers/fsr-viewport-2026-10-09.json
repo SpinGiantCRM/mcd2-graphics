@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "candidateOnly": true,
+  "publishedPayloadChanged": false,
+  "environment": {
+    "platform": "Linux",
+    "gpu": "NVIDIA RTX 4080 SUPER",
+    "driver": "615.71.09",
+    "gameVersion": "1.1.2.0",
+    "steamBuild": 25754144,
+    "output": [
+      3840,
+      2160
+    ]
+  },
+  "diagnosis": {
+    "sdkRecommended": [
+      2258,
+      1270
+    ],
+    "activeViewport": [
+      2259,
+      1271
+    ],
+    "allocation": [
+      2260,
+      1272
+    ],
+    "rectInclusive": [
+      0,
+      0,
+      2258,
+      1270
+    ]
+  },
+  "sourceSHA256": {
+    "src/native/fsr_runtime.hpp": "890d64eb6f32f59c1ff269847d1f0478ec54645cd5f30446a09cf33847ce9d10",
+    "src/native/sr_guide_producer.hpp": "bd1dbdba675ada8dc385dd84e2c608096da5f7cbedefbed29678332f9039a151",
+    "src/providers/sr_viewport.hpp": "9d0b288d15df24832f2d85910e09619bd70340fef7c3d291f5c52aec102133a5",
+    "src/shaders/fsr_dense.hlsl": "234ff8c137649432cb3b0759c834875da5ae8a3fb6cbf2d387e3467fe60ac369",
+    "src/shaders/live_dense.hlsl": "d7b126aad1e4dba2228460d6dd15315193a8995bd4b5e167fba68a0cd2614f52",
+    "experiments/providers/fsr_game_bridge.h": "263f6ae23fda1bad4848371e8e25136c1835ce85c89baf03c3f3b54ed2ca4671"
+  },
+  "nativeSHA256": "95e5723fc94326c8e7964c79aefedb2fe1d7aa5dd7976c52c4191f84699c5652",
+  "fsrShaderSHA256": "089cef22d81092bd9ed2bdf0ec7a9bb6fcfe10268c52e0a57273dc69df68da68",
+  "unchangedDefaultGuideShaderSHA256": "4a65a33ba983124b7c47d5822507613231abef7ec1fca8fa7fc51437fd0c29d2",
+  "buildNote": "Native compiled before the later include-guard-only Windows probe fix; ABI unchanged.",
+  "gameplayCases": [
+    {
+      "mode": "Native AA",
+      "acceptedEvaluations": 2068,
+      "render": [
+        3840,
+        2160
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "requestedScalePercent": 100.0,
+      "observedScalePercent": 100.0,
+      "sdkError": 0
+    },
+    {
+      "mode": "Balanced",
+      "acceptedEvaluations": 6935,
+      "render": [
+        2259,
+        1271
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "requestedScalePercent": 58.823528,
+      "observedScalePercent": 58.823528,
+      "sdkError": 0
+    },
+    {
+      "mode": "Quality",
+      "acceptedEvaluations": 10458,
+      "render": [
+        2560,
+        1440
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "requestedScalePercent": 66.666667,
+      "observedScalePercent": 66.666664,
+      "sdkError": 0
+    }
+  ],
+  "nativeReturn": {
+    "requestedPercent": 100,
+    "observedPercent": 100,
+    "error": 0,
+    "sourceAcknowledged": true
+  },
+  "qualification": {
+    "WindowsAmdRuntime": false,
+    "imageQuality": false,
+    "performance": false,
+    "shutdown": false,
+    "normalVideoMenu": false
+  },
+  "restoration": {
+    "originalPayloadsVerified": 12,
+    "modOwnedSettingsRestored": true,
+    "trialShaderRemoved": true
+  }
+}

@@ -5,8 +5,13 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 
 class GuideProducerTests(unittest.TestCase):
-    def test_initial_extraction_preserves_the_conversion_body(self):
+    def test_default_conversion_body_is_preserved_with_explicit_asset_selection(self):
         text = (ROOT / "src/native/sr_guide_producer.hpp").read_text()
+        self.assertIn('const char *converter_asset="live_dense.cso"', text)
+        # Only the selected converter filename differs from the extracted
+        # body. The default NVIDIA/probe dispatch and resources are unchanged.
+        self.assertEqual(text.count('asset_root/input.converter_asset'), 1)
+        text = text.replace('asset_root/input.converter_asset', 'asset_root/"live_dense.cso"')
         start = text.index(" if(!c.current_signature){")
         end = text.index(" return nullptr;", start)
         self.assertEqual(hashlib.sha256(text[start:end].encode()).hexdigest(),
@@ -15,6 +20,15 @@ class GuideProducerTests(unittest.TestCase):
         self.assertNotIn("live_fixture", text)
         self.assertIn("cache.record(cmd,key,frame)", text)
         self.assertIn("entry.resources={gc,gd,gv,ge,go", text)
+
+    def test_fsr_converter_uses_active_rect_without_changing_default_size(self):
+        shader = (ROOT / 'src/shaders/live_dense.hlsl').read_text()
+        self.assertIn('uint2 size=uint2(passData[9].xy)', shader)
+        self.assertIn('#ifdef MCD2_ACTIVE_VIEW_RECT', shader)
+        self.assertIn('size=rect.zw+1-rect.xy', shader)
+        variant = (ROOT / 'src/shaders/fsr_dense.hlsl').read_text()
+        self.assertIn('#define MCD2_ACTIVE_VIEW_RECT 1', variant)
+        self.assertIn('#include "live_dense.hlsl"', variant)
 
     def test_each_consumer_uses_its_own_generation_and_lease_cache(self):
         lean = (ROOT / "src/native/ngx_lean.hpp").read_text()

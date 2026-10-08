@@ -1,10 +1,25 @@
 #include "../src/providers/sr_runtime_protocol.hpp"
 #include "../src/providers/sr_runtime_save_transport.hpp"
 #include "../src/providers/sr_runtime_snapshot.h"
+#include "../src/providers/sr_viewport.hpp"
 #include <cassert>
 #include <iostream>
 using namespace mcd2::providers;
 int main(){
+ SrViewport viewport;
+ assert(srViewport(2260,1272,{0,0,2258,1270},viewport));
+ assert(viewport.width==2259&&viewport.height==1271);
+ assert(srViewportMatchesPlan(viewport,2258,1270));
+ assert(!srViewportMatchesPlan(viewport,2257,1270));
+ assert(!srViewportMatchesPlan(viewport,2260,1270));
+ assert(srViewport(2560,1440,{0,0,2559,1439},viewport)&&srViewportMatchesPlan(viewport,2560,1440));
+ const auto original=viewport;
+ for(auto rect:{std::array<uint32_t,4>{1,0,2559,1439},{0,1,2559,1439},{0,0,2560,1439},
+                {0,0,2559,1440},{0,0,UINT32_MAX,1439},{0,0,638,1439},{0,0,2559,358}}){
+  assert(!srViewport(2560,1440,rect,viewport));assert(viewport.width==original.width&&viewport.height==original.height);
+ }
+ assert(!srViewport(2268,1280,{0,0,2258,1270},viewport)); // unqualified padding
+ assert(!srViewport(0,0,{0,0,0,0},viewport));
  SrContext c{123,10,{7,0xdeadbeef},2,true,100000,66666668,5,66666667,0};
  SrRuntimeState s{123,5,{7,0xdeadbeef},2,SrPhase::ApplySource,0,2560,1440,3840,2160,66666667,0,SrProvider::AmdFsr,Quality::Quality,1};
  SrRuntimeBytes bytes;SrContext decoded;SrRuntimeState state;
