@@ -1,5 +1,13 @@
 # Windows fixes: reasons and preservation requirements
 
+The [shared SR guide producer](SR_GUIDES_2026-10-08.md) preserves the existing
+conversion and NGX parameter/output path. Each consumer owns independent
+descriptor/recording leases and retirement fences; one consumer's reset or
+release must not invalidate another. Keep the two-consumer fixture on both CI
+platforms, the native stack guard and diagnostics disabled in ordinary builds.
+The bounded Native/Quality/DLAA checks are Linux evidence; Windows runtime checks
+remain required before including this changed native binary in a release.
+
 The opt-in [Anti-Lag integration](AMD_ANTILAG2_2026-10-08.md) uses the official SDK
 through a Microsoft ABI bridge. Preserve actual adapter selection, native
 Windows/loaded-driver gates, exclusive timing ownership, source pins, frame guard

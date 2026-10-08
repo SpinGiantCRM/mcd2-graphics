@@ -27,6 +27,7 @@ jobs:
           python3 -m unittest discover -s tests -p "test_build_toolchain.py" -v
           python3 -m unittest discover -s tests -p "test_amd_latency_build.py" -v
           python3 -m unittest discover -s tests -p "test_fsr_probe.py" -v
+          python3 -m unittest discover -s tests -p "test_sr_guide_producer.py" -v
       - name: Provider baseline provenance
         run: |
           git fetch --no-tags --depth=1 origin e421e57e7667f0e9ec71e1940c6daa352a39f0c7
@@ -97,6 +98,7 @@ jobs:
           python -m unittest discover -s tests -p "test_build_toolchain.py" -v
           python -m unittest discover -s tests -p "test_amd_latency_build.py" -v
           python -m unittest discover -s tests -p "test_fsr_probe.py" -v
+          python -m unittest discover -s tests -p "test_sr_guide_producer.py" -v
       - name: Provider baseline provenance
         run: |
           git fetch --no-tags --depth=1 origin e421e57e7667f0e9ec71e1940c6daa352a39f0c7
@@ -106,6 +108,8 @@ jobs:
       - name: Provider intent contract
         shell: bash
         run: |
+          g++ -std=c++20 -static -Isrc/native tests/lean_borrow_lifetime_test.cpp -o lean-borrow-lifetime.exe
+          ./lean-borrow-lifetime.exe
           g++ -std=c++20 -static -pthread -Wall -Wextra -Werror tests/amd_latency_test.cpp -o amd-latency.exe
           ./amd-latency.exe
           g++ -std=c++20 -Wall -Wextra -Werror tests/engine_layout_test.cpp -o engine-layout.exe

@@ -56,4 +56,17 @@ int main() {
  cache.entries.emplace(key,LeanBorrowEntry{});cache.record(&second,key,40);cache.note_reset(&second,true,20);cache.note_reset(&second,true,21);assert(cache.confirm_reset(&second,21));
  cache.record(&second,key,41);cache.note_reset(&second,false,0);assert(!cache.confirm_reset(&second,22));assert(cache.recordings.contains(&second));assert(cache.begin_recording(&second));assert(!cache.reset_epochs.contains(&second));
 
+ // Two independent consumers can lease the same game resources/recording.
+ // Retiring one consumer never invalidates the other's descriptor ownership.
+ LeanBorrowCache native_guides,dlss;
+ native_guides.entries.emplace(key,LeanBorrowEntry{});dlss.entries.emplace(key,LeanBorrowEntry{});
+ native_guides.record(&list,key,100);dlss.record(&list,key,100);
+ native_guides.note_reset(&list,true,50);assert(native_guides.confirm_reset(&list,51));
+ native_guides.entries.at(key).awaiting_signal=false;native_guides.entries.at(key).retirement_fence=1;
+ native_guides.retire_ready(1,104);assert(native_guides.entries.empty());
+ assert(dlss.recordings.contains(&list)&&dlss.entries.at(key).recordings==1);
+ dlss.note_reset(&list,true,50);assert(!dlss.confirm_reset(&list,50));
+ dlss.retire_ready(100,105);assert(!dlss.entries.empty());
+ assert(dlss.confirm_reset(&list,51));dlss.entries.at(key).awaiting_signal=false;dlss.entries.at(key).retirement_fence=101;
+ dlss.retire_ready(100,105);assert(!dlss.entries.empty());dlss.retire_ready(101,105);assert(dlss.entries.empty());
 }
