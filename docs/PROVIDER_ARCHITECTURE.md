@@ -1,5 +1,10 @@
 # Provider architecture: baseline and migration boundaries
 
+The [official FSR owned-input gate](FSR_OWNED_INPUTS_2026-10-08.md) now passes
+all five analytical 3.1.5 presets in SDR/HDR through local CachyOS Proton:
+160 verified GPU readbacks and clean context retirement. This establishes SDK
+execution, not the game's FSR SR/FG integration or Windows GPU qualification.
+
 The independent [Anti-Lag 2 development path](AMD_ANTILAG2_2026-10-08.md) now
 connects a pinned SDK ABI bridge to verified game timing hooks and the committed
 settings record. It is default-off and awaits active Windows/AMD and real-menu

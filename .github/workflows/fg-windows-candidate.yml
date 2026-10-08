@@ -4,6 +4,8 @@ on:
     paths:
       - '.github/workflows/fg-windows-candidate.yml'
       - 'experiments/fg-streamline/**'
+      - 'experiments/providers/**'
+      - 'tests/test_fsr_probe.py'
       - 'src/native/**'
       - 'src/latency/**'
       - 'src/providers/**'

@@ -26,6 +26,7 @@ jobs:
         run: |
           python3 -m unittest discover -s tests -p "test_build_toolchain.py" -v
           python3 -m unittest discover -s tests -p "test_amd_latency_build.py" -v
+          python3 -m unittest discover -s tests -p "test_fsr_probe.py" -v
       - name: Provider baseline provenance
         run: |
           git fetch --no-tags --depth=1 origin e421e57e7667f0e9ec71e1940c6daa352a39f0c7
@@ -95,6 +96,7 @@ jobs:
         run: |
           python -m unittest discover -s tests -p "test_build_toolchain.py" -v
           python -m unittest discover -s tests -p "test_amd_latency_build.py" -v
+          python -m unittest discover -s tests -p "test_fsr_probe.py" -v
       - name: Provider baseline provenance
         run: |
           git fetch --no-tags --depth=1 origin e421e57e7667f0e9ec71e1940c6daa352a39f0c7
