@@ -67,7 +67,7 @@ extern "C" __declspec(dllexport) int mcd2_fg_visit_frame(uint64_t id,int(*visito
  auto c=controller();if(!installed||!c||!visitor)return -1;
  return c->with_token(id,[&](void*token,unsigned index){return visitor(token,index,context)==0;})?0:-2;
 }
-extern "C" __declspec(dllexport) uint64_t mcd2_fg_render_frame(){return installed&&base?*reinterpret_cast<uint64_t*>(base+0xbe45f18):UINT64_MAX;}
+extern "C" __declspec(dllexport) uint64_t mcd2_fg_render_frame(){return installed&&base?*reinterpret_cast<uint64_t*>(base+engineLayout->renderCounter):UINT64_MAX;}
 extern "C" __declspec(dllexport) uint64_t mcd2_fg_present_frame(){return installed&&presentActive?presentIdentity:UINT64_MAX;}
 extern "C" __declspec(dllexport) uint64_t mcd2_fg_render_marker(){return installed?fgLatestRenderIdentity.load():UINT64_MAX;}
 extern "C" __declspec(dllexport) uint64_t mcd2_fg_thread_render_marker(){return installed?fgThreadRenderIdentity:UINT64_MAX;}
@@ -93,6 +93,7 @@ with (out/'build-private.log').open('w') as log:
     'SDKEnabled':not a.disable_sdk, 'FactoryRouting':not a.disable_factory_routing,
     'baseSourceSHA256':hashlib.sha256(original.encode()).hexdigest(),
     'generatedSourceSHA256':hashlib.sha256(source.encode()).hexdigest(),
+    'engineLayoutSHA256':hashlib.sha256((repo/'src/latency/engine_layout.hpp').read_bytes()).hexdigest(),
     'addonSHA256':hashlib.sha256((out/'mcd2-display-latency.addon64').read_bytes()).hexdigest(),
     'probeBuild':receipt, 'WindowsQualified':False,
 }, indent=2)+'\n')

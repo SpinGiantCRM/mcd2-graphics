@@ -16,6 +16,7 @@
 #include "token_coordinator.hpp"
 #include "display_protocol.hpp"
 #include "../providers/observed_settings.hpp"
+#include "engine_layout.hpp"
 #include <condition_variable>
 #include <thread>
 #include <chrono>
@@ -56,7 +57,7 @@ std::thread settingsWorker;std::mutex workerMutex;std::condition_variable worker
 unsigned sessionId=0;
 bool observeProviderSettings=false;
 struct Feature {void** main;void** modular;};
-std::mutex mutex;std::ofstream log;std::filesystem::path requestPath;unsigned requestId=0,presentCounter=0;uintptr_t base=0;void*registry=nullptr;
+std::mutex mutex;std::ofstream log;std::filesystem::path requestPath;unsigned requestId=0,presentCounter=0;uintptr_t base=0;const mcd2::engine::Layout*engineLayout=nullptr;void*registry=nullptr;
 uint64_t latencyName=0,pacingName=0;std::atomic<bool> installed=false;
  HMODULE addonModule=nullptr;HHOOK messageHook=nullptr;DWORD messageThread=0;
  std::atomic<unsigned> statsMessage=0,pingsSeen=0,pingsSent=0;std::atomic<bool> pingPending=false;
@@ -90,14 +91,13 @@ void render_end(void*,uint64_t id){record(3,id);}
 void present_start(void*,uint64_t id){presentIdentity=id;presentActive=true;record(4,id);}
 void present_end(void*,uint64_t id){auto c=controller();if(c&&c->active()&&id>=firstFrame&&!c->verify_present_end(id))fault();presentActive=false;}
 void flash(void*,uint64_t id){record(7,id);}
-bool pacing(void*,float){auto id=*reinterpret_cast<uint64_t*>(base+0xbe45f10);auto c=controller();
+bool pacing(void*,float){auto id=*reinterpret_cast<uint64_t*>(base+engineLayout->simulationCounter);auto c=controller();
  if(c&&c->active()&&id){if(!firstFrame)firstFrame=id;c->request_mode(sr::Mode(reflexAvailable?currentMode.load():0));if(!c->pre_simulation(id))fault();}
  // Streamline sleep precedes input/simulation even in Off. Preserve the native FPS limiter.
  return false;
 }
 unsigned flags(void*){return 0;}
 void set_flags(void*,unsigned){}
-bool signature(uintptr_t at,std::initializer_list<unsigned char>b){return std::memcmp(reinterpret_cast<void*>(at),b.begin(),b.size())==0;}
 LRESULT CALLBACK pcl_messages(int code,WPARAM removed,LPARAM data){
  if(code>=0&&removed==PM_REMOVE&&installed.load()){
   auto*message=reinterpret_cast<MSG*>(data);auto wanted=statsMessage.load();
@@ -170,13 +170,24 @@ void init(a::device*device){
  base=reinterpret_cast<uintptr_t>(GetModuleHandleW(nullptr));
  auto local=std::make_unique<wchar_t[]>(32768);auto length=GetEnvironmentVariableW(L"LOCALAPPDATA",local.get(),32768);if(!length||length>=32768)return;
  auto dir=std::filesystem::path(local.get())/L"Dungeons2"/L"Saved"/L"MCD2Graphics";std::filesystem::create_directories(dir);log.open(dir/L"display-latency-bootstrap.jsonl",std::ios::trunc);
- // Build 25647713: validate the call wrappers and registry layout before use.
- if(!signature(base+0x45546f0,{0x48,0x89,0x5c,0x24,0x08,0x48,0x89,0x74,0x24,0x10,0x57,0x48,0x83,0xec,0x30}) || !signature(base+0x4554769,{0xff,0x50,0x38}) || !signature(base+0x4554679,{0xff,0x50,0x40}) || !signature(base+0x4557b8a,{0xff,0x50,0x30}) || !signature(base+0x12a64d0,{0x48,0x83,0xec,0x28,0x8b,0x0d})){
-  log<<"{\"kind\":\"rejected\",\"reason\":\"engine signature mismatch\"}\n";log.flush();return;
- }
- auto get=reinterpret_cast<void*(*)()>(base+0x12a64d0);registry=get();auto vt=*reinterpret_cast<uintptr_t**>(registry);
- if(reinterpret_cast<uintptr_t>(registry)!=base+0xba78270 || vt[3]!=base+0x12a7c80 || vt[5]!=base+0x12b4eb0 || vt[6]!=base+0x12bb990){log<<"{\"kind\":\"rejected\",\"reason\":\"registry ABI mismatch\"}\n";log.flush();return;}
- auto construct=reinterpret_cast<void(*)(uint64_t*,const wchar_t*,unsigned)>(base+0x1461040);
+ // Select only an inspected layout; unsupported builds keep the hooks absent.
+ auto dos=reinterpret_cast<const IMAGE_DOS_HEADER*>(base);
+ if(dos->e_magic!=IMAGE_DOS_SIGNATURE||dos->e_lfanew<0||dos->e_lfanew>0x100000)return;
+ auto nt=reinterpret_cast<const IMAGE_NT_HEADERS64*>(base+dos->e_lfanew);
+ if(nt->Signature!=IMAGE_NT_SIGNATURE||nt->FileHeader.Machine!=IMAGE_FILE_MACHINE_AMD64||nt->OptionalHeader.Magic!=IMAGE_NT_OPTIONAL_HDR64_MAGIC)return;
+ const auto imageSize=nt->OptionalHeader.SizeOfImage;
+ auto match=[&](std::uint32_t rva,std::span<const std::uint8_t> bytes){
+  return rva<imageSize&&bytes.size()<=imageSize-rva&&std::memcmp(reinterpret_cast<const void*>(base+rva),bytes.data(),bytes.size())==0;
+ };
+ engineLayout=mcd2::engine::select(nt->FileHeader.TimeDateStamp,imageSize,match);
+ if(!engineLayout){log<<"{\"kind\":\"rejected\",\"reason\":\"engine signature mismatch\"}\n";log.flush();return;}
+ auto get=reinterpret_cast<void*(*)()>(base+engineLayout->registryGet);registry=get();
+ if(reinterpret_cast<uintptr_t>(registry)!=base+engineLayout->registry){log<<"{\"kind\":\"rejected\",\"reason\":\"registry ABI mismatch\"}\n";log.flush();return;}
+ auto vt=*reinterpret_cast<uintptr_t**>(registry);
+ auto vtAddress=reinterpret_cast<uintptr_t>(vt);
+ if(vtAddress<base||vtAddress-base>imageSize||7*sizeof(uintptr_t)>imageSize-(vtAddress-base)||vt[3]!=base+engineLayout->count||vt[5]!=base+engineLayout->add||vt[6]!=base+engineLayout->remove){log<<"{\"kind\":\"rejected\",\"reason\":\"registry ABI mismatch\"}\n";log.flush();return;}
+ log<<"{\"kind\":\"engine_layout\",\"steamBuild\":"<<engineLayout->steamBuild<<"}\n";log.flush();
+ auto construct=reinterpret_cast<void(*)(uint64_t*,const wchar_t*,unsigned)>(base+engineLayout->nameConstructor);
  construct(&latencyName,L"LatencyMarker",1);construct(&pacingName,L"MaxTickRateHandler",1);
  auto count=reinterpret_cast<RegistryCount>(vt[3]);log<<"{\"kind\":\"existing_features\",\"latency\":"<<count(registry,latencyName)<<",\"pacing\":"<<count(registry,pacingName)<<"}\n";
  if(count(registry,latencyName)||count(registry,pacingName)){log<<"{\"kind\":\"rejected\",\"reason\":\"existing modular owner\"}\n";return;}
@@ -191,7 +202,7 @@ void init(a::device*device){
  add(registry,latencyName,&marker.modular);add(registry,pacingName,&pacer.modular);installed=true;
  log<<"{\"kind\":\"registered\",\"gameThread\":"<<GetCurrentThreadId()<<"}\n";log.flush();
 }
-void present(a::command_queue*,a::swapchain*,const a::rect*,const a::rect*,unsigned,const a::rect*){if(installed){record(9,presentActive?presentIdentity:UINT64_MAX);record(11,*reinterpret_cast<uint64_t*>(base+0xbe45f18));if(presentActive){forward(presentIdentity,sr::Marker::RenderEnd);forward(presentIdentity,sr::Marker::PresentStart);}}}
+void present(a::command_queue*,a::swapchain*,const a::rect*,const a::rect*,unsigned,const a::rect*){if(installed){record(9,presentActive?presentIdentity:UINT64_MAX);record(11,*reinterpret_cast<uint64_t*>(base+engineLayout->renderCounter));if(presentActive){forward(presentIdentity,sr::Marker::RenderEnd);forward(presentIdentity,sr::Marker::PresentStart);}}}
 void finish(a::command_queue*,a::swapchain*){
  auto c=controller();if(installed&&c){if(presentActive)forward(presentIdentity,sr::Marker::PresentEnd);
   if(!capabilityChecked){capabilityChecked=true;unsigned available=0,valid=0,complete=0;auto result=provider.state(&available,&valid,&complete);

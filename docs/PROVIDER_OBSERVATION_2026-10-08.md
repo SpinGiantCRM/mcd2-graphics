@@ -54,6 +54,10 @@ Required follow-up: establish a separately verified new-build hook map, registry
 ABI and frame-identity boundary, then repeat activation, transitions, reset,
 shutdown and performance checks. Keep the historical baseline separate.
 
+A subsequent, separate [new-build layout trial](STEAM_25754144_LAYOUT_TRIAL.md)
+restored bounded Linux activation. It does not qualify the rebuilt observation
+chain or replace the results and remaining gates recorded here.
+
 ## Remaining gates
 
 - Actual menu preference edits and persistence, including linked SR presets and

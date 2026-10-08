@@ -63,6 +63,8 @@ jobs:
           /tmp/lean-borrow-lifetime
       - name: Display protocol and Reflex frame identity
         run: |
+          g++ -std=c++20 -Wall -Wextra -Werror tests/engine_layout_test.cpp -o /tmp/engine-layout
+          /tmp/engine-layout
           g++ -std=c++20 -Wall -Wextra -Werror tests/wine_reflex_pacing_test.cpp -o /tmp/wine-reflex-pacing
           /tmp/wine-reflex-pacing
           g++ -std=c++20 -pthread tests/reflex_tokens_test.cpp -o /tmp/reflex-tokens
@@ -90,6 +92,8 @@ jobs:
       - name: Provider intent contract
         shell: bash
         run: |
+          g++ -std=c++20 -Wall -Wextra -Werror tests/engine_layout_test.cpp -o engine-layout.exe
+          ./engine-layout.exe
           g++ -std=c++20 -Wall -Wextra -Werror tests/provider_intent_test.cpp -o provider-intent.exe
           ./provider-intent.exe
           g++ -std=c++20 -static -Wall -Wextra -Werror tests/provider_legacy_test.cpp -o provider-legacy.exe
