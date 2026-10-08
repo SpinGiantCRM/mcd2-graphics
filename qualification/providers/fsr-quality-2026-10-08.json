@@ -1,0 +1,287 @@
+{
+  "sourceBase": "317bc8e16259ef6f46b02bb5fb370c449aa17137",
+  "scope": "bounded private analytical FSR Quality output and bridge-rejection fallback; not a released provider",
+  "environment": {
+    "OS": "CachyOS",
+    "GPU": "RTX 4080 SUPER",
+    "gameBuild": 25754144,
+    "gameVersion": "1.1.2.0",
+    "Proton": "cachyos-11.0-20261005-slr",
+    "output": [
+      3840,
+      2160
+    ],
+    "WorldToMeters": 100,
+    "FG": "Off",
+    "requestedSR": "Native (private FSR replaces validated temporal dispatch)"
+  },
+  "qualityBuild": {
+    "trialOnly": true,
+    "sourceBase": "317bc8e16259ef6f46b02bb5fb370c449aa17137",
+    "frames": 256,
+    "outputReplacement": true,
+    "worldToMeters": 100.0,
+    "qualityMode": 1,
+    "failAfter": 0,
+    "binarySHA256": "dd85c92b1274712deb9297b338018658fb9c5f2ed6d7afa07d7aef45cb6714bf",
+    "recipeSHA256": "d01d92a53178898d16851072d77ef9f30c4c9b8f1b96bcade34f521f588dc418",
+    "generatedSources": {
+      "sr_guide_probe.hpp": "3e04a34550c21c92175a3d66dfc87e54d431162dab909fa7088d9a1bc4e73e6d",
+      "fsr_probe_driver.hpp": "eee74820d8bc5a016fe99ed07eb3cb424e9dd99a6c073d5c6f0314e8182c5d4f",
+      "fsr_sustained_control.hpp": "87103b1393aa4783fc09b87dc34adf445dd4eb3b9825c9e983ad2b661500238c",
+      "observer.cpp": "79b3ce628a0ea7ec53764e88b7e3e7fab7c778682acb63dacbfdd5bcb58382c2"
+    },
+    "vendorRuntimeBundled": false,
+    "WindowsQualified": false
+  },
+  "rejectionBuild": {
+    "trialOnly": true,
+    "sourceBase": "317bc8e16259ef6f46b02bb5fb370c449aa17137",
+    "frames": 256,
+    "outputReplacement": true,
+    "worldToMeters": 100.0,
+    "qualityMode": 1,
+    "failAfter": 128,
+    "binarySHA256": "dbbb558f7310b0500a49277e8db6b5fd6629feebe286011abe90d9c8b6c55560",
+    "recipeSHA256": "d01d92a53178898d16851072d77ef9f30c4c9b8f1b96bcade34f521f588dc418",
+    "generatedSources": {
+      "sr_guide_probe.hpp": "3e04a34550c21c92175a3d66dfc87e54d431162dab909fa7088d9a1bc4e73e6d",
+      "fsr_probe_driver.hpp": "628627cd78941c925a0e3c49fc15ef0280f3ac5b8d87f76f871ac5495b9c4422",
+      "fsr_sustained_control.hpp": "87103b1393aa4783fc09b87dc34adf445dd4eb3b9825c9e983ad2b661500238c",
+      "observer.cpp": "79b3ce628a0ea7ec53764e88b7e3e7fab7c778682acb63dacbfdd5bcb58382c2"
+    },
+    "vendorRuntimeBundled": false,
+    "WindowsQualified": false
+  },
+  "bridgeBuild": {
+    "sdkCommit": "60f4ea81909200d8542eca14dccb2628b763a9a3",
+    "SDKheadersSHA256": {
+      "api/include/ffx_api.h": "e1a9d1b559eaf75f4cb401f1c43a66e2f3dc9621abfeb58b9c6fac56443177fd",
+      "api/include/ffx_api_types.h": "cc0adc0ffc804dd7cd03c39c15581b575e416383177ffe95060201d52cc0fc49",
+      "api/include/dx12/ffx_api_dx12.h": "c9afbc3c4c673723e9e5369a666f0ff54560543b5a93537f8ff453bf1c3bf530",
+      "upscalers/include/ffx_upscale.h": "65be36d5653eb71c10379e0204f7bb7cd6a8aeec96e6f8cffc5f59ffeb1f89bf"
+    },
+    "sourceSHA256": {
+      "fsr_game_bridge.cpp": "207678230e40264f61ba7f5a9dd459a95e43cc06ee38cd7dc9f2397e8b5354a8",
+      "fsr_game_bridge.h": "263f6ae23fda1bad4848371e8e25136c1835ce85c89baf03c3f3b54ed2ca4671"
+    },
+    "recipeSHA256": "02c9fe828b6e45cc9f86877d6d2912bbbc9d38109f270132d0748b20fceafa68",
+    "binarySHA256": "f422af2f70f62ca8462c3aff30d05d1db92dd3b1d0e4289750039b8a2a83514b",
+    "runtimeBundled": false,
+    "gameIntegrationQualified": false,
+    "headersLicenseSHA256": "26ec40256d34d52a5596b7ea9635575f0570c2650d24b7baf090fda2ac9986f0"
+  },
+  "runs": [
+    {
+      "name": "quality-fsr-256-a",
+      "dispatchAttempts": 256,
+      "successfulDispatches": 256,
+      "outputReplacements": 256,
+      "NGXPresent": false,
+      "FSRResets": 1,
+      "NativeResets": 1,
+      "errors": 0,
+      "warnings": 0,
+      "destroyCode": 0,
+      "failureReasons": [],
+      "retired": {
+        "stage": "retired",
+        "complete": true,
+        "bundles": 50,
+        "guideConverterSDKCalls": 0
+      },
+      "render": [
+        2560,
+        1440
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "lastReplacementSequence": 31545,
+      "NativeResetSequence": 31546,
+      "firstViewStamp": 10585,
+      "lastViewStamp": 10840,
+      "stampGaps": 0,
+      "SDKQualityQueries": [
+        {
+          "stage": "fsr_quality_query",
+          "code": 0,
+          "mode": 0,
+          "render": [
+            3840,
+            2160
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "ratio": 1,
+          "providerId": 17700776140660019205
+        },
+        {
+          "stage": "fsr_quality_query",
+          "code": 0,
+          "mode": 1,
+          "render": [
+            2560,
+            1440
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "ratio": 1.5,
+          "providerId": 17700776140660019205
+        },
+        {
+          "stage": "fsr_quality_query",
+          "code": 0,
+          "mode": 2,
+          "render": [
+            2258,
+            1270
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "ratio": 1.7,
+          "providerId": 17700776140660019205
+        },
+        {
+          "stage": "fsr_quality_query",
+          "code": 0,
+          "mode": 3,
+          "render": [
+            1920,
+            1080
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "ratio": 2,
+          "providerId": 17700776140660019205
+        },
+        {
+          "stage": "fsr_quality_query",
+          "code": 0,
+          "mode": 4,
+          "render": [
+            1280,
+            720
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "ratio": 3,
+          "providerId": 17700776140660019205
+        }
+      ],
+      "outputReadbacks": [
+        {
+          "bytes": 66355200,
+          "allRGBFinite": true,
+          "minSceneLinear": 0.0,
+          "maxSceneLinear": 404.0,
+          "nonblackPixels": 8294400
+        },
+        {
+          "bytes": 66355200,
+          "allRGBFinite": true,
+          "minSceneLinear": 0.0,
+          "maxSceneLinear": 336.75,
+          "nonblackPixels": 8294400
+        }
+      ]
+    },
+    {
+      "name": "quality-fsr-rejection-b",
+      "dispatchAttempts": 129,
+      "successfulDispatches": 128,
+      "outputReplacements": 128,
+      "NGXPresent": false,
+      "FSRResets": 1,
+      "NativeResets": 1,
+      "errors": 0,
+      "warnings": 0,
+      "destroyCode": 0,
+      "failureReasons": [
+        "fsr_dispatch"
+      ],
+      "retired": {
+        "stage": "retired",
+        "complete": false,
+        "bundles": 30,
+        "guideConverterSDKCalls": 0
+      },
+      "render": [
+        2560,
+        1440
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "lastReplacementSequence": 42624,
+      "NativeResetSequence": 42625,
+      "firstViewStamp": 24040,
+      "lastViewStamp": 24168,
+      "stampGaps": 0
+    },
+    {
+      "name": "quality-fsr-wrong-preset",
+      "dispatchAttempts": 0,
+      "successfulDispatches": 0,
+      "outputReplacements": 0,
+      "NGXPresent": false,
+      "FSRResets": 0,
+      "NativeResets": 0,
+      "errors": 0,
+      "warnings": 0,
+      "destroyCode": 0,
+      "failureReasons": [
+        "fsr_create"
+      ],
+      "retired": {
+        "stage": "retired",
+        "complete": false,
+        "bundles": 0,
+        "guideConverterSDKCalls": 0
+      }
+    },
+    {
+      "name": "quality-fsr-rejection-a",
+      "dispatchAttempts": 0,
+      "successfulDispatches": 0,
+      "outputReplacements": 0,
+      "NGXPresent": false,
+      "FSRResets": 0,
+      "NativeResets": 0,
+      "errors": 0,
+      "warnings": 0,
+      "destroyCode": 0,
+      "failureReasons": [
+        "input_format"
+      ],
+      "retired": {
+        "stage": "retired",
+        "complete": false,
+        "bundles": 0,
+        "guideConverterSDKCalls": 0
+      }
+    }
+  ],
+  "sourceScaleRestore": {
+    "requestBasisPoints": 10000,
+    "observedScreenPercentage": 100,
+    "mechanism": "private NeoRune game-thread applier, explicitly requested by test controller; no automatic provider rollback claimed"
+  },
+  "originalPayloadsRestored": 12,
+  "modSlotsRestored": 6,
+  "vendorRuntimeBundled": false,
+  "WindowsAMDActiveQualified": false,
+  "qualityOrPerformanceQualified": false
+}

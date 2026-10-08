@@ -106,6 +106,25 @@ extern "C" int mcd2_fsr_info_v1(void *opaque,MCD2FsrInfoV1 *p) {
  p->errors=errors.load();p->warnings=warnings.load();p->reserved=s->stage;p->providerId=s->provider;
  p->requiredResources=s->required;p->optionalResources=s->optional;p->dispatches=s->calls;return 0;
 }
+extern "C" int mcd2_fsr_quality_v1(void *opaque,MCD2FsrQualityV1 *p) {
+ auto *s=static_cast<Session*>(opaque);
+ if(!s||!s->context||s->stage!=5||!p||p->size!=sizeof(*p)||p->qualityMode>4
+  ||!dimensions(p->displayWidth,p->displayHeight))return -1017;
+ uint32_t rw=0,rh=0;float ratio=0;
+ ffxQueryDescUpscaleGetUpscaleRatioFromQualityMode scale{};
+ scale.header.type=FFX_API_QUERY_DESC_TYPE_UPSCALE_GETUPSCALERATIOFROMQUALITYMODE;
+ scale.qualityMode=p->qualityMode;scale.pOutUpscaleRatio=&ratio;
+ auto code=s->query(&s->context,&scale.header);if(code)return int(code);
+ ffxQueryDescUpscaleGetRenderResolutionFromQualityMode render{};
+ render.header.type=FFX_API_QUERY_DESC_TYPE_UPSCALE_GETRENDERRESOLUTIONFROMQUALITYMODE;
+ render.displayWidth=p->displayWidth;render.displayHeight=p->displayHeight;
+ render.qualityMode=p->qualityMode;render.pOutRenderWidth=&rw;render.pOutRenderHeight=&rh;
+ code=s->query(&s->context,&render.header);if(code)return int(code);
+ if(!std::isfinite(ratio)||ratio<1||!dimensions(rw,rh)
+  ||rw>p->displayWidth||rh>p->displayHeight)return -1018;
+ p->renderWidth=rw;p->renderHeight=rh;p->upscaleRatio=ratio;p->reserved=0;p->providerId=s->provider;
+ return 0;
+}
 extern "C" int mcd2_fsr_destroy_v1(void *opaque,void *fence,uint64_t required) {
  auto *s=static_cast<Session*>(opaque);if(!s)return -1015;
  if(s->recorded){if(!fence||!required)return -1016;
