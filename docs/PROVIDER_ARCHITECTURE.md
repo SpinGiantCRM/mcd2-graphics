@@ -232,6 +232,9 @@ MSVC module builds are compile evidence; gameplay and Windows runtime gates are
 separate. Candidate build receipts now include the provider headers, and changes
 to those headers trigger the Windows candidate build.
 
+See the [bounded Linux handoff record](PROVIDER_OBSERVATION_2026-10-08.md) for
+startup results and the installed-game update blocking active FG/Reflex checks.
+
 ### Filesystem guarantees and checks
 
 Linux uses a flushed same-directory rename followed by directory `fsync`.
