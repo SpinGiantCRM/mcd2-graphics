@@ -19,7 +19,9 @@ source_spec.loader.exec_module(source_tree)
 class WindowsBuildChecks(unittest.TestCase):
     def test_isolated_sr_source_contains_its_relative_include_closure(self):
         with tempfile.TemporaryDirectory() as temporary:
-            source = Path(temporary) / 'source'
+            # Windows runners may expose the temp directory through an 8.3
+            # alias. Normalize the existing parent before constructing paths.
+            source = Path(temporary).resolve() / 'source'
             source_tree.copy_sr_sources(candidate.REPO, source)
             # Check real relative includes recursively, including FSR's C ABI
             # and the provider snapshots consumed by the native observer.
