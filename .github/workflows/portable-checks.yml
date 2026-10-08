@@ -41,6 +41,8 @@ jobs:
         run: python3 tests/make_synthetic_saves.py /tmp/mcd2-fixtures
       - name: Settings framing and semantic checks
         run: |
+          g++ -std=c++20 -Wall -Wextra -Werror tests/provider_intent_test.cpp -o /tmp/provider-intent
+          /tmp/provider-intent
           g++ -std=c++20 -Isrc/native tests/settings_bridge_test.cpp -o /tmp/settings-framing
           g++ -std=c++20 -Isrc/native tests/settings_bridge_semantic_test.cpp -o /tmp/settings-semantics
           /tmp/settings-framing /tmp/mcd2-fixtures/settings.sav
@@ -79,6 +81,11 @@ jobs:
           git fetch --no-tags --depth=1 origin e421e57e7667f0e9ec71e1940c6daa352a39f0c7
           python -m unittest discover -s tests -p "test_provider_baseline.py" -v
           python tools/provider_baseline.py verify
+      - name: Provider intent contract
+        shell: bash
+        run: |
+          g++ -std=c++20 -Wall -Wextra -Werror tests/provider_intent_test.cpp -o provider-intent.exe
+          ./provider-intent.exe
       - name: Bounded FG controller checks
         run: python -m unittest discover -s experiments/fg-streamline -p "test_*.py" -v
 
