@@ -462,3 +462,13 @@ reset logic, bounded first/last readbacks and both platform generation checks.
 Its Linux/NVIDIA Native-AA output evidence does not establish Windows/AMD,
 reduced-resolution or induced-failure fallback qualification. Keep this addon
 separate from the ordinary Windows installer and preserve the 16 KiB stack guard.
+
+The [Quality/rejection gate](FSR_QUALITY_FALLBACK_2026-10-08.md) adds an active-
+context SDK preset query and immediate independent Native history reset on all
+failed frames. Keep dirty generations retained when reset cannot be recorded;
+never let a failing SDK frame run ordinary Native with FSR-derived history.
+The Windows experimental artifact now compiles Quality plus a deterministic
+plain-C bridge rejection after 128 frames. No invalid input reaches the vendor
+SDK. This variant stays separate from installers; Linux execution and both
+platform generation guards do not qualify Windows/AMD execution, device removal
+or source-scale rollback. The later UI transaction must restore source scale.

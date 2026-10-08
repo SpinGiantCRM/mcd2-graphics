@@ -14,9 +14,12 @@ spec = importlib.util.spec_from_file_location('first_fsr_probe', HERE/'build_fsr
 base = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(base)
 
-def generate(repo, source, frames=256, replace_output=False, world_to_meters=100.0):
+def generate(repo, source, frames=256, replace_output=False, world_to_meters=100.0,
+             quality_mode=-1, fail_after=0):
     if not 2 <= frames <= 512 or not math.isfinite(world_to_meters) or world_to_meters <= 0:
         raise ValueError('Bounded frame count and measured positive world scale required')
+    if quality_mode not in range(-1,5) or fail_after<0 or fail_after>=frames:
+        raise ValueError('Valid AMD quality mode and bounded failure index required')
     text = base.generate(repo, source)
     patch = base.patch
     shutil.copyfile(HERE/'fsr_sustained_control.hpp', source/'src/native/fsr_sustained_control.hpp')
@@ -31,12 +34,30 @@ def generate(repo, source, frames=256, replace_output=False, world_to_meters=100
                    'if(!guide_probe || guide_probe->busy)return false;')
     record = record.replace('std::array<float,632>', 'std::array<float,662>')
     record = record.replace('<<index<<', '<<(c.fsr_frames-1)<<')
-    record = patch(record, ' if(!fsr_probe_camera(pc,vc)||live_fixture)', ''' if(c.failed || c.fsr_frames>=fsr_probe_frame_limit){
+    record = patch(record, ' std::array<float,84> pc{};std::array<float,662> vc{};', '''
+ // Every unsuccessful frame must resolve dirty Native history before dispatch.
+ // A missing source/view binding does not prevent resetting a valid Native pass.
+ auto fail=[&](const char *reason){
+  guide_probe_failure(reason);if(!c.history_dirty)return false;
+  std::array<float,84> reset_data{};
+  if(pass&&saved.pipeline&&saved.compute_layout&&!saved.dynamic_offsets
+   &&root_push_supported(saved.cp)&&root_push_supported(saved.gp)
+   &&read_upload(*pass,sizeof(reset_data),reset_data.data()))
+   if(fsr_probe_native_reset(c,cmd,saved,*pass,reset_data,x,y,z))return true;
+  // Retain the context/resources and suppress this Native dispatch until a
+  // valid reset can be recorded; never feed contaminated history back into TAA.
+  return true;
+ };
+ std::array<float,84> pc{};std::array<float,662> vc{};''')
+    record = patch(record, ' for(unsigned i:{36u,37u,44u,45u})', '''
+ if(c.failed || c.fsr_frames>=fsr_probe_frame_limit){
   if(c.history_dirty){if(fsr_probe_native_reset(c,cmd,saved,*pass,pc,x,y,z))return true;
-   guide_probe_failure("native_history_reset_unavailable");return true;}
+   return fail("native_history_reset_unavailable");}
   return false;
  }
- if(!fsr_probe_frame(c,vc))return false;
+ for(unsigned i:{36u,37u,44u,45u})''')
+    record = patch(record, ' if(!fsr_probe_camera(pc,vc)||live_fixture)', '''
+ if(!fsr_probe_frame(c,vc)){if(c.history_dirty)return fail("frame_clock");return false;}
  if(!fsr_probe_camera(pc,vc)||live_fixture)''')
     record = patch(record, ' auto *native=reinterpret_cast<ID3D12GraphicsCommandList*>(cmd->get_native());', '')
     # Keep only first and last readbacks, regardless of how many SDK frames run.
@@ -52,6 +73,9 @@ def generate(repo, source, frames=256, replace_output=False, world_to_meters=100
  }
  return false;
 }''')
+    # Route all current-frame failures through the same independent reset.
+    import re
+    record=re.sub(r'guide_probe_failure\(("[^"\n]+"|error)\);return false;',r'return fail(\1);',record)
     text = text[:start]+record+text[end:]
     text = patch(text, 'if(!c.failed && c.samples.size()<2 && GetTickCount64()-c.started>15000)',
                  'if(!c.failed && c.fsr_frames<fsr_probe_frame_limit && GetTickCount64()-c.started>60000)')
@@ -69,6 +93,8 @@ def generate(repo, source, frames=256, replace_output=False, world_to_meters=100
     driver = patch(driver, 'static bool fsr_probe_camera', f'''static constexpr unsigned fsr_probe_frame_limit={frames};
 static constexpr bool fsr_probe_replace_output={'true' if replace_output else 'false'};
 static constexpr float fsr_probe_world_to_meters={world_to_meters!r}f;
+static constexpr int fsr_probe_quality_mode={quality_mode};
+static constexpr unsigned fsr_probe_fail_after={fail_after};
 template<class Capture>
 static bool fsr_probe_frame(Capture &c,const std::array<float,662> &vc){{
  auto &s=c.fsr;LARGE_INTEGER now{{}};
@@ -81,12 +107,33 @@ static bool fsr_probe_frame(Capture &c,const std::array<float,662> &vc){{
  return !first&&std::isfinite(delta)&&delta>0&&delta<=250.f;
 }}
 static bool fsr_probe_camera''')
+    driver=patch(driver,' decltype(&mcd2_fsr_info_v1) info=nullptr;',
+                 ' decltype(&mcd2_fsr_info_v1) info=nullptr;\n decltype(&mcd2_fsr_quality_v1) quality=nullptr;')
+    driver=patch(driver,' s.info=reinterpret_cast<decltype(s.info)>(GetProcAddress(s.bridge,"mcd2_fsr_info_v1"));',
+                 ' s.info=reinterpret_cast<decltype(s.info)>(GetProcAddress(s.bridge,"mcd2_fsr_info_v1"));\n s.quality=reinterpret_cast<decltype(s.quality)>(GetProcAddress(s.bridge,"mcd2_fsr_quality_v1"));')
+    driver=patch(driver,'if(!s.create||!s.dispatch||!s.info||!s.destroy)',
+                 'if(!s.create||!s.dispatch||!s.info||!s.quality||!s.destroy)')
+    driver=patch(driver,' if(code)return code;\n s.output=eval_texture', ''' if(code)return code;
+ for(unsigned mode=0;mode<=4;++mode){
+  MCD2FsrQualityV1 q{sizeof(q),mode,s.output_width,s.output_height};
+  const int queried=s.quality(s.session,&q);
+  c.log<<"{\\\"stage\\\":\\\"fsr_quality_query\\\",\\\"code\\\":"<<queried<<",\\\"mode\\\":"<<mode
+   <<",\\\"render\\\":["<<q.renderWidth<<","<<q.renderHeight<<"],\\\"output\\\":["<<q.displayWidth<<","<<q.displayHeight
+   <<"],\\\"ratio\\\":"<<q.upscaleRatio<<",\\\"providerId\\\":"<<q.providerId<<"}\\n";c.log.flush();
+  if(queried)return queried;
+  if(int(mode)==fsr_probe_quality_mode&&(q.renderWidth!=c.width||q.renderHeight!=c.height))return -1104;
+ }
+ s.output=eval_texture''')
     driver = patch(driver, ' QueryPerformanceCounter(&s.previous);s.ready=true;return 0;', ' s.ready=true;return 0;')
     driver = patch(driver, ''' auto &s=c.fsr;LARGE_INTEGER now{};QueryPerformanceCounter(&now);
  float delta=float(1000.*double(now.QuadPart-s.previous.QuadPart)/double(s.frequency.QuadPart));s.previous=now;''',
                    ' auto &s=c.fsr;const float delta=s.render_delta;uint32_t native_reset=0;memcpy(&native_reset,pc.data()+12,4);')
     driver = driver.replace('c.samples.empty()?1u:0u', '(c.fsr_frames==0||native_reset||s.frame_gap)?1u:0u')
     driver = patch(driver, '.01f};', '(1.f/fsr_probe_world_to_meters)};')
+    driver=patch(driver,' if(s.readable)eval_transition', ''' if constexpr(fsr_probe_fail_after>0){
+  if(c.fsr_frames==fsr_probe_fail_after)p.size=0; // deterministic bridge rejection; no invalid SDK call
+ }
+ if(s.readable)eval_transition''')
     driver = driver.replace('c.samples.size()', 'c.fsr_frames')
     driver = driver.replace('worldUnitsToMetersTrial\\\":0.01,\\\"worldUnitsVerified\\\":false',
                             'worldToMeters\\\":'+str(world_to_meters)+',\\\"worldUnitsSource\\\":\\\"game-world-settings\\\"')
@@ -108,10 +155,12 @@ def main():
     p.add_argument('--frames',type=int,default=256)
     p.add_argument('--replace-output',action='store_true')
     p.add_argument('--world-to-meters',type=float,required=True,help='Value observed from this game world, not an assumption')
+    p.add_argument('--quality-mode',type=int,default=-1,help='-1 arbitrary scale; 0 Native AA, 1 Quality, 2 Balanced, 3 Performance, 4 Ultra Performance; checked against the active AMD SDK query')
+    p.add_argument('--fail-after',type=int,default=0,help='Private deterministic bridge rejection after N successful evaluations; zero disables')
     p.add_argument('--clang-cxx',default='clang++')
     p.add_argument('--mingw-cxx',default='x86_64-w64-mingw32-g++')
     args=p.parse_args();repo=HERE.parents[1];out=args.output.resolve();out.mkdir(parents=True,exist_ok=True)
-    generate(repo,out/'source',args.frames,args.replace_output,args.world_to_meters)
+    generate(repo,out/'source',args.frames,args.replace_output,args.world_to_meters,args.quality_mode,args.fail_after)
     with (out/'build-private.log').open('w') as log:
         subprocess.run([sys.executable,str(out/'source/build.py'),'--native-only','--developer-controls',
                         '--reshade-include',str(args.reshade_include.resolve()),'--ngx-include',str(args.ngx_include.resolve()),
@@ -120,6 +169,7 @@ def main():
     sha=lambda path:hashlib.sha256(path.read_bytes()).hexdigest()
     receipt={'trialOnly':True,'sourceBase':subprocess.check_output(['git','rev-parse','HEAD'],cwd=repo,text=True).strip(),
              'frames':args.frames,'outputReplacement':args.replace_output,'worldToMeters':args.world_to_meters,
+             'qualityMode':args.quality_mode,'failAfter':args.fail_after,
              'binarySHA256':sha(out/'native/mcd2-graphics.addon64'),'recipeSHA256':sha(Path(__file__)),
              'generatedSources':{name:sha(out/'source/src/native'/name) for name in
                                  ('sr_guide_probe.hpp','fsr_probe_driver.hpp','fsr_sustained_control.hpp','observer.cpp')},

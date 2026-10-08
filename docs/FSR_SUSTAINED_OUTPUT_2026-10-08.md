@@ -1,5 +1,9 @@
 # Bounded FSR output and Native fallback gate
 
+The subsequent [Quality/rejection gate](FSR_QUALITY_FALLBACK_2026-10-08.md)
+adds reduced-resolution output and immediate reset on rejected frames. This
+record retains the earlier full-resolution trial and its original limits.
+
 Analytical FSR 3.1.5 replaced 768 gameplay frames across three separate
 256-frame runs on CachyOS/Proton and an RTX 4080 SUPER. Every run returned to
 Native AA, reset its history and retired its independent recording leases.

@@ -195,6 +195,7 @@ def main():
     fsr_sustained = out / 'fsr-sustained'
     run(sys.executable, REPO / 'experiments/providers/build_fsr_sustained_probe.py',
         '--output', fsr_sustained, '--frames', '256', '--replace-output', '--world-to-meters', '100',
+        '--quality-mode', '1', '--fail-after', '128',
         '--reshade-include', reshade / 'include', '--ngx-include', ngx / 'include',
         '--clang-cxx', llvm / 'clang++.exe', '--mingw-cxx', mingw)
     fsr_sustained_destination = artifact / 'isolated-fsr-sustained-probe'
