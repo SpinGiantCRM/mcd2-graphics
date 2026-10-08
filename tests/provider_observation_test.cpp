@@ -39,6 +39,9 @@ int main() {
     assert(!root.empty());
     struct Cleanup { fs::path p; ~Cleanup(){std::error_code e;fs::remove_all(p,e);} } cleanup{root};
     root/=fs::path(u8"settings-測試"); fs::create_directory(root);
+    assert(observedPolicyPath(root/"dxgi.dll")==root/"FGBootstrap.ini");
+    assert(observedPolicyPath(root/"mcd2-display-latency.addon64")==observedPolicyPath(root/"dxgi.dll"));
+    assert(observedPolicyPath(root/"mcd2-display-latency.addon64")!=root/"MCD2Graphics/streamline/FGBootstrap.ini");
     auto saves=root/"SaveGames", mirror=root/"ProviderMirror";
     fs::create_directory(saves); fs::create_directory(mirror);
     GraphicsStore store(mirror);

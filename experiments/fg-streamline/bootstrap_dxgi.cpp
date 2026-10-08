@@ -150,7 +150,7 @@ BOOL CALLBACK initialize(PINIT_ONCE,void*,void**){
  auto folder=std::filesystem::path(filename.get()).parent_path();
  fopen_s(&receipt,(folder/"bootstrap.jsonl").string().c_str(),"w");
  // Local isolation controls are intentionally absent from the released UI.
- auto policy=(folder/L"FGBootstrap.ini").wstring();
+ auto policy=mcd2::providers::observedPolicyPath(filename.get()).wstring();
  if(GetPrivateProfileIntW(L"Experiment",L"TraceNvapi",0,policy.c_str())){
   SetEnvironmentVariableW(L"DXVK_NVAPI_LOG_LEVEL",L"trace");
   SetEnvironmentVariableW(L"DXVK_NVAPI_LOG_PATH",folder.c_str());

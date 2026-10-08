@@ -220,7 +220,7 @@ extern "C" __declspec(dllexport) bool AddonInit(HMODULE module,HMODULE){
  auto logs=std::filesystem::path(local.get())/L"Dungeons2"/L"Saved"/L"MCD2Graphics"/L"StreamlineLogs";std::filesystem::create_directories(logs);
  auto folder=std::filesystem::path(filename.get()).parent_path()/L"MCD2Graphics"/L"streamline";if(provider.initialized)return true;auto success=provider.load(folder,logs);
  // Opt-in development handoff only; the released UI/renderer is unchanged.
- observeProviderSettings=GetPrivateProfileIntW(L"Providers",L"ObserveLegacySettings",0,(folder/L"FGBootstrap.ini").c_str())==1;
+ observeProviderSettings=GetPrivateProfileIntW(L"Providers",L"ObserveLegacySettings",0,mcd2::providers::observedPolicyPath(filename.get()).c_str())==1;
  std::ofstream receipt(logs/L"bootstrap.json");receipt<<"{\"initialized\":"<<(success?"true":"false")<<",\"result\":"<<provider.lastResult<<",\"stage\":\"AddonInit before native D3D12 device; DXGI factory may already exist\",\"fgBootstrapQualified\":false}\n";
  savesPath=std::filesystem::path(local.get())/L"Dungeons2"/L"Saved"/L"SaveGames";
  sessionId=unsigned((GetTickCount64()^(uint64_t(GetCurrentProcessId())<<12))&0x7fffffff);if(!sessionId)sessionId=1;

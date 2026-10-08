@@ -12,6 +12,11 @@ struct LegacySnapshot {
     SlotBytes sr, display, fg;
     bool operator==(const LegacySnapshot&) const = default;
 };
+// Both native modules are installed beside the game executable. SDK binaries
+// live in a subdirectory, but the shared bootstrap policy does not.
+inline std::filesystem::path observedPolicyPath(const std::filesystem::path& moduleFilename) {
+    return moduleFilename.parent_path() / "FGBootstrap.ini";
+}
 
 inline bool readObservedSlot(const std::filesystem::path& path, SlotBytes& out) {
     using namespace store_detail;
