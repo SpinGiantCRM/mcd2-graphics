@@ -391,5 +391,8 @@ revision/checksum CAS, migration provenance and uncertainty handling when wiring
 NeoRune. Its Windows fixtures must execute the real filesystem publication race
 and corrupt-record preservation cases as well as mock-store results. Do not
 reinterpret a commit receipt as GPU capability or successful SDK activation.
+Link the Windows filesystem fixture statically, as with the observation/store
+fixtures. The hosted runner otherwise exits with code 127 before entering the
+test because the compiler's dependent runtime DLLs are not on its launch path.
 The consolidated transport and authority-reader cutover still require rebuilt
 Windows runtime checks; these fixtures do not establish that qualification.
