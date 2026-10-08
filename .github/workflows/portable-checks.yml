@@ -29,6 +29,7 @@ jobs:
           python3 -m unittest discover -s tests -p "test_fsr_probe.py" -v
           python3 -m unittest discover -s tests -p "test_sr_guide_producer.py" -v
           python3 -m unittest discover -s tests -p "test_fsr_game_probe.py" -v
+          python3 -m unittest discover -s tests -p "test_fsr_sustained_probe.py" -v
       - name: Provider baseline provenance
         run: |
           git fetch --no-tags --depth=1 origin e421e57e7667f0e9ec71e1940c6daa352a39f0c7
@@ -101,6 +102,7 @@ jobs:
           python -m unittest discover -s tests -p "test_fsr_probe.py" -v
           python -m unittest discover -s tests -p "test_sr_guide_producer.py" -v
           python -m unittest discover -s tests -p "test_fsr_game_probe.py" -v
+          python -m unittest discover -s tests -p "test_fsr_sustained_probe.py" -v
       - name: Provider baseline provenance
         run: |
           git fetch --no-tags --depth=1 origin e421e57e7667f0e9ec71e1940c6daa352a39f0c7

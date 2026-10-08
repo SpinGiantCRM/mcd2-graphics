@@ -454,3 +454,11 @@ Windows candidate recipe compiles the bridge using the already pinned external
 MIT headers and includes it only as a separate experiment, with no AMD runtime
 DLL. Keep both platform source/generation checks and the Windows native build.
 See [the gate record](FSR_GAME_EVALUATION_2026-10-08.md) for its limits.
+
+The [sustained output trial](FSR_SUSTAINED_OUTPUT_2026-10-08.md) retains that ABI
+and adds a separate developer build. Preserve the output-format/copy guards,
+immutable Native reset upload, dirty-history retirement barrier, frame-stamp
+reset logic, bounded first/last readbacks and both platform generation checks.
+Its Linux/NVIDIA Native-AA output evidence does not establish Windows/AMD,
+reduced-resolution or induced-failure fallback qualification. Keep this addon
+separate from the ordinary Windows installer and preserve the 16 KiB stack guard.

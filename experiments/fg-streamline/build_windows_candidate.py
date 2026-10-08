@@ -192,6 +192,15 @@ def main():
     run(sys.executable, scripts / 'build_sr_candidate.py', '--output', sr,
         '--reshade-headers', reshade / 'include', '--ngx-headers', ngx / 'include',
         '--clang-cxx', llvm / 'clang++.exe', '--mingw-cxx', mingw)
+    fsr_sustained = out / 'fsr-sustained'
+    run(sys.executable, REPO / 'experiments/providers/build_fsr_sustained_probe.py',
+        '--output', fsr_sustained, '--frames', '256', '--replace-output', '--world-to-meters', '100',
+        '--reshade-include', reshade / 'include', '--ngx-include', ngx / 'include',
+        '--clang-cxx', llvm / 'clang++.exe', '--mingw-cxx', mingw)
+    fsr_sustained_destination = artifact / 'isolated-fsr-sustained-probe'
+    fsr_sustained_destination.mkdir()
+    shutil.copyfile(fsr_sustained / 'native/mcd2-graphics.addon64', fsr_sustained_destination / 'mcd2-graphics.addon64')
+    shutil.copyfile(fsr_sustained / 'build-receipt.json', fsr_sustained_destination / 'build-receipt.json')
     for folder in [probe, latency, sr]:
         destination = artifact / folder.name
         destination.mkdir()

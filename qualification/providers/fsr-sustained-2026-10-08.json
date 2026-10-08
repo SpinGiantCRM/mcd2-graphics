@@ -1,0 +1,122 @@
+{
+  "status": "PASS_BOUNDED_NATIVE_AA_OUTPUT_TRIAL",
+  "platform": "CachyOS/Proton; RTX 4080 SUPER",
+  "gameBuild": 25754144,
+  "renderSize": [
+    3840,
+    2160
+  ],
+  "outputSize": [
+    3840,
+    2160
+  ],
+  "SDKProvider": "Analytical FSR 3.1.5",
+  "worldToMeters": 100.0,
+  "worldScaleSource": "NeoRune AWorldSettings.WorldToMeters; mod-owned trial SaveGame",
+  "timingSource": "QPC at observed pre-temporal boundary; UE View frame stamp word 661",
+  "binarySHA256": "c09349f65a1b9f70a239dd15d322eb57b8f7ab4801b53402aaa0fd40cb4f9158",
+  "bridgeSHA256": "d7e62d0fc42f65cfe35667878673be460d1cf4d2fc2633e42bf5f5350760335f",
+  "AMDUpScalerRuntimeSHA256": "d0dcccc74a43c44ba435b7a369b456e0970d8a4464e4bd683119b374f2c9fb46",
+  "runs": [
+    {
+      "name": "native-fsr-visible-256-a",
+      "successfulSDKEvaluations": 256,
+      "nativeOutputReplacements": 256,
+      "nativeTemporalSkipped": true,
+      "FSRHistoryResets": 1,
+      "viewFrameStampGaps": 0,
+      "nativeHistoryResets": 1,
+      "SDKWarnings": 0,
+      "SDKErrors": 0,
+      "retiredBorrowBundles": 257,
+      "GPUFencedReadbacks": 10,
+      "contextDestroyCode": 0,
+      "cameraPositionDeltaWorldUnits": 0.0,
+      "outputs": [
+        {
+          "frame": 0,
+          "finiteRGB": true,
+          "minimumSceneLinear": 0.0,
+          "maximumSceneLinear": 359.25,
+          "nonblackPixels": 8294400
+        },
+        {
+          "frame": 255,
+          "finiteRGB": true,
+          "minimumSceneLinear": 0.0,
+          "maximumSceneLinear": 351.75,
+          "nonblackPixels": 8294400
+        }
+      ]
+    },
+    {
+      "name": "native-fsr-visible-256-b",
+      "successfulSDKEvaluations": 256,
+      "nativeOutputReplacements": 256,
+      "nativeTemporalSkipped": true,
+      "FSRHistoryResets": 1,
+      "viewFrameStampGaps": 0,
+      "nativeHistoryResets": 1,
+      "SDKWarnings": 0,
+      "SDKErrors": 0,
+      "retiredBorrowBundles": 257,
+      "GPUFencedReadbacks": 10,
+      "contextDestroyCode": 0,
+      "cameraPositionDeltaWorldUnits": 0.0,
+      "outputs": [
+        {
+          "frame": 0,
+          "finiteRGB": true,
+          "minimumSceneLinear": 0.0,
+          "maximumSceneLinear": 376.0,
+          "nonblackPixels": 8294400
+        },
+        {
+          "frame": 255,
+          "finiteRGB": true,
+          "minimumSceneLinear": 0.0,
+          "maximumSceneLinear": 399.75,
+          "nonblackPixels": 8294400
+        }
+      ]
+    },
+    {
+      "name": "native-fsr-visible-256-motion",
+      "successfulSDKEvaluations": 256,
+      "nativeOutputReplacements": 256,
+      "nativeTemporalSkipped": true,
+      "FSRHistoryResets": 1,
+      "viewFrameStampGaps": 0,
+      "nativeHistoryResets": 1,
+      "SDKWarnings": 0,
+      "SDKErrors": 0,
+      "retiredBorrowBundles": 257,
+      "GPUFencedReadbacks": 10,
+      "contextDestroyCode": 0,
+      "cameraPositionDeltaWorldUnits": 1396.0487060546875,
+      "outputs": [
+        {
+          "frame": 0,
+          "finiteRGB": true,
+          "minimumSceneLinear": 0.0,
+          "maximumSceneLinear": 648.0,
+          "nonblackPixels": 8294400
+        },
+        {
+          "frame": 255,
+          "finiteRGB": true,
+          "minimumSceneLinear": 0.0,
+          "maximumSceneLinear": 145.75,
+          "nonblackPixels": 8294390
+        }
+      ]
+    }
+  ],
+  "WindowsRuntimeQualified": false,
+  "reducedResolutionQualified": false,
+  "menuIntegrated": false,
+  "FSRFrameGenerationImplemented": false,
+  "restoredOriginalPayloadCount": 12,
+  "restoredModStateSlots": 6,
+  "temporarySDKFilesRemoved": true
+}
