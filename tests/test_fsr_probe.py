@@ -100,5 +100,24 @@ class FsrProbeTests(unittest.TestCase):
                         runner.validate(root, prefix)
                     (root / name).unlink()
 
+    def test_framework_requires_exact_bytes_and_actual_device_wrapper(self):
+        rows = evidence()
+        self.assertFalse(runner.gate(rows, 0, False, True))
+        declaration = {'stage': 'framework', 'requested': True, 'exports': True, 'deviceWrapped': True}
+        self.assertTrue(runner.gate([declaration, *rows], 0, False, True))
+        for key in ['requested', 'exports', 'deviceWrapped']:
+            wrong = dict(declaration); wrong[key] = False
+            self.assertFalse(runner.gate([wrong, *rows], 0, False, True))
+        self.assertFalse(runner.gate([declaration, declaration, *rows], 0, False, True))
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary); prefix = root / 'experiment'; (prefix / 'pfx').mkdir(parents=True)
+            (root / 'fsr-owned-inputs.exe').write_bytes(b'fixture')
+            receipt = {'binarySHA256': hashlib.sha256(b'fixture').hexdigest(), 'runtimeBundled': False, 'gameIntegrationQualified': False}
+            (root / 'build-receipt.json').write_text(json.dumps(receipt))
+            (root / 'dxgi.dll').write_bytes(b'wrong framework')
+            with patch.object(runner, 'RUNTIME', {}):
+                with self.assertRaisesRegex(ValueError, 'Unqualified ReShade'):
+                    runner.validate(root, prefix, True)
+
 if __name__ == '__main__':
     unittest.main()

@@ -100,6 +100,30 @@ An actual Windows machine can execute `fsr-owned-inputs.exe` from a separate
 directory with the pinned official upscaler DLL and inspect its JSONL/result;
 hosted compilation does not qualify active AMD GPU execution.
 
+## ReShade wrapper follow-up
+
+The same updated probe was also run against the exact qualified PR435 MSVC
+ReShade framework, supplied separately as `dxgi.dll` in the isolated experiment.
+Its SHA-256 is
+`ce808bb1494415586cfb2ec5638a3ab0f0cea3879e45146a34976740b59fcf48`.
+The probe checked the ReShade export and the device vtable's module owner,
+confirming that the SDK received a **ReShade-wrapped D3D12 device**.
+
+Both the plain control and wrapped run passed all 160 readbacks, ten context
+retirements and zero SDK errors/warnings, with clean exits. Their wall times
+were 14.631 and 15.232 seconds; this setup/readback test is not a performance
+comparison. The updated probe hash is
+`8e99706f82d108bd5812400eb8c06b088068a05d4caacb53fb35c851f8c1d359`.
+The [follow-up receipt](../qualification/providers/fsr-framework-2026-10-08.json)
+records both runs separately from the original proof.
+
+To repeat the wrapper gate, place that separately acquired framework in the
+isolated probe directory as `dxgi.dll` and add `--qualified-reshade` to the
+runner. The runner rejects any other framework bytes; the executable fails if
+the device is not actually wrapped. Neither tool installs it into the game.
+This covers the SDK/device-wrapper boundary, not the complete game bootstrap,
+FG interposer chain or in-game resource lifetime.
+
 ## What remains
 
 - Connect the existing pre-temporal game observation to provider-independent

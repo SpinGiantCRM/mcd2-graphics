@@ -9,8 +9,9 @@ import subprocess
 import time
 
 RUNTIME = {'amd_fidelityfx_upscaler_dx12.dll': 'd0dcccc74a43c44ba435b7a369b456e0970d8a4464e4bd683119b374f2c9fb46'}
+FRAMEWORK = 'ce808bb1494415586cfb2ec5638a3ab0f0cea3879e45146a34976740b59fcf48'
 
-def validate(output, prefix):
+def validate(output, prefix, framework=False):
     if 'steamapps' in prefix.parts or '1912410' in prefix.parts or not (prefix / 'pfx').is_dir():
         raise ValueError('Existing isolated prefix required; a Steam/game prefix is forbidden')
     receipt = json.loads((output / 'build-receipt.json').read_text())
@@ -23,10 +24,18 @@ def validate(output, prefix):
         if hashlib.sha256((output / name).read_bytes()).hexdigest() != expected:
             raise ValueError('Externally acquired pinned runtime required: ' + name)
     for name in ['dxgi.dll', 'd3d12.dll', 'd3d12core.dll', 'amdxc64.dll', 'sl.interposer.dll']:
+        if name == 'dxgi.dll' and framework:
+            if hashlib.sha256((output / name).read_bytes()).hexdigest() != FRAMEWORK:
+                raise ValueError('Unqualified ReShade framework')
+            continue
         if (output / name).exists():
             raise ValueError('Unexpected proxy/driver in isolated output: ' + name)
 
-def gate(rows, code, timeout):
+def gate(rows, code, timeout, framework=False):
+    if framework:
+        declarations = [row for row in rows if row.get('stage') == 'framework']
+        if len(declarations) != 1 or not all(declarations[0].get(key) is True for key in ['requested', 'exports', 'deviceWrapped']):
+            return False
     trials = [row for row in rows if row.get('stage') == 'trial']
     values = [row for row in rows if row.get('stage') == 'readback']
     completed = [row for row in rows if row.get('stage') == 'complete']
@@ -52,16 +61,18 @@ def gate(rows, code, timeout):
             return False
     return True
 
-def run(proton, prefix, steam, output):
-    validate(output, prefix)
+def run(proton, prefix, steam, output, framework=False):
+    validate(output, prefix, framework)
     env = os.environ.copy()
     for key in ['LD_PRELOAD', 'VKD3D_CONFIG', 'VKD3D_FEATURE_LEVEL', 'VKD3D_SHADER_DEBUG',
-                'PROTON_ENABLE_HDR', 'DXVK_HDR', 'PROTON_LOG', 'MANGOHUD', 'MANGOHUD_CONFIG']:
+                'PROTON_ENABLE_HDR', 'DXVK_HDR', 'PROTON_LOG', 'MANGOHUD', 'MANGOHUD_CONFIG', 'MCD2_FSR_EXPECT_RESHADE']:
         env.pop(key, None)
     env.update(STEAM_COMPAT_DATA_PATH=str(prefix), STEAM_COMPAT_CLIENT_INSTALL_PATH=str(steam),
                STEAM_COMPAT_INSTALL_PATH=str(output), STEAM_COMPAT_APP_ID='0', SteamAppId='0', SteamGameId='0',
                WINEDEBUG='-all', PROTON_LOG='0', PROTON_ENABLE_WAYLAND='1',
                WINEDLLOVERRIDES='d3d12,d3d12core,dxgi=n')
+    if framework:
+        env['MCD2_FSR_EXPECT_RESHADE'] = '1'
     application = output / 'fsr-owned-inputs.jsonl'
     application.unlink(missing_ok=True)
     start = time.monotonic()
@@ -82,10 +93,11 @@ def run(proton, prefix, steam, output):
                 code = process.wait(timeout=5)
     rows = [json.loads(line) for line in application.read_text().splitlines()] if application.exists() else []
     result = {'exitCode': code, 'timeout': timeout, 'seconds': round(time.monotonic() - start, 3),
-              'pass': gate(rows, code, timeout), 'applicationRows': rows, 'isolatedPrefix': True,
+              'pass': gate(rows, code, timeout, framework), 'applicationRows': rows, 'isolatedPrefix': True,
               'gameFilesChanged': False, 'gameIntegrationQualified': False,
               'binarySHA256': hashlib.sha256((output / 'fsr-owned-inputs.exe').read_bytes()).hexdigest(),
               'runtimeSHA256': RUNTIME}
+    result['frameworkSHA256'] = FRAMEWORK if framework else None
     (output / 'run-result.json').write_text(json.dumps(result, indent=2) + '\n')
     return result
 
@@ -93,8 +105,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ['proton', 'prefix', 'steam', 'output']:
         parser.add_argument('--' + name, required=True, type=Path)
+    parser.add_argument('--qualified-reshade', action='store_true', help='Require the exact qualified MSVC framework in the isolated output as dxgi.dll')
     args = parser.parse_args()
-    result = run(*(getattr(args, name).resolve() for name in ['proton', 'prefix', 'steam', 'output']))
+    result = run(*(getattr(args, name).resolve() for name in ['proton', 'prefix', 'steam', 'output']), framework=args.qualified_reshade)
     print(json.dumps({key: value for key, value in result.items() if key != 'applicationRows'}))
     raise SystemExit(0 if result['pass'] else 1)
 

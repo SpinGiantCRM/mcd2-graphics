@@ -159,9 +159,20 @@ int main() {
     s.query = reinterpret_cast<PfnFfxQuery>(GetProcAddress(s.sdk, "ffxQuery"));
     s.dispatch = reinterpret_cast<PfnFfxDispatch>(GetProcAddress(s.sdk, "ffxDispatch"));
     if (!s.create || !s.destroy || !s.query || !s.dispatch) return 4;
+    const bool expectFramework = GetEnvironmentVariableW(L"MCD2_FSR_EXPECT_RESHADE",nullptr,0) != 0;
+    const auto dxgi = GetModuleHandleW(L"dxgi.dll");
+    const bool frameworkExports = dxgi && GetProcAddress(dxgi,"ReShadeRegisterAddon");
     auto hr = CreateDXGIFactory1(IID_PPV_ARGS(&s.factory)); log.result("factory", hr); if (FAILED(hr)) return 5;
     hr = D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS(&s.device));
     log.result("device", hr); if (FAILED(hr)) return 6;
+    HMODULE deviceOwner = nullptr;
+    auto vtable = *reinterpret_cast<void***>(s.device);
+    GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+        reinterpret_cast<LPCWSTR>(vtable[0]), &deviceOwner);
+    const bool wrapped = frameworkExports && deviceOwner == dxgi;
+    fprintf(log.file,"{\"stage\":\"framework\",\"requested\":%s,\"exports\":%s,\"deviceWrapped\":%s}\n",
+        expectFramework?"true":"false",frameworkExports?"true":"false",wrapped?"true":"false"); fflush(log.file);
+    if(expectFramework && !wrapped) return 25;
     IDXGIAdapter1* adapter = nullptr;
     hr = s.factory->EnumAdapterByLuid(s.device->GetAdapterLuid(), IID_PPV_ARGS(&adapter)); if (FAILED(hr)) return 7;
     DXGI_ADAPTER_DESC1 info{}; hr = adapter->GetDesc1(&info); release(adapter); if (FAILED(hr)) return 7;
