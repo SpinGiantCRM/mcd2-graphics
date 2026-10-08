@@ -161,6 +161,13 @@ def main():
         download('https://raw.githubusercontent.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK/' +
                  fsr_recipe.COMMIT + '/Kits/FidelityFX/' + name, destination, expected)
     fsr_recipe.build(fsr_sdk, sysroot, fsr_probe, str(llvm / 'clang-cl.exe'), str(llvm / 'lld-link.exe'))
+    run(sys.executable, REPO / 'experiments/providers/build_fsr_game_bridge.py',
+        '--sdk', fsr_sdk, '--windows-sysroot', sysroot, '--output', out / 'fsr-game-bridge',
+        '--clang-cl', llvm / 'clang-cl.exe', '--linker', llvm / 'lld-link.exe')
+    fsr_bridge_destination = artifact / 'isolated-fsr-game-bridge'
+    fsr_bridge_destination.mkdir()
+    for name in ['mcd2-fsr-game-bridge.dll', 'build-receipt.json', 'FSR-SDK-HEADERS-LICENSE.txt']:
+        shutil.copyfile(out / 'fsr-game-bridge' / name, fsr_bridge_destination / name)
     fsr_destination = artifact / 'isolated-fsr-probe'
     fsr_destination.mkdir()
     for name in ['fsr-owned-inputs.exe', 'build-receipt.json', 'FSR-SDK-HEADERS-LICENSE.txt']:

@@ -1,0 +1,205 @@
+{
+  "scope": "Two analytical FSR 3.1.5 dispatches on actual Native game inputs; output read back privately, not displayed",
+  "platform": "CachyOS/Proton cachyos-11.0-20261005-slr; RTX 4080 SUPER; Steam build 25754144; native Wayland HDR",
+  "SDKBridgeBuild": {
+    "sdkCommit": "60f4ea81909200d8542eca14dccb2628b763a9a3",
+    "SDKheadersSHA256": {
+      "api/include/ffx_api.h": "e1a9d1b559eaf75f4cb401f1c43a66e2f3dc9621abfeb58b9c6fac56443177fd",
+      "api/include/ffx_api_types.h": "cc0adc0ffc804dd7cd03c39c15581b575e416383177ffe95060201d52cc0fc49",
+      "api/include/dx12/ffx_api_dx12.h": "c9afbc3c4c673723e9e5369a666f0ff54560543b5a93537f8ff453bf1c3bf530",
+      "upscalers/include/ffx_upscale.h": "65be36d5653eb71c10379e0204f7bb7cd6a8aeec96e6f8cffc5f59ffeb1f89bf"
+    },
+    "sourceSHA256": {
+      "fsr_game_bridge.cpp": "b3f3527ba05b4b420f374fe91a8a68bb5f053db6d343ab9c5493f3f4e93509f0",
+      "fsr_game_bridge.h": "c5bcba44a88ee2f43bf56406ea0baf2130a2fd1f7726edf2cc25ce37d06e0820"
+    },
+    "recipeSHA256": "4200b69c3325109823a97afc8893b25433fde0bcf781f9cf5b719c58a583277d",
+    "binarySHA256": "d7e62d0fc42f65cfe35667878673be460d1cf4d2fc2633e42bf5f5350760335f",
+    "runtimeBundled": false,
+    "gameIntegrationQualified": false,
+    "headersLicenseSHA256": "26ec40256d34d52a5596b7ea9635575f0570c2650d24b7baf090fda2ac9986f0"
+  },
+  "gameProbeBuild": {
+    "purpose": "bounded real-game FSR evaluation before Native TAA; output not replaced",
+    "sourceBase": "e6c4878cfda86e42dc514dbd25246a4c9bdc4d01",
+    "binarySHA256": "d5920e8a1f60874d83e1a986a086b37ad04dd0eca322de7d2fe2e04d46270b21",
+    "recipeSHA256": "c7fa2c62ecdbea019f62a0dd8a88949c587b10795015c5be54fc7c687de0be95",
+    "sourceSHA256": {
+      "fsr_probe_driver.hpp": "257e3655f7d32b3a53c3f528ab3645a67b7166f53c6b474ae5c83cc6c4f28a41",
+      "fsr_game_bridge.h": "c5bcba44a88ee2f43bf56406ea0baf2130a2fd1f7726edf2cc25ce37d06e0820"
+    },
+    "generatedProbeSHA256": "664dedf8bf078d77d682f4a46801c8d233936bbdce77806fec742b9a6066bbce",
+    "vendorRuntimeBundled": false,
+    "WindowsQualified": false,
+    "worldUnitsToMetersVerified": false
+  },
+  "vendorRuntimeSHA256": "d0dcccc74a43c44ba435b7a369b456e0970d8a4464e4bd683119b374f2c9fb46",
+  "results": [
+    {
+      "stage": "fsr_create",
+      "code": 0,
+      "providerId": 17700776140660019205,
+      "SDKStage": 5,
+      "dispatches": 0,
+      "errors": 0,
+      "warnings": 0,
+      "requiredInputs": 15,
+      "optionalInputs": 48
+    },
+    {
+      "stage": "fsr_dispatch",
+      "code": 0,
+      "sample": 0,
+      "frameTimeMs": 7.6704,
+      "reset": 1,
+      "preExposure": 0.242593,
+      "cameraNear": 10,
+      "worldUnitsToMetersTrial": 0.01,
+      "worldUnitsVerified": false,
+      "NGXContextPresent": false,
+      "outputReplaced": false
+    },
+    {
+      "stage": "pre_temporal_guides",
+      "sample": 0,
+      "presentSequence": 98243,
+      "shader": 56909257,
+      "render": [
+        3840,
+        2160
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "preExposure": 0.242593,
+      "frameDeltaMs": 11,
+      "NGXContextPresent": false,
+      "guideConverterSDKCalls": 0,
+      "outputReplaced": false,
+      "sourceScaleChanged": false
+    },
+    {
+      "stage": "fsr_dispatch",
+      "code": 0,
+      "sample": 1,
+      "frameTimeMs": 21.1731,
+      "reset": 0,
+      "preExposure": 0.242605,
+      "cameraNear": 10,
+      "worldUnitsToMetersTrial": 0.01,
+      "worldUnitsVerified": false,
+      "NGXContextPresent": false,
+      "outputReplaced": false
+    },
+    {
+      "stage": "pre_temporal_guides",
+      "sample": 1,
+      "presentSequence": 98244,
+      "shader": 56909257,
+      "render": [
+        3840,
+        2160
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "preExposure": 0.242605,
+      "frameDeltaMs": 425,
+      "NGXContextPresent": false,
+      "guideConverterSDKCalls": 0,
+      "outputReplaced": false,
+      "sourceScaleChanged": false
+    },
+    {
+      "stage": "readbacks_saved",
+      "afterGPUFence": true,
+      "files": 10
+    },
+    {
+      "stage": "retired",
+      "complete": true,
+      "bundles": 2,
+      "guideConverterSDKCalls": 0
+    },
+    {
+      "stage": "fsr_before_destroy",
+      "code": 0,
+      "providerId": 17700776140660019205,
+      "SDKStage": 5,
+      "dispatches": 2,
+      "errors": 0,
+      "warnings": 0,
+      "requiredInputs": 15,
+      "optionalInputs": 48
+    },
+    {
+      "stage": "fsr_destroy",
+      "code": 0
+    }
+  ],
+  "sampledSignal": [
+    {
+      "sample": 0,
+      "finite": true,
+      "outputMinMax": [
+        0.0,
+        384.0
+      ],
+      "sourceMinMax": [
+        0.0,
+        384.0
+      ],
+      "meanAbsoluteError": 0.006922055967152119,
+      "rmsError": 0.5614467859268188,
+      "meanOutput": 0.2530943751335144,
+      "meanSource": 0.2558094561100006,
+      "nonzeroOutputPixels": 8294400,
+      "depthMinMax": [
+        0.0019807731732726097,
+        0.004707390442490578
+      ],
+      "motionAbsMax": 3.259765625,
+      "exposure": 0.17999640107154846
+    },
+    {
+      "sample": 1,
+      "finite": true,
+      "outputMinMax": [
+        0.0,
+        384.0
+      ],
+      "sourceMinMax": [
+        0.0,
+        384.0
+      ],
+      "meanAbsoluteError": 0.009600085206329823,
+      "rmsError": 0.6048100590705872,
+      "meanOutput": 0.2533714771270752,
+      "meanSource": 0.2556530237197876,
+      "nonzeroOutputPixels": 8294400,
+      "depthMinMax": [
+        0.001980588072910905,
+        0.00470928568392992
+      ],
+      "motionAbsMax": 2.5390625,
+      "exposure": 0.17999640107154846
+    }
+  ],
+  "restoration": {
+    "originalPayloadHashesVerified": 12,
+    "modStateSlotsRestored": 6,
+    "experimentalDLLsRemoved": true,
+    "playerAccountSavesTouched": false
+  },
+  "limits": {
+    "displayReplacement": false,
+    "reducedResolution": false,
+    "FSRFrameGeneration": false,
+    "WindowsRuntime": false,
+    "performanceBenchmark": false,
+    "worldUnitsToMetersVerified": false,
+    "simulationFrameTimingVerified": false
+  }
+}

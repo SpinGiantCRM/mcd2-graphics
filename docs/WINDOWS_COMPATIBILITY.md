@@ -435,3 +435,22 @@ the experimental overlay is not silently substituted into that artifact.
 The recipe records all provider header hashes in the native candidate receipt.
 New Windows UE/native runtime checks are still required for this transport and
 for the later real-control/runtime-reader cutover.
+
+## Experimental FSR game bridge
+
+Keep AMD API descriptors and Microsoft COM calls inside the Microsoft-ABI bridge;
+expose only fixed-width plain-C structs to the native observer. Match explicit
+resource formats/dimensions and the verified game device/command proxy before
+recording. Query returned analytical provider IDs and required inputs instead
+of assuming ML support. Failed create may return an owned session; retain or
+explicitly destroy it, never silently abandon it. Destroying a recorded context
+requires invalidated recordings and a subsequent completed fence; failed proof
+retains its context and loaded modules.
+
+The real-game two-frame Linux gate is an isolated developer probe, not a new
+released rendering path. Its successful execution and readbacks do not qualify
+Windows/AMD, reduced-resolution reconstruction, output substitution or FG. The
+Windows candidate recipe compiles the bridge using the already pinned external
+MIT headers and includes it only as a separate experiment, with no AMD runtime
+DLL. Keep both platform source/generation checks and the Windows native build.
+See [the gate record](FSR_GAME_EVALUATION_2026-10-08.md) for its limits.
