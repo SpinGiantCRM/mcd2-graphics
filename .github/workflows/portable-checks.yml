@@ -23,7 +23,9 @@ jobs:
       - name: Installer regressions
         run: python3 -m unittest discover -s tests -p "test_installer_*.py" -v
       - name: Native build recipe regressions
-        run: python3 -m unittest discover -s tests -p "test_build_toolchain.py" -v
+        run: |
+          python3 -m unittest discover -s tests -p "test_build_toolchain.py" -v
+          python3 -m unittest discover -s tests -p "test_amd_latency_build.py" -v
       - name: Provider baseline provenance
         run: |
           git fetch --no-tags --depth=1 origin e421e57e7667f0e9ec71e1940c6daa352a39f0c7
@@ -68,6 +70,8 @@ jobs:
           /tmp/lean-borrow-lifetime
       - name: Display protocol and Reflex frame identity
         run: |
+          g++ -std=c++20 -pthread -Wall -Wextra -Werror tests/amd_latency_test.cpp -o /tmp/amd-latency
+          /tmp/amd-latency
           g++ -std=c++20 -Wall -Wextra -Werror tests/engine_layout_test.cpp -o /tmp/engine-layout
           /tmp/engine-layout
           g++ -std=c++20 -Wall -Wextra -Werror tests/wine_reflex_pacing_test.cpp -o /tmp/wine-reflex-pacing
@@ -88,7 +92,9 @@ jobs:
       - name: Installer regressions
         run: python -m unittest discover -s tests -p "test_installer_*.py" -v
       - name: Native build recipe regressions
-        run: python -m unittest discover -s tests -p "test_build_toolchain.py" -v
+        run: |
+          python -m unittest discover -s tests -p "test_build_toolchain.py" -v
+          python -m unittest discover -s tests -p "test_amd_latency_build.py" -v
       - name: Provider baseline provenance
         run: |
           git fetch --no-tags --depth=1 origin e421e57e7667f0e9ec71e1940c6daa352a39f0c7
@@ -98,6 +104,8 @@ jobs:
       - name: Provider intent contract
         shell: bash
         run: |
+          g++ -std=c++20 -static -pthread -Wall -Wextra -Werror tests/amd_latency_test.cpp -o amd-latency.exe
+          ./amd-latency.exe
           g++ -std=c++20 -Wall -Wextra -Werror tests/engine_layout_test.cpp -o engine-layout.exe
           ./engine-layout.exe
           g++ -std=c++20 -Wall -Wextra -Werror tests/provider_intent_test.cpp -o provider-intent.exe

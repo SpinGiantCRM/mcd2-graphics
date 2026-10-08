@@ -1,5 +1,12 @@
 # Windows fixes: reasons and preservation requirements
 
+The opt-in [Anti-Lag integration](AMD_ANTILAG2_2026-10-08.md) uses the official SDK
+through a Microsoft ABI bridge. Preserve actual adapter selection, native
+Windows/loaded-driver gates, exclusive timing ownership, source pins, frame guard
+and callback shutdown barrier. Synthetic SDK tests and Linux/NVIDIA fallback are
+not active Windows/AMD qualification. Never copy the fake amdxc64.dll into an
+artifact or game. Existing NVIDIA checks and both CI platforms remain required.
+
 For the held FG candidate, follow the pinned
 [Windows qualification checklist](WINDOWS_QUALIFICATION_CHECKLIST.md) before
 claiming public-installer or Loader 2.3 qualification. It separates the exact

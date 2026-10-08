@@ -1,5 +1,7 @@
 # Preserve verbatim upstream notices, including their original whitespace.
 third-party/** -whitespace
+third-party/AntiLag2/ffx_antilag2_dx12.h -text
+third-party/AntiLag2/LICENSE.txt -text
 
 # Keep patch context and provenance hashes identical on Windows and Linux.
 qualification/fg-release/*.patch text eol=lf

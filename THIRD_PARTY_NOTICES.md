@@ -6,6 +6,11 @@ This software contains source code provided by NVIDIA Corporation. NVIDIA SDK in
 
 No official endorsement by any dependency author, NVIDIA or the game's developers is claimed.
 
+The experimental Anti-Lag 2 bridge incorporates AMD's MIT-licensed SDK header
+from commit `390aa4a8c8655d0ae6e90079db2c85e103a96da3`. Its unchanged copyright
+notice and full license are in `third-party/AntiLag2/`. No AMD driver or FSR
+runtime DLL is included. AMD does not endorse this project.
+
 The self-contained guided installer includes .NET Runtime 10.0.12, Avalonia 11.3.22, SkiaSharp 2.88.9 and HarfBuzzSharp 8.3.1.1 under their upstream licenses. Their complete pinned notices are in `third-party/INSTALLER_NOTICES.txt` and embedded in the installer under Support → Third-party notices. This is distinct from the external graphics runtime dependencies, which are never bundled.
 
 Installer IPC support includes Tmds.DBus.Protocol 0.21.3 and MicroCom.Runtime 0.11.0 (MIT); their notices are retained under third-party and in the installer’s Support page.

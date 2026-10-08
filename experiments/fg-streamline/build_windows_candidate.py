@@ -156,6 +156,10 @@ def main():
     latency = out / 'latency'
     run(sys.executable, scripts / 'build_game_candidate.py', '--probe-output', probe,
         '--reshade-headers', reshade / 'include', '--output', latency, '--mingw-cxx', mingw)
+    amd_latency = out / 'amd-latency'
+    run(sys.executable, REPO / 'build_amd_latency.py', '--windows-sysroot', sysroot,
+        '--output', amd_latency, '--clang-cl', llvm / 'clang-cl.exe', '--linker', llvm / 'lld-link.exe', '--with-tests')
+    run(amd_latency / 'amd-antilag-test.exe')
     ngx = out / 'ngx'
     run('git', 'clone', '--no-checkout', 'https://github.com/NVIDIA/DLSS.git', ngx)
     run('git', '-C', ngx, 'checkout', lock['buildDependencies']['NVIDIASDKCommit'])
@@ -176,6 +180,11 @@ def main():
         for name in names:
             shutil.copyfile(folder / name, destination / name)
     copy_current_ui(REPO, artifact)
+    amd_destination = artifact / 'amd-latency'
+    amd_destination.mkdir()
+    for name in ['mcd2-antilag2-bridge.dll', 'build-receipt.json']:
+        shutil.copyfile(amd_latency / name, amd_destination / name)
+    shutil.copyfile(REPO / 'third-party/AntiLag2/LICENSE.txt', amd_destination / 'LICENSE.txt')
     files = {path.relative_to(artifact).as_posix(): sha(path) for path in artifact.rglob('*') if path.is_file()}
     (artifact / 'windows-build-receipt.json').write_text(json.dumps({
         'sourceCommit': subprocess.check_output(['git', '-C', str(REPO), 'rev-parse', 'HEAD'], text=True).strip(),
