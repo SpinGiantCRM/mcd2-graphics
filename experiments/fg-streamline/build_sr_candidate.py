@@ -9,7 +9,7 @@ a=p.parse_args();repo=Path(__file__).resolve().parents[2];out=a.output.resolve()
 shutil.copytree(repo/'src/native',source/'src/native',dirs_exist_ok=True)
 for name in ('build.py','build_toolchain.py'):shutil.copyfile(repo/name,source/name)
 for name in ('fg_camera_contract.h','fg_camera_math.h'):shutil.copyfile(Path(__file__).parent/name,source/'src/native'/name)
-lean=source/'src/native/ngx_lean.hpp';text=lean.read_text();needle=' restore_root(cmd,saved,false,true);restore_root(cmd,saved,true,true);cmd->bind_pipeline(a::pipeline_stage::all_compute,{saved.pipeline});commands[cmd]=saved;\n auto resource=mcd2_ngx_set_resource;'
+lean=source/'src/native/ngx_lean.hpp';text=lean.read_text();needle=' auto resource=mcd2_ngx_set_resource;'
 assert text.count(needle)==1
 replacement=''' // Temporary observer receives current guides before NGX. It never owns SR state.
  auto fgObserver=GetModuleHandleW(L"mcd2-fg-guide-recon.addon64");
@@ -36,8 +36,6 @@ capture_extra=r''' if(lean.capture_requested){
 '''
 if a.guide_inspection:
  text=text.replace(capture_needle,capture_extra)
- build=source/'build.py';build_text=build.read_text();assert build_text.count('-DMCD2_ENABLE_DIAGNOSTICS=0')==1
- build.write_text(build_text.replace('-DMCD2_ENABLE_DIAGNOSTICS=0','-DMCD2_ENABLE_DIAGNOSTICS=1'))
 if a.guide_inspection:
  start=text.index(' if(!copies.empty()){',text.index('static void lean_present'))
  end=text.index(' if(live_fixture && !seen_taa)',start)
@@ -79,7 +77,7 @@ observer_text=observer_text.replace(needle,needle+'''
 ''')
 observer.write_text(observer_text)
 with (out/'build-private.log').open('w') as log:
- subprocess.run([sys.executable,str(source/'build.py'),'--native-only','--clang-cxx',a.clang_cxx,'--mingw-cxx',a.mingw_cxx,'--reshade-include',str(a.reshade_headers.resolve()),'--ngx-include',str(a.ngx_headers.resolve()),'--output',str(out/'native')],stdout=log,stderr=subprocess.STDOUT,check=True)
+ subprocess.run([sys.executable,str(source/'build.py'),'--native-only',*(['--developer-controls'] if a.guide_inspection else []),'--clang-cxx',a.clang_cxx,'--mingw-cxx',a.mingw_cxx,'--reshade-include',str(a.reshade_headers.resolve()),'--ngx-include',str(a.ngx_headers.resolve()),'--output',str(out/'native')],stdout=log,stderr=subprocess.STDOUT,check=True)
 path=out/'native/mcd2-graphics.addon64';shutil.copyfile(path,out/path.name)
 (out/'build-receipt.json').write_text(json.dumps({'purpose':'temporary game FG guide notification','releasedSourcesChanged':False,'privateGuideInspection':a.guide_inspection,'addonSHA256':hashlib.sha256(path.read_bytes()).hexdigest(),'leanBaseSHA256':hashlib.sha256((repo/'src/native/ngx_lean.hpp').read_bytes()).hexdigest(),'leanGeneratedSHA256':hashlib.sha256(text.encode()).hexdigest(),'observerBaseSHA256':hashlib.sha256((repo/'src/native/observer.cpp').read_bytes()).hexdigest(),'observerGeneratedSHA256':hashlib.sha256(observer_text.encode()).hexdigest(),'generatorSHA256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),'ngxFixtureSHA256':hashlib.sha256((repo/'src/native/ngx_live_fixture.hpp').read_bytes()).hexdigest(),'WindowsQualified':False},indent=2)+'\n')
 print('Temporary SR observer adapter built; released SR sources unchanged.')

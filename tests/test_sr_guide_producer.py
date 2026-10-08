@@ -35,5 +35,13 @@ class GuideProducerTests(unittest.TestCase):
         self.assertIn("if a.developer_controls and not a.native_only:p.error", recipe)
         self.assertIn("('1' if a.developer_controls else '0')", recipe)
 
+    def test_fg_generator_tracks_the_extracted_conversion(self):
+        lean = (ROOT / 'src/native/ngx_lean.hpp').read_text()
+        recipe = (ROOT / 'experiments/fg-streamline/build_sr_candidate.py').read_text()
+        self.assertEqual(lean.count(' auto resource=mcd2_ngx_set_resource;'), 1)
+        self.assertIn("needle=' auto resource=mcd2_ngx_set_resource;'", recipe)
+        self.assertIn("*(['--developer-controls'] if a.guide_inspection else [])", recipe)
+        self.assertNotIn("build_text.replace('-DMCD2_ENABLE_DIAGNOSTICS=0'", recipe)
+
 if __name__ == "__main__":
     unittest.main()
