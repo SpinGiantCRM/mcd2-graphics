@@ -173,7 +173,9 @@ Linux uses a flushed same-directory rename followed by directory `fsync`.
 Windows uses wide-character handles, `FlushFileBuffers`, and same-directory
 `MoveFileExW` replacement with `WRITE_THROUGH`, without a copy fallback or
 delete-before-move. Readers permit sharing for deletion so an open old reader
-does not block replacement. See Microsoft's [file sharing contract](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew),
+does not block replacement. An already-open old handle remains a valid snapshot
+after its filename is replaced; the reader accepts zero remaining links while
+continuing to refuse multiple links. See Microsoft's [file sharing contract](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew),
 [flush API](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-flushfilebuffers)
 and [move flags](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-movefileexw).
 

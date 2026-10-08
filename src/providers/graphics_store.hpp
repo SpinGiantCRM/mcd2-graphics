@@ -28,18 +28,20 @@ namespace store_detail {
 using Handle = HANDLE;
 inline const Handle badHandle = INVALID_HANDLE_VALUE;
 inline void closeHandle(Handle h) { if (h != badHandle) CloseHandle(h); }
-inline bool regularHandle(Handle h) {
+inline bool regularHandle(Handle h, bool requireLinked = true) {
     BY_HANDLE_FILE_INFORMATION info{};
-    return GetFileInformationByHandle(h, &info) && info.nNumberOfLinks == 1 &&
+    return GetFileInformationByHandle(h, &info) &&
+           (requireLinked ? info.nNumberOfLinks == 1 : info.nNumberOfLinks <= 1) &&
            !(info.dwFileAttributes & (FILE_ATTRIBUTE_DIRECTORY | FILE_ATTRIBUTE_REPARSE_POINT));
 }
 #else
 using Handle = int;
 inline constexpr Handle badHandle = -1;
 inline void closeHandle(Handle h) { if (h != badHandle) ::close(h); }
-inline bool regularHandle(Handle h) {
+inline bool regularHandle(Handle h, bool requireLinked = true) {
     struct stat info{};
-    return !fstat(h, &info) && S_ISREG(info.st_mode) && info.st_nlink == 1;
+    return !fstat(h, &info) && S_ISREG(info.st_mode) &&
+           (requireLinked ? info.st_nlink == 1 : info.st_nlink <= 1);
 }
 #endif
 struct File {
@@ -73,7 +75,9 @@ inline StoreResult read(const std::filesystem::path& path, DecodedGraphicsRecord
         return {error == ERROR_FILE_NOT_FOUND ? StoreStatus::Missing : StoreStatus::IoError, {}};
     }
     LARGE_INTEGER size{};
-    if (!regularHandle(file.handle)) return {StoreStatus::Invalid, {}};
+    // A replacement may unlink the old filename after this reader opened it.
+    // That handle still owns a complete old snapshot, not an invalid file.
+    if (!regularHandle(file.handle, false)) return {StoreStatus::Invalid, {}};
     if (!GetFileSizeEx(file.handle, &size)) return {StoreStatus::IoError, {}};
     if (size.QuadPart != 128) return {StoreStatus::Invalid, {}};
     GraphicsRecord bytes{};
@@ -83,7 +87,7 @@ inline StoreResult read(const std::filesystem::path& path, DecodedGraphicsRecord
 #else
     File file(::open(path.c_str(), O_RDONLY | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK));
     if (file.handle == badHandle) return {errno == ENOENT ? StoreStatus::Missing : StoreStatus::IoError, {}};
-    if (!regularHandle(file.handle)) return {StoreStatus::Invalid, {}};
+    if (!regularHandle(file.handle, false)) return {StoreStatus::Invalid, {}};
     struct stat info{};
     if (fstat(file.handle, &info)) return {StoreStatus::IoError, {}};
     if (info.st_size != 128) return {StoreStatus::Invalid, {}};

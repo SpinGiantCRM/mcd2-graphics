@@ -90,9 +90,9 @@ jobs:
         run: |
           g++ -std=c++20 -Wall -Wextra -Werror tests/provider_intent_test.cpp -o provider-intent.exe
           ./provider-intent.exe
-          g++ -std=c++20 -Wall -Wextra -Werror tests/provider_legacy_test.cpp -o provider-legacy.exe
+          g++ -std=c++20 -static -Wall -Wextra -Werror tests/provider_legacy_test.cpp -o provider-legacy.exe
           ./provider-legacy.exe
-          g++ -std=c++20 -municode -Wall -Wextra -Werror tests/provider_store_test.cpp -o provider-store.exe
+          g++ -std=c++20 -static -municode -Wall -Wextra -Werror tests/provider_store_test.cpp -o provider-store.exe
           python tests/test_provider_store_process.py provider-store.exe -v
       - name: Bounded FG controller checks
         run: python -m unittest discover -s experiments/fg-streamline -p "test_*.py" -v

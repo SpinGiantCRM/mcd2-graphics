@@ -130,6 +130,14 @@ static int run(const fs::path& root, int argc, char** argv) {
     assert(published.status == StoreStatus::Ok && published.stamp.revision == 9);
     assert(store.load(observed).status == StoreStatus::Ok && observed.intent == request);
     const auto initial = observed;
+    // Deterministically replace a record while a reader owns its old handle.
+#ifdef _WIN32
+    store_detail::File oldReader(CreateFileW(store.committedPath().c_str(), GENERIC_READ,
+        FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, 0, nullptr));
+#else
+    store_detail::File oldReader(::open(store.committedPath().c_str(), O_RDONLY | O_CLOEXEC));
+#endif
+    assert(oldReader.handle != store_detail::badHandle);
     assert(!fs::exists(store.pendingPath()));
     assert(store.publish(changed, {}).status == StoreStatus::Conflict);
     assert(store.publish(request, published.stamp).status == StoreStatus::Conflict);
@@ -146,6 +154,17 @@ static int run(const fs::path& root, int argc, char** argv) {
     assert(store.load(observed).status == StoreStatus::Ok && observed == initial);
     published = store.publish(changed, published.stamp);
     assert(published.status == StoreStatus::Ok && !fs::exists(store.pendingPath()));
+    assert(store_detail::regularHandle(oldReader.handle, false));
+    GraphicsRecord oldSnapshot;
+#ifdef _WIN32
+    DWORD oldCount = 0;
+    assert(ReadFile(oldReader.handle, oldSnapshot.data(), DWORD(oldSnapshot.size()), &oldCount, nullptr));
+    assert(oldCount == oldSnapshot.size());
+#else
+    assert(::read(oldReader.handle, oldSnapshot.data(), oldSnapshot.size()) == ssize_t(oldSnapshot.size()));
+#endif
+    DecodedGraphicsRecord oldDecoded;
+    assert(decodeGraphicsRecord(oldSnapshot, oldDecoded) && oldDecoded == initial);
     assert(store.load(observed).status == StoreStatus::Ok && observed.intent == changed);
     const auto accepted = observed;
     ++changed.revision;
