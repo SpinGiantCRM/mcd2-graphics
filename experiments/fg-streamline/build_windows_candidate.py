@@ -1,6 +1,7 @@
 """Build an isolated Windows FG trial artifact; never publish vendor runtimes."""
 import argparse
 import hashlib
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -147,6 +148,23 @@ def main():
     for folder in ['ucrt', 'um']:
         junction(sysroot / 'sdk/lib' / folder / 'x86_64', kits / 'Lib' / sdk_version / folder / 'x64')
     llvm = Path(os.environ['ProgramFiles']) / 'LLVM/bin'
+    # Compile the isolated FSR SDK gate with the same Microsoft ABI. Download
+    # only public MIT headers; vendor runtime DLLs stay external and are never
+    # added to this artifact. Hosted CI cannot qualify active GPU execution.
+    spec = importlib.util.spec_from_file_location('fsr_recipe', REPO / 'experiments/providers/build_fsr_probe.py')
+    fsr_recipe = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(fsr_recipe)
+    fsr_sdk, fsr_probe = out / 'fsr-sdk', out / 'fsr-owned-inputs'
+    for name, expected in fsr_recipe.HEADERS.items():
+        destination = fsr_sdk / name
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        download('https://raw.githubusercontent.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK/' +
+                 fsr_recipe.COMMIT + '/Kits/FidelityFX/' + name, destination, expected)
+    fsr_recipe.build(fsr_sdk, sysroot, fsr_probe, str(llvm / 'clang-cl.exe'), str(llvm / 'lld-link.exe'))
+    fsr_destination = artifact / 'isolated-fsr-probe'
+    fsr_destination.mkdir()
+    for name in ['fsr-owned-inputs.exe', 'build-receipt.json', 'FSR-SDK-HEADERS-LICENSE.txt']:
+        shutil.copyfile(fsr_probe / name, fsr_destination / name)
     scripts = REPO / 'experiments/fg-streamline'
     probe = out / 'probe'
     run(sys.executable, scripts / 'build_probe.py', '--sdk', sdk, '--sysroot', sysroot,

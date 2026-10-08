@@ -1,0 +1,124 @@
+{
+  "scope": "isolated synthetic FSR SR GPU gate; no game or Windows GPU qualification",
+  "sdkCommit": "60f4ea81909200d8542eca14dccb2628b763a9a3",
+  "build": {
+    "sdkCommit": "60f4ea81909200d8542eca14dccb2628b763a9a3",
+    "SDKheadersSHA256": {
+      "api/include/ffx_api.h": "e1a9d1b559eaf75f4cb401f1c43a66e2f3dc9621abfeb58b9c6fac56443177fd",
+      "api/include/ffx_api_types.h": "cc0adc0ffc804dd7cd03c39c15581b575e416383177ffe95060201d52cc0fc49",
+      "api/include/dx12/ffx_api_dx12.h": "c9afbc3c4c673723e9e5369a666f0ff54560543b5a93537f8ff453bf1c3bf530",
+      "upscalers/include/ffx_upscale.h": "65be36d5653eb71c10379e0204f7bb7cd6a8aeec96e6f8cffc5f59ffeb1f89bf"
+    },
+    "sourceSHA256": "f6d45c68ecfff58b415ea734507bca8bc43fd36653ad32ddb4985a0bbe2d3cda",
+    "recipeSHA256": "c363319c5786273797a539d5182fe83dcf7817b9423434af0493df641775af98",
+    "binarySHA256": "cc7e7f2c78f08259f08e31edb64c1924c754ea903137ceb8b65ed8456a352682",
+    "runtimeBundled": false,
+    "gameIntegrationQualified": false,
+    "headersLicenseSHA256": "26ec40256d34d52a5596b7ea9635575f0570c2650d24b7baf090fda2ac9986f0"
+  },
+  "runnerSHA256": "0b3861f23c9e441ca24acef74970ccbacdca5a97a86ea474116063f289e8dcbb",
+  "runtimeSHA256": {
+    "amd_fidelityfx_upscaler_dx12.dll": "d0dcccc74a43c44ba435b7a369b456e0970d8a4464e4bd683119b374f2c9fb46"
+  },
+  "platform": "Linux, CachyOS Proton cachyos-11.0-20261005-slr, NVIDIA RTX 4080 SUPER",
+  "pass": true,
+  "exitCode": 0,
+  "timeout": false,
+  "seconds": 14.131,
+  "trials": [
+    {
+      "stage": "trial",
+      "trial": 0,
+      "HDR": false,
+      "quality": 0,
+      "renderWidth": 1280,
+      "renderHeight": 720
+    },
+    {
+      "stage": "trial",
+      "trial": 1,
+      "HDR": false,
+      "quality": 1,
+      "renderWidth": 853,
+      "renderHeight": 480
+    },
+    {
+      "stage": "trial",
+      "trial": 2,
+      "HDR": false,
+      "quality": 2,
+      "renderWidth": 752,
+      "renderHeight": 423
+    },
+    {
+      "stage": "trial",
+      "trial": 3,
+      "HDR": false,
+      "quality": 3,
+      "renderWidth": 640,
+      "renderHeight": 360
+    },
+    {
+      "stage": "trial",
+      "trial": 4,
+      "HDR": false,
+      "quality": 4,
+      "renderWidth": 426,
+      "renderHeight": 240
+    },
+    {
+      "stage": "trial",
+      "trial": 5,
+      "HDR": true,
+      "quality": 0,
+      "renderWidth": 1280,
+      "renderHeight": 720
+    },
+    {
+      "stage": "trial",
+      "trial": 6,
+      "HDR": true,
+      "quality": 1,
+      "renderWidth": 853,
+      "renderHeight": 480
+    },
+    {
+      "stage": "trial",
+      "trial": 7,
+      "HDR": true,
+      "quality": 2,
+      "renderWidth": 752,
+      "renderHeight": 423
+    },
+    {
+      "stage": "trial",
+      "trial": 8,
+      "HDR": true,
+      "quality": 3,
+      "renderWidth": 640,
+      "renderHeight": 360
+    },
+    {
+      "stage": "trial",
+      "trial": 9,
+      "HDR": true,
+      "quality": 4,
+      "renderWidth": 426,
+      "renderHeight": 240
+    }
+  ],
+  "readbacks": 160,
+  "destroyedContexts": 10,
+  "complete": {
+    "stage": "complete",
+    "dispatches": 160,
+    "SDKerrors": 0,
+    "SDKwarnings": 0,
+    "gameFilesChanged": false
+  },
+  "gameFilesChanged": false,
+  "releasedPayloadsVerifiedUnchanged": 12,
+  "vendorRuntimeBundled": false,
+  "gameIntegrationQualified": false,
+  "WindowsGPUQualified": false
+}

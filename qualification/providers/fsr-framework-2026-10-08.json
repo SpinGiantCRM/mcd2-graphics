@@ -1,0 +1,84 @@
+{
+  "scope": "isolated synthetic FSR SR on plain and ReShade-wrapped D3D12; not game integration",
+  "build": {
+    "sdkCommit": "60f4ea81909200d8542eca14dccb2628b763a9a3",
+    "SDKheadersSHA256": {
+      "api/include/ffx_api.h": "e1a9d1b559eaf75f4cb401f1c43a66e2f3dc9621abfeb58b9c6fac56443177fd",
+      "api/include/ffx_api_types.h": "cc0adc0ffc804dd7cd03c39c15581b575e416383177ffe95060201d52cc0fc49",
+      "api/include/dx12/ffx_api_dx12.h": "c9afbc3c4c673723e9e5369a666f0ff54560543b5a93537f8ff453bf1c3bf530",
+      "upscalers/include/ffx_upscale.h": "65be36d5653eb71c10379e0204f7bb7cd6a8aeec96e6f8cffc5f59ffeb1f89bf"
+    },
+    "sourceSHA256": "d84583f61a4c8a798e2c44f81324cc0dd60dd6e33573c5008978f7f5ac6427e1",
+    "recipeSHA256": "c363319c5786273797a539d5182fe83dcf7817b9423434af0493df641775af98",
+    "binarySHA256": "8e99706f82d108bd5812400eb8c06b088068a05d4caacb53fb35c851f8c1d359",
+    "runtimeBundled": false,
+    "gameIntegrationQualified": false,
+    "headersLicenseSHA256": "26ec40256d34d52a5596b7ea9635575f0570c2650d24b7baf090fda2ac9986f0"
+  },
+  "runnerSHA256": "c872f87d8de223ed339c9cd4fa752f7e49d757b554b77d400258fbf8874d862a",
+  "platform": "Linux, CachyOS Proton cachyos-11.0-20261005-slr, NVIDIA RTX 4080 SUPER",
+  "runs": [
+    {
+      "exitCode": 0,
+      "timeout": false,
+      "seconds": 14.631,
+      "pass": true,
+      "isolatedPrefix": true,
+      "gameFilesChanged": false,
+      "gameIntegrationQualified": false,
+      "binarySHA256": "8e99706f82d108bd5812400eb8c06b088068a05d4caacb53fb35c851f8c1d359",
+      "runtimeSHA256": {
+        "amd_fidelityfx_upscaler_dx12.dll": "d0dcccc74a43c44ba435b7a369b456e0970d8a4464e4bd683119b374f2c9fb46"
+      },
+      "frameworkSHA256": null,
+      "framework": {
+        "stage": "framework",
+        "requested": false,
+        "exports": false,
+        "deviceWrapped": false
+      },
+      "readbacks": 160,
+      "destroyedContexts": 10,
+      "complete": {
+        "stage": "complete",
+        "dispatches": 160,
+        "SDKerrors": 0,
+        "SDKwarnings": 0,
+        "gameFilesChanged": false
+      }
+    },
+    {
+      "exitCode": 0,
+      "timeout": false,
+      "seconds": 15.232,
+      "pass": true,
+      "isolatedPrefix": true,
+      "gameFilesChanged": false,
+      "gameIntegrationQualified": false,
+      "binarySHA256": "8e99706f82d108bd5812400eb8c06b088068a05d4caacb53fb35c851f8c1d359",
+      "runtimeSHA256": {
+        "amd_fidelityfx_upscaler_dx12.dll": "d0dcccc74a43c44ba435b7a369b456e0970d8a4464e4bd683119b374f2c9fb46"
+      },
+      "frameworkSHA256": "ce808bb1494415586cfb2ec5638a3ab0f0cea3879e45146a34976740b59fcf48",
+      "framework": {
+        "stage": "framework",
+        "requested": true,
+        "exports": true,
+        "deviceWrapped": true
+      },
+      "readbacks": 160,
+      "destroyedContexts": 10,
+      "complete": {
+        "stage": "complete",
+        "dispatches": 160,
+        "SDKerrors": 0,
+        "SDKwarnings": 0,
+        "gameFilesChanged": false
+      }
+    }
+  ],
+  "gameFilesChanged": false,
+  "gameIntegrationQualified": false,
+  "WindowsGPUQualified": false,
+  "vendorRuntimeBundled": false
+}
