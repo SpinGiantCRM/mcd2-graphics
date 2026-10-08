@@ -94,6 +94,7 @@ with (out/'build-private.log').open('w') as log:
     'baseSourceSHA256':hashlib.sha256(original.encode()).hexdigest(),
     'generatedSourceSHA256':hashlib.sha256(source.encode()).hexdigest(),
     'engineLayoutSHA256':hashlib.sha256((repo/'src/latency/engine_layout.hpp').read_bytes()).hexdigest(),
+    'amdLatencySHA256':hashlib.sha256((repo/'src/latency/amd_latency.hpp').read_bytes()).hexdigest(),
     'providerHeadersSHA256':{path.name:hashlib.sha256(path.read_bytes()).hexdigest()
                              for path in sorted((repo/'src/providers').glob('*.hpp'))},
     'addonSHA256':hashlib.sha256((out/'mcd2-display-latency.addon64').read_bytes()).hexdigest(),

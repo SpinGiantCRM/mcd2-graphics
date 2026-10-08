@@ -1,5 +1,10 @@
 # Provider architecture: baseline and migration boundaries
 
+The independent [Anti-Lag 2 development path](AMD_ANTILAG2_2026-10-08.md) now
+connects a pinned SDK ABI bridge to verified game timing hooks and the committed
+settings record. It is default-off and awaits active Windows/AMD and real-menu
+qualification. This does not complete FSR SR/FG or the settings cutover.
+
 ## Baseline (PR-A)
 
 The starting runtime is `0.3.0-preview.1`, implementation commit

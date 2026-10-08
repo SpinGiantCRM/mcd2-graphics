@@ -4,6 +4,8 @@
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
+#include <d3d12.h>
+#include <dxgi1_4.h>
 #include <reshade.hpp>
 #include <array>
 #include <atomic>
@@ -18,6 +20,7 @@
 #include "../providers/observed_settings.hpp"
 #include "../providers/menu_save_transport.hpp"
 #include "engine_layout.hpp"
+#include "amd_latency.hpp"
 #include <condition_variable>
 #include <thread>
 #include <chrono>
@@ -49,6 +52,34 @@ struct SlProvider:sr::Provider {
  void release()override{mode(sr::Mode::Off);}
  void shutdown(){std::lock_guard lock(configMutex);if(bridge&&stopSdk)stopSdk();initialized=false;if(bridge){FreeLibrary(bridge);bridge=nullptr;}stopSdk=nullptr;}
 } provider;
+struct AmdProvider : mcd2::amd_latency::Provider {
+ HMODULE bridge=nullptr;
+ int(*init)(void*)=nullptr;int(*updateFrame)(unsigned)=nullptr;
+ int(*endRendering)()=nullptr;int(*realFrame)()=nullptr;void(*stop)()=nullptr;
+ std::filesystem::path path;std::atomic<int> lastResult=0;
+ template<class T>bool bind(T*& f,const char* name){f=reinterpret_cast<T*>(GetProcAddress(bridge,name));return f!=nullptr;}
+ bool initialize(uintptr_t device) override {
+  if(bridge){if(!init||!updateFrame||!endRendering||!realFrame||!stop)return false;
+   lastResult=init(reinterpret_cast<void*>(device));return lastResult==0;}
+  bridge=LoadLibraryExW(path.c_str(),nullptr,LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR|LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
+  if(!bridge){lastResult=HRESULT_FROM_WIN32(GetLastError());return false;}
+  auto abi=reinterpret_cast<unsigned(*)()>(GetProcAddress(bridge,"mcd2_al2_abi"));
+  if(!abi||abi()!=1||!bind(init,"mcd2_al2_init")||!bind(updateFrame,"mcd2_al2_update")||
+     !bind(endRendering,"mcd2_al2_end_rendering")||!bind(realFrame,"mcd2_al2_real_frame")||!bind(stop,"mcd2_al2_shutdown")){lastResult=E_NOINTERFACE;return false;}
+  lastResult=init(reinterpret_cast<void*>(device));return lastResult==0;
+ }
+ bool update(bool enabled) override {lastResult=updateFrame(enabled?1:0);return lastResult==0;}
+ bool end_rendering() override {lastResult=endRendering();return lastResult==0;}
+ bool real_frame() override {lastResult=realFrame();return lastResult==0;}
+ // Keep code mapped until callbacks are drained and AddonUninit has joined the
+ // status worker. Device teardown releases only the driver context.
+ void shutdown() override {if(stop)stop();}
+ void unload(){shutdown();if(bridge)FreeLibrary(bridge);bridge=nullptr;init=nullptr;updateFrame=nullptr;endRendering=nullptr;realFrame=nullptr;stop=nullptr;}
+} amdProvider;
+std::shared_ptr<mcd2::amd_latency::Controller> amdCoordinator;
+std::mutex amdRequestMutex;mcd2::amd_latency::Request amdRequest;
+bool amdLatencyOptIn=false;
+std::atomic<unsigned> amdCandidateRejected=0;
 std::shared_ptr<sr::TokenCoordinator> coordinator;std::atomic<uint64_t> firstFrame=0;uint64_t boundNative=0;
 std::atomic<unsigned> currentMode=0,reflexAvailable=0,reflexFault=0,hdrRevision=0,hdrRestart=0;
 std::atomic<bool> faultLogged=false;bool capabilityChecked=false;
@@ -73,6 +104,7 @@ thread_local bool presentActive=false;
 thread_local uint64_t presentIdentity=0;
 void record(unsigned,uint64_t,float=0){} // No per-frame diagnostics or copies.
 std::shared_ptr<sr::TokenCoordinator> controller(){return std::atomic_load(&coordinator);}
+std::shared_ptr<mcd2::amd_latency::Controller> amd_controller(){return std::atomic_load(&amdCoordinator);}
 void fault(){reflexFault=1;reflexAvailable=0;currentMode=0;workerWake.notify_all();}
 void no_op(void*){}
 bool yes(void*){return true;}
@@ -94,6 +126,7 @@ void present_start(void*,uint64_t id){presentIdentity=id;presentActive=true;reco
 void present_end(void*,uint64_t id){auto c=controller();if(c&&c->active()&&id>=firstFrame&&!c->verify_present_end(id))fault();presentActive=false;}
 void flash(void*,uint64_t id){record(7,id);}
 bool pacing(void*,float){auto id=*reinterpret_cast<uint64_t*>(base+engineLayout->simulationCounter);auto c=controller();
+ if(amdLatencyOptIn){if(auto amd=amd_controller()){mcd2::amd_latency::Request request;{std::lock_guard lock(amdRequestMutex);request=amdRequest;}amd->pre_input(id,request);}}
  if(c&&c->active()&&id){if(!firstFrame)firstFrame=id;c->request_mode(sr::Mode(reflexAvailable?currentMode.load():0));if(!c->pre_simulation(id))fault();}
  // Streamline sleep precedes input/simulation even in Off. Preserve the native FPS limiter.
  return false;
@@ -125,6 +158,12 @@ void settings_loop(){std::map<std::string,unsigned> last;auto nextStatus=std::ch
  }
  while(!workerStop){
   if(menuTransport){try{menuTransport->poll();}catch(...){/* A transport failure cannot activate a feature. */}}
+  if(amdLatencyOptIn){mcd2::amd_latency::Request request;
+   try{mcd2::providers::DecodedGraphicsRecord record;mcd2::providers::GraphicsStore authority(authorityPath);
+    if(authority.load(record).status==mcd2::providers::StoreStatus::Ok)request=mcd2::amd_latency::resolve(record);
+   }catch(...){/* Missing/corrupt authority resolves to Off, never legacy Reflex. */}
+   std::lock_guard lock(amdRequestMutex);amdRequest=request;
+  }
   if(observeProviderSettings){try{
    mcd2::providers::LegacySnapshot snapshot;
    if(mcd2::providers::readLegacySnapshot(savesPath,snapshot))observation=observations.observe(snapshot,mirror,[&](const auto& expected){
@@ -143,6 +182,9 @@ void settings_loop(){std::map<std::string,unsigned> last;auto nextStatus=std::ch
      if(MoveFileExW(temp.c_str(),file.c_str(),MOVEFILE_REPLACE_EXISTING|MOVEFILE_WRITE_THROUGH))last=state;
    }}
    if(std::chrono::steady_clock::now()>=nextStatus){auto failure=c?c->marker_failure():sr::MarkerFailure{};unsigned available=0,valid=0,complete=0;uint64_t first=0,lastReport=0,sim=0,pre=0;auto result=provider.state(&available,&valid,&complete);if(!result)provider.reports(&first,&lastReport,&sim,&pre);
+    if(amdLatencyOptIn){auto amd=amd_controller();auto s=amd?amd->state():mcd2::amd_latency::State{};
+     status<<"{\"kind\":\"amd_antilag2\",\"available\":"<<s.available<<",\"enabled\":"<<s.enabled<<",\"fault\":"<<s.fault<<",\"revision\":"<<s.revision<<",\"checksum\":"<<s.checksum<<",\"inputFrames\":"<<s.inputFrames<<",\"renderedFrames\":"<<s.renderedFrames<<",\"candidateRejected\":"<<amdCandidateRejected<<",\"SDKResult\":"<<amdProvider.lastResult<<"}\n";
+    }
     if(observeProviderSettings)status<<"{\"kind\":\"provider_mirror\",\"state\":"<<unsigned(observation.status)<<",\"store\":"<<unsigned(observation.store)<<",\"revision\":"<<observation.stamp.revision<<"}\n";
     status<<"{\"session\":"<<sessionId<<",\"reflexAvailable\":"<<reflexAvailable<<",\"reflexFault\":"<<reflexFault<<",\"mode\":"<<applied<<",\"completedFrames\":"<<(c?c->completed():0)<<",\"coordinatorError\":"<<(c?c->error():0)<<",\"sdkMarkerError\":"<<provider.lastError<<",\"faultFrame\":"<<failure.frame<<",\"faultLastFrame\":"<<failure.last<<",\"faultMarker\":"<<failure.marker<<",\"faultSent\":"<<failure.sent<<",\"faultRequired\":"<<failure.required<<",\"faultFound\":"<<failure.found<<",\"faultReady\":"<<failure.ready<<",\"faultComplete\":"<<failure.complete<<",\"faultIdentity\":"<<failure.identity<<",\"sdkResult\":"<<result<<",\"sdkReportsAvailable\":"<<valid<<",\"sdkCompleteReports\":"<<complete<<",\"sdkFirstFrame\":"<<first<<",\"sdkLastFrame\":"<<lastReport<<",\"pingsSeen\":"<<pingsSeen<<",\"pingsSent\":"<<pingsSent<<",\"hdrRevision\":"<<hdrRevision<<",\"hdrRestart\":"<<hdrRestart<<"}\n";status.flush();nextStatus=std::chrono::steady_clock::now()+std::chrono::seconds(10);
    }
@@ -167,7 +209,7 @@ void apply_hdr_config(){
 
 void destroy_swapchain(a::swapchain*swapchain,bool){if(swapchain->get_device()->get_native()==boundNative && messageHook){UnhookWindowsHookEx(messageHook);messageHook=nullptr;statsMessage=0;pingPending=false;}}
 void init_swapchain(a::swapchain*swapchain,bool){
- if(!installed||messageHook||swapchain->get_device()->get_native()!=boundNative)return;
+ if(!installed||amd_controller()||messageHook||swapchain->get_device()->get_native()!=boundNative)return;
  auto hwnd=static_cast<HWND>(swapchain->get_hwnd());DWORD process=0;
  auto thread=GetWindowThreadProcessId(hwnd,&process);unsigned message=0;
  if(!thread||process!=GetCurrentProcessId()||provider.message(&message)||!message)return;
@@ -175,7 +217,23 @@ void init_swapchain(a::swapchain*swapchain,bool){
  log<<"{\"kind\":\"pcl_message_hook\",\"installed\":"<<(messageHook?"true":"false")<<",\"thread\":"<<messageThread<<"}\n";log.flush();
 }
 void init(a::device*device){
- if(installed||registry||!provider.initialized||device->get_api()!=a::device_api::d3d12)return;
+ if(installed||registry||(!provider.initialized&&!amdLatencyOptIn)||device->get_api()!=a::device_api::d3d12)return;
+ // The actual rendering device LUID determines the AMD route. Never use the
+ // display/default adapter and never attempt to load an AMD driver on Wine.
+ bool useAmd=false;
+ if(amdLatencyOptIn){unsigned vendor=0;IDXGIFactory4* factory=nullptr;IDXGIAdapter1* adapter=nullptr;
+  auto native=reinterpret_cast<ID3D12Device*>(device->get_native());DXGI_ADAPTER_DESC1 desc{};
+  if(SUCCEEDED(CreateDXGIFactory1(IID_PPV_ARGS(&factory)))){
+   if(SUCCEEDED(factory->EnumAdapterByLuid(native->GetAdapterLuid(),IID_PPV_ARGS(&adapter)))){
+    if(SUCCEEDED(adapter->GetDesc1(&desc))&&!(desc.Flags&DXGI_ADAPTER_FLAG_SOFTWARE))vendor=desc.VendorId;
+    adapter->Release();
+   }factory->Release();
+  }
+  const auto ntdll=GetModuleHandleW(L"ntdll.dll");const bool wine=ntdll&&GetProcAddress(ntdll,"wine_get_version");
+  useAmd=mcd2::amd_latency::Eligibility{true,!wine,GetModuleHandleW(L"amdxc64.dll")!=nullptr,vendor}.candidate();
+  if(!useAmd)amdCandidateRejected=1;
+ }
+ if(!useAmd&&!provider.initialized)return;
  base=reinterpret_cast<uintptr_t>(GetModuleHandleW(nullptr));
  auto local=std::make_unique<wchar_t[]>(32768);auto length=GetEnvironmentVariableW(L"LOCALAPPDATA",local.get(),32768);if(!length||length>=32768)return;
  auto dir=std::filesystem::path(local.get())/L"Dungeons2"/L"Saved"/L"MCD2Graphics";std::filesystem::create_directories(dir);log.open(dir/L"display-latency-bootstrap.jsonl",std::ios::trunc);
@@ -200,9 +258,15 @@ void init(a::device*device){
  construct(&latencyName,L"LatencyMarker",1);construct(&pacingName,L"MaxTickRateHandler",1);
  auto count=reinterpret_cast<RegistryCount>(vt[3]);log<<"{\"kind\":\"existing_features\",\"latency\":"<<count(registry,latencyName)<<",\"pacing\":"<<count(registry,pacingName)<<"}\n";
  if(count(registry,latencyName)||count(registry,pacingName)){log<<"{\"kind\":\"rejected\",\"reason\":\"existing modular owner\"}\n";return;}
- boundNative=device->get_native();auto setResult=provider.device(reinterpret_cast<void*>(boundNative));
- log<<"{\"kind\":\"set_device\",\"result\":"<<setResult<<"}\n";log.flush();if(setResult)return;
- std::atomic_store(&coordinator,std::make_shared<sr::TokenCoordinator>(provider));
+ boundNative=device->get_native();
+ if(useAmd){auto amd=std::make_shared<mcd2::amd_latency::Controller>(amdProvider);
+  if(!amd->attach({true,true,true,0x1002},boundNative)){boundNative=0;registry=nullptr;return;}
+  std::atomic_store(&amdCoordinator,amd);reflexAvailable=0;
+  log<<"{\"kind\":\"amd_antilag2_device\",\"available\":true}\n";log.flush();
+ }else{auto setResult=provider.device(reinterpret_cast<void*>(boundNative));
+  log<<"{\"kind\":\"set_device\",\"result\":"<<setResult<<"}\n";log.flush();if(setResult)return;
+  std::atomic_store(&coordinator,std::make_shared<sr::TokenCoordinator>(provider));
+ }
  markerVtable.fill(reinterpret_cast<void*>(zero));pacerVtable.fill(reinterpret_cast<void*>(no_op));secondaryVtable.fill(reinterpret_cast<void*>(no_op));
  markerVtable[0]=reinterpret_cast<void*>(no_op);markerVtable[1]=reinterpret_cast<void*>(no_op);markerVtable[2]=reinterpret_cast<void*>(set_bool);markerVtable[3]=reinterpret_cast<void*>(yes);markerVtable[4]=reinterpret_cast<void*>(set_bool);markerVtable[5]=reinterpret_cast<void*>(no);
  markerVtable[6]=reinterpret_cast<void*>(input);markerVtable[7]=reinterpret_cast<void*>(sim_start);markerVtable[8]=reinterpret_cast<void*>(sim_end);markerVtable[9]=reinterpret_cast<void*>(present_start);markerVtable[10]=reinterpret_cast<void*>(present_end);markerVtable[11]=reinterpret_cast<void*>(render_start);markerVtable[12]=reinterpret_cast<void*>(render_end);markerVtable[13]=reinterpret_cast<void*>(flash);
@@ -211,7 +275,7 @@ void init(a::device*device){
  add(registry,latencyName,&marker.modular);add(registry,pacingName,&pacer.modular);installed=true;
  log<<"{\"kind\":\"registered\",\"gameThread\":"<<GetCurrentThreadId()<<"}\n";log.flush();
 }
-void present(a::command_queue*,a::swapchain*,const a::rect*,const a::rect*,unsigned,const a::rect*){if(installed){record(9,presentActive?presentIdentity:UINT64_MAX);record(11,*reinterpret_cast<uint64_t*>(base+engineLayout->renderCounter));if(presentActive){forward(presentIdentity,sr::Marker::RenderEnd);forward(presentIdentity,sr::Marker::PresentStart);}}}
+void present(a::command_queue*,a::swapchain* swapchain,const a::rect*,const a::rect*,unsigned,const a::rect*){if(installed&&swapchain->get_device()->get_native()==boundNative){record(9,presentActive?presentIdentity:UINT64_MAX);record(11,*reinterpret_cast<uint64_t*>(base+engineLayout->renderCounter));if(presentActive){if(amdLatencyOptIn){if(auto amd=amd_controller())amd->pre_present(presentIdentity);}forward(presentIdentity,sr::Marker::RenderEnd);forward(presentIdentity,sr::Marker::PresentStart);}}}
 void finish(a::command_queue*,a::swapchain*){
  auto c=controller();if(installed&&c){if(presentActive)forward(presentIdentity,sr::Marker::PresentEnd);
   if(!capabilityChecked){capabilityChecked=true;unsigned available=0,valid=0,complete=0;auto result=provider.state(&available,&valid,&complete);
@@ -223,6 +287,7 @@ void finish(a::command_queue*,a::swapchain*){
 void cleanup(){
  if(installed.exchange(false)){remove(registry,pacingName,&pacer.modular);remove(registry,latencyName,&marker.modular);}
  if(messageHook){UnhookWindowsHookEx(messageHook);messageHook=nullptr;}statsMessage=0;pingPending=false;
+ auto amd=std::atomic_exchange(&amdCoordinator,std::shared_ptr<mcd2::amd_latency::Controller>{});if(amd)amd->shutdown();
  auto c=std::atomic_exchange(&coordinator,std::shared_ptr<sr::TokenCoordinator>{});if(c){c->shutdown();c->drain();}provider.shutdown();reflexAvailable=0;boundNative=0;registry=nullptr;firstFrame=0;capabilityChecked=false;workerWake.notify_all();
 }
 void destroy(a::device*device){if(device->get_native()==boundNative)cleanup();}
@@ -242,6 +307,8 @@ extern "C" __declspec(dllexport) bool AddonInit(HMODULE module,HMODULE){
  // Opt-in development handoff only; the released UI/renderer is unchanged.
  observeProviderSettings=GetPrivateProfileIntW(L"Providers",L"ObserveLegacySettings",0,mcd2::providers::observedPolicyPath(filename.get()).c_str())==1;
  consolidatedMenuTransport=GetPrivateProfileIntW(L"Providers",L"ConsolidatedMenuTransport",0,mcd2::providers::observedPolicyPath(filename.get()).c_str())==1;
+ amdLatencyOptIn=GetPrivateProfileIntW(L"Providers",L"AmdAntiLag2",0,mcd2::providers::observedPolicyPath(filename.get()).c_str())==1;
+ amdProvider.path=std::filesystem::path(filename.get()).parent_path()/L"mcd2-antilag2-bridge.dll";
  std::ofstream receipt(logs/L"bootstrap.json");receipt<<"{\"initialized\":"<<(success?"true":"false")<<",\"result\":"<<provider.lastResult<<",\"stage\":\"AddonInit before native D3D12 device; DXGI factory may already exist\",\"fgBootstrapQualified\":false}\n";
  savesPath=std::filesystem::path(local.get())/L"Dungeons2"/L"Saved"/L"SaveGames";
  sessionId=unsigned((GetTickCount64()^(uint64_t(GetCurrentProcessId())<<12))&0x7fffffff);if(!sessionId)sessionId=1;
@@ -251,5 +318,5 @@ extern "C" __declspec(dllexport) bool AddonInit(HMODULE module,HMODULE){
 extern "C" __declspec(dllexport) void AddonUninit(HMODULE,HMODULE){
  // ReShade may unload a probing device before init_device claims it. Release
  // our bootstrap outside DllMain as well; shutdown is deliberately idempotent.
- workerStop=true;workerWake.notify_all();if(settingsWorker.joinable())settingsWorker.join();cleanup();
+ workerStop=true;workerWake.notify_all();if(settingsWorker.joinable())settingsWorker.join();cleanup();amdProvider.unload();
 }
