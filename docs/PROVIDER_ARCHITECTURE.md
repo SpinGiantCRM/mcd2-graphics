@@ -268,3 +268,18 @@ combinations, 1,166 record rejection cases, independent Python/CRC wire bytes,
 cases. Separate processes test lock contention, concurrent readers/writers,
 abrupt termination before commit, pending-file recovery and unchanged legacy
 files. No player saves, live preferences or installed binaries are read/changed.
+
+
+### Consolidated menu save transport trial
+
+The existing native settings worker now has an opt-in consolidated request and
+authority-response path. A separately compiled NeoRune client preserves signed
+word bits and exercises preference-identical transactions across a menu/world
+transition and process restart. See [the protocol](CONSOLIDATED_MENU_REQUESTS.md)
+and [bounded runtime evidence](MENU_TRANSPORT_2026-10-08.md).
+
+This proves the serialization path, not the full UI ownership cutover. Real
+controls and rendering consumers still use the legacy path. Complete their
+migration with separate runtime context/source acknowledgements before exposing
+AMD choices. Keep requests, persistence acknowledgements, effective capability
+receipts and startup presentation ownership distinct.

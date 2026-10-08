@@ -1,8 +1,10 @@
 # Consolidated menu transaction
 
 `src/providers/menu_requests.hpp` implements the portable transaction processor
-for the next settings cutover. It is not yet connected to NeoRune or the live
-settings worker. The released menu and its legacy slots are unchanged.
+for the next settings cutover. `menu_save_transport.hpp` now connects it to an
+opt-in native settings worker and a separately built NeoRune qualification
+client. The released menu and its legacy slots are unchanged; this client sends
+preference-identical requests only, not real control edits.
 
 ## Ownership
 
@@ -79,3 +81,61 @@ keep runtime context separate. Wire one native worker as the sole publisher,
 move runtime readers to the committed authority and qualify real menu edits,
 restart selection, fallback, presets, HDR and latency across platforms. Until
 then this transaction processor is a tested component, not a completed cutover.
+
+## Experimental UE save transport
+
+The request slot is `MCD2GraphicsProviderRequest.sav`, class
+`ProviderRequestSave`, with IntProperty fields `W0` through `W41`. Each signed
+integer preserves one complete little-endian wire word, including CRC values
+with bit 31 set. Default-zero fields may be omitted by UE serialization. Unknown,
+duplicate, noncanonical or out-of-range field names, unexpected classes/types,
+array indices, flags, sizes, malformed strings and trailing bytes are refused.
+The existing nonnegative legacy parser is unchanged.
+
+The response slot is `MCD2GraphicsProviderAuthority.sav`, class
+`ProviderAuthoritySave`, fields `W0` through `W43`. Its 176-byte envelope is:
+
+| Word | Meaning |
+| --- | --- |
+| 0–1 | `MCD2AS1` followed by NUL |
+| 2–4 | Version 1 / length 176 / envelope CRC (word 4 zeroed) |
+| 5 | Current native worker session |
+| 6–7 | Last matching-session request sequence / commit status |
+| 8 | Authority load status: Ok / Missing / Invalid / IoError |
+| 9–10 | Receipt's committed revision / checksum |
+| 11 | Receipt's store result |
+| 12–43 | Current canonical graphics record, or all zero when unavailable |
+
+A response can carry a historical receipt beside newer current settings. Match
+both the request ID and receipt/current revision **and checksum** before treating
+it as the current saved selection. No response means feature activation, SDK
+eligibility, effective settings, runtime context or successful rendering.
+
+The worker writes `Saved/MCD2Graphics/ProviderSettings/intent-v5.bin`. While this
+record is missing, initialization requires stable validated legacy snapshots and
+a complete final byte recheck. Initialization-only observation refuses to update
+a record that appeared between reads, and commits with an empty expected stamp
+so a competing publisher during the recheck wins without being overwritten. Once present, the legacy observer does not update
+it. Corrupt records remain corrupt. Wrong-session requests cannot replace the
+current session's acknowledgement. Responses require a verified UE-created seed;
+the worker retains its engine header and publishes only its own bounded fields,
+with a persistent response lock, flushed pending file and atomic replacement.
+Identical responses are not rewritten at each poll.
+
+Set `[Providers] ConsolidatedMenuTransport=1` in the existing bootstrap policy
+only for this experimental transport trial; default zero performs no transport
+IO. It runs on the existing settings worker independently of NVIDIA availability
+and does not move SDK work onto a rendering callback.
+
+`experiments/providers/build_menu_transport_probe.py` builds a separate,
+source-recorded UI trial with the pinned NeoRune tools. It makes a guarded private
+actor overlay and includes `neorune_transport_probe.cs`; it does not edit the
+released actor, install files, download dependencies or package a release. The
+existing actor drives the polling timer. The no-op client copies every provider
+preference and migration field, advances only the desired transaction revision,
+and computes both checksums using NeoRune-supported integer operations.
+
+See [the live transport trial](MENU_TRANSPORT_2026-10-08.md). The remaining cutover
+must wire actual controls, freeze legacy preference writes after migration,
+separate runtime context/ACK transport, and move bootstrap/SR/FG/display readers
+to the same committed record. This trial does not implement those steps or FSR.

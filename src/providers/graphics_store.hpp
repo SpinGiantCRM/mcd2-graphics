@@ -148,7 +148,7 @@ inline bool discardPending(const std::filesystem::path& path) {
 #endif
     return std::filesystem::remove(path, error) && !error;
 }
-inline bool writeFlushed(const std::filesystem::path& path, const GraphicsRecord& bytes) {
+inline bool writeFlushed(const std::filesystem::path& path, std::span<const std::uint8_t> bytes) {
 #ifdef _WIN32
     File file(CreateFileW(path.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_NEW,
                          FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OPEN_REPARSE_POINT, nullptr));

@@ -129,6 +129,21 @@ int main() {
     assert(observe(original,store).status==ObservationStatus::Rejected);
     assert(store.load(current).status==StoreStatus::Ok&&current.intent==future);
     assert(!observedStartup(store,original,123).valid);
+    // Initialization-only mode cannot resync a record created by a competing
+    // writer after the caller's missing-file probe, including AMD preferences.
+    ObservedSettings initializer;
+    assert(initializer.observe(original,store,[](const auto&){return true;},false).status==ObservationStatus::Waiting);
+    assert(initializer.observe(original,store,[](const auto&){return true;},false).status==ObservationStatus::Unchanged);
+    assert(store.load(current).status==StoreStatus::Ok&&current.intent==future);
+    // If another writer creates the file during final recheck, empty-stamp CAS
+    // refuses publication instead of rewriting it as legacy settings.
+    fs::remove(store.committedPath());initializer.invalidate();
+    assert(initializer.observe(original,store,[](const auto&){return true;},false).status==ObservationStatus::Waiting);
+    const auto competed=initializer.observe(original,store,[&](const auto&){
+        assert(store.publish(future,{}).status==StoreStatus::Ok);return true;
+    },false);
+    assert(competed.status==ObservationStatus::StoreFailure&&competed.store==StoreStatus::Conflict);
+    assert(store.load(current).status==StoreStatus::Ok&&current.intent==future);
     // Saturated revision cannot wrap and overwrite a committed request.
     fs::remove(store.committedPath()); GraphicsIntent saturated;
     assert(decodeObserved(original,saturated)); saturated.revision=0x7fffffff;

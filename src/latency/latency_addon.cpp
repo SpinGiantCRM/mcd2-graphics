@@ -16,6 +16,7 @@
 #include "token_coordinator.hpp"
 #include "display_protocol.hpp"
 #include "../providers/observed_settings.hpp"
+#include "../providers/menu_save_transport.hpp"
 #include "engine_layout.hpp"
 #include <condition_variable>
 #include <thread>
@@ -56,6 +57,7 @@ std::filesystem::path savesPath;std::mutex intentMutex; mcd2::display::Intent la
 std::thread settingsWorker;std::mutex workerMutex;std::condition_variable workerWake;std::atomic<bool> workerStop=false;
 unsigned sessionId=0;
 bool observeProviderSettings=false;
+bool consolidatedMenuTransport=false;
 struct Feature {void** main;void** modular;};
 std::mutex mutex;std::ofstream log;std::filesystem::path requestPath;unsigned requestId=0,presentCounter=0;uintptr_t base=0;const mcd2::engine::Layout*engineLayout=nullptr;void*registry=nullptr;
 uint64_t latencyName=0,pacingName=0;std::atomic<bool> installed=false;
@@ -115,7 +117,14 @@ void settings_loop(){std::map<std::string,unsigned> last;auto nextStatus=std::ch
  mcd2::providers::GraphicsStore mirror(mirrorPath);
  // Reserved experimental directory. Disabled builds perform no mirror IO.
  if(observeProviderSettings){std::error_code error;std::filesystem::create_directory(mirrorPath,error);}
+ const auto authorityPath=savesPath.parent_path()/L"MCD2Graphics"/L"ProviderSettings";
+ std::unique_ptr<mcd2::providers::MenuSaveTransport> menuTransport;
+ if(consolidatedMenuTransport){std::error_code error;std::filesystem::create_directory(authorityPath,error);
+  if(!error&&mcd2::providers::store_detail::directoryReady(authorityPath))
+   menuTransport=std::make_unique<mcd2::providers::MenuSaveTransport>(savesPath,authorityPath,sessionId);
+ }
  while(!workerStop){
+  if(menuTransport){try{menuTransport->poll();}catch(...){/* A transport failure cannot activate a feature. */}}
   if(observeProviderSettings){try{
    mcd2::providers::LegacySnapshot snapshot;
    if(mcd2::providers::readLegacySnapshot(savesPath,snapshot))observation=observations.observe(snapshot,mirror,[&](const auto& expected){
@@ -232,6 +241,7 @@ extern "C" __declspec(dllexport) bool AddonInit(HMODULE module,HMODULE){
  auto folder=std::filesystem::path(filename.get()).parent_path()/L"MCD2Graphics"/L"streamline";if(provider.initialized)return true;auto success=provider.load(folder,logs);
  // Opt-in development handoff only; the released UI/renderer is unchanged.
  observeProviderSettings=GetPrivateProfileIntW(L"Providers",L"ObserveLegacySettings",0,mcd2::providers::observedPolicyPath(filename.get()).c_str())==1;
+ consolidatedMenuTransport=GetPrivateProfileIntW(L"Providers",L"ConsolidatedMenuTransport",0,mcd2::providers::observedPolicyPath(filename.get()).c_str())==1;
  std::ofstream receipt(logs/L"bootstrap.json");receipt<<"{\"initialized\":"<<(success?"true":"false")<<",\"result\":"<<provider.lastResult<<",\"stage\":\"AddonInit before native D3D12 device; DXGI factory may already exist\",\"fgBootstrapQualified\":false}\n";
  savesPath=std::filesystem::path(local.get())/L"Dungeons2"/L"Saved"/L"SaveGames";
  sessionId=unsigned((GetTickCount64()^(uint64_t(GetCurrentProcessId())<<12))&0x7fffffff);if(!sessionId)sessionId=1;
