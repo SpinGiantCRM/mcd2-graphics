@@ -47,6 +47,8 @@ jobs:
           /tmp/provider-legacy
           g++ -std=c++20 -Wall -Wextra -Werror tests/provider_observation_test.cpp -o /tmp/provider-observation
           /tmp/provider-observation
+          g++ -std=c++20 -Wall -Wextra -Werror tests/provider_menu_request_test.cpp -o /tmp/provider-menu-request
+          /tmp/provider-menu-request
           g++ -std=c++20 -Wall -Wextra -Werror tests/provider_store_test.cpp -o /tmp/provider-store
           python3 tests/test_provider_store_process.py /tmp/provider-store -v
           g++ -std=c++20 -Isrc/native tests/settings_bridge_test.cpp -o /tmp/settings-framing
@@ -98,6 +100,8 @@ jobs:
           ./provider-intent.exe
           g++ -std=c++20 -static -Wall -Wextra -Werror tests/provider_legacy_test.cpp -o provider-legacy.exe
           ./provider-legacy.exe
+          g++ -std=c++20 -Wall -Wextra -Werror tests/provider_menu_request_test.cpp -o provider-menu-request.exe
+          ./provider-menu-request.exe
           g++ -std=c++20 -static -Wall -Wextra -Werror tests/provider_observation_test.cpp -o provider-observation.exe
           ./provider-observation.exe
           g++ -std=c++20 -static -municode -Wall -Wextra -Werror tests/provider_store_test.cpp -o provider-store.exe

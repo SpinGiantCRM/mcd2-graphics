@@ -382,3 +382,14 @@ the portable corruption/missing/mixed-map fixtures, frame guard, actual-adapter
 policy, shared SDK shutdown and both CI platforms. These native changes require
 new Windows runtime checks; earlier AMD qualification does not cover them.
 The game installer pin and released assets remain unchanged by this trial.
+
+## Consolidated menu transaction processor
+
+`menu_requests.hpp` is a portable worker component, not a new installed UI or
+transport. Preserve its session/sequence identity, immutable request IDs,
+revision/checksum CAS, migration provenance and uncertainty handling when wiring
+NeoRune. Its Windows fixtures must execute the real filesystem publication race
+and corrupt-record preservation cases as well as mock-store results. Do not
+reinterpret a commit receipt as GPU capability or successful SDK activation.
+The consolidated transport and authority-reader cutover still require rebuilt
+Windows runtime checks; these fixtures do not establish that qualification.

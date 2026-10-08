@@ -224,6 +224,12 @@ atomic UI transaction. The next cutover must use one consolidated menu request,
 retain old saves for rollback, and supply session/revision-matched effective
 runtime receipts. This mirror is stored separately from that future authority.
 
+The [consolidated transaction processor](CONSOLIDATED_MENU_REQUESTS.md) now
+defines the full request payload, native single-publisher processing and commit
+receipts. Its fixtures cover stale sessions, lost ACKs, conflicting publication
+and AMD/mixed requested preferences. NeoRune transport and live reader cutover
+remain subsequent integration work.
+
 Portable observation checks cover stale/malformed startup, acknowledgement
 churn, lower independent revisions, monotonic preference updates, preservation
 of original provenance and legacy bytes, interrupted polling, future-provider
