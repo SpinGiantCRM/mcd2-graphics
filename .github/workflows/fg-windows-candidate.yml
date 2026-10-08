@@ -6,6 +6,7 @@ on:
       - 'experiments/fg-streamline/**'
       - 'src/native/**'
       - 'src/latency/**'
+      - 'src/providers/**'
       - 'src/ui/ModActor.cs'
       - 'tools/ModInfoBuilder/**'
       - 'build.py'

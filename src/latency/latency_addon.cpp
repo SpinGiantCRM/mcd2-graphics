@@ -15,6 +15,7 @@
 #include <memory>
 #include "token_coordinator.hpp"
 #include "display_protocol.hpp"
+#include "../providers/observed_settings.hpp"
 #include <condition_variable>
 #include <thread>
 #include <chrono>
@@ -53,6 +54,7 @@ void settings_loop();void apply_hdr_config();
 std::filesystem::path savesPath;std::mutex intentMutex; mcd2::display::Intent latestIntent{};
 std::thread settingsWorker;std::mutex workerMutex;std::condition_variable workerWake;std::atomic<bool> workerStop=false;
 unsigned sessionId=0;
+bool observeProviderSettings=false;
 struct Feature {void** main;void** modular;};
 std::mutex mutex;std::ofstream log;std::filesystem::path requestPath;unsigned requestId=0,presentCounter=0;uintptr_t base=0;void*registry=nullptr;
 uint64_t latencyName=0,pacingName=0;std::atomic<bool> installed=false;
@@ -107,7 +109,20 @@ LRESULT CALLBACK pcl_messages(int code,WPARAM removed,LPARAM data){
 std::vector<uint8_t> read_slot(const std::filesystem::path&p){std::ifstream f(p,std::ios::binary|std::ios::ate);if(!f)return {};auto n=f.tellg();if(n<64||n>8192)return {};std::vector<uint8_t>b(size_t(n),0);f.seekg(0);f.read(reinterpret_cast<char*>(b.data()),n);return f?b:std::vector<uint8_t>{};}
 void settings_loop(){std::map<std::string,unsigned> last;auto nextStatus=std::chrono::steady_clock::now();
  std::ofstream status(savesPath.parent_path()/L"MCD2Graphics"/L"display-latency-status.jsonl",std::ios::trunc);
+ mcd2::providers::ObservedSettings observations;
+ mcd2::providers::ObservationResult observation;
+ const auto mirrorPath=savesPath.parent_path()/L"MCD2Graphics"/L"ProviderMirror";
+ mcd2::providers::GraphicsStore mirror(mirrorPath);
+ // Reserved experimental directory. Disabled builds perform no mirror IO.
+ if(observeProviderSettings){std::error_code error;std::filesystem::create_directory(mirrorPath,error);}
  while(!workerStop){
+  if(observeProviderSettings){try{
+   mcd2::providers::LegacySnapshot snapshot;
+   if(mcd2::providers::readLegacySnapshot(savesPath,snapshot))observation=observations.observe(snapshot,mirror,[&](const auto& expected){
+    mcd2::providers::LegacySnapshot fresh;return mcd2::providers::readLegacySnapshot(savesPath,fresh)&&fresh==expected;
+   });
+   else {observations.invalidate();observation={mcd2::providers::ObservationStatus::Rejected,mcd2::providers::StoreStatus::Invalid,{}};}
+  }catch(...){observations.invalidate();observation={mcd2::providers::ObservationStatus::StoreFailure,mcd2::providers::StoreStatus::IoError,{}};}}
   try {auto bytes=read_slot(savesPath/L"MCD2GraphicsDisplaySettings.sav");mcd2::display::Intent incoming;
    if(mcd2::display::decode(bytes,incoming)){std::lock_guard lock(intentMutex);latestIntent=incoming;currentMode=reflexAvailable?incoming.reflex:0;}
    mcd2::display::Intent intent;{std::lock_guard lock(intentMutex);intent=latestIntent;}
@@ -119,6 +134,7 @@ void settings_loop(){std::map<std::string,unsigned> last;auto nextStatus=std::ch
      if(MoveFileExW(temp.c_str(),file.c_str(),MOVEFILE_REPLACE_EXISTING|MOVEFILE_WRITE_THROUGH))last=state;
    }}
    if(std::chrono::steady_clock::now()>=nextStatus){auto failure=c?c->marker_failure():sr::MarkerFailure{};unsigned available=0,valid=0,complete=0;uint64_t first=0,lastReport=0,sim=0,pre=0;auto result=provider.state(&available,&valid,&complete);if(!result)provider.reports(&first,&lastReport,&sim,&pre);
+    if(observeProviderSettings)status<<"{\"kind\":\"provider_mirror\",\"state\":"<<unsigned(observation.status)<<",\"store\":"<<unsigned(observation.store)<<",\"revision\":"<<observation.stamp.revision<<"}\n";
     status<<"{\"session\":"<<sessionId<<",\"reflexAvailable\":"<<reflexAvailable<<",\"reflexFault\":"<<reflexFault<<",\"mode\":"<<applied<<",\"completedFrames\":"<<(c?c->completed():0)<<",\"coordinatorError\":"<<(c?c->error():0)<<",\"sdkMarkerError\":"<<provider.lastError<<",\"faultFrame\":"<<failure.frame<<",\"faultLastFrame\":"<<failure.last<<",\"faultMarker\":"<<failure.marker<<",\"faultSent\":"<<failure.sent<<",\"faultRequired\":"<<failure.required<<",\"faultFound\":"<<failure.found<<",\"faultReady\":"<<failure.ready<<",\"faultComplete\":"<<failure.complete<<",\"faultIdentity\":"<<failure.identity<<",\"sdkResult\":"<<result<<",\"sdkReportsAvailable\":"<<valid<<",\"sdkCompleteReports\":"<<complete<<",\"sdkFirstFrame\":"<<first<<",\"sdkLastFrame\":"<<lastReport<<",\"pingsSeen\":"<<pingsSeen<<",\"pingsSent\":"<<pingsSent<<",\"hdrRevision\":"<<hdrRevision<<",\"hdrRestart\":"<<hdrRestart<<"}\n";status.flush();nextStatus=std::chrono::steady_clock::now()+std::chrono::seconds(10);
    }
   }catch(...){/* Status failure cannot alter rendering or the user's other files. */}
@@ -203,6 +219,8 @@ extern "C" __declspec(dllexport) bool AddonInit(HMODULE module,HMODULE){
  if(!moduleLength||moduleLength>=32768||!localLength||localLength>=32768)return true;
  auto logs=std::filesystem::path(local.get())/L"Dungeons2"/L"Saved"/L"MCD2Graphics"/L"StreamlineLogs";std::filesystem::create_directories(logs);
  auto folder=std::filesystem::path(filename.get()).parent_path()/L"MCD2Graphics"/L"streamline";if(provider.initialized)return true;auto success=provider.load(folder,logs);
+ // Opt-in development handoff only; the released UI/renderer is unchanged.
+ observeProviderSettings=GetPrivateProfileIntW(L"Providers",L"ObserveLegacySettings",0,mcd2::providers::observedPolicyPath(filename.get()).c_str())==1;
  std::ofstream receipt(logs/L"bootstrap.json");receipt<<"{\"initialized\":"<<(success?"true":"false")<<",\"result\":"<<provider.lastResult<<",\"stage\":\"AddonInit before native D3D12 device; DXGI factory may already exist\",\"fgBootstrapQualified\":false}\n";
  savesPath=std::filesystem::path(local.get())/L"Dungeons2"/L"Saved"/L"SaveGames";
  sessionId=unsigned((GetTickCount64()^(uint64_t(GetCurrentProcessId())<<12))&0x7fffffff);if(!sessionId)sessionId=1;

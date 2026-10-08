@@ -167,6 +167,74 @@ Before wiring this into the live UI/bootstrap, implement and qualify:
 4. Real menu, restart, persistence and platform regression tests with the rebuilt
    artifacts. The synthetic tests do not qualify gameplay or vendor activation.
 
+### Experimental observation-to-startup handoff
+
+`observed_settings.hpp` connects the existing menu save format to the store
+without switching the UI's writer or changing SR input/output handling. It is an
+intermediate experiment, not completion of the authoritative settings migration.
+
+The existing display/latency settings worker can observe all three mod-owned
+legacy slots, bounded to 8 KiB each. It reads all bytes twice, requires a
+second identical worker poll, and rechecks every slot immediately before
+publishing. Runtime context, session and
+source acknowledgements are validated but excluded from preference comparison;
+their revision increments do not republish the record. Actual preference changes
+receive a monotonically increasing global revision while retaining original
+migration provenance. Corrupt existing records, exhausted revisions and requests
+that the legacy menu cannot represent are refused. The observer writes only
+`Saved/MCD2Graphics/ProviderMirror/intent-v5.{bin,pending,lock}`. The UI still owns
+its existing saves; this phase does not freeze those files or retire that writer.
+
+The early DXGI entry point can read this committed mirror before vendor
+initialization. It requires agreement with a fresh, validated legacy snapshot.
+Missing, invalid, unsupported or stale records select normal FG presentation,
+without falling back to the separate legacy FG slot. The existing actual-adapter,
+SDK, device-binding and one-owner checks remain required for NVIDIA routing.
+This handoff does not enable FSR/XeSS, authorize source reduction, or acknowledge
+live owner changes. Existing SR controls and runtime acknowledgements still use
+their qualified legacy path.
+
+Both switches default to zero in the candidate's `FGBootstrap.ini`:
+
+```ini
+[Providers]
+ObserveLegacySettings=0
+ObservedStartup=0
+```
+
+Development qualification sequence:
+
+1. Use a separate candidate installation and back up its settings. Set only
+   `ObserveLegacySettings=1`; keep `ObservedStartup=0`. Exercise menu settings and
+   resume gameplay, allowing at least two worker polls to settle. Confirm mirror
+   preferences and the bounded private `provider_mirror` status receipt.
+2. Exit normally. Enable `ObservedStartup=1`, relaunch, and verify FG Off/On
+   ownership, stale-request rejection and the actual rendering-adapter checks.
+   A first launch without a committed mirror intentionally uses normal FG
+   presentation. No extra background thread or render-thread flush is introduced.
+3. Compare Native/DLAA/SR, HDR calibration, Reflex, transition/reset, FG restart
+   and clean-exit behavior against the frozen baseline. Include Windows AMD
+   fallback and Windows NVIDIA activation before treating this as qualified.
+4. Return both switches to zero to use the original path. The observer never
+   deletes a corrupt record or rewrites it from legacy saves; recovery must be an
+   explicit operation on the reserved experimental mirror, with the game closed.
+
+Two stable polls reduce transient multi-slot observations but cannot prove an
+atomic UI transaction. The next cutover must use one consolidated menu request,
+retain old saves for rollback, and supply session/revision-matched effective
+runtime receipts. This mirror is stored separately from that future authority.
+
+Portable observation checks cover stale/malformed startup, acknowledgement
+churn, lower independent revisions, monotonic preference updates, preservation
+of original provenance and legacy bytes, interrupted polling, future-provider
+refusal and revision exhaustion. Linux also checks symlink refusal. MinGW and
+MSVC module builds are compile evidence; gameplay and Windows runtime gates are
+separate. Candidate build receipts now include the provider headers, and changes
+to those headers trigger the Windows candidate build.
+
+See the [bounded Linux handoff record](PROVIDER_OBSERVATION_2026-10-08.md) for
+startup results and the installed-game update blocking active FG/Reflex checks.
+
 ### Filesystem guarantees and checks
 
 Linux uses a flushed same-directory rename followed by directory `fsync`.

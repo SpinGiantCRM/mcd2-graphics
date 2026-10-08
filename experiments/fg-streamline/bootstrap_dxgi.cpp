@@ -18,6 +18,7 @@
 #include "fg_bridge_contract.h"
 #include "fg_ui_protocol.hpp"
 #include "wine_reflex_pacing.hpp"
+#include "../../src/providers/observed_settings.hpp"
 #include <fstream>
 extern "C" __declspec(dllimport) int mcd2_sl_init(const wchar_t*,const wchar_t*,const wchar_t*);
 extern "C" __declspec(dllimport) int mcd2_fg_initialized();
@@ -32,12 +33,27 @@ INIT_ONCE once=INIT_ONCE_STATIC_INIT,systemOnce=INIT_ONCE_STATIC_INIT;
 thread_local bool initializing=false;
 bool sdkReady=false,routeEnabled=true;FILE* receipt=nullptr;
 unsigned fgSessionMode=1;
+void event(const char* stage,long result);
 unsigned saved_fg_mode(){
  auto local=std::make_unique<wchar_t[]>(32768);auto n=GetEnvironmentVariableW(L"LOCALAPPDATA",local.get(),32768);if(!n||n>=32768)return 0;
  auto path=std::filesystem::path(local.get())/L"Dungeons2"/L"Saved"/L"SaveGames"/L"MCD2GraphicsFGSettings.sav";
  std::ifstream file(path,std::ios::binary|std::ios::ate);if(!file)return 0;auto size=file.tellg();if(size<64||size>8192)return 0;
  std::vector<uint8_t> bytes(static_cast<size_t>(size));file.seekg(0);if(!file.read(reinterpret_cast<char*>(bytes.data()),bytes.size()))return 0;
  mcd2::fgui::Intent intent{};return mcd2::fgui::decode(bytes,intent)?intent.mode:0;
+}
+unsigned observed_fg_mode(){
+ auto local=std::make_unique<wchar_t[]>(32768);auto n=GetEnvironmentVariableW(L"LOCALAPPDATA",local.get(),32768);if(!n||n>=32768)return 0;
+ const auto saved=std::filesystem::path(local.get())/L"Dungeons2"/L"Saved";
+ mcd2::providers::LegacySnapshot snapshot;
+ if(!mcd2::providers::readLegacySnapshot(saved/L"SaveGames",snapshot))return 0;
+ mcd2::providers::GraphicsStore store(saved/L"MCD2Graphics"/L"ProviderMirror");
+ auto session=(GetTickCount64()^(uint64_t(GetCurrentProcessId())<<32));if(!session)session=1;
+ const auto selection=mcd2::providers::observedStartup(store,snapshot,session);
+ event("observed-settings-valid",selection.valid?1:0);
+ event("observed-settings-revision",selection.bootstrap.stamp.revision);
+ // Only the already implemented NVIDIA owner can request this bootstrap.
+ // Actual rendering-adapter/SDK approval still occurs in create_swap.
+ return selection.valid&&selection.bootstrap.requested==mcd2::providers::PresentationOwner::NvidiaStreamline?1u:0u;
 }
 void event(const char* stage,long result){if(receipt){fprintf(receipt,"{\"stage\":\"%s\",\"result\":%ld}\n",stage,result);fflush(receipt);}}
 BOOL CALLBACK system_init(PINIT_ONCE,void*,void**){
@@ -134,7 +150,7 @@ BOOL CALLBACK initialize(PINIT_ONCE,void*,void**){
  auto folder=std::filesystem::path(filename.get()).parent_path();
  fopen_s(&receipt,(folder/"bootstrap.jsonl").string().c_str(),"w");
  // Local isolation controls are intentionally absent from the released UI.
- auto policy=(folder/L"FGBootstrap.ini").wstring();
+ auto policy=mcd2::providers::observedPolicyPath(filename.get()).wstring();
  if(GetPrivateProfileIntW(L"Experiment",L"TraceNvapi",0,policy.c_str())){
   SetEnvironmentVariableW(L"DXVK_NVAPI_LOG_LEVEL",L"trace");
   SetEnvironmentVariableW(L"DXVK_NVAPI_LOG_PATH",folder.c_str());
@@ -144,7 +160,10 @@ BOOL CALLBACK initialize(PINIT_ONCE,void*,void**){
  // copies/paces frames while generation is Off. Until engine-owned recreation
  // is qualified, the native toggle saves the next-launch presentation mode.
  auto uiPolicy=(folder/L"FGGuideCapture.ini").wstring();
- if(GetPrivateProfileIntW(L"Capture",L"NativeUIToggle",0,uiPolicy.c_str())==1){fgSessionMode=saved_fg_mode();routeEnabled=routeEnabled&&fgSessionMode==1;}
+ if(GetPrivateProfileIntW(L"Providers",L"ObservedStartup",0,policy.c_str())==1){
+  // An invalid/missing mirror must not fall back to the legacy FG-only slot.
+  fgSessionMode=observed_fg_mode();routeEnabled=routeEnabled&&fgSessionMode==1;
+ }else if(GetPrivateProfileIntW(L"Capture",L"NativeUIToggle",0,uiPolicy.c_str())==1){fgSessionMode=saved_fg_mode();routeEnabled=routeEnabled&&fgSessionMode==1;}
  event("FG-session-mode",fgSessionMode);
  auto enableSdk=GetPrivateProfileIntW(L"Experiment",L"EnableSDK",1,policy.c_str())!=0;
  auto result=!enableSdk?-100:(mcd2_fg_initialized()?0:mcd2_sl_init((folder/L"sl.interposer.dll").c_str(),folder.c_str(),folder.c_str()));

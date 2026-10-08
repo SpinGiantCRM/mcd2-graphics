@@ -7,6 +7,9 @@
 
 using namespace mcd2::providers;
 namespace fs = std::filesystem;
+#if defined(_WIN32) && NTDDI_VERSION >= 0x0A000002
+static_assert(static_cast<unsigned>(FileRenameInfoEx) == 22);
+#endif
 
 static void rawWrite(const fs::path& path, std::span<const std::uint8_t> bytes) {
     std::ofstream file(path, std::ios::binary | std::ios::trunc);
