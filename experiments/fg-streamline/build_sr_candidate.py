@@ -1,13 +1,13 @@
 """Generate a temporary SR guide notification without editing released sources."""
 from pathlib import Path
 import argparse,hashlib,json,shutil,subprocess,sys
+from sr_source_tree import copy_sr_sources
 p=argparse.ArgumentParser(description=__doc__)
 p.add_argument('--output',required=True,type=Path);p.add_argument('--reshade-headers',required=True,type=Path);p.add_argument('--ngx-headers',required=True,type=Path)
 p.add_argument('--guide-inspection',action='store_true',help='Private developer capture build; never package this artifact')
 p.add_argument('--clang-cxx',default='clang++');p.add_argument('--mingw-cxx',default='x86_64-w64-mingw32-g++')
 a=p.parse_args();repo=Path(__file__).resolve().parents[2];out=a.output.resolve();source=out/'source';source.mkdir(parents=True,exist_ok=True)
-shutil.copytree(repo/'src/native',source/'src/native',dirs_exist_ok=True)
-for name in ('build.py','build_toolchain.py'):shutil.copyfile(repo/name,source/name)
+copy_sr_sources(repo,source)
 for name in ('fg_camera_contract.h','fg_camera_math.h'):shutil.copyfile(Path(__file__).parent/name,source/'src/native'/name)
 lean=source/'src/native/ngx_lean.hpp';text=lean.read_text();needle=' auto resource=mcd2_ngx_set_resource;'
 assert text.count(needle)==1

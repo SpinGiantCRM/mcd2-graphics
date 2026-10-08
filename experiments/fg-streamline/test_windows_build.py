@@ -5,15 +5,59 @@ import tempfile
 import unittest
 import subprocess
 import json
+import re
+import shutil
 from unittest.mock import patch
 
 spec = importlib.util.spec_from_file_location('windows_candidate', Path(__file__).with_name('build_windows_candidate.py'))
 candidate = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(candidate)
+source_spec = importlib.util.spec_from_file_location('sr_source_tree', Path(__file__).with_name('sr_source_tree.py'))
+source_tree = importlib.util.module_from_spec(source_spec)
+source_spec.loader.exec_module(source_tree)
 
 
 class WindowsBuildChecks(unittest.TestCase):
-    def test_current_package_ui_is_reused_with_metadata_provenance(self):
+    def test_copied_fsr_abi_is_guarded_across_independent_include_paths(self):
+        # The sustained probe and production runtime include separate copies.
+        # pragma once alone does not deduplicate those files with Clang.
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary).resolve()
+            content = (candidate.REPO / 'experiments/providers/fsr_game_bridge.h').read_bytes()
+            for name in ('first.h', 'second.h'):
+                (root / name).write_bytes(content)
+            (root / 'test.cpp').write_text('#include "first.h"\n#include "second.h"\nint main(){}\n')
+            compiler = shutil.which('clang++') or shutil.which('g++')
+            self.assertIsNotNone(compiler, 'C++ compiler required by both CI platforms')
+            subprocess.run([compiler, '-std=c++20', '-fsyntax-only', str(root / 'test.cpp')], check=True)
+
+    def test_isolated_sr_source_contains_its_relative_include_closure(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            # Windows runners may expose the temp directory through an 8.3
+            # alias. Normalize the existing parent before constructing paths.
+            source = Path(temporary).resolve() / 'source'
+            source_tree.copy_sr_sources(candidate.REPO, source)
+            # Check real relative includes recursively, including FSR's C ABI
+            # and the provider snapshots consumed by the native observer.
+            pending = [source / 'src/native/observer.cpp']
+            visited = set()
+            while pending:
+                path = pending.pop().resolve()
+                if path in visited:
+                    continue
+                visited.add(path)
+                for name in re.findall(r'^\s*#include "([^"]+)"', path.read_text(), re.M):
+                    if name in ('reshade.hpp', 'ngx-research/nvsdk_ngx.h'):
+                        continue  # separately verified external SDK include
+                    dependency = (path.parent / name).resolve()
+                    self.assertTrue(dependency.is_relative_to(source.resolve()), name)
+                    self.assertTrue(dependency.is_file(), str(dependency.relative_to(source)))
+                    pending.append(dependency)
+            self.assertIn((source / 'experiments/providers/fsr_game_bridge.h').resolve(), visited)
+            self.assertIn((source / 'src/providers/sr_runtime_snapshot.h').resolve(), visited)
+            self.assertFalse(list(source.rglob('*.dll')))
+
+    def test_current_ui_is_reused_with_metadata_provenance(self):
         with tempfile.TemporaryDirectory() as temporary:
             artifact = Path(temporary) / 'artifact'
             # Exercise git's canonical blobs, as the build does. Windows CRLF
@@ -29,6 +73,26 @@ class WindowsBuildChecks(unittest.TestCase):
             with patch.object(candidate.subprocess, 'check_output', return_value=b'stale source'):
                 with self.assertRaisesRegex(RuntimeError, 'source changed'):
                     candidate.copy_current_ui(candidate.REPO, artifact)
+            self.assertFalse(artifact.exists())
+
+    def test_candidate_checks_all_sources_and_keeps_release_payload_frozen(self):
+        path = candidate.REPO / 'qualification/providers/current-ui-build-receipt.json'
+        receipt = json.loads(path.read_text())
+        self.assertTrue(receipt['candidateOnly'])
+        self.assertIn('src/ui/ProviderRuntimeClient.cs', receipt['sourceFileSHA256'])
+        release = json.loads((candidate.REPO / 'qualification/fg-release/ui-build-receipt.json').read_text())
+        manifest = json.loads((candidate.REPO / 'manifest.json').read_text())
+        for name, expected in release['payloadSHA256'].items():
+            self.assertEqual(manifest['files']['Dungeons/Content/Paks/~mods/MCD2Graphics/' + name], expected)
+        original = subprocess.check_output
+        def stale_runtime(args, **kwargs):
+            if args[-1] == 'HEAD:src/ui/ProviderRuntimeClient.cs':
+                return b'stale runtime client'
+            return original(args, **kwargs)
+        with tempfile.TemporaryDirectory() as temporary, patch.object(candidate.subprocess, 'check_output', side_effect=stale_runtime):
+            artifact = Path(temporary) / 'artifact'
+            with self.assertRaisesRegex(RuntimeError, 'source changed'):
+                candidate.copy_current_ui(candidate.REPO, artifact)
             self.assertFalse(artifact.exists())
 
     def test_framework_patch_has_canonical_checkout_and_hash_bytes(self):

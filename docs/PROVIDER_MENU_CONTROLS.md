@@ -28,7 +28,7 @@ The game Blueprint compiler and the native latency build succeeded locally.
 Both platform CI jobs retain their corresponding client and projection checks.
 
 **Not yet admitted:** the normal Video rows still use the existing NVIDIA path.
-The new client and snapshot must be connected to the continuous FSR controller,
-its current-game source acknowledgement and automatic source rollback before
-FSR is exposed there. Compilation and transport checks do not qualify active
+The client now drives the opt-in [continuous FSR controller](FSR_CONTINUOUS_2026-10-09.md),
+including current-game source acknowledgement and automatic source rollback.
+The normal Video rows still need that connection. Compilation and transport checks do not qualify active
 AMD hardware or FSR frame generation. Published installer payloads are unchanged.

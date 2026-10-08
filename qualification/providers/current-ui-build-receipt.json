@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 2,
+  "purpose": "Source-matched provider UI for qualification artifacts only",
+  "candidateOnly": true,
+  "version": "0.3.0-preview.1",
+  "sourceFileSHA256": {
+    "src/ui/ModActor.cs": "152b81c9813bb919463ba46c8ccd96031f6fc1d5829c6853295bf1b9ca9ea473",
+    "src/ui/ProviderSaveWords.cs": "ae796d9934e3b418e08e035d67eb1d0b3c256a30631cf37f6a710897812fdfee",
+    "src/ui/ProviderMenuClient.cs": "0e7f19e4f08ad64aafbe107b0fdc7bb027b9bc60525568f8cb59f4e1149887c6",
+    "src/ui/ProviderRuntimeWords.cs": "fa5f8626af17474a0f60557050b55fbc470ac549726b0e969a810910d0bb632b",
+    "src/ui/ProviderRuntimeClient.cs": "eafcf5da215b8768b9704005683fcb30c0bffd1eec14319e64cf2c51fabac984",
+    "tools/ModInfoBuilder/Program.cs": "25c1217f83fc97942ac5d94dd9e9707ee0fa4b72224b627131cdea3d87c0f5a2"
+  },
+  "payloadSHA256": {
+    "MCD2Graphics_P.pak": "26742f4efb847eaa6fb2d4a2dc9f8806c27be8213bd57b05472b8b344cf18784",
+    "MCD2Graphics_P.ucas": "cf388aa273ab2362e23fa2c28f0cd68bf608891cbcaa2996f435dc75d8a3a09d",
+    "MCD2Graphics_P.utoc": "bce6dccf5a5f8f0c684049e82182b32f3a44fb4141d13f0b541c9e2c3f781c82"
+  },
+  "archiveSHA256": "bfc0b5f542a96cd9d8c90da515a9d1a640401bd575e162a9feac31a026f91d19",
+  "metadataAPI": "Blueprint Loader 2.0 BP_ModInfo; no popup API",
+  "compiler": "NeoRune 0.1.2 / .NET reference pack 10.0.12",
+  "WindowsQualified": false,
+  "LinuxRuntimeQualified": false,
+  "publishedPayloadChanged": false
+}

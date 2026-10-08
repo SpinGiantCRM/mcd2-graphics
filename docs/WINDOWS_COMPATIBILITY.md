@@ -1,5 +1,18 @@
 # Windows fixes: reasons and preservation requirements
 
+The opt-in [continuous FSR controller](FSR_CONTINUOUS_2026-10-09.md) preserves the
+MSVC bridge, native stack guard and independent recording/fence ownership. Its
+context and runtime-response ABI sizes are 288 and 136 bytes. Retain codec,
+source-acknowledgement, actor-travel and corruption checks on both CI platforms.
+Dependency hashes are checked before loading; unsupported or invalid inputs
+cannot lower source resolution without successful preflight. Linux/NVIDIA FSR
+execution does not qualify Windows/AMD runtime, UI parity or AMD FG.
+
+The isolated FG/SR build copies both native and provider headers plus the FSR
+plain C ABI header. Its relative-include closure test must pass before compiling;
+vendor headers and DLLs remain separately acquired. Provider UI source and
+qualification receipts also trigger the Windows candidate build.
+
 The [shared SR guide producer](SR_GUIDES_2026-10-08.md) preserves the existing
 conversion and NGX parameter/output path. Each consumer owns independent
 descriptor/recording leases and retirement fences; one consumer's reset or

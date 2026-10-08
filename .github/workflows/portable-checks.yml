@@ -30,6 +30,7 @@ jobs:
           python3 -m unittest discover -s tests -p "test_sr_guide_producer.py" -v
           python3 -m unittest discover -s tests -p "test_fsr_game_probe.py" -v
           python3 -m unittest discover -s tests -p "test_fsr_sustained_probe.py" -v
+          python3 -m unittest discover -s tests -p "test_fsr_runtime.py" -v
       - name: Provider baseline provenance
         run: |
           git fetch --no-tags --depth=1 origin e421e57e7667f0e9ec71e1940c6daa352a39f0c7
@@ -60,6 +61,8 @@ jobs:
           /tmp/provider-menu-transport
           g++ -std=c++20 -Wall -Wextra -Werror tests/provider_display_projection_test.cpp -o /tmp/provider-display-projection
           /tmp/provider-display-projection
+          g++ -std=c++20 -Wall -Wextra -Werror tests/provider_sr_runtime_test.cpp -o /tmp/provider-sr-runtime
+          /tmp/provider-sr-runtime
           g++ -std=c++20 -Wall -Wextra -Werror tests/provider_store_test.cpp -o /tmp/provider-store
           python3 tests/test_provider_store_process.py /tmp/provider-store -v
           g++ -std=c++20 -Isrc/native tests/settings_bridge_test.cpp -o /tmp/settings-framing
@@ -105,6 +108,7 @@ jobs:
           python -m unittest discover -s tests -p "test_sr_guide_producer.py" -v
           python -m unittest discover -s tests -p "test_fsr_game_probe.py" -v
           python -m unittest discover -s tests -p "test_fsr_sustained_probe.py" -v
+          python -m unittest discover -s tests -p "test_fsr_runtime.py" -v
       - name: Provider baseline provenance
         run: |
           git fetch --no-tags --depth=1 origin e421e57e7667f0e9ec71e1940c6daa352a39f0c7
@@ -130,6 +134,8 @@ jobs:
           ./provider-menu-transport.exe
           g++ -std=c++20 -static -Wall -Wextra -Werror tests/provider_display_projection_test.cpp -o provider-display-projection.exe
           ./provider-display-projection.exe
+          g++ -std=c++20 -static -Wall -Wextra -Werror tests/provider_sr_runtime_test.cpp -o provider-sr-runtime.exe
+          ./provider-sr-runtime.exe
           g++ -std=c++20 -static -Wall -Wextra -Werror tests/provider_observation_test.cpp -o provider-observation.exe
           ./provider-observation.exe
           g++ -std=c++20 -static -municode -Wall -Wextra -Werror tests/provider_store_test.cpp -o provider-store.exe

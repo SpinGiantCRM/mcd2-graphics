@@ -9,7 +9,7 @@ on:
       - 'src/native/**'
       - 'src/latency/**'
       - 'src/providers/**'
-      - 'src/ui/ModActor.cs'
+      - 'src/ui/**'
       - 'tools/ModInfoBuilder/**'
       - 'build.py'
       - 'build_latency.py'
@@ -22,6 +22,7 @@ on:
       - 'qualification/fg-release/own-payload.zip'
       - 'qualification/fg-release/ui-build-receipt.json'
       - 'qualification/fg-release/reshade-reset-epoch.patch'
+      - 'qualification/providers/**'
   workflow_dispatch:
 permissions:
   contents: read
