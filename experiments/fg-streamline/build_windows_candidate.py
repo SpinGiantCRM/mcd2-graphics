@@ -27,23 +27,41 @@ def sha(path):
 def copy_current_ui(repo, artifact):
     # UI logic and metadata have separate provenance. Never reuse the old v27
     # metadata just because ModActor.cs still matches its original receipt.
-    receipt_path = repo / 'qualification/fg-release/ui-build-receipt.json'
+    candidate_receipt = repo / 'qualification/providers/current-ui-build-receipt.json'
+    is_candidate = candidate_receipt.exists()
+    receipt_path = candidate_receipt if is_candidate else repo / 'qualification/fg-release/ui-build-receipt.json'
     ui = json.loads(receipt_path.read_text())
-    for source_path, field in [('src/ui/ModActor.cs', 'sourceSHA256'),
-                               ('tools/ModInfoBuilder/Program.cs', 'modInfoBuilderSHA256')]:
+    if is_candidate:
+        expected_sources = {'src/ui/' + name for name in ('ModActor.cs', 'ProviderSaveWords.cs',
+                            'ProviderMenuClient.cs', 'ProviderRuntimeWords.cs', 'ProviderRuntimeClient.cs')}
+        expected_sources.add('tools/ModInfoBuilder/Program.cs')
+        if ui.get('candidateOnly') is not True or set(ui.get('sourceFileSHA256', {})) != expected_sources:
+            raise RuntimeError('Incomplete candidate UI source provenance')
+        source_hashes = ui['sourceFileSHA256']
+        archive_path = repo / 'qualification/providers/current-ui-payload.zip'
+        if sha(archive_path) != ui['archiveSHA256']:
+            raise RuntimeError('Candidate UI archive hash mismatch')
+    else:
+        source_hashes = {'src/ui/ModActor.cs': ui['sourceSHA256'],
+                         'tools/ModInfoBuilder/Program.cs': ui['modInfoBuilderSHA256']}
+        archive_path = repo / 'qualification/fg-release/own-payload.zip'
+    for source_path, expected in source_hashes.items():
         source = subprocess.check_output(['git', '-C', str(repo), 'show', 'HEAD:' + source_path])
-        if hashlib.sha256(source).hexdigest() != ui[field]:
+        if hashlib.sha256(source).hexdigest() != expected:
             raise RuntimeError('UI source changed: rebuild UI/metadata instead of reusing the payload')
     manifest = json.loads((repo / 'manifest.json').read_text())
     if ui['version'] != manifest['version']:
         raise RuntimeError('UI metadata version differs from the manifest')
     blobs = {}
-    with zipfile.ZipFile(repo / 'qualification/fg-release/own-payload.zip') as archive:
+    with zipfile.ZipFile(archive_path) as archive:
+        if is_candidate and set(archive.namelist()) != {'Dungeons/Content/Paks/~mods/MCD2Graphics/' + name
+                                                       for name in ui['payloadSHA256']}:
+            raise RuntimeError('Unexpected candidate UI archive member')
         for name, expected in ui['payloadSHA256'].items():
             relative = 'Dungeons/Content/Paks/~mods/MCD2Graphics/' + name
             if name not in {'MCD2Graphics_P.pak', 'MCD2Graphics_P.ucas', 'MCD2Graphics_P.utoc'}:
                 raise RuntimeError('Unexpected UI payload member')
-            if manifest['files'].get(relative) != expected:
+            if not is_candidate and manifest['files'].get(relative) != expected:
                 raise RuntimeError('UI receipt differs from the package manifest')
             if archive.namelist().count(relative) != 1:
                 raise RuntimeError('Missing or duplicate UI payload member')

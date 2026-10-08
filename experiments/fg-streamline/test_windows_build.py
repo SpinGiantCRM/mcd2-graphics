@@ -13,7 +13,7 @@ spec.loader.exec_module(candidate)
 
 
 class WindowsBuildChecks(unittest.TestCase):
-    def test_current_package_ui_is_reused_with_metadata_provenance(self):
+    def test_current_ui_is_reused_with_metadata_provenance(self):
         with tempfile.TemporaryDirectory() as temporary:
             artifact = Path(temporary) / 'artifact'
             # Exercise git's canonical blobs, as the build does. Windows CRLF
@@ -29,6 +29,26 @@ class WindowsBuildChecks(unittest.TestCase):
             with patch.object(candidate.subprocess, 'check_output', return_value=b'stale source'):
                 with self.assertRaisesRegex(RuntimeError, 'source changed'):
                     candidate.copy_current_ui(candidate.REPO, artifact)
+            self.assertFalse(artifact.exists())
+
+    def test_candidate_checks_all_sources_and_keeps_release_payload_frozen(self):
+        path = candidate.REPO / 'qualification/providers/current-ui-build-receipt.json'
+        receipt = json.loads(path.read_text())
+        self.assertTrue(receipt['candidateOnly'])
+        self.assertIn('src/ui/ProviderRuntimeClient.cs', receipt['sourceFileSHA256'])
+        release = json.loads((candidate.REPO / 'qualification/fg-release/ui-build-receipt.json').read_text())
+        manifest = json.loads((candidate.REPO / 'manifest.json').read_text())
+        for name, expected in release['payloadSHA256'].items():
+            self.assertEqual(manifest['files']['Dungeons/Content/Paks/~mods/MCD2Graphics/' + name], expected)
+        original = subprocess.check_output
+        def stale_runtime(args, **kwargs):
+            if args[-1] == 'HEAD:src/ui/ProviderRuntimeClient.cs':
+                return b'stale runtime client'
+            return original(args, **kwargs)
+        with tempfile.TemporaryDirectory() as temporary, patch.object(candidate.subprocess, 'check_output', side_effect=stale_runtime):
+            artifact = Path(temporary) / 'artifact'
+            with self.assertRaisesRegex(RuntimeError, 'source changed'):
+                candidate.copy_current_ui(candidate.REPO, artifact)
             self.assertFalse(artifact.exists())
 
     def test_framework_patch_has_canonical_checkout_and_hash_bytes(self):

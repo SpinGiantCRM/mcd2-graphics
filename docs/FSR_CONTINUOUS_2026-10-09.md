@@ -61,6 +61,13 @@ bridge and official AMD framework under `MCD2Graphics/fsr`, and
 checks the bridge build pin and the tested framework hash before loading either.
 The same native stack guard and separate SDK acquisition requirements apply.
 
+Windows qualification artifacts use `qualification/providers/current-ui-payload.zip`,
+compiled from the normal UI without the private chooser. Its receipt checks all
+five UI source files and the metadata builder against canonical Git blobs,
+plus the archive and all three payload hashes. Stale source is refused before
+writing. The released UI bundle and installer manifest remain unchanged. This
+candidate bundle is build evidence and needs its own runtime qualification.
+
 The trial sent choices through the real game-thread menu client using a
 temporary mod-owned chooser. The normal Video rows remain on the existing
 NVIDIA path. Balanced, Custom, resize/travel, longer sessions, comparative
