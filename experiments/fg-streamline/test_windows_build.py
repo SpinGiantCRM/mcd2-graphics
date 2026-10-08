@@ -6,6 +6,7 @@ import unittest
 import subprocess
 import json
 import re
+import shutil
 from unittest.mock import patch
 
 spec = importlib.util.spec_from_file_location('windows_candidate', Path(__file__).with_name('build_windows_candidate.py'))
@@ -17,6 +18,19 @@ source_spec.loader.exec_module(source_tree)
 
 
 class WindowsBuildChecks(unittest.TestCase):
+    def test_copied_fsr_abi_is_guarded_across_independent_include_paths(self):
+        # The sustained probe and production runtime include separate copies.
+        # pragma once alone does not deduplicate those files with Clang.
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary).resolve()
+            content = (candidate.REPO / 'experiments/providers/fsr_game_bridge.h').read_bytes()
+            for name in ('first.h', 'second.h'):
+                (root / name).write_bytes(content)
+            (root / 'test.cpp').write_text('#include "first.h"\n#include "second.h"\nint main(){}\n')
+            compiler = shutil.which('clang++') or shutil.which('g++')
+            self.assertIsNotNone(compiler, 'C++ compiler required by both CI platforms')
+            subprocess.run([compiler, '-std=c++20', '-fsyntax-only', str(root / 'test.cpp')], check=True)
+
     def test_isolated_sr_source_contains_its_relative_include_closure(self):
         with tempfile.TemporaryDirectory() as temporary:
             # Windows runners may expose the temp directory through an 8.3

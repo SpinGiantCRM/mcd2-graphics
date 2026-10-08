@@ -1,4 +1,6 @@
 #pragma once
+#ifndef MCD2_FSR_GAME_BRIDGE_V1_H
+#define MCD2_FSR_GAME_BRIDGE_V1_H
 #include <stdint.h>
 // Plain C ABI only: SDK descriptors and Microsoft COM calls stay in the bridge.
 // Every texture and command recording remains owned by the calling generation.
@@ -31,3 +33,4 @@ extern "C" {
  // Failure preserves the context/module. Successful destroy consumes the session.
  int mcd2_fsr_destroy_v1(void *session,void *postInvalidationFence,uint64_t requiredValue);
 }
+#endif
