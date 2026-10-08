@@ -396,3 +396,27 @@ fixtures. The hosted runner otherwise exits with code 127 before entering the
 test because the compiler's dependent runtime DLLs are not on its launch path.
 The consolidated transport and authority-reader cutover still require rebuilt
 Windows runtime checks; these fixtures do not establish that qualification.
+
+
+## Consolidated menu save transport
+
+The opt-in transport runs on the existing settings worker, including when the
+NVIDIA provider is unavailable. Preserve the worker's startup/join lifecycle;
+transport failures must not initialize a feature or change rendering settings.
+Its CRC word slots accept the full signed IntProperty bit pattern without
+weakening the legacy nonnegative parser. The authority response preserves the
+verified UE seed and uses flushed, atomic replacement; missing/corrupt authority,
+wrong sessions and stale CAS stamps fail closed. Keep response publication off
+render/present callbacks and avoid per-poll writes of identical snapshots.
+
+Portable native tests exercise real request/response files, sessions, no-op
+retries, corrupt authority preservation and unchanged-response timestamps.
+The exact C# client source runs with test-only UE substitutes on both CI
+platforms; 4,000 CRC comparisons do not qualify UE serialization. The separately
+compiled NeoRune overlay has bounded Linux runtime evidence. Its timer is driven
+by the game actor, not a detached SaveGame object's world context. The frozen
+Windows candidate UI remains reused only under its existing source/hash checks;
+the experimental overlay is not silently substituted into that artifact.
+The recipe records all provider header hashes in the native candidate receipt.
+New Windows UE/native runtime checks are still required for this transport and
+for the later real-control/runtime-reader cutover.

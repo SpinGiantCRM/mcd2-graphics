@@ -97,7 +97,8 @@ public:
     // not proof of an atomic multi-slot UI transaction; authoritative cutover
     // requires a single consolidated UI request and separate qualification.
     template<class Recheck>
-    ObservationResult observe(const LegacySnapshot& snapshot, const GraphicsStore& store, Recheck recheck) {
+    ObservationResult observe(const LegacySnapshot& snapshot, const GraphicsStore& store, Recheck recheck,
+                              bool allowLegacyUpdates = true) {
         GraphicsIntent incoming;
         if (!decodeObserved(snapshot, incoming)) { seen_ = false; return {ObservationStatus::Rejected, StoreStatus::Invalid, {}}; }
         if (!seen_ || previous_ != snapshot) {
@@ -108,6 +109,11 @@ public:
         if (loaded.status != StoreStatus::Ok && loaded.status != StoreStatus::Missing)
             return {ObservationStatus::StoreFailure, loaded.status, {}};
         if (loaded.status == StoreStatus::Ok) {
+            // Initialization-only users must not update an authority that
+            // appeared between their missing-file probe and this read. The
+            // missing case below still commits with the store's empty CAS.
+            if (!allowLegacyUpdates)
+                return {ObservationStatus::Unchanged, StoreStatus::Ok, loaded.stamp};
             // Never downgrade a future provider request through an old UI.
             if (!legacyRepresentable(current.intent)) return {ObservationStatus::Rejected, StoreStatus::Invalid, loaded.stamp};
             if (sameObservedPreferences(current.intent, incoming))

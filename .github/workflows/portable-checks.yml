@@ -28,6 +28,7 @@ jobs:
         run: |
           git fetch --no-tags --depth=1 origin e421e57e7667f0e9ec71e1940c6daa352a39f0c7
           python3 -m unittest discover -s tests -p "test_provider_baseline.py" -v
+          python3 -m unittest discover -s tests -p "test_provider_menu_overlay.py" -v
           python3 tools/provider_baseline.py verify
       - name: Bounded FG controller and camera checks
         run: |
@@ -49,6 +50,8 @@ jobs:
           /tmp/provider-observation
           g++ -std=c++20 -Wall -Wextra -Werror tests/provider_menu_request_test.cpp -o /tmp/provider-menu-request
           /tmp/provider-menu-request
+          g++ -std=c++20 -Wall -Wextra -Werror tests/provider_menu_transport_test.cpp -o /tmp/provider-menu-transport
+          /tmp/provider-menu-transport
           g++ -std=c++20 -Wall -Wextra -Werror tests/provider_store_test.cpp -o /tmp/provider-store
           python3 tests/test_provider_store_process.py /tmp/provider-store -v
           g++ -std=c++20 -Isrc/native tests/settings_bridge_test.cpp -o /tmp/settings-framing
@@ -90,6 +93,7 @@ jobs:
         run: |
           git fetch --no-tags --depth=1 origin e421e57e7667f0e9ec71e1940c6daa352a39f0c7
           python -m unittest discover -s tests -p "test_provider_baseline.py" -v
+          python -m unittest discover -s tests -p "test_provider_menu_overlay.py" -v
           python tools/provider_baseline.py verify
       - name: Provider intent contract
         shell: bash
@@ -102,6 +106,8 @@ jobs:
           ./provider-legacy.exe
           g++ -std=c++20 -static -Wall -Wextra -Werror tests/provider_menu_request_test.cpp -o provider-menu-request.exe
           ./provider-menu-request.exe
+          g++ -std=c++20 -static -Wall -Wextra -Werror tests/provider_menu_transport_test.cpp -o provider-menu-transport.exe
+          ./provider-menu-transport.exe
           g++ -std=c++20 -static -Wall -Wextra -Werror tests/provider_observation_test.cpp -o provider-observation.exe
           ./provider-observation.exe
           g++ -std=c++20 -static -municode -Wall -Wextra -Werror tests/provider_store_test.cpp -o provider-store.exe
@@ -126,6 +132,8 @@ jobs:
           dotnet-version: '10.0.401'
       - name: DLSS foliage ownership checks
         run: python tests/test_fg_foliage_policy.py
+      - name: Consolidated menu checksum client
+        run: dotnet run --project tests/provider-menu-client/ProviderMenuClient.Tests.csproj -c Release
       - name: Guided installer file-safety checks
         run: dotnet run --project tests/installer-core/InstallerCore.Tests.csproj -c Release
       - name: Compile standalone GUI
