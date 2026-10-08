@@ -65,6 +65,13 @@ static void lean_submission(a::command_queue*,a::command_list*);
 static void lean_forget_recording(a::command_list*);
 static void lean_reset_recording(a::command_list*);
 static void lean_begin_recording(a::command_list*);
+static void guide_probe_record(a::command_list*);
+static void guide_probe_present(a::command_queue*,std::unique_lock<std::recursive_mutex>&);
+static void guide_probe_submit(a::command_queue*,a::command_list*);
+static void guide_probe_begin(a::command_list*);
+static void guide_probe_reset(a::command_list*);
+static void guide_probe_forget(a::command_list*);
+static void guide_probe_destroy_queue(a::command_queue*);
 static bool live_saved_gate(a::command_list*,uint32_t,uint32_t,uint32_t,uint32_t);
 static bool live_current_gate(a::command_list*,uint32_t,uint32_t,uint32_t,uint32_t);
 static bool init_live_saved(a::command_queue*,std::unique_lock<std::recursive_mutex>* = nullptr);
@@ -390,7 +397,7 @@ static bool state_gate(a::command_list *cmd,uint32_t shader,uint32_t x,uint32_t 
 static bool dispatch(a::command_list *cmd,uint32_t x,uint32_t y,uint32_t z) {
  if(internal_evaluation)return false;
  std::lock_guard guard(lock);lean_begin_recording(cmd);auto shader=commands[cmd].cs;bool first_taa=!seen_taa;
- if(is_taa(shader) && first_taa){seen_taa=true;return lean_gate(cmd,shader,x,y,z);}
+ if(is_taa(shader) && first_taa){seen_taa=true;guide_probe_record(cmd);return lean_gate(cmd,shader,x,y,z);}
  return false;
  // Historical diagnostic dispatch routes below are inactive in the lean build.
  if(remaining)++frame_compute_counts[shader];if(is_taa(shader) || shader==AO)observe(cmd,shader,true);
@@ -441,7 +448,7 @@ static bool indirect(a::command_list *cmd,a::indirect_command type,a::resource,u
 static bool draw(a::command_list *cmd,uint32_t,uint32_t,uint32_t,uint32_t) {std::lock_guard guard(lock);lean_begin_recording(cmd);auto shader=commands[cmd].ps;if(remaining)++frame_pixel_counts[shader];if(shader==UI)observe(cmd,UI,false);return false;}
 static bool draw_indexed(a::command_list *cmd,uint32_t,uint32_t,uint32_t,int32_t,uint32_t) {return draw(cmd,0,0,0,0);}
 static void execute(a::command_queue *q,a::command_list *cmd) {std::lock_guard guard(lock);
- timer_execute(q,cmd);lean_submission(q,cmd);
+ timer_execute(q,cmd);guide_probe_submit(q,cmd);lean_submission(q,cmd);
  auto pending=current_submissions.find(cmd);if(pending!=current_submissions.end()){
   auto queue=q->get_native();if(!current_submission_queue)current_submission_queue=queue;bool same=queue==current_submission_queue;if(!same)current_queue_mismatch=true;
   for(auto [submitted_frame,index]:pending->second)records.push_back("{\"kind\":\"live_queue_submission\",\"frame\":"+std::to_string(submitted_frame)+",\"index\":"+std::to_string(index)+",\"queue\":"+std::to_string(queue)+",\"sameIntegrationQueue\":"+std::string(same?"true":"false")+"}");current_submissions.erase(pending);
@@ -573,12 +580,13 @@ static void probe_ngx(a::command_queue *queue,const std::string &mode) {
 #include "ngx_live_continuous.hpp"
 #include "ngx_live_current.hpp"
 #include "ngx_lean.hpp"
+#include "sr_guide_probe.hpp"
 #include "render_timing.hpp"
 static void finish_present(a::command_queue *q,a::swapchain *sc) {
  std::unique_lock guard(lock);
  if(q->get_device()->get_api()!=a::device_api::d3d12)return;
  timer_present_interval();auto present_ms=GetTickCount64();frame_delta_ms=previous_present_ms?double(present_ms-previous_present_ms):0.;previous_present_ms=present_ms;
- lean_present(q,guard);timer_present(q);++frame;seen_taa=seen_ui=seen_ao=false;
+ guide_probe_present(q,guard);lean_present(q,guard);timer_present(q);++frame;seen_taa=seen_ui=seen_ao=false;
  auto release_batch=std::move(lean.borrow.ready_to_release);lean.borrow.ready_to_release.clear();
  for(auto &entry:native_reset_borrows.ready_to_release)release_batch.push_back(entry);native_reset_borrows.ready_to_release.clear();
  guard.unlock();for(auto &entry:release_batch)LeanBorrowCache::release(entry);return;
@@ -622,7 +630,7 @@ static void destroy_cmd(a::command_list *cmd){std::lock_guard guard(lock);timer_
 static void init_device(a::device *d) {if(d->get_api()==a::device_api::d3d12)reshade::log::message(reshade::log::level::info,"MCD2 observer D3D12 initialized; captures only on explicit request file");}
 static void init_queue(a::command_queue *q){std::lock_guard guard(lock);if(capture_probe_queue)probe_queue_api=q;}
 static void destroy_queue(a::command_queue *q) {
- std::unique_lock guard(lock);
+ std::unique_lock guard(lock);guide_probe_destroy_queue(q);
  if(native_reset_queue==q){native_reset_borrows.blocked=true;native_reset_queue=nullptr;}
  if(!live_fixture || live_fixture->integration_queue!=q)return;
  lean.terminal=true;lean.wanted=false;

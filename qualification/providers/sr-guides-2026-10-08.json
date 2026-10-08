@@ -1,0 +1,293 @@
+{
+  "scope": "Independent pre-temporal guide production on real game frames and shared-converter DLSS regression; no game FSR evaluation",
+  "sourceBase": "2f0696eab0328eec5bf57c116cf9ab320ac07d80",
+  "build": {
+    "purpose": "provider-independent pre-temporal guides, bounded capture and DLSS regression",
+    "binarySHA256": "07676c0d30f50514a04554800a3a467402c0ec6f3993f23e49e336049633a17e",
+    "sourceSHA256": {
+      "build.py": "2a2222285b020cdc557a5df5bf5bf174cde5883a1bd3dc3c803d13b0e9003152",
+      "src/native/observer.cpp": "5586a340a45a40cc21cbbdd25d763b23c72a73714480e698a03aa259a6cd4807",
+      "src/native/dlss_model_override.hpp": "84e00b0e6517809d7f7792b5ef4ca6d7fb1d6bedd14f84719d63924d412488b1",
+      "src/native/lean_borrow_lifetime.hpp": "dfcfde89bfcd6f9d4a60e7ef897813fbb15efea9871cb97b0f0919c48fed8d21",
+      "src/native/native_reset_gate.hpp": "6309042b6a1c7d72d11e7429f9a6a00f9d4451a3521c4b1e8675950e00772bf8",
+      "src/native/ngx_dense_motion.hpp": "6731007b6c7cca0da03a18b2138571476955d31a75fc5cbc0899e7747faae559",
+      "src/native/ngx_lean.hpp": "f8f663da2d24789ecda0bc6552bc9d598b17c263460ed6bf42075d0d722c732f",
+      "src/native/ngx_live_continuous.hpp": "ec55ee421b81338914bf2c8f259f7521d5260646bb9c9365f3daa991a8a1cea5",
+      "src/native/ngx_live_current.hpp": "1f86327e2a2f8451a2bfafcd2099e764508f7edac07db79abd33e73215d98313",
+      "src/native/ngx_live_fixture.hpp": "5e819a32e22f9290bd8bb7f60bdaa791ffadb8edbe36acdfe656de693dec4d97",
+      "src/native/ngx_parameter_bridge.hpp": "5f18b80dd2d61a99ce0930c301762ffde90d74b286e1d5ebd00b8fc36d365ab4",
+      "src/native/ngx_saved_eval.hpp": "c835227f6cc7a75709155659ac1e11dfd130ac6844bd3cd8661f7c424c77dcc4",
+      "src/native/render_timing.hpp": "7b46f7ac819c9f24ccb9fc4bae660f839d009ade2b26de6127b8f15dcc0d7802",
+      "src/native/reset_epoch_contract.hpp": "61fbc3f6e8390daa4b7366be1aea3428bbdef0f12969a887305c79b6301d6c8b",
+      "src/native/reshade_public_bridge.hpp": "a9b8d00521045bb4547294b91f059d35ec463c2fb548c4a97d77d10e8d1e2be9",
+      "src/native/settings_bridge.hpp": "ed32ece139c38b3b6e89d8364db1ec1502171d8e769dadc93ec3952fe4af2c5e",
+      "src/native/sr_guide_probe.hpp": "99ea9c1a7bd8b0997c002f97a333c35c0361dc579e7f79b5a18598cdc7a65ecf",
+      "src/native/sr_guide_producer.hpp": "ff80a5cf0eee78bd1e034811f39a70db3f27afc183e4be99bcb86cd04a446ff2",
+      "src/native/ui_control_present.hpp": "1c8b0882bb86b77b35ec0bf553d9f50da88f7699b3441bb3d46c0d2ecf190a0b",
+      "src/native/ui_control_state.hpp": "fe9b29983944579bb24aef3c79ab15fea7b52d4011e79631130ac367c539046b",
+      "src/native/upscaler_support.hpp": "e023c92f30eadd161040a033b69063316af5bb56a834902e968c23bec1404c76"
+    },
+    "diagnostics": true,
+    "WindowsQualified": false,
+    "SDKRuntimeBundled": false
+  },
+  "productionBuildSHA256": "5b5e5c1adbde82543807aaba71b68e28bee529bf2874ecd5990710a902b0efcb",
+  "platform": "CachyOS Proton cachyos-11.0-20261005-slr; RTX 4080 SUPER; Steam build 25754144; native Wayland HDR",
+  "nativeGuideSamples": [
+    {
+      "sample": 0,
+      "dimensions": [
+        3840,
+        2160
+      ],
+      "depthMinMax": [
+        0.0019807731732726097,
+        0.004687039647251368
+      ],
+      "nonzeroDepthPixels": 8294400,
+      "motionAbsoluteMax": 6.234375,
+      "motionAbsoluteP99": 0.0,
+      "exposure": 0.179995596408844,
+      "preExposure": 0.30654221773147583,
+      "jitterPixels": [
+        0.37500000558793545,
+        0.05555558294872753
+      ],
+      "projection": [
+        2.4142138957977295,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        4.291935920715332,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        10.0,
+        0.0
+      ],
+      "activeRectangleInclusive": [
+        0,
+        0,
+        3839,
+        2159
+      ],
+      "finite": true,
+      "NGXContextCreated": false
+    },
+    {
+      "sample": 1,
+      "dimensions": [
+        3840,
+        2160
+      ],
+      "depthMinMax": [
+        0.001980588072910905,
+        0.004688945598900318
+      ],
+      "nonzeroDepthPixels": 8294400,
+      "motionAbsoluteMax": 6.58984375,
+      "motionAbsoluteP99": 0.0,
+      "exposure": 0.179995596408844,
+      "preExposure": 0.306448370218277,
+      "jitterPixels": [
+        -0.43750000186264515,
+        0.38888895884156227
+      ],
+      "projection": [
+        2.4142138957977295,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        4.291935920715332,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        10.0,
+        0.0
+      ],
+      "activeRectangleInclusive": [
+        0,
+        0,
+        3839,
+        2159
+      ],
+      "finite": true,
+      "NGXContextCreated": false
+    }
+  ],
+  "qualityGuideSamples": [
+    {
+      "sample": 0,
+      "dimensions": [
+        2560,
+        1440
+      ],
+      "depthMinMax": [
+        0.0019811762031167746,
+        0.004688923712819815
+      ],
+      "motionAbsoluteMax": 3.033203125,
+      "exposure": 0.17999719083309174,
+      "preExposure": 0.2269962877035141,
+      "activeRectangleInclusive": [
+        0,
+        0,
+        2559,
+        1439
+      ],
+      "finite": true,
+      "independentLeaseRetired": true
+    },
+    {
+      "sample": 1,
+      "dimensions": [
+        2560,
+        1440
+      ],
+      "depthMinMax": [
+        0.0019808963406831026,
+        0.004681337624788284
+      ],
+      "motionAbsoluteMax": 3.412109375,
+      "exposure": 0.17999719083309174,
+      "preExposure": 0.22698253393173218,
+      "activeRectangleInclusive": [
+        0,
+        0,
+        2559,
+        1439
+      ],
+      "finite": true,
+      "independentLeaseRetired": true
+    }
+  ],
+  "readbacksAfterGPUFence": true,
+  "nativeGuideNGXContext": false,
+  "qualityGuideNGXContext": true,
+  "probeSDKCalls": 0,
+  "probeOutputReplaced": false,
+  "probeSourceScaleChanged": false,
+  "probeBundlesRetired": {
+    "native": 2,
+    "quality": 2
+  },
+  "dlssRegression": {
+    "qualityActiveSnapshot": {
+      "evaluations": 4452,
+      "transientFallbacks": 0,
+      "nativeDispatches": 0,
+      "nativeResets": 0,
+      "failures": 0,
+      "missingTAAFrames": 0,
+      "immutableHeaps": 2,
+      "recordedLists": 1,
+      "resetPendingLists": 0,
+      "retiredBundles": 1269,
+      "peakBundles": 4,
+      "fenceSignals": 4447,
+      "fenceCompleted": 4445,
+      "retirementBlocked": false,
+      "featurePresent": true,
+      "nativeResetBuffers": 0,
+      "nativeResetRecordedLists": 0,
+      "nativeResetRetired": 0,
+      "nativeResetBlocked": false,
+      "on": true,
+      "historyDirty": true
+    },
+    "qualityAfterChange": {
+      "evaluations": 4628,
+      "transientFallbacks": 0,
+      "nativeDispatches": 11,
+      "nativeResets": 1,
+      "failures": 0,
+      "missingTAAFrames": 57706,
+      "immutableHeaps": 0,
+      "recordedLists": 0,
+      "resetPendingLists": 0,
+      "retiredBundles": 1320,
+      "peakBundles": 4,
+      "fenceSignals": 4624,
+      "fenceCompleted": 0,
+      "retirementBlocked": false,
+      "featurePresent": false,
+      "nativeResetBuffers": 0,
+      "nativeResetRecordedLists": 0,
+      "nativeResetRetired": 1,
+      "nativeResetBlocked": false,
+      "on": false,
+      "historyDirty": false
+    },
+    "dlaaActiveSnapshot": {
+      "evaluations": 3049,
+      "transientFallbacks": 0,
+      "nativeDispatches": 0,
+      "nativeResets": 0,
+      "failures": 0,
+      "missingTAAFrames": 0,
+      "immutableHeaps": 3,
+      "recordedLists": 1,
+      "resetPendingLists": 0,
+      "retiredBundles": 3046,
+      "peakBundles": 4,
+      "fenceSignals": 3045,
+      "fenceCompleted": 3043,
+      "retirementBlocked": false,
+      "featurePresent": true,
+      "nativeResetBuffers": 0,
+      "nativeResetRecordedLists": 0,
+      "nativeResetRetired": 1,
+      "nativeResetBlocked": false,
+      "on": true,
+      "historyDirty": true
+    },
+    "dlaaAfterNativeReturn": {
+      "evaluations": 3138,
+      "transientFallbacks": 0,
+      "nativeDispatches": 7,
+      "nativeResets": 1,
+      "failures": 0,
+      "missingTAAFrames": 41278,
+      "immutableHeaps": 0,
+      "recordedLists": 0,
+      "resetPendingLists": 0,
+      "retiredBundles": 3138,
+      "peakBundles": 4,
+      "fenceSignals": 3135,
+      "fenceCompleted": 0,
+      "retirementBlocked": false,
+      "featurePresent": false,
+      "nativeResetBuffers": 0,
+      "nativeResetRecordedLists": 0,
+      "nativeResetRetired": 2,
+      "nativeResetBlocked": false,
+      "on": false,
+      "historyDirty": false
+    }
+  },
+  "restoration": {
+    "releasePayloadHashesMatched": 12,
+    "modStateSlotsRestored": 6,
+    "playerAccountSavesTouched": false
+  },
+  "limits": {
+    "gameFSRExecution": false,
+    "FSRFrameGeneration": false,
+    "WindowsRuntimeQualified": false,
+    "performanceBenchmark": false,
+    "movingCameraGuideQuality": false
+  },
+  "negativeTrial": "An earlier pre-launch capture request timed out before gameplay and retired without a successful capture; excluded from pass evidence."
+}

@@ -1,3 +1,4 @@
+#pragma once
 // Private single-integration-queue gate. A recorded command list remains an
 // owner even after submission: it can legally be submitted again until reset.
 // ReShade's execute event precedes ExecuteCommandLists, so never signal there.
