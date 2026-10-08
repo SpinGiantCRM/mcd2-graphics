@@ -24,6 +24,11 @@ jobs:
         run: python3 -m unittest discover -s tests -p "test_installer_*.py" -v
       - name: Native build recipe regressions
         run: python3 -m unittest discover -s tests -p "test_build_toolchain.py" -v
+      - name: Provider baseline provenance
+        run: |
+          git fetch --no-tags --depth=1 origin e421e57e7667f0e9ec71e1940c6daa352a39f0c7
+          python3 -m unittest discover -s tests -p "test_provider_baseline.py" -v
+          python3 tools/provider_baseline.py verify
       - name: Bounded FG controller and camera checks
         run: |
           python3 -m unittest discover -s experiments/fg-streamline -p "test_*.py" -v
@@ -69,6 +74,11 @@ jobs:
         run: python -m unittest discover -s tests -p "test_installer_*.py" -v
       - name: Native build recipe regressions
         run: python -m unittest discover -s tests -p "test_build_toolchain.py" -v
+      - name: Provider baseline provenance
+        run: |
+          git fetch --no-tags --depth=1 origin e421e57e7667f0e9ec71e1940c6daa352a39f0c7
+          python -m unittest discover -s tests -p "test_provider_baseline.py" -v
+          python tools/provider_baseline.py verify
       - name: Bounded FG controller checks
         run: python -m unittest discover -s experiments/fg-streamline -p "test_*.py" -v
 
