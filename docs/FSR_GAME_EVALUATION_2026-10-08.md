@@ -46,6 +46,10 @@ slots were restored after the game closed; experimental DLLs were removed.
 
 ## Remaining gates
 
+The subsequent [bounded sustained output gate](FSR_SUSTAINED_OUTPUT_2026-10-08.md)
+verified the world scale and exercised display replacement and normal Native
+history fallback. The limitations below describe this original two-frame gate.
+
 This two-frame experiment does not qualify reduced-resolution reconstruction,
 display substitution, native-history fallback, sustained playback, transitions,
 moving-camera quality, particles/transparency or performance. The world-unit
