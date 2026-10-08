@@ -63,6 +63,29 @@ license are copied into its artifact; fake driver/test binaries are excluded.
 Local bridge and actual FG latency-candidate builds pass frame guards. Existing
 Reflex token, engine-layout, build-recipe and FG regressions pass.
 
+## Bounded Linux/NVIDIA game check
+
+The final source-matched latency addon SHA-256 is
+`f8bb76ca4301721827fa9e45e8dc3cda96fabae9b2c07e1c2820351366b7bf16`.
+The local SDK bridge SHA-256 is
+`9da5e85b5198d08dd11a0a8866a38fd34320f3757f36cde6ee648850b0304230`.
+Only the latency addon and opt-in bootstrap policy were temporarily installed;
+the AMD bridge was deliberately absent from the game directory.
+
+On Steam build 25754144 / CachyOS Proton SLR / RTX 4080 SUPER, the game reached
+the main menu and world. Process mappings confirmed the exact latency addon and
+neither an AMD bridge nor driver. AMD eligibility was rejected; availability,
+active state, input calls and render calls remained zero. Reflex On completed
+24,142 real frames by the sampled checkpoint with zero coordinator, marker or
+Reflex faults. This establishes bounded fallback and continued NVIDIA timing,
+not performance parity, latency reduction or active AMD support.
+
+After normal shutdown, all twelve released payload hashes and the six mod-owned
+settings/runtime slots matched their backups byte for byte. No player/account
+save, raw log or screenshot is included in this report. Both portable platform
+CI jobs and the full native Windows FG/Anti-Lag build passed at implementation
+commit `ff88e33b`, including execution of the synthetic SDK-interface fixture.
+
 ## Remaining qualification
 
 Native Windows/AMD must verify the actual adapter/driver, Off/On through real
