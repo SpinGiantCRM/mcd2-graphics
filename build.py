@@ -45,7 +45,7 @@ args=['build','--mod=MCD2Graphics','--out='+str(o/'ui'),'--tools='+str(a.pack_to
 args += ['--source='+str(a.neorune_sdk/'src'/f)for f in ('Log.cs','Timer.cs','World.cs')]
 args += ['--ref='+str(f)for f in sorted(refs.glob('*.dll'))]
 args += ['--ref='+str(a.neorune_sdk/'ref'/f)for f in ('NeoRune.Abstractions.dll','NeoRune.Game.dll')]
-args += ['--source='+str(r/'src/ui/ModActor.cs')]
+args += ['--source='+str(r/'src/ui'/f) for f in ('ModActor.cs','ProviderSaveWords.cs','ProviderMenuClient.cs')]
 rsp=o/'ui-build.rsp';rsp.write_text('\n'.join(args)+'\n')
 c=subprocess.run([str(a.dotnet),str(a.neorune_sdk/'tools/neorune.dll'),'@'+str(rsp)],capture_output=True,text=True)
 (o/'ui-build.log').write_text(c.stdout+c.stderr)

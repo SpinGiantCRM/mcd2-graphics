@@ -19,6 +19,8 @@
 #include "display_protocol.hpp"
 #include "../providers/observed_settings.hpp"
 #include "../providers/menu_save_transport.hpp"
+#include "../providers/display_projection.hpp"
+#include "../providers/menu_snapshot.h"
 #include "engine_layout.hpp"
 #include "amd_latency.hpp"
 #include <condition_variable>
@@ -89,6 +91,8 @@ std::thread settingsWorker;std::mutex workerMutex;std::condition_variable worker
 unsigned sessionId=0;
 bool observeProviderSettings=false;
 bool consolidatedMenuTransport=false;
+std::mutex providerSnapshotMutex;
+MCD2MenuSnapshotV1 providerSnapshot{sizeof(MCD2MenuSnapshotV1),0,2,0,{}};
 struct Feature {void** main;void** modular;};
 std::mutex mutex;std::ofstream log;std::filesystem::path requestPath;unsigned requestId=0,presentCounter=0;uintptr_t base=0;const mcd2::engine::Layout*engineLayout=nullptr;void*registry=nullptr;
 uint64_t latencyName=0,pacingName=0;std::atomic<bool> installed=false;
@@ -157,10 +161,20 @@ void settings_loop(){std::map<std::string,unsigned> last;auto nextStatus=std::ch
    menuTransport=std::make_unique<mcd2::providers::MenuSaveTransport>(savesPath,authorityPath,sessionId);
  }
  while(!workerStop){
-  if(menuTransport){try{menuTransport->poll();}catch(...){/* A transport failure cannot activate a feature. */}}
+  mcd2::providers::MenuAuthority shared;
+  if(menuTransport){try{shared=menuTransport->poll();}catch(...){/* A transport failure cannot activate a feature. */}}
+  if(consolidatedMenuTransport){
+   MCD2MenuSnapshotV1 snapshot{sizeof(MCD2MenuSnapshotV1),sessionId,unsigned(shared.load),0,{}};
+   mcd2::providers::GraphicsRecord bytes;
+   if(shared.load==mcd2::providers::StoreStatus::Ok && mcd2::providers::encodeGraphicsRecord(shared.current.intent,bytes))
+    std::copy(bytes.begin(),bytes.end(),snapshot.record);
+   else snapshot.load=unsigned(mcd2::providers::StoreStatus::Invalid);
+   std::lock_guard lock(providerSnapshotMutex);providerSnapshot=snapshot;
+  }
   if(amdLatencyOptIn){mcd2::amd_latency::Request request;
    try{mcd2::providers::DecodedGraphicsRecord record;mcd2::providers::GraphicsStore authority(authorityPath);
-    if(authority.load(record).status==mcd2::providers::StoreStatus::Ok)request=mcd2::amd_latency::resolve(record);
+    if(consolidatedMenuTransport){if(shared.load==mcd2::providers::StoreStatus::Ok)request=mcd2::amd_latency::resolve(shared.current);}
+    else if(authority.load(record).status==mcd2::providers::StoreStatus::Ok)request=mcd2::amd_latency::resolve(record);
    }catch(...){/* Missing/corrupt authority resolves to Off, never legacy Reflex. */}
    std::lock_guard lock(amdRequestMutex);amdRequest=request;
   }
@@ -171,8 +185,16 @@ void settings_loop(){std::map<std::string,unsigned> last;auto nextStatus=std::ch
    });
    else {observations.invalidate();observation={mcd2::providers::ObservationStatus::Rejected,mcd2::providers::StoreStatus::Invalid,{}};}
   }catch(...){observations.invalidate();observation={mcd2::providers::ObservationStatus::StoreFailure,mcd2::providers::StoreStatus::IoError,{}};}}
-  try {auto bytes=read_slot(savesPath/L"MCD2GraphicsDisplaySettings.sav");mcd2::display::Intent incoming;
-   if(mcd2::display::decode(bytes,incoming)){std::lock_guard lock(intentMutex);latestIntent=incoming;currentMode=reflexAvailable?incoming.reflex:0;}
+  try {mcd2::display::Intent incoming;bool publish=false;
+   if(consolidatedMenuTransport){
+    if(shared.load==mcd2::providers::StoreStatus::Ok){auto p=mcd2::providers::projectDisplay(shared.current);
+     if(p.valid)incoming={p.revision,p.hdr,p.peak,p.paper,p.ui,p.reflex};
+    }
+    // Invalid shared state disables latency; revision zero leaves HDR untouched.
+    // Never replace committed provider intent with a legacy display preference.
+    publish=true;
+   }else {auto bytes=read_slot(savesPath/L"MCD2GraphicsDisplaySettings.sav");publish=mcd2::display::decode(bytes,incoming);}
+   if(publish){std::lock_guard lock(intentMutex);latestIntent=incoming;currentMode=reflexAvailable?incoming.reflex:0;}
    mcd2::display::Intent intent;{std::lock_guard lock(intentMutex);intent=latestIntent;}
    auto c=controller();unsigned applied=c&&c->active()?unsigned(c->mode()):0;
    std::map<std::string,unsigned> state={{"SchemaVersion",1},{"Revision",intent.revision},{"SessionId",sessionId},{"ReflexAvailable",reflexAvailable},{"ReflexMode",applied},{"ReflexFault",reflexFault},{"HDRRevision",hdrRevision},{"HDRRestartRequired",hdrRestart}};
@@ -292,6 +314,12 @@ void cleanup(){
 }
 void destroy(a::device*device){if(device->get_native()==boundNative)cleanup();}
 
+}
+extern "C" __declspec(dllexport) int mcd2_menu_snapshot_v1(MCD2MenuSnapshotV1* snapshot){
+ if(!snapshot || snapshot->size!=sizeof(MCD2MenuSnapshotV1))return -1;
+ std::unique_lock lock(providerSnapshotMutex,std::try_to_lock);if(!lock.owns_lock())return -2;
+ if(workerStop || !consolidatedMenuTransport || providerSnapshot.load!=0 || !providerSnapshot.session)return -3;
+ *snapshot=providerSnapshot;return 0;
 }
 extern "C" __declspec(dllexport) const char*NAME="MCD2 Graphics display and latency";
 extern "C" __declspec(dllexport) const char*DESCRIPTION="Streamline Reflex and native HDR settings; independent of SR";

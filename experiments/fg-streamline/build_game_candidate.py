@@ -96,7 +96,7 @@ with (out/'build-private.log').open('w') as log:
     'engineLayoutSHA256':hashlib.sha256((repo/'src/latency/engine_layout.hpp').read_bytes()).hexdigest(),
     'amdLatencySHA256':hashlib.sha256((repo/'src/latency/amd_latency.hpp').read_bytes()).hexdigest(),
     'providerHeadersSHA256':{path.name:hashlib.sha256(path.read_bytes()).hexdigest()
-                             for path in sorted((repo/'src/providers').glob('*.hpp'))},
+                             for path in sorted([*(repo/'src/providers').glob('*.hpp'),*(repo/'src/providers').glob('*.h')])},
     'addonSHA256':hashlib.sha256((out/'mcd2-display-latency.addon64').read_bytes()).hexdigest(),
     'probeBuild':receipt, 'WindowsQualified':False,
 }, indent=2)+'\n')

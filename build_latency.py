@@ -22,6 +22,6 @@ commands=[cmd,link,[a.mingw_cxx,'-std=c++20','-O2',*native_frame_guard(a.mingw_c
 with(o/'build.log').open('w')as log:
  for command in commands:subprocess.run(command,stdout=log,stderr=subprocess.STDOUT,check=True)
 amd_bridge=build_amd_bridge(a.windows_sysroot.resolve(),o/'amd-latency',a.clang_cl,a.linker)
-sources=[*src.glob('*.cpp'),*src.glob('*.hpp'),*(r/'src/providers').glob('*.hpp'),*(r/'third-party/AntiLag2').glob('*')]
+sources=[*src.glob('*.cpp'),*src.glob('*.hpp'),*(r/'src/providers').glob('*.hpp'),*(r/'src/providers').glob('*.h'),*(r/'third-party/AntiLag2').glob('*')]
 (o/'build-result.json').write_text(json.dumps({'sdk':'2.14.1','sourceSHA256':{f.relative_to(r).as_posix():hashlib.sha256(f.read_bytes()).hexdigest() for f in sorted(sources)},'files':{f.name:hashlib.sha256(f.read_bytes()).hexdigest()for f in [o/'mcd2-streamline-bridge.dll',o/'mcd2-display-latency.addon64',amd_bridge]},'runtimeQualified':False},indent=2)+'\n')
 print('Display/latency addon and MSVC ABI bridge built. Runtime and Windows gates remain separate.')
