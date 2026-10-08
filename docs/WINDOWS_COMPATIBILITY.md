@@ -365,3 +365,20 @@ Keep the SDK enum-value assertion when available and the Windows held-reader
 fixtures under both default and older target-header macros. Unsupported runtime
 rename still fails closed; do not substitute delete/copy or legacy replacement.
 The observer remains opt-in and does not modify released payloads.
+
+## Steam build 25754144 layout trial — 8 October 2026
+
+A new Steam executable moves the inspected modular latency registry, marker
+wrappers, FName constructor and simulation/render frame counters. The historical
+layout correctly rejects it. `engine_layout.hpp` retains the original map and
+five signature gates, and adds an explicit new-build map gated by PE metadata,
+all five dispatch guards, four registry/name entry guards, and the live registry
+object/vtable identity. Do not calculate one address delta for the entire image.
+
+Both the pacing callback and the FG exported render-frame accessor must use the
+selected map; mixing old and new frame counters can break token identity even
+when registration succeeds. The FG recipe records the map header hash. Keep
+the portable corruption/missing/mixed-map fixtures, frame guard, actual-adapter
+policy, shared SDK shutdown and both CI platforms. These native changes require
+new Windows runtime checks; earlier AMD qualification does not cover them.
+The game installer pin and released assets remain unchanged by this trial.
