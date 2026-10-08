@@ -39,6 +39,7 @@ if a.native_only:
  print('Native addon built. Requalify this artifact before packaging; UI and shader were not rebuilt.')
  sys.exit(0)
 subprocess.run([str(a.dxc),'-T','cs_6_0','-E','main',str(r/'src/shaders/live_dense.hlsl'),'-Fo',str(o/'live_dense.cso')],check=True)
+subprocess.run([str(a.dxc),'-T','cs_6_0','-E','main',str(r/'src/shaders/fsr_dense.hlsl'),'-Fo',str(o/'fsr_dense.cso')],check=True)
 assert '<version>0.1.2</version>' in (a.neorune_sdk/'NeoRune.Sdk.nuspec').read_text(encoding='utf-8-sig'),'Expected NeoRune 0.1.2'
 dotnet_root=a.dotnet.resolve().parent
 refs=dotnet_root/'packs/Microsoft.NETCore.App.Ref/10.0.12/ref/net10.0'

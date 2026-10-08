@@ -11,6 +11,12 @@ RWTexture2D<float> ownedDepth : register(u2);
 [numthreads(8,8,1)]
 void main(uint3 tid : SV_DispatchThreadID) {
  uint2 size=uint2(passData[9].xy);
+#ifdef MCD2_ACTIVE_VIEW_RECT
+ // FSR consumes the active viewport, excluding the allocation's padded edge.
+ // Native/DLSS retain the original full-texture conversion below.
+ uint4 rect=asuint(passData[10]);
+ size=rect.zw+1-rect.xy;
+#endif
  if(any(tid.xy>=size))return;
  float2 ndc=float2((tid.x+.5)*2./size.x-1.,1.-(tid.y+.5)*2./size.y);
  float2 unjittered=ndc-viewData[144].xy;

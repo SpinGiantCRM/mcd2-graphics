@@ -5,6 +5,7 @@
 struct SrGuideInput {
  ID3D12Resource *colour=nullptr,*depth=nullptr,*packed=nullptr,*exposure=nullptr,*output=nullptr;
  Slot pass{},view{}; a::resource_view_desc exposure_view{}; unsigned depth_format=0;
+ const char *converter_asset="live_dense.cso";
 };
 struct SrGuideGeneration {
  EvalOwned owned;
@@ -22,7 +23,7 @@ static const char *record_sr_guides(Generation &c,LeanBorrowCache &cache,a::comm
  const auto *pass=&input.pass,*view=&input.view;const auto ev=input.exposure_view;
  if(!c.current_signature){
   c.current_depth=eval_texture(c.resource_device,c.owned,c.width,c.height,DXGI_FORMAT_R32_FLOAT,true);
-  std::ifstream f(asset_root/"live_dense.cso",std::ios::binary|std::ios::ate);if(!c.current_depth || !f){return ("converter_resources");}
+  std::ifstream f(asset_root/input.converter_asset,std::ios::binary|std::ios::ate);if(!c.current_depth || !f){return ("converter_resources");}
   std::vector<char> code(size_t(f.tellg()));f.seekg(0);f.read(code.data(),code.size());
   D3D12_DESCRIPTOR_RANGE ranges[2]{{D3D12_DESCRIPTOR_RANGE_TYPE_SRV,2,0,0,0},{D3D12_DESCRIPTOR_RANGE_TYPE_UAV,3,0,0,0}};
   D3D12_ROOT_PARAMETER rp[5]{};rp[0].ParameterType=rp[1].ParameterType=D3D12_ROOT_PARAMETER_TYPE_CBV;rp[0].Descriptor={0,0};rp[1].Descriptor={1,0};rp[2].ParameterType=D3D12_ROOT_PARAMETER_TYPE_SRV;rp[2].Descriptor={2,0};rp[3].ParameterType=rp[4].ParameterType=D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;rp[3].DescriptorTable={1,&ranges[0]};rp[4].DescriptorTable={1,&ranges[1]};

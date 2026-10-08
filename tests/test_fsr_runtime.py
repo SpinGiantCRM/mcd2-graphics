@@ -38,9 +38,18 @@ class FsrRuntimeSourceTests(unittest.TestCase):
     def test_eligibility_and_exact_source_ack_precede_real_dispatch(self):
         self.assertIn('c.quality(c.session,&quality)', self.present)
         self.assertIn('p::sourceAcknowledged(state,context)', self.record)
-        self.assertIn('unsigned(pc[36])==state.renderWidth', self.record)
+        self.assertIn('p::srViewportMatchesPlan(viewport,state.renderWidth,state.renderHeight)', self.record)
         self.assertIn('GetTickCount64()-c.started>15000', self.present)
         self.assertIn('1000.f/context.worldToMetersMilli', self.record)
+
+    def test_padded_viewport_has_separate_conversion_and_bounded_colour_crop(self):
+        self.assertIn('p::srViewport(unsigned(pc[36]),unsigned(pc[37]),rect,viewport)', self.record)
+        self.assertIn('state.renderWidth=c.width;state.renderHeight=c.height', self.record)
+        self.assertIn('D3D12_BOX region{0,0,0,c.width,c.height,1}', self.record)
+        self.assertIn('sdk_colour=c.cropped_colour', self.record)
+        self.assertIn('input.converter_asset="fsr_dense.cso"', self.record)
+        self.assertIn('c.width!=c.allocationWidth||c.height!=c.allocationHeight', self.present)
+        self.assertNotIn('cropped_colour', (ROOT / 'src/native/ngx_lean.hpp').read_text())
 
     def test_retirement_precedes_source_restore_and_never_shuts_down_ngx(self):
         self.assertIn('if(c.history_dirty||!cache.recordings.empty()||!cache.entries.empty()||cache.blocked)return', self.present)
