@@ -174,8 +174,9 @@ without switching the UI's writer or changing SR input/output handling. It is an
 intermediate experiment, not completion of the authoritative settings migration.
 
 The existing display/latency settings worker can observe all three mod-owned
-legacy slots, bounded to 8 KiB each. It reads all bytes twice and requires a
-second identical worker poll before publishing. Runtime context, session and
+legacy slots, bounded to 8 KiB each. It reads all bytes twice, requires a
+second identical worker poll, and rechecks every slot immediately before
+publishing. Runtime context, session and
 source acknowledgements are validated but excluded from preference comparison;
 their revision increments do not republish the record. Actual preference changes
 receive a monotonically increasing global revision while retaining original

@@ -91,7 +91,8 @@ public:
     // Two byte-identical polls debounce independently saved UI slots. This is
     // not proof of an atomic multi-slot UI transaction; authoritative cutover
     // requires a single consolidated UI request and separate qualification.
-    ObservationResult observe(const LegacySnapshot& snapshot, const GraphicsStore& store) {
+    template<class Recheck>
+    ObservationResult observe(const LegacySnapshot& snapshot, const GraphicsStore& store, Recheck recheck) {
         GraphicsIntent incoming;
         if (!decodeObserved(snapshot, incoming)) { seen_ = false; return {ObservationStatus::Rejected, StoreStatus::Invalid, {}}; }
         if (!seen_ || previous_ != snapshot) {
@@ -110,6 +111,9 @@ public:
             incoming.revision = std::max(incoming.revision, current.intent.revision+1);
             incoming.migratedFrom = current.intent.migratedFrom; // Original provenance, not latest ACKs.
         }
+        // Recheck all UI bytes immediately before committing. The worker's
+        // earlier stable polls alone do not cover changes during decode/load.
+        if (!recheck(snapshot)) { seen_ = false; return {}; }
         const auto committed = store.publish(incoming, loaded.stamp);
         if (committed.status != StoreStatus::Ok)
             return {ObservationStatus::StoreFailure, committed.status, committed.stamp};

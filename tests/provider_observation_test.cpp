@@ -60,8 +60,12 @@ int main() {
     assert(readLegacySnapshot(saves,disk)&&disk==original);
     assert(!observedStartup(store,disk,123).valid); // No legacy-only fallback.
     ObservedSettings observer;
-    assert(observer.observe(disk,store).status==ObservationStatus::Waiting);
-    assert(observer.observe(disk,store).status==ObservationStatus::Published);
+    bool recheckAgrees=true;
+    auto observe=[&](const LegacySnapshot& bytes,const GraphicsStore& target){
+        return observer.observe(bytes,target,[&](const auto&){return recheckAgrees;});
+    };
+    assert(observe(disk,store).status==ObservationStatus::Waiting);
+    assert(observe(disk,store).status==ObservationStatus::Published);
     DecodedGraphicsRecord current;
     assert(store.load(current).status==StoreStatus::Ok&&current.intent.revision==31);
     const auto first=current;
@@ -73,31 +77,36 @@ int main() {
     s["Revision"]=50; s["AppliedSourceRevision"]=50; s["AppliedSourceSessionId"]=678;
     s["RenderContextSessionId"]=678; f["Revision"]=48; f["SessionId"]=678;
     disk=snapshot();
-    assert(observer.observe(disk,store).status==ObservationStatus::Waiting);
-    assert(observer.observe(disk,store).status==ObservationStatus::Unchanged);
+    assert(observe(disk,store).status==ObservationStatus::Waiting);
+    assert(observe(disk,store).status==ObservationStatus::Unchanged);
     assert(store.load(current).status==StoreStatus::Ok&&current==first);
     assert(observedStartup(store,disk,123).valid);
     // Even a lower independent display revision produces a newer global one.
     d["Revision"]=4; d["PeakNits"]=420; disk=snapshot();
     assert(!observedStartup(store,disk,123).valid); // Pending menu preference is stale.
-    assert(observer.observe(disk,store).status==ObservationStatus::Waiting);
-    assert(observer.observe(disk,store).status==ObservationStatus::Published);
+    assert(observe(disk,store).status==ObservationStatus::Waiting);
+    assert(observe(disk,store).status==ObservationStatus::Published);
     assert(store.load(current).status==StoreStatus::Ok&&current.intent.revision==50);
     assert(current.intent.hdr.peakNits==420&&current.intent.migratedFrom==first.intent.migratedFrom);
     // Changed bytes between polls are never committed from the old observation.
     f["Mode"]=0; f["Revision"]=49; auto off=snapshot();
-    assert(observer.observe(off,store).status==ObservationStatus::Waiting);
-    assert(observer.observe(disk,store).status==ObservationStatus::Waiting);
+    assert(observe(off,store).status==ObservationStatus::Waiting);
+    assert(observe(disk,store).status==ObservationStatus::Waiting);
     observer.invalidate();
-    assert(observer.observe(off,store).status==ObservationStatus::Waiting);
-    assert(observer.observe(off,store).status==ObservationStatus::Published);
+    assert(observe(off,store).status==ObservationStatus::Waiting);
+    recheckAgrees=false;
+    assert(observe(off,store).status==ObservationStatus::Waiting);
+    assert(store.load(current).status==StoreStatus::Ok&&current.intent.hdr.peakNits==420&&current.intent.fgEnabled);
+    recheckAgrees=true;
+    assert(observe(off,store).status==ObservationStatus::Waiting);
+    assert(observe(off,store).status==ObservationStatus::Published);
     assert(observedStartup(store,off,123).valid);
     assert(observedStartup(store,off,123).bootstrap.requested==PresentationOwner::Native);
     // Invalid input interrupts the stability window and cannot change output.
     auto bad=off; bad.sr.resize(30);
-    assert(observer.observe(bad,store).status==ObservationStatus::Rejected);
-    assert(observer.observe(off,store).status==ObservationStatus::Waiting);
-    assert(observer.observe(off,store).status==ObservationStatus::Unchanged);
+    assert(observe(bad,store).status==ObservationStatus::Rejected);
+    assert(observe(off,store).status==ObservationStatus::Waiting);
+    assert(observe(off,store).status==ObservationStatus::Unchanged);
     // Writes only touch the reserved mirror paths, never any legacy slot.
     assert(readLegacySnapshot(saves,disk)&&disk==original);
     fs::remove(saves/"MCD2GraphicsDisplaySettings.sav"); auto held=disk;
@@ -105,8 +114,8 @@ int main() {
     save(original);
     SlotBytes malformed{1,2,3};write(store.committedPath(),malformed);
     assert(!observedStartup(store,original,123).valid);
-    assert(observer.observe(original,store).status==ObservationStatus::Waiting);
-    auto refused=observer.observe(original,store);
+    assert(observe(original,store).status==ObservationStatus::Waiting);
+    auto refused=observe(original,store);
     assert(refused.status==ObservationStatus::StoreFailure&&refused.store==StoreStatus::Invalid);
     SlotBytes remaining; // The corrupt file has not been repaired from legacy.
     {std::ifstream file(store.committedPath(),std::ios::binary); remaining.assign(std::istreambuf_iterator<char>(file),{});}
@@ -114,15 +123,15 @@ int main() {
     fs::remove(store.committedPath());
     GraphicsIntent future; future.sr=SrProvider::AmdFsr;future.fg=FgProvider::Amd;
     assert(store.publish(future,{}).status==StoreStatus::Ok);
-    assert(observer.observe(original,store).status==ObservationStatus::Rejected);
+    assert(observe(original,store).status==ObservationStatus::Rejected);
     assert(store.load(current).status==StoreStatus::Ok&&current.intent==future);
     assert(!observedStartup(store,original,123).valid);
     // Saturated revision cannot wrap and overwrite a committed request.
     fs::remove(store.committedPath()); GraphicsIntent saturated;
     assert(decodeObserved(original,saturated)); saturated.revision=0x7fffffff;
     assert(store.publish(saturated,{}).status==StoreStatus::Ok);
-    assert(observer.observe(off,store).status==ObservationStatus::Waiting);
-    assert(observer.observe(off,store).status==ObservationStatus::Rejected);
+    assert(observe(off,store).status==ObservationStatus::Waiting);
+    assert(observe(off,store).status==ObservationStatus::Rejected);
     assert(store.load(current).status==StoreStatus::Ok&&current.intent==saturated);
 #ifndef _WIN32
     fs::remove(saves/"MCD2GraphicsSettings.sav");

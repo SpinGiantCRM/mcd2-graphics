@@ -118,7 +118,9 @@ void settings_loop(){std::map<std::string,unsigned> last;auto nextStatus=std::ch
  while(!workerStop){
   if(observeProviderSettings){try{
    mcd2::providers::LegacySnapshot snapshot;
-   if(mcd2::providers::readLegacySnapshot(savesPath,snapshot))observation=observations.observe(snapshot,mirror);
+   if(mcd2::providers::readLegacySnapshot(savesPath,snapshot))observation=observations.observe(snapshot,mirror,[&](const auto& expected){
+    mcd2::providers::LegacySnapshot fresh;return mcd2::providers::readLegacySnapshot(savesPath,fresh)&&fresh==expected;
+   });
    else {observations.invalidate();observation={mcd2::providers::ObservationStatus::Rejected,mcd2::providers::StoreStatus::Invalid,{}};}
   }catch(...){observations.invalidate();observation={mcd2::providers::ObservationStatus::StoreFailure,mcd2::providers::StoreStatus::IoError,{}};}}
   try {auto bytes=read_slot(savesPath/L"MCD2GraphicsDisplaySettings.sav");mcd2::display::Intent incoming;
