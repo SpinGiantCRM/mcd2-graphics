@@ -9,7 +9,8 @@ p.add_argument('--fsr-bridge-sha256',default='',help='Pin the separately built F
 p.add_argument('--clang-cxx',default='clang++');p.add_argument('--mingw-cxx',default='x86_64-w64-mingw32-g++')
 a=p.parse_args();repo=Path(__file__).resolve().parents[2];out=a.output.resolve();source=out/'source';source.mkdir(parents=True,exist_ok=True)
 copy_sr_sources(repo,source)
-for name in ('fg_camera_contract.h','fg_camera_math.h'):shutil.copyfile(Path(__file__).parent/name,source/'src/native'/name)
+# Camera headers have one canonical location in the copied source closure.
+# Separate byte-identical copies defeat Clang's file-based pragma-once identity.
 lean=source/'src/native/ngx_lean.hpp';text=lean.read_text();needle=' auto resource=mcd2_ngx_set_resource;'
 assert text.count(needle)==1
 replacement=''' // Temporary observer receives current guides before NGX. It never owns SR state.
@@ -57,7 +58,7 @@ if a.guide_inspection:
   copies.erase(std::remove_if(copies.begin(),copies.end(),[](const Copy&c){return c.readback==nullptr;}),copies.end());
  }
 '''+text[end:]
-text='#include "fg_camera_math.h"\n'+text;lean.write_text(text)
+text='#include "../../experiments/fg-streamline/fg_camera_math.h"\n'+text;lean.write_text(text)
 # FSR already produces the same normalized guide formats. Notify FG before the
 # FSR evaluation without creating an NGX context or invoking its guide producer.
 fsr=source/'src/native/fsr_runtime.hpp';fsr_text=fsr.read_text()
@@ -71,7 +72,7 @@ fsr_extra=''' auto fgObserver=GetModuleHandleW(L"mcd2-fg-guide-recon.addon64");
    notify(proxy,c.current_depth,c.motion,&camera);
  }
 '''
-fsr_text='#include "fg_camera_math.h"\n'+fsr_text.replace(fsr_needle,fsr_extra+fsr_needle);fsr.write_text(fsr_text)
+fsr_text='#include "../../experiments/fg-streamline/fg_camera_math.h"\n'+fsr_text.replace(fsr_needle,fsr_extra+fsr_needle);fsr.write_text(fsr_text)
 observer=source/'src/native/observer.cpp';observer_text='#define MCD2_NATIVE_FG_GUIDES 1\n'+observer.read_text()
 if a.guide_inspection:
  marker=' fs::path path;\n};\nstatic std::vector<Copy> copies;'

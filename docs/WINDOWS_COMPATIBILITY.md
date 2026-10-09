@@ -7,6 +7,14 @@ Windows/AMD or the separately observed shutdown failure.
 
 # Windows fixes: reasons and preservation requirements
 
+The [Native-AA AMD FG guide consumer](NATIVE_AA_AMD_FG_2026-10-09.md)
+leaves native temporal output intact and performs no conversion when FG is Off.
+Preserve authority/session/world/freshness, full-scale/device/viewport admission,
+reset-on-gap and independent recording/fence ownership. Keep Native/NVIDIA FG
+excluded until qualified, actual Anti-Lag presenter/driver gates and the camera
+include closure on both platform builds. Bounded Linux/NVIDIA execution cannot
+qualify native Windows/Radeon or a performance/latency benefit.
+
 The [AMD FG private recording contract](AMD_FG_OWNED_RECORDINGS_2026-10-09.md)
 stages inputs and submits only owned SDK command lists after host work on the
 exact graphics queue. Preserve v2 export admission, nonblocking ring reuse,
@@ -552,3 +560,22 @@ retirement retains the generation. The SDK-owned waitable handle is closed once;
 no Streamline vendor presenter is chained into the AMD presenter. Linux/NVIDIA
 isolated execution cannot qualify Windows/AMD, in-game AMD FG, Anti-Lag coexistence
 or a latency/performance benefit. Both existing CI platforms remain required.
+
+### Native AA / AMD FG candidate qualification
+
+Use the exact artifact from PR41 and separately verified dependencies. Start
+with Native / FG Off, enter gameplay and verify full source resolution and
+zero SR evaluations. Select AMD FG / On through Video, restart when requested,
+and re-enter the same scene. Require matching current-session/world/authority,
+full-resolution current guides, advancing real/generated presenter counters,
+SDK status 0 and no SDK errors. Inspect motion and foliage rather than treating
+a successful dispatch as artifact-quality qualification.
+
+Pause for two independent observation intervals: generated counts must stop,
+while the real presentation path remains responsive. Resume and require fresh
+history reset followed by renewed generation. Exercise Native → FSR → Native,
+world travel and resolution changes, then normal exit and AMD SDK retirement.
+Record artifact/dependency hashes, adapter/driver, counts and exact failures.
+Do not treat the separate Linux/NVIDIA pass or unsupported Anti-Lag fallback
+as active native Windows/Radeon qualification. Anti-Lag coexistence additionally
+needs the actual owned-presenter metadata handshake and native driver support.

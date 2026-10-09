@@ -67,7 +67,10 @@ int main() {
      assert(p.calls==std::vector<int>({0,1,8}));}
     {Fake p;p.fgAvailable=true;p.fgOk=false;Controller c(p);assert(c.attach(yes,123));
      c.pre_input(1,fgRequest);assert(c.state().fault&&!c.state().available&&p.stops==1);}
-    i.sr=providers::SrProvider::Native;assert(!resolve(decoded(i)).enabled&&!resolve(decoded(i)).fg);
+    i.sr=providers::SrProvider::Native;assert(resolve(decoded(i)).enabled&&resolve(decoded(i)).fg);
+    // A selected Native/AMD pair still needs the actual owned-presenter handshake.
+    {Fake p;p.trackFg=true;Controller c(p);assert(c.attach(yes,123));
+     c.pre_input(1,resolve(decoded(i)));c.pre_present(1);assert(!c.state().enabled&&!c.state().fgCompatible&&!c.state().fault);}
     i.sr=providers::SrProvider::AmdFsr;i.fg=providers::FgProvider::Nvidia;
     assert(!resolve(decoded(i)).enabled&&!resolve(decoded(i)).fg);
     {Fake p;Controller c(p);assert(c.attach(yes,123));assert(!c.attach(yes,123));

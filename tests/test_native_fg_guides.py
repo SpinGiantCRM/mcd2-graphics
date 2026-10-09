@@ -42,4 +42,6 @@ class NativeFgTests(unittest.TestCase):
      if include.startswith('../'):self.assertTrue((file.parent/include).resolve().is_file(),str(file)+' '+include)
   recipe=(ROOT/'experiments/fg-streamline/build_sr_candidate.py').read_text()
   self.assertIn('#define MCD2_NATIVE_FG_GUIDES 1',recipe)
+  self.assertNotIn("source/'src/native'/name",recipe)
+  self.assertEqual(recipe.count('../../experiments/fg-streamline/fg_camera_math.h'),2)
 if __name__=='__main__':unittest.main()
