@@ -7,6 +7,15 @@ Windows/AMD or the separately observed shutdown failure.
 
 # Windows fixes: reasons and preservation requirements
 
+The [AMD FG private recording contract](AMD_FG_OWNED_RECORDINGS_2026-10-09.md)
+stages inputs and submits only owned SDK command lists after host work on the
+exact graphics queue. Preserve v2 export admission, nonblocking ring reuse,
+completion plus successful Reset before releasing borrows, failed-signal
+retention and fresh queue completion before private-list destruction. Never
+reset a game-owned list to obtain retirement. Keep the isolated queue/replay
+fixture and both CI platforms. Linux activation and SDK retirement do not
+qualify Windows/Radeon or independent FSR SR teardown.
+
 The [FG provider FName decoder](FG_PROVIDER_NAME_2026-10-09.md) accepts case
 variants of the current and legacy provider property names. Preserve rejection
 of duplicates across both aliases, invalid values, unknown properties, stale
@@ -18,7 +27,8 @@ worker joins and coordinator destruction after NT process teardown has begun.
 Preserve the real-query Windows DLL fixture and ordinary-unload cleanup checks.
 Device/lifecycle cleanup outside process termination must still drain providers.
 The bounded Proton exit pass does not qualify native Windows gameplay or repair
-AMD FG's independently retained command-recording generation.
+the separate FSR SR lifetime path. AMD FG private-recording retirement is
+covered by its own candidate report.
 
 The opt-in [continuous FSR controller](FSR_CONTINUOUS_2026-10-09.md) preserves the
 MSVC bridge, native stack guard and independent recording/fence ownership. Its

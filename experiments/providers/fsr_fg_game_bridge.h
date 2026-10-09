@@ -17,21 +17,25 @@ struct MCD2AmdFgStateV1 {
 static_assert(sizeof(MCD2AmdFgSwapV1)==72);
 static_assert(sizeof(MCD2AmdFgGuidesV1)==364);
 static_assert(sizeof(MCD2AmdFgStateV1)==72);
+inline constexpr int MCD2_AFG_BUSY_V2=1000001;
 extern "C" {
  int mcd2_afg_load_v1(const wchar_t *absoluteVerifiedRuntime);
  // Eligibility query only; does not create contexts, wrap or activate FG.
  int mcd2_afg_support_v1(void *nativeDevice);
  int mcd2_afg_swap_v1(void *factory,void *nativeQueue,void *hwnd,const MCD2AmdFgSwapV1*,void **swap);
- int mcd2_afg_guides_v1(void *nativeCommand,void *depth,void *motion,const MCD2AmdFgGuidesV1*);
- int mcd2_afg_world_v1(void *nativeCommand,void *world,uint64_t engineFrame);
- int mcd2_afg_present_v1(uint64_t engineFrame,uint32_t wanted);
+ // Recording contract 2 stages inputs without touching the host list. Present
+ // must run after host submissions on the exact swapchain graphics queue.
+ unsigned mcd2_afg_recording_contract_v2();
+ int mcd2_afg_guides_v2(void *nativeCommand,void *depth,void *motion,const MCD2AmdFgGuidesV1*);
+ int mcd2_afg_world_v2(void *nativeCommand,void *world,uint64_t engineFrame);
+ int mcd2_afg_present_v2(void *nativeSubmittedQueue,uint64_t engineFrame,uint32_t wanted);
  int mcd2_afg_state_v1(MCD2AmdFgStateV1*);
  // Actual owned FSR presenter only. Clear metadata and drain presentation
  // before the caller releases its persistent Anti-Lag context.
  int mcd2_afg_antilag_ready_v1(void *nativeDevice);
  int mcd2_afg_antilag_v1(void *nativeDevice,void *antiLagContext,uint32_t enabled,uint32_t drain);
- // Confirms successful native Reset epochs, then signals/waits a fresh own fence.
- // Missing invalidation proof retains the session and callbacks. Optional caller
+ // Signals/waits a fresh own queue fence, then releases only own recordings.
+ // Failed completion proof retains the session and callbacks. Optional caller
  // fence evidence supplements, and never replaces, the internal queue proof.
  int mcd2_afg_retire_v1(void *postInvalidationFence,uint64_t completedValue);
 }

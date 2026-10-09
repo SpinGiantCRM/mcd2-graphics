@@ -7,6 +7,7 @@
 #include <dxgi1_6.h>
 #include <atomic>
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstring>
 #include <memory>
@@ -15,7 +16,6 @@
 #include <new>
 #include <vector>
 #include "fsr_fg_game_bridge.h"
-#include "../../src/native/reset_epoch_contract.hpp"
 #include "../../src/latency/amd_fg_private_data.hpp"
 #include "api/include/dx12/ffx_api_dx12.h"
 #include "framegeneration/include/ffx_framegeneration.h"
@@ -37,28 +37,38 @@ struct Session {
  bool worldInitialized=false,historyLost=true,preparedCurrent=false,imageCurrent=false;std::atomic<bool> closing{false};
  uint32_t width=0,height=0;uint64_t engine=UINT64_MAX,ordinal=0,prepared=0,images=0;
  std::atomic<uint64_t> real{0},generated{0};std::atomic<unsigned> fault{0},active{0};
- struct Recording {uint64_t epoch;std::vector<ID3D12Resource*> borrowed;};
- std::map<ID3D12GraphicsCommandList*,Recording> recordings;
+ // SDK work never enters a game-owned command recording. Inputs are staged
+ // with strong refs and consumed only after game submissions, at Present.
+ struct Inputs {
+  ID3D12Resource *depth=nullptr,*motion=nullptr,*colour=nullptr;
+  MCD2AmdFgGuidesV1 parameters{};bool gap=true;
+ } inputs;
+ struct Work {
+  ID3D12CommandAllocator* allocator=nullptr;ID3D12GraphicsCommandList* command=nullptr;
+  std::vector<ID3D12Resource*> borrowed;uint64_t fence=0;
+ };
+ std::array<Work,3> work{};unsigned nextWork=0;
+ ID3D12Fence* workFence=nullptr;uint64_t workSequence=0;
+ bool unconfirmedSubmission=false;
  ID3D12Fence* retirementFence=nullptr;HANDLE retirementEvent=nullptr;bool retirementSignalled=false;
 } *session=nullptr;
-bool epoch(ID3D12GraphicsCommandList* cmd,uint64_t& value,bool arm=false){
- UINT size=sizeof(value);value=0;const auto hr=cmd->GetPrivateData(mcd2_reset_epoch_guid,&size,&value);
- if(hr==DXGI_ERROR_NOT_FOUND)return arm&&SUCCEEDED(cmd->SetPrivateData(mcd2_reset_epoch_guid,sizeof(value),&value));
- return SUCCEEDED(hr)&&size==sizeof(value);
-}
-void forget(Session::Recording& recording){for(auto* resource:recording.borrowed)resource->Release();}
-void confirmRecordings(){
- auto& records=session->recordings;
- for(auto it=records.begin();it!=records.end();){uint64_t current=0;
-  if(epoch(it->first,current)&&current!=it->second.epoch){forget(it->second);it->first->Release();it=records.erase(it);}else ++it;
+void clearInputs(Session::Inputs& p){release(p.depth);release(p.motion);release(p.colour);p={};}
+void clearBorrowed(Session::Work& p){for(auto* resource:p.borrowed)resource->Release();p.borrowed.clear();}
+// No frame-time waits: a busy ring slot declines this generated frame. Failed
+// Reset or uncertain submission retains its recording and inputs for cleanup.
+int beginWork(Session::Work*& out){
+ auto& s=*session;auto& w=s.work[s.nextWork];
+ if(!s.workFence&&FAILED(s.device->CreateFence(0,D3D12_FENCE_FLAG_NONE,IID_PPV_ARGS(&s.workFence))))return -70;
+ const auto completed=s.workFence->GetCompletedValue();if(completed==UINT64_MAX)return -71;
+ if(s.unconfirmedSubmission)return -72;if(w.fence&&completed<w.fence)return 1;
+ if(!w.allocator&&FAILED(s.device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,IID_PPV_ARGS(&w.allocator))))return -73;
+ if(!w.command){
+  if(FAILED(s.device->CreateCommandList(0,D3D12_COMMAND_LIST_TYPE_DIRECT,w.allocator,nullptr,IID_PPV_ARGS(&w.command))))return -74;
+  if(FAILED(w.command->Close()))return -75;
  }
-}
-bool record(ID3D12GraphicsCommandList* cmd,std::initializer_list<ID3D12Resource*> borrowed){
- confirmRecordings();auto& records=session->recordings;uint64_t current=0;if(!epoch(cmd,current,true))return false;
- auto found=records.find(cmd);
- if(found==records.end()){if(records.size()>=256)return false;cmd->AddRef();found=records.emplace(cmd,Session::Recording{current,{}}).first;}
- for(auto* resource:borrowed)if(std::find(found->second.borrowed.begin(),found->second.borrowed.end(),resource)==found->second.borrowed.end()){resource->AddRef();found->second.borrowed.push_back(resource);}
- return true;
+ if(FAILED(w.allocator->Reset())||FAILED(w.command->Reset(w.allocator,nullptr)))return -76;
+ // Completed submission plus successful own Reset invalidates legal replay.
+ clearBorrowed(w);w.fence=0;out=&w;return 0;
 }
 bool absolute(const wchar_t* p){return p&&((p[0]&&p[1]==L':'&&(p[2]==L'\\'||p[2]==L'/'))||(p[0]==L'\\'&&p[1]==L'\\'));}
 bool hashRuntime(const wchar_t* path){
@@ -111,11 +121,11 @@ ffxReturnCode_t compose(ffxCallbackDescFrameGenerationPresent* p,void* user){
  if(src!=dst){transition(cmd,src,a,D3D12_RESOURCE_STATE_COPY_SOURCE);transition(cmd,dst,b,D3D12_RESOURCE_STATE_COPY_DEST);cmd->CopyResource(dst,src);transition(cmd,dst,D3D12_RESOURCE_STATE_COPY_DEST,b);transition(cmd,src,D3D12_RESOURCE_STATE_COPY_SOURCE,a);}
  if(p->isGeneratedFrame)++s.generated;else ++s.real;return FFX_API_RETURN_OK;
 }
-int configure(bool enabled){
+int configure(bool enabled,bool teardown=false){
  auto& s=*session;ffxConfigureDescFrameGeneration c{};c.header.type=FFX_API_CONFIGURE_DESC_TYPE_FRAMEGENERATION;
  c.swapChain=s.swap;c.frameGenerationEnabled=enabled;c.frameID=s.ordinal;c.generationRect={0,0,int32_t(s.width),int32_t(s.height)};
- c.presentCallback=compose;c.presentCallbackUserContext=&s;c.frameGenerationCallback=generate;c.frameGenerationCallbackUserContext=&s;
- if(s.worldInitialized)c.HUDLessColor=ffxApiGetResourceDX12(s.world,FFX_API_RESOURCE_STATE_PIXEL_COMPUTE_READ);
+ c.presentCallback=teardown?nullptr:compose;c.presentCallbackUserContext=teardown?nullptr:&s;c.frameGenerationCallback=teardown?nullptr:generate;c.frameGenerationCallbackUserContext=teardown?nullptr:&s;
+ if(s.worldInitialized&&!teardown)c.HUDLessColor=ffxApiGetResourceDX12(s.world,FFX_API_RESOURCE_STATE_PIXEL_COMPUTE_READ);
  const auto r=s.configure(&s.fg,&c.header);s.active=!r&&enabled;if(r)s.fault=unsigned(r);return int(r);
 }
 }
@@ -177,7 +187,8 @@ extern "C" int mcd2_afg_swap_v1(void* factory,void* queue,void* hwnd,const MCD2A
  code=configure(false);if(code)return int(code);
  return int(s.swap->QueryInterface(IID_IDXGISwapChain1,result));
 }
-extern "C" int mcd2_afg_guides_v1(void* cmd,void* depth,void* motion,const MCD2AmdFgGuidesV1* p){
+extern "C" unsigned mcd2_afg_recording_contract_v2(){return 2;}
+extern "C" int mcd2_afg_guides_v2(void* cmd,void* depth,void* motion,const MCD2AmdFgGuidesV1* p){
  std::lock_guard lock(guard);if(!session||!session->fg||session->closing||session->fault||!p||p->size!=sizeof(*p)||p->reserved)return -20;
  auto& s=*session;const auto& c=p->camera;
  if(c.size!=sizeof(c))return -201;
@@ -189,29 +200,46 @@ extern "C" int mcd2_afg_guides_v1(void* cmd,void* depth,void* motion,const MCD2A
  const float values[]={p->frameTimeMs,p->worldToMeters,c.nearPlane,c.verticalFOV,c.jitter[0],c.jitter[1]};for(float v:values)if(!std::isfinite(v))return -23;
  if(p->frameTimeMs<=0||p->frameTimeMs>1000||p->worldToMeters<=0||c.nearPlane<=0||c.verticalFOV<=0||c.verticalFOV>=3.141593f)return -23;
  for(auto* vector:{c.position,c.up,c.right,c.forward})for(unsigned i=0;i<3;++i)if(!std::isfinite(vector[i]))return -23;
- const bool gap=s.engine==UINT64_MAX||uint64_t(c.frame)!=s.engine+1;s.engine=c.frame;++s.ordinal;s.preparedCurrent=s.imageCurrent=false;
- // Retain borrowed inputs even when a dispatch fails after recording commands.
- if(!record(static_cast<ID3D12GraphicsCommandList*>(cmd),{static_cast<ID3D12Resource*>(depth),static_cast<ID3D12Resource*>(motion)})){s.fault=61;return -61;}
- auto code=configure(true);if(code)return code;
- ffxDispatchDescFrameGenerationPrepareV2 d{};d.header.type=FFX_API_DISPATCH_DESC_TYPE_FRAMEGENERATION_PREPARE_V2;d.commandList=cmd;d.frameID=s.ordinal;d.renderSize={c.width,c.height};d.jitterOffset={c.jitter[0],c.jitter[1]};d.motionVectorScale={1,1};
- d.frameTimeDelta=p->frameTimeMs;d.reset=gap||s.historyLost||c.reset;d.cameraNear=c.nearPlane;d.cameraFar=c.farPlane;d.cameraFovAngleVertical=c.verticalFOV;d.viewSpaceToMetersFactor=p->worldToMeters;
- memcpy(d.cameraPosition,c.position,sizeof(c.position));memcpy(d.cameraUp,c.up,sizeof(c.up));memcpy(d.cameraRight,c.right,sizeof(c.right));memcpy(d.cameraForward,c.forward,sizeof(c.forward));
- d.depth=ffxApiGetResourceDX12(static_cast<ID3D12Resource*>(depth),FFX_API_RESOURCE_STATE_COMPUTE_READ);d.motionVectors=ffxApiGetResourceDX12(static_cast<ID3D12Resource*>(motion),FFX_API_RESOURCE_STATE_COMPUTE_READ);
- code=s.dispatch(&s.fg,&d.header);if(code){s.fault=unsigned(code);s.historyLost=true;return int(code);}s.preparedCurrent=true;++s.prepared;return 0;
+ const bool gap=s.engine==UINT64_MAX||uint64_t(c.frame)!=s.engine+1;
+ clearInputs(s.inputs);s.inputs.depth=static_cast<ID3D12Resource*>(depth);s.inputs.motion=static_cast<ID3D12Resource*>(motion);
+ s.inputs.depth->AddRef();s.inputs.motion->AddRef();s.inputs.parameters=*p;s.inputs.gap=gap;
+ s.engine=c.frame;++s.ordinal;s.preparedCurrent=true;s.imageCurrent=false;return 0;
 }
-extern "C" int mcd2_afg_world_v1(void* cmd,void* world,uint64_t id){
+extern "C" int mcd2_afg_world_v2(void* cmd,void* world,uint64_t id){
  std::lock_guard lock(guard);if(!session||session->closing||!session->preparedCurrent||id!=session->engine||!command(cmd)||!texture(world,session->width,session->height,DXGI_FORMAT_R10G10B10A2_UNORM,true))return -30;
- auto& s=*session;auto* list=static_cast<ID3D12GraphicsCommandList*>(cmd);auto* src=static_cast<ID3D12Resource*>(world);
- if(!record(list,{src})){s.fault=61;return -61;}
- constexpr auto read=D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE|D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
- if(s.worldInitialized)transition(list,s.world,read,D3D12_RESOURCE_STATE_COPY_DEST);
- transition(list,src,read,D3D12_RESOURCE_STATE_COPY_SOURCE);list->CopyResource(s.world,src);transition(list,src,D3D12_RESOURCE_STATE_COPY_SOURCE,read);transition(list,s.world,D3D12_RESOURCE_STATE_COPY_DEST,read);
- s.worldInitialized=s.imageCurrent=true;++s.images;return 0;
+ auto& s=*session;release(s.inputs.colour);s.inputs.colour=static_cast<ID3D12Resource*>(world);s.inputs.colour->AddRef();s.imageCurrent=true;return 0;
 }
-extern "C" int mcd2_afg_present_v1(uint64_t id,uint32_t wanted){
+extern "C" int mcd2_afg_present_v2(void* queue,uint64_t id,uint32_t wanted){
  std::lock_guard lock(guard);if(!session||!session->fg||session->closing||wanted>1)return -40;
- auto& s=*session;const bool enable=wanted&&!s.fault&&id==s.engine&&s.preparedCurrent&&s.imageCurrent;
- s.historyLost=!enable;return configure(enable);
+ auto& s=*session;
+ auto* supplied=queue?identity(static_cast<ID3D12CommandQueue*>(queue)):nullptr;
+ auto* expected=identity(s.queue);const bool matched=supplied&&supplied==expected;release(supplied);release(expected);
+ if(wanted&&!matched){s.historyLost=true;clearInputs(s.inputs);s.preparedCurrent=s.imageCurrent=false;configure(false);return -41;}
+ const bool enable=wanted&&!s.fault&&id==s.engine&&s.preparedCurrent&&s.imageCurrent&&s.inputs.depth&&s.inputs.motion&&s.inputs.colour;
+ if(!enable){s.historyLost=true;clearInputs(s.inputs);s.preparedCurrent=s.imageCurrent=false;return configure(false);}
+ Session::Work* work=nullptr;auto result=beginWork(work);
+ if(result){s.historyLost=true;if(result<0)s.fault=unsigned(-result);clearInputs(s.inputs);s.preparedCurrent=s.imageCurrent=false;auto disabled=configure(false);return disabled?disabled:(result>0?MCD2_AFG_BUSY_V2:result);}
+ // The host has already submitted its current-frame conversion and world draw
+ // on this exact queue. All SDK resources occur only in our private list.
+ auto* list=work->command;auto& p=s.inputs.parameters;auto& c=p.camera;
+ work->borrowed={s.inputs.depth,s.inputs.motion,s.inputs.colour};
+ s.inputs.depth=s.inputs.motion=s.inputs.colour=nullptr;
+ auto fail=[&](int code){s.fault=unsigned(code<0?-code:code);s.historyLost=true;configure(false);return code;};
+ auto code=configure(true);if(code)return fail(code);
+ ffxDispatchDescFrameGenerationPrepareV2 d{};d.header.type=FFX_API_DISPATCH_DESC_TYPE_FRAMEGENERATION_PREPARE_V2;d.commandList=list;d.frameID=s.ordinal;d.renderSize={c.width,c.height};d.jitterOffset={c.jitter[0],c.jitter[1]};d.motionVectorScale={1,1};
+ d.frameTimeDelta=p.frameTimeMs;d.reset=s.inputs.gap||s.historyLost||c.reset;d.cameraNear=c.nearPlane;d.cameraFar=c.farPlane;d.cameraFovAngleVertical=c.verticalFOV;d.viewSpaceToMetersFactor=p.worldToMeters;
+ memcpy(d.cameraPosition,c.position,sizeof(c.position));memcpy(d.cameraUp,c.up,sizeof(c.up));memcpy(d.cameraRight,c.right,sizeof(c.right));memcpy(d.cameraForward,c.forward,sizeof(c.forward));
+ d.depth=ffxApiGetResourceDX12(work->borrowed[0],FFX_API_RESOURCE_STATE_COMPUTE_READ);d.motionVectors=ffxApiGetResourceDX12(work->borrowed[1],FFX_API_RESOURCE_STATE_COMPUTE_READ);
+ code=s.dispatch(&s.fg,&d.header);if(code)return fail(int(code));
+ constexpr auto read=D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE|D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
+ auto* src=work->borrowed[2];if(s.worldInitialized)transition(list,s.world,read,D3D12_RESOURCE_STATE_COPY_DEST);
+ transition(list,src,read,D3D12_RESOURCE_STATE_COPY_SOURCE);list->CopyResource(s.world,src);transition(list,src,D3D12_RESOURCE_STATE_COPY_SOURCE,read);transition(list,s.world,D3D12_RESOURCE_STATE_COPY_DEST,read);
+ if(FAILED(list->Close()))return fail(-77);
+ ID3D12CommandList* batch[]={list};s.queue->ExecuteCommandLists(1,batch);s.worldInitialized=true;
+ // Signal failure cannot be interpreted as an unsubmitted list or safe Reset.
+ const auto value=++s.workSequence;if(FAILED(s.queue->Signal(s.workFence,value))){s.unconfirmedSubmission=true;return fail(-78);}
+ work->fence=value;s.nextWork=(s.nextWork+1)%s.work.size();++s.prepared;++s.images;s.historyLost=false;s.preparedCurrent=s.imageCurrent=false;
+ return configure(true);
 }
 extern "C" int mcd2_afg_state_v1(MCD2AmdFgStateV1* out){
  std::lock_guard lock(guard);if(!session||!out||out->size!=sizeof(*out))return -50;auto& s=*session;
@@ -241,10 +269,10 @@ extern "C" int mcd2_afg_retire_v1(void* fence,uint64_t value){
  // ReShade can retire temporary startup devices before the game creates its
  // world swapchain. No presenter/recording exists to retire in that case.
  if(!s.fg&&!s.presenter&&!s.queue)return 0;
- if(s.fg&&!s.closing){const auto r=configure(false);if(r)return r;s.closing=true;}
- confirmRecordings();if(!s.recordings.empty())return -61;
- // An externally supplied completed fence alone cannot prove its signal occurred
- // after invalidation. Always signal our own queue after the epoch check above.
+ if(s.fg&&!s.closing){const auto r=configure(false,true);if(r)return r;s.closing=true;}
+ clearInputs(s.inputs);
+ // Always obtain fresh queue completion before invalidating our private lists.
+ // An external fence is supplemental evidence only.
  if(fence){const auto completed=static_cast<ID3D12Fence*>(fence)->GetCompletedValue();if(!value||completed==UINT64_MAX||completed<value)return -60;}
  if(s.queue&&!s.retirementSignalled){
   if(!s.retirementFence&&FAILED(s.device->CreateFence(0,D3D12_FENCE_FLAG_NONE,IID_PPV_ARGS(&s.retirementFence))))return -62;
@@ -255,6 +283,10 @@ extern "C" int mcd2_afg_retire_v1(void* fence,uint64_t value){
    if(!s.retirementEvent||FAILED(s.retirementFence->SetEventOnCompletion(1,s.retirementEvent))||WaitForSingleObject(s.retirementEvent,5000)!=WAIT_OBJECT_0)return -62;
   }
  }
+ // No other owner can replay these lists. Queue completion precedes final
+ // release, including unsubmitted/failed recordings and failed frame signals.
+ for(auto& work:s.work){release(work.command);release(work.allocator);clearBorrowed(work);}
+ release(s.workFence);
  if(s.presenter){ffxDispatchDescFrameGenerationSwapChainWaitForPresentsDX12 wait{};wait.header.type=FFX_API_DISPATCH_DESC_TYPE_FRAMEGENERATIONSWAPCHAIN_WAIT_FOR_PRESENTS_DX12;auto r=s.dispatch(&s.presenter,&wait.header);if(r)return int(r);}
  if(s.fg){auto r=s.destroy(&s.fg,nullptr);if(r)return int(r);s.fg=nullptr;}
  if(s.presenter){auto r=s.destroy(&s.presenter,nullptr);if(r)return int(r);s.presenter=nullptr;}

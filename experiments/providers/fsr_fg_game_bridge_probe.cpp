@@ -19,8 +19,12 @@ int main(){
  auto path=std::make_unique<wchar_t[]>(32768);auto length=GetCurrentDirectoryW(32768,path.get());if(!length||length>32600)return 2;
  auto bridge=LoadLibraryW(L"mcd2-fsr-fg-game-bridge.dll");if(!bridge)return 3;
 #define FN(name) auto name=reinterpret_cast<decltype(&mcd2_afg_##name##_v1)>(GetProcAddress(bridge,"mcd2_afg_" #name "_v1"));if(!name)return 4;
- FN(load) FN(swap) FN(guides) FN(world) FN(present) FN(state) FN(retire) FN(antilag_ready) FN(antilag)
+ FN(load) FN(swap) FN(state) FN(retire) FN(antilag_ready) FN(antilag)
 #undef FN
+#define FN(name) auto name=reinterpret_cast<decltype(&mcd2_afg_##name##_v2)>(GetProcAddress(bridge,"mcd2_afg_" #name "_v2"));if(!name)return 4;
+ FN(recording_contract) FN(guides) FN(world) FN(present)
+#undef FN
+ if(result("owned-recording-contract",recording_contract()==2?0:-1))return 35;
  wcscat_s(path.get(),32768,L"\\amd_fidelityfx_framegeneration_dx12.dll");
  if(result("load-verified-runtime",load(path.get())))return 5;
  IDXGIFactory4* factory=nullptr;ID3D12Device* device=nullptr;ID3D12CommandQueue* queue=nullptr;
@@ -43,6 +47,9 @@ int main(){
  if(result("owned-presenter-antilag-ready",antilag_ready(device))||antilag_ready(nullptr)==0)return 31;
  if(antilag(device,nullptr,1,0)!=E_INVALIDARG||antilag(device,nullptr,0,2)!=E_INVALIDARG)return 32;
  if(result("clear-antilag-before-presentation",antilag(device,nullptr,0,1)))return 33;
+ ID3D12CommandQueue* unrelated=nullptr;if(FAILED(device->CreateCommandQueue(&q,IID_PPV_ARGS(&unrelated))))return 36;
+ const auto refused=present(unrelated,100,1);unrelated->Release();
+ if(result("reject-unrelated-submission-queue",refused==-41?0:refused?refused:-1))return 37;
  HANDLE waitable=chain->GetFrameLatencyWaitableObject();if(!waitable)return 11;
  result("set-PQ-output",chain->SetColorSpace1(DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020));
  ID3D12DescriptorHeap* views=nullptr;D3D12_DESCRIPTOR_HEAP_DESC vh{};vh.Type=D3D12_DESCRIPTOR_HEAP_TYPE_RTV;vh.NumDescriptors=3;
@@ -63,10 +70,10 @@ int main(){
     if(result("prepare-game-bridge-inputs",guides(cmd,images[1],images[2],&p)))return 16;
     if(result("copy-hudless-world",world(cmd,images[0],p.camera.frame)))return 17;
    }
-   if(result("configure-bridge-present",present(identity+100,enabled)))return 19;
    ID3D12Resource* back=nullptr;if(FAILED(chain->GetBuffer(chain->GetCurrentBackBufferIndex(),IID_PPV_ARGS(&back))))return 20;
    transition(cmd,images[0],Read,D3D12_RESOURCE_STATE_COPY_SOURCE);transition(cmd,back,D3D12_RESOURCE_STATE_PRESENT,D3D12_RESOURCE_STATE_COPY_DEST);cmd->CopyResource(back,images[0]);transition(cmd,back,D3D12_RESOURCE_STATE_COPY_DEST,D3D12_RESOURCE_STATE_PRESENT);transition(cmd,images[0],D3D12_RESOURCE_STATE_COPY_SOURCE,Read);back->Release();
    if(FAILED(cmd->Close()))return 21;ID3D12CommandList* commands[]={cmd};queue->ExecuteCommandLists(1,commands);
+   if(result("configure-bridge-present",present(queue,identity+100,enabled)))return 19;
    if(FAILED(chain->Present(0,0))||!wait()||FAILED(device->GetDeviceRemovedReason()))return 22;Sleep(16);
   }
   MCD2AmdFgStateV1 after{};after.size=sizeof(after);auto deadline=GetTickCount64()+5000;
@@ -76,13 +83,18 @@ int main(){
   if(real!=frames||after.fault||after.errors||(!enabled&&generated)||(enabled&&generated<frames/2))return 24;
  }
  if(result("clear-antilag-after-presentation",antilag(device,nullptr,0,1)))return 34;
- // Re-record a final prepare to prove retirement retains a live recording.
+ // Staging a guide must not place SDK work in the host recording. Keep this
+ // host list closed and replayable throughout retirement; no native Reset is
+ // needed by the SDK because only the bridge owns its actual prepare lists.
  if(!reset())return 25;MCD2AmdFgGuidesV1 p{};p.size=sizeof(p);p.frameTimeMs=16.667f;p.worldToMeters=1;p.camera.size=sizeof(p.camera);p.camera.frame=identity+100;p.camera.width=W;p.camera.height=H;p.camera.nearPlane=.1f;p.camera.farPlane=1000;p.camera.verticalFOV=1;p.camera.up[1]=1;p.camera.right[0]=1;p.camera.forward[2]=1;
- if(guides(cmd,images[1],images[2],&p)||FAILED(cmd->Close()))return 26;
- if(result("retain-live-recording",retire(nullptr,0))!=-61)return 27;
- hr=cmd->Reset(nullptr,nullptr);if(SUCCEEDED(hr)||result("retain-after-failed-Reset",retire(nullptr,0))!=-61)return 28;
- if(!wait()||!reset()||FAILED(cmd->Close()))return 29;
- if(result("retire-after-successful-Reset-and-own-fence",retire(nullptr,0)))return 30;
+ if(guides(cmd,images[1],images[2],&p))return 26;
+ transition(cmd,images[0],Read,D3D12_RESOURCE_STATE_COPY_SOURCE);
+ transition(cmd,images[0],D3D12_RESOURCE_STATE_COPY_SOURCE,Read);
+ if(FAILED(cmd->Close()))return 26;
+ if(result("retire-with-replayable-host-recording",retire(nullptr,0)))return 27;
+ ID3D12CommandList* host[]={cmd};queue->ExecuteCommandLists(1,host);
+ if(result("host-recording-replay-after-SDK-retirement",wait()?0:-1))return 28;
+ if(result("idempotent-retirement",retire(nullptr,0)))return 29;
  chain->Release();CloseHandle(waitable);for(auto* image:images)image->Release();views->Release();cmd->Release();allocator->Release();fence->Release();CloseHandle(event);queue->Release();device->Release();factory->Release();DestroyWindow(window);FreeLibrary(bridge);
  result("complete",0);fclose(log);return 0;
 }
