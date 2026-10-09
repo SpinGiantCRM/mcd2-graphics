@@ -505,3 +505,18 @@ request, FG exclusion and matching-revision active acknowledgement. Missing new
 fields in the existing schema-1 display slot mean unavailable. Both platforms
 run the synthetic display codec and exact C# admission/request fixtures; those
 checks do not establish active Windows/AMD driver support or latency reduction.
+
+## Isolated AMD Frame Generation probes
+
+The [FSR FG probes](FSR_FRAME_GENERATION_2026-10-09.md) compile with the Microsoft
+ABI, pinned external MIT headers, static CRT and 16 KiB stack guard in the full
+Windows candidate job. Keep both executables separate from the installed addon
+and exclude the AMD runtime DLL. Source-build success is not GPU execution.
+
+Preserve actual selected-provider checks, owned recording invalidation followed
+by a completed fence, SDK presentation drainage before callback/context release,
+and independent real/generated callback plus DXGI presentation counts. A failed
+retirement retains the generation. The SDK-owned waitable handle is closed once;
+no Streamline vendor presenter is chained into the AMD presenter. Linux/NVIDIA
+isolated execution cannot qualify Windows/AMD, in-game AMD FG, Anti-Lag coexistence
+or a latency/performance benefit. Both existing CI platforms remain required.

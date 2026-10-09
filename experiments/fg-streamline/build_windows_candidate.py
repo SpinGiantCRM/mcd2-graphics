@@ -190,6 +190,23 @@ def main():
     fsr_destination.mkdir()
     for name in ['fsr-owned-inputs.exe', 'build-receipt.json', 'FSR-SDK-HEADERS-LICENSE.txt']:
         shutil.copyfile(fsr_probe / name, fsr_destination / name)
+    fg_spec = importlib.util.spec_from_file_location('fsr_fg_recipe', REPO / 'experiments/providers/build_fsr_fg_probe.py')
+    fg_recipe = importlib.util.module_from_spec(fg_spec)
+    fg_spec.loader.exec_module(fg_recipe)
+    for name, expected in fg_recipe.HEADERS.items():
+        destination = fsr_sdk / name
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        download('https://raw.githubusercontent.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK/' +
+                 fg_recipe.COMMIT + '/Kits/FidelityFX/' + name, destination, expected)
+    for presentation in [False, True]:
+        name = 'fsr-fg-presentation' if presentation else 'fsr-fg-owned-inputs'
+        directory = out / name
+        fg_recipe.build(fsr_sdk, sysroot, directory, str(llvm / 'clang-cl.exe'),
+                        str(llvm / 'lld-link.exe'), presentation=presentation)
+        destination = artifact / ('isolated-' + name)
+        destination.mkdir()
+        for filename in [name + '.exe', 'build-receipt.json', 'FSR-SDK-HEADERS-LICENSE.txt']:
+            shutil.copyfile(directory / filename, destination / filename)
     scripts = REPO / 'experiments/fg-streamline'
     probe = out / 'probe'
     run(sys.executable, scripts / 'build_probe.py', '--sdk', sdk, '--sysroot', sysroot,
