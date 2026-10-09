@@ -16,6 +16,7 @@
 #include <atomic>
 #include "fg_camera_contract.h"
 #include "fg_bridge_contract.h"
+#include "../providers/fsr_fg_game_bridge.h"
 namespace a=reshade::api;
 #include "fg_alpha_copy.h"
 #include "fg_controls.hpp"
@@ -51,6 +52,13 @@ unsigned outputWidth=0,outputHeight=0,outputBuffers=0,outputFormat=0;HWND output
 thread_local bool internalGPU=false;
 bool retiring=false,ownerClosing=false;
 std::atomic<bool> captureEnabled{false},guideTags{false},imageTags{false},legacyEnable{false};unsigned cachedRevision=0;
+bool amd_owner(){auto bootstrap=GetModuleHandleW(L"dxgi.dll");auto owner=bootstrap?reinterpret_cast<unsigned(*)()>(GetProcAddress(bootstrap,"mcd2_bootstrap_amd_fg_session")):nullptr;return owner&&owner()==1;}
+HMODULE amd_bridge(){return amd_owner()?GetModuleHandleW(L"mcd2-fsr-fg-game-bridge.dll"):nullptr;}
+ID3D12GraphicsCommandList* native_command(void* proxy){
+ constexpr GUID unwrap={0x7f2c9a11,0x3b4e,0x4d6a,{0x81,0x2f,0x5e,0x9c,0xd3,0x7a,0x1b,0x42}};
+ ID3D12GraphicsCommandList* out=nullptr;
+ return proxy&&SUCCEEDED(static_cast<ID3D12GraphicsCommandList*>(proxy)->QueryInterface(unwrap,reinterpret_cast<void**>(&out)))?out:nullptr;
+}
 void poll_policy(){static ULONGLONG next=0;auto now=GetTickCount64();if(now<next||capturePolicy.empty())return;next=now+200;
  captureEnabled=GetPrivateProfileIntW(L"Capture",L"Enabled",0,capturePolicy.c_str())!=0;
  guideTags=GetPrivateProfileIntW(L"Capture",L"GuideTags",0,capturePolicy.c_str())!=0;
@@ -61,6 +69,12 @@ void poll_policy(){static ULONGLONG next=0;auto now=GetTickCount64();if(now<next
 bool tracking(){return captureEnabled || (fg_controls::enabled?fg_controls::wanted.load():guideTags.load()&&guideSamples<900);}
 
 void try_retirement(){
+ if(auto module=amd_bridge()){
+  bool close=false;{std::lock_guard lock(mutex);close=retiring;}if(!close)return;
+  using Retire=int(*)(void*,uint64_t);auto retire=reinterpret_cast<Retire>(GetProcAddress(module,"mcd2_afg_retire_v1"));
+  const int result=retire?retire(nullptr,0):-1;
+  std::lock_guard lock(mutex);privateLog<<"{\"kind\":\"amd_retirement\",\"SDKResult\":"<<result<<"}\n";privateLog.flush();if(!result)retiring=false;return;
+ }
  bool ready=false;unsigned recordings=0;
  {std::lock_guard lock(mutex);for(auto&[cmd,state]:commands)recordings+=state.usesAlpha;ready=retiring&&!recordings;}
  if(!ready)return;
@@ -130,6 +144,14 @@ void swap_destroy(a::swapchain*swap,bool resize){
   if(owner){retiring=true;ownerClosing=!resize;gameFrames.clear();for(auto&[cmd,state]:commands)recordings+=state.usesAlpha;
    privateLog<<"{\"kind\":\"alpha_retirement_requested\",\"resize\":"<<(resize?"true":"false")<<",\"recordedCommandLeases\":"<<recordings<<"}\n";privateLog.flush();}}
  if(!owner)return;
+ if(auto module=amd_bridge()){
+  using Present=int(*)(uint64_t,uint32_t);auto disable=reinterpret_cast<Present>(GetProcAddress(module,"mcd2_afg_present_v1"));
+  if(disable)disable(UINT64_MAX,0);activeFGMode=0;
+  // ReShade recreates its wrapper on ResizeBuffers; the SDK presenter remains
+  // the same native object. Do not destroy it beneath the game's live COM ref.
+  if(resize){std::lock_guard lock(mutex);retiring=false;return;}
+  try_retirement();return;
+ }
  auto bridge=GetModuleHandleW(L"fg-sdk-bridge.dll");using Configure=int(*)(const MCD2FGConfig*);auto configure=bridge?reinterpret_cast<Configure>(GetProcAddress(bridge,"mcd2_fg_configure")):nullptr;
  if(activeFGMode&&configure){MCD2FGConfig c{sizeof(c),0,outputWidth,outputHeight,outputWidth,outputHeight,outputFormat,61,41,34,outputBuffers,1};if(!configure(&c))activeFGMode=0;}
  // SR owns a feature in the same NGX context. Its queue-retirement callback
@@ -200,6 +222,14 @@ void compositor(a::command_list*cmd){
  auto proxy=fg_alpha::proxy(cmd);if(!proxy)return;int tokenResult=-1,sdkResult=-100;unsigned sdkIndex=0;
  auto uiResource=reinterpret_cast<ID3D12Resource*>(cmd->get_device()->get_resource_from_view(ui.view).handle);auto worldResource=reinterpret_cast<ID3D12Resource*>(cmd->get_device()->get_resource_from_view(world.view).handle);
  internalGPU=true;
+ if(auto module=amd_bridge()){
+  using World=int(*)(void*,void*,uint64_t);auto copy=reinterpret_cast<World>(GetProcAddress(module,"mcd2_afg_world_v1"));auto raw=native_command(proxy);
+  sdkResult=raw&&copy?copy(raw,worldResource,stamp):-100;tokenResult=sdkResult;sdkIndex=stamp;if(raw)raw->Release();
+  restore_root(cmd,saved.compute,true);if(saved.computePipeline)cmd->bind_pipeline(a::pipeline_stage::all_compute,{saved.computePipeline});restore_root(cmd,saved.graphics,false);cmd->bind_pipeline(a::pipeline_stage::all_graphics,{saved.graphicsPipeline});internalGPU=false;proxy->Release();
+  std::lock_guard lock(mutex);commands[cmd]=saved;
+  if(!sdkResult){commands[cmd].imageFrame=stamp;gameFrames[stamp].images=true;}
+  if(sample<120||sample%60==0)privateLog<<"{\"kind\":\"amd_world_copy\",\"frameStamp\":"<<stamp<<",\"SDKResult\":"<<sdkResult<<"}\n";privateLog.flush();return;
+ }
  auto alpha=fg_alpha::copy(proxy,uiResource,DXGI_FORMAT(cmd->get_device()->get_resource_view_desc(ui.view).format),outputWidth,outputHeight);
  if(alpha){
   auto bridge=GetModuleHandleW(L"fg-sdk-bridge.dll");using Images=int(*)(void*,void*,void*,void*,unsigned,unsigned);auto images=bridge?reinterpret_cast<Images>(GetProcAddress(bridge,"mcd2_fg_game_images")):nullptr;
@@ -216,6 +246,11 @@ bool draw(a::command_list*cmd,unsigned,unsigned,unsigned,unsigned){if(!tracking(
 bool indexed(a::command_list*cmd,unsigned,unsigned,unsigned,int,unsigned){return draw(cmd,0,0,0,0);}
 void finish(a::command_queue*,a::swapchain*){
  auto bridge=GetModuleHandleW(L"fg-sdk-bridge.dll");using State=int(*)(unsigned*,unsigned*,unsigned*,unsigned*);auto state=bridge?reinterpret_cast<State>(GetProcAddress(bridge,"mcd2_fg_state")):nullptr;
+ if(auto module=amd_bridge()){
+  using State=int(*)(MCD2AmdFgStateV1*);auto get=reinterpret_cast<State>(GetProcAddress(module,"mcd2_afg_state_v1"));MCD2AmdFgStateV1 state{};state.size=sizeof(state);auto result=get?get(&state):-1;
+  std::lock_guard lock(mutex);++outcomeSample;outcomeResult=result;outcomeStatus=state.fault;outcomePresents=0;
+  if(frame<120||frame%60==0)privateLog<<"{\"kind\":\"amd_fg_outcome\",\"SDKResult\":"<<result<<",\"active\":"<<state.active<<",\"fault\":"<<state.fault<<",\"engineFrame\":"<<state.engineFrame<<",\"providerFrame\":"<<state.providerFrame<<",\"prepared\":"<<state.prepared<<",\"images\":"<<state.images<<",\"realPresents\":"<<state.realPresents<<",\"generatedPresents\":"<<state.generatedPresents<<",\"errors\":"<<state.errors<<",\"warnings\":"<<state.warnings<<"}\n";privateLog.flush();++frame;return;
+ }
  unsigned max=0,status=0,min=0,presents=0;int result=activeFGMode&&state?state(&max,&status,&min,&presents):-1;
  if(fg_controls::enabled && activeFGMode && (result!=0||status!=0))fg_controls::fault=1;
  std::lock_guard lock(mutex);++outcomeSample;
@@ -233,6 +268,12 @@ void present(a::command_queue*q,a::swapchain*swap,const a::rect*,const a::rect*,
   wanted=fg_controls::enabled?fg_controls::wanted.load()&&GetForegroundWindow()==outputWindow:legacyEnable.load()&&fgTrialFrames<600&&GetForegroundWindow()==outputWindow;
  }
  const unsigned mode=ready&&wanted&&fg_alpha::submission_queue(q)?1:0;
+ if(auto module=amd_bridge()){
+  using Present=int(*)(uint64_t,uint32_t);auto configure=reinterpret_cast<Present>(GetProcAddress(module,"mcd2_afg_present_v1"));auto result=configure?configure(id,ready&&wanted?1:0):-1;
+  activeFGMode=!result&&ready&&wanted?1:0;
+  if(activeFGMode){++fgTrialFrames;presentedFrame=uint32_t(id);}return;
+ }
+
  auto bridge=GetModuleHandleW(L"fg-sdk-bridge.dll");using LastConfig=int(*)(MCD2FGConfig*);
  auto last=bridge?reinterpret_cast<LastConfig>(GetProcAddress(bridge,"mcd2_fg_last_config")):nullptr;
  MCD2FGConfig effective{};if(last)last(&effective);
@@ -267,6 +308,18 @@ extern "C" __declspec(dllexport) void mcd2_fg_observe_sr(void*cmd,void*depth,voi
  if(fg_controls::enabled&&!fg_controls::wanted)return;
  {std::lock_guard lock(mutex);if(retiring||ownerClosing||!guideTags)return;}
  const auto sample=guideSamples.fetch_add(1);if((!fg_controls::enabled&&sample>=900)||(fg_controls::enabled&&!fg_controls::wanted))return;
+ if(auto module=amd_bridge()){
+  auto latency=GetModuleHandleW(L"mcd2-display-latency.addon64");renderMarker=latency?reinterpret_cast<Frame>(GetProcAddress(latency,"mcd2_fg_render_marker")):nullptr;presentFrame=latency?reinterpret_cast<Frame>(GetProcAddress(latency,"mcd2_fg_present_frame")):nullptr;
+  using Guides=int(*)(void*,void*,void*,const MCD2AmdFgGuidesV1*);auto prepare=reinterpret_cast<Guides>(GetProcAddress(module,"mcd2_afg_guides_v1"));
+  static LARGE_INTEGER frequency{},previous{};static uint32_t previousFrame=UINT32_MAX;
+  LARGE_INTEGER now{};if(!frequency.QuadPart)QueryPerformanceFrequency(&frequency);QueryPerformanceCounter(&now);
+  if(previousFrame!=UINT32_MAX&&camera->frame<=previousFrame)return;
+  MCD2AmdFgGuidesV1 p{};p.size=sizeof(p);p.camera=*camera;p.worldToMeters=.01f;
+  p.frameTimeMs=previous.QuadPart&&frequency.QuadPart?float(double(now.QuadPart-previous.QuadPart)*1000./frequency.QuadPart):0.f;previous=now;previousFrame=camera->frame;
+  auto raw=native_command(cmd);const auto result=raw&&prepare&&p.frameTimeMs>0?prepare(raw,depth,motion,&p):-101;if(raw)raw->Release();
+  std::lock_guard lock(mutex);gameFrames[camera->frame]={*camera,result==0,false};while(gameFrames.size()>16)gameFrames.erase(gameFrames.begin());
+  if(sample<120||sample%60==0)privateLog<<"{\"kind\":\"amd_guides\",\"frameStamp\":"<<camera->frame<<",\"SDKResult\":"<<result<<",\"frameTimeMs\":"<<p.frameTimeMs<<",\"width\":"<<camera->width<<",\"height\":"<<camera->height<<",\"cameraBytes\":"<<camera->size<<",\"reset\":"<<camera->reset<<"}\n";privateLog.flush();return;
+ }
  auto latency=GetModuleHandleW(L"mcd2-display-latency.addon64"),bridge=GetModuleHandleW(L"fg-sdk-bridge.dll");
  auto visit=latency?reinterpret_cast<Visit>(GetProcAddress(latency,"mcd2_fg_visit_frame")):nullptr;
  {std::lock_guard lock(mutex);if(visit){visitFrame=visit;renderMarker=reinterpret_cast<Frame>(GetProcAddress(latency,"mcd2_fg_render_marker"));presentFrame=reinterpret_cast<Frame>(GetProcAddress(latency,"mcd2_fg_present_frame"));}}

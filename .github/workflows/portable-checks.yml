@@ -28,6 +28,7 @@ jobs:
           python3 -m unittest discover -s tests -p "test_amd_latency_build.py" -v
           python3 -m unittest discover -s tests -p "test_fsr_probe.py" -v
           python3 -m unittest discover -s tests -p "test_fsr_fg_probe.py" -v
+          python3 -m unittest discover -s tests -p "test_fsr_fg_game_bridge.py" -v
           python3 -m unittest discover -s tests -p "test_sr_guide_producer.py" -v
           python3 -m unittest discover -s tests -p "test_fsr_game_probe.py" -v
           python3 -m unittest discover -s tests -p "test_fsr_sustained_probe.py" -v
@@ -107,6 +108,7 @@ jobs:
           python -m unittest discover -s tests -p "test_amd_latency_build.py" -v
           python -m unittest discover -s tests -p "test_fsr_probe.py" -v
           python -m unittest discover -s tests -p "test_fsr_fg_probe.py" -v
+          python -m unittest discover -s tests -p "test_fsr_fg_game_bridge.py" -v
           python -m unittest discover -s tests -p "test_sr_guide_producer.py" -v
           python -m unittest discover -s tests -p "test_fsr_game_probe.py" -v
           python -m unittest discover -s tests -p "test_fsr_sustained_probe.py" -v

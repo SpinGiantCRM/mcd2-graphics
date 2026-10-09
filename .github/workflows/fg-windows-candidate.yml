@@ -5,7 +5,7 @@ on:
       - '.github/workflows/fg-windows-candidate.yml'
       - 'experiments/fg-streamline/**'
       - 'experiments/providers/**'
-      - 'tests/test_fsr_probe.py'
+      - 'tests/test_fsr*.py'
       - 'src/native/**'
       - 'src/latency/**'
       - 'src/providers/**'

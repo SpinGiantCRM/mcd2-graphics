@@ -71,6 +71,7 @@ with zipfile.ZipFile(a.runtime_archive) as archive:
 sources=['streamline_probe_bridge.cpp','fg_bridge_contract.h','fg_camera_contract.h','fg_configuration.hpp',host]+(['factory_route.hpp'] if a.probe=='owned' else [])+(['chain_observer.cpp'] if a.reshade_headers else [])+(['bootstrap_dxgi.cpp','fg_ui_protocol.hpp','wine_reflex_pacing.hpp'] if a.early_bootstrap else [])
 own=['fg-probe.exe']+(['fg-chain-observer.addon64'] if a.reshade_headers else [])+(['fg-sdk-bridge.dll','dxgi.dll'] if a.early_bootstrap else [])
 if a.early_bootstrap:sources+=provider_sources(repo)
+if a.early_bootstrap or a.guide_recon:sources+=['../providers/fsr_fg_game_bridge.h']
 if a.guide_recon:sources+=['guide_recon.cpp','fg_alpha_copy.h','fg_ui_alpha.hlsl','fg_controls.hpp','fg_ui_protocol.hpp'];own+=['mcd2-fg-guide-recon.addon64','FG_UI_ALPHA.cso']
 (out/'build-receipt.json').write_text(json.dumps({'sdk':'2.14.1','archiveSHA256':archive_hash,'probe':a.probe,'earlyBootstrap':a.early_bootstrap,'files':files,'dxcSHA256':hashlib.sha256(a.dxc.read_bytes()).hexdigest() if a.guide_recon else None,'sourceSHA256':source_hashes(repo,src,sources),'ownBinariesSHA256':{name:hashlib.sha256((out/name).read_bytes()).hexdigest() for name in own},'executableSHA256':hashlib.sha256((out/'fg-probe.exe').read_bytes()).hexdigest()},indent=2))
 print('Isolated '+a.probe+' FG probe built; production runtime archive verified. No game files changed.')

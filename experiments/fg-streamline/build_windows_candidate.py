@@ -208,6 +208,15 @@ def main():
         for filename in [name + '.exe', 'build-receipt.json', 'FSR-SDK-HEADERS-LICENSE.txt']:
             shutil.copyfile(directory / filename, destination / filename)
     scripts = REPO / 'experiments/fg-streamline'
+    amd_fg_bridge = out / 'fsr-fg-game-bridge'
+    run(sys.executable, REPO / 'experiments/providers/build_fsr_fg_game_bridge.py',
+        '--sdk', fsr_sdk, '--windows-sysroot', sysroot, '--output', amd_fg_bridge,
+        '--clang-cl', llvm / 'clang-cl.exe', '--linker', llvm / 'lld-link.exe')
+    destination = artifact / 'isolated-fsr-fg-game-bridge'
+    destination.mkdir()
+    for filename in ['mcd2-fsr-fg-game-bridge.dll', 'fsr-fg-game-bridge-probe.exe',
+                     'build-receipt.json', 'FSR-SDK-HEADERS-LICENSE.txt']:
+        shutil.copyfile(amd_fg_bridge / filename, destination / filename)
     probe = out / 'probe'
     run(sys.executable, scripts / 'build_probe.py', '--sdk', sdk, '--sysroot', sysroot,
         '--runtime-archive', sdk_zip, '--output', probe, '--reshade-headers', reshade / 'include',
