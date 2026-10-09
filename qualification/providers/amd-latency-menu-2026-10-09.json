@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Opt-in ordinary-menu Anti-Lag 2 capability admission; no released payload changed",
+  "candidateOnly": true,
+  "nativeSHA256": "f7881b1d981533200a53f42d6b616a3b8cd3ba0909678ff3fe46aad0cc65f567",
+  "latencySHA256": "95343ac5dca0246abae5ad12f5a0ded7afcaeb07888bc55093c5d3f48e6205a9",
+  "ownUIArchiveSHA256": "224b1268a2ef95e76a8bee187869b72498178f672f0f87634a580e6a55cdefa1",
+  "environment": {
+    "OS": "CachyOS Linux",
+    "GPU": "NVIDIA RTX 4080 SUPER",
+    "proton": "CachyOS Proton SLR",
+    "steamBuild": 25754144
+  },
+  "boundedObservations": {
+    "mainMenuVideo": true,
+    "hub": true,
+    "AMDRowHidden": true,
+    "AMDDriverEligibilityRejected": true,
+    "AMDAvailable": 0,
+    "AMDEnabled": 0,
+    "AMDInputCalls": 0,
+    "AMDRenderCalls": 0,
+    "reflexMode": 1,
+    "reflexCompletedFrames": 125034,
+    "reflexFault": 0,
+    "coordinatorError": 0,
+    "SDKMarkerError": 0,
+    "normalQuitProcessAbsentWithinSeconds": 49.972,
+    "normalQuitExitCode": null,
+    "forcedTermination": false,
+    "baselineAndOwnSettingsRestoredExactly": true
+  },
+  "limitations": [
+    "Active Windows/AMD and physical controller not tested",
+    "No latency or performance benefit measured",
+    "Earlier delayed shutdown not diagnosed or repaired"
+  ],
+  "publishedPayloadChanged": false
+}

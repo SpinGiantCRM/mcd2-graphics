@@ -17,6 +17,17 @@ static class RuntimeTest {
   Check(!ProviderRuntimeClient.CanRestoreNvidiaSource(7,2,123,1,7,123,1));
   Check(!ProviderRuntimeClient.CanRestoreNvidiaSource(7,0,123,1,7,123,3));
   Check(!ProviderRuntimeClient.CanRestoreNvidiaSource(7,2,0,1,7,123,3));
+  Check(ProviderRuntimeClient.AmdLatencyAvailable(true,123,1,123,1,0,false));
+  Check(!ProviderRuntimeClient.AmdLatencyAvailable(false,123,1,123,1,0,false));
+  Check(!ProviderRuntimeClient.AmdLatencyAvailable(true,123,1,124,1,0,false));
+  Check(!ProviderRuntimeClient.AmdLatencyAvailable(true,123,2,123,1,0,false));
+  Check(!ProviderRuntimeClient.AmdLatencyAvailable(true,123,1,123,0,0,false));
+  Check(!ProviderRuntimeClient.AmdLatencyAvailable(true,123,1,123,1,1,false));
+  Check(!ProviderRuntimeClient.AmdLatencyAvailable(true,123,1,123,1,0,true));
+  Check(ProviderRuntimeClient.AmdLatencyApplied(7,7,0)==0);
+  Check(ProviderRuntimeClient.AmdLatencyApplied(7,7,1)==1);
+  Check(ProviderRuntimeClient.AmdLatencyApplied(7,6,1)==-1);
+  Check(ProviderRuntimeClient.AmdLatencyApplied(7,7,2)==-1);
   UGameplayStatics.Slots.Clear();UGameplayStatics.FailSave=false;var menu=Menu();var client=new ProviderRuntimeClient();client.Start();
   var s=Plan(5);UGameplayStatics.Slots["MCD2GraphicsProviderSrRuntime"]=s;
   Check(client.Poll(menu,"Hub",true,100000,100000000)&&client.Enabled&&client.NeedsSourceCommand());

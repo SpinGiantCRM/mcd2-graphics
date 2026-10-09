@@ -190,6 +190,7 @@ public class DisplaySettingsSave : USaveGame {
 }
 public class DisplayRuntimeSave : USaveGame {
  public int SchemaVersion;public int Revision;public int SessionId;public int ReflexAvailable;public int ReflexMode;public int ReflexFault;public int HDRRevision;public int HDRRestartRequired;
+ public int AmdAntiLagAvailable;public int AmdAntiLagMode;public int AmdAntiLagFault;public int AmdAntiLagRevision;
 }
 public class DisplaySetting : UGameSetting {public int ControlId;}
 public class DisplayRow : UGameSettingListEntryBase {
@@ -206,12 +207,12 @@ public class DisplayRow : UGameSettingListEntryBase {
  public override void Construct(){Refresh();}
  public void Refresh(){var model=Setting as DisplaySetting;if(model==null || Skin==null || Manager==null || Manager.DisplaySaved==null)return;int id=model.ControlId;
   if(configured!=id){configured=id;if(Skin.Text_SettingName!=null)Skin.Text_SettingName.SetText(Manager.DisplayLabel(id));
-   var choices=new List<FText>();if(id==0 || id==5){choices.Add("Off");choices.Add("On");}else if(id==4){choices.Add("Off");choices.Add("On");choices.Add("On + Boost");}else {int max=id==1?10000:500;int step=id==1?10:1;for(int n=id==1?100:48;n<=max;n+=step)choices.Add(n+" nits");}
+   var choices=new List<FText>();if(id==0 || id==5 || id==6){choices.Add("Off");choices.Add("On");}else if(id==4){choices.Add("Off");choices.Add("On");choices.Add("On + Boost");}else {int max=id==1?10000:500;int step=id==1?10:1;for(int n=id==1?100:48;n<=max;n+=step)choices.Add(n+" nits");}
    if(Skin.Rotator_SettingValue!=null)Skin.Rotator_SettingValue.PopulateTextLabels(choices);
   }
   int value=Manager.DisplayValue(id);int index=id==1?(value-100)/10:(id==2 || id==3?value-48:value);
   if(Skin.Rotator_SettingValue!=null)Skin.Rotator_SettingValue.SetSelectedItem(index);
-  SetIsEnabled(id==5?(Manager.FGRuntime!=null && Manager.FGRuntime.Available==1):id==0 || (id==4?(Manager.DisplayRuntime!=null && Manager.DisplayRuntime.ReflexAvailable==1 && Manager.DisplayRuntime.ReflexFault==0):Manager.DisplaySaved.HDROutput==1));
+  SetIsEnabled(id==6?Manager.AmdLatencyAvailable():id==5?(Manager.FGRuntime!=null && Manager.FGRuntime.Available==1):id==0 || (id==4?(Manager.DisplayRuntime!=null && Manager.DisplayRuntime.ReflexAvailable==1 && Manager.DisplayRuntime.ReflexFault==0):Manager.DisplaySaved.HDROutput==1));
  }
  void Change(int direction){var model=Setting as DisplaySetting;if(model==null || Manager==null)return;Manager.ChangeDisplay(model.ControlId,direction);Refresh();Manager.ShowDisplayHelp(model.ControlId);SetUserFocus(UGameplayStatics.GetPlayerController(this,0));}
  protected override UWidget? GetPrimaryGamepadFocusWidget(){return this;}
@@ -234,6 +235,10 @@ public class ModActor : AActor {
  public int ProviderUiFamily=1;
  int providerView=-1;int providerQualityView=-1;int providerScaleView=-1;int providerPhaseView=-1;
  public bool SharedControls(){return ProviderOwned && ProviderMenu!=null && ProviderMenu.Ready;}
+ public bool AmdLatencyAvailable(){
+  return SharedControls() && ProviderMenu!=null && ProviderMenu.Authority!=null && DisplayRuntime!=null &&
+   ProviderRuntimeClient.AmdLatencyAvailable(true,ProviderMenu.Authority.W5,DisplayRuntime.SchemaVersion,DisplayRuntime.SessionId,DisplayRuntime.AmdAntiLagAvailable,DisplayRuntime.AmdAntiLagFault,ProviderMenu.Value(19)!=0);
+ }
  public int SelectedProvider(){return SharedControls() && ProviderMenu!=null?ProviderMenu.Value(8):(Saved!=null && Saved.ReconstructionMode!=0?1:0);}
  public int SelectedFamily(){int provider=SelectedProvider();if(provider==1 || provider==2)ProviderUiFamily=provider;return ProviderUiFamily;}
  public int SelectedQuality(){if(SharedControls() && ProviderMenu!=null)return ProviderMenu.Value(ProviderMenu.PreferenceWord(SelectedFamily()));return Saved==null?1:Saved.SRPreset==5?0:Saved.SRPreset==4?5:Saved.SRPreset+1;}
@@ -304,7 +309,7 @@ public class ModActor : AActor {
  public List<UGameSettingDetailExtension_DefaultValue> HelpFooters=new List<UGameSettingDetailExtension_DefaultValue>();
  public FGSettingsSave? FGSaved;public FGRuntimeSave? FGRuntime;public FGHeaderSetting? FGHeaderModel;
  bool foliageVelocityOwned;bool foliageVelocityBlocked;int foliageVelocityOriginal;int foliageRestoreAttempts;
- public DisplaySettingsSave? DisplaySaved;public DisplayRuntimeSave? DisplayRuntime;public List<DisplaySetting> DisplayModels=new List<DisplaySetting>();int displayAppliedRevision;bool displayHDRSupported;int displayHelp=-1;
+ public DisplaySettingsSave? DisplaySaved;public DisplayRuntimeSave? DisplayRuntime;public List<DisplaySetting> DisplayModels=new List<DisplaySetting>();bool amdMenuVisible;int displayAppliedRevision;bool displayHDRSupported;int displayHelp=-1;
  public GraphicsSettingsSave? Saved;
  public GraphicsRuntimeStateSave? Runtime;
  public int MinimumScalePercent=17;int outputWidth;int outputHeight;int sourceApplyTicks;int lastAppliedSourceRevision;int lastAppliedSourceSession;int lastFallbackRevision;int lastFallbackSession;
@@ -575,11 +580,12 @@ public class ModActor : AActor {
   {DisplayRuntime=UGameplayStatics.CreateSaveGameObject(Unreal.ClassOf<DisplayRuntimeSave>()) as DisplayRuntimeSave;if(DisplayRuntime!=null){DisplayRuntime.SchemaVersion=1;UGameplayStatics.SaveGameToSlot(DisplayRuntime,"MCD2GraphicsDisplayRuntime",0);}}
  }
  public void PersistDisplay(){if(DisplaySaved!=null)UGameplayStatics.SaveGameToSlot(DisplaySaved,"MCD2GraphicsDisplaySettings",0);}
- public int DisplayValue(int id){if(SharedControls() && ProviderMenu!=null){if(id==5)return ProviderMenu.Value(19);if(id==0)return ProviderMenu.Value(25);if(id==1)return ProviderMenu.Value(26);if(id==2)return ProviderMenu.Value(27);if(id==3)return ProviderMenu.Value(28);return ProviderMenu.Value(24);}if(DisplaySaved==null)return 0;if(id==5)return FGSaved==null?0:FGSaved.Mode;if(id==0)return DisplaySaved.HDROutput;if(id==1)return DisplaySaved.PeakNits;if(id==2)return DisplaySaved.PaperWhiteNits;if(id==3)return DisplaySaved.UINits;return DisplaySaved.ReflexMode;}
- public string DisplayLabel(int id){if(id==5)return "Frame Generation";if(id==0)return "HDR Output";if(id==1)return "HDR Peak Brightness";if(id==2)return "HDR Paper White";if(id==3)return "HDR UI Brightness";return "NVIDIA Reflex";}
- public void ChangeDisplay(int id,int direction){if(ProviderOwned){
+ public int DisplayValue(int id){if(id==6)return SharedControls() && ProviderMenu!=null && (ProviderMenu.Value(23)==0 || ProviderMenu.Value(23)==2) && ProviderMenu.Value(24)==1?1:0;if(SharedControls() && ProviderMenu!=null){if(id==5)return ProviderMenu.Value(19);if(id==0)return ProviderMenu.Value(25);if(id==1)return ProviderMenu.Value(26);if(id==2)return ProviderMenu.Value(27);if(id==3)return ProviderMenu.Value(28);return ProviderMenu.Value(24);}if(DisplaySaved==null)return 0;if(id==5)return FGSaved==null?0:FGSaved.Mode;if(id==0)return DisplaySaved.HDROutput;if(id==1)return DisplaySaved.PeakNits;if(id==2)return DisplaySaved.PaperWhiteNits;if(id==3)return DisplaySaved.UINits;return DisplaySaved.ReflexMode;}
+ public string DisplayLabel(int id){if(id==6)return "AMD Anti-Lag 2";if(id==5)return "Frame Generation";if(id==0)return "HDR Output";if(id==1)return "HDR Peak Brightness";if(id==2)return "HDR Paper White";if(id==3)return "HDR UI Brightness";return "NVIDIA Reflex";}
+ public void ChangeDisplay(int id,int direction){if(id==6 && !ProviderOwned)return;if(ProviderOwned){
   if(!SharedControls() || ProviderMenu==null || direction==0)return;
   if(id==5){if(FGRuntime==null || FGRuntime.Available!=1 || SelectedProvider()!=1)return;ProviderMenu.SelectFg(0,0,2,ProviderMenu.Value(19)==0);}
+  else if(id==6){if(!AmdLatencyAvailable())return;ProviderMenu.SelectAntiLag2(DisplayValue(6)==0);}
   else if(id==4){if(DisplayRuntime==null || DisplayRuntime.ReflexAvailable!=1 || DisplayRuntime.ReflexFault!=0)return;int mode=ProviderMenu.Value(24)+direction;if(mode<0)mode=2;if(mode>2)mode=0;ProviderMenu.SelectLatency(1,mode);}
   else {int enabled=ProviderMenu.Value(25),peak=ProviderMenu.Value(26),paper=ProviderMenu.Value(27),ui=ProviderMenu.Value(28);
    if(id==0){if(!displayHDRSupported && enabled==0)return;enabled=enabled==0?1:0;}
@@ -598,7 +604,7 @@ public class ModActor : AActor {
   var state=UGameplayStatics.LoadGameFromSlot("MCD2GraphicsDisplayRuntime",0) as DisplayRuntimeSave;
   bool supportChanged=state!=null && (DisplayRuntime==null || state.ReflexAvailable!=DisplayRuntime.ReflexAvailable || state.SessionId!=DisplayRuntime.SessionId || state.ReflexFault!=DisplayRuntime.ReflexFault);
   if(state!=null && state.SchemaVersion==1)DisplayRuntime=state;
-  if(supportChanged)SyncLists();
+  bool amdVisible=AmdLatencyAvailable();if(supportChanged || amdVisible!=amdMenuVisible){amdMenuVisible=amdVisible;SyncLists();}
   if(displayAppliedRevision!=DisplaySaved.Revision && DisplayRuntime!=null && DisplayRuntime.HDRRevision==DisplaySaved.Revision && DisplayRuntime.HDRRestartRequired==0){var settings=UGameUserSettings.GetGameUserSettings();if(settings!=null){displayHDRSupported=settings.SupportsHDRDisplayOutput();if(displayHDRSupported || DisplaySaved.HDROutput==0){
     if(DisplaySaved.HDROutput==1){UKismetSystemLibrary.ExecuteConsoleCommand(this,"r.AllowHDR 1",UGameplayStatics.GetPlayerController(this,0));UKismetSystemLibrary.ExecuteConsoleCommand(this,"r.HDR.Display.OutputDevice 3",UGameplayStatics.GetPlayerController(this,0));UKismetSystemLibrary.ExecuteConsoleCommand(this,"r.HDR.Display.ColorGamut 2",UGameplayStatics.GetPlayerController(this,0));UKismetSystemLibrary.ExecuteConsoleCommand(this,"r.HDR.UI.CompositeMode 1",UGameplayStatics.GetPlayerController(this,0));}
     // Reflex/paper-white revisions do not change the native output mode.
@@ -609,11 +615,11 @@ public class ModActor : AActor {
  }
  public void InsertDisplayRows(USpicewoodGameSettingPanel panel,USpicewoodGameSettingRegistry_PrimaryPlayer registry){
   if(panel.ListView_Settings==null || registry.GfxSettings==null)return;
-  if(DisplayModels.Count==0){for(int id=0;id<6;id++){var model=UGameplayStatics.SpawnObject(Unreal.ClassOf<DisplaySetting>(),registry) as DisplaySetting;if(model!=null){model.ControlId=id;model.LocalPlayer=registry.OwningLocalPlayer;model.OwningRegistry=registry;model.SettingParent=registry.GfxSettings;DisplayModels.Add(model);}}}
+  if(DisplayModels.Count==0){for(int id=0;id<7;id++){var model=UGameplayStatics.SpawnObject(Unreal.ClassOf<DisplaySetting>(),registry) as DisplaySetting;if(model!=null){model.ControlId=id;model.LocalPlayer=registry.OwningLocalPlayer;model.OwningRegistry=registry;model.SettingParent=registry.GfxSettings;DisplayModels.Add(model);}}}
   var list=panel.ListView_Settings.GetListItems();var result=new List<UObject>();bool hdrInserted=false;bool reflexInserted=false;
   foreach(var item in list){if(item is DisplaySetting){var own=item as DisplaySetting;if(own!=null && own.ControlId==5 && FGRuntime!=null && FGRuntime.Available==1)result.Add(item);continue;}result.Add(item);if(item==Model || item==HeaderModel || item==PresetModel || item==ScaleModel)continue;var setting=item as UGameSetting;if(setting==null)continue;string label=UKismetTextLibrary.Conv_TextToString(setting.GetDisplayName());string name=UKismetSystemLibrary.GetObjectName(setting);
    if(!hdrInserted && (label=="Brightness" || name.Contains("Brightness"))){foreach(var model in DisplayModels)if(model.ControlId<4)result.Add(model);hdrInserted=true;}
-   if(!reflexInserted && (label=="FPS Limit" || label.Contains("Frame Rate Limit") || name.Contains("FrameRateLimit") || name.Contains("FPSLimit"))){foreach(var model in DisplayModels)if(model.ControlId==4 && ((DisplayRuntime!=null && DisplayRuntime.ReflexAvailable==1 && DisplayRuntime.ReflexFault==0) || list.Contains(model)))result.Add(model);reflexInserted=true;}
+   if(!reflexInserted && (label=="FPS Limit" || label.Contains("Frame Rate Limit") || name.Contains("FrameRateLimit") || name.Contains("FPSLimit"))){foreach(var model in DisplayModels)if(model.ControlId==4 && ((DisplayRuntime!=null && DisplayRuntime.ReflexAvailable==1 && DisplayRuntime.ReflexFault==0) || list.Contains(model)))result.Add(model);foreach(var model in DisplayModels)if(model.ControlId==6 && AmdLatencyAvailable())result.Add(model);reflexInserted=true;}
   }
   // Fail closed when the native anchor cannot be identified; no misplaced giant mod block.
   bool changed=list.Count!=result.Count;if(!changed){for(int i=0;i<list.Count;i++)if(list[i]!=result[i])changed=true;}
@@ -678,14 +684,22 @@ public class ModActor : AActor {
   if(id==1)help="Match the peak brightness of your display’s HDR mode. Use its calibrated value.";
   if(id==2)help="Adjust the brightness of ordinary scene white in HDR. Raise it for a brighter room.";
   if(id==3)help="Adjust menu and text brightness in HDR without changing the scene.";
+  if(id==6)help="Reduce input latency on supported AMD GPUs.\n\n• Off — disabled\n• On — lower latency";
   if(id==4)help="Reduce input latency on supported NVIDIA GPUs.\n\n• Off — disabled\n• On — lower latency\n• On + Boost — lower latency and higher GPU clocks; uses more power";
+  if(id==6 && !AmdLatencyAvailable())help+="\n\nUnavailable in this session.";
   if(id==4 && (DisplayRuntime==null || DisplayRuntime.ReflexAvailable!=1 || DisplayRuntime.ReflexFault!=0))help+="\n\nUnavailable in this session.";
   if(id<4){if(!displayHDRSupported)help+="\n\nEnable system HDR to use this setting.";if(DisplayRuntime!=null && DisplayRuntime.HDRRestartRequired==1)help+="\n\nRestart to apply.";}
   string recommendation=id==5?"Off":id==0?(displayHDRSupported?"On":"Off"):(id==1?"Display peak":(id==2 || id==3?"203 nits":"On"));
+  if(id==6 && !AmdLatencyAvailable())recommendation="Unavailable";
   if(id==4 && (DisplayRuntime==null || DisplayRuntime.ReflexAvailable!=1 || DisplayRuntime.ReflexFault!=0))recommendation="Unavailable";
-  foreach(var p in Panels){if(!UKismetSystemLibrary.IsValid(p) || !p.IsVisible() || p.Details_Settings==null || p.ListView_Settings==null || Model==null || !p.ListView_Settings.GetListItems().Contains(Model))continue;var d=p.Details_Settings;if(d.Text_SettingName!=null)d.Text_SettingName.SetText(DisplayLabel(id));if(d.RichText_Description!=null)d.RichText_Description.SetText(help);if(d.RichText_DynamicDetails!=null)d.RichText_DynamicDetails.SetText(id==5?FGStatus():id==4 && DisplayRuntime!=null?"Active mode: "+(DisplayRuntime.ReflexMode==0?"Off":DisplayRuntime.ReflexMode==1?"On":"On + Boost"):"");if(d.RichText_WarningDetails!=null)d.RichText_WarningDetails.SetText("");if(d.RichText_DisabledDetails!=null)d.RichText_DisabledDetails.SetText("");ShowRecommendation(d,recommendation);}
+  foreach(var p in Panels){if(!UKismetSystemLibrary.IsValid(p) || !p.IsVisible() || p.Details_Settings==null || p.ListView_Settings==null || Model==null || !p.ListView_Settings.GetListItems().Contains(Model))continue;var d=p.Details_Settings;if(d.Text_SettingName!=null)d.Text_SettingName.SetText(DisplayLabel(id));if(d.RichText_Description!=null)d.RichText_Description.SetText(help);if(d.RichText_DynamicDetails!=null)d.RichText_DynamicDetails.SetText(id==6?AmdLatencyStatus():id==5?FGStatus():id==4 && DisplayRuntime!=null?"Active mode: "+(DisplayRuntime.ReflexMode==0?"Off":DisplayRuntime.ReflexMode==1?"On":"On + Boost"):"");if(d.RichText_WarningDetails!=null)d.RichText_WarningDetails.SetText("");if(d.RichText_DisabledDetails!=null)d.RichText_DisabledDetails.SetText("");ShowRecommendation(d,recommendation);}
  }
 
+ public string AmdLatencyStatus(){
+  if(!AmdLatencyAvailable() || ProviderMenu==null || ProviderMenu.Authority==null || DisplayRuntime==null)return "Unavailable in this session.";
+  int applied=ProviderRuntimeClient.AmdLatencyApplied(ProviderMenu.Authority.W19,DisplayRuntime.AmdAntiLagRevision,DisplayRuntime.AmdAntiLagMode);
+  return applied<0?"Applying change...":"Active mode: "+(applied==0?"Off":"On");
+ }
  public string FGStatus(){if(FGRuntime==null || FGRuntime.Available!=1)return "Unavailable in this session.";if(FGRuntime.RestartRequired==1)return "Restart to apply.";if(FGSaved==null || FGSaved.Mode==0)return "Off.";if(FGRuntime.Phase==6)return "Frame generation stopped after a runtime error.";if(Saved==null || Saved.ReconstructionMode==0)return "Select NVIDIA DLSS to use frame generation.";if(DisplaySaved==null || DisplaySaved.HDROutput==0)return "This preview requires HDR.";return FGRuntime.Active==1?"Active: 2× presentation.":"Resumes during gameplay.";}
  protected override void ReceiveEndPlay(EEndPlayReason reason){
   if(ProviderRuntime!=null)ProviderRuntime.Stop();Timer.Stop(this,"PollProviders");

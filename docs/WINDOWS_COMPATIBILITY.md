@@ -498,3 +498,10 @@ committed shared settings into the existing NVIDIA controller and adds FSR
 controls. Keep current-session/world admission, independent preset ratios,
 source-only rollback on authority loss and source-matched UI receipts. New
 Windows runtime qualification is still required.
+
+The ordinary Anti-Lag row requires a matching current-session runtime capability
+from the actual driver and installed timing owner. Preserve its Off/On-only
+request, FG exclusion and matching-revision active acknowledgement. Missing new
+fields in the existing schema-1 display slot mean unavailable. Both platforms
+run the synthetic display codec and exact C# admission/request fixtures; those
+checks do not establish active Windows/AMD driver support or latency reduction.
