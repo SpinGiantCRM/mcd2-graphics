@@ -24,6 +24,23 @@ Windows/AMD execution, latency reduction, visual quality or a performance gain.
 The sanitized [receipt](../qualification/providers/fsr-fg-game-2026-10-09.json)
 records exact binaries; no screenshots, raw logs or game assets are included.
 
+### FSR upscaling + AMD generation
+
+A third game run selected AMD FSR Quality through the Video menu. FSR reached
+its active phase at 2560×1440 → 3840×2160 and completed over 8,800 evaluations
+before the generation trial. The experimental SR adapter now passes FSR's own
+normalized guides and camera to AMD FG before the FSR SDK evaluation; this
+handoff does not invoke the NGX guide/evaluation path.
+
+The FSR phase generated another 600 frames, with 899 accepted guide preparations,
+898 world images, zero SDK error/warning counters, successful context retirement
+and process disappearance on normal close. The first guide after restarting the
+bounded trial was rejected by the frame-interval guard after a long inactive
+gap; subsequent current-frame inputs were accepted. The mod-only transaction
+restored all original protected files and settings byte for byte. This is a
+bounded FSR/AMD-FG pairing check, not normal menu activation, Windows/AMD
+qualification, an artifact assessment or a benchmark.
+
 ## Integration and fixes
 
 - One AMD presenter owns the game swapchain. No NVIDIA presenter is chained
@@ -49,7 +66,7 @@ records exact binaries; no screenshots, raw logs or game assets are included.
 ## Remaining work
 
 Connect provider selection and capability acknowledgements to the normal menu;
-produce guides with FSR SR and Native without relying on NGX; validate AMD
+produce independent Native guides; validate AMD
 timing/Anti-Lag coexistence; then qualify transitions, resize, shutdown, artifacts
 and Off/On performance on Linux and Windows/AMD. The isolated Windows candidate
 build compiles this bridge and host separately from the installer. Vendor runtime

@@ -49,6 +49,32 @@
       "retirementSucceeded": true,
       "processGone": true,
       "exitCodeCaptured": false
+    },
+    {
+      "trial": 7,
+      "upscaler": "AMD FSR Quality",
+      "render": [
+        2560,
+        1440
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "fsrActivePhase": 5,
+      "fsrEvaluationsBeforeFg": 8827,
+      "generatedInFsrPhase": 600,
+      "preparedInFsrPhase": 899,
+      "imagesInFsrPhase": 898,
+      "finalActive": false,
+      "errors": 0,
+      "warnings": 0,
+      "fault": 0,
+      "initialStaleIntervalRejected": true,
+      "retirementSucceeded": true,
+      "processGone": true,
+      "exitCodeCaptured": false,
+      "modFilesAndPreferencesRestored": true
     }
   ],
   "finalBridge": {
@@ -129,11 +155,31 @@
   },
   "limits": [
     "Windows/AMD execution unqualified",
-    "FSR SR / Native guide handoff incomplete",
+    "Independent Native guide handoff incomplete",
     "Ordinary FG provider menu incomplete",
     "Anti-Lag coexistence unqualified",
     "No visual quality, performance or latency claim"
   ],
   "rawLogsPublished": false,
-  "thirdPartyRuntimeBundled": false
+  "thirdPartyRuntimeBundled": false,
+  "fsrGuideAdapter": {
+    "purpose": "temporary game FG guide notification",
+    "releasedSourcesChanged": false,
+    "privateGuideInspection": false,
+    "addonSHA256": "535d32dfea04c65c6285c5b334ca404c0550676df941a9999d031e79a63e564f",
+    "leanBaseSHA256": "1e4b23daf7fb375330d496fcb0557ddc254b77e4c5668fd1d903916bbc8f4594",
+    "leanGeneratedSHA256": "1e6f135adcc8eb9a0d7003022e891a625851769cab8e20d3d118903ede2d347b",
+    "fsrBaseSHA256": "c3a306962d85e10dc27e1f350347f2d7cd1e206183699bd18c7880bf02c59455",
+    "fsrGeneratedSHA256": "0ccb79551e46c01f6b9ecfcb8e9e302c95ed843f8b3810b9d9576f1f89b95de1",
+    "fsrBridgeSHA256": "f422af2f70f62ca8462c3aff30d05d1db92dd3b1d0e4289750039b8a2a83514b",
+    "cameraSourceSHA256": {
+      "fg_camera_contract.h": "b889fa3d89e0d51fc2a70cebdb60c0e635f246efb335438baab9d9d27e73293d",
+      "fg_camera_math.h": "fbee20d2f25f6c98bca8e27b4e2a3b38c25312a4eeb72db2808b283fe0c8dc51"
+    },
+    "observerBaseSHA256": "ebc68feed8429d27e81c09b07a1698b9082a76fddbdf4183950918835ad2642d",
+    "observerGeneratedSHA256": "8aeae2cab76231b50026a7a35b4a9ac23c3ecf2cde175e9045ef8008a9525b8f",
+    "generatorSHA256": "2635355310caf0f640daded0de5699cc155963402db83382630f36f72274628f",
+    "ngxFixtureSHA256": "5e819a32e22f9290bd8bb7f60bdaa791ffadb8edbe36acdfe656de693dec4d97",
+    "WindowsQualified": false
+  }
 }
