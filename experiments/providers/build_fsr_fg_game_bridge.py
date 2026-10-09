@@ -23,7 +23,7 @@ def build(sdk, sysroot, output, compiler='clang-cl', linker='lld-link'):
     for folder in ['crt/include', 'sdk/include/ucrt', 'sdk/include/shared', 'sdk/include/um']:
         command.append('/imsvc'+str(sysroot/folder))
     link = [linker, '/dll', '/out:'+str(binary), str(obj), 'kernel32.lib', 'bcrypt.lib', 'dxgi.lib', 'd3d12.lib', 'dxguid.lib']
-    for name in ['load','swap','guides','world','present','state','retire']:
+    for name in ['load','support','swap','guides','world','present','state','retire']:
         link.append('/export:mcd2_afg_'+name+'_v1')
     for folder in ['crt/lib/x86_64', 'sdk/lib/ucrt/x86_64', 'sdk/lib/um/x86_64']:
         link.append('/libpath:'+str(sysroot/folder))

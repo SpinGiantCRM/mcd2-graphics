@@ -1,4 +1,5 @@
 #include "../src/providers/display_projection.hpp"
+#include "../src/providers/fg_menu_projection.hpp"
 #include "../src/providers/menu_snapshot.h"
 #include "../src/providers/menu_requests.hpp"
 #include "../src/latency/amd_latency.hpp"
@@ -21,6 +22,20 @@ int main(int argc,char** argv){
   record.bootstrap.stamp.checksum^=1;assert(!projectDisplay(record).valid);
  }
  GraphicsRecord bytes;DecodedGraphicsRecord record;
+ for(unsigned sr=0;sr<4;++sr)for(unsigned fg=0;fg<3;++fg){
+  intent.sr=SrProvider(sr);intent.fg=FgProvider(fg);intent.fgEnabled=true;
+  assert(encodeGraphicsRecord(intent,bytes)&&decodeGraphicsRecord(bytes,record));
+  FgMenuProjection projection;assert(projectFgMenu(record,projection));
+  assert(projection.pairEligible==((fg==0&&sr==1)||(fg==1&&(sr==1||sr==2))));
+  assert(fgMenuMatches(projection,42,fg,1));
+  assert(!fgMenuMatches(projection,41,fg,1)&&!fgMenuMatches(projection,42,fg,0));
+  assert(fgOwnerMatches(fg+1,fg)==(fg<2));assert(!fgOwnerMatches(0,fg));
+  record.bootstrap.stamp.checksum^=1;assert(!projectFgMenu(record,projection));
+ }
+ intent.sr=SrProvider::AmdFsr;intent.fgStrategy=FgStrategy::NativeMfg;intent.requestedMultiplier=3;
+ assert(encodeGraphicsRecord(intent,bytes)&&decodeGraphicsRecord(bytes,record));
+ FgMenuProjection unqualified;assert(projectFgMenu(record,unqualified)&&!unqualified.pairEligible);
+ intent.fgStrategy=FgStrategy::Single;intent.requestedMultiplier=2;
  intent.latency=LatencyProvider::RadeonAntiLag2;intent.latencyMode=LatencyMode::On;
  intent.fgEnabled=true;intent.fg=FgProvider::Nvidia;
  assert(encodeGraphicsRecord(intent,bytes)&&decodeGraphicsRecord(bytes,record));
@@ -41,5 +56,5 @@ int main(int argc,char** argv){
   MenuRequestBytes roundtrip;assert(encodeMenuRequest(decoded,roundtrip));
   assert(std::equal(request.begin(),request.end(),roundtrip.begin()));
  }
- std::cout<<"Shared display/latency projection, invalid stamps, snapshot layout and optional exact C# request checks pass\n";
+ std::cout<<"Shared display/latency/FG projection, invalid stamps, current pairings, startup ownership and optional exact C# request checks pass\n";
 }

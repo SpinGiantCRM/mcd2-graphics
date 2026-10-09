@@ -271,6 +271,8 @@ void present(a::command_queue*q,a::swapchain*swap,const a::rect*,const a::rect*,
  if(auto module=amd_bridge()){
   using Present=int(*)(uint64_t,uint32_t);auto configure=reinterpret_cast<Present>(GetProcAddress(module,"mcd2_afg_present_v1"));auto result=configure?configure(id,ready&&wanted?1:0):-1;
   activeFGMode=!result&&ready&&wanted?1:0;
+  if(fg_controls::enabled&&result)fg_controls::fault=1;
+  if(fg_controls::enabled)fg_controls::publish(activeFGMode,ready);
   if(activeFGMode){++fgTrialFrames;presentedFrame=uint32_t(id);}return;
  }
 

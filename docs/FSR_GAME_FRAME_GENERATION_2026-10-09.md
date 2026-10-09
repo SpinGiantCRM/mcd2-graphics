@@ -2,7 +2,7 @@
 
 An opt-in developer route now generates frames from the game's real camera,
 depth, motion vectors and HDR world image. This is an integration checkpoint;
-it is not yet an ordinary menu-selectable AMD FG release.
+it is not yet a qualified AMD FG release.
 
 ## Evidence
 
@@ -65,8 +65,22 @@ qualification, an artifact assessment or a benchmark.
 
 ## Remaining work
 
-Connect provider selection and capability acknowledgements to the normal menu;
-produce independent Native guides; validate AMD
+The candidate now provides an independent **FG Provider** selector and Off/On
+control in the normal Video menu. Provider changes save FG Off; enabling it
+requests the selected provider for the next launch. Startup reads the validated
+shared settings record once and selects one presentation owner. Missing,
+corrupt or unimplemented pairings retain native presentation. SDK eligibility
+on the actual rendering device controls availability; it is not a qualification
+claim. Session, revision and provider must match before runtime activation.
+Current pairings are NVIDIA SR + NVIDIA FG, NVIDIA SR + AMD FG, and FSR SR +
+AMD FG. Native SR guides and FSR SR + NVIDIA FG are not admitted by this candidate.
+
+The UI and Microsoft-ABI bridge/bootstrap builds pass locally, together with
+the shared-settings and projection fixtures. Normal-menu save/restart and
+runtime checks remain required, as do Windows/AMD execution and qualification.
+Published installers and release assets are unchanged.
+
+Produce independent Native guides; validate AMD
 timing/Anti-Lag coexistence; then qualify transitions, resize, shutdown, artifacts
 and Off/On performance on Linux and Windows/AMD. The isolated Windows candidate
 build compiles this bridge and host separately from the installer. Vendor runtime
