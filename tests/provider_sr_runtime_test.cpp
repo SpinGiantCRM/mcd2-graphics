@@ -2,10 +2,22 @@
 #include "../src/providers/sr_runtime_save_transport.hpp"
 #include "../src/providers/sr_runtime_snapshot.h"
 #include "../src/providers/sr_viewport.hpp"
+#include "../src/providers/nvidia_menu_projection.hpp"
 #include <cassert>
 #include <iostream>
 using namespace mcd2::providers;
 int main(){
+ GraphicsIntent intent;intent.revision=9;intent.sr=SrProvider::NvidiaDlss;GraphicsRecord recordBytes;DecodedGraphicsRecord record;NvidiaMenuProjection projection;
+ for(unsigned q=0;q<6;q++){
+  intent.srPreferences[0].quality=Quality(q);intent.srPreferences[0].customScaleBasisPoints=7700;
+  assert(encodeGraphicsRecord(intent,recordBytes)&&decodeGraphicsRecord(recordBytes,record)&&projectNvidiaMenu(record,projection));
+  assert(projection.revision==9&&projection.mode==(q==0?1u:2u)&&projection.preset==(q==0?5u:q==5?4u:q-1));
+  assert(projection.scale==(q==0?10000u:q==1?6667u:q==2?5800u:q==3?5000u:q==4?3333u:7700u));
+ }
+ intent.sr=SrProvider::AmdFsr;assert(encodeGraphicsRecord(intent,recordBytes)&&decodeGraphicsRecord(recordBytes,record)&&projectNvidiaMenu(record,projection)&&projection.mode==0&&projection.scale==10000);
+ record.intent.revision++;assert(!projectNvidiaMenu(record,projection)); // stale checksum/bootstrap pair
+ intent.srPreferences[0].customScaleBasisPoints=6700;
+ assert(encodeGraphicsRecord(intent,recordBytes)&&decodeGraphicsRecord(recordBytes,record)&&!projectNvidiaMenu(record,projection));
  SrViewport viewport;
  assert(srViewport(2260,1272,{0,0,2258,1270},viewport));
  assert(viewport.width==2259&&viewport.height==1271);

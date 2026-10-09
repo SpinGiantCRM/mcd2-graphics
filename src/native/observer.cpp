@@ -75,6 +75,8 @@ static void guide_probe_destroy_queue(a::command_queue*);
 static bool fsr_runtime_record(a::command_list*,uint32_t,uint32_t,uint32_t);
 static void fsr_runtime_present(a::command_queue*,std::unique_lock<std::recursive_mutex>&);
 static bool fsr_runtime_owns_source();
+namespace mcd2ui {struct Settings;}
+static int provider_menu_sr_intent(mcd2ui::Settings&);
 static void fsr_runtime_begin(a::command_list*);
 static void fsr_runtime_reset(a::command_list*);
 static void fsr_runtime_forget(a::command_list*);

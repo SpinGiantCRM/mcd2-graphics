@@ -11,6 +11,12 @@ static class RuntimeTest {
   s.W16=66666667;s.W18=2;s.W19=1;s.W20=1;s.W4=s.Checksum(0,32);return s;
  }
  public static void Run(){
+  Check(ProviderRuntimeClient.CanRestoreNvidiaSource(7,2,123,1,7,123,3));
+  Check(!ProviderRuntimeClient.CanRestoreNvidiaSource(7,2,123,1,7,124,3));
+  Check(!ProviderRuntimeClient.CanRestoreNvidiaSource(7,2,123,1,8,123,3));
+  Check(!ProviderRuntimeClient.CanRestoreNvidiaSource(7,2,123,1,7,123,1));
+  Check(!ProviderRuntimeClient.CanRestoreNvidiaSource(7,0,123,1,7,123,3));
+  Check(!ProviderRuntimeClient.CanRestoreNvidiaSource(7,2,0,1,7,123,3));
   UGameplayStatics.Slots.Clear();UGameplayStatics.FailSave=false;var menu=Menu();var client=new ProviderRuntimeClient();client.Start();
   var s=Plan(5);UGameplayStatics.Slots["MCD2GraphicsProviderSrRuntime"]=s;
   Check(client.Poll(menu,"Hub",true,100000,100000000)&&client.Enabled&&client.NeedsSourceCommand());
@@ -19,11 +25,13 @@ static class RuntimeTest {
   Check(client.Poll(menu,"Hub",true,100000,100000000)&&client.NeedsSourceCommand()); // Engine settings reapply.
   s.W9=2;s.W10=7;s.W16=100000000;s.W6=6;s.W4=s.Checksum(0,32);
   Check(client.Poll(menu,"Menu",false,100000,66666667)&&client.NeedsSourceCommand()); // Rollback works outside gameplay.
-  client.SourceObserved(100000000);Check(!client.NeedsSourceCommand());Check(client.Context.W10==0);
+  menu.Ready=false;Check(client.Poll(menu,"Menu",false,100000,66666667)&&client.Enabled&&client.NeedsSourceCommand());
+  client.SourceObserved(100000000);Check(!client.NeedsSourceCommand());Check(client.Context.W10==0);menu.Ready=true;
   int previous=client.Sequence,world=client.WorldGeneration;var travel=new ProviderRuntimeClient();travel.Start();
   Check(travel.Poll(menu,"Dungeon",true,100000,100000000)&&travel.Sequence>previous&&travel.WorldGeneration>world);
   Check(travel.Context!.W13==0&&travel.Context.W14==0); // Never adopt the old world's source ACK.
-  s.W5=124;s.W4=s.Checksum(0,32);Check(travel.Poll(menu,"Dungeon",true,100000,100000000)&&!travel.Enabled);
+  s.W9=travel.WorldGeneration-1;s.W4=s.Checksum(0,32);Check(travel.Poll(menu,"Dungeon",true,100000,100000000)&&!travel.Enabled); // stale previous actor/world never admits controls
+  s.W9=travel.WorldGeneration;s.W5=124;s.W4=s.Checksum(0,32);Check(travel.Poll(menu,"Dungeon",true,100000,100000000)&&!travel.Enabled);
   s.W5=123;s.W7=8;s.W4=s.Checksum(0,32);Check(travel.Poll(menu,"Dungeon",true,100000,100000000)&&!travel.Enabled);
   s.W7=7;s.W4=s.Checksum(0,32);s.W4^=1;Check(travel.Poll(menu,"Dungeon",true,100000,100000000)&&!travel.Enabled);
   s.W4^=1;s.W21=1;s.W4=s.Checksum(0,32);Check(!travel.StateValid(s));s.W21=0;s.W4=s.Checksum(0,32);

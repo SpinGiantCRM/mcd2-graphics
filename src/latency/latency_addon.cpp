@@ -347,6 +347,7 @@ extern "C" __declspec(dllexport) int mcd2_menu_snapshot_v1(MCD2MenuSnapshotV1* s
  if(workerStop || !consolidatedMenuTransport || providerSnapshot.load!=0 || !providerSnapshot.session)return -3;
  *snapshot=providerSnapshot;return 0;
 }
+extern "C" __declspec(dllexport) int mcd2_menu_enabled_v1(){return consolidatedMenuTransport?1:0;}
 extern "C" __declspec(dllexport) int mcd2_sr_context_v1(MCD2SrContextSnapshotV1* snapshot){
  if(!snapshot||snapshot->size!=sizeof(MCD2SrContextSnapshotV1))return -1;
  std::unique_lock lock(providerSnapshotMutex,std::try_to_lock);if(!lock.owns_lock())return -2;

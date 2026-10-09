@@ -39,6 +39,13 @@ static class ControlsTest {
    !c.SelectFg(1,0,3,true)&&!c.SelectHdr(true,421,203,203),"invalid setters atomic");
   Check(c.Dirty==0,"invalid setters no dirty fields");
 
+  a=Authority();c=Client(a);Check(c.SelectFg(0,0,2,true)&&c.SelectMenuSr(2),"menu FSR selection");c.Poll();r=Sent();
+  Check(r.W18==2&&r.W29==0&&r.W30==0,"unqualified FSR/NVIDIA FG pairing disabled atomically");
+  a=Authority();c=Client(a);Check(c.SelectFg(0,0,2,true)&&c.SelectMenuSr(1),"menu NVIDIA selection");c.Poll();r=Sent();
+  Check(r.W18==1&&r.W29==1,"NVIDIA FG preference preserved with NVIDIA SR");
+  a=Authority();c=Client(a);Check(!c.SelectMenuSr(3)&&c.Dirty==0,"unimplemented menu provider refused atomically");
+  a=Authority();c=Client(a);c.SelectCustomScale(1,6700);c.Poll();r=Sent();Check(r.W19==1,"NVIDIA 67 percent retains Quality alias");
+  a=Authority();c=Client(a);c.SelectCustomScale(2,6700);c.Poll();r=Sent();Check(r.W22==5,"AMD 67 percent stays Custom until exact SDK dimensions identify it");
   a=Authority();c=Client(a);c.SelectCustomScale(2,7000);c.Poll();r=Sent();
   c.SelectCustomScale(2,7200);a.W39=220;a.W19++;Seal(a);Ack(a,r,5);c.Poll();r2=Sent();
   Check(r2.W23==7200&&r2.W24==7200&&r2.W37==220&&r2.W7==8,"conflict rebases newest edits only");

@@ -4,6 +4,7 @@
 #include "../providers/sr_runtime_protocol.hpp"
 #include "../providers/sr_runtime_snapshot.h"
 #include "../providers/sr_viewport.hpp"
+#include "../providers/nvidia_menu_projection.hpp"
 #ifndef MCD2_FSR_BRIDGE_SHA256
 #define MCD2_FSR_BRIDGE_SHA256 ""
 #endif
@@ -18,6 +19,9 @@ static p::RecordStamp rejected{};
 static MCD2MenuSnapshotV1 cachedMenu{};
 static MCD2SrContextSnapshotV1 cachedContext{};
 static std::uint64_t menuReadAt=0;
+static bool menuOwner=false,menuValid=false;
+static std::uint32_t menuWorld=0;static bool menuReady=false;
+static p::RecordStamp menuStamp{};
 struct Generation : SrGuideGeneration {
  LeanBorrowCache borrows;a::command_queue *queue=nullptr;
  HMODULE bridge=nullptr;void *session=nullptr;ID3D12Resource *output=nullptr;
@@ -209,6 +213,8 @@ static int load(Generation& c){
 }
 static void present(a::command_queue *q,std::unique_lock<std::recursive_mutex>& guard){
  auto module=GetModuleHandleW(L"mcd2-display-latency.addon64");
+ auto enabled=module?reinterpret_cast<decltype(&mcd2_menu_enabled_v1)>(GetProcAddress(module,"mcd2_menu_enabled_v1")):nullptr;
+ if(enabled&&enabled()==1)menuOwner=true; // Never revert to legacy preferences on a transport failure.
  auto get=module?reinterpret_cast<decltype(&mcd2_menu_snapshot_v1)>(GetProcAddress(module,"mcd2_menu_snapshot_v1")):nullptr;
  auto getContext=module?reinterpret_cast<decltype(&mcd2_sr_context_v1)>(GetProcAddress(module,"mcd2_sr_context_v1")):nullptr;
  MCD2MenuSnapshotV1 menu{};menu.size=sizeof(menu);p::DecodedGraphicsRecord record;
@@ -216,6 +222,7 @@ static void present(a::command_queue *q,std::unique_lock<std::recursive_mutex>& 
  const bool useCachedMenu=menuResult==-2 && cachedMenu.size==sizeof(menu) && now-menuReadAt<=1000;
  if(useCachedMenu)menu=cachedMenu;
  bool valid=(menuResult==0||useCachedMenu)&&menu.reserved==0&&menu.session!=0&&p::decodeGraphicsRecord(menu.record,record);
+ menuValid=valid;
  if(valid&&!useCachedMenu){cachedMenu=menu;menuReadAt=now;}
  else if(!valid&&menuResult!=-2)cachedMenu={};
  MCD2SrContextSnapshotV1 packet{};packet.size=sizeof(packet);p::SrContext fresh;
@@ -234,6 +241,7 @@ static void present(a::command_queue *q,std::unique_lock<std::recursive_mutex>& 
    if(requestSequence>=0x7fffffffu)return;state.sequence=++requestSequence;
    state.intent=record.bootstrap.stamp;state.world=contextAvailable?context.world:1;state.provider=record.intent.sr;state.quality=record.intent.srPreferences[1].quality;
    if(restoring)state.phase=p::SrPhase::RestoreSource;}
+  if(contextAvailable&&state.world!=context.world){state.world=context.world;if(requestSequence<0x7fffffffu)state.sequence=++requestSequence;}
   if(restoring){
    if(contextAvailable){state.world=context.world;if(p::sourceAcknowledged(state,context)){restoring=false;phase(p::SrPhase::Fallback,state.error);}}
    return;
@@ -304,6 +312,27 @@ static void present(a::command_queue *q,std::unique_lock<std::recursive_mutex>& 
  }
 }
 } // namespace fsr_runtime
+static int provider_menu_sr_intent(mcd2ui::Settings& incoming){
+ namespace p=mcd2::providers;using namespace fsr_runtime;
+ if(!menuOwner)return 0;
+ p::DecodedGraphicsRecord record;p::NvidiaMenuProjection projection;
+ if(!menuValid||GetTickCount64()-menuReadAt>1000||!p::decodeGraphicsRecord(cachedMenu.record,record)||!p::projectNvidiaMenu(record,projection))return -1;
+ // Legacy slot contributes only the source ACK for this exact authority
+ // revision and renderer session; it cannot choose a provider or preset.
+ const bool ack=incoming.revision==projection.revision&&incoming.sourceSession==ui_control.session;
+ incoming.schema=4;incoming.revision=projection.revision;incoming.mode=projection.mode;
+ incoming.preset=projection.preset;incoming.custom=projection.custom;incoming.scale=projection.scale;incoming.fallback=projection.fallback;
+ incoming.contextReady=contextAvailable&&context.ready;incoming.contextSession=ui_control.session;
+ if(!incoming.contextReady){incoming.mode=0;incoming.scale=10000;}
+ if(!ack){incoming.sourceRevision=0;incoming.sourceSession=0;}
+ // Actor travel and ready/menu edges must retire the previous generation even
+ // when the user preference revision has not changed.
+ const auto world=contextAvailable?context.world:0;
+ if(menuStamp!=record.bootstrap.stamp||menuWorld!=world||menuReady!=bool(incoming.contextReady)){
+  menuStamp=record.bootstrap.stamp;menuWorld=world;menuReady=incoming.contextReady;ui_control.queue.latest.revision=0;
+ }
+ return 1;
+}
 static bool fsr_runtime_record(a::command_list *cmd,uint32_t x,uint32_t y,uint32_t z){return fsr_runtime::record(cmd,x,y,z);}
 static void fsr_runtime_present(a::command_queue *q,std::unique_lock<std::recursive_mutex>& guard){fsr_runtime::present(q,guard);}
 static bool fsr_runtime_owns_source(){return fsr_runtime::generation||fsr_runtime::requested||fsr_runtime::state.phase==mcd2::providers::SrPhase::RestoreSource;}

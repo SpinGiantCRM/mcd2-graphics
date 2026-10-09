@@ -9,6 +9,9 @@ public class ProviderRuntimeClient : USaveGame {
  public int Sequence;public int Session;public int WorldGeneration;
  public string? Level;
  public bool Enabled;
+ public static bool CanRestoreNvidiaSource(int savedRevision,int savedMode,int savedSession,int schema,int revision,int session,int phase){
+  return savedRevision>0 && savedMode>0 && savedMode<=2 && savedSession>0 && schema==1 && revision==savedRevision && session==savedSession && phase==3;
+ }
  public bool ContextValid(ProviderSrContextSave c){
   if(c.W0!=843334477 || c.W1!=827867987 || c.W2!=1 || c.W3!=128 || c.W4!=c.Checksum(0,32) ||
    c.W5<1 || c.W6<1 || c.W7<1 || c.W9<1 || c.W10<0 || c.W10>1 || c.W11<0 || c.W11>1000000000 ||
@@ -38,7 +41,15 @@ public class ProviderRuntimeClient : USaveGame {
  }
  public bool Poll(ProviderMenuClient menu,string level,bool ready,int worldToMetersMilli,int observedScaleMicro){
   Enabled=false;State=null;
-  if(!menu.Ready || menu.Authority==null)return false;
+  if(!menu.Ready || menu.Authority==null){
+   // A lost settings authority may still finish an already admitted Native
+   // rollback. This route can command only 100%, never activate a provider.
+   var restore=UGameplayStatics.LoadGameFromSlot("MCD2GraphicsProviderSrRuntime",0) as ProviderSrRuntimeSave;
+   if(Context==null || restore==null || !StateValid(restore) || restore.W10!=7 || restore.W16!=100000000 ||
+      restore.W5!=Session || restore.W9!=WorldGeneration || restore.W7!=Context.W7 || restore.W8!=Context.W8 || Sequence>=2147483646)return false;
+   State=restore;Enabled=true;Context.W6=++Sequence;Context.W12=observedScaleMicro;Context.W4=Context.Checksum(0,32);
+   return ContextValid(Context) && UGameplayStatics.SaveGameToSlot(Context,"MCD2GraphicsProviderSrContext",0);
+  }
   int session=menu.Authority.W5;
   if(Session!=session){Session=session;Sequence=0;WorldGeneration=0;Level="";Context=null;
    var previous=UGameplayStatics.LoadGameFromSlot("MCD2GraphicsProviderSrContext",0) as ProviderSrContextSave;
@@ -47,7 +58,7 @@ public class ProviderRuntimeClient : USaveGame {
   if(level!=Level || WorldGeneration==0){Level=level;WorldGeneration++;if(WorldGeneration<1)WorldGeneration=1;Context=null;}
   if((observedScaleMicro<1000000 && (ready || observedScaleMicro!=0)) || observedScaleMicro>100000000 || worldToMetersMilli<0 || worldToMetersMilli>1000000000)return false;
   var next=UGameplayStatics.LoadGameFromSlot("MCD2GraphicsProviderSrRuntime",0) as ProviderSrRuntimeSave;
-  if(next!=null && StateValid(next) && next.W5==session && next.W7==menu.Authority.W19 && next.W8==menu.Authority.W16){State=next;Enabled=true;}
+  if(next!=null && StateValid(next) && next.W5==session && next.W9==WorldGeneration && next.W7==menu.Authority.W19 && next.W8==menu.Authority.W16){State=next;Enabled=true;}
   if(Context==null)Context=UGameplayStatics.CreateSaveGameObject(Unreal.ClassOf<ProviderSrContextSave>()) as ProviderSrContextSave;
   if(Context==null || Sequence>=2147483646)return false;
   Context.W0=843334477;Context.W1=827867987;Context.W2=1;Context.W3=128;Context.W5=session;
