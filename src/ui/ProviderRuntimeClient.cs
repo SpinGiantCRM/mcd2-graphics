@@ -9,6 +9,12 @@ public class ProviderRuntimeClient : USaveGame {
  public int Sequence;public int Session;public int WorldGeneration;
  public string? Level;
  public bool Enabled;
+ public static bool AmdLatencyAvailable(bool authorityReady,int authoritySession,int runtimeSchema,int runtimeSession,int available,int fault,bool fgEnabled){
+  return authorityReady && authoritySession>0 && runtimeSchema==1 && runtimeSession==authoritySession && available==1 && fault==0 && !fgEnabled;
+ }
+ public static int AmdLatencyApplied(int authorityRevision,int runtimeRevision,int runtimeMode){
+  return authorityRevision>0 && runtimeRevision==authorityRevision && (runtimeMode==0 || runtimeMode==1)?runtimeMode:-1;
+ }
  public static bool CanRestoreNvidiaSource(int savedRevision,int savedMode,int savedSession,int schema,int revision,int session,int phase){
   return savedRevision>0 && savedMode>0 && savedMode<=2 && savedSession>0 && schema==1 && revision==savedRevision && session==savedSession && phase==3;
  }

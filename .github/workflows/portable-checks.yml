@@ -118,6 +118,9 @@ jobs:
       - name: Provider intent contract
         shell: bash
         run: |
+          python tests/make_synthetic_saves.py display-fixtures
+          g++ -std=c++20 -static tests/display_protocol_test.cpp -o display-protocol.exe
+          ./display-protocol.exe display-fixtures/display-settings.sav display-fixtures/display-runtime.sav
           g++ -std=c++20 -static -Isrc/native tests/lean_borrow_lifetime_test.cpp -o lean-borrow-lifetime.exe
           ./lean-borrow-lifetime.exe
           g++ -std=c++20 -static -pthread -Wall -Wextra -Werror tests/amd_latency_test.cpp -o amd-latency.exe

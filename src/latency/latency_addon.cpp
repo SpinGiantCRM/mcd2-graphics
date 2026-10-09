@@ -224,6 +224,13 @@ void settings_loop(){std::map<std::string,unsigned> last;auto nextStatus=std::ch
    mcd2::display::Intent intent;{std::lock_guard lock(intentMutex);intent=latestIntent;}
    auto c=controller();unsigned applied=c&&c->active()?unsigned(c->mode()):0;
    std::map<std::string,unsigned> state={{"SchemaVersion",1},{"Revision",intent.revision},{"SessionId",sessionId},{"ReflexAvailable",reflexAvailable},{"ReflexMode",applied},{"ReflexFault",reflexFault},{"HDRRevision",hdrRevision},{"HDRRestartRequired",hdrRestart}};
+   // Capability comes from the actual driver interface and installed timing
+   // owner, never a requested preference or adapter name in a save.
+   auto amd=amd_controller();auto amdState=amd?amd->state():mcd2::amd_latency::State{};
+   state["AmdAntiLagAvailable"]=amdLatencyOptIn&&installed&&amdState.available&&!amdState.fault;
+   state["AmdAntiLagMode"]=amdState.enabled?1u:0u;
+   state["AmdAntiLagFault"]=amdState.fault?1u:0u;
+   state["AmdAntiLagRevision"]=amdState.revision;
    auto file=savesPath/L"MCD2GraphicsDisplayRuntime.sav";auto seed=read_slot(file);std::map<std::string,unsigned> existing;size_t h=0;
    if(state!=last||!mcd2::display::parse(seed,"DisplayRuntimeSave",existing,h)||existing["SessionId"]!=sessionId){auto data=mcd2::display::encode_runtime(seed,state);if(!data.empty()){
      auto temp=savesPath/L"MCD2GraphicsDisplayRuntime.pending";{std::ofstream f(temp,std::ios::binary|std::ios::trunc);f.write(reinterpret_cast<const char*>(data.data()),data.size());f.flush();if(!f)throw std::runtime_error("Runtime state write failed");}

@@ -12,6 +12,7 @@ int main(int argc,char**argv){assert(argc==3);auto b=read(argv[1]),runtime=read(
  for(size_t n=0;n<b.size();++n){auto shortB=b;shortB.resize(n);assert(!mcd2::display::decode(shortB,intent));}++count;
  auto trailing=b;trailing.push_back(0);assert(!mcd2::display::decode(trailing,intent));++count;
  auto encoded=mcd2::display::encode_runtime(runtime,{{"SchemaVersion",1},{"SessionId",123},{"Revision",3},{"ReflexMode",2},{"HDRRestartRequired",1}});v.clear();assert(mcd2::display::parse(encoded,"DisplayRuntimeSave",v,h));assert(v["ReflexMode"]==2&&v["HDRRestartRequired"]==1);++count;
+ encoded=mcd2::display::encode_runtime(runtime,{{"SchemaVersion",1},{"SessionId",123},{"Revision",9},{"AmdAntiLagAvailable",1},{"AmdAntiLagMode",1},{"AmdAntiLagFault",0},{"AmdAntiLagRevision",9}});v.clear();assert(mcd2::display::parse(encoded,"DisplayRuntimeSave",v,h));assert(v["AmdAntiLagAvailable"]==1&&v["AmdAntiLagMode"]==1&&v["AmdAntiLagFault"]==0&&v["AmdAntiLagRevision"]==9);++count;
  altered.clear();assert(!mcd2::display::parse(runtime,"DisplaySettingsSave",altered,h));++count;
  std::cout<<count<<" display protocol checks passed\n";
 }

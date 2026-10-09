@@ -46,6 +46,9 @@ static class ControlsTest {
   a=Authority();c=Client(a);Check(!c.SelectMenuSr(3)&&c.Dirty==0,"unimplemented menu provider refused atomically");
   a=Authority();c=Client(a);c.SelectCustomScale(1,6700);c.Poll();r=Sent();Check(r.W19==1,"NVIDIA 67 percent retains Quality alias");
   a=Authority();c=Client(a);c.SelectCustomScale(2,6700);c.Poll();r=Sent();Check(r.W22==5,"AMD 67 percent stays Custom until exact SDK dimensions identify it");
+  a=Authority();c=Client(a);Check(c.SelectAntiLag2(true),"Anti-Lag On request");c.Poll();r=Sent();Check(r.W33==2&&r.W34==1,"AMD latency provider and mode committed together");
+  a=Authority();c=Client(a);Check(c.SelectAntiLag2(false),"Anti-Lag Off request");c.Poll();r=Sent();Check(r.W33==2&&r.W34==0,"AMD Off is independent of Reflex");
+  a=Authority();c=Client(a);c.SelectFg(0,0,2,true);int before=c.Dirty;Check(!c.SelectAntiLag2(true)&&c.Dirty==before,"AMD FG pairing not admitted without owned-swapchain handshake");
   a=Authority();c=Client(a);c.SelectCustomScale(2,7000);c.Poll();r=Sent();
   c.SelectCustomScale(2,7200);a.W39=220;a.W19++;Seal(a);Ack(a,r,5);c.Poll();r2=Sent();
   Check(r2.W23==7200&&r2.W24==7200&&r2.W37==220&&r2.W7==8,"conflict rebases newest edits only");

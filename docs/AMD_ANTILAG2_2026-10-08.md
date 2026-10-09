@@ -1,7 +1,8 @@
 # Independent Anti-Lag 2 integration — 8 October 2026
 
-This is an opt-in development path. FSR SR/FG, real menu transactions and the
-full settings-reader cutover remain in progress; no AMD support is released.
+This is an opt-in development path. FSR SR and committed menu transactions are
+integrated; AMD FG and hardware qualification remain in progress. No AMD support
+is released.
 
 ## Contract and ownership
 
@@ -37,8 +38,13 @@ On requests enabled Anti-Lag. Off, corrupt/missing authority, another latency
 provider, Boost or any FG request resolves to Off. No legacy Reflex preference
 is reinterpreted as AMD intent, and the reader never writes the authority.
 
-The current transport probe still sends no-op requests only. Real menu controls
-are a subsequent cutover step; a saved request is not feature activation.
+The ordinary Video page now offers **AMD Anti-Lag 2: Off / On** only when the
+current settings session matches a driver-confirmed runtime response and its
+timing owner is installed. Requests use the committed authority. Missing, stale,
+faulted or unsupported responses hide the row; no Boost mode is invented. The
+active-mode message requires the driver update's matching committed revision.
+The worker publishes these fields through the existing display runtime slot,
+without changing its class path or schema. A saved request is not SDK activation.
 
 All FG combinations remain disabled here. FSR FG needs the owned swapchain's
 documented Anti-Lag context/enabled private-data handshake and generated-frame
@@ -85,6 +91,24 @@ settings/runtime slots matched their backups byte for byte. No player/account
 save, raw log or screenshot is included in this report. Both portable platform
 CI jobs and the full native Windows FG/Anti-Lag build passed at implementation
 commit `ff88e33b`, including execution of the synthetic SDK-interface fixture.
+
+## Ordinary-menu fallback check — 9 October 2026
+
+The source-matched menu candidate reached the main-menu Video page and hub
+with `AmdAntiLag2=1`, Native rendering and FG Off. The AMD row was absent;
+NVIDIA Reflex remained visible and On. The actual driver eligibility gate
+rejected this Linux/NVIDIA session. AMD availability, activation, input and
+render calls remained zero, while Reflex completed 125,034 real frames at the
+last checkpoint with zero coordinator, SDK-marker or Reflex faults.
+
+The shipping process disappeared after normal Save and quit without forced
+termination. Its exit code was not captured, so this is not an exit-code pass
+or a repair of the earlier FSR menu trial's delayed shutdown. All twelve original
+payloads and all mod-owned settings/authority files were restored byte for byte.
+The native addon, latency adapter and own UI archive hashes are recorded in
+`qualification/providers/amd-latency-menu-2026-10-09.json`. No vendor runtime,
+raw log, screenshot or player/account data is included. Active Windows/AMD
+menu operation and latency benefit remain unqualified.
 
 ## Remaining qualification
 
