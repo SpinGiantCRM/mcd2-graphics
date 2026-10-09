@@ -16,6 +16,7 @@
 #include <cstring>
 #include <intrin.h>
 #include "fg_bridge_contract.h"
+#include "../providers/fsr_fg_game_bridge.h"
 #include "fg_ui_protocol.hpp"
 #include "wine_reflex_pacing.hpp"
 #include "../../src/providers/observed_settings.hpp"
@@ -33,6 +34,9 @@ INIT_ONCE once=INIT_ONCE_STATIC_INIT,systemOnce=INIT_ONCE_STATIC_INIT;
 thread_local bool initializing=false;
 bool sdkReady=false,routeEnabled=true;FILE* receipt=nullptr;
 unsigned fgSessionMode=1;
+bool amdFgSession=false;HMODULE amdFgBridge=nullptr;
+int(*amdLoad)(const wchar_t*)=nullptr;
+int(*amdSwap)(void*,void*,void*,const MCD2AmdFgSwapV1*,void**)=nullptr;
 void event(const char* stage,long result);
 unsigned saved_fg_mode(){
  auto local=std::make_unique<wchar_t[]>(32768);auto n=GetEnvironmentVariableW(L"LOCALAPPDATA",local.get(),32768);if(!n||n>=32768)return 0;
@@ -110,6 +114,24 @@ HRESULT STDMETHODCALLTYPE create_swap(IDXGIFactory2* factory,IUnknown* queue,HWN
  if(!route)return E_UNEXPECTED;
  auto original=reinterpret_cast<Route::Create>(route->original[15]);
  if(nested==route)return original(factory,queue,hwnd,desc,fullscreen,output,result);
+ if(amdFgSession){
+  wchar_t ownerClass[256]{};DWORD pid=0;GetClassNameW(hwnd,ownerClass,256);GetWindowThreadProcessId(hwnd,&pid);
+  if(!amdSwap||!desc||!result||output||pid!=GetCurrentProcessId()||wcscmp(ownerClass,L"UnrealWindow"))return original(factory,queue,hwnd,desc,fullscreen,output,result);
+  MCD2AmdFgSwapV1 p{sizeof(p),desc->Width,desc->Height,unsigned(desc->Format),desc->SampleDesc.Count,desc->SampleDesc.Quality,desc->BufferUsage,desc->BufferCount,unsigned(desc->Scaling),unsigned(desc->SwapEffect),unsigned(desc->AlphaMode),desc->Flags,
+   fullscreen?1u:0u,fullscreen?unsigned(fullscreen->Windowed):1u,fullscreen?fullscreen->RefreshRate.Numerator:0u,fullscreen?fullscreen->RefreshRate.Denominator:1u,fullscreen?unsigned(fullscreen->ScanlineOrdering):0u,fullscreen?unsigned(fullscreen->Scaling):0u};
+  RECT client{};if((!p.width||!p.height)&&GetClientRect(hwnd,&client)){
+   if(!p.width&&client.right>client.left)p.width=unsigned(client.right-client.left);
+   if(!p.height&&client.bottom>client.top)p.height=unsigned(client.bottom-client.top);
+  }
+  if(receipt){fprintf(receipt,"{\"stage\":\"AMD-swap-description\",\"width\":%u,\"height\":%u,\"format\":%u,\"samples\":%u,\"buffers\":%u}\n",p.width,p.height,p.format,p.samples,p.buffers);fflush(receipt);}
+  ID3D12CommandQueue* nativeQueue=nullptr;if(!queue||FAILED(queue->QueryInterface(IID_PPV_ARGS(&nativeQueue))))return E_INVALIDARG;
+  auto previous=nested;nested=route;
+  void* out=nullptr;const auto status=amdSwap(factory,nativeQueue,hwnd,&p,&out);nativeQueue->Release();nested=previous;
+  event("AMD-owned-swapchain",status);
+  if(!status&&out){*result=static_cast<IDXGISwapChain1*>(out);return S_OK;}
+  // A failed SDK construction never makes a later NVIDIA owner silently active.
+  return original(factory,queue,hwnd,desc,fullscreen,output,result);
+ }
  // The actual queue identifies the rendering adapter. Bind before the SDK's
  // swapchain hooks run, rather than waiting for ReShade's post-create event.
  ID3D12CommandQueue* commandQueue=nullptr;ID3D12Device* device=nullptr;
@@ -138,7 +160,7 @@ bool attach(IUnknown* outer){
  std::lock_guard guard(routesMutex);Route* target=nullptr;
  for(auto& r:routes){if(r.base==base){base->Release();return true;}if(!r.base&&!target)target=&r;}
  if(!target){base->Release();return false;}target->base=base;
- if(FAILED(base->QueryInterface(IID_PPV_ARGS(&target->proxy)))||mcd2_fg_upgrade(reinterpret_cast<void**>(&target->proxy))){target->detach();return false;}
+ if(!amdFgSession&&(FAILED(base->QueryInterface(IID_PPV_ARGS(&target->proxy)))||mcd2_fg_upgrade(reinterpret_cast<void**>(&target->proxy)))){target->detach();return false;}
  target->original=*reinterpret_cast<void***>(base);std::memcpy(target->table.data(),target->original,sizeof(target->table));target->table[15]=reinterpret_cast<void*>(create_swap);
  InterlockedExchangePointer(reinterpret_cast<void* volatile*>(base),target->table.data());return true;
 }
@@ -156,6 +178,7 @@ BOOL CALLBACK initialize(PINIT_ONCE,void*,void**){
   SetEnvironmentVariableW(L"DXVK_NVAPI_LOG_PATH",folder.c_str());
  }
  routeEnabled=GetPrivateProfileIntW(L"Experiment",L"FactoryRouting",1,policy.c_str())!=0;
+ const bool factoryRoutingRequested=routeEnabled;
  // An Off startup must create the normal swapchain. A retained FG proxy still
  // copies/paces frames while generation is Off. Until engine-owned recreation
  // is qualified, the native toggle saves the next-launch presentation mode.
@@ -164,6 +187,15 @@ BOOL CALLBACK initialize(PINIT_ONCE,void*,void**){
   // An invalid/missing mirror must not fall back to the legacy FG-only slot.
   fgSessionMode=observed_fg_mode();routeEnabled=routeEnabled&&fgSessionMode==1;
  }else if(GetPrivateProfileIntW(L"Capture",L"NativeUIToggle",0,uiPolicy.c_str())==1){fgSessionMode=saved_fg_mode();routeEnabled=routeEnabled&&fgSessionMode==1;}
+ // Explicit private trial only. Ordinary startup/migration remains unchanged.
+ amdFgSession=GetPrivateProfileIntW(L"Providers",L"ExperimentalAmdFG",0,policy.c_str())==1;
+ if(amdFgSession){
+  amdFgBridge=LoadLibraryExW((folder/L"mcd2-fsr-fg-game-bridge.dll").c_str(),nullptr,LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR|LOAD_LIBRARY_SEARCH_SYSTEM32);
+  amdLoad=amdFgBridge?reinterpret_cast<decltype(amdLoad)>(GetProcAddress(amdFgBridge,"mcd2_afg_load_v1")):nullptr;
+  amdSwap=amdFgBridge?reinterpret_cast<decltype(amdSwap)>(GetProcAddress(amdFgBridge,"mcd2_afg_swap_v1")):nullptr;
+  const auto loaded=amdLoad&&amdSwap?amdLoad((folder/L"amd_fidelityfx_framegeneration_dx12.dll").c_str()):-1;
+  event("AMD-pinned-runtime",loaded);routeEnabled=factoryRoutingRequested&&!loaded;fgSessionMode=routeEnabled?1:0;
+ }
  event("FG-session-mode",fgSessionMode);
  auto enableSdk=GetPrivateProfileIntW(L"Experiment",L"EnableSDK",1,policy.c_str())!=0;
  auto result=!enableSdk?-100:(mcd2_fg_initialized()?0:mcd2_sl_init((folder/L"sl.interposer.dll").c_str(),folder.c_str(),folder.c_str()));
@@ -189,7 +221,7 @@ bool host_caller(void* caller){
 void route_result(HRESULT hr,void** out,void* caller){
  // Do not retain or route factories created internally by the SDK, overlays
  // or other DLLs. They are not this experiment's world presentation owner.
- if(SUCCEEDED(hr)&&out&&*out&&sdkReady&&routeEnabled&&host_caller(caller)){auto ok=attach(static_cast<IUnknown*>(*out));event("factory-route",ok?0:-1);}
+ if(SUCCEEDED(hr)&&out&&*out&&(amdFgSession||sdkReady)&&routeEnabled&&host_caller(caller)){auto ok=attach(static_cast<IUnknown*>(*out));event("factory-route",ok?0:-1);}
 }
 }
 extern "C" HRESULT WINAPI CreateDXGIFactory(REFIID iid,void** out){auto f=reinterpret_cast<HRESULT(WINAPI*)(REFIID,void**)>(factory("CreateDXGIFactory"));if(!f)return E_NOINTERFACE;auto hr=f(iid,out);if(!initializing)route_result(hr,out,_ReturnAddress());return hr;}
@@ -199,4 +231,5 @@ extern "C" HRESULT WINAPI DXGIDeclareAdapterRemovalSupport(){auto f=reinterpret_
 extern "C" HRESULT WINAPI DXGIGetDebugInterface1(UINT flags,REFIID iid,void** out){auto f=reinterpret_cast<HRESULT(WINAPI*)(UINT,REFIID,void**)>(native("DXGIGetDebugInterface1"));return f?f(flags,iid,out):E_NOINTERFACE;}
 extern "C" __declspec(dllexport) void mcd2_bootstrap_detach(){std::lock_guard guard(routesMutex);for(auto& r:routes)r.detach();event("factory-routes-detached",0);if(receipt){fclose(receipt);receipt=nullptr;}}
 extern "C" __declspec(dllexport) unsigned mcd2_bootstrap_fg_session_mode(){return fgSessionMode;}
+extern "C" __declspec(dllexport) unsigned mcd2_bootstrap_amd_fg_session(){return amdFgSession&&routeEnabled?1:0;}
 BOOL APIENTRY DllMain(HMODULE module,DWORD reason,LPVOID){if(reason==DLL_PROCESS_ATTACH)self=module;return TRUE;}

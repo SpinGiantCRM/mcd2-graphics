@@ -1,0 +1,139 @@
+{
+  "schema": 1,
+  "date": "2026-10-09",
+  "scope": "Opt-in game AMD presentation checkpoint; not released AMD FG",
+  "host": {
+    "os": "CachyOS",
+    "session": "KDE Wayland",
+    "gpu": "NVIDIA RTX 4080 SUPER",
+    "driver": "615.71.09",
+    "proton": "cachyos11.0-20261005-slr"
+  },
+  "game": {
+    "steamBuild": 25754144,
+    "version": "1.1.2.0",
+    "output": [
+      3840,
+      2160
+    ],
+    "guides": [
+      2560,
+      1440
+    ],
+    "upscaler": "NVIDIA DLSS Quality",
+    "colourSpace": "PQ / BT.2020"
+  },
+  "gameTrials": [
+    {
+      "trial": 5,
+      "generated": 600,
+      "finalActive": false,
+      "prepared": 899,
+      "images": 898,
+      "errors": 0,
+      "warnings": 0,
+      "fault": 0,
+      "retirementSucceeded": true,
+      "processGone": true,
+      "exitCodeCaptured": false
+    },
+    {
+      "trial": 6,
+      "generated": 600,
+      "finalActive": false,
+      "prepared": 899,
+      "images": 898,
+      "errors": 0,
+      "warnings": 0,
+      "fault": 0,
+      "retirementSucceeded": true,
+      "processGone": true,
+      "exitCodeCaptured": false
+    }
+  ],
+  "finalBridge": {
+    "sdkCommit": "60f4ea81909200d8542eca14dccb2628b763a9a3",
+    "SDKheadersSHA256": {
+      "api/include/ffx_api.h": "e1a9d1b559eaf75f4cb401f1c43a66e2f3dc9621abfeb58b9c6fac56443177fd",
+      "api/include/ffx_api_types.h": "cc0adc0ffc804dd7cd03c39c15581b575e416383177ffe95060201d52cc0fc49",
+      "api/include/dx12/ffx_api_dx12.h": "c9afbc3c4c673723e9e5369a666f0ff54560543b5a93537f8ff453bf1c3bf530",
+      "framegeneration/include/ffx_framegeneration.h": "e6c42f8a38aab2c7c4fc6931545a8e5463fdf87349902ec9687d9fe4949a0566",
+      "framegeneration/include/ffx_framegeneration_api_types.h": "396596af3df63310674e8036abd2ad0fcd061e61334e7a2c76653a2be3c686b4",
+      "framegeneration/include/dx12/ffx_api_framegeneration_dx12.h": "d533810bbd6fd4f87dfa2c1657c1457c7b1597b66345827d375b081d67127f66"
+    },
+    "sourceSHA256": {
+      "fsr_fg_game_bridge.cpp": "fd1ba277824593803cd50a20e20cee744d84f6cd42b6bf997626d2e111b8e3b2",
+      "fsr_fg_game_bridge.h": "b82712e9122dbe836ee07a90bc7ab6da15eff4a55b40cb8aa83aa2d283f3dc19",
+      "fsr_fg_game_bridge_probe.cpp": "effc1691e0b5fb99b9860b9becfe9397a1df79a80533b76858e24805f96cbe6a",
+      "build_fsr_fg_probe.py": "0e099b3f00cef5100d591f55627e3de2e672fdeaada2cbc91a5dbc29c6385ea3",
+      "../fg-streamline/fg_camera_contract.h": "b889fa3d89e0d51fc2a70cebdb60c0e635f246efb335438baab9d9d27e73293d",
+      "../../src/native/reset_epoch_contract.hpp": "61fbc3f6e8390daa4b7366be1aea3428bbdef0f12969a887305c79b6301d6c8b"
+    },
+    "recipeSHA256": "3a99bcc91c16733645f6d08013fc1a9d2502e7fdfa971ffd481d222c771e0fa3",
+    "binarySHA256": "d1b336037748807cb32697eeac1eb6bace6efb209f33d07e24704890a2c668bd",
+    "probeSHA256": "2fbeaeb09992afb4e00b99ccb1d2748dd8c5f0558cb59f60e9c2674c7f6c5882",
+    "runtimeBundled": false,
+    "gameIntegrationQualified": false,
+    "headersLicenseSHA256": "26ec40256d34d52a5596b7ea9635575f0570c2650d24b7baf090fda2ac9986f0"
+  },
+  "observerBinariesSHA256": {
+    "fg-probe.exe": "386028f517d30f2ff9eaed5b379eb03801e0d8ea0335e8d68d70e30e960d26a8",
+    "fg-chain-observer.addon64": "44b5b9dec47abcc19533a21453aae19315ac585412133420e1db236c69e53eaa",
+    "fg-sdk-bridge.dll": "5d12825071b2e1b7d283c58c9e274f7af7ae693096c0e553cfc5a97786500a3e",
+    "dxgi.dll": "5684f4ed261a0e6f6ef05113ce6e3cc9d5669b22015858a83533519dddb4bdac",
+    "mcd2-fg-guide-recon.addon64": "86488ace46f62ca3887b83108105f1bb5a2a23bffb3fb90a406d8840da64d0ac",
+    "FG_UI_ALPHA.cso": "fce79e558c20bfafd859f37e397b8a04b5d820670f6aa0214522cef276cca8c1"
+  },
+  "observerSourcesSHA256": {
+    "streamline_probe_bridge.cpp": "26ced6ee46cca95f62c831b623347299359ada2cf59ef9bf0faf957a49c07aaf",
+    "fg_bridge_contract.h": "03b83602c7d45d48f545865b89cc777a15a98af36c3c84a3558e76dfe286bbca",
+    "fg_camera_contract.h": "b889fa3d89e0d51fc2a70cebdb60c0e635f246efb335438baab9d9d27e73293d",
+    "fg_configuration.hpp": "f2e8276a65df772fe1518cdc009306a722aa420af23fc3cbda753ff0854dc3db",
+    "owned_inputs_probe.cpp": "7c28584a478a9a2e68dd680940d6e0017c049ec7121d26148df6846e9e768a04",
+    "factory_route.hpp": "27c581f3d789de6df9daf5affd97c79ea75ac35e0a745245efc58d01b33cebad",
+    "chain_observer.cpp": "1efc17e43678136b2bb9ef7222037a8875b9be6113a1cc4b37db2de6aabcd90c",
+    "bootstrap_dxgi.cpp": "db9baf2d9a5da7bc2f103111c4281c63fc558226b70b1484ebd3b23be40de0ff",
+    "fg_ui_protocol.hpp": "e5b31634a4e794199cf2adc6e3568c6b91cf19a096cbcb3a2109639a59cc3ac9",
+    "wine_reflex_pacing.hpp": "d56a44295fb0b5a60a96506af740ed84979b83c963808b1ee460eb0ca20ebb1f",
+    "src/providers/display_projection.hpp": "f6f6efc85e4a04eb759d2f69e314a9678a590c997250257943e064fa35576a70",
+    "src/providers/graphics_intent.hpp": "0e162ad9bed26d258f4bbc80e4dfc6c360fe45a53f5f8e66d42e61936f82f96b",
+    "src/providers/graphics_record.hpp": "b53c1b212a1f7e131685d5265ff9014927878480b68063f3bbb82342f9239d00",
+    "src/providers/graphics_store.hpp": "1f5f90478f0b3385ba7ba756db88c15efb3b29e9776ad5440e1d15492c3f50c5",
+    "src/providers/legacy_graphics.hpp": "69c8dfb3effec3435eaa0f9a0ef7042954f9dbb997a1777d920b3e22e0ffb59f",
+    "src/providers/menu_requests.hpp": "623ef09b5d35f59ccb679c9d0963cd1922b66e36d8b5e14878a726cd4b840b25",
+    "src/providers/menu_save_transport.hpp": "755b8d733c2f95486314c06e1327d2ab9f9ee17048e0a2d621eb1c0c2138ba37",
+    "src/providers/nvidia_menu_projection.hpp": "c076bfcf9ff47d63540d297775552563cf755934c46509317a4aa36d13e8d4c2",
+    "src/providers/observed_settings.hpp": "2702346520725f80199001ba88d5440a26ad2f459818fec8257aebee4424a186",
+    "src/providers/sr_runtime_protocol.hpp": "ba50b8702c0b0a690d5d238962e047d241de4e724eb9e6b232b54b5d86fbbff4",
+    "src/providers/sr_runtime_save_transport.hpp": "e91e7e65c7df5d95150b8cd73d173d207371cd5c4f5678f02d449507c9c6eeb1",
+    "src/providers/sr_viewport.hpp": "9d0b288d15df24832f2d85910e09619bd70340fef7c3d291f5c52aec102133a5",
+    "../providers/fsr_fg_game_bridge.h": "b82712e9122dbe836ee07a90bc7ab6da15eff4a55b40cb8aa83aa2d283f3dc19",
+    "guide_recon.cpp": "6b0779d4e2f90f4da23dfbd990600510c331b2a1254059af647f7906e0bade86",
+    "fg_alpha_copy.h": "848a4b4ead57159e27ba1d0f7f5c51ac8d3d33218c34a90f16dd577761b12c59",
+    "fg_ui_alpha.hlsl": "e30ff945708375b325f065e29fd7ac79eefe1c22084940b51725e10f274426f9",
+    "fg_controls.hpp": "1f2bce050a7707c3babf027678aa465e8b1a7d3260bf7388a1d0db4d1a2fe059"
+  },
+  "timingBinarySHA256": "17ef09cfe043887c4135540b48dadc8d373c220d75510f881b23ff08376f97d0",
+  "ownedHost": {
+    "exitCode": 0,
+    "timeout": false,
+    "seconds": 3.318,
+    "passed": true,
+    "gameIntegrationQualified": false,
+    "runtimeBundled": false,
+    "bridgeSHA256": "d1b336037748807cb32697eeac1eb6bace6efb209f33d07e24704890a2c668bd",
+    "probeSHA256": "2fbeaeb09992afb4e00b99ccb1d2748dd8c5f0558cb59f60e9c2674c7f6c5882",
+    "runtimeSHA256": {
+      "amd_fidelityfx_framegeneration_dx12.dll": "02297beedd285e822d3a64f314cf00faf378dcec0edc47ff0c4dd71b3a8c2f18"
+    }
+  },
+  "limits": [
+    "Windows/AMD execution unqualified",
+    "FSR SR / Native guide handoff incomplete",
+    "Ordinary FG provider menu incomplete",
+    "Anti-Lag coexistence unqualified",
+    "No visual quality, performance or latency claim"
+  ],
+  "rawLogsPublished": false,
+  "thirdPartyRuntimeBundled": false
+}
