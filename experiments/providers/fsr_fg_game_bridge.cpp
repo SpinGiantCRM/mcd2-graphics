@@ -127,6 +127,21 @@ extern "C" int mcd2_afg_load_v1(const wchar_t* path){
  if(!s->create||!s->destroy||!s->query||!s->dispatch||!s->configure){FreeLibrary(s->module);delete s;return -5;}
  retainedRuntime=s->module;errors=warnings=0;session=s;return 0;
 }
+extern "C" int mcd2_afg_support_v1(void* opaque){
+ std::lock_guard lock(guard);if(!session||!opaque)return -1;
+ auto* device=static_cast<ID3D12Device*>(opaque);
+ D3D12_FEATURE_DATA_SHADER_MODEL shader{D3D_SHADER_MODEL_6_2};
+ if(FAILED(device->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL,&shader,sizeof(shader)))||shader.HighestShaderModel<D3D_SHADER_MODEL_6_2)return -2;
+ ffxQueryDescGetVersions versions{};versions.header.type=FFX_API_QUERY_DESC_TYPE_GET_VERSIONS;
+ versions.createDescType=FFX_API_CREATE_CONTEXT_DESC_TYPE_FRAMEGENERATION;versions.device=device;
+ uint64_t count=0;versions.outputCount=&count;
+ if(session->query(nullptr,&versions.header)||!count||count>32)return -3;
+ std::vector<uint64_t> ids(count);std::vector<const char*> names(count);
+ versions.versionIds=ids.data();versions.versionNames=names.data();
+ if(session->query(nullptr,&versions.header)||count>ids.size())return -4;
+ for(size_t i=0;i<count;++i)if(ids[i]==17726168133342859270ull&&names[i]&&!strcmp(names[i],"3.1.6"))return 0;
+ return -5;
+}
 extern "C" int mcd2_afg_swap_v1(void* factory,void* queue,void* hwnd,const MCD2AmdFgSwapV1* p,void** result){
  std::lock_guard lock(guard);
  if(!session)return -101;if(session->swap||session->fg||session->presenter)return -102;

@@ -19,6 +19,8 @@ static_assert(sizeof(MCD2AmdFgGuidesV1)==364);
 static_assert(sizeof(MCD2AmdFgStateV1)==72);
 extern "C" {
  int mcd2_afg_load_v1(const wchar_t *absoluteVerifiedRuntime);
+ // Eligibility query only; does not create contexts, wrap or activate FG.
+ int mcd2_afg_support_v1(void *nativeDevice);
  int mcd2_afg_swap_v1(void *factory,void *nativeQueue,void *hwnd,const MCD2AmdFgSwapV1*,void **swap);
  int mcd2_afg_guides_v1(void *nativeCommand,void *depth,void *motion,const MCD2AmdFgGuidesV1*);
  int mcd2_afg_world_v1(void *nativeCommand,void *world,uint64_t engineFrame);

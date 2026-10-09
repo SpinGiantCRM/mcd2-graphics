@@ -272,7 +272,9 @@ void init_swapchain(a::swapchain*swapchain,bool){
  log<<"{\"kind\":\"pcl_message_hook\",\"installed\":"<<(messageHook?"true":"false")<<",\"thread\":"<<messageThread<<"}\n";log.flush();
 }
 void init(a::device*device){
- if(installed||registry||(!provider.initialized&&!amdLatencyOptIn)||device->get_api()!=a::device_api::d3d12)return;
+ auto bootstrap=GetModuleHandleW(L"dxgi.dll");auto amdFg=bootstrap?reinterpret_cast<unsigned(*)()>(GetProcAddress(bootstrap,"mcd2_bootstrap_amd_fg_session")):nullptr;
+ const bool frameIdentityOnly=amdFg&&amdFg()==1;
+ if(installed||registry||(!provider.initialized&&!amdLatencyOptIn&&!frameIdentityOnly)||device->get_api()!=a::device_api::d3d12)return;
  // The actual rendering device LUID determines the AMD route. Never use the
  // display/default adapter and never attempt to load an AMD driver on Wine.
  bool useAmd=false;
@@ -288,7 +290,7 @@ void init(a::device*device){
   useAmd=mcd2::amd_latency::Eligibility{true,!wine,GetModuleHandleW(L"amdxc64.dll")!=nullptr,vendor}.candidate();
   if(!useAmd)amdCandidateRejected=1;
  }
- if(!useAmd&&!provider.initialized)return;
+ if(!useAmd&&!provider.initialized&&!frameIdentityOnly)return;
  base=reinterpret_cast<uintptr_t>(GetModuleHandleW(nullptr));
  auto local=std::make_unique<wchar_t[]>(32768);auto length=GetEnvironmentVariableW(L"LOCALAPPDATA",local.get(),32768);if(!length||length>=32768)return;
  auto dir=std::filesystem::path(local.get())/L"Dungeons2"/L"Saved"/L"MCD2Graphics";std::filesystem::create_directories(dir);log.open(dir/L"display-latency-bootstrap.jsonl",std::ios::trunc);
@@ -318,9 +320,11 @@ void init(a::device*device){
   if(!amd->attach({true,true,true,0x1002},boundNative)){boundNative=0;registry=nullptr;return;}
   std::atomic_store(&amdCoordinator,amd);reflexAvailable=0;
   log<<"{\"kind\":\"amd_antilag2_device\",\"available\":true}\n";log.flush();
- }else{auto setResult=provider.device(reinterpret_cast<void*>(boundNative));
-  log<<"{\"kind\":\"set_device\",\"result\":"<<setResult<<"}\n";log.flush();if(setResult)return;
-  std::atomic_store(&coordinator,std::make_shared<sr::TokenCoordinator>(provider));
+ }else if(provider.initialized){auto setResult=provider.device(reinterpret_cast<void*>(boundNative));
+  log<<"{\"kind\":\"set_device\",\"result\":"<<setResult<<"}\n";log.flush();if(setResult&&!frameIdentityOnly)return;
+  if(!setResult)std::atomic_store(&coordinator,std::make_shared<sr::TokenCoordinator>(provider));
+  else {reflexAvailable=0;log<<"{\"kind\":\"frame_identity_only\"}\n";log.flush();}
+ }else{reflexAvailable=0;log<<"{\"kind\":\"frame_identity_only\"}\n";log.flush();
  }
  markerVtable.fill(reinterpret_cast<void*>(zero));pacerVtable.fill(reinterpret_cast<void*>(no_op));secondaryVtable.fill(reinterpret_cast<void*>(no_op));
  markerVtable[0]=reinterpret_cast<void*>(no_op);markerVtable[1]=reinterpret_cast<void*>(no_op);markerVtable[2]=reinterpret_cast<void*>(set_bool);markerVtable[3]=reinterpret_cast<void*>(yes);markerVtable[4]=reinterpret_cast<void*>(set_bool);markerVtable[5]=reinterpret_cast<void*>(no);

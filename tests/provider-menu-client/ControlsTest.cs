@@ -43,6 +43,10 @@ static class ControlsTest {
   Check(r.W18==2&&r.W29==0&&r.W30==0,"unqualified FSR/NVIDIA FG pairing disabled atomically");
   a=Authority();c=Client(a);Check(c.SelectFg(0,0,2,true)&&c.SelectMenuSr(1),"menu NVIDIA selection");c.Poll();r=Sent();
   Check(r.W18==1&&r.W29==1,"NVIDIA FG preference preserved with NVIDIA SR");
+  a=Authority();c=Client(a);Check(c.SelectFg(1,0,2,true)&&c.SelectMenuSr(2),"AMD FG with FSR SR");c.Poll();r=Sent();
+  Check(r.W18==2&&r.W29==1&&r.W30==1,"FSR selection retains AMD generation independently");
+  a=Authority();c=Client(a);Check(c.SelectFg(1,0,2,true)&&c.SelectMenuSr(0),"Native selection with AMD FG");c.Poll();r=Sent();
+  Check(r.W18==0&&r.W29==0&&r.W30==1,"Native selection disables FG without losing provider preference");
   a=Authority();c=Client(a);Check(!c.SelectMenuSr(3)&&c.Dirty==0,"unimplemented menu provider refused atomically");
   a=Authority();c=Client(a);c.SelectCustomScale(1,6700);c.Poll();r=Sent();Check(r.W19==1,"NVIDIA 67 percent retains Quality alias");
   a=Authority();c=Client(a);c.SelectCustomScale(2,6700);c.Poll();r=Sent();Check(r.W22==5,"AMD 67 percent stays Custom until exact SDK dimensions identify it");

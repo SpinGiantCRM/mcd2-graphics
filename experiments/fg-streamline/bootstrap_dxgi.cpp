@@ -9,6 +9,7 @@
 #include <d3d12.h>
 #include <nvapi.h>
 #include <array>
+#include <atomic>
 #include <memory>
 #include <mutex>
 #include <filesystem>
@@ -20,6 +21,7 @@
 #include "fg_ui_protocol.hpp"
 #include "wine_reflex_pacing.hpp"
 #include "../../src/providers/observed_settings.hpp"
+#include "../../src/providers/fg_menu_projection.hpp"
 #include <fstream>
 extern "C" __declspec(dllimport) int mcd2_sl_init(const wchar_t*,const wchar_t*,const wchar_t*);
 extern "C" __declspec(dllimport) int mcd2_fg_initialized();
@@ -35,9 +37,19 @@ thread_local bool initializing=false;
 bool sdkReady=false,routeEnabled=true;FILE* receipt=nullptr;
 unsigned fgSessionMode=1;
 bool amdFgSession=false;HMODULE amdFgBridge=nullptr;
+std::atomic<unsigned> actualFgOwner{0};
 int(*amdLoad)(const wchar_t*)=nullptr;
 int(*amdSwap)(void*,void*,void*,const MCD2AmdFgSwapV1*,void**)=nullptr;
 void event(const char* stage,long result);
+unsigned shared_startup_owner(){
+ auto local=std::make_unique<wchar_t[]>(32768);auto n=GetEnvironmentVariableW(L"LOCALAPPDATA",local.get(),32768);if(!n||n>=32768)return 0;
+ const auto path=std::filesystem::path(local.get())/L"Dungeons2"/L"Saved"/L"MCD2Graphics"/L"ProviderSettings";
+ mcd2::providers::GraphicsStore store(path);mcd2::providers::DecodedGraphicsRecord record;
+ mcd2::providers::FgMenuProjection projection;
+ if(!mcd2::providers::store_detail::directoryReady(path)||store.load(record).status!=mcd2::providers::StoreStatus::Ok||
+    !mcd2::providers::projectFgMenu(record,projection)||!projection.enabled||!projection.pairEligible)return 0;
+ event("shared-FG-startup-revision",projection.revision);return projection.provider+1;
+}
 unsigned saved_fg_mode(){
  auto local=std::make_unique<wchar_t[]>(32768);auto n=GetEnvironmentVariableW(L"LOCALAPPDATA",local.get(),32768);if(!n||n>=32768)return 0;
  auto path=std::filesystem::path(local.get())/L"Dungeons2"/L"Saved"/L"SaveGames"/L"MCD2GraphicsFGSettings.sav";
@@ -128,7 +140,7 @@ HRESULT STDMETHODCALLTYPE create_swap(IDXGIFactory2* factory,IUnknown* queue,HWN
   auto previous=nested;nested=route;
   void* out=nullptr;const auto status=amdSwap(factory,nativeQueue,hwnd,&p,&out);nativeQueue->Release();nested=previous;
   event("AMD-owned-swapchain",status);
-  if(!status&&out){*result=static_cast<IDXGISwapChain1*>(out);return S_OK;}
+  if(!status&&out){*result=static_cast<IDXGISwapChain1*>(out);actualFgOwner=2;return S_OK;}
   // A failed SDK construction never makes a later NVIDIA owner silently active.
   return original(factory,queue,hwnd,desc,fullscreen,output,result);
  }
@@ -150,7 +162,7 @@ HRESULT STDMETHODCALLTYPE create_swap(IDXGIFactory2* factory,IUnknown* queue,HWN
  if(configured)return original(factory,queue,hwnd,desc,fullscreen,output,result);
  auto previous=nested;nested=route;
  auto hr=route->proxy->CreateSwapChainForHwnd(queue,hwnd,desc,fullscreen,output,result);
- nested=previous;event("routed-hwnd-swapchain",hr);return hr;
+ nested=previous;if(SUCCEEDED(hr)&&result&&*result)actualFgOwner=1;event("routed-hwnd-swapchain",hr);return hr;
 }
 bool attach(IUnknown* outer){
  constexpr GUID unwrap={0x7f2c9a11,0x3b4e,0x4d6a,{0x81,0x2f,0x5e,0x9c,0xd3,0x7a,0x1b,0x42}};
@@ -183,18 +195,23 @@ BOOL CALLBACK initialize(PINIT_ONCE,void*,void**){
  // copies/paces frames while generation is Off. Until engine-owned recreation
  // is qualified, the native toggle saves the next-launch presentation mode.
  auto uiPolicy=(folder/L"FGGuideCapture.ini").wstring();
- if(GetPrivateProfileIntW(L"Providers",L"ObservedStartup",0,policy.c_str())==1){
+ const bool sharedMenu=GetPrivateProfileIntW(L"Providers",L"ConsolidatedMenuTransport",0,policy.c_str())==1;
+ unsigned sharedOwner=0;
+ if(sharedMenu){sharedOwner=shared_startup_owner();fgSessionMode=sharedOwner?1:0;routeEnabled=routeEnabled&&fgSessionMode==1;}
+ else if(GetPrivateProfileIntW(L"Providers",L"ObservedStartup",0,policy.c_str())==1){
   // An invalid/missing mirror must not fall back to the legacy FG-only slot.
   fgSessionMode=observed_fg_mode();routeEnabled=routeEnabled&&fgSessionMode==1;
  }else if(GetPrivateProfileIntW(L"Capture",L"NativeUIToggle",0,uiPolicy.c_str())==1){fgSessionMode=saved_fg_mode();routeEnabled=routeEnabled&&fgSessionMode==1;}
  // Explicit private trial only. Ordinary startup/migration remains unchanged.
- amdFgSession=GetPrivateProfileIntW(L"Providers",L"ExperimentalAmdFG",0,policy.c_str())==1;
- if(amdFgSession){
+ const bool privateAmdTrial=GetPrivateProfileIntW(L"Providers",L"ExperimentalAmdFG",0,policy.c_str())==1;
+ amdFgSession=privateAmdTrial||(sharedMenu&&sharedOwner==2);
+ if(amdFgSession||sharedMenu){
   amdFgBridge=LoadLibraryExW((folder/L"mcd2-fsr-fg-game-bridge.dll").c_str(),nullptr,LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR|LOAD_LIBRARY_SEARCH_SYSTEM32);
   amdLoad=amdFgBridge?reinterpret_cast<decltype(amdLoad)>(GetProcAddress(amdFgBridge,"mcd2_afg_load_v1")):nullptr;
   amdSwap=amdFgBridge?reinterpret_cast<decltype(amdSwap)>(GetProcAddress(amdFgBridge,"mcd2_afg_swap_v1")):nullptr;
   const auto loaded=amdLoad&&amdSwap?amdLoad((folder/L"amd_fidelityfx_framegeneration_dx12.dll").c_str()):-1;
-  event("AMD-pinned-runtime",loaded);routeEnabled=factoryRoutingRequested&&!loaded;fgSessionMode=routeEnabled?1:0;
+  event("AMD-pinned-runtime",loaded);
+  if(amdFgSession){routeEnabled=factoryRoutingRequested&&!loaded&&(privateAmdTrial||sharedOwner==2);fgSessionMode=routeEnabled?1:0;}
  }
  event("FG-session-mode",fgSessionMode);
  auto enableSdk=GetPrivateProfileIntW(L"Experiment",L"EnableSDK",1,policy.c_str())!=0;
@@ -232,4 +249,5 @@ extern "C" HRESULT WINAPI DXGIGetDebugInterface1(UINT flags,REFIID iid,void** ou
 extern "C" __declspec(dllexport) void mcd2_bootstrap_detach(){std::lock_guard guard(routesMutex);for(auto& r:routes)r.detach();event("factory-routes-detached",0);if(receipt){fclose(receipt);receipt=nullptr;}}
 extern "C" __declspec(dllexport) unsigned mcd2_bootstrap_fg_session_mode(){return fgSessionMode;}
 extern "C" __declspec(dllexport) unsigned mcd2_bootstrap_amd_fg_session(){return amdFgSession&&routeEnabled?1:0;}
+extern "C" __declspec(dllexport) unsigned mcd2_bootstrap_fg_owner(){return actualFgOwner.load();}
 BOOL APIENTRY DllMain(HMODULE module,DWORD reason,LPVOID){if(reason==DLL_PROCESS_ATTACH)self=module;return TRUE;}
