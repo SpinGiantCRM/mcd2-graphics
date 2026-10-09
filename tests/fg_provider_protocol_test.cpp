@@ -14,16 +14,24 @@ std::vector<uint8_t> fixture(std::vector<std::pair<std::string,unsigned>> fields
 }
 int main(){
  mcd2::fgui::Intent i;
- for(const char* field:{"FGProvider","Provider","provider"}){
+ for(const char* field:{"FGProvider","fgProvider","Provider","provider"}){
   auto b=fixture({{field,1}});assert(mcd2::fgui::decode(b,i));
   assert(i.provider==1&&i.mode==1&&i.ready==1&&i.session==123&&i.settingsRevision==42);
   for(size_t n=0;n<b.size();++n){auto truncated=b;truncated.resize(n);assert(!mcd2::fgui::decode(truncated,i));}
   b.push_back(0);assert(!mcd2::fgui::decode(b,i));
  }
+ for(const std::string base:{"fgprovider","provider"}){
+  for(unsigned mask=0;mask<(1u<<base.size());++mask){auto name=base;
+   for(unsigned n=0;n<name.size();++n)if(mask&(1u<<n))name[n]=char(name[n]-'a'+'A');
+   assert(mcd2::fgui::decode(fixture({{name,1}}),i)&&i.provider==1);
+   assert(!mcd2::fgui::decode(fixture({{name,1},{"FGProvider",1}}),i));
+  }
+ }
  assert(mcd2::fgui::decode(fixture({}),i)&&i.provider==0); // Existing NVIDIA-only saves.
  for(auto fields:std::vector<std::vector<std::pair<std::string,unsigned>>>{
   {{"FGProvider",2}},{{"UnknownProvider",1}},{{"Provider",1},{"provider",1}},
-  {{"FGProvider",1},{"Provider",1}},{{"FGProvider",1},{"provider",1}},{{"FGProvider",1},{"FGProvider",1}}})
+  {{"FGProvider",1},{"Provider",1}},{{"FGProvider",1},{"provider",1}},{{"FGProvider",1},{"FGProvider",1}},
+  {{"FGProvider",1},{"fgProvider",1}},{{"fgProvider",2}},{{"fgProvider",1},{"PROVIDER",0}}})
   assert(!mcd2::fgui::decode(fixture(fields),i));
  std::cout<<"FG provider framing, legacy FName alias, current metadata and duplicate/truncation checks pass\n";
 }

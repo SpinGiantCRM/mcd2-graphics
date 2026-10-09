@@ -1,8 +1,11 @@
 {
   "schemaVersion": 1,
   "date": "2026-10-09",
-  "scope": "Final-process SDK teardown guard; bounded Linux/NVIDIA developer candidate",
-  "sourceBaseCommit": "d3d5e6075cd37f1eb325e7b7fcfeb47d20b6168d",
+  "scope": "FG provider FName decoder and bounded Linux FSR Quality plus AMD FG regression; developer candidate",
+  "sourceBase": "28f333da3b260b5c222848f3e56d9084b0ae0526",
+  "changedNativeSourceSHA256": "161d419e7d4f86e683ac43d1ecb6d4d3d98083b02f1657a5d72fc67544e7c549",
+  "steamBuild": 25754144,
+  "gameVersion": "1.1.2.0",
   "host": {
     "os": "CachyOS",
     "session": "KDE Wayland",
@@ -10,18 +13,52 @@
     "driver": "615.78.08",
     "proton": "cachyos11.0-20261005-slr"
   },
-  "steamBuild": 25754144,
-  "gameVersion": "1.1.2.0",
-  "addonSHA256": "9d0bb873502f57bcc3ea71a70b80612548ab2ee5d95cfcb6b0bd55ad3ac3c7aa",
-  "generatedSourceSHA256": "24391d142fe9bf7405c08cf44f6c3a4fb27e732845e3273076bd445a5637784c",
-  "processExitSHA256": {
-    "process_exit.hpp": "6f4c757e12cfa967c738edf1b19994ce18dad675b2a9fa70d05a516e7e3ada02",
-    "process_lifetime.hpp": "c7f6cdf7317c916598bbe556cb6f1cbb3a4574b75aa86afe72ecbabb4fd7a92b"
+  "selection": {
+    "upscaler": "AMD FSR",
+    "quality": "Quality",
+    "fgProvider": "AMD FSR",
+    "fgMode": "On",
+    "render": [
+      2560,
+      1440
+    ],
+    "output": [
+      3840,
+      2160
+    ],
+    "serializedProviderName": "fgProvider",
+    "privateTrialFlags": false
+  },
+  "checks": {
+    "settingsPersistedAcrossNormalSteamLaunch": true,
+    "actualStartupOwner": 2,
+    "capabilityPublished": true,
+    "FGactive": true,
+    "fsrActivePhase": 5,
+    "fsrEvaluationsAtFinalCheckpoint": 6234,
+    "generatedFrames": 6200,
+    "prepared": 6200,
+    "worldImages": 6200,
+    "SDKerrors": 0,
+    "SDKwarnings": 0,
+    "fault": 0,
+    "pauseDisablesGeneration": true,
+    "pauseGeneratedCountStable": true,
+    "resumeReenablesGeneration": true,
+    "processGoneAfterMenuQuit": true,
+    "normalQuitSeconds": 4.485,
+    "exitCodeCaptured": false,
+    "signalSent": false,
+    "contextRetirementSucceeded": false,
+    "retirementResult": -61,
+    "modPayloadAndSettingsRestoredByteForByte": true,
+    "portableCaseVariantCount": 1280,
+    "fgRecipeChecksPassed": 21
   },
   "installedSHA256": {
     "Dungeons/Binaries/Win64/dxgi.dll": "0d67e79756b1670631426c8b10cfe3913a94699b180ccd4c2dd905641e80219a",
     "Dungeons/Binaries/Win64/fg-sdk-bridge.dll": "31398e27a255b0aab9517aad976c6a0bfd3cdb9a976853217039f3f6e837e03f",
-    "Dungeons/Binaries/Win64/mcd2-fg-guide-recon.addon64": "ac9172f6beea2d69183792683f35a498cf1a31d18e614c3dcdf937859f2863a3",
+    "Dungeons/Binaries/Win64/mcd2-fg-guide-recon.addon64": "43aa452e3c067907372c3e9bdd7d6f8bc2f75f05465ba2e19d926a6070a36e07",
     "Dungeons/Binaries/Win64/mcd2-graphics.addon64": "535d32dfea04c65c6285c5b334ca404c0550676df941a9999d031e79a63e564f",
     "Dungeons/Binaries/Win64/mcd2-display-latency.addon64": "9d0bb873502f57bcc3ea71a70b80612548ab2ee5d95cfcb6b0bd55ad3ac3c7aa",
     "Dungeons/Binaries/Win64/FGBootstrap.ini": "28e372323e4f57087414176fd5b1afa51ac6e1c301dadad23b1e303bbbdde508",
@@ -35,31 +72,10 @@
     "Dungeons/Binaries/Win64/MCD2Graphics/fsr/amd_fidelityfx_upscaler_dx12.dll": "d0dcccc74a43c44ba435b7a369b456e0970d8a4464e4bd683119b374f2c9fb46",
     "Dungeons/Binaries/Win64/MCD2Graphics/fsr_dense.cso": "089cef22d81092bd9ed2bdf0ec7a9bb6fcfe10268c52e0a57273dc69df68da68"
   },
-  "checks": {
-    "portableLifetimeFixture": true,
-    "sourceAndRecipeChecks": 3,
-    "fgRecipeChecks": 21,
-    "protonRealNTQueryOrdinaryUnloadFalse": true,
-    "protonRealNTQueryFinalExitTrue": true,
-    "firstGuardedRunFSREvaluations": 10011,
-    "firstGuardedRunNativeScaleRestored": 100,
-    "firstGuardedQuitSeconds": 5.133,
-    "finalBinaryFSREvaluationsAtCheckpoint": 4436,
-    "finalBinaryQuit": {
-      "normalQuitProcessGone": true,
-      "elapsedSeconds": 5.134,
-      "exitCodeCaptured": false,
-      "terminationSignalSent": false,
-      "amdFGActuallyActive": false
-    },
-    "windowsRealNTQueryFixture": true,
-    "hostedChecksPassed": 8,
-    "additionalFinalBinaryQuitSeconds": 6.883
-  },
   "limits": [
-    "Native Windows gameplay/shutdown requires runtime qualification",
-    "AMD FG command-recording retirement -61 remains independent",
-    "No performance or latency claim"
+    "Windows/AMD runtime not qualified",
+    "No performance, latency or artifact-quality claim",
+    "Final command-recording invalidation proof still missing; AMD FG context retained until process exit"
   ],
   "rawLogsPublished": false,
   "thirdPartyRuntimeBundled": false

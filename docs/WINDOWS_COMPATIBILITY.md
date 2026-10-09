@@ -7,6 +7,12 @@ Windows/AMD or the separately observed shutdown failure.
 
 # Windows fixes: reasons and preservation requirements
 
+The [FG provider FName decoder](FG_PROVIDER_NAME_2026-10-09.md) accepts case
+variants of the current and legacy provider property names. Preserve rejection
+of duplicates across both aliases, invalid values, unknown properties, stale
+sessions and mismatched authority. Keep the 1,280-spelling fixture on both CI
+platforms; serialization spelling must not imply GPU capability or activation.
+
 The [final process teardown guard](PROCESS_EXIT_2026-10-09.md) prevents SDK calls,
 worker joins and coordinator destruction after NT process teardown has begun.
 Preserve the real-query Windows DLL fixture and ordinary-unload cleanup checks.
