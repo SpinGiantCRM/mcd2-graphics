@@ -78,10 +78,10 @@ public class ProviderMenuClient : USaveGame {
  public bool SelectSr(int provider){if(provider<0 || provider>3)return false;return Edit(8,provider);}
  public bool SelectMenuSr(int provider){
   if(provider<0 || provider>2 || !Ready)return false;
-  // AMD FG accepts both implemented SR guide producers; Native has no independent guide path yet.
+  // AMD FG has an independent Native guide producer and both SR producers.
   // Preserve the independent stored provider/strategy, but switch FG Off in
-  // the same transaction before choosing Native or FSR.
-  if((provider==0 || (provider==2 && Value(20)!=1)) && Value(19)!=0 && !Edit(19,0))return false;
+  // the same transaction before choosing an unsupported NVIDIA pairing.
+  if(((provider==0 || provider==2) && Value(20)!=1) && Value(19)!=0 && !Edit(19,0))return false;
   return SelectSr(provider);
  }
  public bool SelectAntiLag2(bool enabled){

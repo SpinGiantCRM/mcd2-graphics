@@ -9,7 +9,8 @@ p.add_argument('--fsr-bridge-sha256',default='',help='Pin the separately built F
 p.add_argument('--clang-cxx',default='clang++');p.add_argument('--mingw-cxx',default='x86_64-w64-mingw32-g++')
 a=p.parse_args();repo=Path(__file__).resolve().parents[2];out=a.output.resolve();source=out/'source';source.mkdir(parents=True,exist_ok=True)
 copy_sr_sources(repo,source)
-for name in ('fg_camera_contract.h','fg_camera_math.h'):shutil.copyfile(Path(__file__).parent/name,source/'src/native'/name)
+# Camera headers have one canonical location in the copied source closure.
+# Separate byte-identical copies defeat Clang's file-based pragma-once identity.
 lean=source/'src/native/ngx_lean.hpp';text=lean.read_text();needle=' auto resource=mcd2_ngx_set_resource;'
 assert text.count(needle)==1
 replacement=''' // Temporary observer receives current guides before NGX. It never owns SR state.
@@ -57,7 +58,7 @@ if a.guide_inspection:
   copies.erase(std::remove_if(copies.begin(),copies.end(),[](const Copy&c){return c.readback==nullptr;}),copies.end());
  }
 '''+text[end:]
-text='#include "fg_camera_math.h"\n'+text;lean.write_text(text)
+text='#include "../../experiments/fg-streamline/fg_camera_math.h"\n'+text;lean.write_text(text)
 # FSR already produces the same normalized guide formats. Notify FG before the
 # FSR evaluation without creating an NGX context or invoking its guide producer.
 fsr=source/'src/native/fsr_runtime.hpp';fsr_text=fsr.read_text()
@@ -71,8 +72,8 @@ fsr_extra=''' auto fgObserver=GetModuleHandleW(L"mcd2-fg-guide-recon.addon64");
    notify(proxy,c.current_depth,c.motion,&camera);
  }
 '''
-fsr_text='#include "fg_camera_math.h"\n'+fsr_text.replace(fsr_needle,fsr_extra+fsr_needle);fsr.write_text(fsr_text)
-observer=source/'src/native/observer.cpp';observer_text=observer.read_text()
+fsr_text='#include "../../experiments/fg-streamline/fg_camera_math.h"\n'+fsr_text.replace(fsr_needle,fsr_extra+fsr_needle);fsr.write_text(fsr_text)
+observer=source/'src/native/observer.cpp';observer_text='#define MCD2_NATIVE_FG_GUIDES 1\n'+observer.read_text()
 if a.guide_inspection:
  marker=' fs::path path;\n};\nstatic std::vector<Copy> copies;'
  assert observer_text.count(marker)==1
@@ -94,5 +95,5 @@ observer.write_text(observer_text)
 with (out/'build-private.log').open('w') as log:
  subprocess.run([sys.executable,str(source/'build.py'),'--native-only',*(['--developer-controls'] if a.guide_inspection else []),'--fsr-bridge-sha256',a.fsr_bridge_sha256,'--clang-cxx',a.clang_cxx,'--mingw-cxx',a.mingw_cxx,'--reshade-include',str(a.reshade_headers.resolve()),'--ngx-include',str(a.ngx_headers.resolve()),'--output',str(out/'native')],stdout=log,stderr=subprocess.STDOUT,check=True)
 path=out/'native/mcd2-graphics.addon64';shutil.copyfile(path,out/path.name)
-(out/'build-receipt.json').write_text(json.dumps({'purpose':'temporary game FG guide notification','releasedSourcesChanged':False,'privateGuideInspection':a.guide_inspection,'addonSHA256':hashlib.sha256(path.read_bytes()).hexdigest(),'leanBaseSHA256':hashlib.sha256((repo/'src/native/ngx_lean.hpp').read_bytes()).hexdigest(),'leanGeneratedSHA256':hashlib.sha256(text.encode()).hexdigest(),'fsrBaseSHA256':hashlib.sha256((repo/'src/native/fsr_runtime.hpp').read_bytes()).hexdigest(),'fsrGeneratedSHA256':hashlib.sha256(fsr_text.encode()).hexdigest(),'fsrBridgeSHA256':a.fsr_bridge_sha256,'cameraSourceSHA256':{name:hashlib.sha256((Path(__file__).parent/name).read_bytes()).hexdigest() for name in ('fg_camera_contract.h','fg_camera_math.h')},'observerBaseSHA256':hashlib.sha256((repo/'src/native/observer.cpp').read_bytes()).hexdigest(),'observerGeneratedSHA256':hashlib.sha256(observer_text.encode()).hexdigest(),'generatorSHA256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),'ngxFixtureSHA256':hashlib.sha256((repo/'src/native/ngx_live_fixture.hpp').read_bytes()).hexdigest(),'WindowsQualified':False},indent=2)+'\n')
+(out/'build-receipt.json').write_text(json.dumps({'purpose':'temporary game FG guide notification','releasedSourcesChanged':False,'privateGuideInspection':a.guide_inspection,'nativeFgGuides':True,'addonSHA256':hashlib.sha256(path.read_bytes()).hexdigest(),'leanBaseSHA256':hashlib.sha256((repo/'src/native/ngx_lean.hpp').read_bytes()).hexdigest(),'leanGeneratedSHA256':hashlib.sha256(text.encode()).hexdigest(),'fsrBaseSHA256':hashlib.sha256((repo/'src/native/fsr_runtime.hpp').read_bytes()).hexdigest(),'fsrGeneratedSHA256':hashlib.sha256(fsr_text.encode()).hexdigest(),'fsrBridgeSHA256':a.fsr_bridge_sha256,'cameraSourceSHA256':{name:hashlib.sha256((Path(__file__).parent/name).read_bytes()).hexdigest() for name in ('fg_camera_contract.h','fg_camera_math.h')},'observerBaseSHA256':hashlib.sha256((repo/'src/native/observer.cpp').read_bytes()).hexdigest(),'observerGeneratedSHA256':hashlib.sha256(observer_text.encode()).hexdigest(),'generatorSHA256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),'ngxFixtureSHA256':hashlib.sha256((repo/'src/native/ngx_live_fixture.hpp').read_bytes()).hexdigest(),'WindowsQualified':False},indent=2)+'\n')
 print('Temporary SR observer adapter built; released SR sources unchanged.')

@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-09",
+  "scope": "Native AA / AMD FG bounded developer candidate",
+  "host": {
+    "os": "CachyOS",
+    "session": "KDE Wayland",
+    "gpu": "NVIDIA RTX 4080 SUPER",
+    "driver": "615.78.08",
+    "proton": "cachyos11.0-20261005-slr"
+  },
+  "gameVersion": "1.1.2.0",
+  "steamBuild": 25754144,
+  "installedSHA256": {
+    "Dungeons/Binaries/Win64/dxgi.dll": "058454439f8e5126dcd20b9aee2ce33c366e087a41c59841924884fc37fe6398",
+    "Dungeons/Binaries/Win64/fg-sdk-bridge.dll": "b9b768ed95df8d9f2ec257a7dfead4d8624844083a02ed94e8f170b4cd4669f8",
+    "Dungeons/Binaries/Win64/mcd2-fg-guide-recon.addon64": "c2069576d96d0715ede6314c65b44ef86f80cb45d535603d1d9fd0b66f416b07",
+    "Dungeons/Binaries/Win64/mcd2-graphics.addon64": "1f2d4b0fa3b190baef721b415e4da60acf1be2278a807893cee78b515bf4f12d",
+    "Dungeons/Binaries/Win64/mcd2-display-latency.addon64": "9d0bb873502f57bcc3ea71a70b80612548ab2ee5d95cfcb6b0bd55ad3ac3c7aa",
+    "Dungeons/Binaries/Win64/FGBootstrap.ini": "28e372323e4f57087414176fd5b1afa51ac6e1c301dadad23b1e303bbbdde508",
+    "Dungeons/Binaries/Win64/FGGuideCapture.ini": "492c4233a4803fe3bcf1b472727ec142ec1d242669030bb7d95b735c22398ca0",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.pak": "0cf2fd66b979abe5279aa2ac026193a1efa25af4968cae0e052ca30db6e3ab70",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.ucas": "4e9c5955228c64fc1d3ae7340ed6bab7348414830b8107f0100ae134194a6168",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.utoc": "250da6c4e352d2a9f0196faf04c6f6a0f6dff8b112a611dcc8d4918790e08655",
+    "Dungeons/Binaries/Win64/mcd2-fsr-fg-game-bridge.dll": "c2f81a73146fa74619e289acc78d0a96d972b80710f3b62529223e2d7f4be6b1",
+    "Dungeons/Binaries/Win64/amd_fidelityfx_framegeneration_dx12.dll": "02297beedd285e822d3a64f314cf00faf378dcec0edc47ff0c4dd71b3a8c2f18",
+    "Dungeons/Binaries/Win64/MCD2Graphics/fsr/mcd2-fsr-game-bridge.dll": "f422af2f70f62ca8462c3aff30d05d1db92dd3b1d0e4289750039b8a2a83514b",
+    "Dungeons/Binaries/Win64/MCD2Graphics/fsr/amd_fidelityfx_upscaler_dx12.dll": "d0dcccc74a43c44ba435b7a369b456e0970d8a4464e4bd683119b374f2c9fb46",
+    "Dungeons/Binaries/Win64/MCD2Graphics/fsr_dense.cso": "089cef22d81092bd9ed2bdf0ec7a9bb6fcfe10268c52e0a57273dc69df68da68"
+  },
+  "firstAddonSHA256": "a210cfa7726fb32034d3dfaa255ee33b053948db965a8011df578156c95025a7",
+  "gameChecks": {
+    "nativeOffFullScale": true,
+    "nativeOffSREvaluations": 0,
+    "restartRequestedBeforeActivation": true,
+    "pauseGenerated": [
+      2726,
+      2726
+    ],
+    "pauseRealPresents": [
+      31321,
+      37741
+    ],
+    "pauseSeconds": 48.0144,
+    "resumedGenerated": 4809,
+    "canonicalGenerated": [
+      681,
+      1581
+    ],
+    "canonicalIntervalSeconds": 21.5232,
+    "canonicalFullScale": 100.0,
+    "canonicalSREvaluations": 0,
+    "canonicalGuides": [
+      3840,
+      2160
+    ],
+    "canonicalFinalCounters": {
+      "prepared": 1662,
+      "images": 1662,
+      "generatedPresents": 1662,
+      "errors": 0,
+      "warnings": 0,
+      "fault": 0
+    },
+    "retirementResult": 0,
+    "normalQuitSeconds": 2.501,
+    "signalSent": false,
+    "exitCodeCaptured": false,
+    "originalModFilesAndPreferencesRestored": true
+  },
+  "limits": [
+    "Native Windows/Radeon runtime unqualified",
+    "No delivered-FPS, latency or artifact-quality claim",
+    "No resize, device-loss, travel or long-session qualification",
+    "Independent source-guide teardown remains separate from AMD SDK retirement"
+  ],
+  "rawLogsPublished": false,
+  "thirdPartyRuntimeBundled": false
+}
