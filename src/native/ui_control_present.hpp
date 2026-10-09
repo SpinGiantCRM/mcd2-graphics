@@ -41,7 +41,9 @@ static bool ui_poll_intent(){
   ui_control.receipt.open(root/L"MCD2GraphicsNativeReceipt.jsonl",std::ios::app);
  }
  mcd2ui::Settings incoming;auto bytes=ui_read_file(ui_control.saves/L"MCD2GraphicsSettings.sav");
- if(!mcd2ui::decode(bytes,incoming)){
+ const bool legacyDecoded=mcd2ui::decode(bytes,incoming);
+ const int shared=provider_menu_sr_intent(incoming);
+ if(shared<0 || (!shared&&!legacyDecoded)){
   // Invalid persisted intent may never activate an NGX feature.
   if(++ui_control.invalid_reads<3)return false;
   if(live_fixture && lean.wanted){lean.wanted=false;ui_control.fallback=true;ui_control.pending=true;ui_control.phase=0;}

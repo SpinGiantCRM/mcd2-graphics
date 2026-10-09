@@ -493,5 +493,8 @@ authority disables latency without applying a zero HDR calibration. Snapshot
 readers must use the exact 144-byte plain-C ABI, handle a busy worker without
 blocking the render thread, and refuse a stopped settings worker. Preserve both
 platform client/projection checks and include the `.h` ABI source in build
-provenance. The native SR controller and normal Video rows have not switched to
-this client yet; no new Windows runtime qualification is implied.
+provenance. The later [native Video-menu cutover](FSR_VIDEO_MENU_2026-10-09.md) projects
+committed shared settings into the existing NVIDIA controller and adds FSR
+controls. Keep current-session/world admission, independent preset ratios,
+source-only rollback on authority loss and source-matched UI receipts. New
+Windows runtime qualification is still required.

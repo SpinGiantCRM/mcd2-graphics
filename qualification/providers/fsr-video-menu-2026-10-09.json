@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "scope": "Opt-in normal Video-menu integration; not a release qualification",
+  "platform": "CachyOS / Proton CachyOS SLR / native WineWayland HDR",
+  "adapter": "NVIDIA RTX 4080 SUPER",
+  "steamBuild": 25754144,
+  "gameVersion": "1.1.2.0",
+  "artifactsSHA256": {
+    "nativeAddon": "1faca6a23eea78a7ca62f79617f6099069febc4ea6da07978c6bde6e95714856",
+    "latencyAddon": "c5998f6822083338282547ec51497b9aeae906a02f3b7856f52b3699cdeb0ce3",
+    "fsrGuideShader": "089cef22d81092bd9ed2bdf0ec7a9bb6fcfe10268c52e0a57273dc69df68da68",
+    "nvidiaGuideShader": "4a65a33ba983124b7c47d5822507613231abef7ec1fca8fa7fc51437fd0c29d2",
+    "uiQualificationArchive": "6c14e49bafe8b0cdf753129ec1c857e9bdfa20d191d137464b8d4bb8fd49e1dc",
+    "externalFsrBridge": "f422af2f70f62ca8462c3aff30d05d1db92dd3b1d0e4289750039b8a2a83514b",
+    "externalFsrRuntime": "d0dcccc74a43c44ba435b7a369b456e0970d8a4464e4bd683119b374f2c9fb46"
+  },
+  "finalSourceMatchedMenuChecks": [
+    {
+      "case": "Select FSR Quality in main menu",
+      "result": "Committed; readiness false; measured source 100%; no SDK evaluation"
+    },
+    {
+      "case": "Enter gameplay",
+      "result": "New actor world acknowledged; FSR Active; error 0",
+      "render": [
+        2560,
+        1440
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "evaluationCheckpoint": 991
+    },
+    {
+      "case": "Keyboard Native AA",
+      "result": "FSR Active; error 0",
+      "render": [
+        3840,
+        2160
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "evaluationCheckpoint": 80
+    },
+    {
+      "case": "Keyboard custom 99%",
+      "result": "Custom label and slider agree; FSR Active; error 0",
+      "render": [
+        3802,
+        2139
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "evaluationCheckpoint": 39
+    },
+    {
+      "case": "Mouse Upscaler arrow",
+      "result": "Committed change from FSR to NVIDIA; independent NVIDIA Quality preference retained"
+    },
+    {
+      "case": "FG row with FSR",
+      "result": "Hidden; selection transaction disables NVIDIA FG"
+    },
+    {
+      "case": "Return from mouse-selected NVIDIA Quality to gameplay",
+      "result": "Measured source 66.666664%; matching committed revision and renderer Active acknowledgement; FSR controller in Fallback"
+    },
+    {
+      "case": "Normal quit",
+      "result": "Shipping process exceeded 120 seconds; terminated only after verifying its exact identity; cause not isolated"
+    }
+  ],
+  "earlierMenuBuildChecks": [
+    {
+      "case": "NVIDIA Quality and DLAA",
+      "result": "Matching committed revision and renderer Active acknowledgement"
+    },
+    {
+      "case": "FSR Balanced",
+      "result": "Active; error 0; independently handled padded allocation",
+      "render": [
+        2259,
+        1271
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "evaluationCheckpoint": 6010
+    },
+    {
+      "case": "FSR to Native",
+      "result": "Source restored and acknowledged at 100%; both reconstruction controllers inactive"
+    },
+    {
+      "case": "Normal quit",
+      "result": "Process exceeded 120 seconds; terminated after 139.9 seconds before exact restoration; cause not isolated"
+    }
+  ],
+  "localChecks": {
+    "pythonCore": {
+      "run": 69,
+      "passed": 64,
+      "skippedWindowsSpecific": 5
+    },
+    "fgPython": {
+      "run": 21,
+      "passed": 21
+    },
+    "csharpClients": "Pass: CRC, coalescing, provider preference independence, retries, travel, rollback and authority loss",
+    "portableCpp": "Pass: intent, request, transport, display projection, SR runtime, AMD latency, engine layout and Reflex tokens",
+    "nativeAndShaderBuild": "Pass",
+    "completeNeoRuneBuild": "Pass",
+    "sourceMatchedUiReceipt": "Pass",
+    "publishedBaseline": "Unchanged"
+  },
+  "notQualified": [
+    "Windows/AMD runtime",
+    "physical controller",
+    "normal shutdown",
+    "extended travel/session",
+    "live authority and dependency failures",
+    "image quality",
+    "performance",
+    "latency benefit",
+    "AMD frame generation",
+    "cross-provider FG"
+  ],
+  "publishedAssetsChanged": false,
+  "privateMaterialIncluded": false
+}

@@ -51,6 +51,18 @@ class FsrRuntimeSourceTests(unittest.TestCase):
         self.assertIn('c.width!=c.allocationWidth||c.height!=c.allocationHeight', self.present)
         self.assertNotIn('cropped_colour', (ROOT / 'src/native/ngx_lean.hpp').read_text())
 
+    def test_shared_preferences_override_legacy_without_io_in_snapshot_reader(self):
+        reader=self.source.split('static int provider_menu_sr_intent(',1)[1].split('static bool fsr_runtime_record',1)[0]
+        self.assertIn('if(!menuOwner)return 0',reader)
+        self.assertIn('p::projectNvidiaMenu(record,projection)',reader)
+        self.assertIn('incoming.revision==projection.revision',reader)
+        self.assertIn('incoming.sourceSession==ui_control.session',reader)
+        self.assertIn('menuStamp!=record.bootstrap.stamp',reader)
+        self.assertNotIn('ifstream',reader)
+        controller=(ROOT/'src/native/ui_control_present.hpp').read_text()
+        self.assertIn('const int shared=provider_menu_sr_intent(incoming)',controller)
+        self.assertIn('shared<0 || (!shared&&!legacyDecoded)',controller)
+
     def test_retirement_precedes_source_restore_and_never_shuts_down_ngx(self):
         self.assertIn('if(c.history_dirty||!cache.recordings.empty()||!cache.entries.empty()||cache.blocked)return', self.present)
         self.assertLess(self.present.index('c.destroy(c.session,cache.fence,cache.next_fence)'),

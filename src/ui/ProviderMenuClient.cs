@@ -76,6 +76,14 @@ public class ProviderMenuClient : USaveGame {
   Edits.SetWord(10+word,value);Dirty=Dirty|Bit(word);RetryCount=0;Failure=0;return true;
  }
  public bool SelectSr(int provider){if(provider<0 || provider>3)return false;return Edit(8,provider);}
+ public bool SelectMenuSr(int provider){
+  if(provider<0 || provider>2 || !Ready)return false;
+  // The normal menu admits only the tested NVIDIA SR + NVIDIA FG pairing.
+  // Preserve the independent stored provider/strategy, but switch FG Off in
+  // the same transaction before choosing Native or FSR.
+  if(provider!=1 && Value(19)!=0 && !Edit(19,0))return false;
+  return SelectSr(provider);
+ }
  public int PreferenceWord(int provider){return provider>=1 && provider<=3?9+(provider-1)*3:-1;}
  public bool SelectQuality(int provider,int quality){
   int word=PreferenceWord(provider);if(word<0 || quality<0 || quality>5 || !Ready)return false;
@@ -87,6 +95,8 @@ public class ProviderMenuClient : USaveGame {
   // Ratios for named modes come from the selected SDK. A manual percentage
   // stays Custom until that provider's validated dimension query identifies it.
   if(scale==10000)return Edit(word,0);
+  if(provider==1){int named=scale==6700?1:scale==5800?2:scale==5000?3:scale==3300?4:5;
+   if(named!=5)return Edit(word,named);}
   return Edit(word+1,scale) && Edit(word+2,scale) && Edit(word,5);
  }
  public bool SelectFg(int provider,int strategy,int multiplier,bool enabled){
