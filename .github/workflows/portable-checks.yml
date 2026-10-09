@@ -63,6 +63,8 @@ jobs:
           /tmp/provider-menu-transport
           g++ -std=c++20 -Wall -Wextra -Werror tests/provider_display_projection_test.cpp -o /tmp/provider-display-projection
           /tmp/provider-display-projection
+          g++ -std=c++20 -Wall -Wextra -Werror -Wno-misleading-indentation tests/fg_provider_protocol_test.cpp -o /tmp/fg-provider-protocol
+          /tmp/fg-provider-protocol
           g++ -std=c++20 -Wall -Wextra -Werror tests/provider_sr_runtime_test.cpp -o /tmp/provider-sr-runtime
           /tmp/provider-sr-runtime
           g++ -std=c++20 -Wall -Wextra -Werror tests/provider_store_test.cpp -o /tmp/provider-store
@@ -141,6 +143,8 @@ jobs:
           ./provider-menu-transport.exe
           g++ -std=c++20 -static -Wall -Wextra -Werror tests/provider_display_projection_test.cpp -o provider-display-projection.exe
           ./provider-display-projection.exe
+          g++ -std=c++20 -static -Wall -Wextra -Werror -Wno-misleading-indentation tests/fg_provider_protocol_test.cpp -o fg-provider-protocol.exe
+          ./fg-provider-protocol.exe
           g++ -std=c++20 -static -Wall -Wextra -Werror tests/provider_sr_runtime_test.cpp -o provider-sr-runtime.exe
           ./provider-sr-runtime.exe
           g++ -std=c++20 -static -Wall -Wextra -Werror tests/provider_observation_test.cpp -o provider-observation.exe

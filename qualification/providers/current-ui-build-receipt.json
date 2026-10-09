@@ -4,7 +4,7 @@
   "candidateOnly": true,
   "version": "0.3.0-preview.1",
   "sourceFileSHA256": {
-    "src/ui/ModActor.cs": "95a5425f1e878172fa6e74b8287e290263fde6fb9bd695058807412c2aa812a8",
+    "src/ui/ModActor.cs": "51b964254fec82f90aa23ef7d3ea57cdc735b6cde17ed54639c6623a13200947",
     "src/ui/ProviderSaveWords.cs": "ae796d9934e3b418e08e035d67eb1d0b3c256a30631cf37f6a710897812fdfee",
     "src/ui/ProviderMenuClient.cs": "152c7112ac10b1cc97e82fa07ef3f42337209d9a35acb4bee995ab6fe04e3f17",
     "src/ui/ProviderRuntimeWords.cs": "fa5f8626af17474a0f60557050b55fbc470ac549726b0e969a810910d0bb632b",
@@ -12,11 +12,11 @@
     "tools/ModInfoBuilder/Program.cs": "25c1217f83fc97942ac5d94dd9e9707ee0fa4b72224b627131cdea3d87c0f5a2"
   },
   "payloadSHA256": {
-    "MCD2Graphics_P.pak": "98dcdd3874a986df83baabb87eff3ed476ec3923c4bd772be8bc7d515841741a",
-    "MCD2Graphics_P.ucas": "004bb2aaf314197bef0a4d2a6519fdce87ef393471694184cfe321b89f5c5754",
-    "MCD2Graphics_P.utoc": "a7c270f4e9393e4f82ef55106539e0c51dcca4b3792b76ab0271f6b8161c331d"
+    "MCD2Graphics_P.pak": "f3d30d07174a8f73c470330ce70e00714ef70f2a4a27ec03565cd90905541a05",
+    "MCD2Graphics_P.ucas": "f3264c105ad160d49bfe3cf487592bc543f12f5f015fd2bcc1d143b853431d6f",
+    "MCD2Graphics_P.utoc": "9661dbe73f5657862b5210674262449a15f822e564cdf0d6244bf0ca478ce89e"
   },
-  "archiveSHA256": "d2b189ad3cf6256580ccd88639785d3225aeaa42a23a66dba516bc1919240d79",
+  "archiveSHA256": "d844c5ef6d67e7d07e6475578a2187a886297965397fbd48a34fe0017db7f2e7",
   "metadataAPI": "Blueprint Loader 2.0 BP_ModInfo; no popup API",
   "compiler": "NeoRune 0.1.2 / .NET reference pack 10.0.12",
   "WindowsQualified": false,

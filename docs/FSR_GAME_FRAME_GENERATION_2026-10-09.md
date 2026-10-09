@@ -75,10 +75,25 @@ claim. Session, revision and provider must match before runtime activation.
 Current pairings are NVIDIA SR + NVIDIA FG, NVIDIA SR + AMD FG, and FSR SR +
 AMD FG. Native SR guides and FSR SR + NVIDIA FG are not admitted by this candidate.
 
-The UI and Microsoft-ABI bridge/bootstrap builds pass locally, together with
-the shared-settings and projection fixtures. Normal-menu save/restart and
-runtime checks remain required, as do Windows/AMD execution and qualification.
-Published installers and release assets are unchanged.
+The normal Video-menu selection persisted across a Steam launch: AMD FSR Quality
+at 2560×1440 → 3840×2160 and AMD FG On. Generation passed 4,976 frames without
+a private trial flag or the old 600-frame limit. SDK errors, warnings and faults
+remained zero. Pause disabled generation; returning to gameplay resumed it.
+The process disappeared after the menu's Save and quit confirmation; an exit
+code was not captured. Final command-list invalidation was not proven, so
+retirement returned -61 and deliberately retained contexts until process exit.
+This is a cleanup limitation, not a successful context-retirement claim.
+All protected mod payloads and settings were restored byte for byte.
+
+Unreal serialized the original Provider field as lowercase provider. The decoder
+now accepts that observed legacy alias and the new FGProvider field, while
+rejecting duplicate aliases, invalid providers and truncated records. The
+synthetic protocol fixture runs on Linux and Windows CI. UI, Microsoft-ABI
+bridge/bootstrap and timing builds and focused portable fixtures pass locally.
+The [normal-menu receipt](../qualification/providers/fsr-fg-menu-2026-10-09.json)
+records exact installed hashes and the scope of these checks. Windows/AMD,
+performance and quality qualification remain required. Published installers
+and release assets are unchanged.
 
 Produce independent Native guides; validate AMD
 timing/Anti-Lag coexistence; then qualify transitions, resize, shutdown, artifacts

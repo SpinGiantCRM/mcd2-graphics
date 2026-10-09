@@ -4,8 +4,13 @@ namespace mcd2::fgui {
 struct Intent {unsigned revision=0,mode=0,ready=0,session=0,provider=0,settingsRevision=0;};
 inline bool decode(const std::vector<uint8_t>&bytes,Intent&out){
  std::map<std::string,unsigned> v;size_t h=0;if(!display::parse(bytes,"FGSettingsSave",v,h))return false;
- const std::set<std::string> allowed={"SchemaVersion","Revision","Mode","ContextReady","SessionId","Provider","SettingsRevision"};for(auto&kv:v)if(!allowed.count(kv.first))return false;
- Intent next{v["Revision"],v["Mode"],v["ContextReady"],v["SessionId"],v["Provider"],v["SettingsRevision"]};if(v["SchemaVersion"]!=1||!next.revision||next.mode>1||next.ready>1||next.provider>1)return false;out=next;return true;
+ // Unreal FName identity is case-insensitive. The old generic Provider field
+ // was observed serialized as 'provider' after another asset interned that
+ // spelling first. Accept that exact legacy alias; never accept duplicates.
+ if(v.contains("provider")){if(v.contains("Provider"))return false;v["Provider"]=v["provider"];v.erase("provider");}
+ const std::set<std::string> allowed={"SchemaVersion","Revision","Mode","ContextReady","SessionId","Provider","FGProvider","SettingsRevision"};for(auto&kv:v)if(!allowed.count(kv.first))return false;
+ if(v.contains("FGProvider")&&v.contains("Provider"))return false;
+ Intent next{v["Revision"],v["Mode"],v["ContextReady"],v["SessionId"],v.contains("FGProvider")?v["FGProvider"]:v["Provider"],v["SettingsRevision"]};if(v["SchemaVersion"]!=1||!next.revision||next.mode>1||next.ready>1||next.provider>1)return false;out=next;return true;
 }
 inline std::vector<uint8_t> encode(const std::vector<uint8_t>&seed,const std::map<std::string,unsigned>&fields){
  std::map<std::string,unsigned> old;size_t h=0;if(!display::parse(seed,"FGRuntimeSave",old,h))return {};

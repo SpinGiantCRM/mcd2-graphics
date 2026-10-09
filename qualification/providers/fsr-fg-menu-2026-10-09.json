@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-09",
+  "scope": "Normal Video-menu AMD FSR Quality plus AMD frame generation on Linux/NVIDIA; developer candidate",
+  "sourceCommit": "37073de",
+  "steamBuild": 25754144,
+  "gameVersion": "1.1.2.0",
+  "host": {
+    "os": "CachyOS",
+    "session": "KDE Wayland",
+    "gpu": "NVIDIA RTX 4080 SUPER",
+    "driver": "615.71.09",
+    "proton": "cachyos11.0-20261005-slr"
+  },
+  "selection": {
+    "upscaler": "AMD FSR",
+    "quality": "Quality",
+    "fgProvider": "AMD FSR",
+    "fgMode": "On",
+    "render": [
+      2560,
+      1440
+    ],
+    "output": [
+      3840,
+      2160
+    ],
+    "privateTrialFlags": false
+  },
+  "checks": {
+    "settingsPersistedAcrossNormalSteamLaunch": true,
+    "actualStartupOwner": 2,
+    "fsrActivePhase": 5,
+    "fsrEvaluationsAtCheckpoint": 4986,
+    "generatedFrames": 4976,
+    "prepared": 4976,
+    "worldImages": 4976,
+    "SDKerrors": 0,
+    "SDKwarnings": 0,
+    "fault": 0,
+    "pauseDisablesGeneration": true,
+    "resumeReenablesGeneration": true,
+    "processGoneAfterMenuQuit": true,
+    "exitCodeCaptured": false,
+    "contextRetirementSucceeded": false,
+    "retirementResult": -61,
+    "modPayloadAndSettingsRestoredByteForByte": true
+  },
+  "installedSHA256": {
+    "Dungeons/Binaries/Win64/dxgi.dll": "0d67e79756b1670631426c8b10cfe3913a94699b180ccd4c2dd905641e80219a",
+    "Dungeons/Binaries/Win64/fg-sdk-bridge.dll": "31398e27a255b0aab9517aad976c6a0bfd3cdb9a976853217039f3f6e837e03f",
+    "Dungeons/Binaries/Win64/mcd2-fg-guide-recon.addon64": "ac9172f6beea2d69183792683f35a498cf1a31d18e614c3dcdf937859f2863a3",
+    "Dungeons/Binaries/Win64/mcd2-graphics.addon64": "535d32dfea04c65c6285c5b334ca404c0550676df941a9999d031e79a63e564f",
+    "Dungeons/Binaries/Win64/mcd2-display-latency.addon64": "564bb0d382ac85ad68a90be1442eb100a57420522c80c26491446409b736f0b2",
+    "Dungeons/Binaries/Win64/FGBootstrap.ini": "28e372323e4f57087414176fd5b1afa51ac6e1c301dadad23b1e303bbbdde508",
+    "Dungeons/Binaries/Win64/FGGuideCapture.ini": "492c4233a4803fe3bcf1b472727ec142ec1d242669030bb7d95b735c22398ca0",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.pak": "f3d30d07174a8f73c470330ce70e00714ef70f2a4a27ec03565cd90905541a05",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.ucas": "f3264c105ad160d49bfe3cf487592bc543f12f5f015fd2bcc1d143b853431d6f",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.utoc": "9661dbe73f5657862b5210674262449a15f822e564cdf0d6244bf0ca478ce89e",
+    "Dungeons/Binaries/Win64/mcd2-fsr-fg-game-bridge.dll": "80b785579a076350cd49acda16d68c2c9638b9f813d31dca4cf3243de30bfaa7",
+    "Dungeons/Binaries/Win64/amd_fidelityfx_framegeneration_dx12.dll": "02297beedd285e822d3a64f314cf00faf378dcec0edc47ff0c4dd71b3a8c2f18",
+    "Dungeons/Binaries/Win64/MCD2Graphics/fsr/mcd2-fsr-game-bridge.dll": "f422af2f70f62ca8462c3aff30d05d1db92dd3b1d0e4289750039b8a2a83514b",
+    "Dungeons/Binaries/Win64/MCD2Graphics/fsr/amd_fidelityfx_upscaler_dx12.dll": "d0dcccc74a43c44ba435b7a369b456e0970d8a4464e4bd683119b374f2c9fb46",
+    "Dungeons/Binaries/Win64/MCD2Graphics/fsr_dense.cso": "089cef22d81092bd9ed2bdf0ec7a9bb6fcfe10268c52e0a57273dc69df68da68"
+  },
+  "limits": [
+    "Windows/AMD execution not qualified",
+    "No performance, latency or artifact-quality claim",
+    "Missing final command-list invalidation proof retained contexts until process exit"
+  ],
+  "rawLogsPublished": false,
+  "thirdPartyRuntimeBundled": false
+}

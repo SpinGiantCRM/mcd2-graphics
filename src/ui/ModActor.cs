@@ -183,7 +183,7 @@ public class ScaleRow : UGameSettingListEntryBase {
 }
 
 // Separate display/latency intent leaves the released SR schema unchanged.
-public class FGSettingsSave : USaveGame {public int SchemaVersion;public int Revision;public int Mode;public int ContextReady;public int SessionId;public int Provider;public int SettingsRevision;}
+public class FGSettingsSave : USaveGame {public int SchemaVersion;public int Revision;public int Mode;public int ContextReady;public int SessionId;public int FGProvider;public int SettingsRevision;}
 public class FGRuntimeSave : USaveGame {public int SchemaVersion;public int Revision;public int SessionId;public int Available;public int Active;public int Phase;public int RestartRequired;public int AvailableProviders;public int StartupOwner;}
 public class DisplaySettingsSave : USaveGame {
  public int SchemaVersion;public int Revision;public int HDROutput;public int PeakNits;public int PaperWhiteNits;public int UINits;public int ReflexMode;
@@ -259,7 +259,7 @@ public class ModActor : AActor {
   var a=ProviderMenu.Authority;int reflex=(a.W35==0 || a.W35==1)?a.W36:0;
   bool changed=DisplaySaved.Revision!=a.W19 || DisplaySaved.HDROutput!=a.W37 || DisplaySaved.PeakNits!=a.W38 || DisplaySaved.PaperWhiteNits!=a.W39 || DisplaySaved.UINits!=a.W40 || DisplaySaved.ReflexMode!=reflex;
   if(changed){DisplaySaved.Revision=a.W19;DisplaySaved.HDROutput=a.W37;DisplaySaved.PeakNits=a.W38;DisplaySaved.PaperWhiteNits=a.W39;DisplaySaved.UINits=a.W40;DisplaySaved.ReflexMode=reflex;PersistDisplay();}
-  if(FGSaved!=null && (FGSaved.SettingsRevision!=a.W19 || FGSaved.Mode!=a.W31 || FGSaved.Provider!=a.W32)){FGSaved.SettingsRevision=a.W19;FGSaved.Revision++;FGSaved.Mode=a.W31;FGSaved.Provider=a.W32;PersistFG();}
+  if(FGSaved!=null && (FGSaved.SettingsRevision!=a.W19 || FGSaved.Mode!=a.W31 || FGSaved.FGProvider!=a.W32)){FGSaved.SettingsRevision=a.W19;FGSaved.Revision++;FGSaved.Mode=a.W31;FGSaved.FGProvider=a.W32;PersistFG();}
  }
  public void ProjectCommittedNvidia(){
   if(!SharedControls() || ProviderMenu==null || ProviderMenu.Authority==null || Saved==null)return;
@@ -580,7 +580,7 @@ public class ModActor : AActor {
   {DisplayRuntime=UGameplayStatics.CreateSaveGameObject(Unreal.ClassOf<DisplayRuntimeSave>()) as DisplayRuntimeSave;if(DisplayRuntime!=null){DisplayRuntime.SchemaVersion=1;UGameplayStatics.SaveGameToSlot(DisplayRuntime,"MCD2GraphicsDisplayRuntime",0);}}
  }
  public void PersistDisplay(){if(DisplaySaved!=null)UGameplayStatics.SaveGameToSlot(DisplaySaved,"MCD2GraphicsDisplaySettings",0);}
- public int SelectedFgProvider(){return SharedControls() && ProviderMenu!=null?ProviderMenu.Value(20):(FGSaved==null?0:FGSaved.Provider);}
+ public int SelectedFgProvider(){return SharedControls() && ProviderMenu!=null?ProviderMenu.Value(20):(FGSaved==null?0:FGSaved.FGProvider);}
  public bool SharedFgAvailable(){return SharedControls() && FGRuntime!=null && FGRuntime.AvailableProviders>0 && FGRuntime.AvailableProviders<=3;}
  public bool SelectedFgAvailable(){if(!SharedControls())return FGRuntime!=null && FGRuntime.Available==1;if(!SharedFgAvailable() || FGRuntime==null)return false;int fg=SelectedFgProvider(),sr=SelectedProvider();return (fg==0 && sr==1 && (FGRuntime.AvailableProviders&1)!=0) || (fg==1 && (sr==1 || sr==2) && (FGRuntime.AvailableProviders&2)!=0);}
  public int DisplayValue(int id){if(id==7)return SelectedFgProvider();if(id==6)return SharedControls() && ProviderMenu!=null && (ProviderMenu.Value(23)==0 || ProviderMenu.Value(23)==2) && ProviderMenu.Value(24)==1?1:0;if(SharedControls() && ProviderMenu!=null){if(id==5)return ProviderMenu.Value(19);if(id==0)return ProviderMenu.Value(25);if(id==1)return ProviderMenu.Value(26);if(id==2)return ProviderMenu.Value(27);if(id==3)return ProviderMenu.Value(28);return ProviderMenu.Value(24);}if(DisplaySaved==null)return 0;if(id==5)return FGSaved==null?0:FGSaved.Mode;if(id==0)return DisplaySaved.HDROutput;if(id==1)return DisplaySaved.PeakNits;if(id==2)return DisplaySaved.PaperWhiteNits;if(id==3)return DisplaySaved.UINits;return DisplaySaved.ReflexMode;}
@@ -633,7 +633,7 @@ public class ModActor : AActor {
  public void InitializeFG(){
   FGSaved=UGameplayStatics.LoadGameFromSlot("MCD2GraphicsFGSettings",0) as FGSettingsSave;
   if(FGSaved==null)FGSaved=UGameplayStatics.CreateSaveGameObject(Unreal.ClassOf<FGSettingsSave>()) as FGSettingsSave;
-  if(FGSaved!=null){if(FGSaved.SchemaVersion!=1 || FGSaved.Mode<0 || FGSaved.Mode>1 || FGSaved.Provider<0 || FGSaved.Provider>1)FGSaved.Mode=0;FGSaved.SchemaVersion=1;FGSaved.ContextReady=0;FGSaved.SessionId=0;FGSaved.Revision++;PersistFG();}
+  if(FGSaved!=null){if(FGSaved.SchemaVersion!=1 || FGSaved.Mode<0 || FGSaved.Mode>1 || FGSaved.FGProvider<0 || FGSaved.FGProvider>1)FGSaved.Mode=0;FGSaved.SchemaVersion=1;FGSaved.ContextReady=0;FGSaved.SessionId=0;FGSaved.Revision++;PersistFG();}
   FGRuntime=UGameplayStatics.CreateSaveGameObject(Unreal.ClassOf<FGRuntimeSave>()) as FGRuntimeSave;
   if(FGRuntime!=null){FGRuntime.SchemaVersion=1;UGameplayStatics.SaveGameToSlot(FGRuntime,"MCD2GraphicsFGRuntime",0);}
  }
