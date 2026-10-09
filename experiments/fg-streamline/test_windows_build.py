@@ -18,6 +18,10 @@ source_spec.loader.exec_module(source_tree)
 
 
 class WindowsBuildChecks(unittest.TestCase):
+    def test_conversion_shader_edits_trigger_windows_candidate_ci(self):
+        workflow = (candidate.REPO / ".github/workflows/fg-windows-candidate.yml").read_text()
+        self.assertIn("      - 'src/shaders/**'", workflow)
+
     def sr_build_fixture(self, root):
         repo = root / 'repo'
         sources = repo / 'src/shaders'
