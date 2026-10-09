@@ -25,6 +25,7 @@
 #include "../providers/sr_runtime_save_transport.hpp"
 #include "engine_layout.hpp"
 #include "amd_latency.hpp"
+#include "process_exit.hpp"
 #include <condition_variable>
 #include <thread>
 #include <chrono>
@@ -87,16 +88,19 @@ struct AmdProvider : mcd2::amd_latency::Provider {
   // exit. Never unload code that an asynchronous presenter may still call.
   bridge=nullptr;init=nullptr;updateFrame=nullptr;endRendering=nullptr;realFrame=nullptr;stop=nullptr;fgSupport=nullptr;frameGeneration=nullptr;canUnload=nullptr;}
 } amdProvider;
-std::shared_ptr<mcd2::amd_latency::Controller> amdCoordinator;
+mcd2::process_exit::Lifetime<std::shared_ptr<mcd2::amd_latency::Controller>,mcd2::process_exit::terminating> amdCoordinatorLifetime;
+auto& amdCoordinator=amdCoordinatorLifetime.get();
 std::mutex amdRequestMutex;mcd2::amd_latency::Request amdRequest;
 bool amdLatencyOptIn=false;
 std::atomic<unsigned> amdCandidateRejected=0;
-std::shared_ptr<sr::TokenCoordinator> coordinator;std::atomic<uint64_t> firstFrame=0;uint64_t boundNative=0;
+mcd2::process_exit::Lifetime<std::shared_ptr<sr::TokenCoordinator>,mcd2::process_exit::terminating> coordinatorLifetime;
+auto& coordinator=coordinatorLifetime.get();std::atomic<uint64_t> firstFrame=0;uint64_t boundNative=0;
 std::atomic<unsigned> currentMode=0,reflexAvailable=0,reflexFault=0,hdrRevision=0,hdrRestart=0;
 std::atomic<bool> faultLogged=false;bool capabilityChecked=false;
 void settings_loop();void apply_hdr_config();
 std::filesystem::path savesPath;std::mutex intentMutex; mcd2::display::Intent latestIntent{};
-std::thread settingsWorker;std::mutex workerMutex;std::condition_variable workerWake;std::atomic<bool> workerStop=false;
+mcd2::process_exit::Lifetime<std::thread,mcd2::process_exit::terminating> settingsWorkerLifetime;
+auto& settingsWorker=settingsWorkerLifetime.get();std::mutex workerMutex;std::condition_variable workerWake;std::atomic<bool> workerStop=false;
 unsigned sessionId=0;
 bool observeProviderSettings=false;
 bool consolidatedMenuTransport=false;
@@ -352,6 +356,7 @@ void finish(a::command_queue*,a::swapchain*){
  apply_hdr_config();
 }
 void cleanup(){
+ if(mcd2::process_exit::terminating())return;
  if(installed.exchange(false)){remove(registry,pacingName,&pacer.modular);remove(registry,latencyName,&marker.modular);}
  if(messageHook){UnhookWindowsHookEx(messageHook);messageHook=nullptr;}statsMessage=0;pingPending=false;
  auto amd=std::atomic_exchange(&amdCoordinator,std::shared_ptr<mcd2::amd_latency::Controller>{});if(amd)amd->shutdown();
@@ -376,9 +381,10 @@ extern "C" __declspec(dllexport) int mcd2_sr_context_v1(MCD2SrContextSnapshotV1*
 }
 extern "C" __declspec(dllexport) const char*NAME="MCD2 Graphics display and latency";
 extern "C" __declspec(dllexport) const char*DESCRIPTION="Streamline Reflex and native HDR settings; independent of SR";
-BOOL APIENTRY DllMain(HMODULE h,DWORD reason,LPVOID){if(reason==DLL_PROCESS_ATTACH){addonModule=h;if(!reshade::register_addon(h))return FALSE;reshade::register_event<reshade::addon_event::init_device>(init);reshade::register_event<reshade::addon_event::init_swapchain>(init_swapchain);reshade::register_event<reshade::addon_event::destroy_swapchain>(destroy_swapchain);reshade::register_event<reshade::addon_event::present>(present);reshade::register_event<reshade::addon_event::finish_present>(finish);reshade::register_event<reshade::addon_event::destroy_device>(destroy);}else if(reason==DLL_PROCESS_DETACH){reshade::unregister_addon(h);}return TRUE;}
+BOOL APIENTRY DllMain(HMODULE h,DWORD reason,LPVOID reserved){if(reason==DLL_PROCESS_ATTACH){addonModule=h;if(!reshade::register_addon(h))return FALSE;reshade::register_event<reshade::addon_event::init_device>(init);reshade::register_event<reshade::addon_event::init_swapchain>(init_swapchain);reshade::register_event<reshade::addon_event::destroy_swapchain>(destroy_swapchain);reshade::register_event<reshade::addon_event::present>(present);reshade::register_event<reshade::addon_event::finish_present>(finish);reshade::register_event<reshade::addon_event::destroy_device>(destroy);}else if(reason==DLL_PROCESS_DETACH){if(reserved)mcd2::process_exit::mark_terminating();else reshade::unregister_addon(h);}return TRUE;}
 
 extern "C" __declspec(dllexport) bool AddonInit(HMODULE module,HMODULE){
+ mcd2::process_exit::initialize();
  try {
  auto filename=std::make_unique<wchar_t[]>(32768),local=std::make_unique<wchar_t[]>(32768);
  auto moduleLength=GetModuleFileNameW(module,filename.get(),32768),localLength=GetEnvironmentVariableW(L"LOCALAPPDATA",local.get(),32768);
@@ -397,6 +403,7 @@ extern "C" __declspec(dllexport) bool AddonInit(HMODULE module,HMODULE){
  }catch(...){reflexAvailable=0;reflexFault=1;}return true;
 }
 extern "C" __declspec(dllexport) void AddonUninit(HMODULE,HMODULE){
+ if(mcd2::process_exit::terminating())return;
  // ReShade may unload a probing device before init_device claims it. Release
  // our bootstrap outside DllMain as well; shutdown is deliberately idempotent.
  workerStop=true;workerWake.notify_all();if(settingsWorker.joinable())settingsWorker.join();cleanup();amdProvider.unload();

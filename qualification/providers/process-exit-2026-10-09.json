@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-09",
+  "scope": "Final-process SDK teardown guard; bounded Linux/NVIDIA developer candidate",
+  "sourceBaseCommit": "d3d5e6075cd37f1eb325e7b7fcfeb47d20b6168d",
+  "host": {
+    "os": "CachyOS",
+    "session": "KDE Wayland",
+    "gpu": "NVIDIA RTX 4080 SUPER",
+    "driver": "615.78.08",
+    "proton": "cachyos11.0-20261005-slr"
+  },
+  "steamBuild": 25754144,
+  "gameVersion": "1.1.2.0",
+  "addonSHA256": "9d0bb873502f57bcc3ea71a70b80612548ab2ee5d95cfcb6b0bd55ad3ac3c7aa",
+  "generatedSourceSHA256": "24391d142fe9bf7405c08cf44f6c3a4fb27e732845e3273076bd445a5637784c",
+  "processExitSHA256": {
+    "process_exit.hpp": "6f4c757e12cfa967c738edf1b19994ce18dad675b2a9fa70d05a516e7e3ada02",
+    "process_lifetime.hpp": "c7f6cdf7317c916598bbe556cb6f1cbb3a4574b75aa86afe72ecbabb4fd7a92b"
+  },
+  "installedSHA256": {
+    "Dungeons/Binaries/Win64/dxgi.dll": "0d67e79756b1670631426c8b10cfe3913a94699b180ccd4c2dd905641e80219a",
+    "Dungeons/Binaries/Win64/fg-sdk-bridge.dll": "31398e27a255b0aab9517aad976c6a0bfd3cdb9a976853217039f3f6e837e03f",
+    "Dungeons/Binaries/Win64/mcd2-fg-guide-recon.addon64": "ac9172f6beea2d69183792683f35a498cf1a31d18e614c3dcdf937859f2863a3",
+    "Dungeons/Binaries/Win64/mcd2-graphics.addon64": "535d32dfea04c65c6285c5b334ca404c0550676df941a9999d031e79a63e564f",
+    "Dungeons/Binaries/Win64/mcd2-display-latency.addon64": "9d0bb873502f57bcc3ea71a70b80612548ab2ee5d95cfcb6b0bd55ad3ac3c7aa",
+    "Dungeons/Binaries/Win64/FGBootstrap.ini": "28e372323e4f57087414176fd5b1afa51ac6e1c301dadad23b1e303bbbdde508",
+    "Dungeons/Binaries/Win64/FGGuideCapture.ini": "492c4233a4803fe3bcf1b472727ec142ec1d242669030bb7d95b735c22398ca0",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.pak": "2d669349729a7d12da5a591fa57782e849baacb475ae35178692e005f461cbff",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.ucas": "77ea91defc57ab304fc6f10112ef1ba3f5229e46442038e7a46c6eb7aa4f175e",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.utoc": "1f66e2dfdfc5693663cee865b77bc6ee1c6db15ed9cdcdbec71c433961be4bd6",
+    "Dungeons/Binaries/Win64/mcd2-fsr-fg-game-bridge.dll": "2a2bc399e2ccce107c9f32b8d916a7cbead8386b034e04a7d440cb0ec3df1ad0",
+    "Dungeons/Binaries/Win64/amd_fidelityfx_framegeneration_dx12.dll": "02297beedd285e822d3a64f314cf00faf378dcec0edc47ff0c4dd71b3a8c2f18",
+    "Dungeons/Binaries/Win64/MCD2Graphics/fsr/mcd2-fsr-game-bridge.dll": "f422af2f70f62ca8462c3aff30d05d1db92dd3b1d0e4289750039b8a2a83514b",
+    "Dungeons/Binaries/Win64/MCD2Graphics/fsr/amd_fidelityfx_upscaler_dx12.dll": "d0dcccc74a43c44ba435b7a369b456e0970d8a4464e4bd683119b374f2c9fb46",
+    "Dungeons/Binaries/Win64/MCD2Graphics/fsr_dense.cso": "089cef22d81092bd9ed2bdf0ec7a9bb6fcfe10268c52e0a57273dc69df68da68"
+  },
+  "checks": {
+    "portableLifetimeFixture": true,
+    "sourceAndRecipeChecks": 3,
+    "fgRecipeChecks": 21,
+    "protonRealNTQueryOrdinaryUnloadFalse": true,
+    "protonRealNTQueryFinalExitTrue": true,
+    "firstGuardedRunFSREvaluations": 10011,
+    "firstGuardedRunNativeScaleRestored": 100,
+    "firstGuardedQuitSeconds": 5.133,
+    "finalBinaryFSREvaluationsAtCheckpoint": 4436,
+    "finalBinaryQuit": {
+      "normalQuitProcessGone": true,
+      "elapsedSeconds": 5.134,
+      "exitCodeCaptured": false,
+      "terminationSignalSent": false,
+      "amdFGActuallyActive": false
+    }
+  },
+  "limits": [
+    "Native Windows gameplay/shutdown requires runtime qualification",
+    "Windows real NT-query fixture pending hosted CI",
+    "AMD FG command-recording retirement -61 remains independent",
+    "No performance or latency claim"
+  ],
+  "rawLogsPublished": false,
+  "thirdPartyRuntimeBundled": false
+}

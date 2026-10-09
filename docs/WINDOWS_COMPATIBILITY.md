@@ -7,6 +7,13 @@ Windows/AMD or the separately observed shutdown failure.
 
 # Windows fixes: reasons and preservation requirements
 
+The [final process teardown guard](PROCESS_EXIT_2026-10-09.md) prevents SDK calls,
+worker joins and coordinator destruction after NT process teardown has begun.
+Preserve the real-query Windows DLL fixture and ordinary-unload cleanup checks.
+Device/lifecycle cleanup outside process termination must still drain providers.
+The bounded Proton exit pass does not qualify native Windows gameplay or repair
+AMD FG's independently retained command-recording generation.
+
 The opt-in [continuous FSR controller](FSR_CONTINUOUS_2026-10-09.md) preserves the
 MSVC bridge, native stack guard and independent recording/fence ownership. Its
 context and runtime-response ABI sizes are 288 and 136 bytes. Retain codec,
