@@ -44,6 +44,9 @@ Its structured, sanitized receipt is
 - The final source-matched build saved FSR from the main-menu Video page, remained
   at 100% there, then applied it on actor travel into gameplay. Native AA also
   evaluated at 3840×2160 through the same ordinary controls.
+- Custom 99% evaluated at 3802×2139 with matching slider and preset labels. A
+  mouse provider selection committed NVIDIA Quality, which activated after
+  resuming gameplay at measured 66.666664% source scale.
 
 These are control/SDK execution checks, not image-quality, FPS or physical-latency
 measurements. No player/account save, raw log or screenshot is included.
@@ -57,9 +60,10 @@ transport, retirement and existing timing ownership. The native addon and comple
 NeoRune UI rebuild pass locally; the current UI qualification archive contains
 only our source-matched menu payload. Windows CI must build the changed sources.
 
-The first ordinary-menu trial remained alive after normal quit exceeded 120
-seconds. It was terminated before exact restoration. This does not isolate the
-cause; shutdown remains unqualified and older control observations are retained.
+Both ordinary-menu trials remained alive after normal quit exceeded 120 seconds.
+Their exact shipping processes were terminated before byte-for-byte restoration
+of the original payloads and mod-owned settings. This does not isolate the cause;
+shutdown remains unqualified and older control observations are retained.
 Windows/AMD execution, physical-controller input, missing-runtime/authority live
 faults, extended travel, image comparisons, performance and FG coexistence need
 separate checks before release. No broad platform or latency benefit is claimed.

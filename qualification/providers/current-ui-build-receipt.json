@@ -16,7 +16,7 @@
     "MCD2Graphics_P.ucas": "3b7c50ead3da84c6307f8735ab2f283c7a645b8ae49be52f98602909d7d07c01",
     "MCD2Graphics_P.utoc": "959f17d43af8922ffab45d126015682a419245e85ed434366b81ed26d1697136"
   },
-  "archiveSHA256": "d969443c616b2fbbad3eb1c58d604937e0bc38845109157acb9b7f773a806d25",
+  "archiveSHA256": "6c14e49bafe8b0cdf753129ec1c857e9bdfa20d191d137464b8d4bb8fd49e1dc",
   "metadataAPI": "Blueprint Loader 2.0 BP_ModInfo; no popup API",
   "compiler": "NeoRune 0.1.2 / .NET reference pack 10.0.12",
   "WindowsQualified": false,
