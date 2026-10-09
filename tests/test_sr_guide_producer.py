@@ -57,5 +57,19 @@ class GuideProducerTests(unittest.TestCase):
         self.assertIn("*(['--developer-controls'] if a.guide_inspection else [])", recipe)
         self.assertNotIn("build_text.replace('-DMCD2_ENABLE_DIAGNOSTICS=0'", recipe)
 
+    def test_fsr_fg_uses_fsr_guides_before_its_sdk_evaluation(self):
+        fsr = (ROOT / 'src/native/fsr_runtime.hpp').read_text()
+        recipe = (ROOT / 'experiments/fg-streamline/build_sr_candidate.py').read_text()
+        self.assertEqual(fsr.count(' auto *sdk_colour=gc;'), 1)
+        hook = recipe.split("fsr_extra='''", 1)[1].split("'''", 1)[0]
+        self.assertIn('enabled && enabled()', hook)
+        self.assertIn('state.evaluations==0||nativeReset||c.gap||c.force_reset', hook)
+        self.assertIn('notify(proxy,c.current_depth,c.motion,&camera)', hook)
+        self.assertNotIn('NVSDK_NGX', hook)
+        self.assertNotIn('lean.', hook)
+        self.assertIn('fsr_text.replace(fsr_needle,fsr_extra+fsr_needle)', recipe)
+        self.assertIn("'--fsr-bridge-sha256',a.fsr_bridge_sha256", recipe)
+        self.assertIn("'fsrGeneratedSHA256'", recipe)
+
 if __name__ == "__main__":
     unittest.main()
