@@ -8,7 +8,7 @@ p.add_argument('--sdk',required=True,type=Path)
 p.add_argument('--sysroot',required=True,type=Path)
 p.add_argument('--runtime-archive',required=True,type=Path)
 p.add_argument('--output',required=True,type=Path)
-p.add_argument('--probe',choices=['owned','presentation'],default='owned')
+p.add_argument('--probe',choices=['owned','presentation','feature-lifetime'],default='owned')
 p.add_argument('--reshade-headers',type=Path,help='Optionally build the read-only synthetic proxy-chain observer')
 p.add_argument('--early-bootstrap',action='store_true',help='Build the separate experimental DXGI startup route')
 p.add_argument('--guide-recon',action='store_true',help='Build a separate bounded FG opt-in game observer with owned UI-alpha conversion')
@@ -25,7 +25,7 @@ version=(a.sdk/'include/sl_version.h').read_text()
 for key,value in [('MAJOR',2),('MINOR',14),('PATCH',1)]:
     assert re.search(r'#define\s+SL_VERSION_'+key+r'\s+'+str(value)+r'\b',version),'Expected SDK 2.14.1'
 out=a.output.resolve();out.mkdir(parents=True,exist_ok=True)
-host='owned_inputs_probe.cpp' if a.probe=='owned' else 'presentation_probe.cpp'
+host={'owned':'owned_inputs_probe.cpp','presentation':'presentation_probe.cpp','feature-lifetime':'feature_lifetime_probe.cpp'}[a.probe]
 commands=[];objects=[]
 if a.guide_recon:commands.append([str(a.dxc.resolve()),'-T','cs_6_0','-E','main',str(src/'fg_ui_alpha.hlsl'),'-Fo',str(out/'FG_UI_ALPHA.cso')])
 for name in ['streamline_probe_bridge.cpp',host]:
@@ -40,7 +40,7 @@ for folder in ['crt/lib/x86_64','sdk/lib/ucrt/x86_64','sdk/lib/um/x86_64']:
 commands.append(link)
 if a.early_bootstrap:
     assert a.probe=='owned','Early bootstrap requires the owned-input host'
-    exports=['mcd2_sl_'+x for x in ['verify','init','set_device','mode_limit','mode','begin','index','sleep','marker','state','report_range','pcl_message','shutdown']]+['mcd2_fg_'+x for x in ['initialized','support','upgrade','state','unload','api_error','mode','inputs','configure','configured','last_config','release','game_guides','game_images','ngx_owner_v1']]
+    exports=['mcd2_sl_'+x for x in ['verify','init','init_for_owner_v1','set_device','mode_limit','mode','begin','index','sleep','marker','state','report_range','pcl_message','shutdown']]+['mcd2_fg_'+x for x in ['initialized','support','upgrade','state','unload','api_error','mode','inputs','configure','configured','last_config','release','game_guides','game_images','ngx_owner_v1']]
     bridge=['lld-link','/dll','/out:'+str(out/'fg-sdk-bridge.dll'),'/implib:'+str(out/'fg-sdk-bridge.lib'),objects[0],*['/export:'+x for x in exports],*[x for x in link[3:] if not x.endswith('.obj')]]
     shimobj=out/'bootstrap_dxgi.obj'
     compile_shim=[*commands[1 if a.guide_recon else 0], '/I'+str(a.sdk.resolve()/'external/nvapi')]
@@ -68,7 +68,7 @@ files={}
 with zipfile.ZipFile(a.runtime_archive) as archive:
     for name in ['sl.interposer.dll','sl.common.dll','sl.pcl.dll','sl.reflex.dll','sl.dlss_g.dll','nvngx_dlssg.dll','NvLowLatencyVk.dll']:
         data=archive.read('bin/x64/'+name);(out/name).write_bytes(data);files[name]=hashlib.sha256(data).hexdigest()
-sources=['streamline_probe_bridge.cpp','fg_bridge_contract.h','fg_camera_contract.h','fg_configuration.hpp',host]+(['factory_route.hpp'] if a.probe=='owned' else [])+(['chain_observer.cpp'] if a.reshade_headers else [])+(['bootstrap_dxgi.cpp','fg_ui_protocol.hpp','wine_reflex_pacing.hpp'] if a.early_bootstrap else [])
+sources=['streamline_probe_bridge.cpp','fg_bridge_contract.h','fg_camera_contract.h','fg_configuration.hpp','streamline_feature_policy.hpp',host]+(['factory_route.hpp'] if a.probe=='owned' else [])+(['chain_observer.cpp'] if a.reshade_headers else [])+(['bootstrap_dxgi.cpp','fg_ui_protocol.hpp','wine_reflex_pacing.hpp'] if a.early_bootstrap else [])
 own=['fg-probe.exe']+(['fg-chain-observer.addon64'] if a.reshade_headers else [])+(['fg-sdk-bridge.dll','dxgi.dll'] if a.early_bootstrap else [])
 if a.early_bootstrap:sources+=provider_sources(repo)
 if a.early_bootstrap or a.guide_recon:sources+=['../providers/fsr_fg_game_bridge.h']

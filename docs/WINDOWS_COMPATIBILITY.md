@@ -7,6 +7,14 @@ Windows/AMD or the separately observed shutdown failure.
 
 # Windows fixes: reasons and preservation requirements
 
+The [AMD Streamline feature lifetime](AMD_STREAMLINE_FEATURE_LIFETIME_2026-10-10.md)
+loads Reflex/PCL without NVIDIA DLSS-G for AMD startup ownership. Preserve
+startup-only SDK discovery before any device/token/proxy binding, exact actual
+adapter-LUID capability lookup, duplicate/invalid-init rejection, device-matched
+NGX ownership and real shutdown calls. Legacy/NVIDIA ownership keeps its full
+feature set. Retain the configuration fixture on both platforms. Linux exits
+and isolated SDK probes do not qualify native Windows/Radeon shutdown.
+
 The [Native-AA AMD FG guide consumer](NATIVE_AA_AMD_FG_2026-10-09.md)
 leaves native temporal output intact and performs no conversion when FG is Off.
 Preserve authority/session/world/freshness, full-scale/device/viewport admission,

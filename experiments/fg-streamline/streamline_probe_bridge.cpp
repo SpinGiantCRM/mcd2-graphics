@@ -5,17 +5,22 @@
 #include <wintrust.h>
 #include <softpub.h>
 #include <d3d12.h>
+#include <dxgi1_4.h>
 #include <sl.h>
 #include <sl_reflex.h>
 #include <sl_pcl.h>
 #include <sl_dlss_g.h>
 #include <atomic>
 #include <filesystem>
+#include <cstring>
 #include "fg_bridge_contract.h"
 #include "fg_camera_contract.h"
 #include "fg_configuration.hpp"
+#include "streamline_feature_policy.hpp"
 namespace {
 HMODULE dll=nullptr;bool initialized=false;
+bool nvidiaFgLoaded=true;
+mcd2::fg::NvidiaFgCapabilities nvidiaFgCapabilities;
 void* boundDevice=nullptr;
 bool fgConfigured=false;
 mcd2::fg::Configuration fgConfiguration;
@@ -33,6 +38,7 @@ int mcd2_fg_initialized(){return initialized?1:0;}
 int mcd2_fg_ngx_owner_v1(void* device){
  if(!initialized||!boundDevice)return 0;
  if(!device||boundDevice!=device)return -1;
+ if(!nvidiaFgLoaded)return 0;
  PFun_slDLSSGGetState* get=nullptr;
  return bindFeature(get,sl::kFeatureDLSS_G,"slDLSSGGetState")==0&&get?1:-1;
 }
@@ -42,17 +48,22 @@ long mcd2_sl_verify(const wchar_t*path){
  WINTRUST_DATA trust{};trust.cbStruct=sizeof(trust);trust.dwUIChoice=WTD_UI_NONE;trust.fdwRevocationChecks=WTD_REVOKE_NONE;trust.dwUnionChoice=WTD_CHOICE_FILE;trust.pFile=&file;trust.dwStateAction=WTD_STATEACTION_VERIFY;trust.dwProvFlags=WTD_CACHE_ONLY_URL_RETRIEVAL;
  GUID action=WINTRUST_ACTION_GENERIC_VERIFY_V2;auto r=WinVerifyTrust(nullptr,&action,&trust);trust.dwStateAction=WTD_STATEACTION_CLOSE;WinVerifyTrust(nullptr,&action,&trust);return r;
 }
-int mcd2_sl_init(const wchar_t*path,const wchar_t*folder,const wchar_t*logFolder){
+static int initialize_features(const wchar_t*path,const wchar_t*folder,const wchar_t*logFolder,bool loadNvidia){
  if(initialized||dll)return -1;if(mcd2_sl_verify(path)!=0)return -2;
+ nvidiaFgLoaded=loadNvidia;
  dll=LoadLibraryExW(path,nullptr,LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR|LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);if(!dll)return -3;
  if(!bind(init,"slInit")||!bind(shutdown,"slShutdown")||!bind(feature,"slGetFeatureFunction")||!bind(setDevice,"slSetD3DDevice")||!bind(newToken,"slGetNewFrameToken"))return -4;
  // NGX is shared per device. The first initializer must retain the existing
  // SR feature-library path as well as FG; no vendor file is copied or replaced.
  const auto srFolder=(std::filesystem::path(folder)/L"MCD2Graphics"/L"ngx-runtime").wstring();
  const bool hasSR=GetFileAttributesW((std::filesystem::path(srFolder)/L"nvngx_dlss.dll").c_str())!=INVALID_FILE_ATTRIBUTES;
- sl::Feature features[]={sl::kFeatureReflex,sl::kFeaturePCL,sl::kFeatureDLSS_G};const wchar_t*paths[]={folder,srFolder.c_str()};sl::Preferences p{};p.pathsToPlugins=paths;p.numPathsToPlugins=hasSR?2:1;p.pathToLogsAndData=logFolder;p.featuresToLoad=features;p.numFeaturesToLoad=3;p.engine=sl::EngineType::eCustom;p.engineVersion="MCD2Graphics-FG-Experiment";p.projectId="2d523377-ba23-4a19-8161-ab7ed2152777";p.flags=sl::PreferenceFlags::eUseManualHooking|sl::PreferenceFlags::eDisableDebugText|sl::PreferenceFlags::eUseFrameBasedResourceTagging;
+ sl::Feature features[]={sl::kFeatureReflex,sl::kFeaturePCL,sl::kFeatureDLSS_G};const wchar_t*paths[]={folder,srFolder.c_str()};sl::Preferences p{};p.pathsToPlugins=paths;p.numPathsToPlugins=hasSR?2:1;p.pathToLogsAndData=logFolder;p.featuresToLoad=features;p.numFeaturesToLoad=nvidiaFgLoaded?3:2;p.engine=sl::EngineType::eCustom;p.engineVersion="MCD2Graphics-FG-Experiment";p.projectId="2d523377-ba23-4a19-8161-ab7ed2152777";p.flags=sl::PreferenceFlags::eUseManualHooking|sl::PreferenceFlags::eDisableDebugText|sl::PreferenceFlags::eUseFrameBasedResourceTagging;
  auto r=init(p,sl::kSDKVersion);if(r!=sl::Result::eOk)return int(r);initialized=true;
  return 0;
+}
+int mcd2_sl_init(const wchar_t*path,const wchar_t*folder,const wchar_t*logFolder){
+ if(initialized||dll)return -1;
+ nvidiaFgCapabilities.clear();return initialize_features(path,folder,logFolder,true);
 }
 int mcd2_sl_set_device(void*device){
  if(!initialized||!device)return -1;
@@ -91,12 +102,41 @@ int mcd2_sl_report_range(uint64_t*first,uint64_t*last,uint64_t*sim,uint64_t*pres
 }
 int mcd2_sl_pcl_message(unsigned*message){if(!getPclState||!message)return -1;sl::PCLState s{};auto r=getPclState(s);*message=s.statsWindowMessage;return int(r);}
 int mcd2_sl_shutdown(){int r=initialized?int(shutdown()):0;if(r)return r;initialized=false;boundDevice=nullptr;fgConfigured=false;fgConfiguration.clear();getState=nullptr;getPclState=nullptr;setOptions=nullptr;sleepFrame=nullptr;markFrame=nullptr;init=nullptr;shutdown=nullptr;feature=nullptr;setDevice=nullptr;newToken=nullptr;return r;}
+// This startup-only discovery is completed before a graphics device is bound.
+// Save the SDK's real support result for each actual adapter LUID, then load
+// only Reflex/PCL for an AMD presenter. No SDK/private-device capability is
+// fabricated and the cached result cannot enable NVIDIA FG in this session.
+int mcd2_sl_init_for_owner_v1(const wchar_t*path,const wchar_t*folder,const wchar_t*logFolder,unsigned owner){
+ if(owner>2||initialized||dll)return -30;
+ nvidiaFgCapabilities.clear();
+ auto result=initialize_features(path,folder,logFolder,true);
+ if(result||mcd2::fg::loadNvidiaFg(owner))return result;
+ PFun_slIsFeatureSupported* supported=nullptr;IDXGIFactory1* factory=nullptr;
+ if(bind(supported,"slIsFeatureSupported")&&SUCCEEDED(CreateDXGIFactory1(IID_PPV_ARGS(&factory)))){
+  for(UINT index=0;index<16;++index){
+   IDXGIAdapter1* adapter=nullptr;if(FAILED(factory->EnumAdapters1(index,&adapter)))break;
+   DXGI_ADAPTER_DESC1 desc{};
+   if(SUCCEEDED(adapter->GetDesc1(&desc))&&!(desc.Flags&DXGI_ADAPTER_FLAG_SOFTWARE)){
+    sl::AdapterInfo info{};info.deviceLUID=reinterpret_cast<uint8_t*>(&desc.AdapterLuid);info.deviceLUIDSizeInBytes=sizeof(desc.AdapterLuid);
+    nvidiaFgCapabilities.remember({desc.AdapterLuid.LowPart,desc.AdapterLuid.HighPart},int(supported(sl::kFeatureDLSS_G,info)));
+   }
+   adapter->Release();
+  }
+  factory->Release();
+ }
+ // No device, token, feature or presentation proxy exists at this point.
+ result=mcd2_sl_shutdown();if(result)return result;
+ FreeLibrary(dll);dll=nullptr;
+ return initialize_features(path,folder,logFolder,false);
+}
 }
 
 // Isolated presentation experiment only. Never linked into the released addon.
 extern "C" int mcd2_fg_support(void* luid,unsigned bytes){
  PFun_slIsFeatureSupported* supported=nullptr;
- if(!initialized||!luid||!bytes||!bind(supported,"slIsFeatureSupported"))return -1;
+ if(!initialized||!luid||bytes!=sizeof(LUID))return -1;
+ if(!nvidiaFgLoaded){LUID id{};std::memcpy(&id,luid,sizeof(id));return nvidiaFgCapabilities.find({id.LowPart,id.HighPart});}
+ if(!bind(supported,"slIsFeatureSupported"))return -1;
  sl::AdapterInfo a{};a.deviceLUID=static_cast<uint8_t*>(luid);a.deviceLUIDSizeInBytes=bytes;
  return int(supported(sl::kFeatureDLSS_G,a));
 }

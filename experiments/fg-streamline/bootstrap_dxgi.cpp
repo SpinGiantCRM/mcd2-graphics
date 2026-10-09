@@ -24,6 +24,7 @@
 #include "../../src/providers/fg_menu_projection.hpp"
 #include <fstream>
 extern "C" __declspec(dllimport) int mcd2_sl_init(const wchar_t*,const wchar_t*,const wchar_t*);
+extern "C" __declspec(dllimport) int mcd2_sl_init_for_owner_v1(const wchar_t*,const wchar_t*,const wchar_t*,unsigned);
 extern "C" __declspec(dllimport) int mcd2_fg_initialized();
 extern "C" __declspec(dllimport) int mcd2_fg_upgrade(void**);
 extern "C" __declspec(dllimport) int mcd2_sl_set_device(void*);
@@ -217,7 +218,8 @@ BOOL CALLBACK initialize(PINIT_ONCE,void*,void**){
  }
  event("FG-session-mode",fgSessionMode);
  auto enableSdk=GetPrivateProfileIntW(L"Experiment",L"EnableSDK",1,policy.c_str())!=0;
- auto result=!enableSdk?-100:(mcd2_fg_initialized()?0:mcd2_sl_init((folder/L"sl.interposer.dll").c_str(),folder.c_str(),folder.c_str()));
+ auto result=!enableSdk?-100:(mcd2_fg_initialized()?0:mcd2_sl_init_for_owner_v1((folder/L"sl.interposer.dll").c_str(),folder.c_str(),folder.c_str(),sharedOwner));
+ event("Streamline-NVIDIA-FG-plugin-requested",sharedOwner==2?0:1);
  sdkReady=result==0;event("early-SDK-init",result);
  if(sdkReady)configure_wine_reflex_pacing(policy.c_str());
  if(sdkReady&&GetPrivateProfileIntW(L"Experiment",L"PrimeWineCubin",1,policy.c_str()))event("wine-cubin-capability-prime",prime_wine_cubin_capability());

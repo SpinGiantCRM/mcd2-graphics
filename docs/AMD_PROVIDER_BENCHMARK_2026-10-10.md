@@ -91,3 +91,12 @@ This does not erase earlier shutdown failures or qualify FSR producer retirement
 on queue destruction. Native Windows/Radeon, active Anti-Lag, broader lifecycle,
 visual quality and an ordinary candidate installer remain separate gates.
 Raw captures/logs, account data, player saves and vendor binaries are excluded.
+
+## Subsequent shutdown investigation
+
+The later Native-after-FSR quit stalled inside shared Streamline shutdown even
+though AMD retirement returned success. It was recorded as a failed normal exit;
+no performance result above establishes shutdown qualification. The subsequent
+[feature lifetime correction](AMD_STREAMLINE_FEATURE_LIFETIME_2026-10-10.md)
+has separate source/build and runtime evidence and is not the binary measured
+in the table above.

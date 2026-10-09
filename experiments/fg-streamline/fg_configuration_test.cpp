@@ -1,9 +1,21 @@
 #include "fg_configuration.hpp"
+#include "streamline_feature_policy.hpp"
 #include <cassert>
 #include <cstring>
 #include <array>
 int main() {
  using namespace mcd2::fg;
+ assert(loadNvidiaFg(0)&&loadNvidiaFg(1)&&!loadNvidiaFg(2));
+ NvidiaFgCapabilities capabilities;
+ assert(capabilities.find({1,2})==-1);
+ assert(capabilities.remember({1,2},0));
+ assert(capabilities.find({1,2})==0&&capabilities.find({1,3})==-1);
+ assert(capabilities.remember({1,2},-17));
+ assert(capabilities.find({1,2})==-17);
+ for(unsigned i=2;i<=16;++i)assert(capabilities.remember({i,-1},int(i)));
+ assert(!capabilities.remember({17,-1},0));
+ assert(capabilities.find({16,-1})==16&&capabilities.find({17,-1})==-1);
+ capabilities.clear();assert(capabilities.find({1,2})==-1);
  for(unsigned available=0;available<2;++available)for(unsigned requested=0;requested<2;++requested)for(unsigned startup=0;startup<2;++startup)for(unsigned retired=0;retired<2;++retired)
   assert(restartRequired(available,requested,startup,retired)==bool(available&&(retired||requested!=startup)));
  for(unsigned mode=0;mode<2;++mode)for(unsigned current=0;current<2;++current)for(unsigned fault=0;fault<2;++fault)

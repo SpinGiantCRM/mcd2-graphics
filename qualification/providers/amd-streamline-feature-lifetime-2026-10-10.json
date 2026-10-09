@@ -1,0 +1,598 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-10",
+  "sourceBase": "655fd369791c4d0447689bcfeb1bd5780690c6b2",
+  "scope": "AMD startup Streamline feature isolation",
+  "environment": {
+    "os": "CachyOS KDE Wayland",
+    "GPU": "RTX 4080 SUPER",
+    "driver": "615.78.08",
+    "Proton": "CachyOS SLR 11.0-20261005",
+    "gameBuild": "25754144",
+    "output": [
+      3840,
+      2160
+    ],
+    "HDR": true
+  },
+  "sourceSHA256": {
+    "experiments/fg-streamline/streamline_probe_bridge.cpp": "c408f3e54a662a451e42fc9a610aaefcbe43d919d17594a08bbe602be4ac886c",
+    "experiments/fg-streamline/streamline_feature_policy.hpp": "362d1e5effd8b148bbb66d6aec4b4fa0b35d8c1f0fe4490cb2fa9a6701ba2c60",
+    "experiments/fg-streamline/feature_lifetime_probe.cpp": "a29f660df43304f012e15f8e4e9fcbef1dd6f293284099b13d5f3a98c19db50d",
+    "experiments/fg-streamline/bootstrap_dxgi.cpp": "efa5cb5a6afaafdc554a9798122bd88d00f127b084edafea63f747ea06630aae",
+    "experiments/fg-streamline/fg_configuration_test.cpp": "190c7394c594752deef62687c1cd5abba738fac34fb32ed4d184eb5fa603aae6",
+    "experiments/fg-streamline/build_probe.py": "f6a77c08acb09a0d91e44ca08ef5f5f0d363350d51e2d0e7dd6d6f63cfed054a"
+  },
+  "binariesSHA256": {
+    "dxgi.dll": "04bc89d1ecf781b769c286da1e9c4fa4def337d7721a0d70f5f0e190df488208",
+    "fg-sdk-bridge.dll": "0d24a96f37e02322c08b5c91b1965c59cd2a2b42c25d231a6404cfb482844647",
+    "mcd2-fg-guide-recon.addon64": "e12095eb09f071b955071272ddef4c944f4f564f295ca432d4f5da61579a1f5e",
+    "mcd2-display-latency.addon64": "b25feedc43ef79bbd611a17c03b0a9e7c9fa50ccd000af0c426286e1ed7d5f2e"
+  },
+  "isolatedProbes": {
+    "amd-owner": {
+      "stages": [
+        {
+          "stage": "invalid-owner",
+          "result": -30,
+          "owner": 2
+        },
+        {
+          "stage": "owner-init",
+          "result": 0,
+          "owner": 2
+        },
+        {
+          "stage": "duplicate-init",
+          "result": -30,
+          "owner": 2
+        },
+        {
+          "stage": "NVIDIA-FG-plugin-loaded",
+          "result": 0,
+          "owner": 2
+        },
+        {
+          "stage": "real-adapter-support",
+          "result": 0,
+          "owner": 2
+        },
+        {
+          "stage": "set-device",
+          "result": 0,
+          "owner": 2
+        },
+        {
+          "stage": "NGX-owner",
+          "result": 0,
+          "owner": 2
+        },
+        {
+          "stage": "Reflex-Off",
+          "result": 0,
+          "owner": 2
+        },
+        {
+          "stage": "shutdown",
+          "result": 0,
+          "owner": 2
+        }
+      ],
+      "exitCode": 0,
+      "timeout": false,
+      "seconds": 1.566,
+      "evidenceSHA256": "be90c5bf4fe29ddcbe20f11946b9c5af14578dac24f8825c0f4230b80994f7b6"
+    },
+    "nvidia-owner": {
+      "stages": [
+        {
+          "stage": "invalid-owner",
+          "result": -30,
+          "owner": 1
+        },
+        {
+          "stage": "owner-init",
+          "result": 0,
+          "owner": 1
+        },
+        {
+          "stage": "duplicate-init",
+          "result": -30,
+          "owner": 1
+        },
+        {
+          "stage": "NVIDIA-FG-plugin-loaded",
+          "result": 1,
+          "owner": 1
+        },
+        {
+          "stage": "real-adapter-support",
+          "result": 0,
+          "owner": 1
+        },
+        {
+          "stage": "set-device",
+          "result": 0,
+          "owner": 1
+        },
+        {
+          "stage": "NGX-owner",
+          "result": 1,
+          "owner": 1
+        },
+        {
+          "stage": "Reflex-Off",
+          "result": 0,
+          "owner": 1
+        },
+        {
+          "stage": "shutdown",
+          "result": 0,
+          "owner": 1
+        }
+      ],
+      "exitCode": 0,
+      "timeout": false,
+      "seconds": 1.465,
+      "evidenceSHA256": "fba26be8b560aab4597dfbb17406f736267ded75cb7a38abc046ab2574321ec5"
+    },
+    "unowned": {
+      "stages": [
+        {
+          "stage": "invalid-owner",
+          "result": -30,
+          "owner": 0
+        },
+        {
+          "stage": "owner-init",
+          "result": 0,
+          "owner": 0
+        },
+        {
+          "stage": "duplicate-init",
+          "result": -30,
+          "owner": 0
+        },
+        {
+          "stage": "NVIDIA-FG-plugin-loaded",
+          "result": 1,
+          "owner": 0
+        },
+        {
+          "stage": "real-adapter-support",
+          "result": 0,
+          "owner": 0
+        },
+        {
+          "stage": "set-device",
+          "result": 0,
+          "owner": 0
+        },
+        {
+          "stage": "NGX-owner",
+          "result": 1,
+          "owner": 0
+        },
+        {
+          "stage": "Reflex-Off",
+          "result": 0,
+          "owner": 0
+        },
+        {
+          "stage": "shutdown",
+          "result": 0,
+          "owner": 0
+        }
+      ],
+      "exitCode": 0,
+      "timeout": false,
+      "seconds": 1.465,
+      "evidenceSHA256": "f93fdf0a23b623eec07ab4bc9b2739c18b7f4a507bbc6753791db3d911783482"
+    }
+  },
+  "gameplay": [
+    {
+      "label": "amd-feature-final-startup",
+      "sr": {
+        "revision": 2348,
+        "world": 1,
+        "phase": 0,
+        "error": 0,
+        "render": [
+          0,
+          0
+        ],
+        "output": [
+          0,
+          0
+        ],
+        "scale": 100.0,
+        "evaluations": 0,
+        "sr": 2,
+        "quality": 1
+      },
+      "context": {
+        "revision": 2348,
+        "world": 1,
+        "ready": 0,
+        "observedScale": 100.0,
+        "ack": 0,
+        "error": 0
+      },
+      "FG": {
+        "Available": 1,
+        "Active": 0,
+        "Phase": 1,
+        "RestartRequired": 0,
+        "AvailableProviders": 3,
+        "StartupOwner": 2
+      },
+      "amd_fg_outcome": {
+        "kind": "amd_fg_outcome",
+        "SDKResult": 0,
+        "active": 0,
+        "fault": 0,
+        "engineFrame": 18446744073709551615,
+        "providerFrame": 0,
+        "prepared": 0,
+        "images": 0,
+        "realPresents": 1741,
+        "generatedPresents": 0,
+        "errors": 0,
+        "warnings": 0
+      },
+      "legacySr": {
+        "Revision": 0,
+        "RequestedRevision": 2347,
+        "ReconstructionMode": 0,
+        "SRPreset": 0,
+        "RenderScaleBasisPoints": 0,
+        "Phase": 1,
+        "ErrorCode": 0,
+        "SessionId": 6921282,
+        "AppliedSourceRevision": 0,
+        "AppliedSourceSessionId": 0
+      }
+    },
+    {
+      "label": "amd-feature-final-world",
+      "sr": {
+        "revision": 2348,
+        "world": 2,
+        "phase": 5,
+        "error": 0,
+        "render": [
+          2560,
+          1440
+        ],
+        "output": [
+          3840,
+          2160
+        ],
+        "scale": 66.666667,
+        "evaluations": 1260,
+        "sr": 2,
+        "quality": 1
+      },
+      "context": {
+        "revision": 2348,
+        "world": 2,
+        "ready": 1,
+        "observedScale": 66.666664,
+        "ack": 4,
+        "error": 0
+      },
+      "FG": {
+        "Available": 1,
+        "Active": 1,
+        "Phase": 3,
+        "RestartRequired": 0,
+        "AvailableProviders": 3,
+        "StartupOwner": 2
+      },
+      "amd_fg_outcome": {
+        "kind": "amd_fg_outcome",
+        "SDKResult": 0,
+        "active": 1,
+        "fault": 0,
+        "engineFrame": 9627,
+        "providerFrame": 1267,
+        "prepared": 1267,
+        "images": 1267,
+        "realPresents": 10080,
+        "generatedPresents": 1266,
+        "errors": 0,
+        "warnings": 0
+      },
+      "amd_guides": {
+        "kind": "amd_guides",
+        "frameStamp": 9620,
+        "SDKResult": 0,
+        "frameTimeMs": 11.5498,
+        "width": 2560,
+        "height": 1440,
+        "cameraBytes": 348,
+        "reset": 0
+      },
+      "legacySr": {
+        "Revision": 0,
+        "RequestedRevision": 2347,
+        "ReconstructionMode": 0,
+        "SRPreset": 0,
+        "RenderScaleBasisPoints": 0,
+        "Phase": 1,
+        "ErrorCode": 0,
+        "SessionId": 6921282,
+        "AppliedSourceRevision": 0,
+        "AppliedSourceSessionId": 0
+      }
+    },
+    {
+      "label": "amd-feature-final-dlss",
+      "sr": {
+        "revision": 2349,
+        "world": 2,
+        "phase": 8,
+        "error": 0,
+        "render": [
+          0,
+          0
+        ],
+        "output": [
+          0,
+          0
+        ],
+        "scale": 100.0,
+        "evaluations": 0,
+        "sr": 1,
+        "quality": 1
+      },
+      "context": {
+        "revision": 2349,
+        "world": 2,
+        "ready": 1,
+        "observedScale": 66.666664,
+        "ack": 12,
+        "error": 0
+      },
+      "FG": {
+        "Available": 1,
+        "Active": 1,
+        "Phase": 3,
+        "RestartRequired": 0,
+        "AvailableProviders": 3,
+        "StartupOwner": 2
+      },
+      "amd_fg_outcome": {
+        "kind": "amd_fg_outcome",
+        "SDKResult": 0,
+        "active": 1,
+        "fault": 0,
+        "engineFrame": 30267,
+        "providerFrame": 2205,
+        "prepared": 2205,
+        "images": 2205,
+        "realPresents": 30720,
+        "generatedPresents": 2204,
+        "errors": 0,
+        "warnings": 0
+      },
+      "amd_guides": {
+        "kind": "amd_guides",
+        "frameStamp": 30221,
+        "SDKResult": 0,
+        "frameTimeMs": 10.975,
+        "width": 2560,
+        "height": 1440,
+        "cameraBytes": 348,
+        "reset": 0
+      },
+      "legacySr": {
+        "Revision": 0,
+        "RequestedRevision": 2349,
+        "ReconstructionMode": 0,
+        "SRPreset": 0,
+        "RenderScaleBasisPoints": 0,
+        "Phase": 2,
+        "ErrorCode": 0,
+        "SessionId": 9918398,
+        "AppliedSourceRevision": 0,
+        "AppliedSourceSessionId": 0
+      }
+    },
+    {
+      "label": "amd-feature-final-native",
+      "sr": {
+        "revision": 2350,
+        "world": 2,
+        "phase": 0,
+        "error": 0,
+        "render": [
+          0,
+          0
+        ],
+        "output": [
+          0,
+          0
+        ],
+        "scale": 100.0,
+        "evaluations": 0,
+        "sr": 0,
+        "quality": 1
+      },
+      "context": {
+        "revision": 2350,
+        "world": 2,
+        "ready": 1,
+        "observedScale": 100.0,
+        "ack": 12,
+        "error": 0
+      },
+      "FG": {
+        "Available": 1,
+        "Active": 1,
+        "Phase": 3,
+        "RestartRequired": 0,
+        "AvailableProviders": 3,
+        "StartupOwner": 2
+      },
+      "amd_fg_outcome": {
+        "kind": "amd_fg_outcome",
+        "SDKResult": 0,
+        "active": 1,
+        "fault": 0,
+        "engineFrame": 45327,
+        "providerFrame": 2762,
+        "prepared": 2762,
+        "images": 2762,
+        "realPresents": 45780,
+        "generatedPresents": 2761,
+        "errors": 0,
+        "warnings": 0
+      },
+      "amd_guides": {
+        "kind": "amd_guides",
+        "frameStamp": 45323,
+        "SDKResult": 0,
+        "frameTimeMs": 16.5837,
+        "width": 3840,
+        "height": 2160,
+        "cameraBytes": 348,
+        "reset": 0
+      },
+      "legacySr": {
+        "Revision": 0,
+        "RequestedRevision": 2350,
+        "ReconstructionMode": 0,
+        "SRPreset": 0,
+        "RenderScaleBasisPoints": 0,
+        "Phase": 2,
+        "ErrorCode": 0,
+        "SessionId": 9918398,
+        "AppliedSourceRevision": 0,
+        "AppliedSourceSessionId": 0
+      }
+    },
+    {
+      "label": "amd-feature-final-normal-quit",
+      "sr": {
+        "revision": 2350,
+        "world": 2,
+        "phase": 0,
+        "error": 0,
+        "render": [
+          0,
+          0
+        ],
+        "output": [
+          0,
+          0
+        ],
+        "scale": 100.0,
+        "evaluations": 0,
+        "sr": 0,
+        "quality": 1
+      },
+      "context": {
+        "revision": 2350,
+        "world": 2,
+        "ready": 0,
+        "observedScale": 100.0,
+        "ack": 0,
+        "error": 0
+      },
+      "FG": {
+        "Available": 1,
+        "Active": 0,
+        "Phase": 1,
+        "RestartRequired": 0,
+        "AvailableProviders": 3,
+        "StartupOwner": 2
+      },
+      "amd_fg_outcome": {
+        "kind": "amd_fg_outcome",
+        "SDKResult": 0,
+        "active": 0,
+        "fault": 0,
+        "engineFrame": 45417,
+        "providerFrame": 2852,
+        "prepared": 2852,
+        "images": 2852,
+        "realPresents": 56101,
+        "generatedPresents": 2852,
+        "errors": 0,
+        "warnings": 0
+      },
+      "amd_guides": {
+        "kind": "amd_guides",
+        "frameStamp": 45383,
+        "SDKResult": 0,
+        "frameTimeMs": 15.049,
+        "width": 3840,
+        "height": 2160,
+        "cameraBytes": 348,
+        "reset": 0
+      },
+      "amd_retirement": {
+        "kind": "amd_retirement",
+        "SDKResult": 0
+      },
+      "legacySr": {
+        "Revision": 0,
+        "RequestedRevision": 2350,
+        "ReconstructionMode": 0,
+        "SRPreset": 0,
+        "RenderScaleBasisPoints": 0,
+        "Phase": 2,
+        "ErrorCode": 0,
+        "SessionId": 9918398,
+        "AppliedSourceRevision": 0,
+        "AppliedSourceSessionId": 0
+      }
+    }
+  ],
+  "windowsRadeonQualified": false,
+  "ordinaryInstallerQualified": false,
+  "physicalScanoutMeasured": false,
+  "publishedFilesChanged": false,
+  "historicalFailure": {
+    "nativeAfterFsrNormalExit": false,
+    "AMDretirementResult": 0,
+    "blockedBoundary": "real shared Streamline shutdown",
+    "symbolicWindowsUnwindComplete": false,
+    "forcedSignal": "SIGTERM"
+  },
+  "openGates": [
+    "native Windows/Radeon active Anti-Lag and FSR/FG lifecycle",
+    "FSR borrowed-recording queue-destruction retirement",
+    "wider lifecycle and performance qualification",
+    "ordinary candidate installer qualification",
+    "delayed normal exit with AMD FG selected after FSR/DLSS/Native transitions"
+  ],
+  "exactFinalRun": {
+    "NVIDIAFgPluginMapped": false,
+    "sharedSDKShutdown": 0,
+    "AMDRetirement": 0,
+    "normalQuitWithin30Seconds": false,
+    "eventualProcessDisappearance": true,
+    "forcedSignal": false,
+    "exitCodeCaptured": false,
+    "baselineRestored": true,
+    "sourceMatchesBuild": true
+  },
+  "earlierPilotRun": {
+    "sameFeatureSelection": true,
+    "preFinalDuplicateInitGuard": true,
+    "FSR_DLSS_NativeTransitions": true,
+    "FGOffNormalQuitProcessGoneSeconds": 3,
+    "sharedSDKShutdown": 0,
+    "forcedSignal": false,
+    "baselineRestored": true,
+    "binariesSHA256": {
+      "dxgi.dll": "dda58d03f751428dda4ddd059d70bcaccd46c867f9a55de32bc34ca669b2c849",
+      "fg-sdk-bridge.dll": "18ba822d8228ff9757015351ca26f6f4f286a4361b8fdf91bf3670ded61f887f",
+      "mcd2-fg-guide-recon.addon64": "bd8131b843a006463e6857968117d43f0cd677e6c80691286705f71d3b3932b9",
+      "mcd2-display-latency.addon64": "4d0f0892e9be406ddbc84fb3feb7eb87c88ba92501efcc1524981e33697b0530"
+    }
+  }
+}
