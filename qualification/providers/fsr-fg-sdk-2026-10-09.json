@@ -1,0 +1,156 @@
+{
+  "schema": 1,
+  "date": "2026-10-09",
+  "scope": "isolated owned resources and presenter; not game integration",
+  "OS": "CachyOS Linux",
+  "GPU": "NVIDIA RTX 4080 SUPER",
+  "driver": "615.71.09",
+  "Proton": "cachyos 11.0 20261005 slr",
+  "sdkCommit": "60f4ea81909200d8542eca14dccb2628b763a9a3",
+  "interpolationProvider": {
+    "id": 17726168133342859270,
+    "name": "3.1.6"
+  },
+  "swapchainProvider": {
+    "id": 17752306900579389447,
+    "name": "3.1.7"
+  },
+  "externalRuntimeSHA256": {
+    "amd_fidelityfx_framegeneration_dx12.dll": "02297beedd285e822d3a64f314cf00faf378dcec0edc47ff0c4dd71b3a8c2f18"
+  },
+  "frameworkSHA256": "ce808bb1494415586cfb2ec5638a3ab0f0cea3879e45146a34976740b59fcf48",
+  "gameIntegrationQualified": false,
+  "WindowsAMDQualified": false,
+  "gameFilesChanged": false,
+  "vendorRuntimeBundled": false,
+  "runs": [
+    {
+      "kind": "owned-inputs",
+      "qualifiedReShade": false,
+      "exitCode": 0,
+      "timeout": false,
+      "pass": true,
+      "binarySHA256": "1aff0e8712221488be36446e88f83391e4199428b95916fd8567727f6a5504e1",
+      "sourceSHA256": "9e61e7157128adbbf3633a702f024ff7aab727fae52d08527bd052249d337dcf",
+      "phases": [],
+      "readbackCount": 32,
+      "SDKerrors": 0,
+      "SDKwarnings": 0,
+      "callbackErrors": 0
+    },
+    {
+      "kind": "presentation",
+      "qualifiedReShade": false,
+      "exitCode": 0,
+      "timeout": false,
+      "pass": true,
+      "binarySHA256": "9792a59e83ab53c3d9a6874e555f5b9560fb3259e22b33b4431846bf99821823",
+      "sourceSHA256": "3f0cc86018b784d8ebf2848f190a0acfbbae2d7153e0b34995dd91d94d62e0fb",
+      "phases": [
+        {
+          "stage": "phase",
+          "phase": 0,
+          "enabled": false,
+          "realSubmissions": 30,
+          "realCallbacks": 30,
+          "generatedCallbacks": 0,
+          "DXGIPresentDelta": 30,
+          "callbackErrors": 0
+        },
+        {
+          "stage": "phase",
+          "phase": 1,
+          "enabled": true,
+          "realSubmissions": 60,
+          "realCallbacks": 60,
+          "generatedCallbacks": 60,
+          "DXGIPresentDelta": 120,
+          "callbackErrors": 0
+        },
+        {
+          "stage": "phase",
+          "phase": 2,
+          "enabled": false,
+          "realSubmissions": 30,
+          "realCallbacks": 30,
+          "generatedCallbacks": 0,
+          "DXGIPresentDelta": 30,
+          "callbackErrors": 0
+        }
+      ],
+      "readbackCount": 0,
+      "SDKerrors": 0,
+      "SDKwarnings": 0,
+      "callbackErrors": 0
+    },
+    {
+      "kind": "owned-inputs",
+      "qualifiedReShade": true,
+      "exitCode": 0,
+      "timeout": false,
+      "pass": true,
+      "binarySHA256": "1aff0e8712221488be36446e88f83391e4199428b95916fd8567727f6a5504e1",
+      "sourceSHA256": "9e61e7157128adbbf3633a702f024ff7aab727fae52d08527bd052249d337dcf",
+      "phases": [],
+      "readbackCount": 32,
+      "SDKerrors": 0,
+      "SDKwarnings": 0,
+      "callbackErrors": 0
+    },
+    {
+      "kind": "presentation",
+      "qualifiedReShade": true,
+      "exitCode": 0,
+      "timeout": false,
+      "pass": true,
+      "binarySHA256": "9792a59e83ab53c3d9a6874e555f5b9560fb3259e22b33b4431846bf99821823",
+      "sourceSHA256": "3f0cc86018b784d8ebf2848f190a0acfbbae2d7153e0b34995dd91d94d62e0fb",
+      "phases": [
+        {
+          "stage": "phase",
+          "phase": 0,
+          "enabled": false,
+          "realSubmissions": 30,
+          "realCallbacks": 30,
+          "generatedCallbacks": 0,
+          "DXGIPresentDelta": 30,
+          "callbackErrors": 0
+        },
+        {
+          "stage": "phase",
+          "phase": 1,
+          "enabled": true,
+          "realSubmissions": 60,
+          "realCallbacks": 60,
+          "generatedCallbacks": 60,
+          "DXGIPresentDelta": 120,
+          "callbackErrors": 0
+        },
+        {
+          "stage": "phase",
+          "phase": 2,
+          "enabled": false,
+          "realSubmissions": 30,
+          "realCallbacks": 30,
+          "generatedCallbacks": 0,
+          "DXGIPresentDelta": 30,
+          "callbackErrors": 0
+        }
+      ],
+      "readbackCount": 0,
+      "SDKerrors": 0,
+      "SDKwarnings": 0,
+      "callbackErrors": 0
+    }
+  ],
+  "checks": {
+    "portableFixtures": 7,
+    "priorSRFixtures": 5
+  },
+  "sourceSHA256": {
+    "experiments/providers/build_fsr_fg_probe.py": "0e099b3f00cef5100d591f55627e3de2e672fdeaada2cbc91a5dbc29c6385ea3",
+    "experiments/providers/run_fsr_fg_probe.py": "4bf68e31430a6f71d5dbbd1e624c8fa4b20b31ef8aea658b926018e43bc836ab",
+    "experiments/providers/fsr_fg_owned_inputs.cpp": "9e61e7157128adbbf3633a702f024ff7aab727fae52d08527bd052249d337dcf",
+    "experiments/providers/fsr_fg_presentation.cpp": "3f0cc86018b784d8ebf2848f190a0acfbbae2d7153e0b34995dd91d94d62e0fb"
+  }
+}
