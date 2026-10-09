@@ -18,6 +18,89 @@ source_spec.loader.exec_module(source_tree)
 
 
 class WindowsBuildChecks(unittest.TestCase):
+    def test_conversion_shader_edits_trigger_windows_candidate_ci(self):
+        workflow = (candidate.REPO / ".github/workflows/fg-windows-candidate.yml").read_text()
+        self.assertIn("      - 'src/shaders/**'", workflow)
+
+    def sr_build_fixture(self, root):
+        repo = root / 'repo'
+        sources = repo / 'src/shaders'
+        sources.mkdir(parents=True)
+        (sources / 'live_dense.hlsl').write_bytes(b'owned shader')
+        (sources / 'fsr_dense.hlsl').write_bytes(b'#include "live_dense.hlsl"')
+        bridge, dxc = root / 'bridge.dll', root / 'dxc.exe'
+        bridge.write_bytes(b'Windows-built bridge')
+        dxc.write_bytes(b'pinned compiler')
+        return repo, root / 'sr', bridge, dxc
+
+    def run_sr_fixture(self, repo, output, bridge, dxc):
+        candidate.build_continuous_sr(repo, output, 'reshade/include', 'ngx/include',
+                                      'clang++.exe', 'mingw.exe', dxc, bridge)
+
+    def test_continuous_sr_pins_windows_bridge_and_packages_both_converters(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            repo, output, bridge, dxc = self.sr_build_fixture(Path(temporary))
+            commands = []
+            def build(*args):
+                commands.append(args)
+                output.mkdir(exist_ok=True)
+                if '--fsr-bridge-sha256' in args:
+                    pin = args[args.index('--fsr-bridge-sha256') + 1]
+                    (output / 'build-receipt.json').write_text(json.dumps({'fsrBridgeSHA256': pin}))
+                else:
+                    Path(args[-1]).write_bytes(b'compiled ' + Path(args[-3]).name.encode())
+            with patch.object(candidate, 'run', side_effect=build):
+                self.run_sr_fixture(repo, output, bridge, dxc)
+            self.assertEqual(len(commands), 3)
+            self.assertEqual(commands[0][-2:], ('--fsr-bridge-sha256', candidate.sha(bridge)))
+            for command in commands[1:]:
+                self.assertEqual(command[:5], (dxc, '-T', 'cs_6_0', '-E', 'main'))
+            receipt = json.loads((output / 'conversion-shaders-receipt.json').read_text())
+            self.assertEqual(receipt['fsrBridgeSHA256'], candidate.sha(bridge))
+            self.assertEqual(receipt['compilerSHA256'], candidate.sha(dxc))
+            self.assertEqual(set(receipt['sourceSHA256']), {'src/shaders/live_dense.hlsl', 'src/shaders/fsr_dense.hlsl'})
+            self.assertEqual(set(receipt['binarySHA256']), {'live_dense.cso', 'fsr_dense.cso'})
+            for name, expected in receipt['binarySHA256'].items():
+                self.assertEqual(candidate.sha(output / name), expected)
+            self.assertFalse(receipt['runtimeQualified'])
+
+    def test_continuous_sr_refuses_missing_or_empty_bridge_before_build(self):
+        with tempfile.TemporaryDirectory() as temporary, patch.object(candidate, 'run') as build:
+            repo, output, bridge, dxc = self.sr_build_fixture(Path(temporary))
+            bridge.unlink()
+            for empty in (False, True):
+                if empty:
+                    bridge.write_bytes(b'')
+                with self.assertRaisesRegex(RuntimeError, 'Missing source-built FSR bridge'):
+                    self.run_sr_fixture(repo, output, bridge, dxc)
+            build.assert_not_called()
+            self.assertFalse(output.exists())
+
+    def test_continuous_sr_refuses_wrong_receipt_pin(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            repo, output, bridge, dxc = self.sr_build_fixture(Path(temporary))
+            output.mkdir()
+            (output / 'build-receipt.json').write_text(json.dumps({'fsrBridgeSHA256': ''}))
+            with patch.object(candidate, 'run') as build:
+                with self.assertRaisesRegex(RuntimeError, 'does not match'):
+                    self.run_sr_fixture(repo, output, bridge, dxc)
+            self.assertEqual(build.call_count, 1)
+            self.assertFalse((output / 'conversion-shaders-receipt.json').exists())
+
+    def test_continuous_sr_refuses_absent_or_empty_compiler_output(self):
+        for empty in (False, True):
+            with self.subTest(empty=empty), tempfile.TemporaryDirectory() as temporary:
+                repo, output, bridge, dxc = self.sr_build_fixture(Path(temporary))
+                output.mkdir()
+                (output / 'build-receipt.json').write_text(json.dumps({'fsrBridgeSHA256': candidate.sha(bridge)}))
+                def build(*args):
+                    if '-Fo' in args and empty:
+                        Path(args[-1]).write_bytes(b'')
+                with patch.object(candidate, 'run', side_effect=build):
+                    with self.assertRaisesRegex(RuntimeError, 'Missing compiled SR conversion shader'):
+                        self.run_sr_fixture(repo, output, bridge, dxc)
+                self.assertFalse((output / 'conversion-shaders-receipt.json').exists())
+
     def test_copied_fsr_abi_is_guarded_across_independent_include_paths(self):
         # The sustained probe and production runtime include separate copies.
         # pragma once alone does not deduplicate those files with Clang.

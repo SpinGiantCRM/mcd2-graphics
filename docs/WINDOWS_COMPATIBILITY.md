@@ -579,3 +579,18 @@ Record artifact/dependency hashes, adapter/driver, counts and exact failures.
 Do not treat the separate Linux/NVIDIA pass or unsupported Anti-Lag fallback
 as active native Windows/Radeon qualification. Anti-Lag coexistence additionally
 needs the actual owned-presenter metadata handshake and native driver support.
+
+### Continuous SR Windows build closure
+
+The Windows candidate must pass the SHA-256 of its own source-built
+`mcd2-fsr-game-bridge.dll` to `build_sr_candidate.py`. An empty pin deliberately
+keeps FSR inactive; a Linux bridge hash cannot authorize a Windows-built binary.
+Refuse missing/empty bridges or a mismatched generated SR receipt.
+
+The native-only addon recipe does not compile shader assets. Compile and include
+both `live_dense.cso` and `fsr_dense.cso` with the pinned Windows DXC, and record
+their source, compiler and output hashes. `fsr_dense.hlsl` includes the shared
+`live_dense.hlsl`; both source hashes belong in that receipt. Missing/empty
+compiler outputs fail the build. Keep these owned assets in the isolated SR
+candidate, with vendor runtimes external. Both CI platforms check the recipe;
+Windows native build success still requires separate Windows GPU qualification.

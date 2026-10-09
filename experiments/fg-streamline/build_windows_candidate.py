@@ -24,6 +24,38 @@ def sha(path):
         return hashlib.file_digest(stream, 'sha256').hexdigest()
 
 
+def build_continuous_sr(repo, output, reshade, ngx, clang, mingw, dxc, bridge):
+    """Bind this platform's bridge and compile both owned guide converters."""
+    bridge = Path(bridge)
+    if not bridge.is_file() or bridge.stat().st_size == 0:
+        raise RuntimeError('Missing source-built FSR bridge')
+    bridge_hash = sha(bridge)
+    sources = [repo / 'src/shaders' / (name + '.hlsl')
+               for name in ('live_dense', 'fsr_dense')]
+    if not all(source.is_file() for source in sources):
+        raise RuntimeError('Missing SR conversion shader source')
+    run(sys.executable, repo / 'experiments/fg-streamline/build_sr_candidate.py',
+        '--output', output, '--reshade-headers', reshade, '--ngx-headers', ngx,
+        '--clang-cxx', clang, '--mingw-cxx', mingw,
+        '--fsr-bridge-sha256', bridge_hash)
+    receipt = json.loads((output / 'build-receipt.json').read_text())
+    if receipt.get('fsrBridgeSHA256') != bridge_hash:
+        raise RuntimeError('SR receipt does not match this Windows FSR bridge')
+    shaders = {}
+    for source in sources:
+        binary = output / (source.stem + '.cso')
+        run(dxc, '-T', 'cs_6_0', '-E', 'main', source, '-Fo', binary)
+        if not binary.is_file() or binary.stat().st_size == 0:
+            raise RuntimeError('Missing compiled SR conversion shader: ' + binary.name)
+        shaders[binary.name] = sha(binary)
+    (output / 'conversion-shaders-receipt.json').write_text(json.dumps({
+        'sourceSHA256': {source.relative_to(repo).as_posix(): sha(source) for source in sources},
+        'binarySHA256': shaders, 'compilerSHA256': sha(dxc),
+        'target': 'cs_6_0', 'entryPoint': 'main',
+        'fsrBridgeSHA256': bridge_hash, 'runtimeQualified': False,
+    }, indent=2) + '\n')
+
+
 def copy_current_ui(repo, artifact):
     # UI logic and metadata have separate provenance. Never reuse the old v27
     # metadata just because ModActor.cs still matches its original receipt.
@@ -233,9 +265,9 @@ def main():
     run('git', 'clone', '--no-checkout', 'https://github.com/NVIDIA/DLSS.git', ngx)
     run('git', '-C', ngx, 'checkout', lock['buildDependencies']['NVIDIASDKCommit'])
     sr = out / 'sr'
-    run(sys.executable, scripts / 'build_sr_candidate.py', '--output', sr,
-        '--reshade-headers', reshade / 'include', '--ngx-headers', ngx / 'include',
-        '--clang-cxx', llvm / 'clang++.exe', '--mingw-cxx', mingw)
+    build_continuous_sr(REPO, sr, reshade / 'include', ngx / 'include',
+                        llvm / 'clang++.exe', mingw, out / 'dxc/bin/x64/dxc.exe',
+                        out / 'fsr-game-bridge/mcd2-fsr-game-bridge.dll')
     fsr_sustained = out / 'fsr-sustained'
     run(sys.executable, REPO / 'experiments/providers/build_fsr_sustained_probe.py',
         '--output', fsr_sustained, '--frames', '256', '--replace-output', '--world-to-meters', '100',
@@ -251,6 +283,9 @@ def main():
         destination.mkdir()
         for name in ['build-receipt.json', 'FGBootstrap.ini', 'FG_UI_ALPHA.cso']:
             if (folder / name).exists():
+                shutil.copyfile(folder / name, destination / name)
+        if folder == sr:
+            for name in ['live_dense.cso', 'fsr_dense.cso', 'conversion-shaders-receipt.json']:
                 shutil.copyfile(folder / name, destination / name)
         receipt = json.loads((folder / 'build-receipt.json').read_text())
         names = receipt.get('ownBinariesSHA256', {}) if folder == probe else {folder.name: ''}
