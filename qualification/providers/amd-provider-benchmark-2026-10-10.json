@@ -1,0 +1,654 @@
+{
+  "scope": "CPU application present intervals and AMD SDK counters; no physical-display FPS or GPU-time measurement",
+  "date": "2026-10-10",
+  "sourceCommit": "1b1e9b2f0b2f83b317b8919cf43fa1c9655f6833",
+  "installedSHA256": {
+    "Dungeons/Binaries/Win64/dxgi.dll": "058454439f8e5126dcd20b9aee2ce33c366e087a41c59841924884fc37fe6398",
+    "Dungeons/Binaries/Win64/fg-sdk-bridge.dll": "b9b768ed95df8d9f2ec257a7dfead4d8624844083a02ed94e8f170b4cd4669f8",
+    "Dungeons/Binaries/Win64/mcd2-fg-guide-recon.addon64": "c2069576d96d0715ede6314c65b44ef86f80cb45d535603d1d9fd0b66f416b07",
+    "Dungeons/Binaries/Win64/mcd2-graphics.addon64": "1f2d4b0fa3b190baef721b415e4da60acf1be2278a807893cee78b515bf4f12d",
+    "Dungeons/Binaries/Win64/mcd2-display-latency.addon64": "9d0bb873502f57bcc3ea71a70b80612548ab2ee5d95cfcb6b0bd55ad3ac3c7aa",
+    "Dungeons/Binaries/Win64/FGBootstrap.ini": "28e372323e4f57087414176fd5b1afa51ac6e1c301dadad23b1e303bbbdde508",
+    "Dungeons/Binaries/Win64/FGGuideCapture.ini": "492c4233a4803fe3bcf1b472727ec142ec1d242669030bb7d95b735c22398ca0",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.pak": "0cf2fd66b979abe5279aa2ac026193a1efa25af4968cae0e052ca30db6e3ab70",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.ucas": "4e9c5955228c64fc1d3ae7340ed6bab7348414830b8107f0100ae134194a6168",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.utoc": "250da6c4e352d2a9f0196faf04c6f6a0f6dff8b112a611dcc8d4918790e08655",
+    "Dungeons/Binaries/Win64/mcd2-fsr-fg-game-bridge.dll": "c2f81a73146fa74619e289acc78d0a96d972b80710f3b62529223e2d7f4be6b1",
+    "Dungeons/Binaries/Win64/amd_fidelityfx_framegeneration_dx12.dll": "02297beedd285e822d3a64f314cf00faf378dcec0edc47ff0c4dd71b3a8c2f18",
+    "Dungeons/Binaries/Win64/MCD2Graphics/fsr/mcd2-fsr-game-bridge.dll": "f422af2f70f62ca8462c3aff30d05d1db92dd3b1d0e4289750039b8a2a83514b",
+    "Dungeons/Binaries/Win64/MCD2Graphics/fsr/amd_fidelityfx_upscaler_dx12.dll": "d0dcccc74a43c44ba435b7a369b456e0970d8a4464e4bd683119b374f2c9fb46",
+    "Dungeons/Binaries/Win64/MCD2Graphics/fsr_dense.cso": "089cef22d81092bd9ed2bdf0ec7a9bb6fcfe10268c52e0a57273dc69df68da68",
+    "Dungeons/Binaries/Win64/mcd2-provider-benchmark.addon64": "f460795cf874ffb8ce3cb11c78bb67236a87585f586fcf506416f0bde88d6224"
+  },
+  "groups": [
+    {
+      "group": "dlss-quality-steady-clean-off",
+      "medianApplicationPresentRate": 124.85127963398229,
+      "medianSDKCountEquivalentTotal": null,
+      "captures": [
+        {
+          "FGOn": false,
+          "intervals": 1199,
+          "seconds": 9.6034258,
+          "applicationPresentRate": 124.85127963398229,
+          "medianMs": 7.8348,
+          "p95Ms": 9.1243,
+          "p99Ms": 9.8901,
+          "SDKRealPresentRate": null,
+          "SDKGeneratedPresentRate": 0,
+          "SDKCountEquivalentTotal": null,
+          "physicalDisplayFPSMeasured": false,
+          "capture": "dlss-quality-steady-clean-off-0",
+          "input": [
+            2560,
+            1440
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "privateCaptureSHA256": "69b51f566d8fea1c626f2cd8cf6817030ba6cbe8cca4e1b37a79ebf0c0f617b2",
+          "SDKDelta": {
+            "realPresents": 0,
+            "generatedPresents": 0,
+            "prepared": 0,
+            "images": 0
+          }
+        },
+        {
+          "FGOn": false,
+          "intervals": 1199,
+          "seconds": 9.5725714,
+          "applicationPresentRate": 125.25370142446783,
+          "medianMs": 7.869,
+          "p95Ms": 9.0675,
+          "p99Ms": 9.5422,
+          "SDKRealPresentRate": null,
+          "SDKGeneratedPresentRate": 0,
+          "SDKCountEquivalentTotal": null,
+          "physicalDisplayFPSMeasured": false,
+          "capture": "dlss-quality-steady-clean-off-1",
+          "input": [
+            2560,
+            1440
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "privateCaptureSHA256": "6aa65f889b3234d8f00de7a03d1b6cad7b9c4721d5d32cc688a3dabc88746ae3",
+          "SDKDelta": {
+            "realPresents": 0,
+            "generatedPresents": 0,
+            "prepared": 0,
+            "images": 0
+          }
+        },
+        {
+          "FGOn": false,
+          "intervals": 1199,
+          "seconds": 9.6082837,
+          "applicationPresentRate": 124.78815545381951,
+          "medianMs": 7.9169,
+          "p95Ms": 9.1278,
+          "p99Ms": 9.7329,
+          "SDKRealPresentRate": null,
+          "SDKGeneratedPresentRate": 0,
+          "SDKCountEquivalentTotal": null,
+          "physicalDisplayFPSMeasured": false,
+          "capture": "dlss-quality-steady-clean-off-2",
+          "input": [
+            2560,
+            1440
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "privateCaptureSHA256": "300d0b05e83340bfc69685ec77dacbc27fd96cfa45e6ca25924a49be66bee2fe",
+          "SDKDelta": {
+            "realPresents": 0,
+            "generatedPresents": 0,
+            "prepared": 0,
+            "images": 0
+          }
+        }
+      ]
+    },
+    {
+      "group": "dlss-quality-active-amd-on",
+      "medianApplicationPresentRate": 86.6762291005557,
+      "medianSDKCountEquivalentTotal": 173.3524582011114,
+      "captures": [
+        {
+          "FGOn": true,
+          "intervals": 1199,
+          "seconds": 13.8330891,
+          "applicationPresentRate": 86.6762291005557,
+          "medianMs": 11.4026,
+          "p95Ms": 12.5769,
+          "p99Ms": 12.902,
+          "SDKRealPresentRate": 86.6762291005557,
+          "SDKGeneratedPresentRate": 86.6762291005557,
+          "SDKCountEquivalentTotal": 173.3524582011114,
+          "physicalDisplayFPSMeasured": false,
+          "capture": "dlss-quality-active-amd-on-0",
+          "input": [
+            2560,
+            1440
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "privateCaptureSHA256": "64fff947549e7dabb825d04ba38b2c85da86f995e5e464e4e8ecc44dc0c5b228",
+          "SDKDelta": {
+            "realPresents": 1199,
+            "generatedPresents": 1199,
+            "prepared": 1199,
+            "images": 1199
+          }
+        },
+        {
+          "FGOn": true,
+          "intervals": 1199,
+          "seconds": 13.7996952,
+          "applicationPresentRate": 86.88597701781123,
+          "medianMs": 11.3816,
+          "p95Ms": 12.5946,
+          "p99Ms": 12.9129,
+          "SDKRealPresentRate": 86.88597701781123,
+          "SDKGeneratedPresentRate": 86.88597701781123,
+          "SDKCountEquivalentTotal": 173.77195403562246,
+          "physicalDisplayFPSMeasured": false,
+          "capture": "dlss-quality-active-amd-on-1",
+          "input": [
+            2560,
+            1440
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "privateCaptureSHA256": "336e143db6335988ae8952c6c7f51247d6a3f4c3fca972d59f00de9b67977225",
+          "SDKDelta": {
+            "realPresents": 1199,
+            "generatedPresents": 1199,
+            "prepared": 1199,
+            "images": 1199
+          }
+        },
+        {
+          "FGOn": true,
+          "intervals": 1199,
+          "seconds": 13.8665749,
+          "applicationPresentRate": 86.46691837362087,
+          "medianMs": 11.402,
+          "p95Ms": 12.7286,
+          "p99Ms": 13.1599,
+          "SDKRealPresentRate": 86.46691837362087,
+          "SDKGeneratedPresentRate": 86.46691837362087,
+          "SDKCountEquivalentTotal": 172.93383674724174,
+          "physicalDisplayFPSMeasured": false,
+          "capture": "dlss-quality-active-amd-on-2",
+          "input": [
+            2560,
+            1440
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "privateCaptureSHA256": "4a7c95e868a8a70d6654e42970641ba0d05d1f5385335c597a1cba71557045f9",
+          "SDKDelta": {
+            "realPresents": 1199,
+            "generatedPresents": 1199,
+            "prepared": 1199,
+            "images": 1199
+          }
+        }
+      ]
+    },
+    {
+      "group": "fsr-quality-steady-clean-off",
+      "medianApplicationPresentRate": 120.63917067542883,
+      "medianSDKCountEquivalentTotal": null,
+      "captures": [
+        {
+          "FGOn": false,
+          "intervals": 1199,
+          "seconds": 9.9387288,
+          "applicationPresentRate": 120.63917067542883,
+          "medianMs": 8.115,
+          "p95Ms": 9.7574,
+          "p99Ms": 12.4832,
+          "SDKRealPresentRate": null,
+          "SDKGeneratedPresentRate": 0,
+          "SDKCountEquivalentTotal": null,
+          "physicalDisplayFPSMeasured": false,
+          "capture": "fsr-quality-steady-clean-off-0",
+          "input": [
+            2560,
+            1440
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "privateCaptureSHA256": "84426dc1b78802d3740937c5260222b428c530219ccf606090f3238858e42dd1",
+          "SDKDelta": {
+            "realPresents": 0,
+            "generatedPresents": 0,
+            "prepared": 0,
+            "images": 0
+          }
+        },
+        {
+          "FGOn": false,
+          "intervals": 1199,
+          "seconds": 9.9674365,
+          "applicationPresentRate": 120.29171191609798,
+          "medianMs": 8.2141,
+          "p95Ms": 9.7351,
+          "p99Ms": 12.4359,
+          "SDKRealPresentRate": null,
+          "SDKGeneratedPresentRate": 0,
+          "SDKCountEquivalentTotal": null,
+          "physicalDisplayFPSMeasured": false,
+          "capture": "fsr-quality-steady-clean-off-1",
+          "input": [
+            2560,
+            1440
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "privateCaptureSHA256": "a16934b1124b3a42b0b031f53505b20f28c82228704b72e13907bbed02c68ff4",
+          "SDKDelta": {
+            "realPresents": 0,
+            "generatedPresents": 0,
+            "prepared": 0,
+            "images": 0
+          }
+        },
+        {
+          "FGOn": false,
+          "intervals": 1199,
+          "seconds": 9.8516319,
+          "applicationPresentRate": 121.7057247134863,
+          "medianMs": 8.0818,
+          "p95Ms": 9.8014,
+          "p99Ms": 12.1452,
+          "SDKRealPresentRate": null,
+          "SDKGeneratedPresentRate": 0,
+          "SDKCountEquivalentTotal": null,
+          "physicalDisplayFPSMeasured": false,
+          "capture": "fsr-quality-steady-clean-off-2",
+          "input": [
+            2560,
+            1440
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "privateCaptureSHA256": "ef06cb208f3b21c1152ee23c8b4d7e241d3a3c73d66fb6b308717f3c6d652ee3",
+          "SDKDelta": {
+            "realPresents": 0,
+            "generatedPresents": 0,
+            "prepared": 0,
+            "images": 0
+          }
+        }
+      ]
+    },
+    {
+      "group": "fsr-quality-active-amd-on",
+      "medianApplicationPresentRate": 82.24546048615971,
+      "medianSDKCountEquivalentTotal": 164.49092097231943,
+      "captures": [
+        {
+          "FGOn": true,
+          "intervals": 1199,
+          "seconds": 13.3099836,
+          "applicationPresentRate": 90.08275562413165,
+          "medianMs": 10.9601,
+          "p95Ms": 12.0741,
+          "p99Ms": 12.7064,
+          "SDKRealPresentRate": 90.08275562413165,
+          "SDKGeneratedPresentRate": 90.08275562413165,
+          "SDKCountEquivalentTotal": 180.1655112482633,
+          "physicalDisplayFPSMeasured": false,
+          "capture": "fsr-quality-active-amd-on-0",
+          "input": [
+            2560,
+            1440
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "privateCaptureSHA256": "164589d8d67c43479203a992b82451b4a7f4da028053e70ff5cae5c504f82e73",
+          "SDKDelta": {
+            "realPresents": 1199,
+            "generatedPresents": 1199,
+            "prepared": 1199,
+            "images": 1199
+          }
+        },
+        {
+          "FGOn": true,
+          "intervals": 1199,
+          "seconds": 14.5783122,
+          "applicationPresentRate": 82.24546048615971,
+          "medianMs": 12.0022,
+          "p95Ms": 14.4594,
+          "p99Ms": 16.4944,
+          "SDKRealPresentRate": 82.24546048615971,
+          "SDKGeneratedPresentRate": 82.24546048615971,
+          "SDKCountEquivalentTotal": 164.49092097231943,
+          "physicalDisplayFPSMeasured": false,
+          "capture": "fsr-quality-active-amd-on-1",
+          "input": [
+            2560,
+            1440
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "privateCaptureSHA256": "bd04fa5664322922617638226ea9b4bd210d16edbdbe5f9192230daf8e5162b6",
+          "SDKDelta": {
+            "realPresents": 1199,
+            "generatedPresents": 1199,
+            "prepared": 1199,
+            "images": 1199
+          }
+        },
+        {
+          "FGOn": true,
+          "intervals": 1199,
+          "seconds": 14.7050103,
+          "applicationPresentRate": 81.5368351017068,
+          "medianMs": 12.0929,
+          "p95Ms": 14.6969,
+          "p99Ms": 16.5491,
+          "SDKRealPresentRate": 81.5368351017068,
+          "SDKGeneratedPresentRate": 81.5368351017068,
+          "SDKCountEquivalentTotal": 163.0736702034136,
+          "physicalDisplayFPSMeasured": false,
+          "capture": "fsr-quality-active-amd-on-2",
+          "input": [
+            2560,
+            1440
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "privateCaptureSHA256": "1f59020604dba899fc41fe53de1781066b009d3d7f247777aaf67330ed496c3c",
+          "SDKDelta": {
+            "realPresents": 1199,
+            "generatedPresents": 1199,
+            "prepared": 1199,
+            "images": 1199
+          }
+        }
+      ]
+    },
+    {
+      "group": "fsr-quality-amd-retained-off",
+      "medianApplicationPresentRate": 125.30157156909641,
+      "medianSDKCountEquivalentTotal": null,
+      "captures": [
+        {
+          "FGOn": false,
+          "intervals": 1199,
+          "seconds": 9.4935941,
+          "applicationPresentRate": 126.29568816303197,
+          "medianMs": 7.8301,
+          "p95Ms": 8.9396,
+          "p99Ms": 9.3922,
+          "SDKRealPresentRate": 126.29568816303197,
+          "SDKGeneratedPresentRate": 0,
+          "SDKCountEquivalentTotal": null,
+          "physicalDisplayFPSMeasured": false,
+          "capture": "fsr-quality-amd-retained-off-0",
+          "input": [
+            2560,
+            1440
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "privateCaptureSHA256": "70bd5e63b05c242624bb36398f158d62c750bab11103c4a27185533665f9f860",
+          "SDKDelta": {
+            "realPresents": 1199,
+            "generatedPresents": 0,
+            "prepared": 0,
+            "images": 0
+          }
+        },
+        {
+          "FGOn": false,
+          "intervals": 1199,
+          "seconds": 9.6355975,
+          "applicationPresentRate": 124.43442142534494,
+          "medianMs": 7.8708,
+          "p95Ms": 9.3702,
+          "p99Ms": 10.6866,
+          "SDKRealPresentRate": 124.43442142534494,
+          "SDKGeneratedPresentRate": 0,
+          "SDKCountEquivalentTotal": null,
+          "physicalDisplayFPSMeasured": false,
+          "capture": "fsr-quality-amd-retained-off-1",
+          "input": [
+            2560,
+            1440
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "privateCaptureSHA256": "64824269356fa57be4cbd17fda6698154f7667fa84912728254e14c296b92922",
+          "SDKDelta": {
+            "realPresents": 1199,
+            "generatedPresents": 0,
+            "prepared": 0,
+            "images": 0
+          }
+        },
+        {
+          "FGOn": false,
+          "intervals": 1199,
+          "seconds": 9.5689143,
+          "applicationPresentRate": 125.30157156909641,
+          "medianMs": 7.8625,
+          "p95Ms": 9.1034,
+          "p99Ms": 9.9503,
+          "SDKRealPresentRate": 125.30157156909641,
+          "SDKGeneratedPresentRate": 0,
+          "SDKCountEquivalentTotal": null,
+          "physicalDisplayFPSMeasured": false,
+          "capture": "fsr-quality-amd-retained-off-2",
+          "input": [
+            2560,
+            1440
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "privateCaptureSHA256": "7a128b20041e9825c9b81c511648ab9aa640dff33fa1277220bd0a68fb72043b",
+          "SDKDelta": {
+            "realPresents": 1199,
+            "generatedPresents": 0,
+            "prepared": 0,
+            "images": 0
+          }
+        }
+      ]
+    },
+    {
+      "group": "fsr-quality-repeat-amd-on",
+      "medianApplicationPresentRate": 89.49010248796144,
+      "medianSDKCountEquivalentTotal": 178.98020497592287,
+      "captures": [
+        {
+          "FGOn": true,
+          "intervals": 1199,
+          "seconds": 13.4066452,
+          "applicationPresentRate": 89.43326105176558,
+          "medianMs": 11.0468,
+          "p95Ms": 12.2448,
+          "p99Ms": 12.9085,
+          "SDKRealPresentRate": 89.43326105176558,
+          "SDKGeneratedPresentRate": 89.35867117599264,
+          "SDKCountEquivalentTotal": 178.79193222775822,
+          "physicalDisplayFPSMeasured": false,
+          "capture": "fsr-quality-repeat-amd-on-0",
+          "input": [
+            2560,
+            1440
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "privateCaptureSHA256": "2cf27a0da6662521e15779fa396f7d46d7862d6af3e64e6532d9a18a1a0a9cf4",
+          "SDKDelta": {
+            "realPresents": 1199,
+            "generatedPresents": 1198,
+            "prepared": 1198,
+            "images": 1198
+          }
+        },
+        {
+          "FGOn": true,
+          "intervals": 1199,
+          "seconds": 13.3286469,
+          "applicationPresentRate": 89.95661817704841,
+          "medianMs": 10.9931,
+          "p95Ms": 12.1286,
+          "p99Ms": 12.5145,
+          "SDKRealPresentRate": 89.95661817704841,
+          "SDKGeneratedPresentRate": 89.95661817704841,
+          "SDKCountEquivalentTotal": 179.91323635409682,
+          "physicalDisplayFPSMeasured": false,
+          "capture": "fsr-quality-repeat-amd-on-1",
+          "input": [
+            2560,
+            1440
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "privateCaptureSHA256": "fe3b389128c2630510a3bfc41ae2faa54d771b9b68d9c50aeb22baa0b8ed56aa",
+          "SDKDelta": {
+            "realPresents": 1199,
+            "generatedPresents": 1199,
+            "prepared": 1199,
+            "images": 1199
+          }
+        },
+        {
+          "FGOn": true,
+          "intervals": 1199,
+          "seconds": 13.3981297,
+          "applicationPresentRate": 89.49010248796144,
+          "medianMs": 11.0156,
+          "p95Ms": 12.2232,
+          "p99Ms": 12.9583,
+          "SDKRealPresentRate": 89.49010248796144,
+          "SDKGeneratedPresentRate": 89.49010248796144,
+          "SDKCountEquivalentTotal": 178.98020497592287,
+          "physicalDisplayFPSMeasured": false,
+          "capture": "fsr-quality-repeat-amd-on-2",
+          "input": [
+            2560,
+            1440
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "privateCaptureSHA256": "aeda0d047c7c246600cdf103b73a75429ebee2f80d0fbaa05dcfe6c48e958e93",
+          "SDKDelta": {
+            "realPresents": 1199,
+            "generatedPresents": 1199,
+            "prepared": 1199,
+            "images": 1199
+          }
+        }
+      ]
+    }
+  ],
+  "excluded": [
+    "dlss-quality-clean-off-0/1/2: loading/menu; no stable current-gameplay admission",
+    "dlss-quality-steady-amd-on-0/1/2: FG ContextReady=0 while Video menu open",
+    "dlss-quality-amd-retained-off-0/1/2: exploratory measurements before automatic source admission was added"
+  ],
+  "physicalDisplayFPSMeasured": false,
+  "WindowsRadeonQualified": false,
+  "AMDLowLatencyActiveQualified": false,
+  "singleNativeChecks": [
+    {
+      "FGOn": true,
+      "intervals": 1199,
+      "seconds": 18.761257,
+      "applicationPresentRate": 63.90829782887148,
+      "medianMs": 15.5561,
+      "p95Ms": 17.8519,
+      "p99Ms": 19.0743,
+      "SDKRealPresentRate": 63.90829782887148,
+      "SDKGeneratedPresentRate": 63.90829782887148,
+      "SDKCountEquivalentTotal": 127.81659565774297,
+      "physicalDisplayFPSMeasured": false,
+      "capture": "native-fullscale-amd-on-0",
+      "input": [
+        3840,
+        2160
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "privateCaptureSHA256": "183322bf13a73e51e779e4f95cb9c7cda5b8f56922861ac0627a019823f2b410",
+      "SDKDelta": {
+        "realPresents": 1199,
+        "generatedPresents": 1199
+      }
+    },
+    {
+      "FGOn": false,
+      "intervals": 1199,
+      "seconds": 12.6587225,
+      "applicationPresentRate": 94.71729868476065,
+      "medianMs": 10.492,
+      "p95Ms": 12.0738,
+      "p99Ms": 13.8929,
+      "SDKRealPresentRate": 94.71729868476065,
+      "SDKGeneratedPresentRate": 0,
+      "SDKCountEquivalentTotal": null,
+      "physicalDisplayFPSMeasured": false,
+      "capture": "native-fullscale-amd-retained-off-0",
+      "input": [
+        3840,
+        2160
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "privateCaptureSHA256": "815af34c787be2de51d6346048d9a5fdab8b06a4907c12085e372e657016febc",
+      "SDKDelta": {
+        "realPresents": 1199,
+        "generatedPresents": 0
+      }
+    }
+  ],
+  "samplerSourceSHA256": "4e6ffd35ec772f84b3e23d39d928fa9a780248e5a03310d4d7702e8e74570cc7"
+}
