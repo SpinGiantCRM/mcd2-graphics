@@ -16,6 +16,7 @@
 #include <vector>
 #include "fsr_fg_game_bridge.h"
 #include "../../src/native/reset_epoch_contract.hpp"
+#include "../../src/latency/amd_fg_private_data.hpp"
 #include "api/include/dx12/ffx_api_dx12.h"
 #include "framegeneration/include/ffx_framegeneration.h"
 #include "framegeneration/include/dx12/ffx_api_framegeneration_dx12.h"
@@ -215,6 +216,25 @@ extern "C" int mcd2_afg_present_v1(uint64_t id,uint32_t wanted){
 extern "C" int mcd2_afg_state_v1(MCD2AmdFgStateV1* out){
  std::lock_guard lock(guard);if(!session||!out||out->size!=sizeof(*out))return -50;auto& s=*session;
  *out={sizeof(*out),s.swap&&s.fg&&s.presenter?1u:0u,s.active.load(),s.fault.load(),errors.load(),warnings.load(),s.engine,s.ordinal,s.prepared,s.images,s.real.load(),s.generated.load()};return 0;
+}
+extern "C" int mcd2_afg_antilag_ready_v1(void* device){
+ std::lock_guard lock(guard);
+ return session&&session->swap&&session->presenter&&!session->closing&&
+        sameDevice(static_cast<ID3D12Device*>(device))?0:-1;
+}
+extern "C" int mcd2_afg_antilag_v1(void* device,void* context,uint32_t enabled,uint32_t drain){
+ std::lock_guard lock(guard);if(enabled>1||drain>1||(enabled&&!context)||(drain&&(context||enabled)))return E_INVALIDARG;
+ // A destroyed presenter cannot make further callbacks. Clearing is idempotent.
+ if(!session||!session->swap||!session->presenter)return !context&&!enabled?0:E_NOINTERFACE;
+ if(!sameDevice(static_cast<ID3D12Device*>(device)))return E_INVALIDARG;
+ if(session->closing&&context)return E_ABORT;
+ auto result=mcd2::amd_fg::publish(session->swap,context,enabled!=0);if(FAILED(result))return int(result);
+ if(drain){
+  ffxDispatchDescFrameGenerationSwapChainWaitForPresentsDX12 wait{};
+  wait.header.type=FFX_API_DISPATCH_DESC_TYPE_FRAMEGENERATIONSWAPCHAIN_WAIT_FOR_PRESENTS_DX12;
+  return int(session->dispatch(&session->presenter,&wait.header));
+ }
+ return 0;
 }
 extern "C" int mcd2_afg_retire_v1(void* fence,uint64_t value){
  std::lock_guard lock(guard);if(!session)return 0;auto& s=*session;

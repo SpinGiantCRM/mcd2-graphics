@@ -34,6 +34,7 @@ def gate(rows, code, timeout):
         if row.get('real')!=count or row.get('generated')!=(count if index==1 else 0): return False
         if any(row.get(key)!=0 for key in ['fault','errors','warnings']): return False
     counts={'load-verified-runtime':1,'create-bridge-swapchain':1,'set-PQ-output':1,
+            'owned-presenter-antilag-ready':1,'clear-antilag-before-presentation':1,'clear-antilag-after-presentation':1,
             'prepare-game-bridge-inputs':60,'copy-hudless-world':60,'configure-bridge-present':120,
             'retain-live-recording':1,'retain-after-failed-Reset':1,
             'retire-after-successful-Reset-and-own-fence':1,'complete':1}

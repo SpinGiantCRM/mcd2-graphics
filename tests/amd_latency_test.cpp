@@ -8,6 +8,7 @@ using namespace mcd2;
 using namespace amd_latency;
 struct Fake : Provider {
     bool initOk=true, updateOk=true, endOk=true, typeOk=true;
+    bool fgAvailable=false,fgOk=true,trackFg=false;
     unsigned inits=0, stops=0;
     std::vector<int> calls;
     bool waiting=false, resume=false, block=false;
@@ -20,6 +21,8 @@ struct Fake : Provider {
     }
     bool end_rendering() override {calls.push_back(3);return endOk;}
     bool real_frame() override {calls.push_back(4);return typeOk;}
+    bool fg_available() override {return fgAvailable;}
+    bool frame_generation(bool requested,bool enabled) override {if(trackFg)calls.push_back(requested?(enabled?6:7):8);return fgOk;}
     void shutdown() override {++stops;calls.push_back(5);}
 };
 static providers::DecodedGraphicsRecord decoded(providers::GraphicsIntent intent) {
@@ -48,6 +51,25 @@ int main() {
     auto invalid=r;invalid.bootstrap.stamp.checksum^=1;assert(!resolve(invalid).valid);
     invalid=r;invalid.bootstrap.stamp.revision++;assert(!resolve(invalid).valid);
     invalid=r;invalid.intent.schema=6;assert(!resolve(invalid).valid);
+    i.sr=providers::SrProvider::AmdFsr;i.fg=providers::FgProvider::Amd;i.fgEnabled=true;
+    i.latency=providers::LatencyProvider::RadeonAntiLag2;i.latencyMode=providers::LatencyMode::On;
+    const auto fgRequest=resolve(decoded(i));assert(fgRequest.valid&&fgRequest.enabled&&fgRequest.fg);
+    {Fake p;p.trackFg=true;p.fgAvailable=true;Controller c(p);assert(c.attach(yes,123));
+     c.refresh_capabilities();assert(c.state().fgCompatible&&!c.state().enabled&&p.calls==std::vector<int>{0});
+     c.pre_input(1,fgRequest);c.pre_present(1);
+     assert(p.calls==std::vector<int>({0,2,6,3})); // FSR presenter owns frame-type flags.
+     assert(c.state().enabled&&c.state().fgCompatible&&c.state().fgBound);
+     c.pre_input(2,{true,false,9,1,true});c.pre_present(2);
+     assert(p.calls.back()==7&&!c.state().enabled&&c.state().fgBound);
+     c.pre_input(3,requested);c.pre_present(3);assert(p.calls.back()==4&&!c.state().fgBound);}
+    {Fake p;p.trackFg=true;Controller c(p);assert(c.attach(yes,123));
+     c.pre_input(1,fgRequest);c.pre_present(1);assert(!c.state().enabled&&!c.state().fgCompatible&&!c.state().fault);
+     assert(p.calls==std::vector<int>({0,1,8}));}
+    {Fake p;p.fgAvailable=true;p.fgOk=false;Controller c(p);assert(c.attach(yes,123));
+     c.pre_input(1,fgRequest);assert(c.state().fault&&!c.state().available&&p.stops==1);}
+    i.sr=providers::SrProvider::Native;assert(!resolve(decoded(i)).enabled&&!resolve(decoded(i)).fg);
+    i.sr=providers::SrProvider::AmdFsr;i.fg=providers::FgProvider::Nvidia;
+    assert(!resolve(decoded(i)).enabled&&!resolve(decoded(i)).fg);
     {Fake p;Controller c(p);assert(c.attach(yes,123));assert(!c.attach(yes,123));
      c.pre_input(0,requested);c.pre_present(1);assert(p.calls==std::vector<int>{0});
      c.pre_input(10,requested);c.pre_input(10,requested);c.pre_input(11,requested);

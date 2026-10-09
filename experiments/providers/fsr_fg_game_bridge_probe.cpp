@@ -19,7 +19,7 @@ int main(){
  auto path=std::make_unique<wchar_t[]>(32768);auto length=GetCurrentDirectoryW(32768,path.get());if(!length||length>32600)return 2;
  auto bridge=LoadLibraryW(L"mcd2-fsr-fg-game-bridge.dll");if(!bridge)return 3;
 #define FN(name) auto name=reinterpret_cast<decltype(&mcd2_afg_##name##_v1)>(GetProcAddress(bridge,"mcd2_afg_" #name "_v1"));if(!name)return 4;
- FN(load) FN(swap) FN(guides) FN(world) FN(present) FN(state) FN(retire)
+ FN(load) FN(swap) FN(guides) FN(world) FN(present) FN(state) FN(retire) FN(antilag_ready) FN(antilag)
 #undef FN
  wcscat_s(path.get(),32768,L"\\amd_fidelityfx_framegeneration_dx12.dll");
  if(result("load-verified-runtime",load(path.get())))return 5;
@@ -40,6 +40,9 @@ int main(){
  MCD2AmdFgSwapV1 desc{sizeof(desc),W,H,unsigned(DXGI_FORMAT_R10G10B10A2_UNORM),1,0,DXGI_USAGE_RENDER_TARGET_OUTPUT,3,unsigned(DXGI_SCALING_STRETCH),unsigned(DXGI_SWAP_EFFECT_FLIP_DISCARD),unsigned(DXGI_ALPHA_MODE_UNSPECIFIED),DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT,0,1,0,1,0,0};
  void* created=nullptr;if(result("create-bridge-swapchain",swap(factory,queue,window,&desc,&created))||!created)return 9;
  IDXGISwapChain4* chain=nullptr;auto* initial=static_cast<IDXGISwapChain1*>(created);auto hr=initial->QueryInterface(IID_PPV_ARGS(&chain));initial->Release();if(FAILED(hr))return 10;
+ if(result("owned-presenter-antilag-ready",antilag_ready(device))||antilag_ready(nullptr)==0)return 31;
+ if(antilag(device,nullptr,1,0)!=E_INVALIDARG||antilag(device,nullptr,0,2)!=E_INVALIDARG)return 32;
+ if(result("clear-antilag-before-presentation",antilag(device,nullptr,0,1)))return 33;
  HANDLE waitable=chain->GetFrameLatencyWaitableObject();if(!waitable)return 11;
  result("set-PQ-output",chain->SetColorSpace1(DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020));
  ID3D12DescriptorHeap* views=nullptr;D3D12_DESCRIPTOR_HEAP_DESC vh{};vh.Type=D3D12_DESCRIPTOR_HEAP_TYPE_RTV;vh.NumDescriptors=3;
@@ -72,6 +75,7 @@ int main(){
   fprintf(log,"{\"stage\":\"phase\",\"phase\":%u,\"enabled\":%s,\"real\":%llu,\"generated\":%llu,\"fault\":%u,\"errors\":%u,\"warnings\":%u}\n",phase,enabled?"true":"false",real,generated,after.fault,after.errors,after.warnings);fflush(log);
   if(real!=frames||after.fault||after.errors||(!enabled&&generated)||(enabled&&generated<frames/2))return 24;
  }
+ if(result("clear-antilag-after-presentation",antilag(device,nullptr,0,1)))return 34;
  // Re-record a final prepare to prove retirement retains a live recording.
  if(!reset())return 25;MCD2AmdFgGuidesV1 p{};p.size=sizeof(p);p.frameTimeMs=16.667f;p.worldToMeters=1;p.camera.size=sizeof(p.camera);p.camera.frame=identity+100;p.camera.width=W;p.camera.height=H;p.camera.nearPlane=.1f;p.camera.farPlane=1000;p.camera.verticalFOV=1;p.camera.up[1]=1;p.camera.right[0]=1;p.camera.forward[2]=1;
  if(guides(cmd,images[1],images[2],&p)||FAILED(cmd->Close()))return 26;

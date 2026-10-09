@@ -60,25 +60,32 @@ struct AmdProvider : mcd2::amd_latency::Provider {
  HMODULE bridge=nullptr;
  int(*init)(void*)=nullptr;int(*updateFrame)(unsigned)=nullptr;
  int(*endRendering)()=nullptr;int(*realFrame)()=nullptr;void(*stop)()=nullptr;
+ unsigned(*fgSupport)()=nullptr;int(*frameGeneration)(unsigned,unsigned)=nullptr;unsigned(*canUnload)()=nullptr;
  std::filesystem::path path;std::atomic<int> lastResult=0;
  template<class T>bool bind(T*& f,const char* name){f=reinterpret_cast<T*>(GetProcAddress(bridge,name));return f!=nullptr;}
  bool initialize(uintptr_t device) override {
-  if(bridge){if(!init||!updateFrame||!endRendering||!realFrame||!stop)return false;
+  if(bridge){if(!init||!updateFrame||!endRendering||!realFrame||!stop||!fgSupport||!frameGeneration||!canUnload)return false;
    lastResult=init(reinterpret_cast<void*>(device));return lastResult==0;}
   bridge=LoadLibraryExW(path.c_str(),nullptr,LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR|LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
   if(!bridge){lastResult=HRESULT_FROM_WIN32(GetLastError());return false;}
   auto abi=reinterpret_cast<unsigned(*)()>(GetProcAddress(bridge,"mcd2_al2_abi"));
-  if(!abi||abi()!=1||!bind(init,"mcd2_al2_init")||!bind(updateFrame,"mcd2_al2_update")||
-     !bind(endRendering,"mcd2_al2_end_rendering")||!bind(realFrame,"mcd2_al2_real_frame")||!bind(stop,"mcd2_al2_shutdown")){lastResult=E_NOINTERFACE;return false;}
+  if(!abi||abi()!=2||!bind(init,"mcd2_al2_init")||!bind(updateFrame,"mcd2_al2_update")||
+     !bind(endRendering,"mcd2_al2_end_rendering")||!bind(realFrame,"mcd2_al2_real_frame")||!bind(stop,"mcd2_al2_shutdown")||
+     !bind(fgSupport,"mcd2_al2_fg_supported")||!bind(frameGeneration,"mcd2_al2_frame_generation")||!bind(canUnload,"mcd2_al2_can_unload")){lastResult=E_NOINTERFACE;return false;}
   lastResult=init(reinterpret_cast<void*>(device));return lastResult==0;
  }
  bool update(bool enabled) override {lastResult=updateFrame(enabled?1:0);return lastResult==0;}
  bool end_rendering() override {lastResult=endRendering();return lastResult==0;}
  bool real_frame() override {lastResult=realFrame();return lastResult==0;}
+ bool fg_available() override {return fgSupport&&fgSupport()==1;}
+ bool frame_generation(bool requested,bool enabled) override {lastResult=frameGeneration(requested?1:0,enabled?1:0);return lastResult==0;}
  // Keep code mapped until callbacks are drained and AddonUninit has joined the
  // status worker. Device teardown releases only the driver context.
  void shutdown() override {if(stop)stop();}
- void unload(){shutdown();if(bridge)FreeLibrary(bridge);bridge=nullptr;init=nullptr;updateFrame=nullptr;endRendering=nullptr;realFrame=nullptr;stop=nullptr;}
+ void unload(){shutdown();if(bridge&&canUnload&&canUnload()==1)FreeLibrary(bridge);
+  // A failed presentation drain retains the module and context until process
+  // exit. Never unload code that an asynchronous presenter may still call.
+  bridge=nullptr;init=nullptr;updateFrame=nullptr;endRendering=nullptr;realFrame=nullptr;stop=nullptr;fgSupport=nullptr;frameGeneration=nullptr;canUnload=nullptr;}
 } amdProvider;
 std::shared_ptr<mcd2::amd_latency::Controller> amdCoordinator;
 std::mutex amdRequestMutex;mcd2::amd_latency::Request amdRequest;
@@ -226,11 +233,12 @@ void settings_loop(){std::map<std::string,unsigned> last;auto nextStatus=std::ch
    std::map<std::string,unsigned> state={{"SchemaVersion",1},{"Revision",intent.revision},{"SessionId",sessionId},{"ReflexAvailable",reflexAvailable},{"ReflexMode",applied},{"ReflexFault",reflexFault},{"HDRRevision",hdrRevision},{"HDRRestartRequired",hdrRestart}};
    // Capability comes from the actual driver interface and installed timing
    // owner, never a requested preference or adapter name in a save.
-   auto amd=amd_controller();auto amdState=amd?amd->state():mcd2::amd_latency::State{};
+   auto amd=amd_controller();if(amd)amd->refresh_capabilities();auto amdState=amd?amd->state():mcd2::amd_latency::State{};
    state["AmdAntiLagAvailable"]=amdLatencyOptIn&&installed&&amdState.available&&!amdState.fault;
    state["AmdAntiLagMode"]=amdState.enabled?1u:0u;
    state["AmdAntiLagFault"]=amdState.fault?1u:0u;
    state["AmdAntiLagRevision"]=amdState.revision;
+   state["AmdAntiLagFgCompatible"]=amdState.fgCompatible&&!amdState.fault?1u:0u;
    auto file=savesPath/L"MCD2GraphicsDisplayRuntime.sav";auto seed=read_slot(file);std::map<std::string,unsigned> existing;size_t h=0;
    if(state!=last||!mcd2::display::parse(seed,"DisplayRuntimeSave",existing,h)||existing["SessionId"]!=sessionId){auto data=mcd2::display::encode_runtime(seed,state);if(!data.empty()){
      auto temp=savesPath/L"MCD2GraphicsDisplayRuntime.pending";{std::ofstream f(temp,std::ios::binary|std::ios::trunc);f.write(reinterpret_cast<const char*>(data.data()),data.size());f.flush();if(!f)throw std::runtime_error("Runtime state write failed");}

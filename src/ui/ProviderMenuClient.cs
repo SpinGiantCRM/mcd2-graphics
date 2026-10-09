@@ -85,9 +85,9 @@ public class ProviderMenuClient : USaveGame {
   return SelectSr(provider);
  }
  public bool SelectAntiLag2(bool enabled){
-  // FG coexistence needs its swapchain handshake; do not save an unsupported
-  // pairing or reinterpret NVIDIA Boost as an AMD latency mode.
-  return Ready && Value(19)==0 && SelectLatency(2,enabled?1:0);
+  // Runtime availability is checked by the row before invoking this method.
+  // Only AMD's FG pairing has the implemented presenter metadata handshake.
+  return Ready && (Value(19)==0 || Value(20)==1) && SelectLatency(2,enabled?1:0);
  }
  public int PreferenceWord(int provider){return provider>=1 && provider<=3?9+(provider-1)*3:-1;}
  public bool SelectQuality(int provider,int quality){

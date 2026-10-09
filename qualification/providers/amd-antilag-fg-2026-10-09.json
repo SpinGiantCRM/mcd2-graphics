@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-09",
+  "scope": "Anti-Lag 2 and owned AMD FSR presenter integration candidate",
+  "sourceSHA256": {
+    "src/latency/amd_antilag_bridge.cpp": "64fb8740f26bcac0ea249eb78116917ee0098653f34936d314c96b6f177ba223",
+    "src/latency/amd_latency.hpp": "d5b030da0237aeb467a51d89b0dbf704ba5d3cfe4c1e42c0cf464ef8dd70f99b",
+    "src/latency/amd_fg_private_data.hpp": "fa0ae16732f2f69322c9d9377dd7c5e9c4d19a1df2fbe6eb4fee7593aba42f32",
+    "src/latency/latency_addon.cpp": "32958ceef29f2688556ca598dcb9f223c34de6b1e9f892a15e18f26249af54c8",
+    "experiments/providers/fsr_fg_game_bridge.cpp": "3ae3984517b66bb9d6440182850322ecc62d4c1b6da5e25d812930d0c1b23229",
+    "experiments/providers/fsr_fg_game_bridge.h": "ccf0f893fb902517c28afaa1c55c79644977c97ed123f287f4046a9d9f4c9509"
+  },
+  "antiLagBuild": {
+    "sdkCommit": "390aa4a8c8655d0ae6e90079db2c85e103a96da3",
+    "sdkSHA256": {
+      "ffx_antilag2_dx12.h": "0554c804cfb02442974b90cf1887031bfd18d41fba2054a2cd23c8ee65e6265f",
+      "LICENSE.txt": "020463d3b92d6d901c9b9d93a432359529be76883bb48f76eaeeecaea2f15c71"
+    },
+    "sourceSHA256": "64fb8740f26bcac0ea249eb78116917ee0098653f34936d314c96b6f177ba223",
+    "recipeSHA256": "054fa60353da80ee04a14c0664a2c57539f619908505e840fed2584b8eaf90d5",
+    "testSourceSHA256": {
+      "amd_antilag_fake_driver.cpp": "05f8a58a830b48edc2f1a26540e5e090b805a89a58687cb20b4780f8e86a1e22",
+      "amd_antilag_fake_presenter.cpp": "c136fe3a497c371fd27289e01c99f200147f2ba6c790bd2f3db20ab67fd0bc68",
+      "amd_antilag_bridge_test.cpp": "8efecbf3e4c13503cf39371b122556791d7bccbb04524d2c716ce0686b026b3a"
+    },
+    "contractSHA256": "fa0ae16732f2f69322c9d9377dd7c5e9c4d19a1df2fbe6eb4fee7593aba42f32",
+    "binarySHA256": "e55f81939baf4e535266a604acdbe6d27bac103e61c2d37a9dd530b8fbbc6178",
+    "vendorRuntimeBundled": false,
+    "runtimeQualified": false
+  },
+  "fgBuild": {
+    "sdkCommit": "60f4ea81909200d8542eca14dccb2628b763a9a3",
+    "SDKheadersSHA256": {
+      "api/include/ffx_api.h": "e1a9d1b559eaf75f4cb401f1c43a66e2f3dc9621abfeb58b9c6fac56443177fd",
+      "api/include/ffx_api_types.h": "cc0adc0ffc804dd7cd03c39c15581b575e416383177ffe95060201d52cc0fc49",
+      "api/include/dx12/ffx_api_dx12.h": "c9afbc3c4c673723e9e5369a666f0ff54560543b5a93537f8ff453bf1c3bf530",
+      "framegeneration/include/ffx_framegeneration.h": "e6c42f8a38aab2c7c4fc6931545a8e5463fdf87349902ec9687d9fe4949a0566",
+      "framegeneration/include/ffx_framegeneration_api_types.h": "396596af3df63310674e8036abd2ad0fcd061e61334e7a2c76653a2be3c686b4",
+      "framegeneration/include/dx12/ffx_api_framegeneration_dx12.h": "d533810bbd6fd4f87dfa2c1657c1457c7b1597b66345827d375b081d67127f66"
+    },
+    "sourceSHA256": {
+      "fsr_fg_game_bridge.cpp": "3ae3984517b66bb9d6440182850322ecc62d4c1b6da5e25d812930d0c1b23229",
+      "fsr_fg_game_bridge.h": "ccf0f893fb902517c28afaa1c55c79644977c97ed123f287f4046a9d9f4c9509",
+      "fsr_fg_game_bridge_probe.cpp": "9970fef8aff47cb7dc8c1757b5e65ca13da50bfd1ed747b6a6b413433b7969f4",
+      "build_fsr_fg_probe.py": "0e099b3f00cef5100d591f55627e3de2e672fdeaada2cbc91a5dbc29c6385ea3",
+      "../fg-streamline/fg_camera_contract.h": "b889fa3d89e0d51fc2a70cebdb60c0e635f246efb335438baab9d9d27e73293d",
+      "../../src/native/reset_epoch_contract.hpp": "61fbc3f6e8390daa4b7366be1aea3428bbdef0f12969a887305c79b6301d6c8b",
+      "../../src/latency/amd_fg_private_data.hpp": "fa0ae16732f2f69322c9d9377dd7c5e9c4d19a1df2fbe6eb4fee7593aba42f32"
+    },
+    "recipeSHA256": "e91746121c6e0b98b2b1c2bad50a142d29bd9d725e35f17cdccf2d6b1f921a99",
+    "binarySHA256": "2a2bc399e2ccce107c9f32b8d916a7cbead8386b034e04a7d440cb0ec3df1ad0",
+    "probeSHA256": "f00fd2c439f394e0be4cdcf3414802cd9dd41d353decec92af9e02d4dbce6e91",
+    "runtimeBundled": false,
+    "gameIntegrationQualified": false,
+    "headersLicenseSHA256": "26ec40256d34d52a5596b7ea9635575f0570c2650d24b7baf090fda2ac9986f0"
+  },
+  "timingAddonSHA256": "fe467823bc5de3daa56feb6e9280879243fbf3e8427c688a308dd6cfe4dceb4a",
+  "checks": {
+    "nativePolicyAndThreadedTeardown": true,
+    "officialSDKwithSyntheticDriverAndPresenter": true,
+    "actualFSRPresenterMetadataClearAndDrain": true,
+    "ownedFSRHost": {
+      "exitCode": 0,
+      "timeout": false,
+      "seconds": 3.719,
+      "passed": true,
+      "gameIntegrationQualified": false,
+      "runtimeBundled": false,
+      "bridgeSHA256": "2a2bc399e2ccce107c9f32b8d916a7cbead8386b034e04a7d440cb0ec3df1ad0",
+      "probeSHA256": "f00fd2c439f394e0be4cdcf3414802cd9dd41d353decec92af9e02d4dbce6e91",
+      "runtimeSHA256": {
+        "amd_fidelityfx_framegeneration_dx12.dll": "02297beedd285e822d3a64f314cf00faf378dcec0edc47ff0c4dd71b3a8c2f18"
+      }
+    },
+    "providerMenuTransportFixture": true,
+    "NeoRuneUiBuild": true,
+    "nativeWindowsAmd": false
+  },
+  "limits": [
+    "Synthetic driver/presenter tests do not qualify Radeon hardware",
+    "Owned presenter test uses no active Anti-Lag driver",
+    "Native Windows/AMD combined gameplay, latency and performance qualification remain required"
+  ],
+  "fakeModulesBundled": false,
+  "vendorRuntimeBundled": false,
+  "gameFilesChanged": false,
+  "publishedPayloadChanged": false
+}

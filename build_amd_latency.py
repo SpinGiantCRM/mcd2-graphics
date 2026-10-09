@@ -24,19 +24,20 @@ def build(sysroot, output, clang_cl='clang-cl', linker='lld-link', with_tests=Fa
     for include in ['crt/include', 'sdk/include/ucrt', 'sdk/include/shared', 'sdk/include/um', 'sdk/include/winrt']:
         command += ['/imsvc' + str(sysroot / include)]
     link = [linker, '/dll', '/out:' + str(binary), '/implib:' + str(output / 'amd-antilag.lib'), str(obj), 'kernel32.lib']
-    link += ['/export:mcd2_al2_' + name for name in ['abi', 'init', 'update', 'end_rendering', 'real_frame', 'shutdown']]
+    link += ['/export:mcd2_al2_' + name for name in ['abi', 'init', 'update', 'end_rendering', 'real_frame', 'shutdown','fg_supported','frame_generation','can_unload']]
     for folder in ['crt/lib/x86_64', 'sdk/lib/ucrt/x86_64', 'sdk/lib/um/x86_64']:
         link += ['/libpath:' + str(sysroot / folder)]
     steps = [command, link]
     if with_tests:
-        for name in ['amd_antilag_fake_driver', 'amd_antilag_bridge_test']:
+        for name in ['amd_antilag_fake_driver','amd_antilag_fake_presenter', 'amd_antilag_bridge_test']:
             test_source = ROOT / 'tests' / (name + '.cpp')
             test_obj = output / (name + '.obj')
             steps.append([str(test_source) if part == str(source) else '/Fo' + str(test_obj)
                           if part.startswith('/Fo') else part for part in command])
             libs = [part for part in link if part.startswith('/libpath:')]
-            if name == 'amd_antilag_fake_driver':
-                steps.append([linker, '/dll', '/out:' + str(output / 'amdxc64.dll'), str(test_obj),
+            if name in ['amd_antilag_fake_driver','amd_antilag_fake_presenter']:
+                dll='amdxc64.dll' if name=='amd_antilag_fake_driver' else 'mcd2-fsr-fg-game-bridge.dll'
+                steps.append([linker, '/dll', '/out:' + str(output / dll), str(test_obj),
                               'kernel32.lib', *libs])
             else:
                 steps.append([linker, '/out:' + str(output / 'amd-antilag-test.exe'), str(test_obj),
@@ -48,7 +49,8 @@ def build(sysroot, output, clang_cl='clang-cl', linker='lld-link', with_tests=Fa
                'sourceSHA256': hashlib.sha256(source.read_bytes()).hexdigest(),
                'recipeSHA256': hashlib.sha256((ROOT / 'build_amd_latency.py').read_bytes()).hexdigest(),
                'testSourceSHA256': {name: hashlib.sha256((ROOT / 'tests' / name).read_bytes()).hexdigest()
-                                    for name in ['amd_antilag_fake_driver.cpp', 'amd_antilag_bridge_test.cpp']} if with_tests else {},
+                                    for name in ['amd_antilag_fake_driver.cpp','amd_antilag_fake_presenter.cpp', 'amd_antilag_bridge_test.cpp']} if with_tests else {},
+               'contractSHA256':hashlib.sha256((ROOT/'src/latency/amd_fg_private_data.hpp').read_bytes()).hexdigest(),
                'binarySHA256': hashlib.sha256(binary.read_bytes()).hexdigest(),
                'vendorRuntimeBundled': False, 'runtimeQualified': False}
     (output / 'build-receipt.json').write_text(json.dumps(receipt, indent=2) + '\n')
