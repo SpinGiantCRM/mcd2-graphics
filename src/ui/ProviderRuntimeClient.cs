@@ -9,8 +9,9 @@ public class ProviderRuntimeClient : USaveGame {
  public int Sequence;public int Session;public int WorldGeneration;
  public string? Level;
  public bool Enabled;
- public static bool AmdLatencyAvailable(bool authorityReady,int authoritySession,int runtimeSchema,int runtimeSession,int available,int fault,bool fgEnabled){
-  return authorityReady && authoritySession>0 && runtimeSchema==1 && runtimeSession==authoritySession && available==1 && fault==0 && !fgEnabled;
+ public static bool AmdLatencyAvailable(bool authorityReady,int authoritySession,int runtimeSchema,int runtimeSession,int available,int fault,bool fgEnabled,int fgProvider=0,int fgCompatible=0){
+  return authorityReady && authoritySession>0 && runtimeSchema==1 && runtimeSession==authoritySession && available==1 && fault==0 &&
+   (!fgEnabled || (fgProvider==1 && fgCompatible==1));
  }
  public static int AmdLatencyApplied(int authorityRevision,int runtimeRevision,int runtimeMode){
   return authorityRevision>0 && runtimeRevision==authorityRevision && (runtimeMode==0 || runtimeMode==1)?runtimeMode:-1;

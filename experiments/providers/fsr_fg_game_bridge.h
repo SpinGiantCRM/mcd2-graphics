@@ -26,6 +26,10 @@ extern "C" {
  int mcd2_afg_world_v1(void *nativeCommand,void *world,uint64_t engineFrame);
  int mcd2_afg_present_v1(uint64_t engineFrame,uint32_t wanted);
  int mcd2_afg_state_v1(MCD2AmdFgStateV1*);
+ // Actual owned FSR presenter only. Clear metadata and drain presentation
+ // before the caller releases its persistent Anti-Lag context.
+ int mcd2_afg_antilag_ready_v1(void *nativeDevice);
+ int mcd2_afg_antilag_v1(void *nativeDevice,void *antiLagContext,uint32_t enabled,uint32_t drain);
  // Confirms successful native Reset epochs, then signals/waits a fresh own fence.
  // Missing invalidation proof retains the session and callbacks. Optional caller
  // fence evidence supplements, and never replaces, the internal queue proof.

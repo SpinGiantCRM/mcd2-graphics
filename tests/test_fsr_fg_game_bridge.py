@@ -16,12 +16,14 @@ def evidence():
     rows=[]
     def event(stage,count=1,result=0):rows.extend(dict(stage=stage,result=result) for _ in range(count))
     for stage in ['load-verified-runtime','create-bridge-swapchain','set-PQ-output']:event(stage)
+    for stage in ['owned-presenter-antilag-ready','clear-antilag-before-presentation']:event(stage)
     for phase in range(3):
         count=60 if phase==1 else 30
         if phase==1:event('prepare-game-bridge-inputs',60);event('copy-hudless-world',60)
         event('configure-bridge-present',count)
         rows.append(dict(stage='phase',phase=phase,enabled=phase==1,real=count,
                          generated=count if phase==1 else 0,fault=0,errors=0,warnings=0))
+    event('clear-antilag-after-presentation')
     event('retain-live-recording',result=-61);event('retain-after-failed-Reset',result=-61)
     event('retire-after-successful-Reset-and-own-fence');event('complete')
     return rows

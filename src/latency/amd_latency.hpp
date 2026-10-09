@@ -1,5 +1,6 @@
 #pragma once
 #include "../providers/graphics_record.hpp"
+#include "../providers/fg_menu_projection.hpp"
 #include <cstdint>
 #include <mutex>
 
@@ -14,6 +15,8 @@ struct Provider {
     virtual bool update(bool enabled) = 0;
     virtual bool end_rendering() = 0;
     virtual bool real_frame() = 0;
+    virtual bool fg_available() { return false; }
+    virtual bool frame_generation(bool requested,bool) { return !requested; }
     virtual void shutdown() = 0;
 };
 
@@ -28,10 +31,11 @@ struct Eligibility {
 struct Request {
     bool valid = false, enabled = false;
     std::uint32_t revision = 0, checksum = 0;
+    bool fg = false;
 };
 
-// This first integration supports independent, non-FG Anti-Lag only. Boost
-// is not an Anti-Lag mode; FG needs the owned FSR swapchain handshake first.
+// Boost is not an Anti-Lag mode. Only the implemented AMD FG pair can request
+// coexistence; the actual owned-presenter handshake is checked before Update.
 inline Request resolve(const providers::DecodedGraphicsRecord& record) {
     const auto& i = record.intent;
     providers::GraphicsRecord bytes;
@@ -40,14 +44,18 @@ inline Request resolve(const providers::DecodedGraphicsRecord& record) {
         !providers::decodeGraphicsRecord(bytes, canonical) || canonical != record) return {};
     const bool selected = i.latency == providers::LatencyProvider::Automatic ||
                           i.latency == providers::LatencyProvider::RadeonAntiLag2;
-    return {true, selected && i.latencyMode == providers::LatencyMode::On && !i.fgEnabled,
-            i.revision, record.bootstrap.stamp.checksum};
+    providers::FgMenuProjection fg;
+    const bool amdFg = providers::projectFgMenu(record,fg) && fg.pairEligible &&
+                      i.fg == providers::FgProvider::Amd && i.fgEnabled;
+    return {true, selected && i.latencyMode == providers::LatencyMode::On && (!i.fgEnabled || amdFg),
+            i.revision, record.bootstrap.stamp.checksum,amdFg};
 }
 
 struct State {
     bool available = false, enabled = false, fault = false;
     std::uint64_t inputFrames = 0, renderedFrames = 0;
     std::uint32_t revision = 0, checksum = 0;
+    bool fgCompatible = false, fgBound = false;
 };
 
 // Serializes SDK access and teardown against callbacks on both game and
@@ -80,11 +88,15 @@ public:
         if (!state_.available || !frame) return;
         if (frame == lastInput_) return; // A repeated pacing query is not another simulation.
         if (frame < lastInput_) { fault(); return; }
-        const bool enabled = request.valid && request.enabled;
+        state_.fgCompatible = provider_.fg_available();
+        const bool fg = request.valid && request.fg && state_.fgCompatible;
+        const bool enabled = request.valid && request.enabled && (!request.fg || fg);
         if (!provider_.update(enabled)) { fault(); return; }
+        if (!provider_.frame_generation(fg,enabled)) { fault(); return; }
         lastInput_ = frame;
         ++state_.inputFrames;
         state_.enabled = enabled;
+        state_.fgBound = fg;
         state_.revision = request.valid ? request.revision : 0;
         state_.checksum = request.valid ? request.checksum : 0;
     }
@@ -94,11 +106,20 @@ public:
         // Rendered frames may lag simulation. Future/unordered identities are
         // not fabricated as SDK frame indices or generated frames.
         if (frame > lastInput_ || frame < lastPresent_) { fault(); return; }
-        if (!provider_.end_rendering() || !provider_.real_frame()) { fault(); return; }
+        // The verified FSR presenter emits real/generated SDK flags itself.
+        // Calling real_frame here as well would label a queued FG presentation
+        // twice and on the wrong presentation thread.
+        if (!provider_.end_rendering() || (!state_.fgBound && !provider_.real_frame())) { fault(); return; }
         lastPresent_ = frame;
         ++state_.renderedFrames;
     }
     State state() const { std::lock_guard lock(mutex_); return state_; }
+    // The settings worker can expose actual presenter capability in the main
+    // menu before the first simulation frame, without enabling or pacing it.
+    void refresh_capabilities() {
+        std::lock_guard lock(mutex_);
+        if(state_.available && !closed_ && !state_.fault)state_.fgCompatible=provider_.fg_available();
+    }
     void shutdown() {
         std::lock_guard lock(mutex_);
         if (state_.available) provider_.shutdown();

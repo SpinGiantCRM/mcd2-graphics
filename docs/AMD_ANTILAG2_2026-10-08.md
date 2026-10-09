@@ -35,7 +35,7 @@ Default zero adds no AMD authority reads, adapter checks or bridge loads.
 The existing settings worker reads the committed ProviderSettings/intent-v5.bin
 record, including its revision/checksum. Automatic or RadeonAntiLag2 with mode
 On requests enabled Anti-Lag. Off, corrupt/missing authority, another latency
-provider, Boost or any FG request resolves to Off. No legacy Reflex preference
+provider, Boost or an unimplemented FG pairing resolves to Off. No legacy Reflex preference
 is reinterpreted as AMD intent, and the reader never writes the authority.
 
 The ordinary Video page now offers **AMD Anti-Lag 2: Off / On** only when the
@@ -46,9 +46,10 @@ active-mode message requires the driver update's matching committed revision.
 The worker publishes these fields through the existing display runtime slot,
 without changing its class path or schema. A saved request is not SDK activation.
 
-All FG combinations remain disabled here. FSR FG needs the owned swapchain's
-documented Anti-Lag context/enabled private-data handshake and generated-frame
-notifications before admitting coexistence. No nested presentation owner is added.
+AMD FG coexistence now requires the actual owned FSR presenter on the same
+D3D12 device. Its runtime capability must match the current menu session before
+the Anti-Lag row appears with AMD FG enabled. NVIDIA FG and unimplemented
+pairings do not admit Anti-Lag coexistence. No second presenter is added.
 
 ## Component evidence
 
@@ -118,3 +119,42 @@ native limiter. Independent latency and Off/On frame-time measurements precede
 any benefit claim. NVIDIA/Proton can establish unsupported fallback only.
 Active Anti-Lag, AMD FG coexistence, new menu controls and packaging remain
 unqualified. No released tag, installer or dependency is changed.
+
+## FSR presenter handoff — 9 October 2026
+
+The official FSR 3.1.1+ integration contract uses swapchain private data under
+GUID `5083ae5b-8070-4fca-8ee5-3582dd367d13`: a persistent SDK context pointer
+and an enabled Boolean. Both project bridges use the Microsoft ABI. The actual
+owned presenter and device identity are checked before publishing that data.
+The FSR runtime supplies real/generated frame-type notifications on its
+presentation thread. The game's timing hook still sends the end-of-render marker;
+it does not duplicate a real-frame notification while FSR owns presentation.
+
+On leaving that path or shutting down, metadata is cleared and the present queue
+is drained before releasing the Anti-Lag context. A failed drain retains the
+context and bridge module; it cannot unload callback code or free a context still
+accessible to an asynchronous presentation worker. The independent non-FG path,
+existing native limiter, current record stamp and unsupported-device gates remain.
+
+The official SDK fixture now covers a synthetic presenter, both frame types,
+Off, clearing, failed drain with an already queued callback, retry and release.
+Its separate fake driver/presenter DLLs are excluded from candidate artifacts.
+The real FSR owned-scene host also checks device eligibility and metadata clearing
+before/after presentation. Its 30 real / 0 generated → 60 / 60 → 30 / 0 phases
+and successful retirement pass with exit code zero and no SDK errors/warnings.
+This host has no active Anti-Lag driver and cannot establish Radeon support.
+Native policy, menu/transport fixtures and bridge, timing and NeoRune UI builds
+pass. Exact hashes and scope are in the
+[handoff receipt](../qualification/providers/amd-antilag-fg-2026-10-09.json).
+
+### Windows/Radeon qualification
+
+Use the same source revision and its `fg-windows-candidate` artifact; acquire the
+pinned vendor runtimes separately. Never copy synthetic test DLLs into the game.
+Check the actual rendering Radeon/driver, then select FSR Quality + AMD FG On,
+restart, and verify both generation and the Anti-Lag row. Exercise Anti-Lag
+Off → On → Off with generation active, pause/resume, level travel and normal quit.
+Repeat with FG Off to verify independent Anti-Lag and the native frame limiter.
+Use AMD's latency monitor and a controlled frame-time comparison for benefit
+claims. Record exact artifact hashes and driver version. No Windows/AMD runtime,
+combined latency or performance benefit is claimed by the synthetic tests.

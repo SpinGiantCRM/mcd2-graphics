@@ -191,6 +191,7 @@ public class DisplaySettingsSave : USaveGame {
 public class DisplayRuntimeSave : USaveGame {
  public int SchemaVersion;public int Revision;public int SessionId;public int ReflexAvailable;public int ReflexMode;public int ReflexFault;public int HDRRevision;public int HDRRestartRequired;
  public int AmdAntiLagAvailable;public int AmdAntiLagMode;public int AmdAntiLagFault;public int AmdAntiLagRevision;
+ public int AmdAntiLagFgCompatible;
 }
 public class DisplaySetting : UGameSetting {public int ControlId;}
 public class DisplayRow : UGameSettingListEntryBase {
@@ -237,7 +238,7 @@ public class ModActor : AActor {
  public bool SharedControls(){return ProviderOwned && ProviderMenu!=null && ProviderMenu.Ready;}
  public bool AmdLatencyAvailable(){
   return SharedControls() && ProviderMenu!=null && ProviderMenu.Authority!=null && DisplayRuntime!=null &&
-   ProviderRuntimeClient.AmdLatencyAvailable(true,ProviderMenu.Authority.W5,DisplayRuntime.SchemaVersion,DisplayRuntime.SessionId,DisplayRuntime.AmdAntiLagAvailable,DisplayRuntime.AmdAntiLagFault,ProviderMenu.Value(19)!=0);
+   ProviderRuntimeClient.AmdLatencyAvailable(true,ProviderMenu.Authority.W5,DisplayRuntime.SchemaVersion,DisplayRuntime.SessionId,DisplayRuntime.AmdAntiLagAvailable,DisplayRuntime.AmdAntiLagFault,ProviderMenu.Value(19)!=0,ProviderMenu.Value(20),DisplayRuntime.AmdAntiLagFgCompatible);
  }
  public int SelectedProvider(){return SharedControls() && ProviderMenu!=null?ProviderMenu.Value(8):(Saved!=null && Saved.ReconstructionMode!=0?1:0);}
  public int SelectedFamily(){int provider=SelectedProvider();if(provider==1 || provider==2)ProviderUiFamily=provider;return ProviderUiFamily;}

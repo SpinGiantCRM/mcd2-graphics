@@ -27,13 +27,14 @@ class AntiLagBuildTests(unittest.TestCase):
             with patch.object(recipe.subprocess,'run',side_effect=fake_run):
                 binary=recipe.build(sysroot,out,'clang','link',True)
             self.assertEqual(binary.name,'mcd2-antilag2-bridge.dll')
-            self.assertEqual(len(calls),6)
+            self.assertEqual(len(calls),8)
             self.assertTrue(all('/MT' in c and '/clang:-Werror=frame-larger-than' in c for c in calls if c[0]=='clang'))
             self.assertIn('/export:mcd2_al2_abi',calls[1])
             self.assertEqual(calls[-1][0],'link')
             record=json.loads((out/'build-receipt.json').read_text())
             self.assertFalse(record['runtimeQualified']);self.assertFalse(record['vendorRuntimeBundled'])
-            self.assertEqual(len(record['testSourceSHA256']),2)
+            self.assertEqual(len(record['testSourceSHA256']),3)
+            self.assertEqual(record['contractSHA256'],hashlib.sha256((recipe.ROOT/'src/latency/amd_fg_private_data.hpp').read_bytes()).hexdigest())
         source=(recipe.ROOT/'experiments/fg-streamline/build_windows_candidate.py').read_text()
         # Explicit copy allowlist, not a glob of the directory containing the fake driver.
         self.assertIn("for name in ['mcd2-antilag2-bridge.dll', 'build-receipt.json']:",source)

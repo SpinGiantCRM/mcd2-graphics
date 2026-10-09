@@ -23,7 +23,7 @@ struct Fake : AMD::AntiLag2DX12::IAmdExtAntiLagApi {
         auto f=static_cast<AMD::AntiLag2DX12::APIData_v2*>(data);
         if(f->uiVersion!=2||f->uiSize!=sizeof(*f)||f->iiFrameIdx)return E_INVALIDARG;
         if(f->flags.signalEndOfFrameIdx)++counts[4];
-        else if(f->flags.signalFgFrameType&&!f->flags.isInterpolatedFrame)++counts[5];
+        else if(f->flags.signalFgFrameType)++counts[f->flags.isInterpolatedFrame?7:5];
         else return E_INVALIDARG;
         return S_OK;
     }

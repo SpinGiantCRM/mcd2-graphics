@@ -24,6 +24,11 @@ static class RuntimeTest {
   Check(!ProviderRuntimeClient.AmdLatencyAvailable(true,123,1,123,0,0,false));
   Check(!ProviderRuntimeClient.AmdLatencyAvailable(true,123,1,123,1,1,false));
   Check(!ProviderRuntimeClient.AmdLatencyAvailable(true,123,1,123,1,0,true));
+  Check(ProviderRuntimeClient.AmdLatencyAvailable(true,123,1,123,1,0,true,1,1));
+  Check(!ProviderRuntimeClient.AmdLatencyAvailable(true,123,1,124,1,0,true,1,1));
+  Check(!ProviderRuntimeClient.AmdLatencyAvailable(true,123,1,123,1,0,true,0,1));
+  Check(!ProviderRuntimeClient.AmdLatencyAvailable(true,123,1,123,1,0,true,1,0));
+  Check(!ProviderRuntimeClient.AmdLatencyAvailable(true,123,1,123,1,0,true,1,2));
   Check(ProviderRuntimeClient.AmdLatencyApplied(7,7,0)==0);
   Check(ProviderRuntimeClient.AmdLatencyApplied(7,7,1)==1);
   Check(ProviderRuntimeClient.AmdLatencyApplied(7,6,1)==-1);

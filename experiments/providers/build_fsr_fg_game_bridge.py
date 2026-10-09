@@ -23,7 +23,7 @@ def build(sdk, sysroot, output, compiler='clang-cl', linker='lld-link'):
     for folder in ['crt/include', 'sdk/include/ucrt', 'sdk/include/shared', 'sdk/include/um']:
         command.append('/imsvc'+str(sysroot/folder))
     link = [linker, '/dll', '/out:'+str(binary), str(obj), 'kernel32.lib', 'bcrypt.lib', 'dxgi.lib', 'd3d12.lib', 'dxguid.lib']
-    for name in ['load','support','swap','guides','world','present','state','retire']:
+    for name in ['load','support','swap','guides','world','present','state','retire','antilag_ready','antilag']:
         link.append('/export:mcd2_afg_'+name+'_v1')
     for folder in ['crt/lib/x86_64', 'sdk/lib/ucrt/x86_64', 'sdk/lib/um/x86_64']:
         link.append('/libpath:'+str(sysroot/folder))
@@ -40,7 +40,7 @@ def build(sdk, sysroot, output, compiler='clang-cl', linker='lld-link'):
     notice = root.parents[1]/'third-party/FSR-SDK-HEADERS-LICENSE.txt'
     (output/notice.name).write_bytes(notice.read_bytes())
     receipt = dict(sdkCommit=COMMIT, SDKheadersSHA256=HEADERS,
-                   sourceSHA256={name:digest(root/name) for name in ['fsr_fg_game_bridge.cpp','fsr_fg_game_bridge.h', 'fsr_fg_game_bridge_probe.cpp', 'build_fsr_fg_probe.py', '../fg-streamline/fg_camera_contract.h', '../../src/native/reset_epoch_contract.hpp']},
+                   sourceSHA256={name:digest(root/name) for name in ['fsr_fg_game_bridge.cpp','fsr_fg_game_bridge.h', 'fsr_fg_game_bridge_probe.cpp', 'build_fsr_fg_probe.py', '../fg-streamline/fg_camera_contract.h', '../../src/native/reset_epoch_contract.hpp','../../src/latency/amd_fg_private_data.hpp']},
                    recipeSHA256=digest(Path(__file__)), binarySHA256=digest(binary),
                    probeSHA256=digest(probe_binary),
                    runtimeBundled=False, gameIntegrationQualified=False,

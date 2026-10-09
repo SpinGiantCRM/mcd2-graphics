@@ -24,8 +24,10 @@ remain required before including this changed native binary in a release.
 The opt-in [Anti-Lag integration](AMD_ANTILAG2_2026-10-08.md) uses the official SDK
 through a Microsoft ABI bridge. Preserve actual adapter selection, native
 Windows/loaded-driver gates, exclusive timing ownership, source pins, frame guard
-and callback shutdown barrier. Synthetic SDK tests and Linux/NVIDIA fallback are
-not active Windows/AMD qualification. Never copy the fake amdxc64.dll into an
+and callback shutdown barrier. The owned FSR presenter uses the documented private-data handshake, with
+clear/drain before Anti-Lag release and retention when drain fails. Preserve
+those lifetime checks and actual-device gates. Synthetic SDK tests and
+Linux/NVIDIA fallback are not active Windows/AMD qualification. Never copy the fake amdxc64.dll into an
 artifact or game. Existing NVIDIA checks and both CI platforms remain required.
 
 For the held FG candidate, follow the pinned
@@ -501,7 +503,7 @@ Windows runtime qualification is still required.
 
 The ordinary Anti-Lag row requires a matching current-session runtime capability
 from the actual driver and installed timing owner. Preserve its Off/On-only
-request, FG exclusion and matching-revision active acknowledgement. Missing new
+request, actual owned AMD FG handshake and matching-revision active acknowledgement. Missing new
 fields in the existing schema-1 display slot mean unavailable. Both platforms
 run the synthetic display codec and exact C# admission/request fixtures; those
 checks do not establish active Windows/AMD driver support or latency reduction.
