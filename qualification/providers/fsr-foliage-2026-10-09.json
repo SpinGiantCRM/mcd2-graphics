@@ -18,8 +18,9 @@
     "os": "CachyOS",
     "session": "KDE Wayland",
     "gpu": "NVIDIA RTX 4080 SUPER",
-    "driver": "615.71.09",
-    "proton": "cachyos11.0-20261005-slr"
+    "driver": "615.78.08",
+    "proton": "cachyos11.0-20261005-slr",
+    "driverVerifiedWith": "nvidia-smi and captured loaded driver module"
   },
   "selection": {
     "upscaler": "AMD FSR",
