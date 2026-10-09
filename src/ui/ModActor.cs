@@ -660,28 +660,36 @@ public class ModActor : AActor {
   // Restore only our value; a later console/user/mod change takes precedence.
   if(UKismetSystemLibrary.GetConsoleVariableStringValue("r.Velocity.EnableVertexDeformation")!="" && UKismetSystemLibrary.GetConsoleVariableIntValue("r.Velocity.EnableVertexDeformation")==1){
    foliageRestoreAttempts++;UKismetSystemLibrary.ExecuteConsoleCommand(this,"r.Velocity.EnableVertexDeformation "+foliageVelocityOriginal,UGameplayStatics.GetPlayerController(this,0));
-   if(UKismetSystemLibrary.GetConsoleVariableIntValue("r.Velocity.EnableVertexDeformation")!=foliageVelocityOriginal){Log.Write("DLSS FOLIAGE RESTORE FAILED");return;}
-   Log.Write("DLSS FOLIAGE RESTORED");
+   if(UKismetSystemLibrary.GetConsoleVariableIntValue("r.Velocity.EnableVertexDeformation")!=foliageVelocityOriginal){Log.Write("SR FOLIAGE RESTORE FAILED");return;}
+   Log.Write("SR FOLIAGE RESTORED");
   }
   foliageVelocityOwned=false;
  }
  public void UpdateFoliageVelocity(int ready){
-  // Vertex deformation velocities benefit DLSS SR and DLAA, independently of FG/HDR.
+  // Vertex deformation velocities feed both temporal SR providers, independently of FG/HDR.
   // Only a current renderer acknowledgement may acquire or retain the override.
   bool eligible=Saved!=null && Saved.SchemaVersion==4 && Saved.RenderContextReady==1 && Saved.ReconstructionMode>0 && Runtime!=null && Runtime.SchemaVersion==1 && Runtime.SessionId>0 && Saved.RenderContextSessionId==Runtime.SessionId && Runtime.RequestedRevision==Saved.Revision && Runtime.ErrorCode==0 && Runtime.Phase!=3;
+  bool active=Runtime!=null && Runtime.Phase==2;
+  if(ProviderOwned){
+   if(!SharedControls()){eligible=false;active=false;}
+   else if(SelectedProvider()==2){
+    eligible=ProviderRuntime!=null && ProviderMenu!=null && ProviderRuntime.FoliageMotionReady(ProviderMenu,false);
+    active=ProviderRuntime!=null && ProviderMenu!=null && ProviderRuntime.FoliageMotionReady(ProviderMenu,true);
+   }else if(SelectedProvider()!=1){eligible=false;active=false;}
+  }
   if(!eligible){RestoreFoliageVelocity();foliageVelocityBlocked=false;return;}
   if(foliageVelocityOwned){
    if(UKismetSystemLibrary.GetConsoleVariableStringValue("r.Velocity.EnableVertexDeformation")=="" || UKismetSystemLibrary.GetConsoleVariableIntValue("r.Velocity.EnableVertexDeformation")!=1){foliageVelocityOwned=false;foliageVelocityBlocked=true;}
    return;
   }
   // Acquire in verified gameplay only. Keep the lease through temporary menus.
-  if(foliageVelocityBlocked || ready!=1 || Runtime==null || Runtime.Phase!=2)return;
+  if(foliageVelocityBlocked || ready!=1 || !active)return;
   if(UKismetSystemLibrary.GetConsoleVariableStringValue("r.Velocity.EnableVertexDeformation")=="" || UKismetSystemLibrary.GetConsoleVariableIntValue("r.VelocityOutputPass")!=2){foliageVelocityBlocked=true;return;}
   int original=UKismetSystemLibrary.GetConsoleVariableIntValue("r.Velocity.EnableVertexDeformation");
   if(original==1)return;
   if(original!=0 && original!=2){foliageVelocityBlocked=true;return;}
   UKismetSystemLibrary.ExecuteConsoleCommand(this,"r.Velocity.EnableVertexDeformation 1",UGameplayStatics.GetPlayerController(this,0));
-  if(UKismetSystemLibrary.GetConsoleVariableIntValue("r.Velocity.EnableVertexDeformation")==1){foliageVelocityOriginal=original;foliageRestoreAttempts=0;foliageVelocityOwned=true;Log.Write("DLSS FOLIAGE VELOCITY ENABLED");}else{foliageVelocityBlocked=true;Log.Write("DLSS FOLIAGE APPLY FAILED");}
+  if(UKismetSystemLibrary.GetConsoleVariableIntValue("r.Velocity.EnableVertexDeformation")==1){foliageVelocityOriginal=original;foliageRestoreAttempts=0;foliageVelocityOwned=true;Log.Write("SR FOLIAGE VELOCITY ENABLED");}else{foliageVelocityBlocked=true;Log.Write("SR FOLIAGE APPLY FAILED");}
  }
  public void ShowDisplayHelp(int id){displayHelp=id;OwnHelpVisible=true;string help="";
   if(id==7)help="Choose the frame-generation provider independently of the upscaler.\n\n• NVIDIA DLSS\n• AMD FSR\n\nRestart after changing providers.";

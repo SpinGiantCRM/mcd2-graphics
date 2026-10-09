@@ -16,6 +16,20 @@ public class ProviderRuntimeClient : USaveGame {
  public static int AmdLatencyApplied(int authorityRevision,int runtimeRevision,int runtimeMode){
   return authorityRevision>0 && runtimeRevision==authorityRevision && (runtimeMode==0 || runtimeMode==1)?runtimeMode:-1;
  }
+ // A saved FSR selection cannot acquire a source-material override. Require
+ // current-world evaluated output and the observed source scale; transient
+ // Evaluate may retain an existing lease but cannot acquire a new one.
+ public bool FoliageMotionReady(ProviderMenuClient menu,bool acquiring){
+  if(!menu.Ready || menu.Authority==null || !Enabled || Context==null || State==null ||
+     !ContextValid(Context) || !StateValid(State))return false;
+  var a=menu.Authority;var c=Context;var s=State;
+  int delta=c.W12-s.W16;if(delta<0)delta=-delta;
+  return a.W20==2 && c.W10==1 && s.W18==2 && s.W11==0 && s.W17>0 &&
+   (s.W10==5 || (!acquiring && s.W10==4)) &&
+   Session==a.W5 && c.W5==Session && s.W5==Session &&
+   c.W9==WorldGeneration && s.W9==WorldGeneration &&
+   c.W7==a.W19 && s.W7==a.W19 && c.W8==a.W16 && s.W8==a.W16 && delta<=100;
+ }
  public static bool CanRestoreNvidiaSource(int savedRevision,int savedMode,int savedSession,int schema,int revision,int session,int phase){
   return savedRevision>0 && savedMode>0 && savedMode<=2 && savedSession>0 && schema==1 && revision==savedRevision && session==savedSession && phase==3;
  }
