@@ -1,6 +1,11 @@
 # Windows/Radeon candidate handoff
 
 This is a development qualification artifact, not a released installer.
+The PR42 download below is historical: it predates the
+[AMD Streamline feature lifetime correction](AMD_STREAMLINE_FEATURE_LIFETIME_2026-10-10.md).
+Use a source-matched later Windows build when qualifying that correction; do
+not apply PR42's binary hashes to a rebuilt candidate. The active-AMD-FG exit
+delay remains an explicit gate.
 Use [PR42's Windows build](https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/38000189718)
 and download `fg-windows-candidate`, artifact 11648679883.
 

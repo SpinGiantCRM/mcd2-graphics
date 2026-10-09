@@ -169,7 +169,11 @@ jobs:
           g++ -std=c++20 -static -municode -DNTDDI_VERSION=0x06010000 -D_WIN32_WINNT=0x0601 -Wall -Wextra -Werror tests/provider_store_test.cpp -o provider-store-old-headers.exe
           python tests/test_provider_store_process.py provider-store-old-headers.exe -v
       - name: Bounded FG controller checks
-        run: python -m unittest discover -s experiments/fg-streamline -p "test_*.py" -v
+        shell: bash
+        run: |
+          python -m unittest discover -s experiments/fg-streamline -p "test_*.py" -v
+          g++ -std=c++20 -static -Wall -Wextra -Werror experiments/fg-streamline/fg_configuration_test.cpp -o fg-configuration.exe
+          ./fg-configuration.exe
 
   guided-installer-checks:
     name: Guided installer (${{ matrix.os }})
