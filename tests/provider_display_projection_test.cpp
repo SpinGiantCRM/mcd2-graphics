@@ -26,7 +26,7 @@ int main(int argc,char** argv){
   intent.sr=SrProvider(sr);intent.fg=FgProvider(fg);intent.fgEnabled=true;
   assert(encodeGraphicsRecord(intent,bytes)&&decodeGraphicsRecord(bytes,record));
   FgMenuProjection projection;assert(projectFgMenu(record,projection));
-  assert(projection.pairEligible==((fg==0&&sr==1)||(fg==1&&(sr==1||sr==2))));
+  assert(projection.pairEligible==((fg==0&&sr==1)||(fg==1&&(sr==0||sr==1||sr==2))));
   assert(fgMenuMatches(projection,42,fg,1));
   assert(!fgMenuMatches(projection,41,fg,1)&&!fgMenuMatches(projection,42,fg,0));
   assert(fgOwnerMatches(fg+1,fg)==(fg<2));assert(!fgOwnerMatches(0,fg));

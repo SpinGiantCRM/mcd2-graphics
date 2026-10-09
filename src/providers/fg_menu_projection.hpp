@@ -13,7 +13,7 @@ inline bool projectFgMenu(const DecodedGraphicsRecord& record,FgMenuProjection& 
     const auto& i=record.intent;
     const bool single=i.fgStrategy==FgStrategy::Single&&i.requestedMultiplier==2;
     const bool pair=single&&((i.fg==FgProvider::Nvidia&&i.sr==SrProvider::NvidiaDlss)||
-        (i.fg==FgProvider::Amd&&(i.sr==SrProvider::NvidiaDlss||i.sr==SrProvider::AmdFsr)));
+        (i.fg==FgProvider::Amd&&(i.sr==SrProvider::Native||i.sr==SrProvider::NvidiaDlss||i.sr==SrProvider::AmdFsr)));
     out={i.revision,unsigned(i.fg),i.fgEnabled,pair};return true;
 }
 constexpr bool fgMenuMatches(const FgMenuProjection& current,std::uint32_t revision,
