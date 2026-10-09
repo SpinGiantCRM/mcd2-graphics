@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-09",
+  "scope": "Private-recording AMD FG developer candidate; isolated GPU and bounded Linux gameplay",
+  "sourceBase": "a215d9f183a85d0f955077fba692afdfec7c3a0a",
+  "recordingContract": 2,
+  "host": {
+    "os": "CachyOS",
+    "session": "KDE Wayland",
+    "gpu": "NVIDIA RTX 4080 SUPER",
+    "driver": "615.78.08",
+    "proton": "cachyos11.0-20261005-slr"
+  },
+  "steamBuild": 25754144,
+  "gameVersion": "1.1.2.0",
+  "installedSHA256": {
+    "Dungeons/Binaries/Win64/dxgi.dll": "90d864a8001b63154d1ba58e97ce7bef52dc772668b844f859213af043703432",
+    "Dungeons/Binaries/Win64/fg-sdk-bridge.dll": "8e42cd9b8e5217bc26d490ae67cf2828ccbc325a332094292c60dea26bd862d8",
+    "Dungeons/Binaries/Win64/mcd2-fg-guide-recon.addon64": "a0979edab0bab08b05285f60698399a7983bba2fe56a774d63f90ea82f2a401d",
+    "Dungeons/Binaries/Win64/mcd2-graphics.addon64": "535d32dfea04c65c6285c5b334ca404c0550676df941a9999d031e79a63e564f",
+    "Dungeons/Binaries/Win64/mcd2-display-latency.addon64": "9d0bb873502f57bcc3ea71a70b80612548ab2ee5d95cfcb6b0bd55ad3ac3c7aa",
+    "Dungeons/Binaries/Win64/FGBootstrap.ini": "28e372323e4f57087414176fd5b1afa51ac6e1c301dadad23b1e303bbbdde508",
+    "Dungeons/Binaries/Win64/FGGuideCapture.ini": "492c4233a4803fe3bcf1b472727ec142ec1d242669030bb7d95b735c22398ca0",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.pak": "2d669349729a7d12da5a591fa57782e849baacb475ae35178692e005f461cbff",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.ucas": "77ea91defc57ab304fc6f10112ef1ba3f5229e46442038e7a46c6eb7aa4f175e",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.utoc": "1f66e2dfdfc5693663cee865b77bc6ee1c6db15ed9cdcdbec71c433961be4bd6",
+    "Dungeons/Binaries/Win64/mcd2-fsr-fg-game-bridge.dll": "39baf4fa23c1f953b5cf9926acdeb90d6ff5a25fdcda4c8ca1ea563e1ca25441",
+    "Dungeons/Binaries/Win64/amd_fidelityfx_framegeneration_dx12.dll": "02297beedd285e822d3a64f314cf00faf378dcec0edc47ff0c4dd71b3a8c2f18",
+    "Dungeons/Binaries/Win64/MCD2Graphics/fsr/mcd2-fsr-game-bridge.dll": "f422af2f70f62ca8462c3aff30d05d1db92dd3b1d0e4289750039b8a2a83514b",
+    "Dungeons/Binaries/Win64/MCD2Graphics/fsr/amd_fidelityfx_upscaler_dx12.dll": "d0dcccc74a43c44ba435b7a369b456e0970d8a4464e4bd683119b374f2c9fb46",
+    "Dungeons/Binaries/Win64/MCD2Graphics/fsr_dense.cso": "089cef22d81092bd9ed2bdf0ec7a9bb6fcfe10268c52e0a57273dc69df68da68"
+  },
+  "changedSourceSHA256": {
+    "experiments/fg-streamline/bootstrap_dxgi.cpp": "a1e153fb1ea4482e0694b9a272069b69d2173cbfdf348b1df973ccbd1c2a27cd",
+    "experiments/fg-streamline/guide_recon.cpp": "7a1d08cc255552137566fe5ecd6de774263714b14af28a98eb7e8d5c68d607cb",
+    "experiments/providers/fsr_fg_game_bridge.cpp": "9c878f3aec5df18bc30f244cf1253afe52de1307f1c3b69d7630b740ca5c9015",
+    "experiments/providers/fsr_fg_game_bridge.h": "aa9f60046dc1e5067158a09bd6c3c1ae2f3d259d1f3ce2ad3323d200e50b5767",
+    "experiments/providers/fsr_fg_game_bridge_probe.cpp": "f8ce117ec3ab33dd03974aa2a6a2c38aa7f4676c8a74f54a1047674b46633e6b"
+  },
+  "isolatedHost": {
+    "exitCode": 0,
+    "timeout": false,
+    "seconds": 4.02,
+    "passed": true,
+    "gameIntegrationQualified": false,
+    "runtimeBundled": false,
+    "bridgeSHA256": "c2f81a73146fa74619e289acc78d0a96d972b80710f3b62529223e2d7f4be6b1",
+    "probeSHA256": "9ab379ddbb343da89c9238893f9fc775ea26ccdc671415678683d2fb468a33fd",
+    "runtimeSHA256": {
+      "amd_fidelityfx_framegeneration_dx12.dll": "02297beedd285e822d3a64f314cf00faf378dcec0edc47ff0c4dd71b3a8c2f18"
+    }
+  },
+  "isolatedHostChecks": {
+    "unrelatedQueueRefused": true,
+    "renderedFrames": [
+      30,
+      60,
+      30
+    ],
+    "generatedFrames": [
+      0,
+      60,
+      0
+    ],
+    "retirementWhileHostListReplayable": true,
+    "hostBarrierRecordingReplayedAfterSDKRetirement": true,
+    "repeatedRetirement": true
+  },
+  "gameChecks": {
+    "normalMenuSelectionPersisted": true,
+    "startupOwner": 2,
+    "FSRQualityRender": [
+      2560,
+      1440
+    ],
+    "output": [
+      3840,
+      2160
+    ],
+    "fsrEvaluations": 6470,
+    "prepared": 6442,
+    "generated": 6442,
+    "errors": 0,
+    "warnings": 0,
+    "fault": 0,
+    "pauseGeneratedCounts": [
+      3863,
+      3863
+    ],
+    "resumeActive": true,
+    "retirementResult": 0,
+    "normalQuitSeconds": 2.933,
+    "processGone": true,
+    "signalSent": false,
+    "exitCodeCaptured": false,
+    "originalModFilesAndPreferencesRestored": true,
+    "FSRStateAfterQueueDestruction": {
+      "phase": 6,
+      "error": 27
+    }
+  },
+  "checks": {
+    "portablePythonPassed": 85,
+    "portablePythonSkipped": 5,
+    "fgRecipePassed": 21
+  },
+  "limits": [
+    "Windows/AMD runtime unqualified",
+    "No performance, latency or artifact-quality claim",
+    "Isolated host rebuilt for stronger queue/replay coverage; its binary hash differs from the installed game bridge although bridge source is unchanged",
+    "FSR SR queue destruction reports phase 6/error 27; this change qualifies AMD FG retirement only",
+    "No resolution/device-loss/long-session qualification"
+  ],
+  "rawLogsPublished": false,
+  "thirdPartyRuntimeBundled": false
+}

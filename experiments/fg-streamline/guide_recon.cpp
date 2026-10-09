@@ -145,8 +145,8 @@ void swap_destroy(a::swapchain*swap,bool resize){
    privateLog<<"{\"kind\":\"alpha_retirement_requested\",\"resize\":"<<(resize?"true":"false")<<",\"recordedCommandLeases\":"<<recordings<<"}\n";privateLog.flush();}}
  if(!owner)return;
  if(auto module=amd_bridge()){
-  using Present=int(*)(uint64_t,uint32_t);auto disable=reinterpret_cast<Present>(GetProcAddress(module,"mcd2_afg_present_v1"));
-  if(disable)disable(UINT64_MAX,0);activeFGMode=0;
+  using Present=int(*)(void*,uint64_t,uint32_t);auto disable=reinterpret_cast<Present>(GetProcAddress(module,"mcd2_afg_present_v2"));
+  if(disable)disable(nullptr,UINT64_MAX,0);activeFGMode=0;
   // ReShade recreates its wrapper on ResizeBuffers; the SDK presenter remains
   // the same native object. Do not destroy it beneath the game's live COM ref.
   if(resize){std::lock_guard lock(mutex);retiring=false;return;}
@@ -223,7 +223,7 @@ void compositor(a::command_list*cmd){
  auto uiResource=reinterpret_cast<ID3D12Resource*>(cmd->get_device()->get_resource_from_view(ui.view).handle);auto worldResource=reinterpret_cast<ID3D12Resource*>(cmd->get_device()->get_resource_from_view(world.view).handle);
  internalGPU=true;
  if(auto module=amd_bridge()){
-  using World=int(*)(void*,void*,uint64_t);auto copy=reinterpret_cast<World>(GetProcAddress(module,"mcd2_afg_world_v1"));auto raw=native_command(proxy);
+  using World=int(*)(void*,void*,uint64_t);auto copy=reinterpret_cast<World>(GetProcAddress(module,"mcd2_afg_world_v2"));auto raw=native_command(proxy);
   sdkResult=raw&&copy?copy(raw,worldResource,stamp):-100;tokenResult=sdkResult;sdkIndex=stamp;if(raw)raw->Release();
   restore_root(cmd,saved.compute,true);if(saved.computePipeline)cmd->bind_pipeline(a::pipeline_stage::all_compute,{saved.computePipeline});restore_root(cmd,saved.graphics,false);cmd->bind_pipeline(a::pipeline_stage::all_graphics,{saved.graphicsPipeline});internalGPU=false;proxy->Release();
   std::lock_guard lock(mutex);commands[cmd]=saved;
@@ -269,9 +269,9 @@ void present(a::command_queue*q,a::swapchain*swap,const a::rect*,const a::rect*,
  }
  const unsigned mode=ready&&wanted&&fg_alpha::submission_queue(q)?1:0;
  if(auto module=amd_bridge()){
-  using Present=int(*)(uint64_t,uint32_t);auto configure=reinterpret_cast<Present>(GetProcAddress(module,"mcd2_afg_present_v1"));auto result=configure?configure(id,ready&&wanted?1:0):-1;
+  using Present=int(*)(void*,uint64_t,uint32_t);auto configure=reinterpret_cast<Present>(GetProcAddress(module,"mcd2_afg_present_v2"));auto result=configure?configure(reinterpret_cast<void*>(q->get_native()),id,ready&&wanted?1:0):-1;
   activeFGMode=!result&&ready&&wanted?1:0;
-  if(fg_controls::enabled&&result)fg_controls::fault=1;
+  if(fg_controls::enabled&&result&&result!=MCD2_AFG_BUSY_V2)fg_controls::fault=1;
   if(fg_controls::enabled)fg_controls::publish(activeFGMode,ready);
   if(activeFGMode){++fgTrialFrames;presentedFrame=uint32_t(id);}return;
  }
@@ -312,7 +312,7 @@ extern "C" __declspec(dllexport) void mcd2_fg_observe_sr(void*cmd,void*depth,voi
  const auto sample=guideSamples.fetch_add(1);if((!fg_controls::enabled&&sample>=900)||(fg_controls::enabled&&!fg_controls::wanted))return;
  if(auto module=amd_bridge()){
   auto latency=GetModuleHandleW(L"mcd2-display-latency.addon64");renderMarker=latency?reinterpret_cast<Frame>(GetProcAddress(latency,"mcd2_fg_render_marker")):nullptr;presentFrame=latency?reinterpret_cast<Frame>(GetProcAddress(latency,"mcd2_fg_present_frame")):nullptr;
-  using Guides=int(*)(void*,void*,void*,const MCD2AmdFgGuidesV1*);auto prepare=reinterpret_cast<Guides>(GetProcAddress(module,"mcd2_afg_guides_v1"));
+  using Guides=int(*)(void*,void*,void*,const MCD2AmdFgGuidesV1*);auto prepare=reinterpret_cast<Guides>(GetProcAddress(module,"mcd2_afg_guides_v2"));
   static LARGE_INTEGER frequency{},previous{};static uint32_t previousFrame=UINT32_MAX;
   LARGE_INTEGER now{};if(!frequency.QuadPart)QueryPerformanceFrequency(&frequency);QueryPerformanceCounter(&now);
   if(previousFrame!=UINT32_MAX&&camera->frame<=previousFrame)return;

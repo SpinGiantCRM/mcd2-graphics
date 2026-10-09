@@ -33,16 +33,16 @@ def gate(rows, code, timeout):
         if row.get('phase')!=index or row.get('enabled') is not (index==1): return False
         if row.get('real')!=count or row.get('generated')!=(count if index==1 else 0): return False
         if any(row.get(key)!=0 for key in ['fault','errors','warnings']): return False
-    counts={'load-verified-runtime':1,'create-bridge-swapchain':1,'set-PQ-output':1,
-            'owned-presenter-antilag-ready':1,'clear-antilag-before-presentation':1,'clear-antilag-after-presentation':1,
+    counts={'owned-recording-contract':1,'load-verified-runtime':1,'create-bridge-swapchain':1,'set-PQ-output':1,
+            'reject-unrelated-submission-queue':1,'owned-presenter-antilag-ready':1,'clear-antilag-before-presentation':1,'clear-antilag-after-presentation':1,
             'prepare-game-bridge-inputs':60,'copy-hudless-world':60,'configure-bridge-present':120,
-            'retain-live-recording':1,'retain-after-failed-Reset':1,
-            'retire-after-successful-Reset-and-own-fence':1,'complete':1}
+            'retire-with-replayable-host-recording':1,'host-recording-replay-after-SDK-retirement':1,
+            'idempotent-retirement':1,'complete':1}
     for name,count in counts.items():
         events=[r for r in rows if r.get('stage')==name]
-        expected=-61 if name.startswith('retain-') else 0
+        expected=0
         if len(events)!=count or any(r.get('result')!=expected for r in events): return False
-    ordered=['retain-live-recording','retain-after-failed-Reset','retire-after-successful-Reset-and-own-fence','complete']
+    ordered=['retire-with-replayable-host-recording','host-recording-replay-after-SDK-retirement','idempotent-retirement','complete']
     indices=[next(i for i,r in enumerate(rows) if r.get('stage')==name) for name in ordered]
     return indices==sorted(indices)
 
