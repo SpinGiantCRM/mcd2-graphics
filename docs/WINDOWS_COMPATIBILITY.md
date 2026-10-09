@@ -101,6 +101,11 @@ release provenance rather than a defect proven exclusive to Windows.
 
 ## Linux regression handoff
 
+The current AMD development handoff is
+[Windows/Radeon candidate qualification](AMD_WINDOWS_CANDIDATE_2026-10-10.md).
+Use its verified PR42 artifact and per-file hashes; the old released installer
+and bounded isolated probes do not install the continuous FSR candidate.
+
 Use this candidate source and its matching release ZIP. GitHub's automatic
 source archive omits the ignored `package/` payload. Check install/removal and
 save preservation, startup beyond the original crash window, gameplay, NVIDIA
