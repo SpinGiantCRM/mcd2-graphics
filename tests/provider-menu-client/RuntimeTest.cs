@@ -11,6 +11,7 @@ static class RuntimeTest {
   s.W16=66666667;s.W18=2;s.W19=1;s.W20=1;s.W4=s.Checksum(0,32);return s;
  }
  public static void Run(){
+  FoliageChecks();
   Check(ProviderRuntimeClient.CanRestoreNvidiaSource(7,2,123,1,7,123,3));
   Check(!ProviderRuntimeClient.CanRestoreNvidiaSource(7,2,123,1,7,124,3));
   Check(!ProviderRuntimeClient.CanRestoreNvidiaSource(7,2,123,1,8,123,3));
@@ -55,5 +56,33 @@ static class RuntimeTest {
   UGameplayStatics.FailSave=true;Check(!travel.Poll(menu,"Dungeon",true,100000,100000000));UGameplayStatics.FailSave=false;
   travel.Stop();Check(travel.Context.W10==0&&travel.Context.W13==0&&travel.Context.W4==travel.Context.Checksum(0,32));
   Console.WriteLine("SR game-thread client: exact scale, reapply, rollback, actor travel, stale plan and corruption checks pass");
+ }
+ static void FoliageChecks(){
+  UGameplayStatics.Slots.Clear();var menu=Menu();menu.Authority!.W20=2;
+  var client=new ProviderRuntimeClient();client.Start();var s=Plan(5,5);s.W17=1;s.W4=s.Checksum(0,32);
+  UGameplayStatics.Slots["MCD2GraphicsProviderSrRuntime"]=s;
+  Check(client.Poll(menu,"Hub",true,100000,66666667));
+  Check(client.FoliageMotionReady(menu,true)&&client.FoliageMotionReady(menu,false));
+  var c=client.Context!;
+  foreach(int word in new[]{4,5,7,8,9,10,12}){
+   int before=c.Word(word);c.SetWord(word,before^1);if(word!=4)c.W4=c.Checksum(0,32);
+   // A one-unit source difference is tolerated; test outside that tolerance.
+   if(word==12){c.W12=66666800;c.W4=c.Checksum(0,32);}
+   Check(!client.FoliageMotionReady(menu,true));c.SetWord(word,before);c.W4=c.Checksum(0,32);
+  }
+  foreach(int phase in new[]{0,1,2,3,6,7,8,9}){s.W10=phase;s.W4=s.Checksum(0,32);Check(!client.FoliageMotionReady(menu,false));}
+  s.W10=4;s.W4=s.Checksum(0,32);Check(!client.FoliageMotionReady(menu,true)&&client.FoliageMotionReady(menu,false));
+  s.W10=5;s.W17=0;s.W4=s.Checksum(0,32);Check(!client.FoliageMotionReady(menu,false));
+  s.W17=1;s.W11=1;s.W4=s.Checksum(0,32);Check(!client.FoliageMotionReady(menu,false));
+  s.W11=0;s.W18=1;s.W4=s.Checksum(0,32);Check(!client.FoliageMotionReady(menu,false));
+  s.W18=2;s.W4=s.Checksum(0,32);s.W4^=1;Check(!client.FoliageMotionReady(menu,false));s.W4^=1;
+  foreach(int word in new[]{5,7,8,9,16}){int before=s.Word(word);s.SetWord(word,before+1000);s.W4=s.Checksum(0,32);Check(!client.FoliageMotionReady(menu,false));s.SetWord(word,before);s.W4=s.Checksum(0,32);}
+  menu.Authority.W20=1;Check(!client.FoliageMotionReady(menu,false));menu.Authority.W20=2;
+  menu.Authority.W19++;Check(!client.FoliageMotionReady(menu,false));menu.Authority.W19--;
+  menu.Ready=false;Check(!client.FoliageMotionReady(menu,false));menu.Ready=true;
+  client.Enabled=false;Check(!client.FoliageMotionReady(menu,false));client.Enabled=true;
+  client.WorldGeneration++;Check(!client.FoliageMotionReady(menu,false));client.WorldGeneration--;
+  Check(client.FoliageMotionReady(menu,true));
+  Console.WriteLine("FSR foliage admission: active output, current world/request, scale, corruption and retirement gates pass");
  }
 }

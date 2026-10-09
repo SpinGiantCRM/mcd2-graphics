@@ -1,3 +1,10 @@
+The [FSR foliage lease](FSR_FOLIAGE_2026-10-09.md) uses actual current-world SR
+output before changing the material velocity CVar. Preserve matching session,
+revision/checksum, scale and successful-evaluation admission, acquisition only
+in gameplay, external ownership and restoration readback. Keep existing NVIDIA
+checks and both platform fixtures. The bounded Linux pass does not qualify
+Windows/AMD or the separately observed shutdown failure.
+
 # Windows fixes: reasons and preservation requirements
 
 The opt-in [continuous FSR controller](FSR_CONTINUOUS_2026-10-09.md) preserves the

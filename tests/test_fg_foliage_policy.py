@@ -35,6 +35,8 @@ class FGRuntimeSave {public int Available=1,SessionId=42,RestartRequired=0,Phase
 class GraphicsSettingsSave {public int SchemaVersion=4,Revision=7,RenderContextSessionId=42,RenderContextReady=1,ReconstructionMode=2;}
 class GraphicsRuntimeStateSave {public int SchemaVersion=1,RequestedRevision=7,SessionId=42,ErrorCode=0,Phase=2;}
 class DisplaySettingsSave {public int HDROutput=1;}
+class ProviderMenuClient {}
+class ProviderRuntimeClient {public bool Eligible=true,Active=true;public bool FoliageMotionReady(ProviderMenuClient m,bool acquire)=>Eligible && (!acquire || Active);}
 static class UGameplayStatics {public static object GetPlayerController(object x,int id)=>x;}
 static class Log {public static void Write(string x){}}
 static class UKismetSystemLibrary {
@@ -47,6 +49,9 @@ static class UKismetSystemLibrary {
 class ModActor {
  public FGSettingsSave FGSaved=new();public FGRuntimeSave FGRuntime=new();
  public GraphicsSettingsSave Saved=new();public GraphicsRuntimeStateSave Runtime=new();public DisplaySettingsSave DisplaySaved=new();
+ public bool ProviderOwned,SharedReady=true;public int Selected=2;
+ public ProviderMenuClient ProviderMenu=new();public ProviderRuntimeClient ProviderRuntime=new();
+ public bool SharedControls()=>SharedReady;public int SelectedProvider()=>Selected;
 __FIELDS__
 __METHODS__
 }
@@ -83,6 +88,15 @@ class Program {
   a=New();a.UpdateFoliageVelocity(1);a.FGSaved.Mode=0;a.FGRuntime.Active=0;a.UpdateFoliageVelocity(1);Check(UKismetSystemLibrary.Vertex==1,"FG Off keeps active SR lease");
   a=New();a.UpdateFoliageVelocity(1);a.Runtime.Phase=3;a.UpdateFoliageVelocity(1);Check(UKismetSystemLibrary.Vertex==2,"runtime fault restores");
   a=New();a.UpdateFoliageVelocity(1);a.Saved.RenderContextReady=0;a.UpdateFoliageVelocity(0);Check(UKismetSystemLibrary.Vertex==2,"travel restores");
+  a=New();a.ProviderOwned=true;a.Saved.ReconstructionMode=0;a.Runtime=null;a.UpdateFoliageVelocity(1);Check(UKismetSystemLibrary.Vertex==1,"FSR acknowledgement acquires without DLSS acknowledgement");
+  a.UpdateFoliageVelocity(0);Check(UKismetSystemLibrary.Vertex==1,"FSR temporary menu retains");
+  a.ProviderRuntime.Active=false;a.UpdateFoliageVelocity(1);Check(UKismetSystemLibrary.Vertex==1,"FSR transient evaluation retains");
+  a.ProviderRuntime.Eligible=false;a.UpdateFoliageVelocity(1);Check(UKismetSystemLibrary.Vertex==2,"FSR loss restores");
+  a=New();a.ProviderOwned=true;a.ProviderRuntime.Active=false;a.UpdateFoliageVelocity(1);Check(UKismetSystemLibrary.Commands==0,"FSR pending cannot acquire");
+  a=New();a.ProviderOwned=true;a.ProviderRuntime.Eligible=false;a.UpdateFoliageVelocity(1);Check(UKismetSystemLibrary.Commands==0,"stale DLSS acknowledgement cannot admit selected FSR");
+  a=New();a.ProviderOwned=true;a.UpdateFoliageVelocity(1);a.SharedReady=false;a.UpdateFoliageVelocity(1);Check(UKismetSystemLibrary.Vertex==2,"lost authority restores");
+  a=New();a.ProviderOwned=true;a.UpdateFoliageVelocity(1);a.Selected=0;a.UpdateFoliageVelocity(1);Check(UKismetSystemLibrary.Vertex==2,"shared Native selection restores");
+  a=New();a.ProviderOwned=true;a.Selected=1;a.UpdateFoliageVelocity(1);a.Selected=2;a.UpdateFoliageVelocity(1);Check(UKismetSystemLibrary.Commands==1,"DLSS to acknowledged FSR shares the existing lease");a.RestoreFoliageVelocity();Check(UKismetSystemLibrary.Vertex==2,"shared lease restores original");
   Console.WriteLine($"{checks} foliage lease checks passed");
  }
 }
