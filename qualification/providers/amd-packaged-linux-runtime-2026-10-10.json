@@ -1,0 +1,211 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-10",
+  "sourceBase": "9d7acdc91faba5b3e3ad1edbf6670addf52b1397",
+  "candidateOnly": true,
+  "runtimeQualificationPassed": false,
+  "package": {
+    "artifact": 11653422430,
+    "run": 38011982509,
+    "sourceCommit": "059bf07928a4640b24185fd9c07b098fe9895bcc",
+    "archiveSHA256": "88543bc92c337f5eb48b39ec2bbb61a90bb4938a48e480339ae1acebda1d0b79",
+    "packages": {
+      "linux": {
+        "filesVerified": 240,
+        "manifestSHA256": "5fee9b1919b40e586372bec08a09748bd57e363ee373faafcd961b66d2c2e6df",
+        "dependencyLockSHA256": "1e6657c712b15c2a633b6c9b0860ed200ba43bf8a29d434c25373845582a2017",
+        "payloadEqualsVerifiedPR45": true,
+        "installerSHA256": "5ef688b4a7d93dd8b4265ae39ef6988fbc3c1db15ea5e38aa27a28981e4fdb7a",
+        "windowsRuntimeQualified": false,
+        "embeddedResourcesMatch": true
+      },
+      "windows": {
+        "filesVerified": 241,
+        "manifestSHA256": "5fee9b1919b40e586372bec08a09748bd57e363ee373faafcd961b66d2c2e6df",
+        "dependencyLockSHA256": "1e6657c712b15c2a633b6c9b0860ed200ba43bf8a29d434c25373845582a2017",
+        "payloadEqualsVerifiedPR45": true,
+        "installerSHA256": "e321388f05b6b0bb254124fcb5c3282df082f23e75ec1591caa05e818ff30e87",
+        "windowsRuntimeQualified": false,
+        "embeddedResourcesMatch": true
+      }
+    },
+    "verifiedZipEntries": 498
+  },
+  "host": {
+    "os": "CachyOS",
+    "session": "KDE Wayland",
+    "renderGPU": "NVIDIA GeForce RTX 4080 SUPER",
+    "driver": "615.78.08",
+    "proton": "CachyOS SLR 11.0-20261005",
+    "gameVersion": "1.1.2.0",
+    "steamBuild": 25754144,
+    "shippingSHA256": "3a8703406fd50520f83c4f70a0212c000cb3b584ef28eb38032902230c01ebdd",
+    "output": [
+      3840,
+      2160
+    ],
+    "hdrRequested": true,
+    "peakNits": 420,
+    "paperWhiteNits": 203,
+    "uiNits": 203
+  },
+  "method": {
+    "cpuFinishPresentCallbacks": 1200,
+    "noGpuQueries": true,
+    "noPixelReadbacks": true,
+    "characterAndCameraStationary": true,
+    "sceneAnimated": true,
+    "extraDiagnosticAddon": "CPU-only present_sampler.cpp",
+    "samplerSourceSHA256": "4e6ffd35ec772f84b3e23d39d928fa9a780248e5a03310d4d7702e8e74570cc7",
+    "samplerBinarySHA256": "f460795cf874ffb8ce3cb11c78bb67236a87585f586fcf506416f0bde88d6224",
+    "analyzerSourceSHA256": "05353ba1d4a4d854291dd87841c51f0bbac3f4499ef441a6dd3834ba8fa7eabe",
+    "analyzerChecks": 8,
+    "gpuMonitor": "nvidia-smi 500ms; identical sampling policy across captures",
+    "groupSummary": "arithmetic mean of the three per-run statistics, not pooled percentile",
+    "physicalDisplayFPSMeasured": false
+  },
+  "summary": {
+    "cleanOff": {
+      "applicationPresentRate": 133.05564374560657,
+      "medianMs": 7.3694,
+      "p95Ms": 8.513166666666667,
+      "p99Ms": 9.162,
+      "runs": 3
+    },
+    "fgOn": {
+      "applicationPresentRate": 90.03299624584456,
+      "medianMs": 10.9709,
+      "p95Ms": 12.236366666666667,
+      "p99Ms": 12.8585,
+      "runs": 3
+    },
+    "retainedOff": {
+      "applicationPresentRate": 127.29291475876703,
+      "medianMs": 7.749466666666667,
+      "p95Ms": 8.870533333333334,
+      "p99Ms": 9.335233333333333,
+      "runs": 3
+    }
+  },
+  "relativeToCleanOff": {
+    "baseFpsReductionPercent": 32.334327420202044,
+    "combinedSdkCountIncreasePercent": 35.331345159595905,
+    "retainedOffBaseFpsReductionPercent": 4.33106693155948
+  },
+  "excluded": [
+    {
+      "label": "pr47-fsr-clean-off-c",
+      "reason": "A concurrent Spectacle screenshot introduced additional GPU/compositor work. Raw capture retained privately."
+    },
+    {
+      "label": "dlss-native-debug-attachment",
+      "reason": "Win32 debugger attachment changed execution: game exited with code 1000 before normal quit input. Not admitted as shutdown evidence; no fast-fail exception was captured."
+    }
+  ],
+  "pause": {
+    "generatedCountBefore": 7659,
+    "generatedCountAfter": 7659,
+    "realCountBefore": 48241,
+    "realCountAfter": 66481,
+    "elapsedSeconds": 22.181429052,
+    "activeAtBothBoundaries": false,
+    "sdkErrorsAtBothBoundaries": 0
+  },
+  "lifecycleSequence": [
+    "FSR Quality + AMD FG",
+    "FG Off (presenter retained; restart requested)",
+    "FG On + FSR Native AA",
+    "DLSS Quality + AMD FG",
+    "Native + AMD FG",
+    "normal menu quit"
+  ],
+  "shutdown": [
+    {
+      "label": "clean-off",
+      "actualGameExitCode": 0,
+      "actualGameExitHex": "0x0",
+      "processQuerySucceeded": true,
+      "waitResult": 0,
+      "confirmationHelperStartToProcessGoneSeconds": 3.3959150289992976,
+      "gameProcessGone": true
+    },
+    {
+      "label": "mixed-on",
+      "actualGameExitCode": 3221226505,
+      "actualGameExitHex": "0xc0000409",
+      "processQuerySucceeded": true,
+      "waitResult": 0,
+      "confirmationHelperStartToProcessGoneSeconds": 2.661583716999303,
+      "gameProcessGone": true
+    }
+  ],
+  "latency": {
+    "nativeRadeonAntiLagQualified": false,
+    "AmdAntiLagAvailable": 0,
+    "AmdAntiLagFault": 0,
+    "ReflexAvailable": 1,
+    "ReflexMode": 1,
+    "ReflexFault": 0
+  },
+  "restore": {
+    "originalModFilesAndPreferencesRestored": true,
+    "accountAndCharacterSavesCopiedOrEdited": false
+  },
+  "limits": [
+    "The mixed-provider session failed normal quit with actual game exit 0xc0000409; root cause is unproven.",
+    "Short stationary scene; no combat, travel, long-session, resize, temporal image quality, latency or physical scanout qualification.",
+    "No direct comparison against the old published payload; clean Off is this candidate with Native presenter ownership.",
+    "Actual active Windows/Radeon FSR/FG/Anti-Lag and Windows installer UI remain unqualified.",
+    "Windows-target native payload ran under Proton; this is not native Windows runtime proof.",
+    "An extra CPU-only sampler was loaded; no production-without-sampler performance claim.",
+    "Existing UI metadata version still needs alignment before a public release."
+  ],
+  "publishedAssetsChanged": false,
+  "shutdownIsolation": [
+    {
+      "label": "menu-control",
+      "actualGameExitCode": 0,
+      "actualGameExitHex": "0x0",
+      "processQuerySucceeded": true,
+      "waitResult": 0,
+      "confirmationHelperStartToProcessGoneSeconds": 5.584381770000618,
+      "gameProcessGone": true,
+      "scope": "Menu only; no reconstruction or generated frames"
+    },
+    {
+      "label": "fsr-only-on",
+      "actualGameExitCode": 0,
+      "actualGameExitHex": "0x0",
+      "processQuerySucceeded": true,
+      "waitResult": 0,
+      "confirmationHelperStartToProcessGoneSeconds": 6.267296381000051,
+      "gameProcessGone": true,
+      "scope": "Fresh FSR Quality + AMD FG; no DLSS selection or preset/provider switch"
+    },
+    {
+      "label": "dlss-native-on-normal",
+      "actualGameExitCode": 0,
+      "actualGameExitHex": "0x0",
+      "processQuerySucceeded": true,
+      "waitResult": 0,
+      "confirmationHelperStartToProcessGoneSeconds": 4.646821773003467,
+      "gameProcessGone": true,
+      "scope": "Fresh DLSS Quality + AMD FG, then actual Video-menu switch to Native 100% + AMD FG; no debugger attached"
+    }
+  ],
+  "shutdownIsolationRestored": true,
+  "runs": [
+    {"group": "cleanOff","label": "pr47-fsr-clean-off-a","captureSHA256": "ee08303a030e7de126774bd6a75d7d55131b7c613d8a03eb3faba12561b9db4b","source": {"sr": 2,"revision": 100,"observedScale": 66.666664,"render": [2560,1440],"output": [3840,2160]},"metrics": {"FGOn": false,"intervals": 1199,"seconds": 9.0483214,"applicationPresentRate": 132.51076603003955,"medianMs": 7.4015,"p95Ms": 8.5604,"p99Ms": 9.4762,"SDKRealPresentRate": null,"SDKGeneratedPresentRate": 0,"SDKCountEquivalentTotal": null,"physicalDisplayFPSMeasured": false},"sdkDeltas": {"providerFrame": 0,"prepared": 0,"images": 0,"realPresents": 0,"generatedPresents": 0},"sdkBoundary": {"active": [0,0],"ready": [0,0],"result": [0,0],"fault": [0,0],"errors": [0,0],"warnings": [0,0]}},
+    {"group": "cleanOff","label": "pr47-fsr-clean-off-b","captureSHA256": "e9095155abd9d1d2a6d611639bfb9deb76e2464f7a1bbc776ca4046a50938857","source": {"sr": 2,"revision": 100,"observedScale": 66.666664,"render": [2560,1440],"output": [3840,2160]},"metrics": {"FGOn": false,"intervals": 1199,"seconds": 9.0084655,"applicationPresentRate": 133.09702967725192,"medianMs": 7.3761,"p95Ms": 8.4862,"p99Ms": 9.0405,"SDKRealPresentRate": null,"SDKGeneratedPresentRate": 0,"SDKCountEquivalentTotal": null,"physicalDisplayFPSMeasured": false},"sdkDeltas": {"providerFrame": 0,"prepared": 0,"images": 0,"realPresents": 0,"generatedPresents": 0},"sdkBoundary": {"active": [0,0],"ready": [0,0],"result": [0,0],"fault": [0,0],"errors": [0,0],"warnings": [0,0]}},
+    {"group": "cleanOff","label": "pr47-fsr-clean-off-d","captureSHA256": "f566291c3092c72e1f4f61692d29497718b137a5317086c981fbad6fb1af61ee","source": {"sr": 2,"revision": 100,"observedScale": 66.666664,"render": [2560,1440],"output": [3840,2160]},"metrics": {"FGOn": false,"intervals": 1199,"seconds": 8.9772968,"applicationPresentRate": 133.55913552952822,"medianMs": 7.3306,"p95Ms": 8.4929,"p99Ms": 8.9693,"SDKRealPresentRate": null,"SDKGeneratedPresentRate": 0,"SDKCountEquivalentTotal": null,"physicalDisplayFPSMeasured": false},"sdkDeltas": {"providerFrame": 0,"prepared": 0,"images": 0,"realPresents": 0,"generatedPresents": 0},"sdkBoundary": {"active": [0,0],"ready": [0,0],"result": [0,0],"fault": [0,0],"errors": [0,0],"warnings": [0,0]}},
+    {"group": "fgOn","label": "pr47-fsr-on-a","captureSHA256": "43047f632380313ea4d53b8d213b4b2f0af7d4934e9cc33184f93b7239d348df","source": {"sr": 2,"revision": 101,"observedScale": 66.666664,"render": [2560,1440],"output": [3840,2160]},"metrics": {"FGOn": true,"intervals": 1199,"seconds": 13.4133019,"applicationPresentRate": 89.38887746946186,"medianMs": 10.9965,"p95Ms": 12.5429,"p99Ms": 13.3261,"SDKRealPresentRate": 89.38887746946186,"SDKGeneratedPresentRate": 89.38887746946186,"SDKCountEquivalentTotal": 178.77775493892372,"physicalDisplayFPSMeasured": false},"sdkDeltas": {"providerFrame": 1199,"prepared": 1199,"images": 1199,"realPresents": 1199,"generatedPresents": 1199},"sdkBoundary": {"active": [1,1],"ready": [1,1],"result": [0,0],"fault": [0,0],"errors": [0,0],"warnings": [0,0]}},
+    {"group": "fgOn","label": "pr47-fsr-on-b","captureSHA256": "42533f49826327239e6b4452a58a4f329c695bcbf734a03ff6f57a5c092403f4","source": {"sr": 2,"revision": 101,"observedScale": 66.666664,"render": [2560,1440],"output": [3840,2160]},"metrics": {"FGOn": true,"intervals": 1199,"seconds": 13.2752184,"applicationPresentRate": 90.31866473850253,"medianMs": 10.9485,"p95Ms": 12.0961,"p99Ms": 12.637,"SDKRealPresentRate": 90.31866473850253,"SDKGeneratedPresentRate": 90.31866473850253,"SDKCountEquivalentTotal": 180.63732947700507,"physicalDisplayFPSMeasured": false},"sdkDeltas": {"providerFrame": 1199,"prepared": 1199,"images": 1199,"realPresents": 1199,"generatedPresents": 1199},"sdkBoundary": {"active": [1,1],"ready": [1,1],"result": [0,0],"fault": [0,0],"errors": [0,0],"warnings": [0,0]}},
+    {"group": "fgOn","label": "pr47-fsr-on-c","captureSHA256": "84c31d2e4aca75c5268e8dee4247a05b2969334ad5a1b258f93451802cb27c5e","source": {"sr": 2,"revision": 101,"observedScale": 66.666664,"render": [2560,1440],"output": [3840,2160]},"metrics": {"FGOn": true,"intervals": 1199,"seconds": 13.2645294,"applicationPresentRate": 90.3914465295693,"medianMs": 10.9677,"p95Ms": 12.0701,"p99Ms": 12.6124,"SDKRealPresentRate": 90.3914465295693,"SDKGeneratedPresentRate": 90.3914465295693,"SDKCountEquivalentTotal": 180.7828930591386,"physicalDisplayFPSMeasured": false},"sdkDeltas": {"providerFrame": 1199,"prepared": 1199,"images": 1199,"realPresents": 1199,"generatedPresents": 1199},"sdkBoundary": {"active": [1,1],"ready": [1,1],"result": [0,0],"fault": [0,0],"errors": [0,0],"warnings": [0,0]}},
+    {"group": "retainedOff","label": "pr47-fsr-retained-off-a","captureSHA256": "61f896fae1726d352d0e6e9635643662ea3bc6677c0fc40eb2e0f27262e68373","source": {"sr": 2,"revision": 102,"observedScale": 66.666664,"render": [2560,1440],"output": [3840,2160]},"metrics": {"FGOn": false,"intervals": 1199,"seconds": 9.3855123,"applicationPresentRate": 127.75008562931615,"medianMs": 7.7073,"p95Ms": 8.8842,"p99Ms": 9.3967,"SDKRealPresentRate": 127.75008562931615,"SDKGeneratedPresentRate": 0,"SDKCountEquivalentTotal": null,"physicalDisplayFPSMeasured": false},"sdkDeltas": {"providerFrame": 0,"prepared": 0,"images": 0,"realPresents": 1199,"generatedPresents": 0},"sdkBoundary": {"active": [0,0],"ready": [1,1],"result": [0,0],"fault": [0,0],"errors": [0,0],"warnings": [0,0]}},
+    {"group": "retainedOff","label": "pr47-fsr-retained-off-b","captureSHA256": "adfcb3c3f991233e55fd51df3bb5a8d7af5b493995188409e5cb1b1ef78a0ffb","source": {"sr": 2,"revision": 102,"observedScale": 66.666664,"render": [2560,1440],"output": [3840,2160]},"metrics": {"FGOn": false,"intervals": 1199,"seconds": 9.4351018,"applicationPresentRate": 127.07865006819534,"medianMs": 7.762,"p95Ms": 8.8474,"p99Ms": 9.3207,"SDKRealPresentRate": 127.07865006819534,"SDKGeneratedPresentRate": 0,"SDKCountEquivalentTotal": null,"physicalDisplayFPSMeasured": false},"sdkDeltas": {"providerFrame": 0,"prepared": 0,"images": 0,"realPresents": 1199,"generatedPresents": 0},"sdkBoundary": {"active": [0,0],"ready": [1,1],"result": [0,0],"fault": [0,0],"errors": [0,0],"warnings": [0,0]}},
+    {"group": "retainedOff","label": "pr47-fsr-retained-off-c","captureSHA256": "9f794992bb7a2f20358edaf7967d281ac9d8e7a9ee126debe0a74020022d01db","source": {"sr": 2,"revision": 102,"observedScale": 66.666664,"render": [2560,1440],"output": [3840,2160]},"metrics": {"FGOn": false,"intervals": 1199,"seconds": 9.4372288,"applicationPresentRate": 127.05000857878957,"medianMs": 7.7791,"p95Ms": 8.88,"p99Ms": 9.2883,"SDKRealPresentRate": 127.05000857878957,"SDKGeneratedPresentRate": 0,"SDKCountEquivalentTotal": null,"physicalDisplayFPSMeasured": false},"sdkDeltas": {"providerFrame": 0,"prepared": 0,"images": 0,"realPresents": 1199,"generatedPresents": 0},"sdkBoundary": {"active": [0,0],"ready": [1,1],"result": [0,0],"fault": [0,0],"errors": [0,0],"warnings": [0,0]}},
+    {"group": "nativeAaOn","label": "pr47-fsr-native-aa-on","captureSHA256": "8fd6abb490815ed5ebd2166ff1d0572ccafd6b5e3e50fc5e952f4b2ab1896480","source": {"sr": 2,"revision": 104,"observedScale": 100.0,"render": [3840,2160],"output": [3840,2160]},"metrics": {"FGOn": true,"intervals": 1199,"seconds": 19.2767576,"applicationPresentRate": 62.19925699537769,"medianMs": 15.921,"p95Ms": 17.3788,"p99Ms": 19.071,"SDKRealPresentRate": 62.19925699537769,"SDKGeneratedPresentRate": 62.19925699537769,"SDKCountEquivalentTotal": 124.39851399075538,"physicalDisplayFPSMeasured": false},"sdkDeltas": {"providerFrame": 1199,"prepared": 1199,"images": 1199,"realPresents": 1199,"generatedPresents": 1199},"sdkBoundary": {"active": [1,1],"ready": [1,1],"result": [0,0],"fault": [0,0],"errors": [0,0],"warnings": [0,0]}},
+    {"group": "dlssAmdOn","label": "pr47-dlss-amd-on","captureSHA256": "b22ff09171c6ba3f3c60b6d6fd02bbbd3afd468de5695292ef9c5a3f92c382e8","source": {"sr": 1,"revision": 105,"observedScale": 66.666664,"render": [2560,1440],"output": [3840,2160]},"metrics": {"FGOn": true,"intervals": 1199,"seconds": 13.7243883,"applicationPresentRate": 87.36272785286904,"medianMs": 11.365,"p95Ms": 12.3225,"p99Ms": 13.1122,"SDKRealPresentRate": 87.36272785286904,"SDKGeneratedPresentRate": 87.36272785286904,"SDKCountEquivalentTotal": 174.72545570573809,"physicalDisplayFPSMeasured": false},"sdkDeltas": {"providerFrame": 1199,"prepared": 1199,"images": 1199,"realPresents": 1199,"generatedPresents": 1199},"sdkBoundary": {"active": [1,1],"ready": [1,1],"result": [0,0],"fault": [0,0],"errors": [0,0],"warnings": [0,0]}},
+    {"group": "nativeAmdOn","label": "pr47-native-amd-on","captureSHA256": "201eea26bc054d6e08502717e4d88f31dc88dba4d0a32e5d6cd28a0089278737","source": {"sr": 0,"revision": 106,"observedScale": 100.0,"render": [3840,2160],"output": [3840,2160]},"metrics": {"FGOn": true,"intervals": 1199,"seconds": 17.7910556,"applicationPresentRate": 67.3934153744087,"medianMs": 14.6863,"p95Ms": 16.2043,"p99Ms": 17.3977,"SDKRealPresentRate": 67.3934153744087,"SDKGeneratedPresentRate": 67.3934153744087,"SDKCountEquivalentTotal": 134.7868307488174,"physicalDisplayFPSMeasured": false},"sdkDeltas": {"providerFrame": 1199,"prepared": 1199,"images": 1199,"realPresents": 1199,"generatedPresents": 1199},"sdkBoundary": {"active": [1,1],"ready": [1,1],"result": [0,0],"fault": [0,0],"errors": [0,0],"warnings": [0,0]}}
+  ]
+}
