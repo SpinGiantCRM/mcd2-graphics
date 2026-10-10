@@ -1,0 +1,513 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-10",
+  "sourceBase": "4bb1eb21ab534541b8e9f2bf74e55d3a59add5cc",
+  "scope": "Single-provider exit controls and corrected NGX device retirement",
+  "environment": {
+    "os": "CachyOS",
+    "gpu": "RTX 4080 SUPER",
+    "driver": "615.78.08",
+    "proton": "CachyOS SLR 11.0-20261005",
+    "gameVersion": "1.1.2.0"
+  },
+  "controls": [
+    {
+      "case": "native-only + AMD FG",
+      "guides": [
+        3840,
+        2160
+      ],
+      "sdk": {
+        "active": 1,
+        "fault": 0,
+        "generatedPresents": 2060,
+        "errors": 0,
+        "warnings": 0
+      },
+      "exit": {
+        "elapsedSeconds": 3.286,
+        "gone": true,
+        "forcedSignal": false,
+        "debuggerAttached": false,
+        "exitCode": null
+      },
+      "baselineRestored": true
+    },
+    {
+      "case": "fsr-only + AMD FG",
+      "guides": [
+        2560,
+        1440
+      ],
+      "sdk": {
+        "active": 1,
+        "fault": 0,
+        "generatedPresents": 1055,
+        "errors": 0,
+        "warnings": 0
+      },
+      "exit": {
+        "elapsedSeconds": 4.085,
+        "gone": true,
+        "forcedSignal": false,
+        "debuggerAttached": false,
+        "exitCode": null
+      },
+      "baselineRestored": true
+    },
+    {
+      "case": "dlss-only + AMD FG",
+      "guides": [
+        2560,
+        1440
+      ],
+      "sdk": {
+        "active": 1,
+        "fault": 0,
+        "generatedPresents": 1641,
+        "errors": 0,
+        "warnings": 0
+      },
+      "exit": {
+        "elapsedSeconds": 3.688,
+        "gone": true,
+        "forcedSignal": false,
+        "debuggerAttached": false,
+        "exitCode": null
+      },
+      "baselineRestored": true
+    }
+  ],
+  "correctedBuild": {
+    "purpose": "temporary game FG guide notification",
+    "releasedSourcesChanged": false,
+    "privateGuideInspection": false,
+    "nativeFgGuides": true,
+    "addonSHA256": "91611395851b2726103bb30d627390924e05bd6e50cb00b8856d9f557d20558a",
+    "leanBaseSHA256": "3d3fb68207b2d9f0bc11520c7597935a588572dd824c50e6b43691c739ff67d1",
+    "leanGeneratedSHA256": "5400b3ed69d261a6220a7e93c7dbf71ca5a815c16cb6a8c9af7e76174a5c2cbd",
+    "fsrBaseSHA256": "c3a306962d85e10dc27e1f350347f2d7cd1e206183699bd18c7880bf02c59455",
+    "fsrGeneratedSHA256": "017fd06830ba5eacecba4e6ca28f176f05c3399e13044809da00c8ac7a4b6cef",
+    "fsrBridgeSHA256": "f422af2f70f62ca8462c3aff30d05d1db92dd3b1d0e4289750039b8a2a83514b",
+    "cameraSourceSHA256": {
+      "fg_camera_contract.h": "b889fa3d89e0d51fc2a70cebdb60c0e635f246efb335438baab9d9d27e73293d",
+      "fg_camera_math.h": "fbee20d2f25f6c98bca8e27b4e2a3b38c25312a4eeb72db2808b283fe0c8dc51"
+    },
+    "observerBaseSHA256": "98f804c5f8c4f3861e86f5494b12af439bdfcbc71328b32664e4d75c4f713fb3",
+    "observerGeneratedSHA256": "d3ef97f0804ac93fcb2790a49f5825546de9c2b77b472cf98bf84e9286626834",
+    "generatorSHA256": "dec3fb91f64e37057122d248b8902fa3d358cbf0cb02d24f05c4cb200fdbcd78",
+    "ngxFixtureSHA256": "dbde320ecdbaf4ad35a2815f8ae708f84b5b2e03677b4a8ca11b1afe1268f283",
+    "WindowsQualified": false
+  },
+  "windowsRadeonQualified": false,
+  "windowsNvidiaQualified": false,
+  "physicalScanoutMeasured": false,
+  "publishedFilesChanged": false,
+  "mixedProviderDelayRootCauseEstablished": false,
+  "deviceIdentityOnlyMixedRegression": {
+    "sequence": [
+      "FSR Quality",
+      "DLSS Quality",
+      "Native"
+    ],
+    "amdFgEnabledThroughout": true,
+    "ngXRetirementResult": 1,
+    "ngXOwnedReleased": true,
+    "exitCode": 1,
+    "stillAliveAtSeconds": 40.079,
+    "observerWaitMs": 108033,
+    "observerWaitIncludesPreQuitSetup": true,
+    "forcedSignal": false,
+    "debuggerAttached": true,
+    "baselineRestored": true,
+    "passed": false
+  },
+  "terminalCleanupFinding": {
+    "windowsStackMethod": "private syscall-frame stack candidates correlated with exact binary disassembly",
+    "nativeGuideStaticDestructorAtReturnRVA": "0x7d8e",
+    "callImmediatelyBeforeReturn": "IUnknown::Release through vtable offset 0x10",
+    "binarySHA256": "91611395851b2726103bb30d627390924e05bd6e50cb00b8856d9f557d20558a",
+    "completeWindowsUnwind": false,
+    "rawStacksPublished": false
+  },
+  "ntGuardOnlyMixedRegression": {
+    "sequence": [
+      "FSR Quality",
+      "DLSS Quality",
+      "Native"
+    ],
+    "amdFgEnabledThroughout": true,
+    "exitCode": 1,
+    "stillAliveAtSeconds": 40.085,
+    "observerWaitMs": 88718,
+    "observerWaitIncludesPreQuitSetup": true,
+    "forcedSignal": false,
+    "debuggerAttached": true,
+    "baselineRestored": true,
+    "passed": false,
+    "stackCandidate": "Native FG generation lifetime static destructor",
+    "ordinaryUnloadingPrecedesNtTermination": true
+  },
+  "retainedUnloadMixedRegression": {
+    "runtimeSourceCommit": "2f903e3d5be805be0542cec04c1214b591e0319d",
+    "build": {
+      "purpose": "temporary game FG guide notification",
+      "releasedSourcesChanged": false,
+      "privateGuideInspection": false,
+      "nativeFgGuides": true,
+      "addonSHA256": "5f1a60ce5bc458f17f358a890b97253b42c3cf9e0fef4ccb46153748b44bfb32",
+      "leanBaseSHA256": "3d3fb68207b2d9f0bc11520c7597935a588572dd824c50e6b43691c739ff67d1",
+      "leanGeneratedSHA256": "5400b3ed69d261a6220a7e93c7dbf71ca5a815c16cb6a8c9af7e76174a5c2cbd",
+      "fsrBaseSHA256": "9e61101b752eb53cb12adc868d1f1937a0eb089913a01633b7884267b9a82f8c",
+      "fsrGeneratedSHA256": "1e797af5dc1c04b2cd05dfdf70ab84f650b3c96b70799eed7792ef53e780f35d",
+      "fsrBridgeSHA256": "f422af2f70f62ca8462c3aff30d05d1db92dd3b1d0e4289750039b8a2a83514b",
+      "cameraSourceSHA256": {
+        "fg_camera_contract.h": "b889fa3d89e0d51fc2a70cebdb60c0e635f246efb335438baab9d9d27e73293d",
+        "fg_camera_math.h": "fbee20d2f25f6c98bca8e27b4e2a3b38c25312a4eeb72db2808b283fe0c8dc51"
+      },
+      "observerBaseSHA256": "213adcae2999b4cd52211bf83180afee328d461d945b5c0c70b858f1132e7629",
+      "observerGeneratedSHA256": "ed074ec9a5ce682aaf3d1bd4a779dd6f86d452aa4fcdfb90a83d7bcadd419eff",
+      "generatorSHA256": "eabbb0f6b62efea1d9ede6346ffcc02c4b36024a5a8361e031859b9147726094",
+      "ngxFixtureSHA256": "3722313005526589fcfddbb31d83591f7ba2db222856ba660c8cbed89730a8a2",
+      "terminalGuardSourceSHA256": {
+        "process_exit.hpp": "6f4c757e12cfa967c738edf1b19994ce18dad675b2a9fa70d05a516e7e3ada02",
+        "process_lifetime.hpp": "c7f6cdf7317c916598bbe556cb6f1cbb3a4574b75aa86afe72ecbabb4fd7a92b"
+      },
+      "WindowsQualified": false
+    },
+    "sequence": [
+      "FSR Quality",
+      "DLSS Quality",
+      "Native",
+      "FSR Quality",
+      "Native"
+    ],
+    "checkpoints": [
+      {
+        "label": "retained-final-fsr-active",
+        "sr": {
+          "session": 12134702,
+          "sequence": 9,
+          "revision": 1,
+          "world": 2,
+          "phase": 5,
+          "error": 0,
+          "render": [
+            2560,
+            1440
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "scale": 66.666667,
+          "evaluations": 1198,
+          "sr": 2,
+          "quality": 1,
+          "capabilities": 1
+        },
+        "context": {
+          "session": 12134702,
+          "sequence": 429,
+          "revision": 1,
+          "world": 2,
+          "ready": 1,
+          "worldToMeters": 100.0,
+          "observedScale": 66.666664,
+          "ack": 4,
+          "error": 0
+        },
+        "amd_fg_outcome": {
+          "kind": "amd_fg_outcome",
+          "SDKResult": 0,
+          "active": 1,
+          "fault": 0,
+          "engineFrame": 12400,
+          "providerFrame": 1140,
+          "prepared": 1140,
+          "images": 1140,
+          "realPresents": 31140,
+          "generatedPresents": 1139,
+          "errors": 0,
+          "warnings": 0
+        },
+        "amd_guides": {
+          "kind": "amd_guides",
+          "frameStamp": 12400,
+          "SDKResult": 0,
+          "frameTimeMs": 10.9477,
+          "width": 2560,
+          "height": 1440,
+          "cameraBytes": 348,
+          "reset": 0
+        }
+      },
+      {
+        "label": "retained-final-dlss-active",
+        "sr": {
+          "session": 12134702,
+          "sequence": 13,
+          "revision": 2,
+          "world": 2,
+          "phase": 8,
+          "error": 0,
+          "render": [
+            0,
+            0
+          ],
+          "output": [
+            0,
+            0
+          ],
+          "scale": 100.0,
+          "evaluations": 0,
+          "sr": 1,
+          "quality": 1,
+          "capabilities": 0
+        },
+        "context": {
+          "session": 12134702,
+          "sequence": 637,
+          "revision": 2,
+          "world": 2,
+          "ready": 1,
+          "worldToMeters": 100.0,
+          "observedScale": 66.666664,
+          "ack": 12,
+          "error": 0
+        },
+        "amd_fg_outcome": {
+          "kind": "amd_fg_outcome",
+          "SDKResult": 0,
+          "active": 1,
+          "fault": 0,
+          "engineFrame": 21640,
+          "providerFrame": 4951,
+          "prepared": 4951,
+          "images": 4951,
+          "realPresents": 40380,
+          "generatedPresents": 4950,
+          "errors": 0,
+          "warnings": 0
+        },
+        "amd_guides": {
+          "kind": "amd_guides",
+          "frameStamp": 21608,
+          "SDKResult": 0,
+          "frameTimeMs": 11.1581,
+          "width": 2560,
+          "height": 1440,
+          "cameraBytes": 348,
+          "reset": 0
+        }
+      },
+      {
+        "label": "retained-final-native-active",
+        "sr": {
+          "session": 12134702,
+          "sequence": 15,
+          "revision": 3,
+          "world": 2,
+          "phase": 0,
+          "error": 0,
+          "render": [
+            0,
+            0
+          ],
+          "output": [
+            0,
+            0
+          ],
+          "scale": 100.0,
+          "evaluations": 0,
+          "sr": 0,
+          "quality": 1,
+          "capabilities": 0
+        },
+        "context": {
+          "session": 12134702,
+          "sequence": 738,
+          "revision": 3,
+          "world": 2,
+          "ready": 1,
+          "worldToMeters": 100.0,
+          "observedScale": 100.0,
+          "ack": 12,
+          "error": 0
+        },
+        "amd_fg_outcome": {
+          "kind": "amd_fg_outcome",
+          "SDKResult": 0,
+          "active": 1,
+          "fault": 0,
+          "engineFrame": 28180,
+          "providerFrame": 6166,
+          "prepared": 6166,
+          "images": 6166,
+          "realPresents": 46920,
+          "generatedPresents": 6165,
+          "errors": 0,
+          "warnings": 0
+        },
+        "amd_guides": {
+          "kind": "amd_guides",
+          "frameStamp": 28192,
+          "SDKResult": 0,
+          "frameTimeMs": 14.088,
+          "width": 3840,
+          "height": 2160,
+          "cameraBytes": 348,
+          "reset": 0
+        }
+      },
+      {
+        "label": "retained-final-fsr-reactivated",
+        "sr": {
+          "session": 12134702,
+          "sequence": 23,
+          "revision": 5,
+          "world": 2,
+          "phase": 5,
+          "error": 0,
+          "render": [
+            2560,
+            1440
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "scale": 66.666667,
+          "evaluations": 13756,
+          "sr": 2,
+          "quality": 1,
+          "capabilities": 1
+        },
+        "context": {
+          "session": 12134702,
+          "sequence": 1381,
+          "revision": 5,
+          "world": 2,
+          "ready": 1,
+          "worldToMeters": 100.0,
+          "observedScale": 66.666664,
+          "ack": 20,
+          "error": 0
+        },
+        "amd_fg_outcome": {
+          "kind": "amd_fg_outcome",
+          "SDKResult": 0,
+          "active": 1,
+          "fault": 0,
+          "engineFrame": 47800,
+          "providerFrame": 19991,
+          "prepared": 19991,
+          "images": 19991,
+          "realPresents": 66540,
+          "generatedPresents": 19990,
+          "errors": 0,
+          "warnings": 0
+        },
+        "amd_guides": {
+          "kind": "amd_guides",
+          "frameStamp": 47786,
+          "SDKResult": 0,
+          "frameTimeMs": 10.7915,
+          "width": 2560,
+          "height": 1440,
+          "cameraBytes": 348,
+          "reset": 0
+        }
+      },
+      {
+        "label": "retained-final-native-before-quit",
+        "sr": {
+          "session": 12134702,
+          "sequence": 28,
+          "revision": 7,
+          "world": 2,
+          "phase": 8,
+          "error": 0,
+          "render": [
+            0,
+            0
+          ],
+          "output": [
+            0,
+            0
+          ],
+          "scale": 100.0,
+          "evaluations": 0,
+          "sr": 0,
+          "quality": 1,
+          "capabilities": 0
+        },
+        "context": {
+          "session": 12134702,
+          "sequence": 1553,
+          "revision": 7,
+          "world": 2,
+          "ready": 1,
+          "worldToMeters": 100.0,
+          "observedScale": 100.0,
+          "ack": 27,
+          "error": 0
+        },
+        "amd_fg_outcome": {
+          "kind": "amd_fg_outcome",
+          "SDKResult": 0,
+          "active": 1,
+          "fault": 0,
+          "engineFrame": 58900,
+          "providerFrame": 22662,
+          "prepared": 22662,
+          "images": 22662,
+          "realPresents": 77640,
+          "generatedPresents": 22661,
+          "errors": 0,
+          "warnings": 0
+        },
+        "amd_guides": {
+          "kind": "amd_guides",
+          "frameStamp": 58854,
+          "SDKResult": 0,
+          "frameTimeMs": 14.7643,
+          "width": 3840,
+          "height": 2160,
+          "cameraBytes": 348,
+          "reset": 0
+        }
+      }
+    ],
+    "legacyNgxAcknowledgement": {
+      "requestedRevision": 2,
+      "phase": 2,
+      "error": 0,
+      "settingsRevision": 2,
+      "appliedSourceRevision": 2,
+      "matchingSession": true
+    },
+    "exit": {
+      "exitCode": 0,
+      "querySucceeded": true,
+      "waitResult": 0,
+      "observerWaitMs": 26774,
+      "observerWaitIncludesPreQuitSetup": true,
+      "inputExitCode": 0,
+      "gameProcessGone": true,
+      "confirmationToProcessGoneSeconds": 4.555,
+      "forcedSignals": false
+    },
+    "retention": {
+      "generationRetained": true,
+      "modulePinSucceeded": true,
+      "ordinaryRetirementComplete": false
+    },
+    "amdFgRetirementSDKResult": 0,
+    "debuggerAttached": false,
+    "baselineRestored": true,
+    "passed": true,
+    "windowsRuntimeQualified": false,
+    "ordinaryHotReloadQualified": false
+  }
+}

@@ -17,7 +17,10 @@ struct LiveFixture {
  float constants[5]{};unsigned width=0,height=0,outwidth=3840,outheight=2160;
  std::ofstream log;
 };
-static std::unique_ptr<LiveFixture> live_fixture;
+// Final NT process teardown cannot release COM through an unloading renderer.
+// Normal gameplay retirement and ordinary unload retain their existing cleanup.
+static mcd2::process_exit::Lifetime<std::unique_ptr<LiveFixture>,retain_sr_generation> live_fixtureLifetime;
+static auto &live_fixture=live_fixtureLifetime.get();
 static bool live_cleanup_busy=false;
 template<class F> static F live_export(const char *name){return reinterpret_cast<F>(GetProcAddress(live_fixture->module,name));}
 // Creation uses a dedicated allocator/list retained by the generation. Nothing
@@ -66,7 +69,10 @@ static bool cleanup_detached_live(LiveFixture &c) {
   const int ownership=shared&&owner?owner(c.proxy_device):shared?-1:0;
   if(ownership<0){c.log<<"{\"stage\":\"shared_ngx_owner_unverified\",\"generationRetained\":true}\n";c.log.flush();return false;}
   if(ownership==1){c.log<<"{\"stage\":\"shutdown_deferred_to_streamline\",\"deviceMatched\":true,\"finalOwner\":\"Streamline\"}\n";c.log.flush();}
-  else {using F=NVSDK_NGX_Result(*)(ID3D12Device*);auto fn=reinterpret_cast<F>(GetProcAddress(c.module,"NVSDK_NGX_D3D12_Shutdown1"));if(!fn||!result("shutdown_device",fn(c.resource_device)))return false;}
+  // NGX was initialized with this proxy device. Shutdown1 selects that device's
+  // instance; the unwrapped resource device is not the initialization identity.
+  // Never pass nullptr here: it would shut down every device's NGX instance.
+  else {using F=NVSDK_NGX_Result(*)(ID3D12Device*);auto fn=reinterpret_cast<F>(GetProcAddress(c.module,"NVSDK_NGX_D3D12_Shutdown1"));if(!fn||!c.proxy_device||!result("shutdown_device",fn(c.proxy_device)))return false;}
   c.initialized=false;
  }
  // Device references were inserted first; reverse release drops them last.

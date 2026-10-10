@@ -2,6 +2,7 @@ from pathlib import Path
 import importlib.util
 import tempfile
 import unittest
+import re
 
 ROOT=Path(__file__).resolve().parents[1]
 spec=importlib.util.spec_from_file_location('fsr_sustained',ROOT/'experiments/providers/build_fsr_sustained_probe.py')
@@ -9,6 +10,27 @@ probe=importlib.util.module_from_spec(spec)
 spec.loader.exec_module(probe)
 
 class FsrSustainedProbeTests(unittest.TestCase):
+    def test_generated_probe_contains_its_relative_include_closure(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory).resolve()
+            probe.generate(ROOT,root,256,True,100.0,1,128)
+            pending=[root/'src/native/observer.cpp'];visited=set()
+            while pending:
+                path=pending.pop().resolve()
+                if path in visited:continue
+                visited.add(path)
+                for name in re.findall(r'^\s*#include "([^"]+)"',path.read_text(),re.M):
+                    if name in ('reshade.hpp','ngx-research/nvsdk_ngx.h'):continue
+                    dependency=(path.parent/name).resolve()
+                    self.assertTrue(dependency.is_relative_to(root),name)
+                    self.assertTrue(dependency.is_file(),str(dependency.relative_to(root)))
+                    pending.append(dependency)
+            for name in ('process_exit.hpp','process_lifetime.hpp'):
+                copied=root/'src/latency'/name
+                self.assertIn(copied.resolve(),visited)
+                self.assertEqual(copied.read_bytes(),(ROOT/'src/latency'/name).read_bytes())
+            self.assertFalse(list(root.rglob('*.dll')))
+
     def generated(self,frames=256,replace=True,quality=-1,fail_after=0):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory)

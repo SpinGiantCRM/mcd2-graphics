@@ -33,6 +33,20 @@ int main() {
     delete retained; // Fixture cleanup, never part of final process exit.
     assert(Value::destroyed == 2);
 
+    // Reconstruction generations are nullable unique_ptrs inside the same guard.
+    using GenerationOwner = Lifetime<std::unique_ptr<Value>, terminating>;
+    { GenerationOwner owner; owner.get() = std::make_unique<Value>(); owner.get().reset(); }
+    assert(Value::destroyed == 3); // Gameplay retirement remains immediate.
+    { GenerationOwner owner; owner.get() = std::make_unique<Value>(); }
+    assert(Value::destroyed == 4); // Ordinary unload still releases.
+    std::unique_ptr<Value>* generation = nullptr;
+    {
+        GenerationOwner owner;
+        owner.get() = std::make_unique<Value>(); generation = &owner.get(); exiting = true;
+    }
+    assert(Value::destroyed == 4); // Terminal static destruction makes no COM-like call.
+    exiting = false; delete generation; assert(Value::destroyed == 5);
+
     using Coordinator = mcd2::streamline_reflex::TokenCoordinator;
     Provider provider;
     {

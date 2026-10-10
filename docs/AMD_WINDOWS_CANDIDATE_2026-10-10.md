@@ -1,21 +1,28 @@
 # Windows/Radeon candidate handoff
 
 This is a development qualification artifact, not a released installer.
-The PR42 download below is historical: it predates the
-[AMD Streamline feature lifetime correction](AMD_STREAMLINE_FEATURE_LIFETIME_2026-10-10.md).
-Use a source-matched later Windows build when qualifying that correction; do
-not apply PR42's binary hashes to a rebuilt candidate. The active-AMD-FG exit
-delay remains an explicit gate.
-Use [PR42's Windows build](https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/38000189718)
-and download `fg-windows-candidate`, artifact 11648679883.
+The historical PR44 baseline below predates the later
+[terminal generation cleanup correction](NGX_DEVICE_RETIREMENT_2026-10-10.md).
+Do not treat it as a qualification artifact for that correction.
+
+Use [PR44's Windows build](https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/38005220664/artifacts/11651176693)
+and download `fg-windows-candidate`, artifact 11651176693.
+It contains the [AMD Streamline feature lifetime correction](AMD_STREAMLINE_FEATURE_LIFETIME_2026-10-10.md).
+The active-AMD-FG exit delay remains an explicit gate.
 
 Archive SHA-256:
-`78dd4a35cf4a534b4da89408c297652a8170e3db0fdc4056da54adeba8dff19c`.
-The embedded source commit `dcec48a08ede8ae6e9935b9de622eea8714e78da` is GitHub's
-test merge of PR42 head `df46a8f2683bf029126824afe7a8375366c755e5` into PR41 main.
-The download and all 42 file hashes were verified locally against its receipt.
-See [the recorded hashes](../qualification/providers/windows-candidate-pr42-2026-10-10.json).
-Build success does not establish Windows GPU execution.
+`39d7ece7ecdd1e69b0d5dfb6dd8b309b6d18ae4b7040528733f6b136b01a127e`.
+The embedded source commit `9989df9196dcd84e7d7e1abba1646094156ae1b6` is GitHub's
+test merge of PR44 head `1468ec57951b30bca9fb8139c72ab073b5145c10` into PR43 main.
+Its tree matches the merged implementation. The archive and all 42 manifest
+file hashes were verified locally against its receipt.
+See [the recorded hashes](../qualification/providers/windows-candidate-pr44-2026-10-10.json).
+Build success does not establish Windows GPU execution. The Windows checkout
+uses CRLF source bytes; binary hashes must be taken from this artifact's receipt,
+not substituted from a Linux build.
+
+The [PR42 receipt](../qualification/providers/windows-candidate-pr42-2026-10-10.json)
+remains historical evidence and does not qualify this rebuilt candidate.
 
 ## Prepare a reversible trial
 
@@ -41,7 +48,7 @@ Map these artifact files relative to `Dungeons/Binaries/Win64`:
 The three `ui/Pak/MCD2Graphics_P.*` files go in
 `Dungeons/Content/Paks/~mods/MCD2Graphics`. Validate every copied hash.
 The Windows SR bridge hash must equal the SR receipt's `fsrBridgeSHA256`:
-`be180d9d2f4a1608f9c110a155f32f944f24bc7fae26aa54dad557c149e35c00`.
+`1782894e374cc92fea77eac1c43cc3442ae452086be48c4fd683301d10c5e24f`.
 Do not substitute a Linux-built bridge or the bounded sustained-probe addon.
 
 Acquire vendor runtimes separately from their official pinned SDK sources;
