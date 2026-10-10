@@ -239,6 +239,30 @@
       "startupOwner": 0,
       "fgActiveAtBothPresetBoundaries": false,
       "fsrActiveAtBothPresetBoundaries": true
+    },
+    {
+      "label": "fg-toggle-only",
+      "actualGameExitCode": 0,
+      "actualGameExitHex": "0x0",
+      "processQuerySucceeded": true,
+      "waitResult": 0,
+      "confirmationHelperStartToProcessGoneSeconds": 5.377005984999414,
+      "gameProcessGone": true,
+      "scope": "Fresh FSR Quality + AMD FG -> Off -> On -> normal exit; Quality kept throughout",
+      "additionalDiagnosticAddon": false,
+      "startupOwner": 2
+    },
+    {
+      "label": "aa-continuous-on",
+      "actualGameExitCode": 0,
+      "actualGameExitHex": "0x0",
+      "processQuerySucceeded": true,
+      "waitResult": 0,
+      "confirmationHelperStartToProcessGoneSeconds": 5.780729182999494,
+      "gameProcessGone": true,
+      "scope": "Fresh FSR Quality -> FSR Native AA with AMD FG continuously On; no FG toggle cycle",
+      "additionalDiagnosticAddon": false,
+      "startupOwner": 2
     }
   ],
   "shutdownIsolationRestored": true,
@@ -294,6 +318,37 @@
     "actualGameExitCode": 3221226505,
     "pinAlonePreventedFatalExit": false,
     "shippingCodeChanged": false
+  },
+  "combinedExceptionTrace": {
+    "normalStartup": true,
+    "debuggerAttached": false,
+    "sourceChanged": false,
+    "sequence": "FSR Quality + AMD FG -> FG Off -> FG On -> FSR Native AA -> normal quit",
+    "actualGameExitCode": 0,
+    "gameProcessGone": true,
+    "failedExitReproduced": false,
+    "performanceAdmitted": false,
+    "fastFailInFinalTrace": false,
+    "originalLaunchOptionsRestoredExactly": true
+  },
+  "fgGuideTerminalGuardControl": {
+    "variant": "FG guide terminal guard only; remaining own files and dependencies from the packaged candidate",
+    "sourceSHA256": "11aac85f97ec9a6c1a1f3ccbae0ab742bce310bd36e283d8ef11e6e6b44b1fd3",
+    "addonSHA256": "e28b94a30c869de61c3c6c278350d32899d6d5045fa47ba4a7cf89270c96d07a",
+    "compiler": "clang-cl MSVC ABI 19.44",
+    "sequence": "FSR Quality + AMD FG -> FG Off -> FG On -> FSR Native AA -> normal quit",
+    "actualGameExitCode": 0,
+    "processQuerySucceeded": true,
+    "waitResult": 0,
+    "gameProcessGone": true,
+    "confirmationHelperStartToProcessGoneSeconds": 4.109514257001138,
+    "SDKFaultAtFinalGameplayBoundary": 0,
+    "FGActiveAtFinalGameplayBoundary": true,
+    "FSRActiveAtFinalGameplayBoundary": true,
+    "performanceAdmitted": false,
+    "intermittentCrashProvenFixed": false,
+    "WindowsRuntimeQualified": false,
+    "originalFilesAndPreferencesRestoredExactly": true
   },
   "runs": [
     {"group": "cleanOff","label": "pr47-fsr-clean-off-a","captureSHA256": "ee08303a030e7de126774bd6a75d7d55131b7c613d8a03eb3faba12561b9db4b","source": {"sr": 2,"revision": 100,"observedScale": 66.666664,"render": [2560,1440],"output": [3840,2160]},"metrics": {"FGOn": false,"intervals": 1199,"seconds": 9.0483214,"applicationPresentRate": 132.51076603003955,"medianMs": 7.4015,"p95Ms": 8.5604,"p99Ms": 9.4762,"SDKRealPresentRate": null,"SDKGeneratedPresentRate": 0,"SDKCountEquivalentTotal": null,"physicalDisplayFPSMeasured": false},"sdkDeltas": {"providerFrame": 0,"prepared": 0,"images": 0,"realPresents": 0,"generatedPresents": 0},"sdkBoundary": {"active": [0,0],"ready": [0,0],"result": [0,0],"fault": [0,0],"errors": [0,0],"warnings": [0,0]}},

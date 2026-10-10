@@ -1,10 +1,38 @@
 from pathlib import Path
+import re
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 class ProcessExitTests(unittest.TestCase):
+    def test_fg_guide_callbacks_guard_terminal_teardown_before_work(self):
+        source = (ROOT / 'experiments/fg-streamline/guide_recon.cpp').read_text()
+        callbacks = re.findall(r'E\(\w+,(\w+)\)', source)
+        callbacks = [name for name in callbacks if name != 'f']
+        self.assertGreaterEqual(len(callbacks), 20)
+        for name in callbacks + ['try_retirement', 'mcd2_fg_active',
+                                 'mcd2_fg_inputs_wanted', 'mcd2_fg_last_present',
+                                 'mcd2_fg_observe_sr', 'mcd2_fg_sr_retired', 'AddonUninit']:
+            with self.subTest(callback=name):
+                body = re.search(r'\b(?:void|bool|int) ' + name + r'\([^\{]*\)\{([^\n]*)', source)
+                self.assertIsNotNone(body)
+                first = body.group(1)
+                if name == 'AddonUninit':
+                    first = source.split('void AddonUninit(HMODULE,HMODULE){', 1)[1].lstrip()
+                if name == 'init_device':
+                    first = first.removeprefix('mcd2::process_exit::initialize();')
+                self.assertTrue(first.startswith('if(mcd2::process_exit::terminating())return'), first)
+        self.assertIn('bool AddonInit(HMODULE,HMODULE){mcd2::process_exit::initialize();', source)
+        self.assertIn('if(reserved)mcd2::process_exit::mark_terminating();else reshade::unregister_addon(module)', source)
+        # Ordinary unload still requests real retirement; only terminal teardown skips it.
+        uninit = source.split('void AddonUninit(HMODULE,HMODULE){', 1)[1]
+        self.assertIn('retiring=true;ownerClosing=true;', uninit)
+        self.assertIn('try_retirement();', uninit)
+        recipe = (ROOT / 'experiments/fg-streamline/build_probe.py').read_text()
+        for name in ('process_exit.hpp', 'process_lifetime.hpp'):
+            self.assertIn('src/latency/' + name, recipe)
+
     def test_ngx_unshared_shutdown_uses_the_initialization_device(self):
         source = (ROOT / 'src/native/ngx_live_fixture.hpp').read_text()
         cleanup = source.split('static bool cleanup_detached_live(', 1)[1].split('static void cleanup_live_saved(', 1)[0]
