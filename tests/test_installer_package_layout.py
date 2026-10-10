@@ -21,6 +21,8 @@ class FolderPackageTests(unittest.TestCase):
         self.manifest={'version':'0.0.0-test','files':{self.relative:hashlib.sha256(self.data).hexdigest()}}
         (self.root/'manifest.json').write_text(json.dumps(self.manifest));(self.root/'dependencies.lock.json').write_text('{}')
         (self.root/'third-party').mkdir();(self.root/'third-party/INSTALLER_NOTICES.txt').write_text('fixture notices')
+        for name in ('FSR-SDK-HEADERS-LICENSE.txt','AntiLag2/LICENSE.txt'):
+            p=self.root/'third-party'/name;p.parent.mkdir(parents=True,exist_ok=True);p.write_text('fixture AMD license')
         shutil.copyfile(ROOT/'build_installer.py',self.root/'build_installer.py')
 
     def build(self, nested=False, extra=(), during_build=None):
@@ -79,6 +81,8 @@ class FolderPackageTests(unittest.TestCase):
         self.assertEqual(r['deployment'],'self-contained-folder');self.assertFalse(r['selfExtraction']);self.assertFalse(r['embeddedPayloadArchive'])
         self.assertIn('runtime.dll',r['files']);self.assertIn('MCD2-Graphics-Installer.exe',r['files'])
         self.assertIn('payload/'+self.relative,r['files']);self.assertFalse(r['signedReleaseQualified'])
+        self.assertIn('licenses/FSR-SDK-HEADERS-LICENSE.txt',r['files'])
+        self.assertIn('licenses/AntiLag2/LICENSE.txt',r['files'])
         for name,h in r['files'].items():self.assertEqual(hashlib.sha256((self.output/name).read_bytes()).hexdigest(),h)
 
     def test_modified_source_prevents_publish(self):
