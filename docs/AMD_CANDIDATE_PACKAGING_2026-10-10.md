@@ -2,6 +2,10 @@
 
 ## Complete development candidate
 
+The [packaged Linux runtime trial](AMD_PACKAGED_LINUX_RUNTIME_2026-10-10.md)
+measured working FSR/AMD FG but failed normal quit after provider transitions.
+The artifact remains a development download and is not runtime-qualified.
+
 `tools/assemble_amd_candidate.py` now assembles 16 own files from the independently
 verified [PR45 Windows artifact](AMD_WINDOWS_CANDIDATE_2026-10-10.md). It checks
 the archive, every recorded member, source commit, SR/FSR bridge binding and UI
