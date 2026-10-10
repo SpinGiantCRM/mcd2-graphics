@@ -1,28 +1,25 @@
 # Windows/Radeon candidate handoff
 
 This is a development qualification artifact, not a released installer.
-The historical PR44 baseline below predates the later
-[terminal generation cleanup correction](NGX_DEVICE_RETIREMENT_2026-10-10.md).
-Do not treat it as a qualification artifact for that correction.
-
-Use [PR44's Windows build](https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/38005220664/artifacts/11651176693)
-and download `fg-windows-candidate`, artifact 11651176693.
-It contains the [AMD Streamline feature lifetime correction](AMD_STREAMLINE_FEATURE_LIFETIME_2026-10-10.md).
-The active-AMD-FG exit delay remains an explicit gate.
+Use [PR45's Windows build](https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/38009520993/artifacts/11652882639)
+and download `fg-windows-candidate`, artifact 11652882639.
+It contains the [AMD Streamline feature lifetime correction](AMD_STREAMLINE_FEATURE_LIFETIME_2026-10-10.md)
+and the [retained-generation unload correction](NGX_DEVICE_RETIREMENT_2026-10-10.md).
 
 Archive SHA-256:
-`39d7ece7ecdd1e69b0d5dfb6dd8b309b6d18ae4b7040528733f6b136b01a127e`.
-The embedded source commit `9989df9196dcd84e7d7e1abba1646094156ae1b6` is GitHub's
-test merge of PR44 head `1468ec57951b30bca9fb8139c72ab073b5145c10` into PR43 main.
-Its tree matches the merged implementation. The archive and all 42 manifest
-file hashes were verified locally against its receipt.
-See [the recorded hashes](../qualification/providers/windows-candidate-pr44-2026-10-10.json).
-Build success does not establish Windows GPU execution. The Windows checkout
-uses CRLF source bytes; binary hashes must be taken from this artifact's receipt,
-not substituted from a Linux build.
+`b0e4d1ba4acb8d52e6063d67d41419e0446b9d425dd582846a8f76d6b10c7f8b`.
+The embedded source commit `826f18177418044c68910f9e85e21f0dfbbb00f2` is GitHub's
+test merge of PR45 head `ea6e651431245752944502c56bba713174033f1f`. Its tree
+`5af0e85bc4c71e13eb12adadec7599af617c540e` matches the merged implementation.
+All 42 manifest file hashes and the continuous SR addon’s binding to this
+Windows FSR bridge were verified. See [the recorded hashes](../qualification/providers/windows-candidate-pr45-2026-10-10.json).
+Build success does not establish Windows GPU execution. The bounded mixed-provider
+Linux trial exited normally, but Windows active-FSR/FG/Anti-Lag and shutdown
+remain qualification gates. Do not substitute Linux-built binaries or old hashes.
 
-The [PR42 receipt](../qualification/providers/windows-candidate-pr42-2026-10-10.json)
-remains historical evidence and does not qualify this rebuilt candidate.
+The [PR44 receipt](../qualification/providers/windows-candidate-pr44-2026-10-10.json)
+and [PR42 receipt](../qualification/providers/windows-candidate-pr42-2026-10-10.json)
+remain historical evidence and do not qualify this rebuilt candidate.
 
 ## Prepare a reversible trial
 
@@ -40,7 +37,7 @@ Map these artifact files relative to `Dungeons/Binaries/Win64`:
 | `probe/dxgi.dll`, `probe/fg-sdk-bridge.dll`, `probe/fg-chain-observer.addon64`, `probe/mcd2-fg-guide-recon.addon64` | Same basenames |
 | `latency/mcd2-display-latency.addon64`, `amd-latency/mcd2-antilag2-bridge.dll` | Same basenames |
 | `sr/mcd2-graphics.addon64` | `mcd2-graphics.addon64` |
-| `experimental-reshade/ReShade64.dll` | `ReShade64.dll`, preserving its separate build/license provenance |
+| `experimental-reshade/ReShade64.dll` | `d3d12.asi`, preserving its separate build/license provenance |
 | `isolated-fsr-fg-game-bridge/mcd2-fsr-fg-game-bridge.dll` | `mcd2-fsr-fg-game-bridge.dll` |
 | `isolated-fsr-game-bridge/mcd2-fsr-game-bridge.dll` | `MCD2Graphics/fsr/mcd2-fsr-game-bridge.dll` |
 | `sr/live_dense.cso`, `sr/fsr_dense.cso` | `MCD2Graphics/live_dense.cso`, `MCD2Graphics/fsr_dense.cso` |
@@ -48,7 +45,7 @@ Map these artifact files relative to `Dungeons/Binaries/Win64`:
 The three `ui/Pak/MCD2Graphics_P.*` files go in
 `Dungeons/Content/Paks/~mods/MCD2Graphics`. Validate every copied hash.
 The Windows SR bridge hash must equal the SR receipt's `fsrBridgeSHA256`:
-`1782894e374cc92fea77eac1c43cc3442ae452086be48c4fd683301d10c5e24f`.
+`2e9b74f5d165a7e6b8191e3fc982636c7ada884430b4ff9035db030d8a977fca`.
 Do not substitute a Linux-built bridge or the bounded sustained-probe addon.
 
 Acquire vendor runtimes separately from their official pinned SDK sources;

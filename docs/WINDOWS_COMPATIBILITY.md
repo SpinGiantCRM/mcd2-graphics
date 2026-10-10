@@ -7,6 +7,13 @@ Windows/AMD or the separately observed shutdown failure.
 
 # Windows fixes: reasons and preservation requirements
 
+The [separate candidate installer inputs](AMD_CANDIDATE_PACKAGING_2026-10-10.md)
+embed and distribute the same captured manifest/dependency-lock bytes. Preserve
+the default released inputs, resource snapshots, payload checks, external-runtime
+exclusion and full folder deployment. Resource-selection builds do not establish
+AMD installer or Windows GPU runtime qualification; both platform jobs remain
+required.
+
 The [NGX device retirement correction](NGX_DEVICE_RETIREMENT_2026-10-10.md)
 also applies the existing terminal-lifetime guard to Native FG, FSR and NGX
 generations and skips terminal queue/device callbacks before locks. Ordinary
@@ -126,7 +133,7 @@ release provenance rather than a defect proven exclusive to Windows.
 
 The current AMD development handoff is
 [Windows/Radeon candidate qualification](AMD_WINDOWS_CANDIDATE_2026-10-10.md).
-Use its verified PR44 artifact and per-file hashes; the old released installer
+Use its verified PR45 artifact and per-file hashes; the old released installer
 and bounded isolated probes do not install the continuous FSR candidate.
 
 Use this candidate source and its matching release ZIP. GitHub's automatic
