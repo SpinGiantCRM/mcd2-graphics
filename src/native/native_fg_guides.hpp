@@ -13,7 +13,10 @@ struct Generation : SrGuideGeneration {
  LeanBorrowCache borrows;a::command_queue *queue=nullptr;
  bool retiring=false,busy=false,gap=true;uint32_t previous=0,world=0;
 };
-static std::unique_ptr<Generation> generation;
+// Final NT process teardown cannot release COM through an unloading renderer.
+// Normal gameplay retirement and ordinary unload retain their existing cleanup.
+static mcd2::process_exit::Lifetime<std::unique_ptr<Generation>,retain_sr_generation> generationLifetime;
+static auto &generation=generationLifetime.get();
 static uint64_t conversions=0,skips=0,retirements=0;
 using Notify=void(*)(void*,void*,void*,const MCD2FGCamera*);
 static Notify notify=nullptr;
@@ -102,6 +105,7 @@ static void present(a::command_queue *q,std::unique_lock<std::recursive_mutex>& 
  if(c.retiring&&cache.recordings.empty()&&cache.entries.empty()&&!cache.blocked){
   auto retired=std::move(generation);guard.unlock();retired->borrows.clear_after_idle();
   for(auto it=retired->owned.resources.rbegin();it!=retired->owned.resources.rend();++it)if(*it)(*it)->Release();
+  retired->owned.resources.clear(); // Manual reverse release must not run twice.
   retired.reset();guard.lock();++retirements;
  }
 }

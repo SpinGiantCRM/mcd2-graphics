@@ -35,7 +35,10 @@ struct Generation : SrGuideGeneration {
  std::uint64_t started=0;std::uint32_t previousId=0;LARGE_INTEGER previous{},frequency{};
  float delta=0;bool gap=false;
 };
-static std::unique_ptr<Generation> generation;
+// Final NT process teardown cannot release COM through an unloading renderer.
+// Normal gameplay retirement and ordinary unload retain their existing cleanup.
+static mcd2::process_exit::Lifetime<std::unique_ptr<Generation>,retain_sr_generation> generationLifetime;
+static auto &generation=generationLifetime.get();
 static void phase(p::SrPhase next,unsigned error=0){
  if(state.phase!=next||state.error!=error){state.phase=next;state.error=error;
   if(requestSequence<0x7fffffffu)state.sequence=++requestSequence;else state.phase=p::SrPhase::Failed;

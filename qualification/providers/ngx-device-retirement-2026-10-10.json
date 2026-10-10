@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-10",
+  "sourceBase": "4bb1eb21ab534541b8e9f2bf74e55d3a59add5cc",
+  "scope": "Single-provider exit controls and corrected NGX device retirement",
+  "environment": {
+    "os": "CachyOS",
+    "gpu": "RTX 4080 SUPER",
+    "driver": "615.78.08",
+    "proton": "CachyOS SLR 11.0-20261005",
+    "gameVersion": "1.1.2.0"
+  },
+  "controls": [
+    {
+      "case": "native-only + AMD FG",
+      "guides": [
+        3840,
+        2160
+      ],
+      "sdk": {
+        "active": 1,
+        "fault": 0,
+        "generatedPresents": 2060,
+        "errors": 0,
+        "warnings": 0
+      },
+      "exit": {
+        "elapsedSeconds": 3.286,
+        "gone": true,
+        "forcedSignal": false,
+        "debuggerAttached": false,
+        "exitCode": null
+      },
+      "baselineRestored": true
+    },
+    {
+      "case": "fsr-only + AMD FG",
+      "guides": [
+        2560,
+        1440
+      ],
+      "sdk": {
+        "active": 1,
+        "fault": 0,
+        "generatedPresents": 1055,
+        "errors": 0,
+        "warnings": 0
+      },
+      "exit": {
+        "elapsedSeconds": 4.085,
+        "gone": true,
+        "forcedSignal": false,
+        "debuggerAttached": false,
+        "exitCode": null
+      },
+      "baselineRestored": true
+    },
+    {
+      "case": "dlss-only + AMD FG",
+      "guides": [
+        2560,
+        1440
+      ],
+      "sdk": {
+        "active": 1,
+        "fault": 0,
+        "generatedPresents": 1641,
+        "errors": 0,
+        "warnings": 0
+      },
+      "exit": {
+        "elapsedSeconds": 3.688,
+        "gone": true,
+        "forcedSignal": false,
+        "debuggerAttached": false,
+        "exitCode": null
+      },
+      "baselineRestored": true
+    }
+  ],
+  "correctedBuild": {
+    "purpose": "temporary game FG guide notification",
+    "releasedSourcesChanged": false,
+    "privateGuideInspection": false,
+    "nativeFgGuides": true,
+    "addonSHA256": "91611395851b2726103bb30d627390924e05bd6e50cb00b8856d9f557d20558a",
+    "leanBaseSHA256": "3d3fb68207b2d9f0bc11520c7597935a588572dd824c50e6b43691c739ff67d1",
+    "leanGeneratedSHA256": "5400b3ed69d261a6220a7e93c7dbf71ca5a815c16cb6a8c9af7e76174a5c2cbd",
+    "fsrBaseSHA256": "c3a306962d85e10dc27e1f350347f2d7cd1e206183699bd18c7880bf02c59455",
+    "fsrGeneratedSHA256": "017fd06830ba5eacecba4e6ca28f176f05c3399e13044809da00c8ac7a4b6cef",
+    "fsrBridgeSHA256": "f422af2f70f62ca8462c3aff30d05d1db92dd3b1d0e4289750039b8a2a83514b",
+    "cameraSourceSHA256": {
+      "fg_camera_contract.h": "b889fa3d89e0d51fc2a70cebdb60c0e635f246efb335438baab9d9d27e73293d",
+      "fg_camera_math.h": "fbee20d2f25f6c98bca8e27b4e2a3b38c25312a4eeb72db2808b283fe0c8dc51"
+    },
+    "observerBaseSHA256": "98f804c5f8c4f3861e86f5494b12af439bdfcbc71328b32664e4d75c4f713fb3",
+    "observerGeneratedSHA256": "d3ef97f0804ac93fcb2790a49f5825546de9c2b77b472cf98bf84e9286626834",
+    "generatorSHA256": "dec3fb91f64e37057122d248b8902fa3d358cbf0cb02d24f05c4cb200fdbcd78",
+    "ngxFixtureSHA256": "dbde320ecdbaf4ad35a2815f8ae708f84b5b2e03677b4a8ca11b1afe1268f283",
+    "WindowsQualified": false
+  },
+  "windowsRadeonQualified": false,
+  "windowsNvidiaQualified": false,
+  "physicalScanoutMeasured": false,
+  "publishedFilesChanged": false,
+  "mixedProviderDelayRootCauseEstablished": false,
+  "deviceIdentityOnlyMixedRegression": {
+    "sequence": [
+      "FSR Quality",
+      "DLSS Quality",
+      "Native"
+    ],
+    "amdFgEnabledThroughout": true,
+    "ngXRetirementResult": 1,
+    "ngXOwnedReleased": true,
+    "exitCode": 1,
+    "stillAliveAtSeconds": 40.079,
+    "observerWaitMs": 108033,
+    "observerWaitIncludesPreQuitSetup": true,
+    "forcedSignal": false,
+    "debuggerAttached": true,
+    "baselineRestored": true,
+    "passed": false
+  },
+  "terminalCleanupFinding": {
+    "windowsStackMethod": "private syscall-frame stack candidates correlated with exact binary disassembly",
+    "nativeGuideStaticDestructorAtReturnRVA": "0x7d8e",
+    "callImmediatelyBeforeReturn": "IUnknown::Release through vtable offset 0x10",
+    "binarySHA256": "91611395851b2726103bb30d627390924e05bd6e50cb00b8856d9f557d20558a",
+    "completeWindowsUnwind": false,
+    "rawStacksPublished": false
+  },
+  "ntGuardOnlyMixedRegression": {
+    "sequence": [
+      "FSR Quality",
+      "DLSS Quality",
+      "Native"
+    ],
+    "amdFgEnabledThroughout": true,
+    "exitCode": 1,
+    "stillAliveAtSeconds": 40.085,
+    "observerWaitMs": 88718,
+    "observerWaitIncludesPreQuitSetup": true,
+    "forcedSignal": false,
+    "debuggerAttached": true,
+    "baselineRestored": true,
+    "passed": false,
+    "stackCandidate": "Native FG generation lifetime static destructor",
+    "ordinaryUnloadingPrecedesNtTermination": true
+  }
+}

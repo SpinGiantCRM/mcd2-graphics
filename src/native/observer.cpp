@@ -24,6 +24,9 @@
 #include <unordered_map>
 #include <vector>
 #include "dlss_model_override.hpp"
+#include "../latency/process_exit.hpp"
+static bool unload_generation_retained=false;
+static bool retain_sr_generation(){return unload_generation_retained||mcd2::process_exit::terminating();}
 
 namespace a = reshade::api;
 namespace fs = std::filesystem;
@@ -646,9 +649,10 @@ static void finish_present(a::command_queue *q,a::swapchain *sc) {
  }
 }
 static void destroy_cmd(a::command_list *cmd){std::lock_guard guard(lock);timer_reset(cmd);lean_forget_recording(cmd);commands.erase(cmd);}
-static void init_device(a::device *d) {if(d->get_api()==a::device_api::d3d12)reshade::log::message(reshade::log::level::info,"MCD2 observer D3D12 initialized; captures only on explicit request file");}
+static void init_device(a::device *d) {mcd2::process_exit::initialize();if(d->get_api()==a::device_api::d3d12)reshade::log::message(reshade::log::level::info,"MCD2 observer D3D12 initialized; captures only on explicit request file");}
 static void init_queue(a::command_queue *q){std::lock_guard guard(lock);if(capture_probe_queue)probe_queue_api=q;}
 static void destroy_queue(a::command_queue *q) {
+ if(mcd2::process_exit::terminating())return;
  std::unique_lock guard(lock);guide_probe_destroy_queue(q);native_fg_destroy_queue(q);fsr_runtime_destroy_queue(q);
  if(native_reset_queue==q){native_reset_borrows.blocked=true;native_reset_queue=nullptr;}
  if(!live_fixture || live_fixture->integration_queue!=q)return;
@@ -658,13 +662,40 @@ static void destroy_queue(a::command_queue *q) {
  if(!success){lean.failed=true;lean.borrow.blocked=true;if(live_fixture){live_fixture->ready=false;live_fixture->integration_queue=nullptr;}}
  std::ofstream(root/label/"queue-teardown.json")<<"{\"cleanupCompleted\":"<<(success?"true":"false")<<",\"generationRetained\":"<<(live_fixture?"true":"false")<<"}\n";
 }
-static void destroy_device(a::device *dev) {std::lock_guard guard(lock);pipelines.clear();layouts.clear();commands.clear();descriptors.clear();initial_states.clear();live_resources.clear();submitted_states.clear();remaining=0;records.clear();for(auto &c:copies)if(c.readback)c.readback->Release();copies.clear();auto it=roundtrip_textures.find(dev);if(it!=roundtrip_textures.end()){if(it->second)it->second->Release();roundtrip_textures.erase(it);}}
+static void destroy_device(a::device *dev) {if(mcd2::process_exit::terminating())return;std::lock_guard guard(lock);pipelines.clear();layouts.clear();commands.clear();descriptors.clear();initial_states.clear();live_resources.clear();submitted_states.clear();remaining=0;records.clear();for(auto &c:copies)if(c.readback)c.readback->Release();copies.clear();auto it=roundtrip_textures.find(dev);if(it!=roundtrip_textures.end()){if(it->second)it->second->Release();roundtrip_textures.erase(it);}}
 
 extern "C" __declspec(dllexport) const char *NAME="MCD2 Graphics Reconstruction Candidate";
 extern "C" __declspec(dllexport) const char *DESCRIPTION="Native graphics-menu reconstruction; version-pinned interop";
 #define EVENT(ev,fn) reshade::register_event<reshade::addon_event::ev>(fn)
 #define REMOVE(ev,fn) reshade::unregister_event<reshade::addon_event::ev>(fn)
-BOOL WINAPI DllMain(HMODULE module,DWORD reason,LPVOID) {
+// Queue teardown can retain still-replayable generations. ReShade's ordinary
+// unload must not run their COM destructors after its renderer has torn down.
+extern "C" __declspec(dllexport) bool AddonInit(HMODULE module,HMODULE framework) {
+ if(!module||!framework)return false;
+ mcd2::process_exit::initialize();
+ // A retained generation is not a fresh renderer instance or proof of retirement.
+ return !unload_generation_retained;
+}
+extern "C" __declspec(dllexport) void AddonUninit(HMODULE module,HMODULE framework) {
+ if(mcd2::process_exit::terminating())return;
+ bool retained=false;
+ {std::lock_guard guard(lock);retained=bool(live_fixture)||bool(fsr_runtime::generation);
+#if MCD2_NATIVE_FG_GUIDES
+  retained=retained||bool(native_fg::generation);
+#endif
+ }
+ if(!retained)return; // Ordinary empty-generation unload remains unchanged.
+ // Keep both the owned generation code and its COM vtables valid until OS exit.
+ // No SDK call, command-list reset or resource release substitutes for retirement.
+ HMODULE heldAddon=nullptr,heldFramework=nullptr;
+ const auto flags=GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS|GET_MODULE_HANDLE_EX_FLAG_PIN;
+ const bool pinned=module&&framework&&GetModuleHandleExW(flags,reinterpret_cast<LPCWSTR>(module),&heldAddon)&&
+  GetModuleHandleExW(flags,reinterpret_cast<LPCWSTR>(framework),&heldFramework)&&heldAddon==module&&heldFramework==framework;
+ unload_generation_retained=true;
+ reshade::unregister_addon(module); // Disable future callbacks outside DllMain.
+ std::ofstream(root/"sr-unload-retention.json")<<"{\"generationRetained\":true,\"modulePinSucceeded\":"<<(pinned?"true":"false")<<",\"ordinaryRetirementComplete\":false}";
+}
+BOOL WINAPI DllMain(HMODULE module,DWORD reason,LPVOID reserved) {
  if(reason==DLL_PROCESS_ATTACH) {
   // Keep this 64 KiB Windows path buffer off the DLL-loading thread's stack.
   // See docs/WINDOWS_COMPATIBILITY.md before replacing it with a fixed array.
@@ -679,6 +710,7 @@ BOOL WINAPI DllMain(HMODULE module,DWORD reason,LPVOID) {
   
   
  } else if(reason==DLL_PROCESS_DETACH) {
+  if(reserved){mcd2::process_exit::mark_terminating();return TRUE;}
   REMOVE(init_device,init_device);REMOVE(destroy_device,destroy_device);REMOVE(init_command_queue,init_queue);REMOVE(destroy_command_queue,destroy_queue);REMOVE(init_pipeline_layout,init_layout);REMOVE(init_pipeline,init_pipe);REMOVE(bind_pipeline,bind_pipe);
   REMOVE(push_descriptors,push_desc);REMOVE(bind_descriptor_tables,bind_tables);REMOVE(push_constants,push_constants);REMOVE(update_descriptor_tables,update_desc);REMOVE(copy_descriptor_tables,copy_desc);
   REMOVE(init_resource,init_resource);REMOVE(destroy_resource,destroy_resource);REMOVE(barrier,barrier);REMOVE(reset_command_list,reset_cmd);REMOVE(close_command_list,timer_close);REMOVE(destroy_command_list,destroy_cmd);REMOVE(dispatch,dispatch);REMOVE(execute_command_list,execute);REMOVE(finish_present,finish_present);

@@ -7,6 +7,21 @@ Windows/AMD or the separately observed shutdown failure.
 
 # Windows fixes: reasons and preservation requirements
 
+The [NGX device retirement correction](NGX_DEVICE_RETIREMENT_2026-10-10.md)
+also applies the existing terminal-lifetime guard to Native FG, FSR and NGX
+generations and skips terminal queue/device callbacks before locks. Ordinary
+unload and gameplay retirement remain required; replayable borrows are not
+freed by this guard. Native guide manual release clears destructor ownership. On ordinary ReShade
+unload with any retained generation, pin the exact addon/framework modules
+outside DllMain, unregister callbacks and refuse reuse until process restart.
+This is retained ownership, not completed retirement or hot-reload support.
+It uses the exact held proxy device supplied to NGX initialization for unshared
+`Shutdown1`. Preserve the non-null guard, verified shared ownership, fresh GPU
+completion and feature/parameter release before owned device/resource release.
+Retain the source checks on both CI platforms; Linux exit controls do not
+qualify Windows/NVIDIA NGX lifecycle or identify the mixed-provider exit delay.
+
+
 The [AMD Streamline feature lifetime](AMD_STREAMLINE_FEATURE_LIFETIME_2026-10-10.md)
 loads Reflex/PCL without NVIDIA DLSS-G for AMD startup ownership. Preserve
 startup-only SDK discovery before any device/token/proxy binding, exact actual
@@ -111,7 +126,7 @@ release provenance rather than a defect proven exclusive to Windows.
 
 The current AMD development handoff is
 [Windows/Radeon candidate qualification](AMD_WINDOWS_CANDIDATE_2026-10-10.md).
-Use its verified PR42 artifact and per-file hashes; the old released installer
+Use its verified PR44 artifact and per-file hashes; the old released installer
 and bounded isolated probes do not install the continuous FSR candidate.
 
 Use this candidate source and its matching release ZIP. GitHub's automatic

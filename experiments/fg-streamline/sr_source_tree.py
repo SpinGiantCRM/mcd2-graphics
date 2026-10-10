@@ -6,6 +6,10 @@ import shutil
 def copy_sr_sources(repo: Path, source: Path) -> None:
     for directory in ('src/native', 'src/providers'):
         shutil.copytree(repo / directory, source / directory, dirs_exist_ok=True)
+    # Same terminal query/lifetime guard as the latency addon; no vendor files.
+    (source / 'src/latency').mkdir(parents=True, exist_ok=True)
+    for name in ('process_exit.hpp', 'process_lifetime.hpp'):
+        shutil.copyfile(repo / 'src/latency' / name, source / 'src/latency' / name)
     # Plain C ABI only. Vendor SDK headers and runtime DLLs remain external.
     abi = Path('experiments/providers/fsr_game_bridge.h')
     (source / abi).parent.mkdir(parents=True, exist_ok=True)
