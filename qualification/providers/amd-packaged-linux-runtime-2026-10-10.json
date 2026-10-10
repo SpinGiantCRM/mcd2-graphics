@@ -191,9 +191,110 @@
       "confirmationHelperStartToProcessGoneSeconds": 4.646821773003467,
       "gameProcessGone": true,
       "scope": "Fresh DLSS Quality + AMD FG, then actual Video-menu switch to Native 100% + AMD FG; no debugger attached"
+    },
+    {
+      "label": "fsr-toggle-aa-on",
+      "actualGameExitCode": 3221226505,
+      "actualGameExitHex": "0xc0000409",
+      "processQuerySucceeded": true,
+      "waitResult": 0,
+      "confirmationHelperStartToProcessGoneSeconds": 2.615363671000523,
+      "gameProcessGone": true,
+      "scope": "Fresh FSR Quality + AMD FG, FG Off then On, FSR Native AA; no DLSS selected",
+      "additionalDiagnosticAddon": false
+    },
+    {
+      "label": "fsr-toggle-aa-routing",
+      "actualGameExitCode": 3221226505,
+      "actualGameExitHex": "0xc0000409",
+      "processQuerySucceeded": true,
+      "waitResult": 0,
+      "confirmationHelperStartToProcessGoneSeconds": 2.25036240800182,
+      "gameProcessGone": true,
+      "scope": "Same FSR-only sequence with an extra bounded CPU module-routing inspector",
+      "additionalDiagnosticAddon": true
+    },
+    {
+      "label": "fsr-toggle-aa-pin",
+      "actualGameExitCode": 3221226505,
+      "actualGameExitHex": "0xc0000409",
+      "processQuerySucceeded": true,
+      "waitResult": 0,
+      "confirmationHelperStartToProcessGoneSeconds": 2.6714656009971804,
+      "gameProcessGone": true,
+      "scope": "Same FSR-only Quality + AMD FG / Off / On / Native AA sequence, with temporary process-lifetime pin of the already-loaded upscaler SDK DLL; no SDK context-retirement change",
+      "additionalDiagnosticAddon": true,
+      "sdkModulePinSucceeded": true
+    },
+    {
+      "label": "fsr-quality-aa-clean-off",
+      "actualGameExitCode": 0,
+      "actualGameExitHex": "0x0",
+      "processQuerySucceeded": true,
+      "waitResult": 0,
+      "confirmationHelperStartToProcessGoneSeconds": 5.170443278999301,
+      "gameProcessGone": true,
+      "scope": "Fresh FSR Quality -> FSR Native AA with FG clean Off from startup; Native presentation owner throughout; no SDK pin or routing inspector",
+      "additionalDiagnosticAddon": false,
+      "startupOwner": 0,
+      "fgActiveAtBothPresetBoundaries": false,
+      "fsrActiveAtBothPresetBoundaries": true
     }
   ],
   "shutdownIsolationRestored": true,
+  "transitionFaultIsolation": {
+    "failedLaunch": {
+      "label": "fsr-toggle-aa-on",
+      "fsrRevision": 103,
+      "fsrPhase": 5,
+      "fsrError": 0,
+      "inputOutput": [
+        3840,
+        2160
+      ],
+      "fgPhase": 6,
+      "fgActive": 0,
+      "startupOwner": 2,
+      "unexpectedNvidiaConfigureResult": 31,
+      "amdSdkErrors": 0,
+      "amdSdkWarnings": 0,
+      "amdSdkFault": 0,
+      "persistedAcrossSettleSeconds": 72.8
+    },
+    "repeatedLaunch": {
+      "label": "fsr-toggle-aa-routing",
+      "fsrRevision": 103,
+      "fsrPhase": 5,
+      "fsrError": 0,
+      "inputOutput": [
+        3840,
+        2160
+      ],
+      "fgPhase": 3,
+      "fgActive": 1,
+      "startupOwner": 2,
+      "unexpectedNvidiaConfigureRecords": 0,
+      "amdSdkErrors": 0,
+      "amdSdkWarnings": 0,
+      "amdSdkFault": 0
+    },
+    "rootCauseEstablished": false,
+    "activationFaultRequiredForFatalExit": false,
+    "moduleInspectionLimit": "The 180 one-second module samples ended before the Native AA transition. They do not identify the lookup used by the later transition or prove a routing root cause."
+  },
+  "runtimeModulePinIsolation": {
+    "sdkModuleAlreadyLoaded": true,
+    "pinSucceeded": true,
+    "processLifetimeOnly": true,
+    "contextRetirementChanged": false,
+    "addonSourceSHA256": "a3830693ae6b5214f4db4d6e069f1018ad231a21ae17e17e0f74a2bc2bf9f077",
+    "addonBinarySHA256": "6ac119b38024bddabb801be758f164bdee2786a1904144e8276596cf3af39fa1",
+    "fsrActiveAtNativeAa": true,
+    "amdFgActiveAtNativeAa": true,
+    "actualGameExitCode": 3221226505,
+    "pinAlonePreventedFatalExit": false,
+    "shippingCodeChanged": false
+  },
   "runs": [
     {"group": "cleanOff","label": "pr47-fsr-clean-off-a","captureSHA256": "ee08303a030e7de126774bd6a75d7d55131b7c613d8a03eb3faba12561b9db4b","source": {"sr": 2,"revision": 100,"observedScale": 66.666664,"render": [2560,1440],"output": [3840,2160]},"metrics": {"FGOn": false,"intervals": 1199,"seconds": 9.0483214,"applicationPresentRate": 132.51076603003955,"medianMs": 7.4015,"p95Ms": 8.5604,"p99Ms": 9.4762,"SDKRealPresentRate": null,"SDKGeneratedPresentRate": 0,"SDKCountEquivalentTotal": null,"physicalDisplayFPSMeasured": false},"sdkDeltas": {"providerFrame": 0,"prepared": 0,"images": 0,"realPresents": 0,"generatedPresents": 0},"sdkBoundary": {"active": [0,0],"ready": [0,0],"result": [0,0],"fault": [0,0],"errors": [0,0],"warnings": [0,0]}},
     {"group": "cleanOff","label": "pr47-fsr-clean-off-b","captureSHA256": "e9095155abd9d1d2a6d611639bfb9deb76e2464f7a1bbc776ca4046a50938857","source": {"sr": 2,"revision": 100,"observedScale": 66.666664,"render": [2560,1440],"output": [3840,2160]},"metrics": {"FGOn": false,"intervals": 1199,"seconds": 9.0084655,"applicationPresentRate": 133.09702967725192,"medianMs": 7.3761,"p95Ms": 8.4862,"p99Ms": 9.0405,"SDKRealPresentRate": null,"SDKGeneratedPresentRate": 0,"SDKCountEquivalentTotal": null,"physicalDisplayFPSMeasured": false},"sdkDeltas": {"providerFrame": 0,"prepared": 0,"images": 0,"realPresents": 0,"generatedPresents": 0},"sdkBoundary": {"active": [0,0],"ready": [0,0],"result": [0,0],"fault": [0,0],"errors": [0,0],"warnings": [0,0]}},
