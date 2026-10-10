@@ -16,6 +16,8 @@
 #include <new>
 #include <vector>
 #include "fsr_fg_game_bridge.h"
+#include "synchronized_swapchain.hpp"
+#include "../../src/latency/process_exit.hpp"
 #include "../../src/latency/amd_fg_private_data.hpp"
 #include "api/include/dx12/ffx_api_dx12.h"
 #include "framegeneration/include/ffx_framegeneration.h"
@@ -52,6 +54,7 @@ struct Session {
  bool unconfirmedSubmission=false;
  ID3D12Fence* retirementFence=nullptr;HANDLE retirementEvent=nullptr;bool retirementSignalled=false;
 } *session=nullptr;
+bool swapLive(IDXGISwapChain4* raw){return session&&session->swap==raw&&session->presenter&&!session->closing;}
 void clearInputs(Session::Inputs& p){release(p.depth);release(p.motion);release(p.colour);p={};}
 void clearBorrowed(Session::Work& p){for(auto* resource:p.borrowed)resource->Release();p.borrowed.clear();}
 // No frame-time waits: a busy ring slot declines this generated frame. Failed
@@ -130,6 +133,7 @@ int configure(bool enabled,bool teardown=false){
 }
 }
 extern "C" int mcd2_afg_load_v1(const wchar_t* path){
+ mcd2::process_exit::initialize();
  std::lock_guard lock(guard);if(session)return -1;if(!absolute(path)||!hashRuntime(path))return -2;
  auto* s=new(std::nothrow) Session;if(!s)return -3;s->module=retainedRuntime?retainedRuntime:LoadLibraryExW(path,nullptr,LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR|LOAD_LIBRARY_SEARCH_SYSTEM32);
  if(!s->module){delete s;return -4;}
@@ -185,7 +189,10 @@ extern "C" int mcd2_afg_swap_v1(void* factory,void* queue,void* hwnd,const MCD2A
  D3D12_HEAP_PROPERTIES hp{};hp.Type=D3D12_HEAP_TYPE_DEFAULT;D3D12_RESOURCE_DESC texture{};texture.Dimension=D3D12_RESOURCE_DIMENSION_TEXTURE2D;texture.Width=s.width;texture.Height=s.height;texture.DepthOrArraySize=texture.MipLevels=1;texture.SampleDesc.Count=1;texture.Format=DXGI_FORMAT_R10G10B10A2_UNORM;
  hr=s.device->CreateCommittedResource(&hp,D3D12_HEAP_FLAG_NONE,&texture,D3D12_RESOURCE_STATE_COPY_DEST,nullptr,IID_PPV_ARGS(&s.world));if(FAILED(hr))return int(hr);
  code=configure(false);if(code)return int(code);
- return int(s.swap->QueryInterface(IID_IDXGISwapChain1,result));
+ // Keep the SDK's raw swapchain for its configuration API. The application
+ // receives one outer identity that serializes Present with our SDK gate.
+ auto* outer=new(std::nothrow) MCD2SynchronizedSwapchain(s.swap,guard,swapLive,mcd2::process_exit::terminating);
+ if(!outer)return E_OUTOFMEMORY;*result=static_cast<IDXGISwapChain1*>(outer);return 0;
 }
 extern "C" unsigned mcd2_afg_recording_contract_v2(){return 2;}
 extern "C" int mcd2_afg_guides_v2(void* cmd,void* depth,void* motion,const MCD2AmdFgGuidesV1* p){

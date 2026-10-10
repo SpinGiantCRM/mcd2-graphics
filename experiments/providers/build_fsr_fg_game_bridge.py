@@ -42,7 +42,7 @@ def build(sdk, sysroot, output, compiler='clang-cl', linker='lld-link'):
     notice = root.parents[1]/'third-party/FSR-SDK-HEADERS-LICENSE.txt'
     (output/notice.name).write_bytes(notice.read_bytes())
     receipt = dict(sdkCommit=COMMIT, SDKheadersSHA256=HEADERS,
-                   sourceSHA256={name:digest(root/name) for name in ['fsr_fg_game_bridge.cpp','fsr_fg_game_bridge.h', 'fsr_fg_game_bridge_probe.cpp', 'build_fsr_fg_probe.py', '../fg-streamline/fg_camera_contract.h', '../../src/native/reset_epoch_contract.hpp','../../src/latency/amd_fg_private_data.hpp']},
+                   sourceSHA256={name:digest(root/name) for name in ['fsr_fg_game_bridge.cpp','fsr_fg_game_bridge.h','synchronized_swapchain.hpp','../../src/latency/process_exit.hpp','../../src/latency/process_lifetime.hpp', 'fsr_fg_game_bridge_probe.cpp', 'build_fsr_fg_probe.py', '../fg-streamline/fg_camera_contract.h', '../../src/native/reset_epoch_contract.hpp','../../src/latency/amd_fg_private_data.hpp']},
                    recipeSHA256=digest(Path(__file__)), binarySHA256=digest(binary),
                    probeSHA256=digest(probe_binary),
                    runtimeBundled=False, gameIntegrationQualified=False,
