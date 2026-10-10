@@ -92,6 +92,26 @@ ownership and no FG activation. It exited with actual code 0 (5.17 s). The FSR
 preset change alone therefore did not reproduce this failure; the AMD presenter
 or its interaction with the transition remains a target, not an established cause.
 
+Two further separated controls exited with actual code 0: FSR Quality + AMD FG
+→ Off → On with Quality kept throughout (5.38 s), and Quality → Native AA with
+AMD FG continuously On and no toggle cycle (5.78 s). Both were active at their
+final gameplay boundary. Neither operation alone reproduced the combined-session
+failure; these short controls do not establish a root cause or long-session safety.
+
+A normal-start exception-trace launch repeated the combined sequence with both
+FSR Native AA and AMD FG active. It exited with actual code 0 (4.17 s); its final
+trace contained no fast-fail exception. Logging changes timing, so this run is
+excluded from performance results and supplies no failure-location evidence.
+The original Steam launch options were restored exactly afterward.
+
+A private Windows-ABI build added terminal-process guards to the FG guide addon
+only. The same combined sequence kept FSR Native AA and AMD FG active and exited
+with actual code 0 (4.11 s). All other own files and dependencies came from the
+packaged candidate. This closes a missing callback/ordinary-unload distinction;
+it is one passing control, not proof that the intermittent crash is repaired.
+Its performance and native Windows/Radeon runtime remain unqualified. Both guard
+headers are included in the build receipt; ordinary SDK retirement is retained.
+
 The original mod files, mod preferences and renderer settings were restored byte
 for byte after the measurement sequence. Account/character saves were never
 copied or edited. Raw logs, screenshots and account information remain private.

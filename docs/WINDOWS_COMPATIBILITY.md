@@ -1,3 +1,10 @@
+The FG guide addon now uses the same terminal process guard as SR and latency.
+Resolve the NT query outside DllMain; skip callback state locks and SDK retirement
+only during final process teardown. Ordinary unload must still request retirement.
+Preserve both header hashes in its build receipt and both platform checks. This
+closes a source-level teardown gap; it does not establish the cause of the
+packaged candidate's intermittent fatal exit or qualify Windows/Radeon runtime.
+
 The [FSR foliage lease](FSR_FOLIAGE_2026-10-09.md) uses actual current-world SR
 output before changing the material velocity CVar. Preserve matching session,
 revision/checksum, scale and successful-evaluation admission, acquisition only

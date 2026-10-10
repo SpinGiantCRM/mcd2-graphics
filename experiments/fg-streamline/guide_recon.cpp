@@ -17,6 +17,7 @@
 #include "fg_camera_contract.h"
 #include "fg_bridge_contract.h"
 #include "../providers/fsr_fg_game_bridge.h"
+#include "../../src/latency/process_exit.hpp"
 namespace a=reshade::api;
 #include "fg_alpha_copy.h"
 #include "fg_controls.hpp"
@@ -68,7 +69,7 @@ void poll_policy(){static ULONGLONG next=0;auto now=GetTickCount64();if(now<next
 }
 bool tracking(){return captureEnabled || (fg_controls::enabled?fg_controls::wanted.load():guideTags.load()&&guideSamples<900);}
 
-void try_retirement(){
+void try_retirement(){if(mcd2::process_exit::terminating())return;
  if(auto module=amd_bridge()){
   bool close=false;{std::lock_guard lock(mutex);close=retiring;}if(!close)return;
   using Retire=int(*)(void*,uint64_t);auto retire=reinterpret_cast<Retire>(GetProcAddress(module,"mcd2_afg_retire_v1"));
@@ -113,32 +114,32 @@ Binding unpack(const a::descriptor_table_update& update,unsigned i){
  return out;
 }
 std::pair<uint64_t,unsigned> key(a::device*device,a::descriptor_table table,unsigned binding){a::descriptor_heap heap{};unsigned offset=0;device->get_descriptor_heap_offset(table,binding,0,&heap,&offset);return {heap.handle,offset};}
-void init_device(a::device*){std::lock_guard lock(mutex);open();}
-void init_pipeline(a::device*,a::pipeline_layout,unsigned count,const a::pipeline_subobject* sub,a::pipeline p){
+void init_device(a::device*){mcd2::process_exit::initialize();if(mcd2::process_exit::terminating())return;std::lock_guard lock(mutex);open();}
+void init_pipeline(a::device*,a::pipeline_layout,unsigned count,const a::pipeline_subobject* sub,a::pipeline p){if(mcd2::process_exit::terminating())return;
  Pipe pipe;for(unsigned i=0;i<count;++i)if(sub[i].type==a::pipeline_subobject_type::pixel_shader||sub[i].type==a::pipeline_subobject_type::compute_shader){auto& shader=*static_cast<const a::shader_desc*>(sub[i].data);auto hash=crc(shader.code,shader.code_size);if(sub[i].type==a::pipeline_subobject_type::pixel_shader)pipe.ps=hash;else pipe.cs=hash;}
  std::lock_guard lock(mutex);pipelines[p.handle]=pipe;
 }
-void destroy_pipeline(a::device*,a::pipeline p){std::lock_guard lock(mutex);pipelines.erase(p.handle);}
-void bind_pipeline(a::command_list* cmd,a::pipeline_stage stages,a::pipeline p){if(!tracking())return;std::lock_guard lock(mutex);auto it=pipelines.find(p.handle);auto& state=commands[cmd];if(unsigned(stages&a::pipeline_stage::pixel_shader)){state.graphicsPipeline=p.handle;state.ps=it==pipelines.end()?0:it->second.ps;}if(unsigned(stages&a::pipeline_stage::compute_shader)){state.computePipeline=p.handle;state.cs=it==pipelines.end()?0:it->second.cs;}}
-void init_layout(a::device*,unsigned count,const a::pipeline_layout_param* param,a::pipeline_layout handle){
+void destroy_pipeline(a::device*,a::pipeline p){if(mcd2::process_exit::terminating())return;std::lock_guard lock(mutex);pipelines.erase(p.handle);}
+void bind_pipeline(a::command_list* cmd,a::pipeline_stage stages,a::pipeline p){if(mcd2::process_exit::terminating())return;if(!tracking())return;std::lock_guard lock(mutex);auto it=pipelines.find(p.handle);auto& state=commands[cmd];if(unsigned(stages&a::pipeline_stage::pixel_shader)){state.graphicsPipeline=p.handle;state.ps=it==pipelines.end()?0:it->second.ps;}if(unsigned(stages&a::pipeline_stage::compute_shader)){state.computePipeline=p.handle;state.cs=it==pipelines.end()?0:it->second.cs;}}
+void init_layout(a::device*,unsigned count,const a::pipeline_layout_param* param,a::pipeline_layout handle){if(mcd2::process_exit::terminating())return;
  std::lock_guard lock(mutex);auto& out=layouts[handle.handle];out.resize(count);
  for(unsigned i=0;i<count;++i){auto& p=param[i];if(p.type==a::pipeline_layout_param_type::push_descriptors)out[i].push_back(p.push_descriptors);
  else if(p.type==a::pipeline_layout_param_type::descriptor_table||p.type==a::pipeline_layout_param_type::push_descriptors_with_ranges)for(unsigned j=0;j<p.descriptor_table.count;++j)out[i].push_back(p.descriptor_table.ranges[j]);
  else if(p.type==a::pipeline_layout_param_type::descriptor_table_with_flags||p.type==a::pipeline_layout_param_type::push_descriptors_with_ranges_and_flags)for(unsigned j=0;j<p.descriptor_table_with_flags.count;++j)out[i].push_back(p.descriptor_table_with_flags.ranges[j]);}
 }
-void destroy_layout(a::device*,a::pipeline_layout handle){std::lock_guard lock(mutex);layouts.erase(handle.handle);}
-void push(a::command_list*cmd,a::shader_stage stage,a::pipeline_layout handle,unsigned param,const a::descriptor_table_update& update){if(!tracking())return;std::lock_guard lock(mutex);auto& root=compute(stage)?commands[cmd].compute:commands[cmd].graphics;layout(root,handle.handle);root.tables.erase(param);for(unsigned i=0;i<update.count;++i)root.pushed[param][update.binding+i]=unpack(update,i);}
-void tables(a::command_list*cmd,a::shader_stage stage,a::pipeline_layout handle,unsigned first,unsigned count,const a::descriptor_table* table,unsigned dynamicCount,const unsigned*){if(!tracking())return;std::lock_guard lock(mutex);auto& root=compute(stage)?commands[cmd].compute:commands[cmd].graphics;layout(root,handle.handle);root.dynamicOffsets|=dynamicCount!=0;for(unsigned i=0;i<count;++i){root.tables[first+i]=table[i].handle;root.pushed.erase(first+i);}}
-void constants(a::command_list*cmd,a::shader_stage stage,a::pipeline_layout handle,unsigned param,unsigned first,unsigned count,const void*data){if(!tracking())return;std::lock_guard lock(mutex);auto&root=compute(stage)?commands[cmd].compute:commands[cmd].graphics;layout(root,handle.handle);auto values=static_cast<const uint32_t*>(data);for(unsigned i=0;i<count;++i)root.constants[param][first+i]=values[i];}
-bool update(a::device*device,unsigned count,const a::descriptor_table_update* updates){std::lock_guard lock(mutex);for(unsigned j=0;j<count;++j)for(unsigned i=0;i<updates[j].count;++i)descriptors[key(device,updates[j].table,updates[j].binding+i)]=unpack(updates[j],i);return false;}
-bool copy(a::device*device,unsigned count,const a::descriptor_table_copy* copies){std::lock_guard lock(mutex);for(unsigned j=0;j<count;++j){auto& c=copies[j];std::vector<Binding> snapshot(c.count);for(unsigned i=0;i<c.count;++i){auto it=descriptors.find(key(device,c.source_table,c.source_binding+i));if(it!=descriptors.end())snapshot[i]=it->second;}for(unsigned i=0;i<c.count;++i)descriptors[key(device,c.dest_table,c.dest_binding+i)]=snapshot[i];}return false;}
-void resource_init(a::device*,const a::resource_desc&,const a::subresource_data*,a::resource_usage state,a::resource resource){std::lock_guard lock(mutex);initial[resource.handle]=state;}
-void resource_destroy(a::device*,a::resource resource){std::lock_guard lock(mutex);initial.erase(resource.handle);submitted.erase(resource.handle);for(auto& [cmd,state]:commands)state.states.erase(resource.handle);}
-void barrier(a::command_list*cmd,unsigned count,const a::resource*resources,const a::resource_usage*,const a::resource_usage*after){if(!captureEnabled)return;std::lock_guard lock(mutex);for(unsigned i=0;i<count;++i)commands[cmd].states[resources[i].handle]=after[i];}
-void execute(a::command_queue*q,a::command_list*cmd){bool tagged=false;{std::lock_guard lock(mutex);if(captureEnabled)for(auto& [resource,state]:commands[cmd].states)submitted[resource]=state;tagged=commands[cmd].imageFrame!=UINT32_MAX;}if(tagged)fg_alpha::submission_queue(q);}
-void reset(a::command_list*cmd){{std::lock_guard lock(mutex);commands.erase(cmd);}try_retirement();}
-void swap_init(a::swapchain*swap,bool resize){std::lock_guard lock(mutex);open();for(unsigned i=0;i<swap->get_back_buffer_count();++i)backbuffers.insert(swap->get_back_buffer(i).handle);auto d=swap->get_device()->get_resource_desc(swap->get_current_back_buffer());outputWidth=d.texture.width;outputHeight=d.texture.height;outputFormat=unsigned(d.texture.format);outputBuffers=swap->get_back_buffer_count();outputWindow=static_cast<HWND>(swap->get_hwnd());privateLog<<"{\"kind\":\"swapchain\",\"resize\":"<<(resize?"true":"false")<<",\"width\":"<<d.texture.width<<",\"height\":"<<d.texture.height<<",\"format\":"<<unsigned(d.texture.format)<<",\"buffers\":"<<swap->get_back_buffer_count()<<"}\n";privateLog.flush();}
-void swap_destroy(a::swapchain*swap,bool resize){
+void destroy_layout(a::device*,a::pipeline_layout handle){if(mcd2::process_exit::terminating())return;std::lock_guard lock(mutex);layouts.erase(handle.handle);}
+void push(a::command_list*cmd,a::shader_stage stage,a::pipeline_layout handle,unsigned param,const a::descriptor_table_update& update){if(mcd2::process_exit::terminating())return;if(!tracking())return;std::lock_guard lock(mutex);auto& root=compute(stage)?commands[cmd].compute:commands[cmd].graphics;layout(root,handle.handle);root.tables.erase(param);for(unsigned i=0;i<update.count;++i)root.pushed[param][update.binding+i]=unpack(update,i);}
+void tables(a::command_list*cmd,a::shader_stage stage,a::pipeline_layout handle,unsigned first,unsigned count,const a::descriptor_table* table,unsigned dynamicCount,const unsigned*){if(mcd2::process_exit::terminating())return;if(!tracking())return;std::lock_guard lock(mutex);auto& root=compute(stage)?commands[cmd].compute:commands[cmd].graphics;layout(root,handle.handle);root.dynamicOffsets|=dynamicCount!=0;for(unsigned i=0;i<count;++i){root.tables[first+i]=table[i].handle;root.pushed.erase(first+i);}}
+void constants(a::command_list*cmd,a::shader_stage stage,a::pipeline_layout handle,unsigned param,unsigned first,unsigned count,const void*data){if(mcd2::process_exit::terminating())return;if(!tracking())return;std::lock_guard lock(mutex);auto&root=compute(stage)?commands[cmd].compute:commands[cmd].graphics;layout(root,handle.handle);auto values=static_cast<const uint32_t*>(data);for(unsigned i=0;i<count;++i)root.constants[param][first+i]=values[i];}
+bool update(a::device*device,unsigned count,const a::descriptor_table_update* updates){if(mcd2::process_exit::terminating())return false;std::lock_guard lock(mutex);for(unsigned j=0;j<count;++j)for(unsigned i=0;i<updates[j].count;++i)descriptors[key(device,updates[j].table,updates[j].binding+i)]=unpack(updates[j],i);return false;}
+bool copy(a::device*device,unsigned count,const a::descriptor_table_copy* copies){if(mcd2::process_exit::terminating())return false;std::lock_guard lock(mutex);for(unsigned j=0;j<count;++j){auto& c=copies[j];std::vector<Binding> snapshot(c.count);for(unsigned i=0;i<c.count;++i){auto it=descriptors.find(key(device,c.source_table,c.source_binding+i));if(it!=descriptors.end())snapshot[i]=it->second;}for(unsigned i=0;i<c.count;++i)descriptors[key(device,c.dest_table,c.dest_binding+i)]=snapshot[i];}return false;}
+void resource_init(a::device*,const a::resource_desc&,const a::subresource_data*,a::resource_usage state,a::resource resource){if(mcd2::process_exit::terminating())return;std::lock_guard lock(mutex);initial[resource.handle]=state;}
+void resource_destroy(a::device*,a::resource resource){if(mcd2::process_exit::terminating())return;std::lock_guard lock(mutex);initial.erase(resource.handle);submitted.erase(resource.handle);for(auto& [cmd,state]:commands)state.states.erase(resource.handle);}
+void barrier(a::command_list*cmd,unsigned count,const a::resource*resources,const a::resource_usage*,const a::resource_usage*after){if(mcd2::process_exit::terminating())return;if(!captureEnabled)return;std::lock_guard lock(mutex);for(unsigned i=0;i<count;++i)commands[cmd].states[resources[i].handle]=after[i];}
+void execute(a::command_queue*q,a::command_list*cmd){if(mcd2::process_exit::terminating())return;bool tagged=false;{std::lock_guard lock(mutex);if(captureEnabled)for(auto& [resource,state]:commands[cmd].states)submitted[resource]=state;tagged=commands[cmd].imageFrame!=UINT32_MAX;}if(tagged)fg_alpha::submission_queue(q);}
+void reset(a::command_list*cmd){if(mcd2::process_exit::terminating())return;{std::lock_guard lock(mutex);commands.erase(cmd);}try_retirement();}
+void swap_init(a::swapchain*swap,bool resize){if(mcd2::process_exit::terminating())return;std::lock_guard lock(mutex);open();for(unsigned i=0;i<swap->get_back_buffer_count();++i)backbuffers.insert(swap->get_back_buffer(i).handle);auto d=swap->get_device()->get_resource_desc(swap->get_current_back_buffer());outputWidth=d.texture.width;outputHeight=d.texture.height;outputFormat=unsigned(d.texture.format);outputBuffers=swap->get_back_buffer_count();outputWindow=static_cast<HWND>(swap->get_hwnd());privateLog<<"{\"kind\":\"swapchain\",\"resize\":"<<(resize?"true":"false")<<",\"width\":"<<d.texture.width<<",\"height\":"<<d.texture.height<<",\"format\":"<<unsigned(d.texture.format)<<",\"buffers\":"<<swap->get_back_buffer_count()<<"}\n";privateLog.flush();}
+void swap_destroy(a::swapchain*swap,bool resize){if(mcd2::process_exit::terminating())return;
  bool owner=false;unsigned recordings=0;
  {std::lock_guard lock(mutex);owner=swap->get_hwnd()==outputWindow;for(unsigned i=0;i<swap->get_back_buffer_count();++i)backbuffers.erase(swap->get_back_buffer(i).handle);
   if(owner){retiring=true;ownerClosing=!resize;gameFrames.clear();for(auto&[cmd,state]:commands)recordings+=state.usesAlpha;
@@ -158,8 +159,8 @@ void swap_destroy(a::swapchain*swap,bool resize){
  // acknowledges feature release before the shared SDK may be shut down.
  try_retirement();
 }
-void targets(a::command_list*cmd,unsigned count,const a::resource_view*views,a::resource_view){if(!tracking())return;std::lock_guard lock(mutex);auto& state=commands[cmd];state.backbuffer=false;for(unsigned i=0;i<count;++i)if(backbuffers.count(cmd->get_device()->get_resource_from_view(views[i]).handle))state.backbuffer=true;}
-bool pass(a::command_list*cmd,unsigned count,const a::render_pass_render_target_desc*rt,const a::render_pass_depth_stencil_desc*,a::render_pass_flags){std::vector<a::resource_view> views;for(unsigned i=0;i<count;++i)views.push_back(rt[i].view);targets(cmd,count,views.data(),{});return false;}
+void targets(a::command_list*cmd,unsigned count,const a::resource_view*views,a::resource_view){if(mcd2::process_exit::terminating())return;if(!tracking())return;std::lock_guard lock(mutex);auto& state=commands[cmd];state.backbuffer=false;for(unsigned i=0;i<count;++i)if(backbuffers.count(cmd->get_device()->get_resource_from_view(views[i]).handle))state.backbuffer=true;}
+bool pass(a::command_list*cmd,unsigned count,const a::render_pass_render_target_desc*rt,const a::render_pass_depth_stencil_desc*,a::render_pass_flags){if(mcd2::process_exit::terminating())return false;std::vector<a::resource_view> views;for(unsigned i=0;i<count;++i)views.push_back(rt[i].view);targets(cmd,count,views.data(),{});return false;}
 void observe(a::command_list*cmd,bool cs){
  if(!capturing())return;auto& state=commands[cmd];auto& root=cs?state.compute:state.graphics;auto found=layouts.find(root.layout);if(found==layouts.end())return;
  identity_receipt(cs?"temporal":"compositor");
@@ -241,10 +242,10 @@ void compositor(a::command_list*cmd){
  std::lock_guard lock(mutex);commands[cmd]=saved;commands[cmd].usesAlpha|=alpha!=nullptr;if(!tokenResult&&!sdkResult){commands[cmd].imageFrame=stamp;gameFrames[stamp].images=true;}
  if(!fg_controls::enabled||sample<120||sample%60==0)privateLog<<"{\"kind\":\"game_image_tags\",\"sample\":"<<sample<<",\"frameStamp\":"<<stamp<<",\"SDKIndex\":"<<sdkIndex<<",\"tokenResult\":"<<tokenResult<<",\"SDKResult\":"<<sdkResult<<",\"alphaReady\":"<<(alpha?"true":"false")<<",\"alphaStage\":"<<fg_alpha::stage.load()<<",\"alphaHRESULT\":"<<uint32_t(fg_alpha::lastHR.load())<<",\"UIViewFormat\":"<<unsigned(cmd->get_device()->get_resource_view_desc(ui.view).format)<<"}\n";privateLog.flush();
 }
-bool dispatch(a::command_list*cmd,unsigned,unsigned,unsigned){if(internalGPU||!captureEnabled)return false;std::lock_guard lock(mutex);auto cs=commands[cmd].cs;if(cs==0x03645dc9||cs==0xf56e10f9)observe(cmd,true);return false;}
-bool draw(a::command_list*cmd,unsigned,unsigned,unsigned,unsigned){if(!tracking())return false;{std::lock_guard lock(mutex);auto& state=commands[cmd];if(!internalGPU&&(state.backbuffer||state.ps==0x378df900))observe(cmd,false);}compositor(cmd);return false;}
-bool indexed(a::command_list*cmd,unsigned,unsigned,unsigned,int,unsigned){return draw(cmd,0,0,0,0);}
-void finish(a::command_queue*,a::swapchain*){
+bool dispatch(a::command_list*cmd,unsigned,unsigned,unsigned){if(mcd2::process_exit::terminating())return false;if(internalGPU||!captureEnabled)return false;std::lock_guard lock(mutex);auto cs=commands[cmd].cs;if(cs==0x03645dc9||cs==0xf56e10f9)observe(cmd,true);return false;}
+bool draw(a::command_list*cmd,unsigned,unsigned,unsigned,unsigned){if(mcd2::process_exit::terminating())return false;if(!tracking())return false;{std::lock_guard lock(mutex);auto& state=commands[cmd];if(!internalGPU&&(state.backbuffer||state.ps==0x378df900))observe(cmd,false);}compositor(cmd);return false;}
+bool indexed(a::command_list*cmd,unsigned,unsigned,unsigned,int,unsigned){if(mcd2::process_exit::terminating())return false;return draw(cmd,0,0,0,0);}
+void finish(a::command_queue*,a::swapchain*){if(mcd2::process_exit::terminating())return;
  auto bridge=GetModuleHandleW(L"fg-sdk-bridge.dll");using State=int(*)(unsigned*,unsigned*,unsigned*,unsigned*);auto state=bridge?reinterpret_cast<State>(GetProcAddress(bridge,"mcd2_fg_state")):nullptr;
  if(auto module=amd_bridge()){
   using State=int(*)(MCD2AmdFgStateV1*);auto get=reinterpret_cast<State>(GetProcAddress(module,"mcd2_afg_state_v1"));MCD2AmdFgStateV1 state{};state.size=sizeof(state);auto result=get?get(&state):-1;
@@ -257,7 +258,7 @@ void finish(a::command_queue*,a::swapchain*){
  outcomeResult=activeFGMode?result:0;outcomeStatus=activeFGMode?status:0;outcomePresents=activeFGMode?presents:1;
  if(activeFGMode && (!fg_controls::enabled||fgTrialFrames<120||fgTrialFrames%60==0)){privateLog<<"{\"kind\":\"fg_present_outcome\",\"frameStamp\":"<<presentedFrame<<",\"SDKResult\":"<<result<<",\"status\":"<<status<<",\"actualPresents\":"<<presents<<"}\n";privateLog.flush();}++frame;
 }
-void present(a::command_queue*q,a::swapchain*swap,const a::rect*,const a::rect*,unsigned,const a::rect*){
+void present(a::command_queue*q,a::swapchain*swap,const a::rect*,const a::rect*,unsigned,const a::rect*){if(mcd2::process_exit::terminating())return;
  poll_policy();fg_controls::poll(swap->get_device(),capturePolicy,activeFGMode);
  FrameData data{};bool ready=false,wanted=false;uint64_t id=UINT64_MAX;
  {
@@ -299,13 +300,13 @@ void present(a::command_queue*q,a::swapchain*swap,const a::rect*,const a::rect*,
  if(activeFGMode){++fgTrialFrames;presentedFrame=uint32_t(id);}
 }
 }
-extern "C" __declspec(dllexport) int mcd2_fg_active(){return activeFGMode.load()?1:0;}
-extern "C" __declspec(dllexport) int mcd2_fg_last_present(uint64_t* sample,unsigned* status,unsigned* presents){
+extern "C" __declspec(dllexport) int mcd2_fg_active(){if(mcd2::process_exit::terminating())return 0;return activeFGMode.load()?1:0;}
+extern "C" __declspec(dllexport) int mcd2_fg_last_present(uint64_t* sample,unsigned* status,unsigned* presents){if(mcd2::process_exit::terminating())return -1;
  if(!sample||!status||!presents)return -1;
  std::lock_guard lock(mutex);*sample=outcomeSample;*status=outcomeStatus;*presents=outcomePresents;return outcomeResult;
 }
-extern "C" __declspec(dllexport) int mcd2_fg_inputs_wanted(){return tracking()?1:0;}
-extern "C" __declspec(dllexport) void mcd2_fg_observe_sr(void*cmd,void*depth,void*motion,const MCD2FGCamera*camera){
+extern "C" __declspec(dllexport) int mcd2_fg_inputs_wanted(){if(mcd2::process_exit::terminating())return 0;return tracking()?1:0;}
+extern "C" __declspec(dllexport) void mcd2_fg_observe_sr(void*cmd,void*depth,void*motion,const MCD2FGCamera*camera){if(mcd2::process_exit::terminating())return;
  if(!camera||camera->size!=sizeof(*camera)||!cmd||!depth||!motion)return;
  if(fg_controls::enabled&&!fg_controls::wanted)return;
  {std::lock_guard lock(mutex);if(retiring||ownerClosing||!guideTags)return;}
@@ -338,19 +339,20 @@ extern "C" __declspec(dllexport) void mcd2_fg_observe_sr(void*cmd,void*depth,voi
  if(!fg_controls::enabled||sample<120||sample%60==0)privateLog<<"{\"kind\":\"game_guide_tags\",\"sample\":"<<sample<<",\"frameStamp\":"<<camera->frame<<",\"SDKIndex\":"<<context.index<<",\"tokenResult\":"<<tokenResult<<",\"SDKResult\":"<<context.result<<",\"reset\":"<<measured.reset<<",\"width\":"<<camera->width<<",\"height\":"<<camera->height<<"}\n";privateLog.flush();
 }
 extern "C" __declspec(dllexport) const char*NAME="MCD2 FG bounded guide reconnaissance";
-extern "C" __declspec(dllexport) void mcd2_fg_sr_retired(){
+extern "C" __declspec(dllexport) void mcd2_fg_sr_retired(){if(mcd2::process_exit::terminating())return;
  {std::lock_guard lock(mutex);if(!ownerClosing)return;}
  auto latency=GetModuleHandleW(L"mcd2-display-latency.addon64");auto quiesce=latency?reinterpret_cast<int(*)()>(GetProcAddress(latency,"mcd2_fg_quiesce")):nullptr;
  const int result=quiesce?quiesce():-1;
  std::lock_guard lock(mutex);privateLog<<"{\"kind\":\"shared_sdk_retired\",\"SRFeatureRetired\":true,\"quiesceAvailable\":"<<(quiesce?"true":"false")<<",\"SDKResult\":"<<result<<"}\n";privateLog.flush();
 }
 extern "C" __declspec(dllexport) const char*DESCRIPTION="Private bounded game-input and frame-generation experiment; disabled by default";
-BOOL APIENTRY DllMain(HMODULE module,DWORD reason,LPVOID){if(reason==DLL_PROCESS_ATTACH){if(!reshade::register_addon(module))return FALSE;
+BOOL APIENTRY DllMain(HMODULE module,DWORD reason,LPVOID reserved){if(reason==DLL_PROCESS_ATTACH){if(!reshade::register_addon(module))return FALSE;
 #define E(e,f) reshade::register_event<reshade::addon_event::e>(f)
  E(init_device,init_device);E(init_pipeline,init_pipeline);E(destroy_pipeline,destroy_pipeline);E(bind_pipeline,bind_pipeline);E(init_pipeline_layout,init_layout);E(destroy_pipeline_layout,destroy_layout);E(push_descriptors,push);E(push_constants,constants);E(bind_descriptor_tables,tables);E(update_descriptor_tables,update);E(copy_descriptor_tables,copy);E(init_resource,resource_init);E(destroy_resource,resource_destroy);E(barrier,barrier);E(execute_command_list,execute);E(reset_command_list,reset);E(destroy_command_list,reset);E(init_swapchain,swap_init);E(destroy_swapchain,swap_destroy);E(bind_render_targets_and_depth_stencil,targets);E(begin_render_pass,pass);E(dispatch,dispatch);E(draw,draw);E(draw_indexed,indexed);E(present,present);E(finish_present,finish);
 #undef E
- }else if(reason==DLL_PROCESS_DETACH)reshade::unregister_addon(module);return TRUE;}
-extern "C" __declspec(dllexport) bool AddonInit(HMODULE,HMODULE){return true;}
+ }else if(reason==DLL_PROCESS_DETACH){if(reserved)mcd2::process_exit::mark_terminating();else reshade::unregister_addon(module);}return TRUE;}
+extern "C" __declspec(dllexport) bool AddonInit(HMODULE,HMODULE){mcd2::process_exit::initialize();return true;}
 extern "C" __declspec(dllexport) void AddonUninit(HMODULE,HMODULE){
+ if(mcd2::process_exit::terminating())return;
  {std::lock_guard lock(mutex);retiring=true;ownerClosing=true;}try_retirement();
 }
