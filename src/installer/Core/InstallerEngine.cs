@@ -59,6 +59,7 @@ public sealed partial class InstallerEngine {
         foreach(var pair in hashes){overrideHashes[pair.Key]=pair.Value;overrideOriginals[pair.Key]=pair.Value;selections.Remove(pair.Key);}
     }
     public string Version { get; }
+    public string Description { get; }
     public IReadOnlyList<Dependency> Dependencies { get; }
     public string? GameRoot { get; private set; }
     public Action RequireClosed { get; set; } = EnsureGameClosed;
@@ -69,6 +70,8 @@ public sealed partial class InstallerEngine {
         gameHash=l.RootElement.GetProperty("game").GetProperty("exeSHA256").GetString()!;
         supportedBuild=l.RootElement.GetProperty("game").GetProperty("steamBuildID").ToString();
         Version=m.RootElement.GetProperty("version").GetString()!;
+        Description=m.RootElement.TryGetProperty("description",out var description)?description.GetString()??throw new InvalidDataException("Invalid package description."):"Core graphics addon\nNative Video settings\nDLSS Super Resolution and DLAA\nFrame Generation preview (DLSS/DLAA + native HDR)\nHDR support\nReflex appears only when the rendering GPU and integration support it.";
+        if(Description.Length is 0 or >1200)throw new InvalidDataException("Invalid package description.");
         own=ReadHashes(m.RootElement.GetProperty("files"));
         foreach(var p in own.Keys) ValidateRelative(p);
         if(m.RootElement.TryGetProperty("upgradeFrom",out var upgrades))foreach(var version in upgrades.EnumerateObject())previousInstalls.Add(version.Name,ReadHashes(version.Value));
@@ -78,7 +81,7 @@ public sealed partial class InstallerEngine {
             var files=d.TryGetProperty("files",out var f)?ReadHashes(f):new Dictionary<string,string> {{d.GetProperty("file").GetString()!,d.GetProperty("sha256").GetString()!}};
             foreach(var path in files.Keys) ValidateRelative(path);
             var url=d.TryGetProperty("download",out var u)?u.GetString():d.TryGetProperty("source",out u)?u.GetString():d.TryGetProperty("url",out u)?u.GetString():null;
-            deps.Add(new(item.Name,item.Name switch {"BlueprintLoader"=>"Blueprint Loader", "ReShade"=>"ReShade full addon support", "RenoDXUEExtended"=>"RenoDX HDR support", "DLSSRuntime"=>"NVIDIA DLSS runtime", "Streamline"=>"NVIDIA Reflex / Frame Generation runtime", _=>item.Name},
+            deps.Add(new(item.Name,item.Name switch {"BlueprintLoader"=>"Blueprint Loader", "ReShade"=>"ReShade full addon support", "RenoDXUEExtended"=>"RenoDX HDR support", "DLSSRuntime"=>"NVIDIA DLSS runtime", "Streamline"=>"NVIDIA Reflex / Frame Generation runtime", "FSRUpscaler"=>"AMD FSR upscaling runtime", "FSRFrameGeneration"=>"AMD Frame Generation runtime", _=>item.Name},
                 d.TryGetProperty("version",out var v)?v.ToString():d.TryGetProperty("releaseTag",out v)?v.ToString():"Pinned", url??OfficialUrl(item.Name), files,
                 d.TryGetProperty("archiveSHA256",out var a)?a.GetString():null, d.TryGetProperty("archiveMembers",out var members)?ReadHashes(members):null, d.TryGetProperty("upgradeFromFiles",out var prior)?ReadHashes(prior):null,
                 d.TryGetProperty("upgradeFromFileSets",out var sets)?sets.EnumerateArray().Select(ReadHashes).ToList():null,

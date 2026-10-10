@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-10",
+  "sourceBase": "249155657c4fe9e13973b9f4094c2b5e5464fd93",
+  "purpose": "Separate AMD development installer inputs and transaction checks",
+  "candidateVersion": "0.4.0-amd.dev.1",
+  "nativeArtifact": {
+    "schemaVersion": 1,
+    "candidateOnly": true,
+    "sourceCommit": "826f18177418044c68910f9e85e21f0dfbbb00f2",
+    "artifactUrl": "https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/38009520993/artifacts/11652882639",
+    "archiveSHA256": "b0e4d1ba4acb8d52e6063d67d41419e0446b9d425dd582846a8f76d6b10c7f8b",
+    "verifiedArtifactFiles": 42,
+    "payload": {
+      "Dungeons/Binaries/Win64/FGBootstrap.ini": "28e372323e4f57087414176fd5b1afa51ac6e1c301dadad23b1e303bbbdde508",
+      "Dungeons/Binaries/Win64/FGGuideCapture.ini": "492c4233a4803fe3bcf1b472727ec142ec1d242669030bb7d95b735c22398ca0",
+      "Dungeons/Binaries/Win64/FG_UI_ALPHA.cso": "fce79e558c20bfafd859f37e397b8a04b5d820670f6aa0214522cef276cca8c1",
+      "Dungeons/Binaries/Win64/MCD2Graphics/fsr/mcd2-fsr-game-bridge.dll": "2e9b74f5d165a7e6b8191e3fc982636c7ada884430b4ff9035db030d8a977fca",
+      "Dungeons/Binaries/Win64/MCD2Graphics/fsr_dense.cso": "089cef22d81092bd9ed2bdf0ec7a9bb6fcfe10268c52e0a57273dc69df68da68",
+      "Dungeons/Binaries/Win64/MCD2Graphics/live_dense.cso": "4a65a33ba983124b7c47d5822507613231abef7ec1fca8fa7fc51437fd0c29d2",
+      "Dungeons/Binaries/Win64/dxgi.dll": "90f508219a296931c5e6c44c4b8c917d6e827b46c0e4f4aff19fc0bd9c3ae7c4",
+      "Dungeons/Binaries/Win64/fg-sdk-bridge.dll": "63024fe066b1d603acf3c037a19d20484a16eebcb11f4772bf60681aaabc9e70",
+      "Dungeons/Binaries/Win64/mcd2-antilag2-bridge.dll": "acd224b9e6dab78f6e8c0d9dea20e84860d16fd1953bb7d2312e8e868d276f8b",
+      "Dungeons/Binaries/Win64/mcd2-display-latency.addon64": "4871ebdaca9bc29b106ec2ed750519c6c2bf39e0b55d4b931b3917d8dda57eb7",
+      "Dungeons/Binaries/Win64/mcd2-fg-guide-recon.addon64": "6701382880be081925ec1f2d4c5a12c0361ad747194468727c5bf769e3175cc0",
+      "Dungeons/Binaries/Win64/mcd2-fsr-fg-game-bridge.dll": "be1b979d8bb3bed0bdfdcad3e0a3faa36545d85ea522df4f45f6291fbc4a4a38",
+      "Dungeons/Binaries/Win64/mcd2-graphics.addon64": "e4cc8f9ee12a3864632ad948825377afe7fd50a57c25d597d1eac6b3ffc7094c",
+      "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.pak": "0cf2fd66b979abe5279aa2ac026193a1efa25af4968cae0e052ca30db6e3ab70",
+      "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.ucas": "4e9c5955228c64fc1d3ae7340ed6bab7348414830b8107f0100ae134194a6168",
+      "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.utoc": "250da6c4e352d2a9f0196faf04c6f6a0f6dff8b112a611dcc8d4918790e08655"
+    },
+    "uiMetadataVersion": "0.3.0-preview.1",
+    "vendorRuntimeBundled": false,
+    "frameworkBundled": false,
+    "windowsRuntimeQualified": false,
+    "excludedDiagnostics": [
+      "probe/fg-chain-observer.addon64",
+      "isolated probe executables/addons"
+    ],
+    "sourceBuildReceipts": {
+      "amd-latency/build-receipt.json": "7860768114bb5f3a4774e5f1bbb7ab8b2b34ed130024b5e7ebbbdc8e5299b0d2",
+      "experimental-reshade/build-receipt.json": "434d10d7ebd39d0c2eae7b6552816044b6e0e4f9f8a47f2ec0e5953b111d66a7",
+      "isolated-fsr-fg-game-bridge/build-receipt.json": "0609bec6e25394a0f89a9b6ac8938a9ed8f8b940bbe937e47ed9873a32062d4a",
+      "isolated-fsr-fg-owned-inputs/build-receipt.json": "b14cd6af3c3f09ea6a6075b2f8d80ad3605c73c00a9733d4b55337bfc17193ed",
+      "isolated-fsr-fg-presentation/build-receipt.json": "8ec183340780b8aea6a8c679023d33b4f63d0bcc9a9e2d72f1282cef04134139",
+      "isolated-fsr-game-bridge/build-receipt.json": "aeda77d8f1ce8b1246cee107397a9d18789fcc3a6abe58749f7a8ad1eeca659d",
+      "isolated-fsr-probe/build-receipt.json": "e64ce19b344ab42aff2d44acacb38364759a14570237581dee82ee7d26387a65",
+      "isolated-fsr-sustained-probe/build-receipt.json": "a0719fd035759a7b4c095202cd77f416ba49c81402bc396b2822ba73860fd238",
+      "latency/build-receipt.json": "cb2370c60cb8802a6ae86d3390ebbf01d89c8e337bda054b0df76c7388950e3a",
+      "probe/build-receipt.json": "50bcdd527fa2ac5d13870b85457c23670726400eb6c2766d56da51842737fcef",
+      "sr/build-receipt.json": "d2a92d85176764f1dc9a7b289347e3efde8a4c47923f3748c8e98531e5bae489",
+      "ui/build-receipt.json": "c3e778da55d9c87a95b6c481a2d34f7c6c2da9ef43bcfc9695744dd6ad478832"
+    }
+  },
+  "gamePin": {
+    "steamBuild": "25754144",
+    "shippingSHA256": "3a8703406fd50520f83c4f70a0212c000cb3b584ef28eb38032902230c01ebdd",
+    "timestamp": 3355288315,
+    "imageSize": 216018944,
+    "metadataMatch": true,
+    "staticFileEntryGuardsVerified": false,
+    "runtimeEntryGuardsPreserved": true,
+    "runtimeEvidence": "docs/AMD_STREAMLINE_FEATURE_LIFETIME_2026-10-10.md"
+  },
+  "packageVerification": {
+    "linux": {
+      "filesVerified": 240,
+      "installerSHA256": "5ef688b4a7d93dd8b4265ae39ef6988fbc3c1db15ea5e38aa27a28981e4fdb7a",
+      "manifestSHA256": "875219401e37ae09d70897855a11ce29f9b29b8bb0565f648d0a5a894a53597c",
+      "dependencyLockSHA256": "0f2def228b908e1beacdc18d7c3982de945fd9db9ac9ba8cb9e1a79361b8ca73",
+      "embeddedResourcesMatch": true,
+      "nestedArchives": false,
+      "windowsRuntimeQualified": false
+    },
+    "windows": {
+      "filesVerified": 241,
+      "installerSHA256": "03a3a4145972ee4ff8e09a7efe53ab7b33d8f9ae678447433aced1a4344f0ca1",
+      "manifestSHA256": "875219401e37ae09d70897855a11ce29f9b29b8bb0565f648d0a5a894a53597c",
+      "dependencyLockSHA256": "0f2def228b908e1beacdc18d7c3982de945fd9db9ac9ba8cb9e1a79361b8ca73",
+      "embeddedResourcesMatch": true,
+      "nestedArchives": false,
+      "windowsRuntimeQualified": false
+    }
+  },
+  "transactions": {
+    "linux": {
+      "checks": 59,
+      "freshInstall": true,
+      "repair": true,
+      "modifiedFileRefused": true,
+      "uninstall": true,
+      "reinstall": true,
+      "syntheticSavesPreserved": true,
+      "externalDependenciesPreserved": true,
+      "actualGameLaunched": false,
+      "windowsRuntimeQualified": false
+    },
+    "windows": {
+      "checks": 59,
+      "freshInstall": true,
+      "repair": true,
+      "modifiedFileRefused": true,
+      "uninstall": true,
+      "reinstall": true,
+      "syntheticSavesPreserved": true,
+      "externalDependenciesPreserved": true,
+      "actualGameLaunched": false,
+      "windowsRuntimeQualified": false
+    }
+  },
+  "sourceSHA256": {
+    "tools/assemble_amd_candidate.py": "381c4d3215c876935f82418c9374e1968a29252068c53e5d3657f2248be9880b",
+    "build_installer.py": "742e34402c80aad6cd3bc9a8795545e9cd9e6655b8cb85d4e62487d3285b8762",
+    "src/installer/Core/InstallerEngine.cs": "845227a02900c5b5b9ce5c6ac692353b0903c3ebd41dd764c2043658502cb139",
+    "src/installer/Program.cs": "b6567a2b561bfbfc3c3d835e4d026921785cbda6bb59d4712659b8bc8bfbb9bd",
+    "tests/test_installer_amd_candidate.py": "06f3476aae5b8afb053fd5b05e98c0c4c54f9ddb0a13e998ec064e10ae27d616",
+    "tests/test_installer_package_layout.py": "c86b2bf563e5670b0a69145e310f9df1db3fa0521e3bb7b150b491db4bc48369",
+    "tests/installer-core/Program.cs": "d5dad677a0d77ca8941e2549cd880fd04cc2648c460dcc15eabd2104f66c35a7",
+    ".github/workflows/amd-installer-candidate.yml": "a8b7cc09ca6794adbab040c2fd4b901ba1720009516842689c7e17fe9f077e39"
+  },
+  "pythonInstallerChecks": 30,
+  "coreChecks": 133,
+  "qualificationLimits": [
+    "Managed package transactions executed on Linux in a temporary tree, not Windows GUI or GPU execution.",
+    "Actual game was not launched or modified during these checks.",
+    "Native payload is the verified PR45 Windows artifact, not a rebuilt or qualified Windows/Radeon runtime.",
+    "Existing UI metadata remains 0.3.0-preview.1 and is separately recorded; the installer candidate has a distinct version.",
+    "No measured latency, quality, physical presentation or performance claim."
+  ],
+  "publishedAssetsChanged": false
+}

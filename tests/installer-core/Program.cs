@@ -184,5 +184,31 @@ try {
    Check(ActualPolicy().Scan().Single(x=>x.Name=="Blueprint Loader").State=="OK","Installed official Loader "+status.Version+" recognized without upgrade");
   }
  }
+ // AMD candidate metadata and externally selected runtimes use the same ownership transaction.
+ var amdRoot=Path.Combine(temp,"AmdCandidateGame");Directory.CreateDirectory(amdRoot);
+ void PutAmd(string path,byte[]? bytes=null){var p=InstallerEngine.Target(amdRoot,path);Directory.CreateDirectory(Path.GetDirectoryName(p)!);File.WriteAllBytes(p,bytes??file);}
+ PutAmd(InstallerEngine.Shipping);PutAmd("Dungeons/Binaries/Win64/dxgi.dll");PutAmd("Dungeons/Binaries/Win64/renodx-ue-extended.addon64");
+ var amdDeps=new Dictionary<string,object>(dependencies);
+ var fsrPath="Dungeons/Binaries/Win64/MCD2Graphics/fsr/amd_fidelityfx_upscaler_dx12.dll";
+ var fgPath="Dungeons/Binaries/Win64/amd_fidelityfx_framegeneration_dx12.dll";
+ amdDeps["FSRUpscaler"]=new{version="SDK 2.3 analytical",file=fsrPath,sha256=hash,url="https://github.com/amd/FidelityFX-SDK"};
+ amdDeps["FSRFrameGeneration"]=new{version="SDK 2.3 analytical",file=fgPath,sha256=hash,url="https://github.com/amd/FidelityFX-SDK"};
+ var amdLock=JsonSerializer.Serialize(new{game=new{steamBuildID="123",exeSHA256=hash},dependencies=amdDeps});
+ var amdManifest=JsonSerializer.Serialize(new{version="0.4.0-amd.dev.1",description="AMD development candidate; Radeon runtime qualification pending.",files=own});
+ InstallerEngine AmdEngine(){var x=new InstallerEngine(amdLock,amdManifest,()=>new MemoryStream(Payload())){RequireClosed=()=>{},ConfigRootOverride=Path.Combine(amdRoot,"Config")};x.SetGame(amdRoot);return x;}
+ var amd=AmdEngine();Check(amd.Description.StartsWith("AMD development candidate"),"Candidate description replaces NVIDIA-only summary");Check(e.Description.Contains("DLSS Super Resolution and DLAA"),"Default release description preserved");
+ var preserved=new Dictionary<string,byte[]>{{"Dungeons/Content/Paks/~mods/Unrelated/keep.pak",oldBytes},{"Saved/SaveGames/Character.sav",oldBytes},{"Saved/SaveGames/Account.sav",oldBytes}};
+ foreach(var pair in preserved)PutAmd(pair.Key,pair.Value);
+ Check(!amd.Ready,"Missing AMD runtimes prevent candidate installation");
+ foreach(var id in new[]{"DLSSRuntime","FSRUpscaler","FSRFrameGeneration"})amd.SelectDependency(id,runtime);
+ Check(amd.Ready,"Exact external AMD selections admit candidate install");amd.Install();
+ Check(InstallerEngine.DigestFile(InstallerEngine.Target(amdRoot,fsrPath))==hash&&InstallerEngine.DigestFile(InstallerEngine.Target(amdRoot,fgPath))==hash,"AMD runtimes installed at exact private paths");
+ var amdReceipt=JsonSerializer.Deserialize<Receipt>(File.ReadAllText(InstallerEngine.Target(amdRoot,InstallerEngine.Marker)),new JsonSerializerOptions{PropertyNameCaseInsensitive=true})!;
+ Check(!amdReceipt.Files.ContainsKey(fsrPath)&&!amdReceipt.Files.ContainsKey(fgPath),"AMD vendor runtimes remain external ownership");
+ File.Delete(InstallerEngine.Target(amdRoot,own.Keys.Single()));amd.Install(true);Check(File.Exists(InstallerEngine.Target(amdRoot,own.Keys.Single())),"AMD candidate missing own payload repaired");
+ amd.Uninstall();Check(File.Exists(InstallerEngine.Target(amdRoot,fsrPath))&&File.Exists(InstallerEngine.Target(amdRoot,fgPath)),"AMD dependencies preserved on uninstall");
+ Check(!File.Exists(InstallerEngine.Target(amdRoot,own.Keys.Single()))&&!File.Exists(InstallerEngine.Target(amdRoot,InstallerEngine.Marker)),"AMD candidate payload and receipt removed");
+ foreach(var pair in preserved)Check(File.ReadAllBytes(InstallerEngine.Target(amdRoot,pair.Key)).SequenceEqual(pair.Value),"AMD transaction preserves "+Path.GetFileName(pair.Key));
+ PutAmd(fsrPath,oldBytes);var badAmd=AmdEngine();badAmd.SelectDependency("DLSSRuntime",runtime);Throws(()=>badAmd.SelectDependency("FSRUpscaler",runtime),"Unknown installed AMD dependency not overwritten");Check(!File.Exists(InstallerEngine.Target(amdRoot,InstallerEngine.Marker)),"Rejected AMD dependency writes no installation receipt");
 }finally{Directory.Delete(temp,true);}
 Console.WriteLine($"{cases} checks passed");

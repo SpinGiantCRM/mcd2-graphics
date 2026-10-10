@@ -7,6 +7,16 @@ Windows/AMD or the separately observed shutdown failure.
 
 # Windows fixes: reasons and preservation requirements
 
+The [AMD development installer assembly](AMD_CANDIDATE_PACKAGING_2026-10-10.md)
+uses the pinned PR45 Windows native artifact and the explicit Steam 25754144 game
+pin. Preserve complete archive/member/source verification, exact bridge binding,
+external runtime separation, known-framework upgrade backups and all existing
+ownership checks. Candidate descriptions may replace the NVIDIA-only summary;
+the default release text remains unchanged. Installer overrides do not relax
+native FSR/Anti-Lag capability or runtime checks. Both platform fixtures remain
+required. Temporary-tree package transactions on Linux do not qualify Windows
+GUI execution or actual Radeon GPU features; existing published pins are intact.
+
 The [separate candidate installer inputs](AMD_CANDIDATE_PACKAGING_2026-10-10.md)
 embed and distribute the same captured manifest/dependency-lock bytes. Preserve
 the default released inputs, resource snapshots, payload checks, external-runtime

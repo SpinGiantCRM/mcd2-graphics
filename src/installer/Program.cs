@@ -82,7 +82,7 @@ public sealed class InstallerWindow:Window {
             var actions=new StackPanel{Orientation=Orientation.Horizontal,Spacing=12};actions.Children.Add(AsyncButton("Check again",async()=>{await Task.Run(()=>engine.Scan());Draw();message.Text=engine.Ready?"All requirements are ready.":"Resolve the missing or unsupported requirements above.";}));actions.Children.Add(Button("Continue",()=>{page=2;Draw();}));content.Children.Add(actions);
         }else if(page==2) {
             Text("Install or maintain",22);Text("Version: "+engine.Version);
-            Text("Core graphics addon\nNative Video settings\nDLSS Super Resolution and DLAA\nFrame Generation preview (DLSS/DLAA + native HDR)\nHDR support\nReflex appears only when the rendering GPU and integration support it.");
+            Text(engine.Description);
             Text(engine.Ready?"Requirements ready":"Some requirements still need attention. Go back to Requirements.");
             content.Children.Add(AsyncButton("Install",async()=>{await Task.Run(()=>engine.Install());Draw();message.Text="Installed and verified. Launch normally through Steam. Open Settings → Video.";}));
             content.Children.Add(AsyncButton("Repair / Verify",async()=>{var checks=await Task.Run(()=>engine.Scan());if(checks.All(x=>x.State=="OK")){message.Text="Installation and dependencies verified.";return;}await Task.Run(()=>engine.Install(true));Draw();message.Text="Repair complete. Modified or unowned files were not overwritten.";}));

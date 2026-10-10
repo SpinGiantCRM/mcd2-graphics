@@ -39,6 +39,9 @@ for relative,path in paths:
  target=output/'payload'/relative;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(path,target)
  assert hashlib.sha256(target.read_bytes()).hexdigest()==manifest['files'][relative]
 shutil.copyfile(root/'third-party/INSTALLER_NOTICES.txt',output/'INSTALLER_NOTICES.txt')
+for name in ('FSR-SDK-HEADERS-LICENSE.txt','AntiLag2/LICENSE.txt'):
+ target=output/'licenses'/name;target.parent.mkdir(parents=True,exist_ok=True)
+ shutil.copyfile(root/'third-party'/name,target)
 assert not any(p.suffix.lower() in ('.zip','.7z','.rar') for p in output.rglob('*') if p.is_file()),'Nested archive refused'
 exe=a.output.resolve()/('mcd2-graphics-installer.exe' if a.rid=='win-x64' else 'mcd2-graphics-installer')
 if a.rid=='win-x64':

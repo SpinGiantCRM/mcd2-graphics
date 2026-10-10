@@ -1,0 +1,61 @@
+name: AMD development installer candidate
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/amd-installer-candidate.yml'
+      - 'tools/assemble_amd_candidate.py'
+      - 'src/installer/**'
+      - 'build_installer.py'
+      - 'tests/test_installer_amd_candidate.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  amd-candidate:
+    runs-on: windows-2025
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9
+        with:
+          dotnet-version: '10.0.401'
+      - name: Verify and assemble pinned Windows native inputs
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          @'
+          import json,pathlib,subprocess,sys
+          p=json.loads(pathlib.Path('qualification/providers/windows-candidate-pr45-2026-10-10.json').read_text())
+          stage=pathlib.Path('dist/amd');stage.mkdir(parents=True)
+          artifact=stage/'native-input.zip'
+          with artifact.open('wb') as out:
+              subprocess.run(['gh','api',f'repos/SpinGiantCRM/mcd2-graphics/actions/artifacts/{p["artifact"]}/zip'],stdout=out,check=True)
+          subprocess.run([sys.executable,'tools/assemble_amd_candidate.py','--artifact',str(artifact),
+              '--archive-sha256',p['archiveSHA256'],'--source-commit',p['sourceCommit'],
+              '--artifact-url',f'https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/{p["run"]}/artifacts/{p["artifact"]}',
+              '--version','0.4.0-amd.dev.1','--output',str(stage/'inputs')],check=True)
+          '@ | python
+      - name: Build visible installer folders
+        shell: pwsh
+        run: |
+          $sdk = (Get-Command dotnet).Source
+          python build_installer.py --dotnet $sdk --payload dist/amd/inputs/payload --rid linux-x64 --manifest dist/amd/inputs/manifest.json --dependency-lock dist/amd/inputs/dependencies.lock.json --output dist/amd/installers/linux
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python build_installer.py --dotnet $sdk --payload dist/amd/inputs/payload --rid win-x64 --manifest dist/amd/inputs/manifest.json --dependency-lock dist/amd/inputs/dependencies.lock.json --output dist/amd/installers/windows
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Upload development installers and provenance (not a release)
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: amd-development-installers
+          retention-days: 30
+          if-no-files-found: error
+          path: |
+            dist/amd/installers/**
+            dist/amd/inputs/assembly-receipt.json
+            dist/amd/inputs/AMD_BRIDGE_NOTICES.txt
+            dist/amd/inputs/provenance/**
