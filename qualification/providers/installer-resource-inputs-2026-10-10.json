@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-10",
+  "purpose": "Candidate pin selection and exact managed-resource embedding; existing released own payload, never installed",
+  "sourceBase": "9c34b9e6eca63f2638799bb861a8aa1dd1e41bda",
+  "sourceFileSHA256": {
+    "build_installer.py": "5b82cbf4a9c98063a81f744e07d415faa390e9227fa37a5181a8abb06548da92",
+    "src/installer/MCD2.Installer.csproj": "2db1b669a4f9d6f397567cb1918e9f0d2f0ec49df97c8dfc7c32202df184e67c",
+    "tests/test_installer_package_layout.py": "0a88c61e55a0dd37641a71ce3c7a15092a0b2af10e4b5362dcd8694948bc84bf"
+  },
+  "fixtureChecksPassed": 9,
+  "builds": [
+    {
+      "rid": "linux-x64",
+      "installerSHA256": "5ef688b4a7d93dd8b4265ae39ef6988fbc3c1db15ea5e38aa27a28981e4fdb7a",
+      "manifestSHA256": "ac36ef42dcb0399d9332e367d3ff8b6f6fde2d6fa9dd986c267a9522fb658aa8",
+      "dependencyLockSHA256": "18ee45e660274d64466b90154168fc17072761fe6053cc23eb7cff86f7bf038e",
+      "embeddedResourcesSHA256": {
+        "manifest.json": "ac36ef42dcb0399d9332e367d3ff8b6f6fde2d6fa9dd986c267a9522fb658aa8",
+        "dependencies.lock.json": "18ee45e660274d64466b90154168fc17072761fe6053cc23eb7cff86f7bf038e"
+      },
+      "fileHashesVerified": 234,
+      "deployment": "self-contained-folder",
+      "selfExtraction": false,
+      "gameInstalled": false,
+      "windowsRuntimeQualified": false
+    },
+    {
+      "rid": "win-x64",
+      "installerSHA256": "2524a0b8fe1a27bc73b7a35a31a7e5d623753758ce01a160b6dfac65cc8af583",
+      "manifestSHA256": "ac36ef42dcb0399d9332e367d3ff8b6f6fde2d6fa9dd986c267a9522fb658aa8",
+      "dependencyLockSHA256": "18ee45e660274d64466b90154168fc17072761fe6053cc23eb7cff86f7bf038e",
+      "embeddedResourcesSHA256": {
+        "manifest.json": "ac36ef42dcb0399d9332e367d3ff8b6f6fde2d6fa9dd986c267a9522fb658aa8",
+        "dependencies.lock.json": "18ee45e660274d64466b90154168fc17072761fe6053cc23eb7cff86f7bf038e"
+      },
+      "fileHashesVerified": 235,
+      "deployment": "self-contained-folder",
+      "selfExtraction": false,
+      "gameInstalled": false,
+      "windowsRuntimeQualified": false
+    }
+  ],
+  "defaultReleaseManifestChanged": false,
+  "defaultDependencyLockChanged": false,
+  "amdInstallerQualified": false
+}
