@@ -73,6 +73,25 @@ These controls do not establish its cause or qualify the longer mixed sequence.
 A separate debugger-attachment trial altered execution and ended before normal
 quit; it was excluded and supplied no fast-fail exception evidence.
 
+A smaller FSR-only sequence also reproduced the fatal exit twice: Quality +
+AMD FG → FG Off → FG On → FSR Native AA → normal quit. Neither launch selected
+DLSS. One lost FG activation after Native AA and recorded NVIDIA configuration
+result 31 despite AMD startup ownership; the repeat kept AMD FG active and still
+failed quit. Thus the intermittent activation fault is not required for the exit
+failure. The repeat included an extra bounded CPU module inspector, whose samples
+ended before the Native AA switch; it did not establish the routing cause.
+
+A further isolation launch pinned the already-loaded FSR upscaler SDK DLL
+until process exit, without changing SDK context retirement. The pin succeeded;
+Native AA and AMD FG both remained active, but normal quit still returned
+0xc0000409 (2.67 s). Pinning that DLL alone is insufficient and was not adopted
+as a shipping change. This does not establish the failing module.
+
+The clean-Off control changed FSR Quality → Native AA with Native presentation
+ownership and no FG activation. It exited with actual code 0 (5.17 s). The FSR
+preset change alone therefore did not reproduce this failure; the AMD presenter
+or its interaction with the transition remains a target, not an established cause.
+
 The original mod files, mod preferences and renderer settings were restored byte
 for byte after the measurement sequence. Account/character saves were never
 copied or edited. Raw logs, screenshots and account information remain private.
