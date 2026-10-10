@@ -75,3 +75,28 @@ NT termination, so a failed pin cannot trigger resource destructors either.
 Pin success is still required before admitting this path. This is deliberately retention, not a GPU
 completion or replay-invalidation claim; memory remains held until process exit.
 No host command list is reset, no fence is fabricated, and no shutdown is forced.
+
+## Bounded mixed-provider regression
+
+The retained-unload candidate (`5f1a60ce5bc458f17f358a890b97253b42c3cf9e0fef4ccb46153748b44bfb32`)
+passed FSR Quality → DLSS Quality → Native → FSR Quality → Native with AMD FG
+active throughout. FSR evaluation, the legacy NGX acknowledgement, current
+render-scale acknowledgements and matching FG guide sizes were checked. The
+last Native checkpoint recorded 22,661 generated presents, zero SDK errors,
+warnings or faults, and 3840×2160 guides. AMD FG retirement returned SDK result 0.
+
+A Win32 process handle captured normal exit code 0. The process disappeared
+4.555 seconds after starting the confirmation-input helper, without debugger
+attachment or forced signals. The independent handle wait includes pre-quit
+setup and is not used as the quit duration. Both exact module pins succeeded;
+the receipt still reports ordinary generation retirement incomplete. Original
+mod payloads and preferences were restored byte for byte. This qualifies this
+bounded Proton sequence only; Windows GPU runtime, resize, renderer recreation,
+long sessions and ordinary hot reload remain unqualified.
+
+The first Windows candidate build compiled the continuous SR addon but failed
+the separate sustained probe because its isolated source tree omitted the
+new shared lifetime headers. Capture/sustained probes now use the same own-source
+include closure as continuous SR, including the camera headers. A recursive
+relative-include fixture checks the generated probe on both CI platforms. This
+build correction does not change the gameplay addon used for the exit test.

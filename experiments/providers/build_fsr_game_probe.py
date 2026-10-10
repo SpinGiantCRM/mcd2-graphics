@@ -1,6 +1,11 @@
 """Generate an opt-in real-game FSR capture probe; no output replacement or vendor downloads."""
 from pathlib import Path
-import argparse, hashlib, json, shutil, subprocess, sys
+import argparse, hashlib, importlib.util, json, shutil, subprocess, sys
+
+_source_spec=importlib.util.spec_from_file_location(
+    'fsr_probe_source_tree',Path(__file__).resolve().parents[1]/'fg-streamline/sr_source_tree.py')
+_source_tree=importlib.util.module_from_spec(_source_spec)
+_source_spec.loader.exec_module(_source_tree)
 
 def patch(text, before, after):
     if text.count(before) != 1:
@@ -8,12 +13,8 @@ def patch(text, before, after):
     return text.replace(before, after)
 
 def generate(repo, source):
-    shutil.copytree(repo/'src/native', source/'src/native', dirs_exist_ok=True)
-    shutil.copytree(repo/'src/providers', source/'src/providers', dirs_exist_ok=True)
-    (source/'experiments/providers').mkdir(parents=True,exist_ok=True)
-    shutil.copyfile(Path(__file__).with_name('fsr_game_bridge.h'),source/'experiments/providers/fsr_game_bridge.h')
-    for name in ['build.py','build_toolchain.py']:
-        shutil.copyfile(repo/name,source/name)
+    # Continuous SR and both isolated probe variants share one include closure.
+    _source_tree.copy_sr_sources(repo,source)
     for name in ['fsr_game_bridge.h','fsr_probe_driver.hpp']:
         shutil.copyfile(Path(__file__).with_name(name),source/'src/native'/name)
     probe=source/'src/native/sr_guide_probe.hpp'
