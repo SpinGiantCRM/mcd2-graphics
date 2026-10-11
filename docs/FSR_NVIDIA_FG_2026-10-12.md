@@ -16,7 +16,20 @@ with NVIDIA FG, XeSS sources, native MFG and hybrid routes remain excluded.
 The portable projection fixture covers all SR/FG selections, all six FSR
 qualities with FG Off/On, exact requested startup ownership, corrupt stamps and
 unimplemented strategy/source refusal. Both Windows and Linux CI retain it.
-Rebuilt source needs its own runtime, transition and shutdown qualification;
-the earlier package's inactive pairing is retained as a failed result.
+
+The first rebuilt MSVC candidate acquired the NVIDIA owner and activated FSR
+Quality plus NVIDIA FG, with successful guide tags and two SDK-reported presents
+per rendered frame. A preset change then saved FG Off: the menu retained a second
+NVIDIA-only SR restriction in `SelectMenuSr` and its availability check. That
+failed transition is retained; startup activation alone does not qualify the
+pairing.
+
+The menu now shares a pairing predicate between availability and SR-selection
+transactions. FSR preset/scale edits retain independent NVIDIA FG intent; an
+unimplemented Native/NVIDIA route still turns FG Off atomically. The managed
+fixtures cover every SR/FG route and all six preset edits, including the saved
+startup owner. The source-matched NeoRune UI is rebuilt alongside its receipt.
+The combined correction needs matching-artifact runtime, transition and shutdown
+qualification. Windows/Radeon and physical pacing remain separate gates.
 
 Published releases and dependency pins are unchanged.

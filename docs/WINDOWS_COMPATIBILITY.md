@@ -3,7 +3,11 @@ shared guide producer without equating SR vendor with FG vendor. Preserve exact
 record and startup-owner matching, actual-adapter SDK checks, input readiness,
 one presenter and compatible latency ownership. Native/NVIDIA FG, XeSS and MFG
 remain excluded. Both-platform projection fixtures cover all six FSR qualities
-and Off/On startup ownership; they do not qualify gameplay or Windows/Radeon.
+and Off/On startup ownership. The menu uses one matching pairing predicate for
+availability and atomic SR selection; preserve FG intent through FSR preset and
+scale edits, and Native/NVIDIA refusal. Retain managed transaction checks and a
+source-matched rebuilt UI archive/receipt. These do not qualify gameplay or
+Windows/Radeon.
 
 The [bootstrap module identity](BOOTSTRAP_MODULE_IDENTITY_2026-10-11.md) uses the
 full executable-directory path when local and system DXGI are both loaded.
