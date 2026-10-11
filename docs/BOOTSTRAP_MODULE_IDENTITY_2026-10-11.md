@@ -22,6 +22,23 @@ A real Windows-ABI fixture loads two different DLLs named `dxgi.dll` in both
 orders. It checks exact identity, absence before local loading, a directory
 containing spaces, independence from current working directory and refusal after
 local unloading. The fixture passed under Proton; Windows CI runs it natively.
-Source/include-receipt checks run on both platforms. Updated game artifacts need
-their own transition and shutdown qualification; this fixture alone does not
-qualify gameplay or Radeon runtime.
+Source/include-receipt checks run on both platforms. The fixture also passed
+natively in Windows CI.
+
+## Matching-artifact runtime checks
+
+Commit `e7dc811f97079060029f6824345c1164af6ce76d` was tested with its exact
+MSVC artifact, archive SHA-256
+`bf801b2ca928a375489f468608750692c114ad80e23d345eff7756131ab38b61`.
+Two fresh Linux/NVIDIA launches completed FSR Quality + AMD FG On → Off → On,
+then FSR Native AA + AMD FG On. Both sequences reported successful SR evaluation,
+the expected FG activation state and zero SDK errors/warnings. Neither entered
+the NVIDIA FG configuration path. Each normal quit returned code 0, with one
+successful shared SDK retirement receipt, in approximately 4.20 and 4.70 seconds
+after confirmation. Original mod files, preferences and renderer configuration
+were restored exactly after each run.
+
+See the [sanitized receipt](../qualification/providers/bootstrap-identity-linux-2026-10-12.json)
+for provenance and scope. These bounded stationary checks do not establish a
+performance/latency benefit, native Windows/Radeon support or a conclusive cause
+of the earlier intermittent failures. Longer lifecycle checks remain required.

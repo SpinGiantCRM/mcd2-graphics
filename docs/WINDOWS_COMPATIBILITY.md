@@ -3,7 +3,8 @@ full executable-directory path when local and system DXGI are both loaded.
 Preserve missing/unloaded refusal, checked heap-backed path storage, no library
 loading, all ownership/UI/detachment consumers and source receipts. Retain the
 real duplicate-basename fixture on Windows and the source checks on both CI
-platforms. A Proton fixture pass does not qualify changed game artifacts.
+platforms. Native Windows CI and two matching-artifact Linux transition/exit
+runs passed; neither qualifies Windows/Radeon gameplay or wider lifecycle.
 
 The [AMD shared SDK retirement](AMD_SHARED_SDK_RETIREMENT_2026-10-11.md) requests
 Streamline cleanup before device destruction only after both AMD presentation
@@ -27,8 +28,11 @@ identity and all source/header hashes. Retain the real Windows COM fixture and
 both platform checks. A synthetic Proton probe does not qualify Windows/Radeon
 or establish the cause of the intermittent game shutdown failure. One combined
 game control exited with code 0; a repeat hung after SDK retirement returned 0.
-Keep shutdown unqualified until that failure is resolved. The fixture exercises
-actual final raw destruction, not merely an intermediate reference release.
+Subsequent shared SDK ordering and bootstrap-identity changes passed two bounded
+Linux transition/exit repeats, as recorded in their reports. Native
+Windows/Radeon shutdown and longer lifecycle coverage remain unqualified.
+The fixture exercises actual final raw destruction, not merely an intermediate
+reference release.
 
 The FG guide addon now uses the same terminal process guard as SR and latency.
 Resolve the NT query outside DllMain; skip callback state locks and SDK retirement

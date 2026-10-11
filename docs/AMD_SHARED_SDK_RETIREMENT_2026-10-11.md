@@ -48,11 +48,18 @@ active; see [bootstrap identity](BOOTSTRAP_MODULE_IDENTITY_2026-10-11.md).
 Both installations restored original files and preferences exactly. These exit
 passes do not erase the separate transition failure or qualify subsequent source.
 
+After the bootstrap lookup correction at `e7dc811f`, two matching MSVC-artifact
+Linux runs passed the combined transitions and normal quits, each with one
+successful shared SDK retirement. The process exited with code 0 approximately
+4.20 and 4.70 seconds after confirmation. See the
+[bootstrap report](BOOTSTRAP_MODULE_IDENTITY_2026-10-11.md) for exact provenance
+and limits. Neither run used exit-phase instrumentation or forced termination.
+
 The private trial established an ordering candidate, not a proven root cause or
 qualification of the changed production source. The earlier intermittent hang
-remains a failed result. The changed source requires matching-artifact runtime
-repeats, including actual SDK-retirement receipts, and Windows/Radeon lifecycle
-qualification. No raw runtime logs, account data or third-party binaries are
+remains a failed result. The bounded Linux repeats now include actual
+SDK-retirement receipts; wider lifecycle and Windows/Radeon qualification remain
+required. No raw runtime logs, account data or third-party binaries are
 included. Published releases remain unchanged.
 
 The vendor-free admission fixture covers all 64 input combinations, including
