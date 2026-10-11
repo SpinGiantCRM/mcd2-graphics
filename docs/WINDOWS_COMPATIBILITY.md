@@ -1,3 +1,10 @@
+The [bootstrap module identity](BOOTSTRAP_MODULE_IDENTITY_2026-10-11.md) uses the
+full executable-directory path when local and system DXGI are both loaded.
+Preserve missing/unloaded refusal, checked heap-backed path storage, no library
+loading, all ownership/UI/detachment consumers and source receipts. Retain the
+real duplicate-basename fixture on Windows and the source checks on both CI
+platforms. A Proton fixture pass does not qualify changed game artifacts.
+
 The [AMD shared SDK retirement](AMD_SHARED_SDK_RETIREMENT_2026-10-11.md) requests
 Streamline cleanup before device destruction only after both AMD presentation
 and native NGX retirement are observed. Preserve atomic AMD-only bound-device

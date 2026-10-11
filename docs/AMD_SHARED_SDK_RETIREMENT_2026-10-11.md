@@ -37,6 +37,17 @@ files and preferences were restored byte for byte. A prior diagnostic control
 exited without entering final SDK shutdown, so process exit alone cannot prove
 the SDK retirement path ran.
 
+The production-shaped source at commit
+`a65b3a2a475966516e4fd930f0c56127b1238842` was then tested using the exact
+MSVC CI archive SHA-256
+`275d70627ee9ed9330a2166c6c4ab42a560d3eefe0f7fab6c36efa60c5530579`.
+Two normal quits returned code 0 in approximately 6.00 and 6.29 seconds, each
+with exactly one successful shared SDK retirement receipt. The first combined
+transition sequence passed. The repeat lost FG after Off → On while FSR remained
+active; see [bootstrap identity](BOOTSTRAP_MODULE_IDENTITY_2026-10-11.md).
+Both installations restored original files and preferences exactly. These exit
+passes do not erase the separate transition failure or qualify subsequent source.
+
 The private trial established an ordering candidate, not a proven root cause or
 qualification of the changed production source. The earlier intermittent hang
 remains a failed result. The changed source requires matching-artifact runtime

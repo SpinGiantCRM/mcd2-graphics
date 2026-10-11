@@ -2,6 +2,7 @@
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
+#include "../../src/providers/bootstrap_module.hpp"
 #include <d3d12.h>
 #include <dxgi1_6.h>
 #include <cstdio>
@@ -26,7 +27,7 @@ struct Session {
   release(swap);for(auto& p:inputs)release(p);release(views);release(cmd);release(allocator);release(fence);release(queue);
   route.detach();if(proxyDevice!=device)release(proxyDevice);if(proxyFactory!=factory)release(proxyFactory);release(device);release(factory);
   if(done)CloseHandle(done);if(window)DestroyWindow(window);
-  auto shim=GetModuleHandleW(L"dxgi.dll");auto detach=shim?reinterpret_cast<void(*)()>(GetProcAddress(shim,"mcd2_bootstrap_detach")):nullptr;if(detach)detach();mcd2_fg_unload();
+  auto shim=mcd2::providers::bootstrapModule();auto detach=shim?reinterpret_cast<void(*)()>(GetProcAddress(shim,"mcd2_bootstrap_detach")):nullptr;if(detach)detach();mcd2_fg_unload();
  }
 };
 void barrier(ID3D12GraphicsCommandList* cmd,ID3D12Resource* p,D3D12_RESOURCE_STATES from,D3D12_RESOURCE_STATES to){D3D12_RESOURCE_BARRIER b{};b.Type=D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;b.Transition={p,D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,from,to};cmd->ResourceBarrier(1,&b);}

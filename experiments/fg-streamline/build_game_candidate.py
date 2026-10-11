@@ -39,7 +39,7 @@ changes = [
     ('provider.shutdown();reflexAvailable=0;',
      'provider.shutdown(boundNative!=0);\n'
      ' if(boundNative){log<<"{\\\"kind\\\":\\\"shared_sdk_shutdown\\\",\\\"SDKResult\\\":"<<provider.shutdownResult<<"}\\n";log.flush();\n'
-     '  if(!provider.shutdownResult){auto bootstrap=GetModuleHandleW(L"dxgi.dll");auto detach=bootstrap?reinterpret_cast<void(*)()>(GetProcAddress(bootstrap,"mcd2_bootstrap_detach")):nullptr;if(detach)detach();}}\n'
+     '  if(!provider.shutdownResult){auto bootstrap=mcd2::providers::bootstrapModule();auto detach=bootstrap?reinterpret_cast<void(*)()>(GetProcAddress(bootstrap,"mcd2_bootstrap_detach")):nullptr;if(detach)detach();}}\n'
      ' reflexAvailable=0;'),
     ('void init_swapchain(a::swapchain*swapchain,bool){',
      'void init(a::device*);\nvoid init_swapchain(a::swapchain*swapchain,bool){\n'

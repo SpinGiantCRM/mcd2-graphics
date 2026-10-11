@@ -4,6 +4,7 @@
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
+#include "../providers/bootstrap_module.hpp"
 #include <d3d12.h>
 #include <dxgi1_4.h>
 #include <reshade.hpp>
@@ -284,7 +285,7 @@ void init_swapchain(a::swapchain*swapchain,bool){
  log<<"{\"kind\":\"pcl_message_hook\",\"installed\":"<<(messageHook?"true":"false")<<",\"thread\":"<<messageThread<<"}\n";log.flush();
 }
 void init(a::device*device){
- auto bootstrap=GetModuleHandleW(L"dxgi.dll");auto amdFg=bootstrap?reinterpret_cast<unsigned(*)()>(GetProcAddress(bootstrap,"mcd2_bootstrap_amd_fg_session")):nullptr;
+ auto bootstrap=mcd2::providers::bootstrapModule();auto amdFg=bootstrap?reinterpret_cast<unsigned(*)()>(GetProcAddress(bootstrap,"mcd2_bootstrap_amd_fg_session")):nullptr;
  const bool frameIdentityOnly=amdFg&&amdFg()==1;
  if(installed||registry||(!provider.initialized&&!amdLatencyOptIn&&!frameIdentityOnly)||device->get_api()!=a::device_api::d3d12)return;
  // The actual rendering device LUID determines the AMD route. Never use the

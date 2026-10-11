@@ -19,6 +19,7 @@
 #include "../providers/fsr_fg_game_bridge.h"
 #include "../../src/latency/process_exit.hpp"
 #include "../../src/providers/shared_sdk_shutdown.hpp"
+#include "../../src/providers/bootstrap_module.hpp"
 namespace a=reshade::api;
 #include "fg_alpha_copy.h"
 #include "fg_controls.hpp"
@@ -56,7 +57,7 @@ bool retiring=false,ownerClosing=false;
 bool amdRetiredForClose=false;
 std::atomic<bool> sharedQuiesceIssued{false};
 std::atomic<bool> captureEnabled{false},guideTags{false},imageTags{false},legacyEnable{false};unsigned cachedRevision=0;
-bool amd_owner(){auto bootstrap=GetModuleHandleW(L"dxgi.dll");auto owner=bootstrap?reinterpret_cast<unsigned(*)()>(GetProcAddress(bootstrap,"mcd2_bootstrap_amd_fg_session")):nullptr;return owner&&owner()==1;}
+bool amd_owner(){auto bootstrap=mcd2::providers::bootstrapModule();auto owner=bootstrap?reinterpret_cast<unsigned(*)()>(GetProcAddress(bootstrap,"mcd2_bootstrap_amd_fg_session")):nullptr;return owner&&owner()==1;}
 HMODULE amd_bridge(){return amd_owner()?GetModuleHandleW(L"mcd2-fsr-fg-game-bridge.dll"):nullptr;}
 ID3D12GraphicsCommandList* native_command(void* proxy){
  constexpr GUID unwrap={0x7f2c9a11,0x3b4e,0x4d6a,{0x81,0x2f,0x5e,0x9c,0xd3,0x7a,0x1b,0x42}};
@@ -93,7 +94,7 @@ void try_shared_sdk_quiesce(){
 }
 void try_retirement(){if(mcd2::process_exit::terminating())return;
  if(auto module=amd_bridge()){
-  bool close=false;{std::lock_guard lock(mutex);close=retiring;}if(!close){try_shared_sdk_quiesce();return;}
+  bool close=false,sharedReady=false;{std::lock_guard lock(mutex);close=retiring;sharedReady=ownerClosing&&amdRetiredForClose;}if(!close){if(sharedReady)try_shared_sdk_quiesce();return;}
   using Retire=int(*)(void*,uint64_t);auto retire=reinterpret_cast<Retire>(GetProcAddress(module,"mcd2_afg_retire_v1"));
   const int result=retire?retire(nullptr,0):-1;
   {std::lock_guard lock(mutex);privateLog<<"{\"kind\":\"amd_retirement\",\"SDKResult\":"<<result<<"}\n";privateLog.flush();if(!result){retiring=false;amdRetiredForClose=ownerClosing;}}
