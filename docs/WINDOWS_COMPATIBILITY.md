@@ -1,3 +1,10 @@
+The [FSR SR / NVIDIA FG route](FSR_NVIDIA_FG_2026-10-12.md) admits FSR through the
+shared guide producer without equating SR vendor with FG vendor. Preserve exact
+record and startup-owner matching, actual-adapter SDK checks, input readiness,
+one presenter and compatible latency ownership. Native/NVIDIA FG, XeSS and MFG
+remain excluded. Both-platform projection fixtures cover all six FSR qualities
+and Off/On startup ownership; they do not qualify gameplay or Windows/Radeon.
+
 The [bootstrap module identity](BOOTSTRAP_MODULE_IDENTITY_2026-10-11.md) uses the
 full executable-directory path when local and system DXGI are both loaded.
 Preserve missing/unloaded refusal, checked heap-backed path storage, no library
