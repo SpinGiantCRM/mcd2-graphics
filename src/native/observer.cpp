@@ -664,6 +664,14 @@ static void destroy_queue(a::command_queue *q) {
 }
 static void destroy_device(a::device *dev) {if(mcd2::process_exit::terminating())return;std::lock_guard guard(lock);pipelines.clear();layouts.clear();commands.clear();descriptors.clear();initial_states.clear();live_resources.clear();submitted_states.clear();remaining=0;records.clear();for(auto &c:copies)if(c.readback)c.readback->Release();copies.clear();auto it=roundtrip_textures.find(dev);if(it!=roundtrip_textures.end()){if(it->second)it->second->Release();roundtrip_textures.erase(it);}}
 
+// The guide must not infer NGX retirement from an FSR menu selection. A retained
+// or failed NGX generation still owns its SDK feature even if it stopped drawing.
+extern "C" __declspec(dllexport) int mcd2_sr_ngx_retired_v1() {
+ if(mcd2::process_exit::terminating())return -1;
+ std::unique_lock guard(lock,std::try_to_lock);if(!guard.owns_lock())return -1;
+ return live_fixture?0:1;
+}
+
 extern "C" __declspec(dllexport) const char *NAME="MCD2 Graphics Reconstruction Candidate";
 extern "C" __declspec(dllexport) const char *DESCRIPTION="Native graphics-menu reconstruction; version-pinned interop";
 #define EVENT(ev,fn) reshade::register_event<reshade::addon_event::ev>(fn)

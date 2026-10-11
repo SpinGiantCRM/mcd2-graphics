@@ -18,6 +18,7 @@
 #include "fg_bridge_contract.h"
 #include "../providers/fsr_fg_game_bridge.h"
 #include "../../src/latency/process_exit.hpp"
+#include "../../src/providers/shared_sdk_shutdown.hpp"
 namespace a=reshade::api;
 #include "fg_alpha_copy.h"
 #include "fg_controls.hpp"
@@ -52,6 +53,8 @@ std::atomic<unsigned> guideSamples{0};unsigned trialRevision=0;
 unsigned outputWidth=0,outputHeight=0,outputBuffers=0,outputFormat=0;HWND outputWindow=nullptr;
 thread_local bool internalGPU=false;
 bool retiring=false,ownerClosing=false;
+bool amdRetiredForClose=false;
+std::atomic<bool> sharedQuiesceIssued{false};
 std::atomic<bool> captureEnabled{false},guideTags{false},imageTags{false},legacyEnable{false};unsigned cachedRevision=0;
 bool amd_owner(){auto bootstrap=GetModuleHandleW(L"dxgi.dll");auto owner=bootstrap?reinterpret_cast<unsigned(*)()>(GetProcAddress(bootstrap,"mcd2_bootstrap_amd_fg_session")):nullptr;return owner&&owner()==1;}
 HMODULE amd_bridge(){return amd_owner()?GetModuleHandleW(L"mcd2-fsr-fg-game-bridge.dll"):nullptr;}
@@ -69,12 +72,32 @@ void poll_policy(){static ULONGLONG next=0;auto now=GetTickCount64();if(now<next
 }
 bool tracking(){return captureEnabled || (fg_controls::enabled?fg_controls::wanted.load():guideTags.load()&&guideSamples<900);}
 
+void try_shared_sdk_quiesce(){
+ if(mcd2::process_exit::terminating())return;
+ mcd2::providers::SharedSdkShutdownAdmission admission{};
+ {std::lock_guard lock(mutex);admission.ownerClosing=ownerClosing;admission.amdPresenterRetired=amdRetiredForClose;}
+ if(!admission.ownerClosing||!admission.amdPresenterRetired)return;
+ auto native=GetModuleHandleW(L"mcd2-graphics.addon64");
+ auto retired=native?reinterpret_cast<int(*)()>(GetProcAddress(native,"mcd2_sr_ngx_retired_v1")):nullptr;
+ auto bridge=GetModuleHandleW(L"fg-sdk-bridge.dll");
+ auto ready=bridge?reinterpret_cast<int(*)()>(GetProcAddress(bridge,"mcd2_fg_shared_shutdown_ready_v1")):nullptr;
+ auto latency=GetModuleHandleW(L"mcd2-display-latency.addon64");
+ auto quiesce=latency?reinterpret_cast<int(*)()>(GetProcAddress(latency,"mcd2_fg_quiesce")):nullptr;
+ admission.nativeNgxRetired=retired&&retired()==1;
+ admission.sdkHasDeviceWithoutNvidiaFg=ready&&ready()==1;
+ admission.terminal=mcd2::process_exit::terminating();admission.alreadyIssued=sharedQuiesceIssued.load();
+ if(!quiesce||!mcd2::providers::admitSharedSdkShutdown(admission)||sharedQuiesceIssued.exchange(true))return;
+ // Token drain and SDK shutdown invoke other addons: no guide lock is held.
+ const int result=quiesce();
+ std::lock_guard lock(mutex);privateLog<<"{\"kind\":\"amd_shared_sdk_retired\",\"SDKResult\":"<<result<<"}\n";privateLog.flush();
+}
 void try_retirement(){if(mcd2::process_exit::terminating())return;
  if(auto module=amd_bridge()){
-  bool close=false;{std::lock_guard lock(mutex);close=retiring;}if(!close)return;
+  bool close=false;{std::lock_guard lock(mutex);close=retiring;}if(!close){try_shared_sdk_quiesce();return;}
   using Retire=int(*)(void*,uint64_t);auto retire=reinterpret_cast<Retire>(GetProcAddress(module,"mcd2_afg_retire_v1"));
   const int result=retire?retire(nullptr,0):-1;
-  std::lock_guard lock(mutex);privateLog<<"{\"kind\":\"amd_retirement\",\"SDKResult\":"<<result<<"}\n";privateLog.flush();if(!result)retiring=false;return;
+  {std::lock_guard lock(mutex);privateLog<<"{\"kind\":\"amd_retirement\",\"SDKResult\":"<<result<<"}\n";privateLog.flush();if(!result){retiring=false;amdRetiredForClose=ownerClosing;}}
+  if(!result)try_shared_sdk_quiesce();return;
  }
  bool ready=false;unsigned recordings=0;
  {std::lock_guard lock(mutex);for(auto&[cmd,state]:commands)recordings+=state.usesAlpha;ready=retiring&&!recordings;}
@@ -340,6 +363,9 @@ extern "C" __declspec(dllexport) void mcd2_fg_observe_sr(void*cmd,void*depth,voi
 }
 extern "C" __declspec(dllexport) const char*NAME="MCD2 FG bounded guide reconnaissance";
 extern "C" __declspec(dllexport) void mcd2_fg_sr_retired(){if(mcd2::process_exit::terminating())return;
+ // AMD retirement and native feature retirement can arrive in either order.
+ // Both observations are required before the shared SDK is stopped.
+ if(amd_owner()){try_shared_sdk_quiesce();return;}
  {std::lock_guard lock(mutex);if(!ownerClosing)return;}
  auto latency=GetModuleHandleW(L"mcd2-display-latency.addon64");auto quiesce=latency?reinterpret_cast<int(*)()>(GetProcAddress(latency,"mcd2_fg_quiesce")):nullptr;
  const int result=quiesce?quiesce():-1;

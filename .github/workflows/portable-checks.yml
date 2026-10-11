@@ -27,6 +27,7 @@ jobs:
           python3 -m unittest discover -s tests -p "test_build_toolchain.py" -v
           python3 -m unittest discover -s tests -p "test_amd_latency_build.py" -v
           python3 -m unittest discover -s tests -p "test_process_exit.py" -v
+          python3 -m unittest discover -s tests -p "test_shared_sdk_shutdown.py" -v
           python3 -m unittest discover -s tests -p "test_fsr_probe.py" -v
           python3 -m unittest discover -s tests -p "test_fsr_fg_probe.py" -v
           python3 -m unittest discover -s tests -p "test_fsr_fg_game_bridge.py" -v
@@ -68,6 +69,8 @@ jobs:
           /tmp/provider-display-projection
           g++ -std=c++20 -Wall -Wextra -Werror tests/native_fg_admission_test.cpp -o /tmp/native-fg-admission
           /tmp/native-fg-admission
+          g++ -std=c++20 -Wall -Wextra -Werror tests/shared_sdk_shutdown_test.cpp -o /tmp/shared-sdk-shutdown
+          /tmp/shared-sdk-shutdown
           g++ -std=c++20 -Wall -Wextra -Werror -Wno-misleading-indentation tests/fg_provider_protocol_test.cpp -o /tmp/fg-provider-protocol
           /tmp/fg-provider-protocol
           g++ -std=c++20 -Wall -Wextra -Werror tests/provider_sr_runtime_test.cpp -o /tmp/provider-sr-runtime
@@ -116,6 +119,7 @@ jobs:
           python -m unittest discover -s tests -p "test_build_toolchain.py" -v
           python -m unittest discover -s tests -p "test_amd_latency_build.py" -v
           python -m unittest discover -s tests -p "test_process_exit.py" -v
+          python -m unittest discover -s tests -p "test_shared_sdk_shutdown.py" -v
           python -m unittest discover -s tests -p "test_fsr_probe.py" -v
           python -m unittest discover -s tests -p "test_fsr_fg_probe.py" -v
           python -m unittest discover -s tests -p "test_fsr_fg_game_bridge.py" -v
@@ -160,6 +164,8 @@ jobs:
           ./provider-display-projection.exe
           g++ -std=c++20 -static -Wall -Wextra -Werror tests/native_fg_admission_test.cpp -o native-fg-admission.exe
           ./native-fg-admission.exe
+          g++ -std=c++20 -static -Wall -Wextra -Werror tests/shared_sdk_shutdown_test.cpp -o shared-sdk-shutdown.exe
+          ./shared-sdk-shutdown.exe
           g++ -std=c++20 -static -Wall -Wextra -Werror -Wno-misleading-indentation tests/fg_provider_protocol_test.cpp -o fg-provider-protocol.exe
           ./fg-provider-protocol.exe
           g++ -std=c++20 -static -Wall -Wextra -Werror tests/provider_sr_runtime_test.cpp -o provider-sr-runtime.exe

@@ -1,3 +1,11 @@
+The [AMD shared SDK retirement](AMD_SHARED_SDK_RETIREMENT_2026-10-11.md) requests
+Streamline cleanup before device destruction only after both AMD presentation
+and native NGX retirement are observed. Preserve atomic AMD-only bound-device
+readiness, missing/busy/retained refusal, one-shot admission, callbacks outside
+the guide mutex, resize exclusion, existing NVIDIA retirement, source receipts
+and both platform fixtures. A private early-cleanup trial is ordering evidence;
+it does not qualify the changed production source or Windows/Radeon shutdown.
+
 Native SR resource destruction and command-list reset/destruction use the NT
 terminal guard before the state mutex, alongside existing queue/device guards.
 Preserve ordinary resource and recording retirement and the terminal-lifetime

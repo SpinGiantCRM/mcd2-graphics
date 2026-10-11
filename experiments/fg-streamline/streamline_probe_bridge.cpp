@@ -22,6 +22,9 @@ HMODULE dll=nullptr;bool initialized=false;
 bool nvidiaFgLoaded=true;
 mcd2::fg::NvidiaFgCapabilities nvidiaFgCapabilities;
 void* boundDevice=nullptr;
+// Published only after successful AMD-only device binding. The retirement
+// observer must not race reads of the bridge's mutable lifecycle fields.
+std::atomic<bool> sharedShutdownReady{false};
 bool fgConfigured=false;
 mcd2::fg::Configuration fgConfiguration;
 PFun_slInit*init=nullptr;PFun_slShutdown*shutdown=nullptr;
@@ -33,6 +36,11 @@ template<class T>int bindFeature(T*&out,sl::Feature id,const char*name){void*p=n
 }
 extern "C" {
 int mcd2_fg_initialized(){return initialized?1:0;}
+// Read only at owner retirement, before any device destruction. AMD startup
+// loads Reflex/PCL without NVIDIA FG; no raw device borrow crosses this ABI.
+int mcd2_fg_shared_shutdown_ready_v1(){
+ return sharedShutdownReady.load(std::memory_order_acquire)?1:0;
+}
 // Versioned plain-C ownership query. A loaded FG plugin owns NGX until slShutdown,
 // including temporary Off. SR may release its feature but must leave NGX alive.
 int mcd2_fg_ngx_owner_v1(void* device){
@@ -81,7 +89,7 @@ int mcd2_sl_set_device(void*device){
  if((r=sl::Result(bindFeature(setOptions,sl::kFeatureReflex,"slReflexSetOptions")))!=sl::Result::eOk)return int(r);
  if((r=sl::Result(bindFeature(sleepFrame,sl::kFeatureReflex,"slReflexSleep")))!=sl::Result::eOk)return int(r);
  if((r=sl::Result(bindFeature(markFrame,sl::kFeaturePCL,"slPCLSetMarker")))!=sl::Result::eOk)return int(r);
- auto result=bindFeature(getPclState,sl::kFeaturePCL,"slPCLGetState");if(!result)boundDevice=device;return result;
+ auto result=bindFeature(getPclState,sl::kFeaturePCL,"slPCLGetState");if(!result){boundDevice=device;sharedShutdownReady.store(!nvidiaFgLoaded,std::memory_order_release);}return result;
 }
 int mcd2_sl_mode_limit(unsigned mode,unsigned limitUs){if(!initialized||!setOptions||mode>2)return -1;sl::ReflexOptions p{};p.mode=sl::ReflexMode(mode);p.frameLimitUs=limitUs;p.useMarkersToOptimize=false;return int(setOptions(p));}
 int mcd2_sl_mode(unsigned mode){return mcd2_sl_mode_limit(mode,0);}
@@ -101,7 +109,7 @@ int mcd2_sl_report_range(uint64_t*first,uint64_t*last,uint64_t*sim,uint64_t*pres
  }return 0;
 }
 int mcd2_sl_pcl_message(unsigned*message){if(!getPclState||!message)return -1;sl::PCLState s{};auto r=getPclState(s);*message=s.statsWindowMessage;return int(r);}
-int mcd2_sl_shutdown(){int r=initialized?int(shutdown()):0;if(r)return r;initialized=false;boundDevice=nullptr;fgConfigured=false;fgConfiguration.clear();getState=nullptr;getPclState=nullptr;setOptions=nullptr;sleepFrame=nullptr;markFrame=nullptr;init=nullptr;shutdown=nullptr;feature=nullptr;setDevice=nullptr;newToken=nullptr;return r;}
+int mcd2_sl_shutdown(){sharedShutdownReady.store(false,std::memory_order_release);int r=initialized?int(shutdown()):0;if(r)return r;initialized=false;boundDevice=nullptr;fgConfigured=false;fgConfiguration.clear();getState=nullptr;getPclState=nullptr;setOptions=nullptr;sleepFrame=nullptr;markFrame=nullptr;init=nullptr;shutdown=nullptr;feature=nullptr;setDevice=nullptr;newToken=nullptr;return r;}
 // This startup-only discovery is completed before a graphics device is bound.
 // Save the SDK's real support result for each actual adapter LUID, then load
 // only Reflex/PCL for an AMD presenter. No SDK/private-device capability is
