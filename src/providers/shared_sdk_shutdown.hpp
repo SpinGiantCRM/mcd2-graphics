@@ -15,4 +15,16 @@ constexpr bool admitSharedSdkShutdown(const SharedSdkShutdownAdmission& a) {
     return !a.terminal && a.ownerClosing && a.amdPresenterRetired &&
         a.nativeNgxRetired && a.sdkHasDeviceWithoutNvidiaFg && !a.alreadyIssued;
 }
+struct NvidiaSdkShutdownAdmission {
+    bool terminal = false;
+    bool ownerClosing = false;
+    bool nvidiaOwnerStopped = false;
+    bool alphaGpuRetired = false;
+    bool nativeNgxRetired = false;
+    bool alreadyIssued = false;
+};
+constexpr bool admitNvidiaSdkShutdown(const NvidiaSdkShutdownAdmission& a) {
+    return !a.terminal && a.ownerClosing && a.nvidiaOwnerStopped &&
+        a.alphaGpuRetired && a.nativeNgxRetired && !a.alreadyIssued;
+}
 }

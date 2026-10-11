@@ -29,7 +29,27 @@ transactions. FSR preset/scale edits retain independent NVIDIA FG intent; an
 unimplemented Native/NVIDIA route still turns FG Off atomically. The managed
 fixtures cover every SR/FG route and all six preset edits, including the saved
 startup owner. The source-matched NeoRune UI is rebuilt alongside its receipt.
-The combined correction needs matching-artifact runtime, transition and shutdown
-qualification. Windows/Radeon and physical pacing remain separate gates.
+The combined correction at `a2f62c617e338467e86897990f0a477efb143e13` then passed
+all six FSR choices with NVIDIA FG active: Quality, Balanced, Performance, Ultra
+Performance, Custom 77% and Native AA. Current guide dimensions matched SR input
+dimensions, token/tag status was zero and the SDK reported two presents per
+rendered frame. Normal quit nevertheless remained alive at the 180-second
+watcher deadline, after render/RHI threads had exited. No shared SDK retirement
+receipt appeared. The test process was ended and the original setup restored;
+this is a failed shutdown, not a clean exit or a qualified package.
+
+The native queue teardown returned before its shared-SDK notification when no
+NGX SR feature existed. FSR never creates that feature. The generated adapter now
+also notifies for the no-NGX path, outside the native observer mutex. An owned
+NVIDIA presenter additionally requires stopped generation, verified alpha GPU
+retirement, no retained NGX feature, ordinary closing ownership and one-shot
+admission before shared SDK cleanup. Resize does not satisfy closing ownership.
+The AMD path retains its existing bound-device and presenter-retirement guards.
+The portable fixture now covers 128 AMD/NVIDIA admission combinations. Exit-only
+private numeric receipts distinguish admission from successful cleanup.
+
+This corrects a concrete missing-notification path; its role in the observed
+hang needs a matching-artifact repeat. Windows/Radeon, wider lifecycle,
+performance and physical pacing remain separate gates.
 
 Published releases and dependency pins are unchanged.

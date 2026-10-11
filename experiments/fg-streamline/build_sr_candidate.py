@@ -84,6 +84,19 @@ if a.guide_inspection:
 
 needle=' const bool success=lean_cleanup(q,guard,true);'
 assert observer_text.count(needle)==1
+no_ngx=' if(!live_fixture || live_fixture->integration_queue!=q)return;'
+assert observer_text.count(no_ngx)==1
+observer_text=observer_text.replace(no_ngx,'''
+ if(!live_fixture || live_fixture->integration_queue!=q){
+  // FSR never creates an NGX SR feature. It must still notify the shared FG
+  // owner during queue destruction, before the renderer/device disappears.
+  // The guide independently checks closing ownership and completed GPU work.
+  if(!live_fixture){guard.unlock();auto observer=GetModuleHandleW(L"mcd2-fg-guide-recon.addon64");
+   auto retired=observer?reinterpret_cast<void(*)()>(GetProcAddress(observer,"mcd2_fg_sr_retired")):nullptr;
+   if(retired)retired();guard.lock();}
+  return;
+ }
+''')
 observer_text=observer_text.replace(needle,needle+'''
  // Shared NGX teardown: SR must release its feature before Streamline stops.
  // Never call the other module while holding the SR observer mutex.

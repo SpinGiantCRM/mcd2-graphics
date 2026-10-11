@@ -54,6 +54,25 @@ class SharedSdkShutdownTests(unittest.TestCase):
         workflow = (ROOT / '.github/workflows/portable-checks.yml').read_text()
         self.assertEqual(workflow.count('tests/shared_sdk_shutdown_test.cpp'), 2)
 
+    def test_no_ngx_queue_path_notifies_outside_observer_lock(self):
+        recipe = (ROOT / 'experiments/fg-streamline/build_sr_candidate.py').read_text()
+        self.assertIn('if(!live_fixture){guard.unlock();auto observer=', recipe)
+        self.assertIn('if(retired)retired();guard.lock();}', recipe)
+        self.assertIn('FSR never creates an NGX SR feature.', recipe)
+
+    def test_nvidia_owner_requires_gpu_retirement_and_stopped_generation(self):
+        source = (ROOT / 'experiments/fg-streamline/guide_recon.cpp').read_text()
+        notify = source.split('void mcd2_fg_sr_retired(){', 1)[1].split('\nextern "C"', 1)[0]
+        self.assertIn('if(owner&&owner()==1)', notify)
+        self.assertIn('admission.alphaGpuRetired=nvidiaAlphaRetiredForClose;}', notify)
+        self.assertIn('admission.nvidiaOwnerStopped=activeFGMode.load()==0;', notify)
+        self.assertIn('admission.nativeNgxRetired=retired&&retired()==1;', notify)
+        self.assertIn('!mcd2::providers::admitNvidiaSdkShutdown(admission)', notify)
+        self.assertIn('if(quiesce&&sharedQuiesceIssued.exchange(true))return;', notify)
+        self.assertLess(notify.index('nvidiaAlphaRetiredForClose;}'), notify.index('retired()==1'))
+        self.assertLess(notify.index('const int result=quiesce?quiesce():-1;'), notify.rindex('std::lock_guard lock(mutex);privateLog'))
+        self.assertIn('if(complete){retiring=false;nvidiaAlphaRetiredForClose=ownerClosing;}', source)
+
 
 if __name__ == '__main__':
     unittest.main()

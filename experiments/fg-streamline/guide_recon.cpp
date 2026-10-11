@@ -55,6 +55,7 @@ unsigned outputWidth=0,outputHeight=0,outputBuffers=0,outputFormat=0;HWND output
 thread_local bool internalGPU=false;
 bool retiring=false,ownerClosing=false;
 bool amdRetiredForClose=false;
+bool nvidiaAlphaRetiredForClose=false;
 std::atomic<bool> sharedQuiesceIssued{false};
 std::atomic<bool> captureEnabled{false},guideTags{false},imageTags{false},legacyEnable{false};unsigned cachedRevision=0;
 bool amd_owner(){auto bootstrap=mcd2::providers::bootstrapModule();auto owner=bootstrap?reinterpret_cast<unsigned(*)()>(GetProcAddress(bootstrap,"mcd2_bootstrap_amd_fg_session")):nullptr;return owner&&owner()==1;}
@@ -105,7 +106,7 @@ void try_retirement(){if(mcd2::process_exit::terminating())return;
  if(!ready)return;
  const bool complete=fg_alpha::cleanup();
  std::lock_guard lock(mutex);privateLog<<"{\"kind\":\"alpha_retirement\",\"recordedCommandLeases\":"<<recordings<<",\"GPUCompletionVerified\":"<<(complete?"true":"false")<<"}\n";privateLog.flush();
- if(complete)retiring=false;
+ if(complete){retiring=false;nvidiaAlphaRetiredForClose=ownerClosing;}
 }
 int token_identity(void*,unsigned index,void* out){*static_cast<unsigned*>(out)=index;return 0;}
 void identity_receipt(const char* stage){
@@ -368,7 +369,21 @@ extern "C" __declspec(dllexport) void mcd2_fg_sr_retired(){if(mcd2::process_exit
  // Both observations are required before the shared SDK is stopped.
  if(amd_owner()){try_shared_sdk_quiesce();return;}
  {std::lock_guard lock(mutex);if(!ownerClosing)return;}
+ auto bootstrap=mcd2::providers::bootstrapModule();
+ auto owner=bootstrap?reinterpret_cast<unsigned(*)()>(GetProcAddress(bootstrap,"mcd2_bootstrap_fg_owner")):nullptr;
+ if(owner&&owner()==1){
+  mcd2::providers::NvidiaSdkShutdownAdmission admission{};
+  {std::lock_guard lock(mutex);admission.ownerClosing=ownerClosing;admission.alphaGpuRetired=nvidiaAlphaRetiredForClose;}
+  admission.nvidiaOwnerStopped=activeFGMode.load()==0;
+  auto native=GetModuleHandleW(L"mcd2-graphics.addon64");
+  auto retired=native?reinterpret_cast<int(*)()>(GetProcAddress(native,"mcd2_sr_ngx_retired_v1")):nullptr;
+  admission.nativeNgxRetired=retired&&retired()==1;
+  admission.terminal=mcd2::process_exit::terminating();admission.alreadyIssued=sharedQuiesceIssued.load();
+  {std::lock_guard lock(mutex);privateLog<<"{\"kind\":\"nvidia_shared_sdk_admission\",\"ownerClosing\":"<<admission.ownerClosing<<",\"generationStopped\":"<<admission.nvidiaOwnerStopped<<",\"alphaGpuRetired\":"<<admission.alphaGpuRetired<<",\"nativeNgxRetired\":"<<admission.nativeNgxRetired<<",\"terminal\":"<<admission.terminal<<",\"alreadyIssued\":"<<admission.alreadyIssued<<"}\n";privateLog.flush();}
+  if(!mcd2::providers::admitNvidiaSdkShutdown(admission))return;
+ }
  auto latency=GetModuleHandleW(L"mcd2-display-latency.addon64");auto quiesce=latency?reinterpret_cast<int(*)()>(GetProcAddress(latency,"mcd2_fg_quiesce")):nullptr;
+ if(quiesce&&sharedQuiesceIssued.exchange(true))return;
  const int result=quiesce?quiesce():-1;
  std::lock_guard lock(mutex);privateLog<<"{\"kind\":\"shared_sdk_retired\",\"SRFeatureRetired\":true,\"quiesceAvailable\":"<<(quiesce?"true":"false")<<",\"SDKResult\":"<<result<<"}\n";privateLog.flush();
 }

@@ -19,5 +19,14 @@ int main() {
     }
     assert(admitted == 1);
     assert(!admitSharedSdkShutdown({}));
-    std::cout << "64 shared SDK retirement combinations passed\n";
+    admitted = 0;
+    for (unsigned mask = 0; mask < 64; ++mask) {
+        NvidiaSdkShutdownAdmission a{
+            bool(mask & 1), bool(mask & 2), bool(mask & 4),
+            bool(mask & 8), bool(mask & 16), bool(mask & 32)};
+        assert(admitNvidiaSdkShutdown(a) == (mask == 30));
+        admitted += admitNvidiaSdkShutdown(a);
+    }
+    assert(admitted == 1 && !admitNvidiaSdkShutdown({}));
+    std::cout << "128 AMD/NVIDIA shared SDK retirement combinations passed\n";
 }
