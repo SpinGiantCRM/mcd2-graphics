@@ -13,8 +13,12 @@ Queue teardown must notify the shared SDK owner even when no NGX SR feature was
 created. Preserve callbacks outside the native observer mutex, NVIDIA stopped
 generation and alpha GPU completion, native NGX retirement, terminal/resize
 refusal and one-shot cleanup. Keep the AMD bound-device gate and both-platform
-128-combination fixture. The FSR/NVIDIA candidate passed preset transitions but
-failed shutdown; the corrected notification still needs runtime qualification.
+128-combination fixture. Queue notification restored a normal Linux process
+exit, but shared SDK shutdown returned error 24. NVIDIA closing-owner cleanup
+now attempts the same admission after alpha retirement, before graphics teardown;
+a retained NGX feature still defers to its queue notification. Preserve both
+notification orders, callbacks outside locks and resize/unsupported-owner refusal.
+The earlier normal exit does not qualify this correction or SDK cleanup.
 
 The [bootstrap module identity](BOOTSTRAP_MODULE_IDENTITY_2026-10-11.md) uses the
 full executable-directory path when local and system DXGI are both loaded.

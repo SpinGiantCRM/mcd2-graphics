@@ -42,7 +42,7 @@ class SharedSdkShutdownTests(unittest.TestCase):
         self.assertIn('if(!result)try_shared_sdk_quiesce();return;', retire)
         notify = source.split('void mcd2_fg_sr_retired(){', 1)[1].split('\nextern "C"', 1)[0]
         self.assertIn('if(amd_owner()){try_shared_sdk_quiesce();return;}', notify)
-        self.assertIn('const int result=quiesce?quiesce():-1;', notify)  # Existing NVIDIA path.
+        self.assertIn('try_nvidia_shared_sdk_quiesce(false);', notify)
         swap = source.split('void swap_destroy(', 1)[1].split('\nvoid targets', 1)[0]
         self.assertIn('ownerClosing=!resize;', swap)
         self.assertIn('if(resize){std::lock_guard lock(mutex);retiring=false;return;}', swap)
@@ -62,8 +62,9 @@ class SharedSdkShutdownTests(unittest.TestCase):
 
     def test_nvidia_owner_requires_gpu_retirement_and_stopped_generation(self):
         source = (ROOT / 'experiments/fg-streamline/guide_recon.cpp').read_text()
-        notify = source.split('void mcd2_fg_sr_retired(){', 1)[1].split('\nextern "C"', 1)[0]
-        self.assertIn('if(owner&&owner()==1)', notify)
+        notify = source.split('void try_nvidia_shared_sdk_quiesce(bool closingBoundary){', 1)[1].split('\nvoid try_retirement()', 1)[0]
+        self.assertIn('const bool nvidiaOwner=owner&&owner()==1;', notify)
+        self.assertIn('if(closingBoundary&&!nvidiaOwner)return;', notify)
         self.assertIn('admission.alphaGpuRetired=nvidiaAlphaRetiredForClose;}', notify)
         self.assertIn('admission.nvidiaOwnerStopped=activeFGMode.load()==0;', notify)
         self.assertIn('admission.nativeNgxRetired=retired&&retired()==1;', notify)
@@ -72,6 +73,15 @@ class SharedSdkShutdownTests(unittest.TestCase):
         self.assertLess(notify.index('nvidiaAlphaRetiredForClose;}'), notify.index('retired()==1'))
         self.assertLess(notify.index('const int result=quiesce?quiesce():-1;'), notify.rindex('std::lock_guard lock(mutex);privateLog'))
         self.assertIn('if(complete){retiring=false;nvidiaAlphaRetiredForClose=ownerClosing;}', source)
+
+    def test_nvidia_closing_boundary_notifies_after_alpha_retirement_outside_lock(self):
+        source = (ROOT / 'experiments/fg-streamline/guide_recon.cpp').read_text()
+        retire = source.split('void try_retirement(){', 1)[1].split('\nint token_identity', 1)[0]
+        self.assertLess(retire.index('const bool complete=fg_alpha::cleanup();'),
+                        retire.index('if(complete)try_nvidia_shared_sdk_quiesce(true);'))
+        self.assertIn('nvidiaAlphaRetiredForClose=ownerClosing;}}', retire)
+        self.assertLess(retire.index('nvidiaAlphaRetiredForClose=ownerClosing;}}'),
+                        retire.index('if(complete)try_nvidia_shared_sdk_quiesce(true);'))
 
 
 if __name__ == '__main__':

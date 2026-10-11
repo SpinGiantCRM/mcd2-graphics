@@ -48,8 +48,27 @@ The AMD path retains its existing bound-device and presenter-retirement guards.
 The portable fixture now covers 128 AMD/NVIDIA admission combinations. Exit-only
 private numeric receipts distinguish admission from successful cleanup.
 
-This corrects a concrete missing-notification path; its role in the observed
-hang needs a matching-artifact repeat. Windows/Radeon, wider lifecycle,
-performance and physical pacing remain separate gates.
+The matching MSVC archive at commit
+`858bda0aa721d32809d976867fb3af718817f5a2`, SHA-256
+`2226ded9f8820862284d218505673e5b5347bae1d88a8d31ffd2abdcaf48a1c2`,
+repeated all six FSR choices with active NVIDIA FG and zero tag/present status.
+Normal quit returned code 0 approximately 5.33 seconds after confirmation.
+The new notification reached shared SDK shutdown exactly once, but that call
+returned 24 (`eErrorExceptionHandler`), with the SDK log locating the exception
+in its FG plugin shutdown. A clean process exit does not qualify SDK cleanup.
+Both standalone installer folders passed 59 real core transaction checks each,
+including repair, ownership refusal, uninstall and reinstall; these ran on
+Linux with synthetic fixtures and do not qualify the Windows GUI. Original
+runtime files and mod preferences were restored exactly.
+
+The next correction attempts NVIDIA cleanup at the closing swapchain boundary,
+after stopped generation and completed alpha GPU retirement. It still requires
+explicit native NGX retirement, ordinary closing ownership, an actual NVIDIA
+presenter and one-shot admission, outside observer mutexes. A retained NGX
+feature continues to defer to the native queue notification. Resize and AMD
+presentation retain their existing paths. This follows the SDK's requirement
+to shut down before graphics components are destroyed; it is not yet a proven
+repair of error 24. Windows/Radeon, wider lifecycle, performance and physical
+pacing remain separate gates.
 
 Published releases and dependency pins are unchanged.
