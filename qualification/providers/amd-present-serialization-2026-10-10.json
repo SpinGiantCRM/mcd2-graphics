@@ -1,0 +1,302 @@
+{
+  "scope": "Windows-ABI isolated owned-scene bridge and bounded Steam gameplay under Proton on NVIDIA; no Windows/Radeon qualification",
+  "bridgeSHA256": "5b4a1ca3888cef96cbda955ade18fea812a6454f20525ccaf0f3e057cac99b1a",
+  "probeSHA256": "84d3b772986410662dc1c5e1eaf09d401fdc99f83fb8bce5e773a4490a2236a0",
+  "runtimeSHA256": {
+    "amd_fidelityfx_framegeneration_dx12.dll": "02297beedd285e822d3a64f314cf00faf378dcec0edc47ff0c4dd71b3a8c2f18"
+  },
+  "actualProbeExitCode": 0,
+  "timeout": false,
+  "seconds": 3.619,
+  "gatePassed": true,
+  "COMFixture": {
+    "WindowsAbi": true,
+    "ProtonExitCode": 0,
+    "identityAndForwarding": true,
+    "PresentAndPresent1SerializedWithSdkGate": true,
+    "closedAndTerminalRefusal": true,
+    "balancedFinalRelease": true,
+    "actualFinalRawDestructionSerializedWithSdkGate": true
+  },
+  "phases": [
+    {
+      "stage": "phase",
+      "phase": 0,
+      "enabled": false,
+      "real": 30,
+      "generated": 0,
+      "fault": 0,
+      "errors": 0,
+      "warnings": 0
+    },
+    {
+      "stage": "phase",
+      "phase": 1,
+      "enabled": true,
+      "real": 60,
+      "generated": 60,
+      "fault": 0,
+      "errors": 0,
+      "warnings": 0
+    },
+    {
+      "stage": "phase",
+      "phase": 2,
+      "enabled": false,
+      "real": 30,
+      "generated": 0,
+      "fault": 0,
+      "errors": 0,
+      "warnings": 0
+    }
+  ],
+  "gameIntegrationQualified": false,
+  "WindowsRadeonRuntimeQualified": false,
+  "intermittentCrashProvenFixed": false,
+  "performanceClaim": false,
+  "gameControls": [
+    {
+      "sequence": "FSR Quality + AMD FG -> FG Off -> FG On -> FSR Native AA -> normal quit",
+      "phases": [
+        {
+          "label": "serialized-quality-on",
+          "render": [
+            2560,
+            1440
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "scale": 66.666667,
+          "FSRPhase": 5,
+          "FSREvaluations": 903,
+          "FGActive": true,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "label": "serialized-quality-off",
+          "render": [
+            2560,
+            1440
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "scale": 66.666667,
+          "FSRPhase": 5,
+          "FSREvaluations": 1002,
+          "FGActive": false,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "label": "serialized-quality-reenabled",
+          "render": [
+            2560,
+            1440
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "scale": 66.666667,
+          "FSRPhase": 5,
+          "FSREvaluations": 844,
+          "FGActive": true,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "label": "serialized-native-aa",
+          "render": [
+            3840,
+            2160
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "scale": 100.0,
+          "FSRPhase": 5,
+          "FSREvaluations": 170,
+          "FGActive": true,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        }
+      ],
+      "actualGameExitCode": 0,
+      "processQuerySucceeded": true,
+      "waitResult": 0,
+      "confirmationHelperExit": 0,
+      "confirmationHelperStartToProcessGoneSeconds": 4.066449013000238,
+      "originalFilesAndPreferencesRestoredExactly": true
+    },
+    {
+      "sequence": "FSR Quality + AMD FG -> FG Off -> FG On -> FSR Native AA -> normal quit",
+      "phases": [
+        {
+          "label": "serialized-repeat-quality-on",
+          "render": [
+            2560,
+            1440
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "scale": 66.666667,
+          "FSRPhase": 5,
+          "FSREvaluations": 1540,
+          "FGActive": true
+        },
+        {
+          "label": "serialized-repeat-quality-off",
+          "render": [
+            2560,
+            1440
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "scale": 66.666667,
+          "FSRPhase": 5,
+          "FSREvaluations": 1951,
+          "FGActive": false
+        },
+        {
+          "label": "serialized-repeat-quality-reenabled",
+          "render": [
+            2560,
+            1440
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "scale": 66.666667,
+          "FSRPhase": 5,
+          "FSREvaluations": 1745,
+          "FGActive": true
+        },
+        {
+          "label": "serialized-repeat-native-aa",
+          "render": [
+            3840,
+            2160
+          ],
+          "output": [
+            3840,
+            2160
+          ],
+          "scale": 100.0,
+          "FSRPhase": 5,
+          "FSREvaluations": 1052,
+          "FGActive": true
+        }
+      ],
+      "actualGameExitCode": null,
+      "normalExitQualified": false,
+      "processQuerySucceeded": true,
+      "waitResult": 258,
+      "queriedExitCode": 259,
+      "queriedExitCodeMeaning": "STILL_ACTIVE after observation timeout, not terminal exit",
+      "observationTimeoutMs": 179994,
+      "SDKRetirementResult": 0,
+      "remainingThreadObservation": "GameThread remained; RenderThread and RHIThread absent",
+      "onlyGameProcessEnded": true,
+      "originalFilesAndPreferencesRestoredExactly": true,
+      "forcedTermination": true
+    }
+  ],
+  "gameVariant": {
+    "baseCandidateArchiveSHA256": "88543bc92c337f5eb48b39ec2bbb61a90bb4938a48e480339ae1acebda1d0b79",
+    "FGGuideSHA256": "4dfec214aa5b8f3cfba0c0279f7982fb7a727a761d5d0b975ba95c48a62ba65d",
+    "FGGuideCompiler": "Microsoft MSVC from PR50 exact CI artifact",
+    "bridgeCompiler": "clang-cl MSVC ABI 19.44",
+    "ReShadeSHA256": "fc40e5694a293b455ed65c32a48f05f62460c89f5b646df987d5a53fe6f5372c",
+    "extraInstrumentation": "CPU interval and SDK counter sampler; no added GPU dispatches"
+  },
+  "diagnosticPerformance": {
+    "samples": [
+      {
+        "label": "serialized-quality-on-a",
+        "FGOn": true,
+        "samples": 1199,
+        "seconds": 13.574440699999998,
+        "renderedFPS": 88.32776439916233,
+        "medianMs": 11.1402,
+        "p95Ms": 12.8437,
+        "p99Ms": 13.9616,
+        "SDKRealPresentRate": 88.32776439916233,
+        "SDKGeneratedPresentRate": 88.32776439916233,
+        "SDKCountEquivalentTotal": 176.65552879832467,
+        "physicalDisplayFPSMeasured": false
+      },
+      {
+        "label": "serialized-quality-on-b",
+        "FGOn": true,
+        "samples": 1199,
+        "seconds": 13.5523687,
+        "renderedFPS": 88.47161898716642,
+        "medianMs": 11.1837,
+        "p95Ms": 12.5965,
+        "p99Ms": 13.45,
+        "SDKRealPresentRate": 88.47161898716642,
+        "SDKGeneratedPresentRate": 88.47161898716642,
+        "SDKCountEquivalentTotal": 176.94323797433285,
+        "physicalDisplayFPSMeasured": false
+      },
+      {
+        "label": "serialized-quality-retained-off",
+        "FGOn": false,
+        "samples": 1199,
+        "seconds": 9.6280343,
+        "renderedFPS": 124.5321695623789,
+        "medianMs": 7.9086,
+        "p95Ms": 9.2708,
+        "p99Ms": 9.8458,
+        "SDKRealPresentRate": 124.5321695623789,
+        "SDKGeneratedPresentRate": 0,
+        "SDKCountEquivalentTotal": null,
+        "physicalDisplayFPSMeasured": false
+      }
+    ],
+    "stationaryCamera": true,
+    "animatedScene": true,
+    "matchedImmutableScene": false,
+    "publishedBaselineCompared": false,
+    "notReleasePerformanceAdmission": true
+  },
+  "exitDiagnosticControls": {
+    "bridgeSHA256": "b793cf7b9507fa6ccb16ec1d81fa6de7da1f7ae68a95a31b0b91e4403597ab27",
+    "changedFromCandidate": "Exit-only thread phase names and bounded private event writes; no per-frame instrumentation",
+    "notCandidateQualification": true,
+    "controls": [
+      {
+        "actualGameExitCode": 0,
+        "waitResult": 0,
+        "SDKRetirementCompleted": true,
+        "finalRawReleaseCompleted": true,
+        "confirmationToProcessGoneSeconds": 3.671783248002612,
+        "sequence": "FSR Quality + AMD FG -> FG Off -> FG On -> FSR Native AA -> normal quit"
+      },
+      {
+        "actualGameExitCode": 0,
+        "waitResult": 0,
+        "SDKRetirementCompleted": true,
+        "finalRawReleaseCompleted": true,
+        "confirmationToProcessGoneSeconds": 4.594575205999718,
+        "sequence": "FSR Quality + AMD FG -> FG Off -> FG On -> FSR Native AA -> normal quit"
+      }
+    ],
+    "unexplainedCandidateHangStillOpen": true
+  }
+}

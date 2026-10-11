@@ -5,6 +5,7 @@
 #include <iostream>
 std::atomic<bool> entered{false},allow{false},live{true},terminal{false};
 std::atomic<unsigned> calls{0},destroyed{0};
+std::atomic<bool> finalReleaseEntered{false},allowFinalRelease{false};
 bool isLive(IDXGISwapChain4*){return live.load();}
 bool isTerminal(){return terminal.load();}
 void until(std::atomic<bool>& flag){auto end=std::chrono::steady_clock::now()+std::chrono::seconds(2);while(!flag.load()){assert(std::chrono::steady_clock::now()<end);std::this_thread::yield();}}
@@ -13,7 +14,7 @@ class Fake final : public IDXGISwapChain4 {
 public:
  HRESULT STDMETHODCALLTYPE QueryInterface(REFIID,void** out) override {*out=this;AddRef();return S_OK;}
  ULONG STDMETHODCALLTYPE AddRef() override {return references_.fetch_add(1)+1;}
- ULONG STDMETHODCALLTYPE Release() override {auto n=references_.fetch_sub(1)-1;if(!n){++destroyed;delete this;}return n;}
+ ULONG STDMETHODCALLTYPE Release() override {auto n=references_.fetch_sub(1)-1;if(!n){finalReleaseEntered=true;until(allowFinalRelease);++destroyed;delete this;}return n;}
  HRESULT STDMETHODCALLTYPE SetPrivateData(REFGUID Name, UINT DataSize, const void *pData) override {return S_OK;}
  HRESULT STDMETHODCALLTYPE SetPrivateDataInterface(REFGUID Name, const IUnknown *pUnknown) override {return S_OK;}
  HRESULT STDMETHODCALLTYPE GetPrivateData(REFGUID Name, UINT *pDataSize, void *pData) override {return S_OK;}
@@ -66,6 +67,14 @@ int main(){
  }
  live=false;assert(outer->Present(0,0)==E_ABORT&&outer->Present1(0,0,nullptr)==E_ABORT);assert(calls==2);assert(outer->GetCurrentBackBufferIndex()==0&&!outer->GetFrameLatencyWaitableObject());
  {std::lock_guard lock(gate);terminal=true;assert(outer->Release()==1);assert(outer->Present(0,0)==E_ABORT);terminal=false;}
- assert(outer->Release()==0&&destroyed==0);assert(raw->Release()==0&&destroyed==1);
- std::cout<<"COM identity, forwarding, both Present gates, concurrent SDK exclusion, closed/terminal refusal and balanced destruction passed\n";
+ // The bridge drops its own raw ref during SDK retirement. The outer ref
+ // then owns the actual final vendor destruction, not an intermediate Release.
+ assert(raw->Release()==1);
+ std::atomic<bool> sdkAttempted{false},sdkEntered{false};
+ std::thread finalRelease([&]{assert(outer->Release()==0);});until(finalReleaseEntered);
+ assert(!gate.try_lock());
+ std::thread concurrentSdk([&]{sdkAttempted=true;std::lock_guard lock(gate);sdkEntered=true;});
+ until(sdkAttempted);assert(!sdkEntered);allowFinalRelease=true;
+ finalRelease.join();concurrentSdk.join();assert(sdkEntered&&destroyed==1);
+ std::cout<<"COM identity, forwarding, both Present gates, concurrent SDK exclusion, closed/terminal refusal and actual final vendor destruction exclusion passed\n";
 }

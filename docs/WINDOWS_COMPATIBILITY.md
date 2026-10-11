@@ -1,3 +1,14 @@
+The [AMD FG presentation gate](AMD_PRESENT_SERIALIZATION_2026-10-10.md) keeps one
+outer COM identity and serializes both Present methods with Prepare/Configure/
+Destroy. Preserve standard interface identity, unknown-interface refusal,
+terminal refusal before locks, normal final Release, exact raw vendor config
+identity and all source/header hashes. Retain the real Windows COM fixture and
+both platform checks. A synthetic Proton probe does not qualify Windows/Radeon
+or establish the cause of the intermittent game shutdown failure. One combined
+game control exited with code 0; a repeat hung after SDK retirement returned 0.
+Keep shutdown unqualified until that failure is resolved. The fixture exercises
+actual final raw destruction, not merely an intermediate reference release.
+
 The FG guide addon now uses the same terminal process guard as SR and latency.
 Resolve the NT query outside DllMain; skip callback state locks and SDK retirement
 only during final process teardown. Ordinary unload must still request retirement.
