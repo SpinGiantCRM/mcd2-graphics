@@ -1,4 +1,5 @@
 #pragma once
+#include "../../src/providers/bootstrap_module.hpp"
 #include "fg_ui_protocol.hpp"
 #include "fg_configuration.hpp"
 #include "../../src/providers/menu_snapshot.h"
@@ -33,7 +34,7 @@ void poll(a::device*device,const std::filesystem::path&policy,unsigned active){
  intent=next;available=(availableProviders&(1u<<intent.provider))?1:0;
  if(intent.mode!=previousMode){if(intent.mode)fault=0;previousMode=intent.mode;}
  if(seed.empty())seed=read(runtimePath);
- auto bootstrap=GetModuleHandleW(L"dxgi.dll");auto startup=bootstrap?reinterpret_cast<unsigned(*)()>(GetProcAddress(bootstrap,"mcd2_bootstrap_fg_session_mode")):nullptr;
+ auto bootstrap=mcd2::providers::bootstrapModule();auto startup=bootstrap?reinterpret_cast<unsigned(*)()>(GetProcAddress(bootstrap,"mcd2_bootstrap_fg_session_mode")):nullptr;
  sessionMode=startup?startup():0;restartRequired=mcd2::fg::restartRequired(available,intent.mode,sessionMode,retired.load())?1:0;
  if(shared){
   auto owner=bootstrap?reinterpret_cast<unsigned(*)()>(GetProcAddress(bootstrap,"mcd2_bootstrap_fg_owner")):nullptr;startupOwner=owner?owner():0;

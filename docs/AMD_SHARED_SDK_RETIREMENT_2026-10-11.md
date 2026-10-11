@@ -1,0 +1,68 @@
+# AMD shared SDK retirement
+
+The AMD presenter and the shared Streamline Reflex/PCL context have separate
+lifetimes. Retiring the AMD presenter alone does not shut down Streamline.
+NVIDIA's [manual-hooking lifecycle guide](https://github.com/NVIDIA-RTX/Streamline/blob/v2.14.1/docs/ProgrammingGuideManualHooking.md)
+requires `slShutdown` before destroying the graphics device and other engine
+components.
+
+The AMD closing-owner path now requests shared SDK cleanup after successful
+presenter retirement, while the device is still available. It requires a native
+NGX retirement observation, a bound AMD-only Streamline context, ordinary
+shutdown rather than terminal process teardown, and a one-shot admission gate.
+An FSR menu selection is insufficient: a retained or failed NGX generation
+refuses admission. Missing exports and busy native state also refuse admission.
+The native retirement notification permits either order of owner retirement.
+NVIDIA's existing shared-NGX retirement path remains in place.
+
+Streamline readiness is published atomically only after successful device and
+feature binding, and revoked before SDK shutdown. Ownership queries and cleanup
+run outside the guide mutex. Resize callbacks do not admit shared SDK shutdown.
+The new plain-C exports and admission header are covered by source receipts.
+
+## Evidence and limits
+
+An exact MSVC artifact of PR51 commit
+`d42f6aef217b67b22f66aaaf592f4fef06442eb6` passed FSR Quality with AMD FG
+On → Off → On, then FSR Native AA with FG On at 3840×2160. All checkpoints
+reported successful evaluation and zero SDK faults, errors and warnings. Normal
+quit returned code 0, approximately 4.36 seconds after confirmation. This artifact
+preceded the shared SDK cleanup change.
+
+A separate private trial moved shared SDK cleanup earlier. It completed the
+same transitions and returned code 0 approximately 3.59 seconds after quit
+confirmation. Exit-only instrumentation observed AMD retirement, `slShutdown`,
+bridge unloading and bootstrap detachment all returning successfully. Original
+files and preferences were restored byte for byte. A prior diagnostic control
+exited without entering final SDK shutdown, so process exit alone cannot prove
+the SDK retirement path ran.
+
+The production-shaped source at commit
+`a65b3a2a475966516e4fd930f0c56127b1238842` was then tested using the exact
+MSVC CI archive SHA-256
+`275d70627ee9ed9330a2166c6c4ab42a560d3eefe0f7fab6c36efa60c5530579`.
+Two normal quits returned code 0 in approximately 6.00 and 6.29 seconds, each
+with exactly one successful shared SDK retirement receipt. The first combined
+transition sequence passed. The repeat lost FG after Off → On while FSR remained
+active; see [bootstrap identity](BOOTSTRAP_MODULE_IDENTITY_2026-10-11.md).
+Both installations restored original files and preferences exactly. These exit
+passes do not erase the separate transition failure or qualify subsequent source.
+
+After the bootstrap lookup correction at `e7dc811f`, two matching MSVC-artifact
+Linux runs passed the combined transitions and normal quits, each with one
+successful shared SDK retirement. The process exited with code 0 approximately
+4.20 and 4.70 seconds after confirmation. See the
+[bootstrap report](BOOTSTRAP_MODULE_IDENTITY_2026-10-11.md) for exact provenance
+and limits. Neither run used exit-phase instrumentation or forced termination.
+
+The private trial established an ordering candidate, not a proven root cause or
+qualification of the changed production source. The earlier intermittent hang
+remains a failed result. The bounded Linux repeats now include actual
+SDK-retirement receipts; wider lifecycle and Windows/Radeon qualification remain
+required. No raw runtime logs, account data or third-party binaries are
+included. Published releases remain unchanged.
+
+The vendor-free admission fixture covers all 64 input combinations, including
+terminal shutdown, resize/non-closing ownership, retained NGX, unbound or NVIDIA
+SDK ownership and duplicate cleanup. Source contracts and the fixture run in
+both Linux and Windows CI.

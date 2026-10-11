@@ -1,3 +1,39 @@
+The [bootstrap module identity](BOOTSTRAP_MODULE_IDENTITY_2026-10-11.md) uses the
+full executable-directory path when local and system DXGI are both loaded.
+Preserve missing/unloaded refusal, checked heap-backed path storage, no library
+loading, all ownership/UI/detachment consumers and source receipts. Retain the
+real duplicate-basename fixture on Windows and the source checks on both CI
+platforms. Native Windows CI and two matching-artifact Linux transition/exit
+runs passed; neither qualifies Windows/Radeon gameplay or wider lifecycle.
+
+The [AMD shared SDK retirement](AMD_SHARED_SDK_RETIREMENT_2026-10-11.md) requests
+Streamline cleanup before device destruction only after both AMD presentation
+and native NGX retirement are observed. Preserve atomic AMD-only bound-device
+readiness, missing/busy/retained refusal, one-shot admission, callbacks outside
+the guide mutex, resize exclusion, existing NVIDIA retirement, source receipts
+and both platform fixtures. A private early-cleanup trial is ordering evidence;
+it does not qualify the changed production source or Windows/Radeon shutdown.
+
+Native SR resource destruction and command-list reset/destruction use the NT
+terminal guard before the state mutex, alongside existing queue/device guards.
+Preserve ordinary resource and recording retirement and the terminal-lifetime
+fixtures on both CI platforms. This does not identify the intermittent quit
+cause; rebuilt native artifacts need their own runtime qualification.
+
+The [AMD FG presentation gate](AMD_PRESENT_SERIALIZATION_2026-10-10.md) keeps one
+outer COM identity and serializes both Present methods with Prepare/Configure/
+Destroy. Preserve standard interface identity, unknown-interface refusal,
+terminal refusal before locks, normal final Release, exact raw vendor config
+identity and all source/header hashes. Retain the real Windows COM fixture and
+both platform checks. A synthetic Proton probe does not qualify Windows/Radeon
+or establish the cause of the intermittent game shutdown failure. One combined
+game control exited with code 0; a repeat hung after SDK retirement returned 0.
+Subsequent shared SDK ordering and bootstrap-identity changes passed two bounded
+Linux transition/exit repeats, as recorded in their reports. Native
+Windows/Radeon shutdown and longer lifecycle coverage remain unqualified.
+The fixture exercises actual final raw destruction, not merely an intermediate
+reference release.
+
 The FG guide addon now uses the same terminal process guard as SR and latency.
 Resolve the NT query outside DllMain; skip callback state locks and SDK retirement
 only during final process teardown. Ordinary unload must still request retirement.

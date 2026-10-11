@@ -239,9 +239,9 @@ static bool copy_desc(a::device *d,uint32_t n,const a::descriptor_table_copy *x)
  return false;
 }
 static void init_resource(a::device*,const a::resource_desc &d,const a::subresource_data*,a::resource_usage s,a::resource r) {std::lock_guard guard(lock);initial_states[r.handle]=s;live_resources[r.handle]=d;}
-static void destroy_resource(a::device*,a::resource r) {std::lock_guard guard(lock);initial_states.erase(r.handle);live_resources.erase(r.handle);submitted_states.erase(r.handle);for(auto &[cmd,c]:commands)c.states.erase(r.handle);}
+static void destroy_resource(a::device*,a::resource r) {if(mcd2::process_exit::terminating())return;std::lock_guard guard(lock);initial_states.erase(r.handle);live_resources.erase(r.handle);submitted_states.erase(r.handle);for(auto &[cmd,c]:commands)c.states.erase(r.handle);}
 static void barrier(a::command_list *cmd,uint32_t n,const a::resource *r,const a::resource_usage*,const a::resource_usage *s) {std::lock_guard guard(lock);lean_begin_recording(cmd);timer_begin(cmd);if(remaining){++frame_api_counts["barrier_event_calls"];frame_api_counts["barrier_event_resources"]+=n;}for(uint32_t i=0;i<n;i++)commands[cmd].states[r[i].handle]=s[i];}
-static void reset_cmd(a::command_list *cmd) {std::lock_guard guard(lock);timer_reset(cmd);lean_reset_recording(cmd);commands.erase(cmd);}
+static void reset_cmd(a::command_list *cmd) {if(mcd2::process_exit::terminating())return;std::lock_guard guard(lock);timer_reset(cmd);lean_reset_recording(cmd);commands.erase(cmd);}
 struct Slot {uint32_t reg,space;Binding binding;uint32_t param,rangebinding;};
 static std::vector<Slot> resolve(a::command_list *cmd,bool cs) {
  auto &c=commands[cmd];uint64_t l=cs?c.compute_layout:c.graphics_layout;auto li=layouts.find(l);std::vector<Slot> out;if(li==layouts.end())return out;
@@ -648,7 +648,7 @@ static void finish_present(a::command_queue *q,a::swapchain *sc) {
   }
  }
 }
-static void destroy_cmd(a::command_list *cmd){std::lock_guard guard(lock);timer_reset(cmd);lean_forget_recording(cmd);commands.erase(cmd);}
+static void destroy_cmd(a::command_list *cmd){if(mcd2::process_exit::terminating())return;std::lock_guard guard(lock);timer_reset(cmd);lean_forget_recording(cmd);commands.erase(cmd);}
 static void init_device(a::device *d) {mcd2::process_exit::initialize();if(d->get_api()==a::device_api::d3d12)reshade::log::message(reshade::log::level::info,"MCD2 observer D3D12 initialized; captures only on explicit request file");}
 static void init_queue(a::command_queue *q){std::lock_guard guard(lock);if(capture_probe_queue)probe_queue_api=q;}
 static void destroy_queue(a::command_queue *q) {
@@ -663,6 +663,14 @@ static void destroy_queue(a::command_queue *q) {
  std::ofstream(root/label/"queue-teardown.json")<<"{\"cleanupCompleted\":"<<(success?"true":"false")<<",\"generationRetained\":"<<(live_fixture?"true":"false")<<"}\n";
 }
 static void destroy_device(a::device *dev) {if(mcd2::process_exit::terminating())return;std::lock_guard guard(lock);pipelines.clear();layouts.clear();commands.clear();descriptors.clear();initial_states.clear();live_resources.clear();submitted_states.clear();remaining=0;records.clear();for(auto &c:copies)if(c.readback)c.readback->Release();copies.clear();auto it=roundtrip_textures.find(dev);if(it!=roundtrip_textures.end()){if(it->second)it->second->Release();roundtrip_textures.erase(it);}}
+
+// The guide must not infer NGX retirement from an FSR menu selection. A retained
+// or failed NGX generation still owns its SDK feature even if it stopped drawing.
+extern "C" __declspec(dllexport) int mcd2_sr_ngx_retired_v1() {
+ if(mcd2::process_exit::terminating())return -1;
+ std::unique_lock guard(lock,std::try_to_lock);if(!guard.owns_lock())return -1;
+ return live_fixture?0:1;
+}
 
 extern "C" __declspec(dllexport) const char *NAME="MCD2 Graphics Reconstruction Candidate";
 extern "C" __declspec(dllexport) const char *DESCRIPTION="Native graphics-menu reconstruction; version-pinned interop";

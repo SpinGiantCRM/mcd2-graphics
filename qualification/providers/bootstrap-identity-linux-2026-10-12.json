@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-12",
+  "sourceCommit": "e7dc811f97079060029f6824345c1164af6ce76d",
+  "sourceTree": "5b17e6504212b15f2fb1eef412583af8bfb86d04",
+  "ciTestMerge": "2ee8b0902af985f353e124083c298e2129950db7",
+  "artifact": {
+    "id": 11716302078,
+    "sha256": "bf801b2ca928a375489f468608750692c114ad80e23d345eff7756131ab38b61",
+    "run": 38177678689
+  },
+  "host": {
+    "platform": "Linux / Proton",
+    "gpu": "RTX 4080 SUPER",
+    "driver": "615.78.08",
+    "proton": "CachyOS SLR 11.0-20261005",
+    "gameBuild": 25754144,
+    "output": [
+      3840,
+      2160
+    ]
+  },
+  "runs": [
+    {
+      "run": 1,
+      "checkpoints": [
+        "FSR Quality + AMD FG On",
+        "FSR Quality + AMD FG Off",
+        "FSR Quality + AMD FG reactivated",
+        "FSR Native AA + AMD FG On"
+      ],
+      "srErrors": 0,
+      "fgErrors": 0,
+      "fgWarnings": 0,
+      "unexpectedNvidiaConfiguration": false,
+      "exitCode": 0,
+      "sharedSDKRetirementCalls": 1,
+      "sharedSDKRetirementResult": 0,
+      "confirmationToGoneSeconds": 4.201089239000339,
+      "baselineRestored": true
+    },
+    {
+      "run": 2,
+      "checkpoints": [
+        "FSR Quality + AMD FG On",
+        "FSR Quality + AMD FG Off",
+        "FSR Quality + AMD FG reactivated",
+        "FSR Native AA + AMD FG On"
+      ],
+      "srErrors": 0,
+      "fgErrors": 0,
+      "fgWarnings": 0,
+      "unexpectedNvidiaConfiguration": false,
+      "exitCode": 0,
+      "sharedSDKRetirementCalls": 1,
+      "sharedSDKRetirementResult": 0,
+      "confirmationToGoneSeconds": 4.701455271999748,
+      "baselineRestored": true
+    }
+  ],
+  "limits": [
+    "Bounded stationary Linux/NVIDIA execution; not native Windows/Radeon qualification",
+    "No performance or latency benefit measured",
+    "Earlier shutdown and FG failures remain historical evidence; root cause not conclusively established",
+    "Original separately pinned ReShade dependency preserved"
+  ],
+  "releasedArtifactsChanged": false
+}

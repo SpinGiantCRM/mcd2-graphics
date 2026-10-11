@@ -3,6 +3,7 @@ import copy
 import hashlib
 import importlib.util
 import json
+import re
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -88,6 +89,30 @@ class BridgeTests(unittest.TestCase):
         bootstrap=(ROOT/'experiments/fg-streamline/bootstrap_dxgi.cpp').read_text()
         for name in ['mcd2_afg_recording_contract_v2','mcd2_afg_guides_v2','mcd2_afg_world_v2','mcd2_afg_present_v2']:
             self.assertIn(name,bootstrap)
+
+    def test_present_uses_same_gate_as_sdk_and_never_exposes_raw_identity(self):
+        source=(ROOT/'experiments/providers/fsr_fg_game_bridge.cpp').read_text()
+        wrapper=(ROOT/'experiments/providers/synchronized_swapchain.hpp').read_text()
+        self.assertIn('MCD2SynchronizedSwapchain(s.swap,guard,swapLive,mcd2::process_exit::terminating)', source)
+        self.assertNotIn('s.swap->QueryInterface(IID_IDXGISwapChain1,result)', source)
+        self.assertIn('session->swap==raw&&session->presenter&&!session->closing', source)
+        self.assertIn('mcd2::process_exit::initialize();', source)
+        methods=re.findall(r'(?:HRESULT|UINT|BOOL|HANDLE) STDMETHODCALLTYPE (\w+)\([^\n]*?override \{([^\n]*)',wrapper)
+        forward=[(name,body) for name,body in methods if name!='QueryInterface']
+        self.assertEqual(len(forward),38)
+        for name,body in forward:
+            with self.subTest(method=name):
+                self.assertTrue(body.startswith('if(terminal_())return'))
+                self.assertLess(body.index('std::lock_guard lock(gate_)'),body.index('raw_->'))
+                self.assertIn('if(!live_(raw_))return',body)
+        identity=wrapper.split('QueryInterface(',1)[1].split('ULONG STDMETHODCALLTYPE AddRef',1)[0]
+        self.assertNotIn('raw_->',identity)
+        self.assertIn('return E_NOINTERFACE',identity)
+        release=wrapper.split('ULONG STDMETHODCALLTYPE Release()',1)[1].split('HRESULT STDMETHODCALLTYPE SetPrivateData',1)[0]
+        self.assertLess(release.index('if(terminal_())'),release.index('std::lock_guard'))
+        self.assertLess(release.index('std::lock_guard'),release.index('raw_->Release()'))
+        for name in ['synchronized_swapchain.hpp','../../src/latency/process_exit.hpp','../../src/latency/process_lifetime.hpp']:
+            self.assertIn(name,(ROOT/'experiments/providers/build_fsr_fg_game_bridge.py').read_text())
 
     def test_run_validation_does_not_accept_game_or_tamper(self):
         with tempfile.TemporaryDirectory() as temporary:
