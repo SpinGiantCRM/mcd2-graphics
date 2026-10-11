@@ -72,6 +72,21 @@ class ProcessExitTests(unittest.TestCase):
             self.assertIn(f'Lifetime<std::unique_ptr<{typename}>,retain_sr_generation> {name}Lifetime', header)
             self.assertIn(f'{name}Lifetime.get()', header)
 
+    def test_sr_resource_and_recording_cleanup_refuses_terminal_callbacks(self):
+        source = (ROOT / 'src/native/observer.cpp').read_text()
+        for name, ordinary in [('destroy_resource', 'initial_states.erase'),
+                               ('reset_cmd', 'lean_reset_recording(cmd)'),
+                               ('destroy_cmd', 'lean_forget_recording(cmd)')]:
+            with self.subTest(callback=name):
+                body = re.search(r'static void ' + name + r'\([^\n]*?\)\s*\{([^\n]*)', source)
+                self.assertIsNotNone(body)
+                first = body.group(1)
+                self.assertTrue(first.startswith('if(mcd2::process_exit::terminating())return;'))
+                self.assertLess(first.index('if(mcd2::process_exit::terminating())'),
+                                first.index('std::lock_guard guard(lock)'))
+                self.assertIn(ordinary, first)
+                self.assertIn('commands', first)
+
     def test_retained_generation_unload_pins_both_modules_outside_dllmain(self):
         source = (ROOT / 'src/native/observer.cpp').read_text()
         uninit = source.split('void AddonUninit(', 1)[1].split('BOOL WINAPI DllMain(', 1)[0]

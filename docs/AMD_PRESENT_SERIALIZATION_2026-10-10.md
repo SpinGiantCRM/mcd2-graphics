@@ -64,3 +64,12 @@ exit-only phase markers show both SDK context retirement and final raw swapchain
 release returning. No per-frame work was added. These results do not qualify the
 uninstrumented candidate or locate the intermittent hang: exit instrumentation
 changes timing. The diagnostic code and raw records are kept outside the repo.
+
+## Resource and command recording teardown
+
+Source review also found native SR resource destruction and command-list
+reset/destruction callbacks could still enter their state mutex during terminal
+process teardown. They now use the existing NT shutdown guard before locks,
+matching the queue/device callbacks. Ordinary resource and recording retirement
+remains unchanged. This closes another teardown contract gap; it does not
+establish the cause of the recorded hang or qualify a rebuilt runtime.

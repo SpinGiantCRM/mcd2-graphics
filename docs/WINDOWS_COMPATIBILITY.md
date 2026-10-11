@@ -1,3 +1,9 @@
+Native SR resource destruction and command-list reset/destruction use the NT
+terminal guard before the state mutex, alongside existing queue/device guards.
+Preserve ordinary resource and recording retirement and the terminal-lifetime
+fixtures on both CI platforms. This does not identify the intermittent quit
+cause; rebuilt native artifacts need their own runtime qualification.
+
 The [AMD FG presentation gate](AMD_PRESENT_SERIALIZATION_2026-10-10.md) keeps one
 outer COM identity and serializes both Present methods with Prepare/Configure/
 Destroy. Preserve standard interface identity, unknown-interface refusal,
