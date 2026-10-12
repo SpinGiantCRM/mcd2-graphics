@@ -76,6 +76,12 @@ match. This does not qualify Windows GUI execution or active Radeon features.
 
 ## Native Windows/Radeon qualification
 
+The later [SDR benchmark](AMD_SDR_BENCHMARK_2026-10-13.md) passed its registered
+numeric gates but hung after the final retained-Off menu quit. Candidate
+qualification is therefore incomplete despite the three earlier normal exits.
+The failure and authorized forced termination are retained separately; the
+temporary sampler's involvement is under isolation, not established causation.
+
 Use this candidate's installer and dependency lock. Follow the preparation and
 required runs in [the Windows checklist](AMD_WINDOWS_CANDIDATE_2026-10-12.md),
 using this artifact's pins rather than its historical PR52 pins. Additionally:
