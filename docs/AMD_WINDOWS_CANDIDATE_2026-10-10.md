@@ -1,5 +1,9 @@
 # Windows/Radeon candidate handoff
 
+Historical candidate record. Current pinned development inputs and qualification
+steps are in [the 12 October handoff](AMD_WINDOWS_CANDIDATE_2026-10-12.md).
+
+
 This is a development qualification artifact, not a released installer.
 Use [PR45's Windows build](https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/38009520993/artifacts/11652882639)
 and download `fg-windows-candidate`, artifact 11652882639.

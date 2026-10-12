@@ -18,7 +18,10 @@ exit, but shared SDK shutdown returned error 24. NVIDIA closing-owner cleanup
 now attempts the same admission after alpha retirement, before graphics teardown;
 a retained NGX feature still defers to its queue notification. Preserve both
 notification orders, callbacks outside locks and resize/unsupported-owner refusal.
-The earlier normal exit does not qualify this correction or SDK cleanup.
+The matching corrected artifact passed three bounded Linux/NVIDIA transition
+and exit runs, including explicit retained-NGX refusal before later successful
+SDK cleanup. Keep those numeric receipts separate from the earlier hang and
+error 24. They do not qualify Windows/Radeon or broader lifecycle.
 
 The [bootstrap module identity](BOOTSTRAP_MODULE_IDENTITY_2026-10-11.md) uses the
 full executable-directory path when local and system DXGI are both loaded.

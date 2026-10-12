@@ -1,5 +1,9 @@
 # Separate candidate installer inputs
 
+Historical candidate record. Current pinned development inputs and qualification
+steps are in [the 12 October handoff](AMD_WINDOWS_CANDIDATE_2026-10-12.md).
+
+
 ## Complete development candidate
 
 The [packaged Linux runtime trial](AMD_PACKAGED_LINUX_RUNTIME_2026-10-10.md)

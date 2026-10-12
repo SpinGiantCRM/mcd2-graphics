@@ -61,14 +61,42 @@ including repair, ownership refusal, uninstall and reinstall; these ran on
 Linux with synthetic fixtures and do not qualify the Windows GUI. Original
 runtime files and mod preferences were restored exactly.
 
-The next correction attempts NVIDIA cleanup at the closing swapchain boundary,
+The closing-owner correction attempts NVIDIA cleanup at the swapchain boundary,
 after stopped generation and completed alpha GPU retirement. It still requires
 explicit native NGX retirement, ordinary closing ownership, an actual NVIDIA
 presenter and one-shot admission, outside observer mutexes. A retained NGX
 feature continues to defer to the native queue notification. Resize and AMD
 presentation retain their existing paths. This follows the SDK's requirement
-to shut down before graphics components are destroyed; it is not yet a proven
-repair of error 24. Windows/Radeon, wider lifecycle, performance and physical
-pacing remain separate gates.
+to shut down before graphics components are destroyed. Matching runtime results
+are recorded below.
+
+## Matching candidate qualification
+
+The implementation at `4d5a5ebd993c0e59bacd0833788128f7d0565c3e` passed
+three bounded Linux/NVIDIA runs using the exact MSVC artifact, archive SHA-256
+`71fc9e563a31de90878e35b66c23f841e39ea9ce9284a066a8aa1a6266639622`:
+
+| Route / transitions | Normal exit | Shared SDK cleanup |
+| --- | --- | --- |
+| FSR six presets + NVIDIA FG | Code 0; 6.87 s | One receipt; result 0 |
+| DLSS Quality → DLAA + NVIDIA FG | Code 0; 3.26 s | Early refusal while NGX retained, then result 0 |
+| FSR + AMD FG Off → On; DLSS → Native | Code 0; 4.90 s | AMD presenter and shared SDK result 0 |
+
+All six FSR choices retained active NVIDIA FG, matching guide dimensions,
+successful tokens/tags and two SDK-reported presents per rendered frame.
+AMD generated counts stopped during a retained-owner Off interval while real
+presentation continued; On and both SR-provider transitions resumed generation.
+Native restored 100% source scale and independent full-resolution guides.
+Original mod files and mod preferences were restored after every run. No forced
+termination or exit-phase patch was used in these three tests.
+
+[The numeric receipt](../qualification/providers/fsr-nvidia-fg-2026-10-12.json)
+keeps the earlier hang and SDK error separate from these passes. The exact
+framework remains an external dependency. Both installer folders passed their
+59 core transaction checks; the [current packaging record](AMD_CANDIDATE_PACKAGING_2026-10-12.md)
+and [Windows checklist](AMD_WINDOWS_CANDIDATE_2026-10-12.md) pin the same native
+inputs. Windows/Radeon, active Anti-Lag/latency, wider lifecycle, performance
+and physical pacing remain separate gates. Three clean exits do not establish
+a universal shutdown repair or qualify a different rebuilt framework.
 
 Published releases and dependency pins are unchanged.
