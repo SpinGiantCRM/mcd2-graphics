@@ -10,6 +10,7 @@
 #include <mutex>
 #include <string>
 #include "fsr_fg_game_bridge.h"
+#include "../../src/latency/process_exit.hpp"
 namespace {
 namespace fs=std::filesystem;
 std::mutex mutex;fs::path root;
@@ -31,6 +32,7 @@ void write_outcome(std::ostream& out,const char* name,const Outcome& v){
  <<",\"realPresents\":"<<v.amd.realPresents<<",\"generatedPresents\":"<<v.amd.generatedPresents<<"}\n";
 }
 void finish(reshade::api::command_queue*,reshade::api::swapchain*){
+ if(mcd2::process_exit::terminating())return;
  std::lock_guard lock(mutex);
  if(root.empty()){
   auto local=std::make_unique<wchar_t[]>(32768);auto n=GetEnvironmentVariableW(L"LOCALAPPDATA",local.get(),32768);
@@ -61,8 +63,10 @@ void finish(reshade::api::command_queue*,reshade::api::swapchain*){
 }
 extern "C" __declspec(dllexport) const char* NAME="MCD2 provider CPU sampler (temporary)";
 extern "C" __declspec(dllexport) const char* DESCRIPTION="Bounded application intervals and AMD SDK counters; no physical-FPS claim";
-BOOL APIENTRY DllMain(HMODULE module,DWORD reason,LPVOID){
+BOOL APIENTRY DllMain(HMODULE module,DWORD reason,LPVOID reserved){
  if(reason==DLL_PROCESS_ATTACH){if(!reshade::register_addon(module))return FALSE;reshade::register_event<reshade::addon_event::finish_present>(finish);}
- else if(reason==DLL_PROCESS_DETACH)reshade::unregister_addon(module);
+ else if(reason==DLL_PROCESS_DETACH){if(reserved)mcd2::process_exit::mark_terminating();else reshade::unregister_addon(module);}
  return TRUE;
 }
+// Resolve the NT query outside DllMain, before any device/present callbacks.
+extern "C" __declspec(dllexport) bool AddonInit(HMODULE,HMODULE){mcd2::process_exit::initialize();return true;}
