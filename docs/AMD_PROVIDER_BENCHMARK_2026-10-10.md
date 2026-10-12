@@ -1,5 +1,9 @@
 # AMD Frame Generation pairing measurements
 
+The later [12 October repeated Off/On measurements](AMD_PROVIDER_BENCHMARK_2026-10-12.md)
+use the corrected PR52 lifecycle candidate. They retain the historical results
+below and do not treat a different production build as the same benchmark.
+
 Development evidence for AMD FG with NVIDIA DLSS and AMD FSR, using the same
 source-matched candidate and ordinary Video controls. Published payloads are
 unchanged. The numeric receipt is

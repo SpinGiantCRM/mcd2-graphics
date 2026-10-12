@@ -75,6 +75,14 @@ Windows/AMD or the separately observed shutdown failure.
 
 # Windows fixes: reasons and preservation requirements
 
+The temporary [provider present sampler](AMD_PROVIDER_BENCHMARK_2026-10-12.md)
+uses the same NT process-termination guard before its callback mutex and skips
+unregister only during terminal DllMain detach. Resolve the query in AddonInit;
+preserve ordinary unload registration cleanup and both-platform source checks.
+Its original instrumented quit failed with `0xc0000409`; a no-sampler control
+and two guarded-sampler sessions exited 0. This does not establish causation or
+native Windows qualification. Production renderer/provider files are unchanged.
+
 The [AMD development installer assembly](AMD_CANDIDATE_PACKAGING_2026-10-10.md)
 uses the pinned PR45 Windows native artifact and the explicit Steam 25754144 game
 pin. Preserve complete archive/member/source verification, exact bridge binding,
