@@ -21,6 +21,16 @@ def fixture(enabled=True, owned=True):
 
 
 class ProviderBenchmarkTests(unittest.TestCase):
+    def test_sampler_skips_terminal_callbacks_and_preserves_ordinary_unregister(self):
+        source = (path.parent / 'present_sampler.cpp').read_text()
+        finish = source.split('void finish(', 1)[1].split('extern "C"', 1)[0]
+        self.assertLess(finish.index('if(mcd2::process_exit::terminating())return;'),
+                        finish.index('std::lock_guard lock(mutex);'))
+        self.assertIn('bool AddonInit(HMODULE,HMODULE){mcd2::process_exit::initialize();', source)
+        self.assertIn('LPVOID reserved)', source)
+        self.assertIn('if(reserved)mcd2::process_exit::mark_terminating();else reshade::unregister_addon(module);', source)
+        self.assertIn('src/latency/process_exit.hpp', source)
+
     def test_sdk_counts_and_cpu_intervals_are_separate_from_physical_fps(self):
         result = samples.analyze(fixture(), True)
         self.assertEqual(result['applicationPresentRate'], 100)
