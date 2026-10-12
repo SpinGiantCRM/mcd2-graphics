@@ -115,6 +115,9 @@ jobs:
   windows-installer-checks:
     name: Windows installer checks
     runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
@@ -132,6 +135,7 @@ jobs:
           python -m unittest discover -s tests -p "test_fsr_fg_game_bridge.py" -v
           python -m unittest discover -s tests -p "test_sr_guide_producer.py" -v
           python -m unittest discover -s tests -p "test_native_fg_guides.py" -v
+          python -m unittest discover -s tests -p "test_fg_output.py" -v
           python -m unittest discover -s tests -p "test_fsr_game_probe.py" -v
           python -m unittest discover -s tests -p "test_fsr_sustained_probe.py" -v
           python -m unittest discover -s tests -p "test_fsr_runtime.py" -v

@@ -38,14 +38,15 @@ class SharedSdkShutdownTests(unittest.TestCase):
         self.assertLess(body.index('amdRetiredForClose;}'), body.index('retired()==1'))
         self.assertLess(body.index('const int result=quiesce();'), body.index('std::lock_guard lock(mutex);privateLog'))
         retire = source.split('void try_retirement(){', 1)[1].split('\nint token_identity', 1)[0]
-        self.assertIn('if(!result){retiring=false;amdRetiredForClose=ownerClosing;}', retire)
-        self.assertIn('if(!result)try_shared_sdk_quiesce();return;', retire)
+        self.assertIn('const bool complete=!result&&!recordings&&fg_scene::cleanup();', retire)
+        self.assertIn('if(complete){retiring=false;amdRetiredForClose=ownerClosing;}', retire)
+        self.assertIn('if(complete&&closing)try_shared_sdk_quiesce();return;', retire)
         notify = source.split('void mcd2_fg_sr_retired(){', 1)[1].split('\nextern "C"', 1)[0]
         self.assertIn('if(amd_owner()){try_shared_sdk_quiesce();return;}', notify)
         self.assertIn('try_nvidia_shared_sdk_quiesce(false);', notify)
         swap = source.split('void swap_destroy(', 1)[1].split('\nvoid targets', 1)[0]
         self.assertIn('ownerClosing=!resize;', swap)
-        self.assertIn('if(resize){std::lock_guard lock(mutex);retiring=false;return;}', swap)
+        self.assertIn('if(resize){outputReady=false;snapshotTracking=false;try_retirement();return;}', swap)
 
     def test_exports_and_header_receipts_survive_both_build_hosts(self):
         recipe = (ROOT / 'experiments/fg-streamline/build_probe.py').read_text()

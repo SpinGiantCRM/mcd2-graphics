@@ -1,3 +1,9 @@
+The portable Windows checks use Bash with fail-fast step execution, so an earlier
+Python failure cannot be masked by a later successful command. Keep the SDR
+output checks on both platforms. UI source changes require a real NeoRune and
+ModInfo rebuild with matching archive, member and source receipts; updating
+hashes alone is not a rebuild. Candidate payloads do not replace release files.
+
 The [SDR scene implementation](AMD_SDR_IMPLEMENTATION_2026-10-12.md) adds an
 owned RGB-preserving, opaque-alpha snapshot of the primary backbuffer after the
 original tone-map draw. Preserve complete original draw arguments, full coverage,
