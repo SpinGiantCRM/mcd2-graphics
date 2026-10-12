@@ -36,6 +36,44 @@ These controlled images are not gameplay, native Windows/Radeon qualification,
 physical display FPS or measured input latency. The game observer's recording
 leases, original rendering and real output transitions require separate checks.
 
+## Complete-artifact Linux SDR control
+
+The [bounded game receipt](../qualification/providers/amd-sdr-pr54-game-2026-10-13.json)
+uses the fresh artifact, including its exact separately selected framework.
+FSR Quality + AMD FG ran in 3840×2160 SDR, resized through the native Video menu
+to a 3200×1800 window and returned to 4K borderless. Generation resumed with
+current 2560×1440 / 2134×1200 / 2560×1440 guides; consecutive admitted intervals
+recorded 60 real and 60 generated callbacks without SDK faults/errors/warnings.
+The rebuilt FG control was available without HDR. Pause/menu generation stopped.
+
+The actual shipping process exited 0 after a normal menu quit, with scene leases
+retired and shared SDK retirement returning 0. Original mod files, own settings,
+renderer configuration and calibration INI were restored. This is one bounded
+complete-artifact SDR control, not a performance, long-session or Windows pass.
+
+## Complete-artifact Linux HDR control
+
+The [HDR game receipt](../qualification/providers/amd-hdr-pr54-game-2026-10-13.json)
+uses the same full artifact with the existing RenoDX HDR addon present. Startup
+reported 3840×2160 PQ/BT.2020. AMD generation remained active through FSR Quality,
+Native at 100%, and DLSS Quality selected through the native Video page. Fresh
+full-resolution or 1440p guides matched each route; the NVIDIA feature was created
+and reached the successful-evaluation acknowledgement. SDK faults/errors/warnings
+were zero. Normal quit exited 0, with scene and shared SDK retirement completed.
+Original files and configuration were restored after the control.
+
+A [third complete-artifact control](../qualification/providers/amd-hdr-pr54-repeat-2026-10-13.json)
+repeated HDR FSR Quality + AMD FG and exited 0 with completed retirement and
+restoration. The three held-process normal quits took about 3.56–4.38 seconds
+from confirmation to process disappearance. This bounded series retains the
+prior historical failures; it does not establish their cause or prove every
+shutdown/lifecycle case is fixed.
+
+The [installer verification](../qualification/providers/amd-pr54-installers-2026-10-13.json)
+checks the downloaded Windows-built installer archive and both visible platform
+folders. All 17 own payload hashes and the captured manifests/dependency locks
+match. This does not qualify Windows GUI execution or active Radeon features.
+
 ## Native Windows/Radeon qualification
 
 Use this candidate's installer and dependency lock. Follow the preparation and
@@ -44,8 +82,9 @@ using this artifact's pins rather than its historical PR52 pins. Additionally:
 
 1. Run SDR first; require actual sRGB output and active AMD generation without
    the NVIDIA-only HDR requirement. Check HUD edges, foliage and moving objects.
-2. Toggle native HDR only on a supporting output. Require matching PQ output,
-   current guides, generation-context recreation and no colour corruption.
+2. Select native HDR only on a supporting output and restart as prompted.
+   Require matching PQ output, current guides and no colour corruption. Live
+   transfer-function changes are isolated-host evidence, not a game UI claim.
 3. Change output resolution/window mode, then restore it. Require generation to
    suspend during invalid output and resume only with matching current resources.
 4. Repeat normal quits with the actual shipping process handle held through exit.

@@ -1,0 +1,23 @@
+{
+  "artifact": 11775708263,
+  "run": 38314463890,
+  "archiveSHA256": "83de1ca93fdec7944f3ebad055528e635eaabd5a232f9d2c85ee1a07c1074681",
+  "platforms": {
+    "linux": {
+      "ownPayloadFiles": 17,
+      "manifestSHA256": "77d41f9db2a5dc09f9315ea1d7eb01f75837a85bc7c0db8604bdc893c1ef1565",
+      "dependenciesSHA256": "52b9bd8cdc9bc0ea315d0116e617b73a89eaa44406d2abc5d17c052ee57af5bf"
+    },
+    "windows": {
+      "ownPayloadFiles": 17,
+      "manifestSHA256": "77d41f9db2a5dc09f9315ea1d7eb01f75837a85bc7c0db8604bdc893c1ef1565",
+      "dependenciesSHA256": "52b9bd8cdc9bc0ea315d0116e617b73a89eaa44406d2abc5d17c052ee57af5bf"
+    }
+  },
+  "nativeSource": "de03af164956512ec5d0d6b8a03d6eb21e6b40c6",
+  "resourceJSONMatching": true,
+  "gpuRuntimeQualified": false,
+  "windowsInstallerExecutionQualified": false,
+  "candidateOnly": true,
+  "publishedReleaseChanged": false
+}
