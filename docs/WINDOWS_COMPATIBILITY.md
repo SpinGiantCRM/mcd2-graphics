@@ -75,6 +75,15 @@ Windows/AMD or the separately observed shutdown failure.
 
 # Windows fixes: reasons and preservation requirements
 
+The [SDR boundary diagnostic](AMD_SDR_FG_2026-10-12.md) records actual ReShade
+presentation colour space, indexed/non-indexed draw arguments and explicit
+viewport/scissor/blend/write-mask metadata. Preserve unknown coverage defaults,
+capture-disabled and terminal returns before locks, and the original rendering
+callbacks. A 10-bit format does not prove HDR, and an RGB-only tone-map draw does
+not establish alpha validity. Keep both-platform source checks. The private
+Microsoft-ABI diagnostic's Linux metadata/exit pass does not qualify SDR FG,
+output resize, production performance or native Windows/Radeon execution.
+
 The temporary [provider present sampler](AMD_PROVIDER_BENCHMARK_2026-10-12.md)
 uses the same NT process-termination guard before its callback mutex and skips
 unregister only during terminal DllMain detach. Resolve the query in AddonInit;
