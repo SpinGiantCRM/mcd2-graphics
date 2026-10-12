@@ -1,3 +1,14 @@
+The [SDR scene implementation](AMD_SDR_IMPLEMENTATION_2026-10-12.md) adds an
+owned RGB-preserving, opaque-alpha snapshot of the primary backbuffer after the
+original tone-map draw. Preserve complete original draw arguments, full coverage,
+actual colour/format/device gates, submitted-frame and camera parity, independent
+host recording leases, successful-reset stamps and strong Present borrows.
+Keep output context recreation separate from presenter ownership and preserve
+existing NVIDIA/HDR behavior. Include the new owned shader and all source headers
+in build/package receipts, with both platform checks. Two private Linux controls
+exited 0 after an earlier active SDR run failed with `0xc0000409`; these do not
+establish causation or qualify a complete rebuilt artifact or Windows/Radeon.
+
 The [FSR SR / NVIDIA FG route](FSR_NVIDIA_FG_2026-10-12.md) admits FSR through the
 shared guide producer without equating SR vendor with FG vendor. Preserve exact
 record and startup-owner matching, actual-adapter SDK checks, input readiness,

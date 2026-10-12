@@ -19,6 +19,7 @@ OWN = {
     'probe/fg-sdk-bridge.dll': BIN+'fg-sdk-bridge.dll',
     'probe/mcd2-fg-guide-recon.addon64': BIN+'mcd2-fg-guide-recon.addon64',
     'probe/FG_UI_ALPHA.cso': BIN+'FG_UI_ALPHA.cso',
+    'probe/FG_SCENE_COPY.cso': BIN+'FG_SCENE_COPY.cso',
     'latency/mcd2-display-latency.addon64': BIN+'mcd2-display-latency.addon64',
     'amd-latency/mcd2-antilag2-bridge.dll': BIN+'mcd2-antilag2-bridge.dll',
     'sr/mcd2-graphics.addon64': BIN+'mcd2-graphics.addon64',

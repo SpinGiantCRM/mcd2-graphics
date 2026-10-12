@@ -25,9 +25,9 @@ class ProviderBenchmarkTests(unittest.TestCase):
         source = (path.parent.parent / 'fg-streamline/guide_recon.cpp').read_text()
         self.assertIn('unsigned(swap->get_color_space())', source)
         self.assertIn('if(captureEnabled){static unsigned lastColour=UINT32_MAX;', source)
-        self.assertIn('draw_common(cmd,vertices,instances,false)', source)
-        self.assertIn('draw_common(cmd,indices,instances,true)', source)
-        self.assertIn('observe(cmd,false,elements,instances,indexed)', source)
+        self.assertIn('draw_common(cmd,{vertices,instances,first,0,firstInstance,false})', source)
+        self.assertIn('draw_common(cmd,{indices,instances,first,base,firstInstance,true})', source)
+        self.assertIn('observe(cmd,false,call.elements,call.instances,call.indexed)', source)
         self.assertIn('blend.blend_enable[0]', source)
         self.assertIn('blend.render_target_write_mask[0]', source)
 
@@ -37,7 +37,7 @@ class ProviderBenchmarkTests(unittest.TestCase):
             body = source.split('void ' + name + '(', 1)[1].split('\n', 1)[0]
             self.assertLess(body.index('if(mcd2::process_exit::terminating())return;'),
                             body.index('std::lock_guard lock(mutex);'))
-            self.assertLess(body.index('if(!captureEnabled||first!=0)return;'),
+            self.assertLess(body.index('if((!captureEnabled&&!snapshotTracking)||first!=0)return;'),
                             body.index('std::lock_guard lock(mutex);'))
             self.assertIn('count==1&&values', body)
             self.assertNotIn('cmd->', body)

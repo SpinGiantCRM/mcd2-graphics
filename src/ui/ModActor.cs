@@ -719,7 +719,7 @@ public class ModActor : AActor {
   if(FGRuntime.RestartRequired==1)return "Restart to apply.";
   if(DisplayValue(5)==0)return "Off.";
   if(FGRuntime.Phase==6)return "Frame generation stopped after a runtime error.";
-  if(DisplaySaved==null || DisplaySaved.HDROutput==0)return "Enable HDR to use this mode.";
+  if(SelectedFgProvider()==0 && (DisplaySaved==null || DisplaySaved.HDROutput==0))return "Enable HDR to use this mode.";
   return FGRuntime.Active==1?"Active.":"Resumes during gameplay.";
  }
 

@@ -19,14 +19,14 @@ class ProcessExitTests(unittest.TestCase):
                 self.assertIsNotNone(body)
                 first = body.group(1)
                 if name == 'AddonUninit':
-                    first = source.split('void AddonUninit(HMODULE,HMODULE){', 1)[1].lstrip()
+                    first = source.split('void AddonUninit(HMODULE addon,HMODULE framework){', 1)[1].lstrip()
                 if name == 'init_device':
                     first = first.removeprefix('mcd2::process_exit::initialize();')
                 self.assertTrue(first.startswith('if(mcd2::process_exit::terminating())return'), first)
         self.assertIn('bool AddonInit(HMODULE,HMODULE){mcd2::process_exit::initialize();', source)
         self.assertIn('if(reserved)mcd2::process_exit::mark_terminating();else reshade::unregister_addon(module)', source)
         # Ordinary unload still requests real retirement; only terminal teardown skips it.
-        uninit = source.split('void AddonUninit(HMODULE,HMODULE){', 1)[1]
+        uninit = source.split('void AddonUninit(HMODULE addon,HMODULE framework){', 1)[1]
         self.assertIn('retiring=true;ownerClosing=true;', uninit)
         self.assertIn('try_retirement();', uninit)
         recipe = (ROOT / 'experiments/fg-streamline/build_probe.py').read_text()

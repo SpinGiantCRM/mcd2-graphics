@@ -34,6 +34,7 @@ jobs:
           python3 -m unittest discover -s tests -p "test_fsr_fg_game_bridge.py" -v
           python3 -m unittest discover -s tests -p "test_sr_guide_producer.py" -v
           python3 -m unittest discover -s tests -p "test_native_fg_guides.py" -v
+          python3 -m unittest discover -s tests -p "test_fg_output.py" -v
           python3 -m unittest discover -s tests -p "test_fsr_game_probe.py" -v
           python3 -m unittest discover -s tests -p "test_fsr_sustained_probe.py" -v
           python3 -m unittest discover -s tests -p "test_fsr_runtime.py" -v
@@ -70,6 +71,10 @@ jobs:
           /tmp/provider-display-projection
           g++ -std=c++20 -Wall -Wextra -Werror tests/native_fg_admission_test.cpp -o /tmp/native-fg-admission
           /tmp/native-fg-admission
+          g++ -std=c++20 -Wall -Wextra -Werror tests/fg_output_contract_test.cpp -o /tmp/fg-output-contract
+          /tmp/fg-output-contract
+          g++ -std=c++20 -Wall -Wextra -Werror tests/fg_scene_identity_test.cpp -o /tmp/fg-scene-identity
+          /tmp/fg-scene-identity
           g++ -std=c++20 -Wall -Wextra -Werror tests/shared_sdk_shutdown_test.cpp -o /tmp/shared-sdk-shutdown
           /tmp/shared-sdk-shutdown
           g++ -std=c++20 -Wall -Wextra -Werror -Wno-misleading-indentation tests/fg_provider_protocol_test.cpp -o /tmp/fg-provider-protocol
@@ -166,6 +171,10 @@ jobs:
           ./provider-display-projection.exe
           g++ -std=c++20 -static -Wall -Wextra -Werror tests/native_fg_admission_test.cpp -o native-fg-admission.exe
           ./native-fg-admission.exe
+          g++ -std=c++20 -static -Wall -Wextra -Werror tests/fg_output_contract_test.cpp -o fg-output-contract.exe
+          ./fg-output-contract.exe
+          g++ -std=c++20 -static -Wall -Wextra -Werror tests/fg_scene_identity_test.cpp -o fg-scene-identity.exe
+          ./fg-scene-identity.exe
           g++ -std=c++20 -static -Wall -Wextra -Werror tests/shared_sdk_shutdown_test.cpp -o shared-sdk-shutdown.exe
           ./shared-sdk-shutdown.exe
           mkdir -p "bootstrap lookup/other"

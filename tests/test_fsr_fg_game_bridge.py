@@ -16,7 +16,7 @@ recipe=load('build_fsr_fg_game_bridge');runner=load('run_fsr_fg_game_bridge_prob
 def evidence():
     rows=[]
     def event(stage,count=1,result=0):rows.extend(dict(stage=stage,result=result) for _ in range(count))
-    for stage in ['owned-recording-contract','load-verified-runtime','create-bridge-swapchain','set-PQ-output']:event(stage)
+    for stage in ['owned-recording-contract','load-verified-runtime','create-bridge-swapchain','set-presentation-colour','configure-output-contract']:event(stage)
     for stage in ['reject-unrelated-submission-queue','owned-presenter-antilag-ready','clear-antilag-before-presentation']:event(stage)
     for phase in range(3):
         count=60 if phase==1 else 30

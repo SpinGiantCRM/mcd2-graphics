@@ -281,7 +281,7 @@ def main():
     for folder in [probe, latency, sr]:
         destination = artifact / folder.name
         destination.mkdir()
-        for name in ['build-receipt.json', 'FGBootstrap.ini', 'FG_UI_ALPHA.cso']:
+        for name in ['build-receipt.json', 'FGBootstrap.ini', 'FG_UI_ALPHA.cso', 'FG_SCENE_COPY.cso']:
             if (folder / name).exists():
                 shutil.copyfile(folder / name, destination / name)
         if folder == sr:

@@ -211,7 +211,7 @@ BOOL CALLBACK initialize(PINIT_ONCE,void*,void**){
   amdLoad=amdFgBridge?reinterpret_cast<decltype(amdLoad)>(GetProcAddress(amdFgBridge,"mcd2_afg_load_v1")):nullptr;
   amdSwap=amdFgBridge?reinterpret_cast<decltype(amdSwap)>(GetProcAddress(amdFgBridge,"mcd2_afg_swap_v1")):nullptr;
   auto contract=amdFgBridge?reinterpret_cast<unsigned(*)()>(GetProcAddress(amdFgBridge,"mcd2_afg_recording_contract_v2")):nullptr;
-  const bool ownRecordings=contract&&contract()==2&&GetProcAddress(amdFgBridge,"mcd2_afg_guides_v2")&&GetProcAddress(amdFgBridge,"mcd2_afg_world_v2")&&GetProcAddress(amdFgBridge,"mcd2_afg_present_v2");
+  const bool ownRecordings=contract&&contract()==2&&GetProcAddress(amdFgBridge,"mcd2_afg_output_v1")&&GetProcAddress(amdFgBridge,"mcd2_afg_scene_v1")&&GetProcAddress(amdFgBridge,"mcd2_afg_guides_v2")&&GetProcAddress(amdFgBridge,"mcd2_afg_world_v2")&&GetProcAddress(amdFgBridge,"mcd2_afg_present_v2");
   const auto loaded=ownRecordings&&amdLoad&&amdSwap?amdLoad((folder/L"amd_fidelityfx_framegeneration_dx12.dll").c_str()):-1;
   event("AMD-pinned-runtime",loaded);
   if(amdFgSession){routeEnabled=factoryRoutingRequested&&!loaded&&(privateAmdTrial||sharedOwner==2);fgSessionMode=routeEnabled?1:0;}

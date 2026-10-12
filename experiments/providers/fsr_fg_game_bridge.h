@@ -14,15 +14,24 @@ struct MCD2AmdFgStateV1 {
  uint32_t size,ready,active,fault,errors,warnings;
  uint64_t engineFrame,providerFrame,prepared,images,realPresents,generatedPresents;
 };
+struct MCD2AmdFgOutputV1 {
+ uint32_t size,width,height,backbufferFormat,sceneFormat,colourSpace,sceneStage,reserved;
+};
 static_assert(sizeof(MCD2AmdFgSwapV1)==72);
 static_assert(sizeof(MCD2AmdFgGuidesV1)==364);
 static_assert(sizeof(MCD2AmdFgStateV1)==72);
+static_assert(sizeof(MCD2AmdFgOutputV1)==32);
 inline constexpr int MCD2_AFG_BUSY_V2=1000001;
+inline constexpr int MCD2_AFG_OUTPUT_UNSUPPORTED_V3=1000002;
 extern "C" {
  int mcd2_afg_load_v1(const wchar_t *absoluteVerifiedRuntime);
  // Eligibility query only; does not create contexts, wrap or activate FG.
  int mcd2_afg_support_v1(void *nativeDevice);
  int mcd2_afg_swap_v1(void *factory,void *nativeQueue,void *hwnd,const MCD2AmdFgSwapV1*,void **swap);
+ // Actual output contract; context changes drain old SDK and owned GPU work.
+ // A busy retirement declines generation and retains its resources for retry.
+ int mcd2_afg_scene_v1(void* device,void* world,uint64_t engineFrame);
+ int mcd2_afg_output_v1(const MCD2AmdFgOutputV1*);
  // Recording contract 2 stages inputs without touching the host list. Present
  // must run after host submissions on the exact swapchain graphics queue.
  unsigned mcd2_afg_recording_contract_v2();
