@@ -7,7 +7,14 @@ on:
       - 'src/installer/**'
       - 'build_installer.py'
       - 'tests/test_installer_amd_candidate.py'
+      - 'qualification/providers/windows-candidate-*.json'
   workflow_dispatch:
+    inputs:
+      qualification_receipt:
+        description: Repository receipt containing exact native archive and source pins
+        default: qualification/providers/windows-candidate-current.json
+        required: true
+        type: string
 permissions:
   contents: read
   actions: read
@@ -27,10 +34,14 @@ jobs:
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
+          CANDIDATE_RECEIPT: ${{ inputs.qualification_receipt || 'qualification/providers/windows-candidate-current.json' }}
         run: |
           @'
-          import json,pathlib,subprocess,sys
-          p=json.loads(pathlib.Path('qualification/providers/windows-candidate-pr52-2026-10-12.json').read_text())
+          import json,os,pathlib,re,subprocess,sys
+          selected=os.environ['CANDIDATE_RECEIPT']
+          if not re.fullmatch(r'qualification/providers/windows-candidate-[a-zA-Z0-9.-]+\.json',selected):
+              raise ValueError('Select a repository qualification receipt; arbitrary paths are refused')
+          p=json.loads(pathlib.Path(selected).read_text())
           stage=pathlib.Path('dist/amd');stage.mkdir(parents=True)
           artifact=stage/'native-input.zip'
           with artifact.open('wb') as out:
