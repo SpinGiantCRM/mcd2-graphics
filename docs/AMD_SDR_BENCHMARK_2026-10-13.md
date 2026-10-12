@@ -46,8 +46,10 @@ establish a display pacing or latency benefit.
 
 The fresh-Off process exited normally with code 0. After the final retained-Off
 phase, Save and quit to desktop left the game on a black screen with its process
-still alive. At the preserved observation the render thread was absent and the
-RHI thread remained. The guide log contained no closing retirement event.
+still alive. The preserved task names include `RenderThread 0` and `RHIThread`.
+An earlier exact-name check incorrectly reported the render thread absent;
+neither the corrected names nor their wait metadata identify the blocked call.
+The guide log contained no closing retirement event.
 The user authorized terminating only that verified hung shipping process.
 Forced termination is not a normal exit pass.
 

@@ -773,7 +773,7 @@
     "forcedTermination": true,
     "forcedTerminationUserAuthorized": true,
     "normalExitClaimed": false,
-    "renderThreadAbsentAtHang": true,
+    "renderThreadAbsentAtHang": false,
     "rhiThreadStillPresent": true,
     "privateProcessEvidenceSHA256": "5740d6e9fe0ae560700a371e8f8f431ed17d65131169e07fdc1513b77191454f",
     "samplerCauseEstablished": false,
@@ -793,7 +793,9 @@
       "durationMatched": false,
       "causeEstablished": false,
       "originalSetupRestored": true
-    }
+    },
+    "renderThreadNameAtHang": "RenderThread 0",
+    "threadObservationCorrection": "Exact-name lookup for RenderThread was insufficient; preserved Linux task names show RenderThread 0 and RHIThread present. Names do not identify the blocked call."
   },
   "restoration": {
     "originalFilesAndOwnSettingsVerified": true,
