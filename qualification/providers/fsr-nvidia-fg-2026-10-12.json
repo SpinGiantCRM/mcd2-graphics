@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-12",
+  "implementationHead": "4d5a5ebd993c0e59bacd0833788128f7d0565c3e",
+  "sourceTree": "65a3dba7bf16925182024c8faa6a651a940167f6",
+  "nativeRun": 38185912901,
+  "nativeArtifact": 11719049992,
+  "archiveSHA256": "71fc9e563a31de90878e35b66c23f841e39ea9ce9284a066a8aa1a6266639622",
+  "host": {
+    "os": "CachyOS / KDE Wayland",
+    "gpu": "NVIDIA RTX 4080 SUPER",
+    "driver": "615.78.08",
+    "proton": "CachyOS Proton SLR 11.0-20261005",
+    "steamBuild": "25754144",
+    "output": [
+      3840,
+      2160
+    ],
+    "hdr": "native Wayland HDR"
+  },
+  "failuresRetained": [
+    {
+      "implementation": "a2f62c617e338467e86897990f0a477efb143e13",
+      "sixPresetPass": true,
+      "normalQuit": "alive after 180 seconds",
+      "sharedSdkReceipt": false,
+      "qualified": false
+    },
+    {
+      "implementation": "858bda0aa721d32809d976867fb3af718817f5a2",
+      "normalExitCode": 0,
+      "sharedSdkResult": 24,
+      "qualified": false
+    }
+  ],
+  "privateIsolation": {
+    "changedGuideOnly": true,
+    "compiler": "clang-cl / Microsoft ABI",
+    "normalExitCode": 0,
+    "sharedSdkResult": 0,
+    "exactMsvcCandidateQualification": false
+  },
+  "exactCandidateRuns": [
+    {
+      "implementation": "4d5a5ebd993c0e59bacd0833788128f7d0565c3e",
+      "run": 38185912901,
+      "artifact": 11719049992,
+      "archiveSHA256": "71fc9e563a31de90878e35b66c23f841e39ea9ce9284a066a8aa1a6266639622",
+      "route": "FSR SR/NVIDIA FG",
+      "sixPresetsPassed": true,
+      "gameExitCode": 0,
+      "confirmationToGoneSeconds": 6.8651040910008305,
+      "sharedSdkResult": 0,
+      "sharedSdkShutdownReceipts": 1,
+      "restored": true,
+      "windowsRuntimeQualified": false
+    },
+    {
+      "route": "NVIDIA Quality to DLAA / NVIDIA FG",
+      "requestedAndCurrentAckMatched": true,
+      "gameExitCode": 0,
+      "confirmationToGoneSeconds": 3.2607653499999287,
+      "sharedSdkResult": 0,
+      "sharedSdkShutdownReceipts": 1,
+      "earlyCleanupRefusedWhileNgxRetained": true,
+      "queueNotificationThenAdmitted": true,
+      "restored": true,
+      "windowsRuntimeQualified": false
+    },
+    {
+      "route": "FSR to NVIDIA to Native / AMD FG",
+      "fgOffOnPassed": true,
+      "offGeneratedCountStopped": true,
+      "offRealPresentationContinued": true,
+      "providerTransitionsPassed": true,
+      "nativeSourceFullResolution": true,
+      "gameExitCode": 0,
+      "confirmationToGoneSeconds": 4.904687830001421,
+      "amdPresenterRetirementResult": 0,
+      "sharedSdkResult": 0,
+      "sharedSdkShutdownReceipts": 1,
+      "restored": true,
+      "windowsRuntimeQualified": false
+    }
+  ],
+  "fsrPresetSourceDimensions": {
+    "Quality": [
+      2560,
+      1440
+    ],
+    "Balanced": [
+      2259,
+      1271
+    ],
+    "Performance": [
+      1920,
+      1080
+    ],
+    "UltraPerformance": [
+      1280,
+      720
+    ],
+    "Custom77": [
+      2957,
+      1664
+    ],
+    "NativeAA": [
+      3840,
+      2160
+    ]
+  },
+  "windowsRadeonRuntimeQualified": false,
+  "latencyBenefitClaimed": false,
+  "physicalDisplayFpsMeasured": false,
+  "longSessionQualified": false,
+  "releasedAssetsChanged": false,
+  "rawDataIncluded": false
+}

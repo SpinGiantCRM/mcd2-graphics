@@ -30,7 +30,7 @@ jobs:
         run: |
           @'
           import json,pathlib,subprocess,sys
-          p=json.loads(pathlib.Path('qualification/providers/windows-candidate-pr45-2026-10-10.json').read_text())
+          p=json.loads(pathlib.Path('qualification/providers/windows-candidate-pr52-2026-10-12.json').read_text())
           stage=pathlib.Path('dist/amd');stage.mkdir(parents=True)
           artifact=stage/'native-input.zip'
           with artifact.open('wb') as out:
@@ -38,7 +38,7 @@ jobs:
           subprocess.run([sys.executable,'tools/assemble_amd_candidate.py','--artifact',str(artifact),
               '--archive-sha256',p['archiveSHA256'],'--source-commit',p['sourceCommit'],
               '--artifact-url',f'https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/{p["run"]}/artifacts/{p["artifact"]}',
-              '--version','0.4.0-amd.dev.1','--output',str(stage/'inputs')],check=True)
+              '--version',p['candidateVersion'],'--output',str(stage/'inputs')],check=True)
           '@ | python
       - name: Build visible installer folders
         shell: pwsh

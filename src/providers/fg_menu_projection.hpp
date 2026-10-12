@@ -6,13 +6,14 @@ struct FgMenuProjection {
     std::uint32_t revision=0,provider=0;
     bool enabled=false,pairEligible=false;
 };
-// Current implemented pairings only. A valid preference is not SDK approval.
+// Structural routes using the existing shared SR guide producer. A valid
+// preference is not SDK/device approval or proof that current inputs are ready.
 inline bool projectFgMenu(const DecodedGraphicsRecord& record,FgMenuProjection& out){
     GraphicsRecord bytes;DecodedGraphicsRecord canonical;
     if(!encodeGraphicsRecord(record.intent,bytes)||!decodeGraphicsRecord(bytes,canonical)||canonical!=record)return false;
     const auto& i=record.intent;
     const bool single=i.fgStrategy==FgStrategy::Single&&i.requestedMultiplier==2;
-    const bool pair=single&&((i.fg==FgProvider::Nvidia&&i.sr==SrProvider::NvidiaDlss)||
+    const bool pair=single&&((i.fg==FgProvider::Nvidia&&(i.sr==SrProvider::NvidiaDlss||i.sr==SrProvider::AmdFsr))||
         (i.fg==FgProvider::Amd&&(i.sr==SrProvider::Native||i.sr==SrProvider::NvidiaDlss||i.sr==SrProvider::AmdFsr)));
     out={i.revision,unsigned(i.fg),i.fgEnabled,pair};return true;
 }

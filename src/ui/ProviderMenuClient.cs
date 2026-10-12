@@ -76,12 +76,16 @@ public class ProviderMenuClient : USaveGame {
   Edits.SetWord(10+word,value);Dirty=Dirty|Bit(word);RetryCount=0;Failure=0;return true;
  }
  public bool SelectSr(int provider){if(provider<0 || provider>3)return false;return Edit(8,provider);}
+ public bool MenuFgPairEligible(int sr,int fg,int strategy,int multiplier){
+  return strategy==0 && multiplier==2 && ((fg==0 && (sr==1 || sr==2)) ||
+   (fg==1 && (sr==0 || sr==1 || sr==2)));
+ }
  public bool SelectMenuSr(int provider){
   if(provider<0 || provider>2 || !Ready)return false;
-  // AMD FG has an independent Native guide producer and both SR producers.
-  // Preserve the independent stored provider/strategy, but switch FG Off in
-  // the same transaction before choosing an unsupported NVIDIA pairing.
-  if(((provider==0 || provider==2) && Value(20)!=1) && Value(19)!=0 && !Edit(19,0))return false;
+  // Both SR producers can feed NVIDIA FG; AMD also has Native guides.
+  // Reselecting FSR after a preset/scale edit must preserve its FG preference.
+  // Unsupported routes still turn FG Off in the same request transaction.
+  if(Value(19)!=0 && !MenuFgPairEligible(provider,Value(20),Value(21),Value(22)) && !Edit(19,0))return false;
   return SelectSr(provider);
  }
  public bool SelectAntiLag2(bool enabled){

@@ -26,7 +26,7 @@ int main(int argc,char** argv){
   intent.sr=SrProvider(sr);intent.fg=FgProvider(fg);intent.fgEnabled=true;
   assert(encodeGraphicsRecord(intent,bytes)&&decodeGraphicsRecord(bytes,record));
   FgMenuProjection projection;assert(projectFgMenu(record,projection));
-  assert(projection.pairEligible==((fg==0&&sr==1)||(fg==1&&(sr==0||sr==1||sr==2))));
+  assert(projection.pairEligible==((fg==0&&(sr==1||sr==2))||(fg==1&&(sr==0||sr==1||sr==2))));
   assert(fgMenuMatches(projection,42,fg,1));
   assert(!fgMenuMatches(projection,41,fg,1)&&!fgMenuMatches(projection,42,fg,0));
   assert(fgOwnerMatches(fg+1,fg)==(fg<2));assert(!fgOwnerMatches(0,fg));
@@ -35,6 +35,29 @@ int main(int argc,char** argv){
  intent.sr=SrProvider::AmdFsr;intent.fgStrategy=FgStrategy::NativeMfg;intent.requestedMultiplier=3;
  assert(encodeGraphicsRecord(intent,bytes)&&decodeGraphicsRecord(bytes,record));
  FgMenuProjection unqualified;assert(projectFgMenu(record,unqualified)&&!unqualified.pairEligible);
+ intent.fgStrategy=FgStrategy::Single;intent.requestedMultiplier=2;
+ // FSR quality does not select the FG vendor. Both initial startup and later
+ // menu projection must admit the independently selected NVIDIA route.
+ intent.sr=SrProvider::AmdFsr;intent.fg=FgProvider::Nvidia;
+ for(unsigned quality=0;quality<6;++quality)for(unsigned on=0;on<2;++on){
+  intent.srPreferences[1].quality=Quality(quality);intent.fgEnabled=on!=0;
+  assert(encodeGraphicsRecord(intent,bytes)&&decodeGraphicsRecord(bytes,record));
+  FgMenuProjection cross;assert(projectFgMenu(record,cross)&&cross.pairEligible);
+  assert(cross.provider==0&&cross.enabled==(on!=0));
+  assert(record.bootstrap.requested==(on?PresentationOwner::NvidiaStreamline:PresentationOwner::Native));
+  assert(fgMenuMatches(cross,42,0,on));
+ }
+ // Unimplemented sources, strategies and generated-frame counts stay refused.
+ for(auto sr:{SrProvider::Native,SrProvider::IntelXeSs}){
+  intent.sr=sr;assert(encodeGraphicsRecord(intent,bytes)&&decodeGraphicsRecord(bytes,record));
+  assert(projectFgMenu(record,unqualified)&&!unqualified.pairEligible);
+ }
+ intent.sr=SrProvider::AmdFsr;
+ for(auto strategy:{FgStrategy::NativeMfg,FgStrategy::Hybrid}){
+  intent.fgStrategy=strategy;intent.requestedMultiplier=3;
+  assert(encodeGraphicsRecord(intent,bytes)&&decodeGraphicsRecord(bytes,record));
+  assert(projectFgMenu(record,unqualified)&&!unqualified.pairEligible);
+ }
  intent.fgStrategy=FgStrategy::Single;intent.requestedMultiplier=2;
  intent.latency=LatencyProvider::RadeonAntiLag2;intent.latencyMode=LatencyMode::On;
  intent.fgEnabled=true;intent.fg=FgProvider::Nvidia;

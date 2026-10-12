@@ -1,3 +1,28 @@
+The [FSR SR / NVIDIA FG route](FSR_NVIDIA_FG_2026-10-12.md) admits FSR through the
+shared guide producer without equating SR vendor with FG vendor. Preserve exact
+record and startup-owner matching, actual-adapter SDK checks, input readiness,
+one presenter and compatible latency ownership. Native/NVIDIA FG, XeSS and MFG
+remain excluded. Both-platform projection fixtures cover all six FSR qualities
+and Off/On startup ownership. The menu uses one matching pairing predicate for
+availability and atomic SR selection; preserve FG intent through FSR preset and
+scale edits, and Native/NVIDIA refusal. Retain managed transaction checks and a
+source-matched rebuilt UI archive/receipt. These do not qualify gameplay or
+Windows/Radeon.
+
+Queue teardown must notify the shared SDK owner even when no NGX SR feature was
+created. Preserve callbacks outside the native observer mutex, NVIDIA stopped
+generation and alpha GPU completion, native NGX retirement, terminal/resize
+refusal and one-shot cleanup. Keep the AMD bound-device gate and both-platform
+128-combination fixture. Queue notification restored a normal Linux process
+exit, but shared SDK shutdown returned error 24. NVIDIA closing-owner cleanup
+now attempts the same admission after alpha retirement, before graphics teardown;
+a retained NGX feature still defers to its queue notification. Preserve both
+notification orders, callbacks outside locks and resize/unsupported-owner refusal.
+The matching corrected artifact passed three bounded Linux/NVIDIA transition
+and exit runs, including explicit retained-NGX refusal before later successful
+SDK cleanup. Keep those numeric receipts separate from the earlier hang and
+error 24. They do not qualify Windows/Radeon or broader lifecycle.
+
 The [bootstrap module identity](BOOTSTRAP_MODULE_IDENTITY_2026-10-11.md) uses the
 full executable-directory path when local and system DXGI are both loaded.
 Preserve missing/unloaded refusal, checked heap-backed path storage, no library

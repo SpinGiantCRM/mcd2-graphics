@@ -40,7 +40,17 @@ static class ControlsTest {
   Check(c.Dirty==0,"invalid setters no dirty fields");
 
   a=Authority();c=Client(a);Check(c.SelectFg(0,0,2,true)&&c.SelectMenuSr(2),"menu FSR selection");c.Poll();r=Sent();
-  Check(r.W18==2&&r.W29==0&&r.W30==0,"unqualified FSR/NVIDIA FG pairing disabled atomically");
+  Check(r.W18==2&&r.W29==1&&r.W30==0,"FSR/NVIDIA FG pairing preserved atomically");
+  for(int sr=0;sr<4;sr++)for(int fg=0;fg<3;fg++){
+   Check(c.MenuFgPairEligible(sr,fg,0,2)==((fg==0&&(sr==1||sr==2))||(fg==1&&(sr==0||sr==1||sr==2))),"UI/native route matrix agrees");
+   Check(!c.MenuFgPairEligible(sr,fg,1,3)&&!c.MenuFgPairEligible(sr,fg,2,3)&&!c.MenuFgPairEligible(sr,fg,0,3),"unimplemented strategy/count refused");
+  }
+  for(int quality=0;quality<6;quality++){
+   a=Authority();c=Client(a);Check(c.SelectFg(0,0,2,true)&&c.SelectQuality(2,quality)&&c.SelectMenuSr(2),"FSR preset edit with NVIDIA FG");c.Poll();r=Sent();
+   Check(r.W18==2&&r.W22==quality&&r.W29==1&&r.W30==0&&r.W15==1,"FSR preset preserves independent FG and owner");
+  }
+  a=Authority();c=Client(a);Check(c.SelectFg(0,0,2,true)&&c.SelectMenuSr(0),"Native selection with NVIDIA FG");c.Poll();r=Sent();
+  Check(r.W18==0&&r.W29==0&&r.W30==0,"unimplemented Native/NVIDIA FG disabled atomically");
   a=Authority();c=Client(a);Check(c.SelectFg(0,0,2,true)&&c.SelectMenuSr(1),"menu NVIDIA selection");c.Poll();r=Sent();
   Check(r.W18==1&&r.W29==1,"NVIDIA FG preference preserved with NVIDIA SR");
   a=Authority();c=Client(a);Check(c.SelectFg(1,0,2,true)&&c.SelectMenuSr(2),"AMD FG with FSR SR");c.Poll();r=Sent();
