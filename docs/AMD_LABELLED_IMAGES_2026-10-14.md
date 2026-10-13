@@ -31,6 +31,10 @@ Screenshots confirm character displacement during the pointer test. Collection
 used short consecutive bursts separated by gaps; it is not continuous footage
 or comprehensive temporal-quality qualification. Raw images and logs remain private.
 
+A later [continuous movement capture](AMD_CONTINUOUS_IMAGES_2026-10-14.md)
+retains 600 consecutive pairs and their source timing. It has the same private-build
+and physical-presentation limitations.
+
 ## Limits
 
 The held game process exited with code 0 after the interrupted run. Its initiating
