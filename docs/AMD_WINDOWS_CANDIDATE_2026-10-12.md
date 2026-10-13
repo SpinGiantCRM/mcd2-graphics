@@ -1,12 +1,25 @@
 # Windows/Radeon development qualification
 
-Use the AMD development installer artifact built from the pinned native archive.
-The native inputs are run 38185912901, artifact 11719049992, implementation
-4d5a5ebd993c0e59bacd0833788128f7d0565c3e. Archive SHA-256:
-`71fc9e563a31de90878e35b66c23f841e39ea9ce9284a066a8aa1a6266639622`.
-Its receipt source is GitHub test merge
-`79538debe04b9b49d3360509a1fded2f8883e936`; its runtime source tree matches
-that implementation. Keep these pins distinct from later documentation commits.
+Use [the current candidate receipt](../qualification/providers/windows-candidate-current.json)
+and [the exact installer verification](../qualification/providers/amd-pr54-rebuilt-installers-2026-10-13.json).
+The selected candidate is **0.4.0-amd.dev.8**. Its native inputs are
+[run 38333151314 / artifact 11783652643](https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/38333151314/artifacts/11783652643),
+archive SHA-256 `9574ec28b096f35e484af61e066835a1815178070d96e390c4c24ddd599c9e64`.
+Its source receipt is test merge `818033960e3347718a1c7f7ef0ca4e169f0b99d5`,
+matching implementation `c9f011a5bdc8dd6fd50885eeb8c2986764183755`.
+
+The verified visible installer folders are from
+[run 38340596287](https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/38340596287),
+installer archive SHA-256 `2605460e66a8fb4336a75e9c22da8899a873dd1d22ce5471b9f52d6d6beeabc3`.
+Use the accompanying dependency lock. The required source-built framework is
+separate, SHA-256 `5ab60fb92385c774bb5f61d668676556c32fc91d989a18679129cdb32031bb84`;
+do not substitute an earlier artifact's framework and inherit its results.
+
+**Qualification remains incomplete.** The complete dev.8 Linux run passed
+bounded NVIDIA preset/status checks but hung on shutdown. A short private
+instrumented control exited 0; it does not clear the production failure.
+Preserve that distinction when reporting Windows results. See
+[the regression report](AMD_NVIDIA_REGRESSION_2026-10-13.md).
 
 ## Preparation
 

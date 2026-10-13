@@ -107,3 +107,21 @@ This shorter instrumented run did not reproduce the earlier production hang.
 It neither clears that failure nor proves the trace fixed it. The failing run
 stopped before any closing-swapchain observation; a longer matched control and
 broader lifecycle coverage remain necessary to identify its cause.
+
+
+## Longer native callback tracing control
+
+The [13-minute control](../qualification/providers/amd-pr54-native-shutdown-trace-2026-10-13.json)
+added a low-frequency native Present heartbeat and generation cleanup entry/return
+markers, alongside the private guide trace. It exercised all six FSR qualities,
+then DLSS Quality, DLAA and permanent FG Off → requested On. The native callbacks
+continued returning during the session. Normal menu quit returned actual process
+exit code 0 in 4.79 seconds; GPU completion, native feature cleanup and shared
+NVIDIA SDK quiescence all returned. The latter took 14 ms. Original files and
+settings were restored.
+
+These private native/guide substitutions add no GPU commands but can affect CPU
+timing. This run does not establish the production hang's cause, qualify the
+production archive or prove continuous FG activation throughout thirteen minutes.
+The earlier retained native status showed many missing temporal passes and an
+unreset history; that observation alone does not establish a deadlock in SR.

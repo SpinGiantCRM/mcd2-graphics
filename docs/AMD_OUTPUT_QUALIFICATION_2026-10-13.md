@@ -116,3 +116,28 @@ using this artifact's pins rather than its historical PR52 pins. Additionally:
    Record actual driver activation; do not infer a latency benefit from a row.
 
 Active Windows/Radeon, wider lifecycle and performance qualification remain open.
+
+
+## Exact compiled installer engine
+
+The [installer engine receipt](../qualification/providers/amd-pr54-exact-installer-engine-2026-10-13.json)
+uses the downloaded Linux installer core assembly, current dev.8 manifest and
+visible payload directly. In an isolated fixture with the verified executable
+copy and complete recognized external dependency sets (including Loader 2.3),
+fresh install, repair, modified-file uninstall refusal, uninstall and reinstall
+passed. All 17 own payload hashes matched; refusal changed no fixture files.
+External framework/loader/provider files and synthetic preservation witnesses
+remained intact. Uninstall removed the mod-owned DLSS runtime as documented and
+restored the fixture renderer configuration exactly. Overrides started Off.
+
+The fixture used synthetic save/account witnesses; real saves were not read or
+copied. The shipped GUI, native Windows filesystem behavior and active Radeon
+features remain separate qualification gates.
+
+
+The [Linux GUI startup receipt](../qualification/providers/amd-pr54-linux-installer-startup-2026-10-13.json)
+records a successful self-contained launch and rendered game-selection page,
+including detection of the supported game. No GUI installation was performed.
+The executable needed its execute permission restored after artifact extraction;
+installation instructions now include that step. Windows GUI execution remains
+unqualified.
