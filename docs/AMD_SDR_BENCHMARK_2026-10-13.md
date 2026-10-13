@@ -66,3 +66,23 @@ are not attached.
 
 Native Windows/Radeon, active Anti-Lag 2, wider lifecycle and moving-image checks
 remain open. Published release payloads and tags are unchanged.
+
+## Longer diagnostic reproduction
+
+The [separate diagnostic receipt](../qualification/providers/amd-pr54-long-diagnostic-2026-10-13.json)
+records an On → Off → On → Off run with the same CPU sampler and a private
+guide rebuild that logs shutdown boundaries. It adds no GPU commands, but it
+is a different guide binary and cannot qualify the unchanged production archive.
+
+The same shipping process remained alive for at least 30 minutes. Generation
+prepared 61,766 frames with zero SDK faults/errors/warnings, exceeding the active
+work count in the earlier hang evidence. All twelve diagnostic captures are
+retained. Final Off stopped generated counts while ordinary FSR rendering
+continued; a stale FG-only frame stamp while Off does not prove rendering stopped.
+
+The recorded menu confirmation was followed by actual exit code 0 in 3.36 seconds.
+The trace reached AMD presenter retirement, scene GPU cleanup, shared SDK shutdown,
+queue destruction and addon cleanup. Recorded retirement results were 0, with
+zero retained scene recording leases. Original files and own settings were
+restored byte for byte. This longer run did not reproduce the hang and does not
+identify its cause or clear the candidate's outstanding qualification gates.

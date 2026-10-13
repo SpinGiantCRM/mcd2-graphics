@@ -1,0 +1,226 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Long private shutdown reproduction; not production artifact qualification",
+  "candidate": "0.4.0-amd.dev.7",
+  "implementationCommit": "17d51e178f48345a3632a053e79cf44f82d5f21c",
+  "nativeArchiveSHA256": "d7826ce0b330595d0a66bfbee3e3275e129519ebdabc443a0fc6b02d1462661f",
+  "frameworkSHA256": "379dc8d812304cae5d4cd85e65e2dac4899b14db856d57d3540e6fdf750e39b4",
+  "diagnosticGuideSHA256": "c3509369448888babf172ed20c1ddaf134e28f7dd902465ffc886b6c564ab25d",
+  "samplerSHA256": "6ca3743cf8ce98dfe4a82fc9155deea51b7e9d66c0700648b5c3752482ccccfc",
+  "diagnosticChanges": "Low-frequency shutdown boundary logging and queue destruction observation; no added GPU commands",
+  "registeredPlanSHA256": "43ed0f7dadd39f54bb2ee01562c0e8ff27d819abd8cfce51e5c1c456e71dc495",
+  "presentationColour": "sRGB",
+  "render": [
+    2560,
+    1440
+  ],
+  "output": [
+    3840,
+    2160
+  ],
+  "SR": "FSR analytical 3.1.5 Quality",
+  "FG": "AMD analytical 3.1.6",
+  "minimumProcessSecondsObserved": 1800.0200000000004,
+  "normalQuitConfirmationRecorded": true,
+  "actualShippingExitCode": 0,
+  "confirmationToGoneSeconds": 3.356451087998721,
+  "finalSDKOutcome": {
+    "kind": "amd_fg_outcome",
+    "SDKResult": 0,
+    "active": 0,
+    "fault": 0,
+    "engineFrame": 269866,
+    "providerFrame": 61766,
+    "prepared": 61766,
+    "images": 61766,
+    "realPresents": 553561,
+    "generatedPresents": 61766,
+    "errors": 0,
+    "warnings": 0
+  },
+  "retirement": {
+    "kind": "amd_retirement",
+    "SDKResult": 0,
+    "recordedSceneLeases": 0,
+    "sceneGPUComplete": 1
+  },
+  "sharedSDKRetirement": {
+    "kind": "amd_shared_sdk_retired",
+    "SDKResult": 0
+  },
+  "boundaryCallMillisecondsFromGetTickCount64": {
+    "disable": 0,
+    "amd_retire": 2,
+    "scene_cleanup": 1,
+    "shared_quiesce": 9
+  },
+  "groups": {
+    "on-a": {
+      "captures": [
+        {
+          "label": "pr54-sdr-long-on-a-0",
+          "intervals": 1199,
+          "applicationPresentRate": 92.7781560695106,
+          "p95Ms": 11.7597,
+          "p99Ms": 12.649,
+          "SDKRealPresentRate": 92.7781560695106,
+          "SDKGeneratedPresentRate": 92.7781560695106,
+          "SDKCountEquivalentTotal": 185.5563121390212,
+          "privateCaptureSHA256": "cf3e4d48abd562fad6adcc9c488e802cea2031f365cdcaa2a170d46461f2eaae"
+        },
+        {
+          "label": "pr54-sdr-long-on-a-1",
+          "intervals": 1199,
+          "applicationPresentRate": 93.04238222518329,
+          "p95Ms": 11.7037,
+          "p99Ms": 12.3788,
+          "SDKRealPresentRate": 93.04238222518329,
+          "SDKGeneratedPresentRate": 93.04238222518329,
+          "SDKCountEquivalentTotal": 186.08476445036658,
+          "privateCaptureSHA256": "738f9108fb97dc35ed3bf5744ab505bbc78cad9bb5369908d6d1ee9958178579"
+        },
+        {
+          "label": "pr54-sdr-long-on-a-2",
+          "intervals": 1199,
+          "applicationPresentRate": 92.67740588845184,
+          "p95Ms": 11.8202,
+          "p99Ms": 12.9178,
+          "SDKRealPresentRate": 92.67740588845184,
+          "SDKGeneratedPresentRate": 92.67740588845184,
+          "SDKCountEquivalentTotal": 185.3548117769037,
+          "privateCaptureSHA256": "cbf5c7248faeb380a79d690ea24f02bd54a29c3b9800fbaa966fb85df1edb766"
+        }
+      ],
+      "medianApplicationPresentRate": 92.7781560695106,
+      "medianP99Ms": 12.649
+    },
+    "off-a": {
+      "captures": [
+        {
+          "label": "pr54-sdr-long-off-a-0",
+          "intervals": 1199,
+          "applicationPresentRate": 134.45319952694453,
+          "p95Ms": 8.358,
+          "p99Ms": 8.8311,
+          "SDKRealPresentRate": 134.45319952694453,
+          "SDKGeneratedPresentRate": 0,
+          "SDKCountEquivalentTotal": null,
+          "privateCaptureSHA256": "a106f5803a9a97824b439b7a7822c9d3251552e5ca52870190c569ce62042384"
+        },
+        {
+          "label": "pr54-sdr-long-off-a-1",
+          "intervals": 1199,
+          "applicationPresentRate": 134.0595027631296,
+          "p95Ms": 8.5027,
+          "p99Ms": 8.9456,
+          "SDKRealPresentRate": 134.0595027631296,
+          "SDKGeneratedPresentRate": 0,
+          "SDKCountEquivalentTotal": null,
+          "privateCaptureSHA256": "17f0979f91d42c023d710553bbde96eaa23c7629943ee8d404bdcc4b2e2103af"
+        },
+        {
+          "label": "pr54-sdr-long-off-a-2",
+          "intervals": 1199,
+          "applicationPresentRate": 134.90024031594604,
+          "p95Ms": 8.4302,
+          "p99Ms": 8.8718,
+          "SDKRealPresentRate": 134.90024031594604,
+          "SDKGeneratedPresentRate": 0,
+          "SDKCountEquivalentTotal": null,
+          "privateCaptureSHA256": "155a720dcf1565da5d56bc2a78cb2291bdf5294b4c546018db98a52f707c724d"
+        }
+      ],
+      "medianApplicationPresentRate": 134.45319952694453,
+      "medianP99Ms": 8.8718
+    },
+    "on-b": {
+      "captures": [
+        {
+          "label": "pr54-sdr-long-on-b-0",
+          "intervals": 1199,
+          "applicationPresentRate": 92.89345182281784,
+          "p95Ms": 11.7853,
+          "p99Ms": 12.6432,
+          "SDKRealPresentRate": 92.89345182281784,
+          "SDKGeneratedPresentRate": 92.89345182281784,
+          "SDKCountEquivalentTotal": 185.78690364563568,
+          "privateCaptureSHA256": "073d753a0653b4985f9f6e4c40b0391eb3850dcd8a0ef49ab965ed1f93a42c07"
+        },
+        {
+          "label": "pr54-sdr-long-on-b-1",
+          "intervals": 1199,
+          "applicationPresentRate": 93.63222029170302,
+          "p95Ms": 11.7616,
+          "p99Ms": 12.4226,
+          "SDKRealPresentRate": 93.63222029170302,
+          "SDKGeneratedPresentRate": 93.63222029170302,
+          "SDKCountEquivalentTotal": 187.26444058340604,
+          "privateCaptureSHA256": "d948df9a2a7c819168508dd8ae8a283acf10878bbc82ac55d244e339a29c3d53"
+        },
+        {
+          "label": "pr54-sdr-long-on-b-2",
+          "intervals": 1199,
+          "applicationPresentRate": 93.40292274338111,
+          "p95Ms": 11.9069,
+          "p99Ms": 12.9655,
+          "SDKRealPresentRate": 93.40292274338111,
+          "SDKGeneratedPresentRate": 93.40292274338111,
+          "SDKCountEquivalentTotal": 186.80584548676222,
+          "privateCaptureSHA256": "dfc5f450d88839479238a25b8294ab38adbf359b7ffcb99fdd1ed1098b9843fe"
+        }
+      ],
+      "medianApplicationPresentRate": 93.40292274338111,
+      "medianP99Ms": 12.6432
+    },
+    "off-b": {
+      "captures": [
+        {
+          "label": "pr54-sdr-long-off-b-0",
+          "intervals": 1199,
+          "applicationPresentRate": 135.6965385374831,
+          "p95Ms": 8.2671,
+          "p99Ms": 8.8048,
+          "SDKRealPresentRate": 135.6965385374831,
+          "SDKGeneratedPresentRate": 0,
+          "SDKCountEquivalentTotal": null,
+          "privateCaptureSHA256": "1170e53e83027b1ea032ac3a1573f8db94b2afd3481e3bf9697a62c2a7fd6d65"
+        },
+        {
+          "label": "pr54-sdr-long-off-b-1",
+          "intervals": 1199,
+          "applicationPresentRate": 135.13352680156547,
+          "p95Ms": 8.4011,
+          "p99Ms": 8.8893,
+          "SDKRealPresentRate": 135.13352680156547,
+          "SDKGeneratedPresentRate": 0,
+          "SDKCountEquivalentTotal": null,
+          "privateCaptureSHA256": "0fb6b7ae4dd6131d5b08665284c9d44d8a3ca70d58b01b29b4d3eedc030aa08f"
+        },
+        {
+          "label": "pr54-sdr-long-off-b-2",
+          "intervals": 1199,
+          "applicationPresentRate": 135.7631748536617,
+          "p95Ms": 8.2718,
+          "p99Ms": 8.7755,
+          "SDKRealPresentRate": 135.7631748536617,
+          "SDKGeneratedPresentRate": 0,
+          "SDKCountEquivalentTotal": null,
+          "privateCaptureSHA256": "0635d88bd7e7b0b301ccb1b19f538444c505634596c65849d240b9f818020a60"
+        }
+      ],
+      "medianApplicationPresentRate": 135.6965385374831,
+      "medianP99Ms": 8.8048
+    }
+  },
+  "physicalDisplayFPSMeasured": false,
+  "inputLatencyMeasured": false,
+  "gpuPassTimesMeasured": false,
+  "gameProcessRestartedDuringRun": false,
+  "samplerCauseEstablished": false,
+  "historicalHangErased": false,
+  "productionCandidateQualificationPassed": false,
+  "windowsRadeonQualified": false,
+  "originalFilesOwnSettingsAndConfigurationRestored": true,
+  "playerAccountSavesAccessed": false,
+  "rawDiagnosticsPublished": false
+}
