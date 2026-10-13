@@ -17,7 +17,8 @@ do not substitute an earlier artifact's framework and inherit its results.
 
 **Qualification remains incomplete.** The complete dev.8 Linux run passed
 bounded NVIDIA preset/status checks but hung on shutdown. A short private
-instrumented control exited 0; it does not clear the production failure.
+instrumented control and a later unmodified 13-minute production control exited
+0; neither clears the earlier production failure or establishes its cause.
 Preserve that distinction when reporting Windows results. See
 [the regression report](AMD_NVIDIA_REGRESSION_2026-10-13.md).
 

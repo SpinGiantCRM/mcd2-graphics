@@ -125,3 +125,28 @@ timing. This run does not establish the production hang's cause, qualify the
 production archive or prove continuous FG activation throughout thirteen minutes.
 The earlier retained native status showed many missing temporal passes and an
 unreset history; that observation alone does not establish a deadlock in SR.
+
+## Unmodified production control, 14 October
+
+The [matched production control](../qualification/providers/amd-pr54-production-shutdown-control-2026-10-14.json)
+used the exact selected dev.8 payload and dependencies, with no private native,
+guide or AMD bridge substitutions and no performance sampler. Installed hashes
+were checked before testing. The same shipping process remained alive for the
+planned 780-second world-session interval, including the settings checks.
+
+All six FSR presets with NVIDIA FG passed two sampled activation checks each.
+DLSS Quality and DLAA also reported successful two-present samples. Permanent
+FG Off followed by requested On correctly remained inactive with restart required;
+DLAA continued evaluating independently.
+
+Normal menu quit returned shipping-process code 0 in 3.88 seconds. Queue teardown
+reported native generation cleanup complete with no retained generation. Shared
+NVIDIA SDK shutdown returned 0 after native NGX retirement. Original files,
+mod preferences and renderer configuration were restored byte for byte.
+
+This establishes a clean exit without private tracing; it does not reproduce or
+explain the earlier failure. That failure remains open. Periodic `lean-status`
+snapshots can precede terminal cleanup: use queue teardown and API completion
+receipts to assess retirement, rather than treating the last periodic snapshot
+as final ownership. No runtime source changed, and Windows/Radeon and active
+Anti-Lag 2 qualification remain outstanding.
