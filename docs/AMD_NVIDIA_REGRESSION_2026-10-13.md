@@ -29,6 +29,32 @@ do not retire it, and AMD live Off/On keeps its existing behavior. A 96-case
 portable projection fixture runs on both platforms, with a source check tying
 the controller to that predicate. Corrected binaries need a fresh runtime check.
 
+## Corrected-guide runtime checks
+
+The [correction receipt](../qualification/providers/amd-pr54-restart-correction-2026-10-13.json)
+records two subsequent trials using a production-source corrected guide over
+the original complete candidate, with the same framework. This was a deliberate
+guide-only substitution, not qualification of a complete rebuilt archive.
+
+NVIDIA startup and temporary pause/resume passed. After permanent Off then On,
+the runtime correctly reported `RestartRequired=1` while refusing activation.
+AMD generation stopped while Off, real presents continued, and generation resumed
+when On without a restart requirement. One resumed interval advanced both real
+and generated counters by 3,600, with no SDK faults/errors/warnings. This is not
+a physical display measurement.
+
+Both held-process normal quits returned exit code 0, in 4.49 seconds for NVIDIA
+and 3.87 seconds for AMD. Both shared SDK retirements returned 0. Each original
+setup was restored byte for byte.
+
+The source-matched complete rebuild from run 38333151314 / artifact 11783652643
+passed Windows build and both platform checks. Its archive digest is
+`9574ec28b096f35e484af61e066835a1815178070d96e390c4c24ddd599c9e64`;
+all 44 receipt members and 41 FG source hashes were verified. Isolated
+`0.4.0-amd.dev.8` installer inputs contain 17 own files. Their new framework
+binary is a separate dependency and has not inherited the earlier framework's
+runtime evidence. Complete rebuilt-candidate and Windows/Radeon checks remain.
+
 The original artifact's normal quit returned held-process exit code 0 in 3.97
 seconds. Closing-owner cleanup first deferred while NGX was retained, then
 shared SDK retirement succeeded after native queue notification. Original files,

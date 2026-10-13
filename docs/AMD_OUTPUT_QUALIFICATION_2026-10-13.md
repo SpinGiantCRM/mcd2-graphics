@@ -76,6 +76,14 @@ match. This does not qualify Windows GUI execution or active Radeon features.
 
 ## Native Windows/Radeon qualification
 
+The pinned `0.4.0-amd.dev.7` artifact predates the later permanent NVIDIA FG
+restart-status correction. Keep it as the reference for the results above;
+do not use it to qualify current corrected source. See the
+[NVIDIA regression and correction](AMD_NVIDIA_REGRESSION_2026-10-13.md) for
+the failed gate, guide-only retests and separately staged complete rebuild.
+The [HDR benchmark](AMD_HDR_BENCHMARK_2026-10-13.md) retains its transient
+generation pause and distinguishes SDK totals from physical display FPS.
+
 The later [SDR benchmark](AMD_SDR_BENCHMARK_2026-10-13.md) passed its registered
 numeric gates but hung after the final retained-Off menu quit. Candidate
 qualification is therefore incomplete despite the three earlier normal exits.
