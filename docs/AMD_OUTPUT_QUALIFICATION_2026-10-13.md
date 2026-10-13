@@ -76,6 +76,13 @@ match. This does not qualify Windows GUI execution or active Radeon features.
 
 ## Native Windows/Radeon qualification
 
+**Latest development input:** `windows-candidate-current.json` now selects
+`0.4.0-amd.dev.8`, run 38333151314 / artifact 11783652643. The
+[rebuilt benchmark](AMD_REBUILT_BENCHMARK_2026-10-13.md) retains all thirty SDR/HDR
+captures, the failed sampler-assisted SDR exit and separate no-sampler controls.
+Neither Linux-wide nor Windows/Radeon qualification is marked passed. Installer
+generation uses this newer receipt; historical dev.7 results remain below.
+
 The pinned `0.4.0-amd.dev.7` artifact predates the later permanent NVIDIA FG
 restart-status correction. Keep it as the reference for the results above;
 do not use it to qualify current corrected source. See the
