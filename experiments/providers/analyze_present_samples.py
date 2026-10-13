@@ -32,6 +32,7 @@ def analyze(rows, enabled):
     if any(row.get('active') != int(enabled) for row in (before, after)):
         raise ValueError('Requested FG mode was not active at both boundaries')
     real_rate = generated_rate = total_rate = None
+    generated_per_real = prepared_per_real = images_per_real = None
     if enabled:
         if not provider or any(row.get('ready') != 1 or any(row.get(key) != 0
                 for key in ('fault', 'errors', 'warnings')) for row in (before, after)):
@@ -52,6 +53,9 @@ def analyze(rows, enabled):
         real_rate = deltas['realPresents'] / seconds
         generated_rate = deltas['generatedPresents'] / seconds
         total_rate = real_rate + generated_rate
+        generated_per_real = deltas['generatedPresents'] / deltas['realPresents']
+        prepared_per_real = deltas['prepared'] / deltas['realPresents']
+        images_per_real = deltas['images'] / deltas['realPresents']
     elif provider:
         if any(row.get(key) != 0 for row in (before, after) for key in ('fault', 'errors', 'warnings')):
             raise ValueError('Disabled provider reported a fault')
@@ -79,6 +83,11 @@ def analyze(rows, enabled):
         'p99Ms': ordered[round((len(ms) - 1) * .99)],
         'SDKRealPresentRate': real_rate, 'SDKGeneratedPresentRate': generated_rate,
         'SDKCountEquivalentTotal': total_rate, 'physicalDisplayFPSMeasured': False,
+        'SDKGeneratedPerRealPresent': generated_per_real,
+        'SDKPreparedPerRealPresent': prepared_per_real,
+        'SDKImagesPerRealPresent': images_per_real,
+        'FGModeObservedOnlyAtCaptureBoundaries': True,
+        'continuousFGActivationMeasured': False,
     }
 
 

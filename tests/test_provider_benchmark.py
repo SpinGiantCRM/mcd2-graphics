@@ -58,12 +58,27 @@ class ProviderBenchmarkTests(unittest.TestCase):
         self.assertEqual(result['applicationPresentRate'], 100)
         self.assertEqual(result['SDKCountEquivalentTotal'], 200)
         self.assertFalse(result['physicalDisplayFPSMeasured'])
+        self.assertEqual(result['SDKGeneratedPerRealPresent'], 1)
+        self.assertTrue(result['FGModeObservedOnlyAtCaptureBoundaries'])
+        self.assertFalse(result['continuousFGActivationMeasured'])
+
+    def test_partial_generation_is_reported_without_assuming_continuous_on(self):
+        rows = fixture()
+        for key in ('providerFrame', 'prepared', 'images', 'generatedPresents'):
+            rows[2][key] = rows[1][key] + 14
+        result = samples.analyze(rows, True)
+        self.assertAlmostEqual(result['SDKGeneratedPerRealPresent'], 14 / 29)
+        self.assertAlmostEqual(result['SDKPreparedPerRealPresent'], 14 / 29)
+        self.assertAlmostEqual(result['SDKImagesPerRealPresent'], 14 / 29)
+        self.assertLess(result['SDKCountEquivalentTotal'], 200)
+        self.assertFalse(result['continuousFGActivationMeasured'])
 
     def test_retained_off_has_real_counts_but_no_generated_total_claim(self):
         result = samples.analyze(fixture(False), False)
         self.assertEqual(result['SDKRealPresentRate'], 100)
         self.assertEqual(result['SDKGeneratedPresentRate'], 0)
         self.assertIsNone(result['SDKCountEquivalentTotal'])
+        self.assertIsNone(result['SDKGeneratedPerRealPresent'])
 
     def test_clean_off_does_not_report_unowned_sdk_zero_as_measured_fps(self):
         result = samples.analyze(fixture(False, False), False)
