@@ -1,3 +1,12 @@
+The shared FG restart status must include permanent session retirement, even
+when the startup presenter still matches the requested provider. Preserve the
+retired admission refusal, ownership changes, unsupported-provider behavior,
+temporary menu suspension and AMD live Off/On. The portable projection fixture
+checks all 96 availability/mode/owner/provider/retirement combinations on both
+platforms; the source check verifies the real controller uses that predicate.
+The original PR54 NVIDIA regression exposed the missing status after successful
+permanent release. Corrected binaries need their own runtime checks.
+
 The portable Windows checks use Bash with fail-fast step execution, so an earlier
 Python failure cannot be masked by a later successful command. Keep the SDR
 output checks on both platforms. UI source changes require a real NeoRune and

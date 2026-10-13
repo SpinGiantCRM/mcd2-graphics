@@ -1,0 +1,189 @@
+{
+  "schemaVersion": 1,
+  "candidate": "0.4.0-amd.dev.7",
+  "implementationCommit": "17d51e178f48345a3632a053e79cf44f82d5f21c",
+  "nativeArchiveSHA256": "d7826ce0b330595d0a66bfbee3e3275e129519ebdabc443a0fc6b02d1462661f",
+  "frameworkSHA256": "379dc8d812304cae5d4cd85e65e2dac4899b14db856d57d3540e6fdf750e39b4",
+  "host": "Linux/NVIDIA RTX 4080 SUPER",
+  "output": {
+    "width": 3840,
+    "height": 2160,
+    "format": 24,
+    "colourSpace": 3,
+    "hdrAddonSHA256": "7941e06607c90f187688382fd259d483cde78f54ccb72099b239e8d45f5f87ac"
+  },
+  "fsrWithNvidiaFG": [
+    {
+      "quality": 1,
+      "source": [
+        2560,
+        1440
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "scalePercent": 66.666667,
+      "successfulEvaluationsObserved": 1482,
+      "fgActive": true,
+      "matchingGuides": true,
+      "matchingFrameToken": true,
+      "alphaReady": true,
+      "sdkResult": 0,
+      "sampledActualPresents": 2
+    },
+    {
+      "quality": 2,
+      "source": [
+        2259,
+        1271
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "scalePercent": 58.823528,
+      "successfulEvaluationsObserved": 688,
+      "fgActive": true,
+      "matchingGuides": true,
+      "matchingFrameToken": true,
+      "alphaReady": true,
+      "sdkResult": 0,
+      "sampledActualPresents": 2
+    },
+    {
+      "quality": 3,
+      "source": [
+        1920,
+        1080
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "scalePercent": 50.0,
+      "successfulEvaluationsObserved": 263,
+      "fgActive": true,
+      "matchingGuides": true,
+      "matchingFrameToken": true,
+      "alphaReady": true,
+      "sdkResult": 0,
+      "sampledActualPresents": 2
+    },
+    {
+      "quality": 4,
+      "source": [
+        1280,
+        720
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "scalePercent": 33.333333,
+      "successfulEvaluationsObserved": 326,
+      "fgActive": true,
+      "matchingGuides": true,
+      "matchingFrameToken": true,
+      "alphaReady": true,
+      "sdkResult": 0,
+      "sampledActualPresents": 2
+    },
+    {
+      "quality": 5,
+      "source": [
+        2996,
+        1685
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "scalePercent": 78.0,
+      "successfulEvaluationsObserved": 208,
+      "fgActive": true,
+      "matchingGuides": true,
+      "matchingFrameToken": true,
+      "alphaReady": true,
+      "sdkResult": 0,
+      "sampledActualPresents": 2
+    },
+    {
+      "quality": 0,
+      "source": [
+        3840,
+        2160
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "scalePercent": 100.0,
+      "successfulEvaluationsObserved": 201,
+      "fgActive": true,
+      "matchingGuides": true,
+      "matchingFrameToken": true,
+      "alphaReady": true,
+      "sdkResult": 0,
+      "sampledActualPresents": 2
+    }
+  ],
+  "pause": {
+    "observations": 2,
+    "active": false,
+    "sdkDisableResult": 0
+  },
+  "resume": {
+    "active": true,
+    "sampledActualPresents": 2
+  },
+  "dlssQuality": {
+    "source": [
+      2560,
+      1440
+    ],
+    "output": [
+      3840,
+      2160
+    ],
+    "nativeCreatedAndActive": true,
+    "sdkFgActive": true
+  },
+  "dlaa": {
+    "source": [
+      3840,
+      2160
+    ],
+    "output": [
+      3840,
+      2160
+    ],
+    "nativePhase": 2,
+    "nativeError": 0,
+    "sdkFgActive": true,
+    "sampledActualPresents": 2
+  },
+  "permanentOffThenOn": {
+    "permanentReleaseSDKResult": 0,
+    "requestedOnAndGameplayReady": true,
+    "active": false,
+    "reportedRestartRequired": false,
+    "expectedRestartRequired": true,
+    "passed": false,
+    "cause": "Shared status projection omitted the permanent session-retired flag; actual activation continued to refuse it."
+  },
+  "normalQuit": {
+    "actualHeldProcessExitCode": 0,
+    "confirmationToGoneSeconds": 3.967994038001052,
+    "sharedSDKResult": 0,
+    "retainedNgxDeferredCleanupUntilQueueNotification": true
+  },
+  "restoredByteForByte": true,
+  "rawDiagnosticsPublished": false,
+  "candidateQualificationPassed": false,
+  "correctedSourceRuntimeQualified": false,
+  "windowsRadeonQualified": false,
+  "physicalDisplayFPSMeasured": false,
+  "inputLatencyMeasured": false,
+  "movingImageQualityQualified": false
+}

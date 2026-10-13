@@ -24,4 +24,10 @@ constexpr bool fgMenuMatches(const FgMenuProjection& current,std::uint32_t revis
 constexpr bool fgOwnerMatches(std::uint32_t owner,std::uint32_t provider){
     return provider<2&&owner==provider+1;
 }
+// A matching startup presenter cannot revive a permanently retired FG session.
+// Temporary menu suspension does not retire it; AMD live Off/On retains it.
+constexpr bool fgMenuRestartRequired(bool available,bool enabled,std::uint32_t owner,
+                                     std::uint32_t provider,bool retired){
+    return available&&(retired||(enabled?!fgOwnerMatches(owner,provider):owner!=0));
+}
 } // namespace mcd2::providers
