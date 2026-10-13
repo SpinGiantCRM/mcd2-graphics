@@ -64,3 +64,29 @@ Player/account saves were not copied or edited; raw traces remain private.
 The original candidate is not cleared by this report. Its earlier SDR quit
 failure and transient HDR generation pause remain recorded. Published releases
 and selected artifact pins are unchanged.
+
+
+## Complete dev.8 regression
+
+The [rebuilt NVIDIA receipt](../qualification/providers/amd-pr54-rebuilt-nvidia-2026-10-13.json)
+uses the complete dev.8 payload and its newly selected framework, without a
+sampler or private guide substitution. All six FSR qualities, a repeated Quality
+selection, DLSS Quality and DLAA produced matching current guides and successful
+sampled two-present outcomes. FSR image tags had matching frame identity and
+valid stage-6 alpha. Pause suspended generation without requiring restart;
+resume restored it. Permanent NVIDIA Off then On correctly refused activation
+and reported `RestartRequired=1`.
+
+Shutdown did not pass. The process remained alive after the menu quit and
+required an explicitly approved termination of that process alone. The retained
+trace contained no closing-swapchain callback. OS metadata still showed render
+and RHI threads; their presence or wait state does not identify the blocked call.
+No cause is established. Original mod files, own preferences and renderer
+configuration were restored byte for byte. This failure remains recorded despite
+the successful gameplay checkpoints and earlier normal exits.
+
+The [rebuilt installer receipt](../qualification/providers/amd-pr54-rebuilt-installers-2026-10-13.json)
+verifies both platform folders from run 38340596287 against the selected dev.8
+inputs: all 17 own payloads match, with semantically matching manifests and
+locks and no bundled vendor runtimes. This is packaging evidence, not Windows
+GUI, Radeon gameplay or complete lifecycle qualification.

@@ -1,0 +1,216 @@
+{
+  "schemaVersion": 1,
+  "candidate": "0.4.0-amd.dev.8",
+  "nativeArchiveSHA256": "9574ec28b096f35e484af61e066835a1815178070d96e390c4c24ddd599c9e64",
+  "frameworkSHA256": "5ab60fb92385c774bb5f61d668676556c32fc91d989a18679129cdb32031bb84",
+  "productionGuideSHA256": "511a7d8e684054dabeaa6d557eaa93db6efa1614dd90a725ed14250ba09c929c",
+  "host": "Linux/NVIDIA RTX 4080 SUPER",
+  "samplerInstalled": false,
+  "privateGuideSubstitution": false,
+  "fsrWithNvidiaFG": [
+    {
+      "quality": 1,
+      "source": [
+        2560,
+        1440
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "scalePercent": 66.666667,
+      "successfulEvaluationsObserved": 4414,
+      "fgActive": true,
+      "restartRequired": false,
+      "matchingGuides": true,
+      "matchingFrameToken": true,
+      "alphaReady": true,
+      "sdkResult": 0,
+      "sampledActualPresents": 2
+    },
+    {
+      "quality": 2,
+      "source": [
+        2259,
+        1271
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "scalePercent": 58.823528,
+      "successfulEvaluationsObserved": 196,
+      "fgActive": true,
+      "restartRequired": false,
+      "matchingGuides": true,
+      "matchingFrameToken": true,
+      "alphaReady": true,
+      "sdkResult": 0,
+      "sampledActualPresents": 2
+    },
+    {
+      "quality": 3,
+      "source": [
+        1920,
+        1080
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "scalePercent": 50.0,
+      "successfulEvaluationsObserved": 259,
+      "fgActive": true,
+      "restartRequired": false,
+      "matchingGuides": true,
+      "matchingFrameToken": true,
+      "alphaReady": true,
+      "sdkResult": 0,
+      "sampledActualPresents": 2
+    },
+    {
+      "quality": 4,
+      "source": [
+        1280,
+        720
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "scalePercent": 33.333333,
+      "successfulEvaluationsObserved": 425,
+      "fgActive": true,
+      "restartRequired": false,
+      "matchingGuides": true,
+      "matchingFrameToken": true,
+      "alphaReady": true,
+      "sdkResult": 0,
+      "sampledActualPresents": 2
+    },
+    {
+      "quality": 5,
+      "source": [
+        2996,
+        1685
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "scalePercent": 78.0,
+      "successfulEvaluationsObserved": 249,
+      "fgActive": true,
+      "restartRequired": false,
+      "matchingGuides": true,
+      "matchingFrameToken": true,
+      "alphaReady": true,
+      "sdkResult": 0,
+      "sampledActualPresents": 2
+    },
+    {
+      "quality": 0,
+      "source": [
+        3840,
+        2160
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "scalePercent": 100.0,
+      "successfulEvaluationsObserved": 200,
+      "fgActive": true,
+      "restartRequired": false,
+      "matchingGuides": true,
+      "matchingFrameToken": true,
+      "alphaReady": true,
+      "sdkResult": 0,
+      "sampledActualPresents": 2
+    },
+    {
+      "quality": 1,
+      "source": [
+        2560,
+        1440
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "scalePercent": 66.666667,
+      "successfulEvaluationsObserved": 233,
+      "fgActive": true,
+      "restartRequired": false,
+      "matchingGuides": true,
+      "matchingFrameToken": true,
+      "alphaReady": true,
+      "sdkResult": 0,
+      "sampledActualPresents": 2
+    }
+  ],
+  "nvidiaSRWithNvidiaFG": [
+    {
+      "mode": "dlss-quality",
+      "source": [
+        2560,
+        1440
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "runtimePhase": 2,
+      "runtimeError": 0,
+      "fgActive": true,
+      "matchingGuides": true,
+      "sampledActualPresents": 2
+    },
+    {
+      "mode": "dlaa",
+      "source": [
+        3840,
+        2160
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "runtimePhase": 2,
+      "runtimeError": 0,
+      "fgActive": true,
+      "matchingGuides": true,
+      "sampledActualPresents": 2
+    }
+  ],
+  "pauseActiveStates": [
+    0,
+    0,
+    1
+  ],
+  "pauseRestartStates": [
+    0,
+    0,
+    0
+  ],
+  "permanentOffOn": {
+    "requestedOn": true,
+    "active": false,
+    "restartRequired": true,
+    "sdkPermanentReleaseResult": 0
+  },
+  "shutdown": {
+    "normalExitObserved": false,
+    "processHungAfterMenuQuit": true,
+    "closingSwapchainCallbackRecorded": false,
+    "renderAndRhiThreadsStillPresent": true,
+    "approvedExactProcessTermination": true,
+    "causeEstablished": false
+  },
+  "restoredByteForByte": true,
+  "candidateQualificationPassed": false,
+  "physicalDisplayFpsMeasured": false,
+  "physicalInputLatencyMeasured": false,
+  "movingImageQualityQualified": false,
+  "windowsRadeonRuntimeQualified": false
+}

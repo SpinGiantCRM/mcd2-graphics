@@ -80,7 +80,9 @@ match. This does not qualify Windows GUI execution or active Radeon features.
 `0.4.0-amd.dev.8`, run 38333151314 / artifact 11783652643. The
 [rebuilt benchmark](AMD_REBUILT_BENCHMARK_2026-10-13.md) retains all thirty SDR/HDR
 captures, the failed sampler-assisted SDR exit and separate no-sampler controls.
-Neither Linux-wide nor Windows/Radeon qualification is marked passed. Installer
+Neither Linux-wide nor Windows/Radeon qualification is marked passed. The
+[complete NVIDIA regression](AMD_NVIDIA_REGRESSION_2026-10-13.md#complete-dev8-regression)
+passed bounded preset/status checks but hung on shutdown without a sampler. Installer
 generation uses this newer receipt; historical dev.7 results remain below.
 
 The pinned `0.4.0-amd.dev.7` artifact predates the later permanent NVIDIA FG
