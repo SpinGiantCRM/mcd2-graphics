@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "candidateBase": "0.4.0-amd.dev.8",
+  "host": "Linux/NVIDIA RTX 4080 SUPER",
+  "privateDiagnosticGuide": true,
+  "productionSourceSHA256": "d11ae27015919779e80b2964a81f86c165e7d3d3fd25a06f7583ba959d93d896",
+  "diagnosticSourceSHA256": "40616036ca532b62198cd0bd7c7feb97c27105f9a5af774cc8bc8b240e32647e",
+  "diagnosticBinarySHA256": "d13438c6388cbf12109065f493856906165bcdfcb43c563f0e1a22920a31f288",
+  "frameworkSHA256": "5ab60fb92385c774bb5f61d668676556c32fc91d989a18679129cdb32031bb84",
+  "samplerInstalled": false,
+  "additionalGpuCommands": false,
+  "sequence": [
+    "DLSS Quality with NVIDIA FG",
+    "DLAA with NVIDIA FG",
+    "permanent NVIDIA FG Off",
+    "On refused with restart required",
+    "normal menu quit"
+  ],
+  "shippingProcessExitCode": 0,
+  "confirmationToGoneSeconds": 3.564492307999899,
+  "closingSwapchainCallbackObserved": true,
+  "nativeSrRetirementCallbackObserved": true,
+  "completedBoundaries": [
+    {
+      "boundary": "alpha_cleanup",
+      "durationMs": 0
+    },
+    {
+      "boundary": "alpha_cleanup",
+      "durationMs": 0
+    },
+    {
+      "boundary": "alpha_cleanup",
+      "durationMs": 0
+    },
+    {
+      "boundary": "nvidia_quiesce",
+      "durationMs": 13
+    },
+    {
+      "boundary": "alpha_cleanup",
+      "durationMs": 0
+    }
+  ],
+  "restoredByteForByte": true,
+  "priorProductionHangReproduced": false,
+  "causeEstablished": false,
+  "productionCandidateQualificationPassed": false,
+  "longSessionQualified": false,
+  "windowsRadeonRuntimeQualified": false
+}

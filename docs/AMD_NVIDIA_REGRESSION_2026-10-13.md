@@ -90,3 +90,20 @@ verifies both platform folders from run 38340596287 against the selected dev.8
 inputs: all 17 own payloads match, with semantically matching manifests and
 locks and no bundled vendor runtimes. This is packaging evidence, not Windows
 GUI, Radeon gameplay or complete lifecycle qualification.
+
+
+## Private shutdown tracing control
+
+A [short diagnostic control](../qualification/providers/amd-pr54-nvidia-shutdown-control-2026-10-13.json)
+repeated DLSS Quality → DLAA → permanent FG Off → requested On. It substituted
+one private guide built from current production source, adding only callback
+entry/return timestamps and no GPU commands. The same selected framework and
+other dev.8 payloads remained installed. Normal quit returned actual process
+exit code 0 in 3.56 seconds. Closing-swapchain and native SR retirement callbacks
+were observed, and shared NVIDIA SDK quiescence returned in 13 ms. Original
+files/settings were restored afterward.
+
+This shorter instrumented run did not reproduce the earlier production hang.
+It neither clears that failure nor proves the trace fixed it. The failing run
+stopped before any closing-swapchain observation; a longer matched control and
+broader lifecycle coverage remain necessary to identify its cause.
