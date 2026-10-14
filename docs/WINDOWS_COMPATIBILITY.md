@@ -1,3 +1,14 @@
+The [Anti-Lag shutdown correction](AMD_ANTILAG_SHUTDOWN_2026-10-14.md) removes
+`Update` from teardown: the official SDK inserts its pacing operation there.
+Preserve clear/drain before `DeInitialize`, failed-drain context/module retention,
+ordinary pre-input updates, the unchanged ABI and frame-type handoff. The real
+Microsoft-ABI fixture starts enabled and checks zero teardown mode/delay calls
+on failed drain, successful retry, API error, repeated and independent cleanup.
+Keep it in native Windows CI and preserve the controller's threaded teardown
+checks on both platforms. A Wine synthetic pass does not qualify Radeon hardware.
+Earlier dev.8 results do not qualify the changed bridge; select a new complete
+source-matched artifact before Windows testing or publishing.
+
 The shared FG restart status must include permanent session retirement, even
 when the startup presenter still matches the requested provider. Preserve the
 retired admission refusal, ownership changes, unsupported-provider behavior,

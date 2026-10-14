@@ -72,5 +72,9 @@
   ],
   "linuxBenchmarkReceipt": "qualification/providers/amd-pr54-rebuilt-benchmark-2026-10-13.json",
   "linuxNoSamplerReceipt": "qualification/providers/amd-pr54-rebuilt-no-sampler-2026-10-13.json",
-  "publishedReleaseChanged": false
+  "publishedReleaseChanged": false,
+  "sourceChangedAfterSelection": true,
+  "selectionNeedsRebuild": true,
+  "sourceChangeReport": "docs/AMD_ANTILAG_SHUTDOWN_2026-10-14.md",
+  "windowsHardwareCurrentlyUnavailable": true
 }

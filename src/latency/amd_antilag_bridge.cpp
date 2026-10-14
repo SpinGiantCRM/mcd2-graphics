@@ -57,7 +57,9 @@ extern "C" __declspec(dllexport) HRESULT mcd2_al2_real_frame() {
     return AMD::AntiLag2DX12::SetFrameGenFrameType(&context, false);
 }
 extern "C" __declspec(dllexport) void mcd2_al2_shutdown() {
-    if(context.m_pAntiLagAPI)AMD::AntiLag2DX12::Update(&context,false,0);
+    // Update inserts the SDK's pacing delay, including its disabled-mode call.
+    // Teardown is not a pre-input stage. Clear/drain presentation readers first,
+    // then use the official release operation without another pacing call.
     if(!clearAndDrain())return;
     AMD::AntiLag2DX12::DeInitialize(&context);
     boundDevice=nullptr;

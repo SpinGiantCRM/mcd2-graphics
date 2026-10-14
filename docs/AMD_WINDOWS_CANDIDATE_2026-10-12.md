@@ -1,5 +1,11 @@
 # Windows/Radeon development qualification
 
+**Selection update, 14 October:** the [Anti-Lag shutdown correction](AMD_ANTILAG_SHUTDOWN_2026-10-14.md)
+changes the project bridge after dev.8. The dev.8 hashes below identify the tested
+baseline; they do not contain that correction. Select a new complete rebuilt
+artifact before starting new Windows qualification. The AMD laptop is currently
+unavailable, so active driver testing remains outstanding.
+
 Use [the current candidate receipt](../qualification/providers/windows-candidate-current.json)
 and [the exact installer verification](../qualification/providers/amd-pr54-rebuilt-installers-2026-10-13.json).
 The selected candidate is **0.4.0-amd.dev.8**. Its native inputs are
