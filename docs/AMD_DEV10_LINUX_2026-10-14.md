@@ -45,6 +45,24 @@ prevents treating it as an equivalent Steam qualification or performance run.
 The earlier fatal exit remains unresolved; no source fix is inferred from this
 non-reproduction, and raw logs are not published.
 
+Two subsequent [complete Steam replays](../qualification/providers/amd-dev10-quiet-replays-2026-10-14.json)
+used the unchanged dev.10 files without extra addons or exception logging. Each
+passed all six FSR presets, DLSS Quality/DLAA, a measured 62-second menu hold,
+resume, FSR return and permanent FG Off/On refusal. Their held shipping handles
+returned 0; normal quits took 6.04 and 4.80 seconds.
+
+A [graphics-disabled baseline](../qualification/providers/graphics-disabled-baseline-2026-10-14.json)
+also reached gameplay and exited 0 in 1.92 seconds. Nine verified entrypoints
+were archived temporarily: this mod's UI/native graphics, bootstrap, ReShade
+and RenoDX. Blueprint Loader remained installed. The original Video menu was
+observed, disabled entrypoints were absent from named OS module mappings, and
+all archived files/configuration were restored. Mod slots and other pak assets
+were unchanged. This was a scoped baseline, not a wholly unmodified game.
+
+Neither result reproduces or attributes the original fatal exit. That failure
+remains recorded; repeated clean exits alone are not a source fix or complete
+platform qualification.
+
 These are bounded operational checks, not complete lifecycle, image-quality,
 performance, physical display pacing or native Windows/Radeon qualification.
 Anti-Lag 2 driver activation remains untested. Earlier candidate benchmarks do

@@ -88,5 +88,7 @@
   "installerArtifact": 11865709322,
   "installerArchiveSHA256": "d6e50cd6058759fcb07db7883d3bd5bb3a5b9c1224314cc34b2f7fb967d0f51f",
   "installerGUIAndTransactionsQualified": false,
-  "linuxShortExitControlReceipt": "qualification/providers/amd-dev10-exit-controls-2026-10-14.json"
+  "linuxShortExitControlReceipt": "qualification/providers/amd-dev10-exit-controls-2026-10-14.json",
+  "linuxQuietReplayReceipt": "qualification/providers/amd-dev10-quiet-replays-2026-10-14.json",
+  "linuxGraphicsDisabledBaselineReceipt": "qualification/providers/graphics-disabled-baseline-2026-10-14.json"
 }
