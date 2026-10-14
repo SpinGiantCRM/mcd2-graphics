@@ -1,0 +1,36 @@
+{
+  "controls": [
+    {
+      "control": "active",
+      "shippingExitCode": 0,
+      "normalQuitSeconds": 3.5705621960005374
+    },
+    {
+      "control": "off",
+      "shippingExitCode": 0,
+      "normalQuitSeconds": 4.913697918000253
+    },
+    {
+      "control": "refused",
+      "shippingExitCode": 0,
+      "normalQuitSeconds": 3.2639721180021297
+    }
+  ],
+  "previousMixedFailureCleared": false,
+  "payloadChanged": false,
+  "schemaVersion": 1,
+  "candidateOnly": true,
+  "candidateVersion": "0.4.0-amd.dev.10",
+  "nativeInputsArtifact": 11863879034,
+  "ownPayloadSubstitutions": 0,
+  "privateAddons": 0,
+  "host": "Linux / RTX 4080 SUPER / Proton SLR / native Wayland HDR",
+  "sr": "FSR Quality 2560x1440 to 3840x2160",
+  "fg": "NVIDIA FG startup owner",
+  "allThreeShortControlsExitedZero": true,
+  "statusCRCFramingAndSemanticValidation": true,
+  "validatedCheckpoints": 8,
+  "oldFailureRootCauseEstablished": false,
+  "nativeWindowsRadeonQualified": false,
+  "publishedReleaseChanged": false
+}

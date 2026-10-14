@@ -29,6 +29,22 @@ Alpha retirement and shared SDK shutdown reported success beforehand; those
 results do not clear the process failure or establish its cause. The required
 three clean exits have **not** passed. Every run restored the original setup.
 
+Three subsequent [short isolation controls](../qualification/providers/amd-dev10-exit-controls-2026-10-14.json)
+used unchanged dev.10 files with FSR Quality and a NVIDIA FG startup owner:
+active quit, permanent Off quit, and Off/On refusal quit all returned 0.
+The captures validate mod-owned SR record framing, checksums and field semantics.
+These results show that Off/On alone did not reproduce the longer mixed-provider
+failure. They do not clear it or establish its cause.
+
+A subsequent [exception-logged replay](../qualification/providers/amd-dev10-seh-replay-2026-10-14.json)
+repeated the six FSR presets, DLSS Quality/DLAA, menu suspension, FSR return and
+permanent Off/On refusal. It exited 0 after a 22-minute diagnostic session.
+This used the same payload through a direct Proton launch with standard Wine
+exception logging and bounded private storage. The altered launch/logging timing
+prevents treating it as an equivalent Steam qualification or performance run.
+The earlier fatal exit remains unresolved; no source fix is inferred from this
+non-reproduction, and raw logs are not published.
+
 These are bounded operational checks, not complete lifecycle, image-quality,
 performance, physical display pacing or native Windows/Radeon qualification.
 Anti-Lag 2 driver activation remains untested. Earlier candidate benchmarks do

@@ -13,7 +13,14 @@ Test merge `87078dbab5f3658267300796046f709ede96d3ef` matches implementation
 verified. The separate framework SHA-256 is
 `1b5d71669299aa06dae2b27bf51f554fb59e2cd2f6a406a7447d59caf385c71b`.
 Use its accompanying dependency lock; do not inherit earlier binary results.
-Visible installer rebuild and verification against this selection remain pending.
+Visible installer folders now match this selection:
+[run 38502849822 / artifact 11865709322](https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/38502849822/artifacts/11865709322),
+archive SHA-256 `d6e50cd6058759fcb07db7883d3bd5bb3a5b9c1224314cc34b2f7fb967d0f51f`.
+The [file verification receipt](../qualification/providers/amd-dev10-installers-2026-10-14.json)
+records both visible folders, their identical manifest/dependency-lock bytes and
+all 17 own payload files matching the game-tested selection. They use no embedded
+payload archive or self-extraction; framework/vendor runtimes remain separate.
+This verifies packaging, not installer GUI transactions or Windows execution.
 
 **Not cleared for qualification or release:** [dev.10 Linux checks](AMD_DEV10_LINUX_2026-10-14.md)
 passed all six FSR presets with each FG route, AMD transitions/resize and NVIDIA

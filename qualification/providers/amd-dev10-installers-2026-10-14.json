@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "candidateOnly": true,
+  "candidateVersion": "0.4.0-amd.dev.10",
+  "run": 38502849822,
+  "artifact": 11865709322,
+  "archiveSHA256": "d6e50cd6058759fcb07db7883d3bd5bb3a5b9c1224314cc34b2f7fb967d0f51f",
+  "sourceCommit": "90eb2332b04440ef3ba03bedbf786e34a1a9dacb",
+  "nativeInputsArtifact": 11863879034,
+  "visibleFolders": {
+    "linux": {
+      "rid": "linux-x64",
+      "sha256": "5ef688b4a7d93dd8b4265ae39ef6988fbc3c1db15ea5e38aa27a28981e4fdb7a",
+      "manifestSHA256": "a38bc4866a11791f4d83bdf1e2f6dc17b415b823be6b5cd609ac2012939db986",
+      "dependencyLockSHA256": "43a96a20ab01757e67151cd3fc679057e95c1e5b19ba593c12d96b8bcf8a30d2",
+      "deployment": "self-contained-folder",
+      "embeddedPayloadArchive": false,
+      "selfExtraction": false,
+      "filesVerified": 241,
+      "payloadFilesVerified": 17
+    },
+    "windows": {
+      "rid": "win-x64",
+      "sha256": "b7a2122a089f7b5cbff5dc0d5324ff9116908f7bb144d416a17b810fc3e001ab",
+      "manifestSHA256": "a38bc4866a11791f4d83bdf1e2f6dc17b415b823be6b5cd609ac2012939db986",
+      "dependencyLockSHA256": "43a96a20ab01757e67151cd3fc679057e95c1e5b19ba593c12d96b8bcf8a30d2",
+      "deployment": "self-contained-folder",
+      "embeddedPayloadArchive": false,
+      "selfExtraction": false,
+      "filesVerified": 242,
+      "payloadFilesVerified": 17
+    }
+  },
+  "manifestAndLockMatchGameTestedSelection": true,
+  "vendorRuntimeBundled": false,
+  "frameworkBundled": false,
+  "GUIAndInstallTransactionsQualified": false,
+  "nativeWindowsRuntimeQualified": false,
+  "releaseChanged": false
+}

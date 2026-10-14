@@ -76,11 +76,17 @@
   "windowsHardwareCurrentlyUnavailable": true,
   "windowsQualificationCleared": false,
   "knownShutdownFailure": true,
-  "installerRebuildAndVerificationPending": true,
+  "installerRebuildAndVerificationPending": false,
   "publishedReleaseChanged": false,
   "includedSourceCorrections": [
     "docs/AMD_ANTILAG_SHUTDOWN_2026-10-14.md",
     "docs/FSR_OWNED_RETIREMENT_2026-10-14.md",
     "docs/FSR_MENU_READINESS_2026-10-14.md"
-  ]
+  ],
+  "installerFileVerificationReceipt": "qualification/providers/amd-dev10-installers-2026-10-14.json",
+  "installerRun": 38502849822,
+  "installerArtifact": 11865709322,
+  "installerArchiveSHA256": "d6e50cd6058759fcb07db7883d3bd5bb3a5b9c1224314cc34b2f7fb967d0f51f",
+  "installerGUIAndTransactionsQualified": false,
+  "linuxShortExitControlReceipt": "qualification/providers/amd-dev10-exit-controls-2026-10-14.json"
 }
