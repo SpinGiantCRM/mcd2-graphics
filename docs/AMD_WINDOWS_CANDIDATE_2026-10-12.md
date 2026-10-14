@@ -6,6 +6,13 @@ baseline; they do not contain that correction. Select a new complete rebuilt
 artifact before starting new Windows qualification. The AMD laptop is currently
 unavailable, so active driver testing remains outstanding.
 
+Source-matched [dev.9 inputs](../qualification/providers/amd-pr54-dev9-build-2026-10-14.json)
+are prepared from [native run 38490399017](https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/38490399017).
+All 44 receipt members and 17 own payload files were verified/assembled; all three
+CI jobs passed. This rebuild includes the Anti-Lag correction. It has not yet
+been installed, runtime-qualified or selected to replace the dev.8 baseline below.
+Its rebuilt binaries and framework require their own qualification.
+
 Use [the current candidate receipt](../qualification/providers/windows-candidate-current.json)
 and [the exact installer verification](../qualification/providers/amd-pr54-rebuilt-installers-2026-10-13.json).
 The selected candidate is **0.4.0-amd.dev.8**. Its native inputs are

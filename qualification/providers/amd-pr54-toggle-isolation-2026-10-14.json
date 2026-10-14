@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "candidateOnly": true,
+  "candidate": "0.4.0-amd.dev.8",
+  "implementationCommit": "c9f011a5bdc8dd6fd50885eeb8c2986764183755",
+  "productionPayloadOnly": true,
+  "privateSamplerInstalled": false,
+  "changedAntiLagBridgeInstalled": false,
+  "numericCheckpointCount": 28,
+  "host": "Linux / RTX 4080 SUPER / Proton SLR / native Wayland HDR",
+  "noResizeCombinedOffOnPassed": true,
+  "noResizeHoldSeconds": 17.292883145,
+  "outputResizeRecovered": [
+    {
+      "render": [
+        2134,
+        1200
+      ],
+      "output": [
+        3200,
+        1800
+      ],
+      "fgActive": true
+    },
+    {
+      "render": [
+        1280,
+        720
+      ],
+      "output": [
+        1920,
+        1080
+      ],
+      "fgActive": true
+    },
+    {
+      "render": [
+        1707,
+        960
+      ],
+      "output": [
+        2560,
+        1440
+      ],
+      "fgActive": true
+    },
+    {
+      "render": [
+        2560,
+        1440
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "fgActive": true
+    }
+  ],
+  "retainedOffSourceReactivated": true,
+  "generatedCountStableWhileOff": true,
+  "separateOffOnAfterResizePassed": true,
+  "onMenuHoldSeconds": 27.484087308,
+  "finalSrPhase": 5,
+  "finalSrError": 0,
+  "finalFgActive": true,
+  "freshEvaluationDelta": 716,
+  "freshGeneratedPresentDelta": 720,
+  "menuSrReady": 1,
+  "menuFgReady": 0,
+  "earlierTimeout22Resolved": false,
+  "menuMismatchSufficientToCauseTimeout": false,
+  "shutdownPassed": false,
+  "shippingExitCode": 3221226505,
+  "shippingExitCodeHex": "0xc0000409",
+  "windowGoneDoesNotEstablishSuccessfulExit": true,
+  "quitConfirmationToGoneSeconds": 1.6100501389992132,
+  "lastOwnAmdRetirementSDKResult": 0,
+  "lastOwnSharedSDKRetirementSDKResult": 0,
+  "shutdownCauseEstablished": false,
+  "setupRestoredByteForByte": true,
+  "fullProductionQualificationPassed": false,
+  "nativeWindowsRadeonQualified": false,
+  "rawLogsScreenshotsOrSavesPublished": false
+}

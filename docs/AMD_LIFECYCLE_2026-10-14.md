@@ -30,3 +30,7 @@ Raw screenshots, own runtime slots and diagnostics remain private.
 This run establishes bounded main-menu world recreation and operational output
 resize behavior. It does not establish dungeon travel, comprehensive image quality,
 physical latency, native Windows/Radeon support or a clean full qualification.
+
+A later [unchanged-production isolation run](AMD_TOGGLE_ISOLATION_2026-10-14.md)
+passed the resize and separate Off/On repeat, but failed normal shutdown with
+`0xc0000409`. The intermittent timeout and shutdown failures remain open.
