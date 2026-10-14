@@ -1,44 +1,27 @@
 # Windows/Radeon development qualification
 
-**Selection update, 14 October:** the [Anti-Lag shutdown correction](AMD_ANTILAG_SHUTDOWN_2026-10-14.md)
-changes the project bridge after dev.8. The dev.8 hashes below identify the tested
-baseline; they do not contain that correction. Select a new complete rebuilt
-artifact before starting new Windows qualification. The AMD laptop is currently
-unavailable, so active driver testing remains outstanding.
+**Selection update, 14 October:** use the complete **0.4.0-amd.dev.10**
+[candidate receipt](../qualification/providers/windows-candidate-current.json).
+It includes the Anti-Lag shutdown, FSR owned-resource and shared gameplay-gate
+corrections, including the real rebuilt UI. Earlier dev.8/dev.9 artifacts do not.
 
-Source-matched [dev.9 inputs](../qualification/providers/amd-pr54-dev9-build-2026-10-14.json)
-are prepared from [native run 38490399017](https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/38490399017).
-All 44 receipt members and 17 own payload files were verified/assembled; all three
-CI jobs passed. This rebuild includes the Anti-Lag correction. It has not yet
-been installed, runtime-qualified or selected to replace the dev.8 baseline below.
-Its rebuilt binaries and framework require their own qualification.
+Native inputs:
+[run 38497329826 / artifact 11863879034](https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/38497329826/artifacts/11863879034).
+Archive SHA-256 `0146aa19f2e71c87dd2f303f7b0526a188325f6c8a8a66fe6aa24d61d5936751`.
+Test merge `87078dbab5f3658267300796046f709ede96d3ef` matches implementation
+`9483952ec9896633c58685493e0c101757c004a2` by tree. All 44 artifact members were
+verified. The separate framework SHA-256 is
+`1b5d71669299aa06dae2b27bf51f554fb59e2cd2f6a406a7447d59caf385c71b`.
+Use its accompanying dependency lock; do not inherit earlier binary results.
+Visible installer rebuild and verification against this selection remain pending.
 
-Dev.9 also predates the [FSR owned-resource correction](FSR_OWNED_RETIREMENT_2026-10-14.md).
-Rebuild the complete candidate with both corrections before active qualification.
-It also predates the [shared SR/FG gameplay gate](FSR_MENU_READINESS_2026-10-14.md).
-Include its rebuilt source-matched UI in the next complete candidate.
-
-Use [the current candidate receipt](../qualification/providers/windows-candidate-current.json)
-and [the exact installer verification](../qualification/providers/amd-pr54-rebuilt-installers-2026-10-13.json).
-The selected candidate is **0.4.0-amd.dev.8**. Its native inputs are
-[run 38333151314 / artifact 11783652643](https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/38333151314/artifacts/11783652643),
-archive SHA-256 `9574ec28b096f35e484af61e066835a1815178070d96e390c4c24ddd599c9e64`.
-Its source receipt is test merge `818033960e3347718a1c7f7ef0ca4e169f0b99d5`,
-matching implementation `c9f011a5bdc8dd6fd50885eeb8c2986764183755`.
-
-The verified visible installer folders are from
-[run 38340596287](https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/38340596287),
-installer archive SHA-256 `2605460e66a8fb4336a75e9c22da8899a873dd1d22ce5471b9f52d6d6beeabc3`.
-Use the accompanying dependency lock. The required source-built framework is
-separate, SHA-256 `5ab60fb92385c774bb5f61d668676556c32fc91d989a18679129cdb32031bb84`;
-do not substitute an earlier artifact's framework and inherit its results.
-
-**Qualification remains incomplete.** The complete dev.8 Linux run passed
-bounded NVIDIA preset/status checks but hung on shutdown. A short private
-instrumented control and a later unmodified 13-minute production control exited
-0; neither clears the earlier production failure or establishes its cause.
-Preserve that distinction when reporting Windows results. See
-[the regression report](AMD_NVIDIA_REGRESSION_2026-10-13.md).
+**Not cleared for qualification or release:** [dev.10 Linux checks](AMD_DEV10_LINUX_2026-10-14.md)
+passed all six FSR presets with each FG route, AMD transitions/resize and NVIDIA
+DLSS/DLAA checks. Two normal quits returned 0; the third returned `0xc0000409`
+after NVIDIA retirement/re-enable refusal. Successful SDK cleanup does not clear
+that process failure. Its cause remains unresolved. Earlier failure records are
+preserved. Native Windows/Radeon and actual Anti-Lag driver results also remain
+outstanding; the AMD laptop is currently unavailable.
 
 ## Preparation
 
