@@ -1,3 +1,10 @@
+The [FSR retirement correction](FSR_OWNED_RETIREMENT_2026-10-14.md) clears the
+owned resource list after manual reverse releases, before bridge unloading and
+generation destruction. Otherwise `EvalOwned` releases those references twice.
+Preserve SDK destruction, GPU/recording admission and failed-drain retention.
+Keep the actual-source reference-count fixture and order guard on both platforms.
+Earlier dev.8/dev.9 artifacts do not include this correction and cannot qualify it.
+
 The [Anti-Lag shutdown correction](AMD_ANTILAG_SHUTDOWN_2026-10-14.md) removes
 `Update` from teardown: the official SDK inserts its pacing operation there.
 Preserve clear/drain before `DeInitialize`, failed-drain context/module retention,

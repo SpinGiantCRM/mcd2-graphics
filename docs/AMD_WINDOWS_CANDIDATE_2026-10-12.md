@@ -13,6 +13,9 @@ CI jobs passed. This rebuild includes the Anti-Lag correction. It has not yet
 been installed, runtime-qualified or selected to replace the dev.8 baseline below.
 Its rebuilt binaries and framework require their own qualification.
 
+Dev.9 also predates the [FSR owned-resource correction](FSR_OWNED_RETIREMENT_2026-10-14.md).
+Rebuild the complete candidate with both corrections before active qualification.
+
 Use [the current candidate receipt](../qualification/providers/windows-candidate-current.json)
 and [the exact installer verification](../qualification/providers/amd-pr54-rebuilt-installers-2026-10-13.json).
 The selected candidate is **0.4.0-amd.dev.8**. Its native inputs are

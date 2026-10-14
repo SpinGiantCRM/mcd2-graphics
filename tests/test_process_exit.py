@@ -113,6 +113,13 @@ class ProcessExitTests(unittest.TestCase):
         recipe = (ROOT / 'experiments/fg-streamline/build_sr_candidate.py').read_text()
         self.assertIn('terminalGuardSourceSHA256', recipe)
 
+    def test_fsr_manual_release_clears_destructor_ownership(self):
+        source = (ROOT / 'src/native/fsr_runtime.hpp').read_text()
+        release = source.split('auto retired=std::move(generation)', 1)[1].split('state.sourceScaleMicro=100000000', 1)[0]
+        self.assertLess(release.index('(*it)->Release()'), release.index('owned.resources.clear()'))
+        self.assertLess(release.index('owned.resources.clear()'), release.index('FreeLibrary(retired->bridge)'))
+        self.assertLess(release.index('FreeLibrary(retired->bridge)'), release.index('retired.reset()'))
+
     def test_terminal_guards_precede_locks_and_sdk_cleanup(self):
         source = (ROOT / 'src/latency/latency_addon.cpp').read_text()
         self.assertIn('void cleanup(){\n if(mcd2::process_exit::terminating())return;', source)

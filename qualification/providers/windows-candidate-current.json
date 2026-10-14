@@ -76,5 +76,9 @@
   "sourceChangedAfterSelection": true,
   "selectionNeedsRebuild": true,
   "sourceChangeReport": "docs/AMD_ANTILAG_SHUTDOWN_2026-10-14.md",
-  "windowsHardwareCurrentlyUnavailable": true
+  "windowsHardwareCurrentlyUnavailable": true,
+  "requiredSourceCorrections": [
+    "docs/AMD_ANTILAG_SHUTDOWN_2026-10-14.md",
+    "docs/FSR_OWNED_RETIREMENT_2026-10-14.md"
+  ]
 }

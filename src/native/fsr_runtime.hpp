@@ -275,7 +275,9 @@ static void present(a::command_queue *q,std::unique_lock<std::recursive_mutex>& 
   if(result){cache.blocked=true;phase(p::SrPhase::Failed,21);return;}c.session=nullptr;
   auto retired=std::move(generation);guard.unlock();retired->borrows.clear_after_idle();
   for(auto it=retired->owned.resources.rbegin();it!=retired->owned.resources.rend();++it)if(*it)(*it)->Release();
-  if(retired->bridge)FreeLibrary(retired->bridge);retired.reset();guard.lock();
+  retired->owned.resources.clear(); // EvalOwned must not release these references again.
+  if(retired->bridge)FreeLibrary(retired->bridge);
+  retired.reset();guard.lock();
   state.sourceScaleMicro=100000000;if(contextAvailable)state.world=context.world;restoring=true;phase(p::SrPhase::RestoreSource,state.error);return;
  }
  if((state.phase==p::SrPhase::Preflight||state.phase==p::SrPhase::ApplySource||state.phase==p::SrPhase::Create||state.phase==p::SrPhase::Evaluate)&&
