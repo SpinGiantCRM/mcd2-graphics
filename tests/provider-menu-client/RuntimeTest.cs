@@ -11,6 +11,7 @@ static class RuntimeTest {
   s.W16=66666667;s.W18=2;s.W19=1;s.W20=1;s.W4=s.Checksum(0,32);return s;
  }
  public static void Run(){
+  ReadinessChecks();
   FoliageChecks();
   Check(ProviderRuntimeClient.CanRestoreNvidiaSource(7,2,123,1,7,123,3));
   Check(!ProviderRuntimeClient.CanRestoreNvidiaSource(7,2,123,1,7,124,3));
@@ -57,6 +58,18 @@ static class RuntimeTest {
   travel.Stop();Check(travel.Context.W10==0&&travel.Context.W13==0&&travel.Context.W4==travel.Context.Checksum(0,32));
   Console.WriteLine("SR game-thread client: exact scale, reapply, rollback, actor travel, stale plan and corruption checks pass");
  }
+ static void ReadinessChecks(){
+  foreach(string name in new[]{"W_PlayerHUD_Activatable_C_1","W_HotbarContainer_Activatable_C_4","W_InGameNavigation_Activatable_C_9"}){
+   Check(ProviderRuntimeClient.GameplayWidgetAllowed(name,true));Check(ProviderRuntimeClient.GameplayWidgetAllowed(name,false));
+  }
+  foreach(string name in new[]{"Hotbar","MiniInventory","W_ActivityLayer_Activatable_C_2","W_LootNotification_Activatable_C_3"}){
+   Check(!ProviderRuntimeClient.GameplayWidgetAllowed(name,true));Check(ProviderRuntimeClient.GameplayWidgetAllowed(name,false));
+  }
+  foreach(string name in new[]{"","Activity_Stack","W_Settings_Activatable_C_1","W_System_Activatable_C_2","W_Inventory_Activatable_C_3","W_Map_Activatable_C_4","W_UnknownMod_Activatable_C_5"}){
+   Check(!ProviderRuntimeClient.GameplayWidgetAllowed(name,true));Check(!ProviderRuntimeClient.GameplayWidgetAllowed(name,false));
+  }
+  Console.WriteLine("28 gameplay widget admission checks passed");
+ }
  static void FoliageChecks(){
   UGameplayStatics.Slots.Clear();var menu=Menu();menu.Authority!.W20=2;
   var client=new ProviderRuntimeClient();client.Start();var s=Plan(5,5);s.W17=1;s.W4=s.Checksum(0,32);
@@ -64,6 +77,10 @@ static class RuntimeTest {
   Check(client.Poll(menu,"Hub",true,100000,66666667));
   Check(client.FoliageMotionReady(menu,true)&&client.FoliageMotionReady(menu,false));
   var c=client.Context!;
+  c.W10=0;c.W4=c.Checksum(0,32);Check(!client.FoliageMotionReady(menu,true)&&client.FoliageMotionReady(menu,false));
+  s.W10=6;s.W4=s.Checksum(0,32);Check(!client.FoliageMotionReady(menu,true)&&client.FoliageMotionReady(menu,false));
+  s.W11=22;s.W4=s.Checksum(0,32);Check(!client.FoliageMotionReady(menu,false));
+  s.W11=0;s.W10=5;s.W4=s.Checksum(0,32);c.W10=1;c.W4=c.Checksum(0,32);
   foreach(int word in new[]{4,5,7,8,9,10,12}){
    int before=c.Word(word);c.SetWord(word,before^1);if(word!=4)c.W4=c.Checksum(0,32);
    // A one-unit source difference is tolerated; test outside that tolerance.

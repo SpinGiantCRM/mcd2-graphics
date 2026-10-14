@@ -28,3 +28,9 @@ This proves the double release and its correction. It does not establish that
 every earlier timeout, hang or `0xc0000409` was caused by it. Corrected game
 artifacts require fresh lifecycle/exit checks; native Windows/Radeon qualification
 remains pending. No published release file or tag is replaced.
+
+A private corrected-native control retired FSR to Native at 100% with AMD FG
+continuing, and exited normally. Reactivation with the previous UI reproduced
+the separate [menu readiness failure](FSR_MENU_READINESS_2026-10-14.md). All three
+CI jobs for the ownership correction passed; these do not qualify a new complete
+runtime artifact.

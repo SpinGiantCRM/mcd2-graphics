@@ -79,6 +79,7 @@
   "windowsHardwareCurrentlyUnavailable": true,
   "requiredSourceCorrections": [
     "docs/AMD_ANTILAG_SHUTDOWN_2026-10-14.md",
-    "docs/FSR_OWNED_RETIREMENT_2026-10-14.md"
+    "docs/FSR_OWNED_RETIREMENT_2026-10-14.md",
+    "docs/FSR_MENU_READINESS_2026-10-14.md"
   ]
 }

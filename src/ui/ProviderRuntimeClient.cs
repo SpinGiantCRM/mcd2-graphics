@@ -9,6 +9,10 @@ public class ProviderRuntimeClient : USaveGame {
  public int Sequence;public int Session;public int WorldGeneration;
  public string? Level;
  public bool Enabled;
+ public static bool GameplayWidgetAllowed(string name,bool layer){
+  if(name.StartsWith("W_PlayerHUD_Activatable_C_") || name.StartsWith("W_HotbarContainer_Activatable_C_") || name.StartsWith("W_InGameNavigation_Activatable_C_"))return true;
+  return !layer && (name=="Hotbar" || name=="MiniInventory" || name.StartsWith("W_ActivityLayer_Activatable_C_") || name.Contains("Notification_Activatable_C_"));
+ }
  public static bool AmdLatencyAvailable(bool authorityReady,int authoritySession,int runtimeSchema,int runtimeSession,int available,int fault,bool fgEnabled,int fgProvider=0,int fgCompatible=0){
   return authorityReady && authoritySession>0 && runtimeSchema==1 && runtimeSession==authoritySession && available==1 && fault==0 &&
    (!fgEnabled || (fgProvider==1 && fgCompatible==1));
@@ -24,8 +28,11 @@ public class ProviderRuntimeClient : USaveGame {
      !ContextValid(Context) || !StateValid(State))return false;
   var a=menu.Authority;var c=Context;var s=State;
   int delta=c.W12-s.W16;if(delta<0)delta=-delta;
-  return a.W20==2 && c.W10==1 && s.W18==2 && s.W11==0 && s.W17>0 &&
-   (s.W10==5 || (!acquiring && s.W10==4)) &&
+  // A temporary menu can retain an existing velocity lease while SR retires.
+  // Acquisition still requires gameplay and active output; errors cannot retain it.
+  bool pausedRetirement=!acquiring && c.W10==0 && s.W10==6;
+  return a.W20==2 && (c.W10==1 || !acquiring) && s.W18==2 && s.W11==0 && s.W17>0 &&
+   (s.W10==5 || (!acquiring && s.W10==4) || pausedRetirement) &&
    Session==a.W5 && c.W5==Session && s.W5==Session &&
    c.W9==WorldGeneration && s.W9==WorldGeneration &&
    c.W7==a.W19 && s.W7==a.W19 && c.W8==a.W16 && s.W8==a.W16 && delta<=100;

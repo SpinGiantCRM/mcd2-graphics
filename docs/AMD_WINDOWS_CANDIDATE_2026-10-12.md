@@ -15,6 +15,8 @@ Its rebuilt binaries and framework require their own qualification.
 
 Dev.9 also predates the [FSR owned-resource correction](FSR_OWNED_RETIREMENT_2026-10-14.md).
 Rebuild the complete candidate with both corrections before active qualification.
+It also predates the [shared SR/FG gameplay gate](FSR_MENU_READINESS_2026-10-14.md).
+Include its rebuilt source-matched UI in the next complete candidate.
 
 Use [the current candidate receipt](../qualification/providers/windows-candidate-current.json)
 and [the exact installer verification](../qualification/providers/amd-pr54-rebuilt-installers-2026-10-13.json).

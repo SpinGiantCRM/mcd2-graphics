@@ -282,7 +282,7 @@ public class ModActor : AActor {
   if(ProviderMenu==null || ProviderRuntime==null)return;
   ProviderMenu.Poll();
   var level=UGameplayStatics.GetCurrentLevelName(this,true);
-  bool ready=level!="" && level!="Menu_Spicewood" && World.Player(this)!=null;
+  bool ready=level!="" && level!="Menu_Spicewood" && World.Player(this)!=null && GameplayRenderingAllowed();
   float units=0;var worlds=World.FindAll(this,Unreal.ClassOf<AWorldSettings>());
   if(worlds.Count>0){var settings=worlds[0] as AWorldSettings;if(settings!=null)units=settings.WorldToMeters;}
   float percentage=UKismetSystemLibrary.GetConsoleVariableFloatValue("r.ScreenPercentage");
@@ -639,16 +639,19 @@ public class ModActor : AActor {
   if(FGRuntime!=null){FGRuntime.SchemaVersion=1;UGameplayStatics.SaveGameToSlot(FGRuntime,"MCD2GraphicsFGRuntime",0);}
  }
  public void PersistFG(){if(FGSaved!=null)UGameplayStatics.SaveGameToSlot(FGSaved,"MCD2GraphicsFGSettings",0);}
+ public bool GameplayRenderingAllowed(){
+  if(UGameplayStatics.IsGamePaused(this))return false;
+  foreach(var layer in Layers){if(!UKismetSystemLibrary.IsValid(layer))continue;if(UKismetSystemLibrary.GetObjectName(layer)=="Activity_Stack")continue;var active=layer.DisplayedWidget;if(active==null || !UKismetSystemLibrary.IsValid(active) || !active.IsActivated())continue;if(!ProviderRuntimeClient.GameplayWidgetAllowed(UKismetSystemLibrary.GetObjectName(active),true))return false;}
+  // Navigation roots stay active around their Inventory/System children.
+  foreach(var active in LifecycleWidgets){if(!UKismetSystemLibrary.IsValid(active) || !active.IsActivated())continue;if(!ProviderRuntimeClient.GameplayWidgetAllowed(UKismetSystemLibrary.GetObjectName(active),false))return false;}
+  return true;
+ }
  public void PollFG(){
   if(FGSaved==null)return;
   var state=UGameplayStatics.LoadGameFromSlot("MCD2GraphicsFGRuntime",0) as FGRuntimeSave;
   bool changed=state!=null && (FGRuntime==null || state.Available!=FGRuntime.Available || state.AvailableProviders!=FGRuntime.AvailableProviders || state.SessionId!=FGRuntime.SessionId);
   if(state!=null && state.SchemaVersion==1)FGRuntime=state;
-  int ready=Saved!=null && Saved.RenderContextReady==1 && !UGameplayStatics.IsGamePaused(this)?1:0;
-  foreach(var layer in Layers){if(!UKismetSystemLibrary.IsValid(layer))continue;if(UKismetSystemLibrary.GetObjectName(layer)=="Activity_Stack")continue;var active=layer.DisplayedWidget;if(active==null || !UKismetSystemLibrary.IsValid(active) || !active.IsActivated())continue;string name=UKismetSystemLibrary.GetObjectName(active);if(!name.StartsWith("W_PlayerHUD_Activatable_C_") && !name.StartsWith("W_HotbarContainer_Activatable_C_") && !name.StartsWith("W_InGameNavigation_Activatable_C_")){ready=0;}}
-  // The navigation root stays active around its Inventory/System children.
-  // Check those children's activation too; a root-only gate admits menus.
-  foreach(var active in LifecycleWidgets){if(!UKismetSystemLibrary.IsValid(active) || !active.IsActivated())continue;string name=UKismetSystemLibrary.GetObjectName(active);if(name=="Hotbar" || name=="MiniInventory" || name.StartsWith("W_ActivityLayer_Activatable_C_") || name.StartsWith("W_PlayerHUD_Activatable_C_") || name.StartsWith("W_HotbarContainer_Activatable_C_") || name.StartsWith("W_InGameNavigation_Activatable_C_") || name.Contains("Notification_Activatable_C_"))continue;ready=0;}
+  int ready=Saved!=null && Saved.RenderContextReady==1 && GameplayRenderingAllowed()?1:0;
   int session=FGRuntime==null?0:FGRuntime.SessionId;
   bool intentChanged=FGSaved.ContextReady!=ready || FGSaved.SessionId!=session;
   if(intentChanged){FGSaved.ContextReady=ready;FGSaved.SessionId=session;FGSaved.Revision++;Log.Write("FG CONTEXT ready="+ready);}

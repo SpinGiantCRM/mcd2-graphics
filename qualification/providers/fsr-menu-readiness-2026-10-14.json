@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "candidateOnly": true,
+  "host": "Linux / RTX 4080 SUPER / Proton SLR / native Wayland HDR",
+  "baseCandidate": "0.4.0-amd.dev.8",
+  "nativeOwnershipCorrectionSHA256": "7c53345f10729bba0af3f6cb1bfe28d2bc21b3df77d779db5d40a1cc0973fbc8",
+  "realNeoRuneAndModInfoRebuild": true,
+  "uiArchiveSHA256": "9e9ed57c6af621ae2b9d48ac842b8f6fadc17d065b8608346439eba72c92dab6",
+  "uiSourceAndPayloadClosureVerified": true,
+  "nativeTimeoutUnchangedMilliseconds": 15000,
+  "beforeFixMenuPreflightThenError22Observed": true,
+  "newRequestMenuHoldSeconds": 24.282047751,
+  "newRequestInactiveUntilGameplay": true,
+  "newRequestResumePassed": true,
+  "activeSessionMenuHoldSeconds": 21.185820234,
+  "activeSessionMenuRetirementError": 0,
+  "generationCounterStableInMenu": true,
+  "activeSessionResumePassed": true,
+  "postResumeEvaluationDelta": 895,
+  "postResumeGeneratedPresentDelta": 900,
+  "renderResolution": [
+    2560,
+    1440
+  ],
+  "outputResolution": [
+    3840,
+    2160
+  ],
+  "managedWidgetCases": 28,
+  "foliageLeaseCases": 41,
+  "nativeWindowsRadeonQualified": false,
+  "completeFutureArtifactQualified": false,
+  "shippingExitCode": 0,
+  "normalQuitSeconds": 4.186337896999248,
+  "setupRestoredByteForByte": true,
+  "rawCapturesPublished": false,
+  "earlierShutdownFailuresCompletelyCleared": false
+}

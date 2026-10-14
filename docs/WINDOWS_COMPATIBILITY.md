@@ -1,3 +1,11 @@
+The [shared gameplay readiness gate](FSR_MENU_READINESS_2026-10-14.md) applies
+the existing pause/widget exclusions to SR as well as FG. Preserve HUD/activity/
+notification allowances, source rollback outside gameplay and the acyclic actor
+gate. Keep acquisition gameplay-only and retain existing matching foliage leases
+through error-free temporary-menu retirement. The native timeout is unchanged.
+Require source guards, managed cases and a real source-matched UI/ModInfo rebuild;
+the bounded Linux control does not qualify native Windows/Radeon.
+
 The [FSR retirement correction](FSR_OWNED_RETIREMENT_2026-10-14.md) clears the
 owned resource list after manual reverse releases, before bridge unloading and
 generation destruction. Otherwise `EvalOwned` releases those references twice.

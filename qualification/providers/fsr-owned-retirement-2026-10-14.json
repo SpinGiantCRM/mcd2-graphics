@@ -13,8 +13,23 @@
   "correctedCases": 14,
   "localSourceTestsPassed": 30,
   "linuxAndWindowsCIRequired": true,
-  "privateGameControlPending": true,
+  "privateGameControlPending": false,
   "nativeWindowsRadeonQualified": false,
   "shutdownCauseFullyEstablished": false,
-  "publishedPayloadChanged": false
+  "publishedPayloadChanged": false,
+  "privateCorrectionNativeSHA256": "7c53345f10729bba0af3f6cb1bfe28d2bc21b3df77d779db5d40a1cc0973fbc8",
+  "fsrToNativeRetirementPassed": true,
+  "NativeWithAmdFgContinued": true,
+  "fsrReactivationPassed": false,
+  "menuTimeout22Reproduced": true,
+  "shippingExitCode": 0,
+  "normalQuitSeconds": 4.293414036001195,
+  "originalSetupRestored": true,
+  "completeArtifactQualified": false,
+  "ci": {
+    "portable": 38494319362,
+    "native": 38494319406,
+    "installers": 38494319419,
+    "allSuccess": true
+  }
 }
