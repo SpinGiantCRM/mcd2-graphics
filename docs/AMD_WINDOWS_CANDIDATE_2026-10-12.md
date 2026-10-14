@@ -1,5 +1,11 @@
 # Windows/Radeon development qualification
 
+**Rebuild pending:** the [native HDR Off correction](HDR_OFF_ACKNOWLEDGEMENT_2026-10-14.md)
+changes runtime source after the dev.10 selection. The selector now marks that
+artifact stale; installer CI skips assembly until a new source-matched artifact
+is selected. Do not use dev.10 to qualify this correction. The dev.10 inputs below
+remain historical evidence, not the next testing selection.
+
 **Selection update, 14 October:** use the complete **0.4.0-amd.dev.10**
 [candidate receipt](../qualification/providers/windows-candidate-current.json).
 It includes the Anti-Lag shutdown, FSR owned-resource and shared gameplay-gate
@@ -61,6 +67,11 @@ outstanding; the AMD laptop is currently unavailable.
 - **Lifecycle:** main/pause menus, hub/level travel, cuts/death/respawn,
   pause/resume, source/output resolution and window changes. Provider owner
   changes require restart; no two presenter proxies may be active.
+- **HDR/SDR output:** with RenoDX absent and the native setting initially HDR On,
+  request HDR Off. Require matching HDR revision, restart flag 0, native HDR Off
+  and actual SDR swapchain metadata before recording SDR benchmarks. Missing-addon
+  HDR On must remain refused. Reinstall the pinned addon and check the existing
+  HDR calibration/restart sequence; never qualify colour space from a preference.
 - **Shutdown:** hold the shipping process handle through three normal quits.
   Require code 0 and completed owning presenter/shared SDK retirement, not
   merely a closed window. Preserve SDK errors and delayed exits as failures.

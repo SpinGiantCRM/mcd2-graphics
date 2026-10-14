@@ -1,0 +1,1046 @@
+{
+  "schemaVersion": 1,
+  "candidate": "0.4.0-amd.dev.10",
+  "implementationCommit": "9483952ec9896633c58685493e0c101757c004a2",
+  "nativeArtifact": 11863879034,
+  "nativeArchiveSHA256": "0146aa19f2e71c87dd2f303f7b0526a188325f6c8a8a66fe6aa24d61d5936751",
+  "frameworkSHA256": "1b5d71669299aa06dae2b27bf51f554fb59e2cd2f6a406a7447d59caf385c71b",
+  "samplerSHA256": "6ca3743cf8ce98dfe4a82fc9155deea51b7e9d66c0700648b5c3752482ccccfc",
+  "samplerSourceMatchesCandidate": true,
+  "benchmarkSamplerIsSeparateDiagnostic": true,
+  "ownPayloadFilesVerifiedPerRun": 17,
+  "externalDependencyFilesVerifiedPerRun": 15,
+  "host": {
+    "os": "CachyOS / Proton SLR 11.0-20261005",
+    "GPU": "RTX 4080 SUPER",
+    "driver": "615.78.08"
+  },
+  "workload": {
+    "scene": "stationary hub; lighting, NPCs and wind remain live",
+    "render": [
+      2560,
+      1440
+    ],
+    "output": [
+      3840,
+      2160
+    ],
+    "sr": "FSR analytical 3.1.5 Quality",
+    "fg": "FSR analytical 3.1.6",
+    "vsync": "Off",
+    "frameLimit": "None",
+    "latency": "Reflex On; Anti-Lag 2 unsupported on this host",
+    "capturesPerPhase": 3,
+    "samplesPerCapture": 1200,
+    "startupWarmupSeconds": 45,
+    "menuSettleSeconds": 15
+  },
+  "HDR": {
+    "mode": "hdr",
+    "planSHA256": "b3a73875c7aa33900a29c5eeb288f0ea456a541da5e1b4956c809d8255b0fac7",
+    "nativeArchiveSHA256": "0146aa19f2e71c87dd2f303f7b0526a188325f6c8a8a66fe6aa24d61d5936751",
+    "frameworkSHA256": "1b5d71669299aa06dae2b27bf51f554fb59e2cd2f6a406a7447d59caf385c71b",
+    "samplerSHA256": "6ca3743cf8ce98dfe4a82fc9155deea51b7e9d66c0700648b5c3752482ccccfc",
+    "thresholdsRegisteredBeforeMeasurement": {
+      "retainedOffMedianPresentRateMinimumRatioVsClean": 0.9,
+      "retainedOffP99MaximumRatioVsClean": 1.15,
+      "onMedianRenderedRateMinimumRatioVsClean": 0.65,
+      "onSDKTotalRateMinimumRatioVsClean": 1.2,
+      "onP99MaximumRatioVsClean": 1.65,
+      "vramMaximumIncreaseMiB": 2048,
+      "powerMaximumIncreaseW": 60,
+      "temperatureMaximumIncreaseC": 8
+    },
+    "groups": {
+      "clean-off": {
+        "captures": [
+          {
+            "label": "dev10-hdr-clean-off-0",
+            "intervals": 1199,
+            "seconds": 9.1194419,
+            "applicationPresentRate": 131.47734402474782,
+            "medianMs": 7.4898,
+            "p95Ms": 8.872,
+            "p99Ms": 9.3833,
+            "SDKRealPresentRate": null,
+            "SDKGeneratedPresentRate": 0,
+            "SDKCountEquivalentTotal": null,
+            "SDKGeneratedPerRealPresent": null,
+            "SDKPreparedPerRealPresent": null,
+            "SDKImagesPerRealPresent": null,
+            "privateCaptureSHA256": "a324dcccb107ae65f00e09dfc9aa1d46823de68897a01f6733b057a384ee27dc",
+            "gpuTelemetry": {
+              "utilizationPercent": {
+                "median": 95.0,
+                "min": 94.0,
+                "max": 95.0
+              },
+              "graphicsClockMHz": {
+                "median": 3000.0,
+                "min": 3000.0,
+                "max": 3000.0
+              },
+              "powerW": {
+                "median": 291.49,
+                "min": 284.72,
+                "max": 293.07
+              },
+              "memoryMiB": {
+                "median": 6310.0,
+                "min": 6309.0,
+                "max": 6310.0
+              },
+              "temperatureC": {
+                "median": 44.0,
+                "min": 43.0,
+                "max": 45.0
+              }
+            }
+          },
+          {
+            "label": "dev10-hdr-clean-off-1",
+            "intervals": 1199,
+            "seconds": 9.1530242,
+            "applicationPresentRate": 130.99495574369834,
+            "medianMs": 7.5099,
+            "p95Ms": 8.8917,
+            "p99Ms": 9.3851,
+            "SDKRealPresentRate": null,
+            "SDKGeneratedPresentRate": 0,
+            "SDKCountEquivalentTotal": null,
+            "SDKGeneratedPerRealPresent": null,
+            "SDKPreparedPerRealPresent": null,
+            "SDKImagesPerRealPresent": null,
+            "privateCaptureSHA256": "b4f58c916844d7ec2a0fb8587cab28ea14859511bf1f24a56b31e70a31c290aa",
+            "gpuTelemetry": {
+              "utilizationPercent": {
+                "median": 95.0,
+                "min": 94.0,
+                "max": 95.0
+              },
+              "graphicsClockMHz": {
+                "median": 3000.0,
+                "min": 3000.0,
+                "max": 3000.0
+              },
+              "powerW": {
+                "median": 291.47,
+                "min": 284.91,
+                "max": 293.28
+              },
+              "memoryMiB": {
+                "median": 6310.0,
+                "min": 6305.0,
+                "max": 6310.0
+              },
+              "temperatureC": {
+                "median": 44.0,
+                "min": 43.0,
+                "max": 45.0
+              }
+            }
+          },
+          {
+            "label": "dev10-hdr-clean-off-2",
+            "intervals": 1199,
+            "seconds": 9.1322176,
+            "applicationPresentRate": 131.29341114254657,
+            "medianMs": 7.516,
+            "p95Ms": 8.775,
+            "p99Ms": 9.403,
+            "SDKRealPresentRate": null,
+            "SDKGeneratedPresentRate": 0,
+            "SDKCountEquivalentTotal": null,
+            "SDKGeneratedPerRealPresent": null,
+            "SDKPreparedPerRealPresent": null,
+            "SDKImagesPerRealPresent": null,
+            "privateCaptureSHA256": "19f0a0c571cf4beb38acd04df806116c996073d0d24ab66d674886763131dc63",
+            "gpuTelemetry": {
+              "utilizationPercent": {
+                "median": 95.0,
+                "min": 94.0,
+                "max": 95.0
+              },
+              "graphicsClockMHz": {
+                "median": 3000.0,
+                "min": 3000.0,
+                "max": 3000.0
+              },
+              "powerW": {
+                "median": 290.33,
+                "min": 284.3,
+                "max": 292.73
+              },
+              "memoryMiB": {
+                "median": 6310.0,
+                "min": 6306.0,
+                "max": 6310.0
+              },
+              "temperatureC": {
+                "median": 44.0,
+                "min": 43.0,
+                "max": 45.0
+              }
+            }
+          }
+        ],
+        "medians": {
+          "applicationPresentRate": 131.29341114254657,
+          "p95Ms": 8.872,
+          "p99Ms": 9.3851,
+          "SDKCountEquivalentTotal": null,
+          "gpuTelemetry": {
+            "memoryMiB": 6310.0,
+            "powerW": 291.47,
+            "temperatureC": 44.0,
+            "graphicsClockMHz": 3000.0,
+            "utilizationPercent": 95.0
+          }
+        }
+      },
+      "on-a": {
+        "captures": [
+          {
+            "label": "dev10-hdr-on-a-0",
+            "intervals": 1199,
+            "seconds": 13.4135554,
+            "applicationPresentRate": 89.38718812761604,
+            "medianMs": 11.0764,
+            "p95Ms": 12.3539,
+            "p99Ms": 13.152,
+            "SDKRealPresentRate": 89.38718812761604,
+            "SDKGeneratedPresentRate": 89.38718812761604,
+            "SDKCountEquivalentTotal": 178.77437625523208,
+            "SDKGeneratedPerRealPresent": 1.0,
+            "SDKPreparedPerRealPresent": 1.0,
+            "SDKImagesPerRealPresent": 1.0,
+            "privateCaptureSHA256": "7c57af98b05b596149694f78cde335b61a19a2e191ac7daf1daef74041e36790",
+            "gpuTelemetry": {
+              "utilizationPercent": {
+                "median": 96.0,
+                "min": 95.0,
+                "max": 96.0
+              },
+              "graphicsClockMHz": {
+                "median": 3000.0,
+                "min": 3000.0,
+                "max": 3000.0
+              },
+              "powerW": {
+                "median": 284.40999999999997,
+                "min": 278.66,
+                "max": 285.7
+              },
+              "memoryMiB": {
+                "median": 6973.0,
+                "min": 6969.0,
+                "max": 6973.0
+              },
+              "temperatureC": {
+                "median": 44.0,
+                "min": 43.0,
+                "max": 45.0
+              }
+            }
+          },
+          {
+            "label": "dev10-hdr-on-a-1",
+            "intervals": 1199,
+            "seconds": 13.4672558,
+            "applicationPresentRate": 89.03075859003138,
+            "medianMs": 11.1391,
+            "p95Ms": 12.4239,
+            "p99Ms": 13.0491,
+            "SDKRealPresentRate": 89.03075859003138,
+            "SDKGeneratedPresentRate": 89.03075859003138,
+            "SDKCountEquivalentTotal": 178.06151718006276,
+            "SDKGeneratedPerRealPresent": 1.0,
+            "SDKPreparedPerRealPresent": 1.0,
+            "SDKImagesPerRealPresent": 1.0,
+            "privateCaptureSHA256": "da02850982ea9381f00614d08e2a6162545c81ad99bcb6580b361d8bc544c7bc",
+            "gpuTelemetry": {
+              "utilizationPercent": {
+                "median": 96.0,
+                "min": 93.0,
+                "max": 96.0
+              },
+              "graphicsClockMHz": {
+                "median": 3000.0,
+                "min": 3000.0,
+                "max": 3000.0
+              },
+              "powerW": {
+                "median": 284.365,
+                "min": 278.01,
+                "max": 286.08
+              },
+              "memoryMiB": {
+                "median": 6973.0,
+                "min": 6973.0,
+                "max": 6973.0
+              },
+              "temperatureC": {
+                "median": 44.0,
+                "min": 43.0,
+                "max": 45.0
+              }
+            }
+          },
+          {
+            "label": "dev10-hdr-on-a-2",
+            "intervals": 1199,
+            "seconds": 13.6957048,
+            "applicationPresentRate": 87.54569534822333,
+            "medianMs": 11.1925,
+            "p95Ms": 13.1079,
+            "p99Ms": 14.1977,
+            "SDKRealPresentRate": 87.54569534822333,
+            "SDKGeneratedPresentRate": 87.54569534822333,
+            "SDKCountEquivalentTotal": 175.09139069644667,
+            "SDKGeneratedPerRealPresent": 1.0,
+            "SDKPreparedPerRealPresent": 1.0,
+            "SDKImagesPerRealPresent": 1.0,
+            "privateCaptureSHA256": "be81959a4edcc4d6a784ac7176841a80a66df90154ce39753f5b4561cda718f2",
+            "gpuTelemetry": {
+              "utilizationPercent": {
+                "median": 96.0,
+                "min": 94.0,
+                "max": 96.0
+              },
+              "graphicsClockMHz": {
+                "median": 3000.0,
+                "min": 3000.0,
+                "max": 3000.0
+              },
+              "powerW": {
+                "median": 284.0,
+                "min": 264.03,
+                "max": 285.68
+              },
+              "memoryMiB": {
+                "median": 6973.0,
+                "min": 6973.0,
+                "max": 6983.0
+              },
+              "temperatureC": {
+                "median": 44.0,
+                "min": 42.0,
+                "max": 45.0
+              }
+            }
+          }
+        ],
+        "medians": {
+          "applicationPresentRate": 89.03075859003138,
+          "p95Ms": 12.4239,
+          "p99Ms": 13.152,
+          "SDKCountEquivalentTotal": 178.06151718006276,
+          "gpuTelemetry": {
+            "memoryMiB": 6973.0,
+            "powerW": 284.365,
+            "temperatureC": 44.0,
+            "graphicsClockMHz": 3000.0,
+            "utilizationPercent": 96.0
+          }
+        }
+      },
+      "retained-off-a": {
+        "captures": [
+          {
+            "label": "dev10-hdr-retained-off-a-0",
+            "intervals": 1199,
+            "seconds": 9.5333912,
+            "applicationPresentRate": 125.76846736342887,
+            "medianMs": 7.8046,
+            "p95Ms": 9.1871,
+            "p99Ms": 9.853,
+            "SDKRealPresentRate": 125.76846736342887,
+            "SDKGeneratedPresentRate": 0,
+            "SDKCountEquivalentTotal": null,
+            "SDKGeneratedPerRealPresent": null,
+            "SDKPreparedPerRealPresent": null,
+            "SDKImagesPerRealPresent": null,
+            "privateCaptureSHA256": "cadd5696292dc3f57ee0b837d436d3f0bd21fcd82f596210ebf756d748fc5d0b",
+            "gpuTelemetry": {
+              "utilizationPercent": {
+                "median": 95.0,
+                "min": 95.0,
+                "max": 95.0
+              },
+              "graphicsClockMHz": {
+                "median": 3000.0,
+                "min": 3000.0,
+                "max": 3000.0
+              },
+              "powerW": {
+                "median": 284.775,
+                "min": 278.58,
+                "max": 286.8
+              },
+              "memoryMiB": {
+                "median": 7005.0,
+                "min": 7004.0,
+                "max": 7005.0
+              },
+              "temperatureC": {
+                "median": 44.0,
+                "min": 44.0,
+                "max": 45.0
+              }
+            }
+          },
+          {
+            "label": "dev10-hdr-retained-off-a-1",
+            "intervals": 1199,
+            "seconds": 9.5560612,
+            "applicationPresentRate": 125.47010477496733,
+            "medianMs": 7.8421,
+            "p95Ms": 9.198,
+            "p99Ms": 9.647,
+            "SDKRealPresentRate": 125.47010477496733,
+            "SDKGeneratedPresentRate": 0,
+            "SDKCountEquivalentTotal": null,
+            "SDKGeneratedPerRealPresent": null,
+            "SDKPreparedPerRealPresent": null,
+            "SDKImagesPerRealPresent": null,
+            "privateCaptureSHA256": "054a325e317e2c216daa64fbd3ac93a1d2f72526a024bc7d55742a6f1b167fd1",
+            "gpuTelemetry": {
+              "utilizationPercent": {
+                "median": 95.0,
+                "min": 94.0,
+                "max": 95.0
+              },
+              "graphicsClockMHz": {
+                "median": 3000.0,
+                "min": 3000.0,
+                "max": 3000.0
+              },
+              "powerW": {
+                "median": 286.16999999999996,
+                "min": 280.15,
+                "max": 287.37
+              },
+              "memoryMiB": {
+                "median": 7005.0,
+                "min": 7004.0,
+                "max": 7005.0
+              },
+              "temperatureC": {
+                "median": 44.0,
+                "min": 43.0,
+                "max": 45.0
+              }
+            }
+          },
+          {
+            "label": "dev10-hdr-retained-off-a-2",
+            "intervals": 1199,
+            "seconds": 9.498138,
+            "applicationPresentRate": 126.23526842840143,
+            "medianMs": 7.777,
+            "p95Ms": 9.1377,
+            "p99Ms": 9.5811,
+            "SDKRealPresentRate": 126.23526842840143,
+            "SDKGeneratedPresentRate": 0,
+            "SDKCountEquivalentTotal": null,
+            "SDKGeneratedPerRealPresent": null,
+            "SDKPreparedPerRealPresent": null,
+            "SDKImagesPerRealPresent": null,
+            "privateCaptureSHA256": "d7a785cf5f43c688d812b675ed616e5052089e3b52bed2f184a52b929bef4d92",
+            "gpuTelemetry": {
+              "utilizationPercent": {
+                "median": 95.0,
+                "min": 94.0,
+                "max": 95.0
+              },
+              "graphicsClockMHz": {
+                "median": 3000.0,
+                "min": 3000.0,
+                "max": 3000.0
+              },
+              "powerW": {
+                "median": 285.15999999999997,
+                "min": 277.94,
+                "max": 286.42
+              },
+              "memoryMiB": {
+                "median": 7005.0,
+                "min": 7004.0,
+                "max": 7005.0
+              },
+              "temperatureC": {
+                "median": 45.0,
+                "min": 44.0,
+                "max": 45.0
+              }
+            }
+          }
+        ],
+        "medians": {
+          "applicationPresentRate": 125.76846736342887,
+          "p95Ms": 9.1871,
+          "p99Ms": 9.647,
+          "SDKCountEquivalentTotal": null,
+          "gpuTelemetry": {
+            "memoryMiB": 7005.0,
+            "powerW": 285.15999999999997,
+            "temperatureC": 44.0,
+            "graphicsClockMHz": 3000.0,
+            "utilizationPercent": 95.0
+          }
+        }
+      },
+      "on-b": {
+        "captures": [
+          {
+            "label": "dev10-hdr-on-b-0",
+            "intervals": 1199,
+            "seconds": 13.3790329,
+            "applicationPresentRate": 89.61783777361067,
+            "medianMs": 10.9984,
+            "p95Ms": 12.4207,
+            "p99Ms": 12.8599,
+            "SDKRealPresentRate": 89.61783777361067,
+            "SDKGeneratedPresentRate": 89.61783777361067,
+            "SDKCountEquivalentTotal": 179.23567554722135,
+            "SDKGeneratedPerRealPresent": 1.0,
+            "SDKPreparedPerRealPresent": 1.0,
+            "SDKImagesPerRealPresent": 1.0,
+            "privateCaptureSHA256": "33ae79e96428355e85e8253fdc71708b0a2703f655e1e419273fc8258af72422",
+            "gpuTelemetry": {
+              "utilizationPercent": {
+                "median": 96.0,
+                "min": 94.0,
+                "max": 96.0
+              },
+              "graphicsClockMHz": {
+                "median": 2985.0,
+                "min": 2985.0,
+                "max": 2985.0
+              },
+              "powerW": {
+                "median": 285.125,
+                "min": 277.95,
+                "max": 285.9
+              },
+              "memoryMiB": {
+                "median": 6974.0,
+                "min": 6973.0,
+                "max": 6974.0
+              },
+              "temperatureC": {
+                "median": 44.0,
+                "min": 43.0,
+                "max": 45.0
+              }
+            }
+          },
+          {
+            "label": "dev10-hdr-on-b-1",
+            "intervals": 1199,
+            "seconds": 13.4206833,
+            "applicationPresentRate": 89.33971342576871,
+            "medianMs": 11.1306,
+            "p95Ms": 12.354,
+            "p99Ms": 12.8752,
+            "SDKRealPresentRate": 89.33971342576871,
+            "SDKGeneratedPresentRate": 89.33971342576871,
+            "SDKCountEquivalentTotal": 178.67942685153741,
+            "SDKGeneratedPerRealPresent": 1.0,
+            "SDKPreparedPerRealPresent": 1.0,
+            "SDKImagesPerRealPresent": 1.0,
+            "privateCaptureSHA256": "badc3b0ef0487bb1ac552f1deec14fb10cf47854103543e276b8b1aeff66de1e",
+            "gpuTelemetry": {
+              "utilizationPercent": {
+                "median": 96.0,
+                "min": 95.0,
+                "max": 96.0
+              },
+              "graphicsClockMHz": {
+                "median": 2985.0,
+                "min": 2985.0,
+                "max": 2985.0
+              },
+              "powerW": {
+                "median": 285.2,
+                "min": 279.36,
+                "max": 286.24
+              },
+              "memoryMiB": {
+                "median": 6974.0,
+                "min": 6973.0,
+                "max": 6974.0
+              },
+              "temperatureC": {
+                "median": 45.0,
+                "min": 44.0,
+                "max": 45.0
+              }
+            }
+          },
+          {
+            "label": "dev10-hdr-on-b-2",
+            "intervals": 1199,
+            "seconds": 13.4312421,
+            "applicationPresentRate": 89.26948014733499,
+            "medianMs": 11.064,
+            "p95Ms": 12.479,
+            "p99Ms": 13.2591,
+            "SDKRealPresentRate": 89.26948014733499,
+            "SDKGeneratedPresentRate": 89.26948014733499,
+            "SDKCountEquivalentTotal": 178.53896029466998,
+            "SDKGeneratedPerRealPresent": 1.0,
+            "SDKPreparedPerRealPresent": 1.0,
+            "SDKImagesPerRealPresent": 1.0,
+            "privateCaptureSHA256": "52302172c6a869af8867e4becffdc97b0cfd78c3cea476b04fc4e35ca4e998aa",
+            "gpuTelemetry": {
+              "utilizationPercent": {
+                "median": 96.0,
+                "min": 95.0,
+                "max": 96.0
+              },
+              "graphicsClockMHz": {
+                "median": 2985.0,
+                "min": 2985.0,
+                "max": 2985.0
+              },
+              "powerW": {
+                "median": 284.99,
+                "min": 279.89,
+                "max": 286.24
+              },
+              "memoryMiB": {
+                "median": 6974.0,
+                "min": 6973.0,
+                "max": 6974.0
+              },
+              "temperatureC": {
+                "median": 44.0,
+                "min": 44.0,
+                "max": 45.0
+              }
+            }
+          }
+        ],
+        "medians": {
+          "applicationPresentRate": 89.33971342576871,
+          "p95Ms": 12.4207,
+          "p99Ms": 12.8752,
+          "SDKCountEquivalentTotal": 178.67942685153741,
+          "gpuTelemetry": {
+            "memoryMiB": 6974.0,
+            "powerW": 285.125,
+            "temperatureC": 44.0,
+            "graphicsClockMHz": 2985.0,
+            "utilizationPercent": 96.0
+          }
+        }
+      },
+      "retained-off-b": {
+        "captures": [
+          {
+            "label": "dev10-hdr-retained-off-b-0",
+            "intervals": 1199,
+            "seconds": 9.5332392,
+            "applicationPresentRate": 125.77047264270888,
+            "medianMs": 7.8172,
+            "p95Ms": 9.0978,
+            "p99Ms": 9.6459,
+            "SDKRealPresentRate": 125.77047264270888,
+            "SDKGeneratedPresentRate": 0,
+            "SDKCountEquivalentTotal": null,
+            "SDKGeneratedPerRealPresent": null,
+            "SDKPreparedPerRealPresent": null,
+            "SDKImagesPerRealPresent": null,
+            "privateCaptureSHA256": "7836d653556dd4eefdd6af31d2dcecb06fb391a92e1e1c20735fae178638bcb9",
+            "gpuTelemetry": {
+              "utilizationPercent": {
+                "median": 95.0,
+                "min": 95.0,
+                "max": 95.0
+              },
+              "graphicsClockMHz": {
+                "median": 2985.0,
+                "min": 2985.0,
+                "max": 2985.0
+              },
+              "powerW": {
+                "median": 286.25,
+                "min": 279.08,
+                "max": 287.3
+              },
+              "memoryMiB": {
+                "median": 7006.0,
+                "min": 7005.0,
+                "max": 7006.0
+              },
+              "temperatureC": {
+                "median": 45.0,
+                "min": 43.0,
+                "max": 46.0
+              }
+            }
+          },
+          {
+            "label": "dev10-hdr-retained-off-b-1",
+            "intervals": 1199,
+            "seconds": 9.5618034,
+            "applicationPresentRate": 125.3947555541667,
+            "medianMs": 7.8302,
+            "p95Ms": 9.2229,
+            "p99Ms": 10.0693,
+            "SDKRealPresentRate": 125.3947555541667,
+            "SDKGeneratedPresentRate": 0,
+            "SDKCountEquivalentTotal": null,
+            "SDKGeneratedPerRealPresent": null,
+            "SDKPreparedPerRealPresent": null,
+            "SDKImagesPerRealPresent": null,
+            "privateCaptureSHA256": "faefc36cf844e6f0b87b4298559c07edf1850de08fb4b3422a4bd957d3cbe915",
+            "gpuTelemetry": {
+              "utilizationPercent": {
+                "median": 95.0,
+                "min": 86.0,
+                "max": 95.0
+              },
+              "graphicsClockMHz": {
+                "median": 2985.0,
+                "min": 2985.0,
+                "max": 2985.0
+              },
+              "powerW": {
+                "median": 285.96,
+                "min": 277.63,
+                "max": 287.31
+              },
+              "memoryMiB": {
+                "median": 7006.0,
+                "min": 7005.0,
+                "max": 7006.0
+              },
+              "temperatureC": {
+                "median": 45.0,
+                "min": 44.0,
+                "max": 46.0
+              }
+            }
+          },
+          {
+            "label": "dev10-hdr-retained-off-b-2",
+            "intervals": 1199,
+            "seconds": 9.5702511,
+            "applicationPresentRate": 125.28406908780063,
+            "medianMs": 7.8774,
+            "p95Ms": 9.1802,
+            "p99Ms": 9.6121,
+            "SDKRealPresentRate": 125.28406908780063,
+            "SDKGeneratedPresentRate": 0,
+            "SDKCountEquivalentTotal": null,
+            "SDKGeneratedPerRealPresent": null,
+            "SDKPreparedPerRealPresent": null,
+            "SDKImagesPerRealPresent": null,
+            "privateCaptureSHA256": "a77084366808b694dcbbbfb8e90f4d692caef3b0b61e2a01251f706c69aabfce",
+            "gpuTelemetry": {
+              "utilizationPercent": {
+                "median": 95.0,
+                "min": 94.0,
+                "max": 95.0
+              },
+              "graphicsClockMHz": {
+                "median": 2985.0,
+                "min": 2985.0,
+                "max": 2985.0
+              },
+              "powerW": {
+                "median": 285.73,
+                "min": 279.03,
+                "max": 287.45
+              },
+              "memoryMiB": {
+                "median": 7006.0,
+                "min": 7005.0,
+                "max": 7006.0
+              },
+              "temperatureC": {
+                "median": 45.0,
+                "min": 44.0,
+                "max": 46.0
+              }
+            }
+          }
+        ],
+        "medians": {
+          "applicationPresentRate": 125.3947555541667,
+          "p95Ms": 9.1802,
+          "p99Ms": 9.6459,
+          "SDKCountEquivalentTotal": null,
+          "gpuTelemetry": {
+            "memoryMiB": 7006.0,
+            "powerW": 285.96,
+            "temperatureC": 45.0,
+            "graphicsClockMHz": 2985.0,
+            "utilizationPercent": 95.0
+          }
+        }
+      }
+    },
+    "gates": [
+      {
+        "phase": "clean-off",
+        "rateRatio": 1.0,
+        "p99Ratio": 1.0,
+        "memoryIncreaseMiB": 0.0,
+        "powerIncreaseW": 0.0,
+        "temperatureIncreaseC": 0.0,
+        "throughputPassed": true,
+        "tailPassed": true,
+        "resourcePassed": true,
+        "passed": true
+      },
+      {
+        "phase": "on-a",
+        "rateRatio": 0.6781053048684202,
+        "p99Ratio": 1.4013702571096738,
+        "memoryIncreaseMiB": 663.0,
+        "powerIncreaseW": -7.105000000000018,
+        "temperatureIncreaseC": 0.0,
+        "sdkTotalRatio": 1.3562106097368405,
+        "throughputPassed": true,
+        "tailPassed": true,
+        "resourcePassed": true,
+        "passed": true
+      },
+      {
+        "phase": "retained-off-a",
+        "rateRatio": 0.9579191085749215,
+        "p99Ratio": 1.027905936004944,
+        "memoryIncreaseMiB": 695.0,
+        "powerIncreaseW": -6.310000000000059,
+        "temperatureIncreaseC": 0.0,
+        "throughputPassed": true,
+        "tailPassed": true,
+        "resourcePassed": true,
+        "passed": true
+      },
+      {
+        "phase": "on-b",
+        "rateRatio": 0.6804584681616025,
+        "p99Ratio": 1.3718766981705044,
+        "memoryIncreaseMiB": 664.0,
+        "powerIncreaseW": -6.345000000000027,
+        "temperatureIncreaseC": 0.0,
+        "sdkTotalRatio": 1.360916936323205,
+        "throughputPassed": true,
+        "tailPassed": true,
+        "resourcePassed": true,
+        "passed": true
+      },
+      {
+        "phase": "retained-off-b",
+        "rateRatio": 0.9550727219511751,
+        "p99Ratio": 1.0277887289426857,
+        "memoryIncreaseMiB": 696.0,
+        "powerIncreaseW": -5.510000000000048,
+        "temperatureIncreaseC": 1.0,
+        "throughputPassed": true,
+        "tailPassed": true,
+        "resourcePassed": true,
+        "passed": true
+      }
+    ],
+    "passed": true,
+    "physicalDisplayFPSMeasured": false,
+    "inputLatencyMeasured": false,
+    "gpuPassTimesMeasured": false,
+    "windowsRadeonQualified": false
+  },
+  "rejectedSDRMeasurements": {
+    "reason": "HDR Off preference was not acknowledged without RenoDX; native HDR remained enabled. These are not qualified SDR samples. No SDR FG-On throughput capture was taken.",
+    "captures": [
+      {
+        "label": "dev10-sdr-clean-off-0",
+        "intervals": 1199,
+        "seconds": 9.0532732,
+        "applicationPresentRate": 132.4382876239723,
+        "medianMs": 7.4537,
+        "p95Ms": 8.8299,
+        "p99Ms": 9.4949,
+        "SDKRealPresentRate": null,
+        "SDKGeneratedPresentRate": 0,
+        "SDKCountEquivalentTotal": null,
+        "SDKGeneratedPerRealPresent": null,
+        "SDKPreparedPerRealPresent": null,
+        "SDKImagesPerRealPresent": null,
+        "privateCaptureSHA256": "1b33dac93eb89b17baa32ee0eea287d70c4745d82805813062bd669270af707d",
+        "gpuTelemetry": {
+          "utilizationPercent": {
+            "median": 95.0,
+            "min": 94.0,
+            "max": 95.0
+          },
+          "graphicsClockMHz": {
+            "median": 3000.0,
+            "min": 3000.0,
+            "max": 3000.0
+          },
+          "powerW": {
+            "median": 291.58,
+            "min": 285.14,
+            "max": 292.88
+          },
+          "memoryMiB": {
+            "median": 6310.0,
+            "min": 6308.0,
+            "max": 6310.0
+          },
+          "temperatureC": {
+            "median": 45.0,
+            "min": 44.0,
+            "max": 46.0
+          }
+        }
+      },
+      {
+        "label": "dev10-sdr-clean-off-1",
+        "intervals": 1199,
+        "seconds": 9.087059,
+        "applicationPresentRate": 131.94588039980812,
+        "medianMs": 7.4781,
+        "p95Ms": 8.9049,
+        "p99Ms": 9.4717,
+        "SDKRealPresentRate": null,
+        "SDKGeneratedPresentRate": 0,
+        "SDKCountEquivalentTotal": null,
+        "SDKGeneratedPerRealPresent": null,
+        "SDKPreparedPerRealPresent": null,
+        "SDKImagesPerRealPresent": null,
+        "privateCaptureSHA256": "778e318838df9b4b00585f700dd24cf684e1626b509ad5383032b9d6cc6887d9",
+        "gpuTelemetry": {
+          "utilizationPercent": {
+            "median": 95.0,
+            "min": 94.0,
+            "max": 95.0
+          },
+          "graphicsClockMHz": {
+            "median": 3000.0,
+            "min": 3000.0,
+            "max": 3000.0
+          },
+          "powerW": {
+            "median": 291.18,
+            "min": 285.26,
+            "max": 292.98
+          },
+          "memoryMiB": {
+            "median": 6310.0,
+            "min": 6308.0,
+            "max": 6310.0
+          },
+          "temperatureC": {
+            "median": 45.0,
+            "min": 44.0,
+            "max": 46.0
+          }
+        }
+      },
+      {
+        "label": "dev10-sdr-clean-off-2",
+        "intervals": 1199,
+        "seconds": 9.0608932,
+        "applicationPresentRate": 132.32691011080453,
+        "medianMs": 7.4703,
+        "p95Ms": 8.7732,
+        "p99Ms": 9.5608,
+        "SDKRealPresentRate": null,
+        "SDKGeneratedPresentRate": 0,
+        "SDKCountEquivalentTotal": null,
+        "SDKGeneratedPerRealPresent": null,
+        "SDKPreparedPerRealPresent": null,
+        "SDKImagesPerRealPresent": null,
+        "privateCaptureSHA256": "22e3e6f192e32092da783be3e3a7cefd1d0963b4b5763146d859631bc161d748",
+        "gpuTelemetry": {
+          "utilizationPercent": {
+            "median": 95.0,
+            "min": 94.0,
+            "max": 95.0
+          },
+          "graphicsClockMHz": {
+            "median": 3000.0,
+            "min": 3000.0,
+            "max": 3000.0
+          },
+          "powerW": {
+            "median": 290.69,
+            "min": 283.7,
+            "max": 292.25
+          },
+          "memoryMiB": {
+            "median": 6310.0,
+            "min": 6308.0,
+            "max": 6310.0
+          },
+          "temperatureC": {
+            "median": 45.0,
+            "min": 44.0,
+            "max": 46.0
+          }
+        }
+      }
+    ],
+    "outputDiagnostic": {
+      "hdrPreference": 0,
+      "HDRRevision": 0,
+      "HDRRestartRequired": 1,
+      "nativeHDRSaved": true,
+      "amdOutputColourSpace": 3,
+      "amdOutputFormat": 24,
+      "renoDXLoaded": false
+    }
+  },
+  "normalExits": {
+    "hdr-off": {
+      "shippingExitCode": 0,
+      "heldProcessHandle": true,
+      "normalQuitSeconds": 3.4641823499987368,
+      "setupRestored": true
+    },
+    "hdr-amd": {
+      "shippingExitCode": 0,
+      "heldProcessHandle": true,
+      "normalQuitSeconds": 3.777429691999714,
+      "setupRestored": true
+    },
+    "sdr-off": {
+      "shippingExitCode": 0,
+      "heldProcessHandle": true,
+      "normalQuitSeconds": 4.08360684299987,
+      "setupRestored": true
+    },
+    "sdr-amd": {
+      "shippingExitCode": 3221226505,
+      "heldProcessHandle": true,
+      "normalQuitSeconds": 3.566168593999464,
+      "setupRestored": true
+    }
+  },
+  "allNormalExitsPassed": false,
+  "newFatalExit": {
+    "run": "sdr-amd",
+    "hexCode": "0xc0000409",
+    "actualOutput": "PQ/HDR despite requested SDR",
+    "samplerInstalled": true,
+    "amdSDKRetirementResult": 0,
+    "sharedSDKRetirementResult": 0,
+    "causeEstablished": false
+  },
+  "SRStatusCRCFramingSemanticsVerified": true,
+  "allRunsRestored": true,
+  "physicalDisplayFPSMeasured": false,
+  "inputLatencyMeasured": false,
+  "GPUExecutionTimesMeasured": false,
+  "nativeWindowsRadeonQualified": false,
+  "antiLag2DriverActivationQualified": false,
+  "longSessionQualified": false,
+  "candidateQualified": false,
+  "publishedReleaseChanged": false,
+  "rawDiagnosticsPublished": false
+}

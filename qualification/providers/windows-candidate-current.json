@@ -71,12 +71,12 @@
     "Two normal quits returned 0; NVIDIA retirement/re-enable-refusal run quit returned 0xc0000409"
   ],
   "linuxRuntimeReceipt": "qualification/providers/amd-dev10-linux-2026-10-14.json",
-  "sourceChangedAfterSelection": false,
-  "selectionNeedsRebuild": false,
+  "sourceChangedAfterSelection": true,
+  "selectionNeedsRebuild": true,
   "windowsHardwareCurrentlyUnavailable": true,
   "windowsQualificationCleared": false,
   "knownShutdownFailure": true,
-  "installerRebuildAndVerificationPending": false,
+  "installerRebuildAndVerificationPending": true,
   "publishedReleaseChanged": false,
   "includedSourceCorrections": [
     "docs/AMD_ANTILAG_SHUTDOWN_2026-10-14.md",
@@ -90,5 +90,11 @@
   "installerGUIAndTransactionsQualified": false,
   "linuxShortExitControlReceipt": "qualification/providers/amd-dev10-exit-controls-2026-10-14.json",
   "linuxQuietReplayReceipt": "qualification/providers/amd-dev10-quiet-replays-2026-10-14.json",
-  "linuxGraphicsDisabledBaselineReceipt": "qualification/providers/graphics-disabled-baseline-2026-10-14.json"
+  "linuxGraphicsDisabledBaselineReceipt": "qualification/providers/graphics-disabled-baseline-2026-10-14.json",
+  "pendingCandidateVersion": "0.4.0-amd.dev.11",
+  "pendingCorrection": "Native HDR Off acknowledgement without RenoDX",
+  "pendingLatencySourceSHA256": "d1f22096becb9a1824039926da819797e2e7f0f8a1d6d70cac87f7703f8458c2",
+  "linuxHDRBenchmarkReceipt": "qualification/providers/amd-dev10-benchmark-2026-10-14.json",
+  "linuxSDRBenchmarkRejected": true,
+  "linuxAdditionalAMDExitFailure": true
 }

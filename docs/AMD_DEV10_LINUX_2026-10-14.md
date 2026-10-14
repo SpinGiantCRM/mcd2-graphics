@@ -67,3 +67,10 @@ These are bounded operational checks, not complete lifecycle, image-quality,
 performance, physical display pacing or native Windows/Radeon qualification.
 Anti-Lag 2 driver activation remains untested. Earlier candidate benchmarks do
 not qualify these rebuilt binaries. Published files and tags are unchanged.
+
+The subsequent [dev.10 HDR benchmark](AMD_DEV10_BENCHMARK_2026-10-14.md) passed
+its registered numerical envelope across fresh Off and two live On/Off cycles.
+Its SDR attempt exposed a native-output acknowledgement error and was rejected
+as SDR evidence. That diagnostic AMD FG process also returned `0xc0000409`
+despite successful SDK retirement. Its cause remains unresolved. The output
+correction needs a new artifact; the HDR benchmark cannot qualify that rebuild.

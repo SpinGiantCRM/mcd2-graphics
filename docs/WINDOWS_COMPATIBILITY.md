@@ -1,3 +1,11 @@
+The [native HDR Off correction](HDR_OFF_ACKNOWLEDGEMENT_2026-10-14.md) allows
+the UI to disable native HDR without a loaded RenoDX addon. Preserve missing-addon
+On refusal, loaded-addon calibration/restart admission and one wake per Off
+revision. Keep the actual-source fixture in both portable CI jobs. Require a new
+artifact and actual output-colour checks; saved HDR Off alone is insufficient.
+Candidate installer assembly must skip stale source/artifact selections. Linux
+source tests and HDR throughput measurements do not qualify Windows/Radeon.
+
 The [shared gameplay readiness gate](FSR_MENU_READINESS_2026-10-14.md) applies
 the existing pause/widget exclusions to SR as well as FG. Preserve HUD/activity/
 notification allowances, source rollback outside gameplay and the acyclic actor
