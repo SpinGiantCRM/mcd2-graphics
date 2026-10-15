@@ -25,6 +25,8 @@ adds immediate settings-page refresh and text/widget indentation according to
 [its official changelog](https://www.nexusmods.com/minecraftdungeons2/mods/2?tab=files).
 These additions do not require a new graphics UI build. The final Linux/NVIDIA and Windows/AMD qualification used Loader 2.3; future releases still require their own checks.
 
+Blueprint Loader **2.5** is not yet a recognized or qualified release set. Use the explicit untested-version override to try it; the existing API minimum is unchanged.
+
 For Blueprint Loader, ReShade, RenoDX, DLSS or Streamline, select **Try an
 untested dependency version** beside that requirement. Select an official
 download, or explicitly select **Use installed version** to keep the files

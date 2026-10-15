@@ -1,5 +1,7 @@
 """Regress the mixed directory names in a real Windows Kits installation."""
 import importlib.util
+import ast
+import fnmatch
 from pathlib import Path
 import tempfile
 import unittest
@@ -20,7 +22,14 @@ source_spec.loader.exec_module(source_tree)
 class WindowsBuildChecks(unittest.TestCase):
     def test_conversion_shader_edits_trigger_windows_candidate_ci(self):
         workflow = (candidate.REPO / ".github/workflows/fg-windows-candidate.yml").read_text()
-        self.assertIn("      - 'src/shaders/**'", workflow)
+        # The workflow always reports its gate; expensive builds use this scope.
+        match = re.search(r'^\s+patterns = (\[.*\])$', workflow, re.MULTILINE)
+        self.assertIsNotNone(match)
+        patterns = ast.literal_eval(match.group(1))
+        self.assertTrue(any(fnmatch.fnmatchcase('src/shaders/fsr_dense.hlsl', pattern)
+                            for pattern in patterns))
+        self.assertIn("if: needs.changes.outputs.native == 'true'", workflow)
+        self.assertIn('needs: [changes, build]', workflow)
 
     def sr_build_fixture(self, root):
         repo = root / 'repo'
