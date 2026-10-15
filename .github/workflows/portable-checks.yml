@@ -54,6 +54,12 @@ jobs:
           /tmp/fg-configuration
       - name: Generate synthetic parser fixtures
         run: python3 tests/make_synthetic_saves.py /tmp/mcd2-fixtures
+      - name: GDK legacy slot validation
+        run: |
+          g++ -std=c++20 tests/gdk_save_slots_test.cpp -o /tmp/gdk-save-slots
+          /tmp/gdk-save-slots /tmp/mcd2-fixtures
+          g++ -std=c++20 tests/gdk_cache_time_test.cpp -o /tmp/gdk-cache-time
+          /tmp/gdk-cache-time
       - name: Settings framing and semantic checks
         run: |
           g++ -std=c++20 -Wall -Wextra -Werror tests/provider_intent_test.cpp -o /tmp/provider-intent
@@ -137,6 +143,11 @@ jobs:
           python -m unittest discover -s tests -p "test_provider_baseline.py" -v
           python -m unittest discover -s tests -p "test_provider_menu_overlay.py" -v
           python tools/provider_baseline.py verify
+      - name: Windows NGX driver loader
+        shell: bash
+        run: |
+          g++ -std=c++20 -static -Wall -Wextra -Werror tests/ngx_driver_load_test.cpp -ladvapi32 -o ngx-driver-load.exe
+          ./ngx-driver-load.exe || test "$?" -eq 77
       - name: Provider intent contract
         shell: bash
         run: |
@@ -148,6 +159,10 @@ jobs:
           python tests/make_synthetic_saves.py display-fixtures
           g++ -std=c++20 -static tests/display_protocol_test.cpp -o display-protocol.exe
           ./display-protocol.exe display-fixtures/display-settings.sav display-fixtures/display-runtime.sav
+          g++ -std=c++20 -static tests/gdk_save_slots_test.cpp -o gdk-save-slots.exe
+          ./gdk-save-slots.exe display-fixtures
+          g++ -std=c++20 -static tests/gdk_cache_time_test.cpp -o gdk-cache-time.exe
+          ./gdk-cache-time.exe
           g++ -std=c++20 -static -Isrc/native tests/lean_borrow_lifetime_test.cpp -o lean-borrow-lifetime.exe
           ./lean-borrow-lifetime.exe
           g++ -std=c++20 -static -pthread -Wall -Wextra -Werror tests/amd_latency_test.cpp -o amd-latency.exe

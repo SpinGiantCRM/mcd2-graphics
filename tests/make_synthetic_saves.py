@@ -37,6 +37,11 @@ def main():
         'SchemaVersion': 1, 'RequestedRevision': 22, 'SessionId': 345,
         'Phase': 2, 'ErrorCode': 0,
     }))
+    (output / 'fg-settings.sav').write_bytes(save('FGSettingsSave', {
+        'SchemaVersion': 1, 'Revision': 3, 'Mode': 1, 'ContextReady': 1,
+        'SessionId': 345, 'SettingsRevision': 22,
+    }))
+    (output / 'fg-runtime.sav').write_bytes(save('FGRuntimeSave', {'SchemaVersion': 1}))
 
 if __name__ == '__main__':
     main()

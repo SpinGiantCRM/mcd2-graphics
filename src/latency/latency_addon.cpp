@@ -120,6 +120,7 @@ using RegistryCount=int(*)(void*,uint64_t);
 RegistryMutation add=nullptr,remove=nullptr;
 
 thread_local bool presentActive=false;
+std::atomic<uint64_t> cpuPresentationOwner{0};
 thread_local uint64_t presentIdentity=0;
 void record(unsigned,uint64_t,float=0){} // No per-frame diagnostics or copies.
 std::shared_ptr<sr::TokenCoordinator> controller(){return std::atomic_load(&coordinator);}
@@ -347,9 +348,9 @@ void init(a::device*device){
  add(registry,latencyName,&marker.modular);add(registry,pacingName,&pacer.modular);installed=true;
  log<<"{\"kind\":\"registered\",\"gameThread\":"<<GetCurrentThreadId()<<"}\n";log.flush();
 }
-void present(a::command_queue*,a::swapchain* swapchain,const a::rect*,const a::rect*,unsigned,const a::rect*){if(installed&&swapchain->get_device()->get_native()==boundNative){record(9,presentActive?presentIdentity:UINT64_MAX);record(11,*reinterpret_cast<uint64_t*>(base+engineLayout->renderCounter));if(presentActive){if(amdLatencyOptIn){if(auto amd=amd_controller())amd->pre_present(presentIdentity);}forward(presentIdentity,sr::Marker::RenderEnd);forward(presentIdentity,sr::Marker::PresentStart);}}}
+void present(a::command_queue*,a::swapchain* swapchain,const a::rect*,const a::rect*,unsigned,const a::rect*){if(cpuPresentationOwner)return;if(installed&&swapchain->get_device()->get_native()==boundNative){record(9,presentActive?presentIdentity:UINT64_MAX);record(11,*reinterpret_cast<uint64_t*>(base+engineLayout->renderCounter));if(presentActive){if(amdLatencyOptIn){if(auto amd=amd_controller())amd->pre_present(presentIdentity);}forward(presentIdentity,sr::Marker::RenderEnd);forward(presentIdentity,sr::Marker::PresentStart);}}}
 void finish(a::command_queue*,a::swapchain*){
- auto c=controller();if(installed&&c){if(presentActive)forward(presentIdentity,sr::Marker::PresentEnd);
+ auto c=controller();if(installed&&c){if(presentActive&&!cpuPresentationOwner)forward(presentIdentity,sr::Marker::PresentEnd);
   if(!capabilityChecked){capabilityChecked=true;unsigned available=0,valid=0,complete=0;auto result=provider.state(&available,&valid,&complete);
    if(!result&&c->attach()){reflexAvailable=available?1:0;}else fault();workerWake.notify_all();
   }
@@ -408,4 +409,13 @@ extern "C" __declspec(dllexport) void AddonUninit(HMODULE,HMODULE){
  // ReShade may unload a probing device before init_device claims it. Release
  // our bootstrap outside DllMain as well; shutdown is deliberately idempotent.
  workerStop=true;workerWake.notify_all();if(settingsWorker.joinable())settingsWorker.join();cleanup();amdProvider.unload();
+}
+extern "C" __declspec(dllexport) int mcd2_fg_game_cpu_present_v1(uint64_t owner,uint64_t){
+ if(!owner||!installed||!presentActive)return 0;
+ cpuPresentationOwner=owner;forward(presentIdentity,sr::Marker::RenderEnd);forward(presentIdentity,sr::Marker::PresentStart);return 1;
+}
+extern "C" __declspec(dllexport) int mcd2_fg_game_cpu_present_end_v1(uint64_t owner,uint64_t){uint64_t expected=owner;cpuPresentationOwner.compare_exchange_strong(expected,0);return 1;}
+extern "C" __declspec(dllexport) int mcd2_fg_game_cpu_present_done_v1(uint64_t owner,uint64_t){
+ if(!owner||cpuPresentationOwner!=owner||!installed||!presentActive)return 0;
+ forward(presentIdentity,sr::Marker::PresentEnd);return 1;
 }
