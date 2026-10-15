@@ -224,6 +224,8 @@ jobs:
           dotnet-version: '10.0.401'
       - name: Temporal SR foliage ownership checks
         run: python tests/test_fg_foliage_policy.py
+      - name: HDR menu fallback checks
+        run: python tests/test_hdr_rows.py
       - name: Consolidated provider menu controls
         run: dotnet run --project tests/provider-menu-client/ProviderMenuClient.Tests.csproj -c Release
       - name: Guided installer file-safety checks

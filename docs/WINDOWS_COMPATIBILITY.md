@@ -1,3 +1,11 @@
+The HDR controls retain their native Brightness placement when available.
+If that anchor is absent, use the existing owned Upscaler row, and refuse
+insertion when that row is absent too. Keep the managed fallback fixture on
+Windows/Linux and rebuild all three UI archives with matching source receipts.
+A stored HDR Off request can otherwise disable manually enabled Unreal HDR even
+when the old menu hides the control. UI visibility and actual HDR10 output need
+separate runtime verification; do not infer either from a successful build.
+
 Windows NGX discovery must include the 64-bit `NGXCore/FullPath` registry location:
 the installed driver DLL can be outside ordinary DLL search paths. Both the
 capability probe and live SR initialization use the same loader. Keep existing

@@ -23,8 +23,12 @@ The tested configuration enables Unreal's own HDR output and uses RenoDX's
 native-HDR correction mode. Both settings are required. `r.AllowHDR=1` alone
 does not activate HDR. Unreal also needs its saved `bUseHDRDisplayOutput=True`
 preference, otherwise it can switch its swapchain back to SDR after startup.
-The HDR checkbox in the mod controls RenoDX tonemapping/calibration; this
-manual candidate does not synchronize Unreal's saved HDR preference with it.
+The mod's HDR Output control updates RenoDX calibration and applies Unreal's
+HDR preference after the matching runtime acknowledgement, once no restart is
+pending. A stored HDR Off request can therefore undo a manually enabled Unreal
+preference at startup. Keep both preferences enabled. If the native Brightness
+anchor is absent, the rebuilt candidate UI places HDR controls beside its own
+Upscaler row. The frozen preview archives are unchanged.
 
 With WinGDK 1.1.2.0, RTX 4080, driver 617.42, 3840x2160, borderless, DLSS
 Performance, FG On and Reflex On, the follow-up trial retained HDR10/PQ output.
@@ -77,7 +81,7 @@ r.HDR.UI.CompositeMode=1
 bUseHDRDisplayOutput=True
 ```
 
-6. Start through the Xbox app. Retain borderless mode, DLSS Performance, FG On and Reflex On. Enable HDR in the mod's video controls for its RenoDX tonemapping/calibration and restart when requested. Changing calibration in the menu does not immediately update the running RenoDX bindings. Native Unreal HDR output is separately controlled by steps 4 and 5.
+6. Start through the Xbox app. Retain borderless mode, DLSS Performance, FG On and Reflex On. Enable HDR in the mod's video controls for its RenoDX tonemapping/calibration and restart when requested. Changing calibration in the menu does not immediately update the running RenoDX bindings. Keep the mod control On as well as the native Unreal HDR settings in steps 4 and 5.
 7. Enter a mission and leave the game foreground for at least 30 seconds. Check motion, UI and colours, then compare the in-game counter with Xbox Game Bar. FG intentionally pauses when the game loses foreground focus; do not disable that guard to make background measurements look active.
 
 `SetColorSpace1(ColorSpace = 12)` in ReShade's log identifies the HDR10/PQ
