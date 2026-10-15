@@ -411,11 +411,13 @@ extern "C" __declspec(dllexport) void AddonUninit(HMODULE,HMODULE){
  workerStop=true;workerWake.notify_all();if(settingsWorker.joinable())settingsWorker.join();cleanup();amdProvider.unload();
 }
 extern "C" __declspec(dllexport) int mcd2_fg_game_cpu_present_v1(uint64_t owner,uint64_t){
+ if(mcd2::process_exit::terminating())return 0;
  if(!owner||!installed||!presentActive)return 0;
  cpuPresentationOwner=owner;forward(presentIdentity,sr::Marker::RenderEnd);forward(presentIdentity,sr::Marker::PresentStart);return 1;
 }
-extern "C" __declspec(dllexport) int mcd2_fg_game_cpu_present_end_v1(uint64_t owner,uint64_t){uint64_t expected=owner;cpuPresentationOwner.compare_exchange_strong(expected,0);return 1;}
+extern "C" __declspec(dllexport) int mcd2_fg_game_cpu_present_end_v1(uint64_t owner,uint64_t){if(mcd2::process_exit::terminating())return 0;uint64_t expected=owner;cpuPresentationOwner.compare_exchange_strong(expected,0);return 1;}
 extern "C" __declspec(dllexport) int mcd2_fg_game_cpu_present_done_v1(uint64_t owner,uint64_t){
+ if(mcd2::process_exit::terminating())return 0;
  if(!owner||cpuPresentationOwner!=owner||!installed||!presentActive)return 0;
  forward(presentIdentity,sr::Marker::PresentEnd);return 1;
 }

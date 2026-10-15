@@ -45,8 +45,8 @@ std::map<uint64_t,a::command_queue*> gameQueues;
 std::map<a::swapchain*,HWND> gameSwaps;
 std::atomic<uint64_t> gamePresentationOwner{0};
 thread_local bool gamePresentationCallback=false;
-void game_queue_init(a::command_queue*q){std::lock_guard lock(mutex);gameQueues[q->get_native()]=q;}
-void game_queue_destroy(a::command_queue*q){std::lock_guard lock(mutex);auto it=gameQueues.find(q->get_native());if(it!=gameQueues.end()&&it->second==q)gameQueues.erase(it);}
+void game_queue_init(a::command_queue*q){if(mcd2::process_exit::terminating())return;std::lock_guard lock(mutex);gameQueues[q->get_native()]=q;}
+void game_queue_destroy(a::command_queue*q){if(mcd2::process_exit::terminating())return;std::lock_guard lock(mutex);auto it=gameQueues.find(q->get_native());if(it!=gameQueues.end()&&it->second==q)gameQueues.erase(it);}
 using Frame=uint64_t(*)();
 using Visit=int(*)(uint64_t,int(*)(void*,unsigned,void*),void*);
 Frame renderFrame=nullptr,presentFrame=nullptr,renderMarker=nullptr,threadRenderMarker=nullptr;Visit visitFrame=nullptr;
