@@ -19,7 +19,7 @@ The current source tree separates native code, shaders and UI under `src/native`
 Contributions are welcome for areas including:
 
 - rendering integration and lifecycle correctness;
-- DLSS/NGX, Reflex and later Frame Generation work;
+- DLSS/NGX, FSR, Frame Generation and latency integration;
 - UI and settings integration;
 - HDR/RenoDX compatibility;
 - provider/interoperability work;
@@ -79,6 +79,8 @@ MCD2 Graphics depends on or interoperates with external projects including ReSha
 When a defect is demonstrably in a third-party project, prefer a minimal upstream reproducer over a game-specific workaround. Keep game-specific integration changes in this repository.
 
 ## Pull requests
+
+Group related changes into a coherent goal with reviewable commits. Main requires the Portable checks and Native candidate checks gates; relevant native changes require a Windows build. Runtime support needs exact-artifact qualification; green CI alone does not establish it.
 
 A useful pull request should include:
 
