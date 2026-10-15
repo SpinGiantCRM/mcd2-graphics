@@ -9,7 +9,8 @@ inline constexpr std::size_t viewFrameOffset=661*sizeof(float);
 inline bool view_frame(const void*data,std::size_t size,uint32_t& out){
  if(!data||size<viewFrameOffset+sizeof(uint32_t))return false;
  uint32_t stamp=0;std::memcpy(&stamp,static_cast<const char*>(data)+viewFrameOffset,sizeof(stamp));
- if(!stamp||stamp==UINT32_MAX)return false;out=stamp;return true;
+ if(!stamp||stamp==UINT32_MAX)return false;
+ out=stamp;return true;
 }
 inline bool inverse(const float* in,float* out){
  double work[4][8]{};
