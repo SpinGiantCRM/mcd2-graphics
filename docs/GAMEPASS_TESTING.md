@@ -31,6 +31,15 @@ images, so UI quality needs more testing. Other game builds, GPUs, drivers,
 long sessions and other platforms remain unqualified. Native FG Off retires
 this experimental session; restart the game before turning it back on.
 
+## Optional native HDR with RenoDX
+
+The original binary ZIP remains the SDR test package described above. A later
+bounded test passed with native Unreal HDR and RenoDX, using the same native
+components plus temporary admission logging. See [the HDR configuration guide](GAMEPASS_HDR.md)
+and the separate HDR configuration ZIP on the same prerelease. Use that guide
+to enable the native HDR path; adding RenoDX with its default SDR upgrade mode
+reproduces a black screen. Calibration and wider runtime checks remain limited.
+
 ## External requirements
 
 Acquire dependencies separately from their official sources and retain their

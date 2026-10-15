@@ -37,6 +37,13 @@ passes both readbacks. The experimental Windows FG trial therefore disables
 RenoDX and loses its HDR modifications. Do not qualify the combined RenoDX/FG
 configuration from API success or advertise HDR support for that trial.
 
+A later bounded [native HDR/RenoDX trial](GAMEPASS_HDR.md) passed using
+RenoDX `Set_Path=0`, Unreal HDR output CVars and the saved
+`bUseHDRDisplayOutput=True` preference. The SDR-upgrade proxy remains
+incompatible. Preserve this distinction: changing only `r.AllowHDR` or loading
+RenoDX does not qualify HDR. The HDR runtime capture used extra FG admission
+logging with unchanged guards; the normal guide was restored afterwards.
+
 The outer Windows NVIDIA swapchain also advances SR on the application's queue.
 Internal NVIDIA/ReShade presents can use a different queue; initializing SR there
 causes the existing submission-queue guard to stop evaluation. The application
