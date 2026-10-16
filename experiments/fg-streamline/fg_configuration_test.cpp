@@ -1,4 +1,5 @@
 #include "fg_configuration.hpp"
+#include "fg_frame_inputs.hpp"
 #include "streamline_feature_policy.hpp"
 #include <cassert>
 #include <cstring>
@@ -23,6 +24,24 @@ int main() {
  assert(!permanentOff(0,false,0)); // No UI acknowledgement yet.
  assert(!permanentOff(1,false,0)); // Previous-process saved On.
  Configuration c;
+ assert(!nvidiaInputsReady(false,false,false));
+ assert(!nvidiaInputsReady(false,true,true));
+ assert(!nvidiaInputsReady(true,false,false));
+ assert(nvidiaInputsReady(true,true,false));
+ assert(nvidiaInputsReady(true,false,true));
+ MCD2FGCamera camera{};camera.frame=42;camera.width=1920;camera.height=1080;
+ FrameInputs colorFirst{};colorFirst.sdrFinalColor=true;
+ assert(!nvidiaInputsReady(colorFirst.guides,colorFirst.images,colorFirst.sdrFinalColor));
+ colorFirst.setGuides(camera,true);
+ assert(nvidiaInputsReady(colorFirst.guides,colorFirst.images,colorFirst.sdrFinalColor)&&colorFirst.camera.frame==42);
+ FrameInputs guidesFirst{};guidesFirst.setGuides(camera,true);
+ assert(!nvidiaInputsReady(guidesFirst.guides,guidesFirst.images,guidesFirst.sdrFinalColor));
+ guidesFirst.sdrFinalColor=true;
+ assert(nvidiaInputsReady(guidesFirst.guides,guidesFirst.images,guidesFirst.sdrFinalColor));
+ colorFirst.images=true;colorFirst.setGuides(camera,false);
+ assert(colorFirst.images&&colorFirst.sdrFinalColor&&!nvidiaInputsReady(colorFirst.guides,colorFirst.images,colorFirst.sdrFinalColor));
+ colorFirst.setGuides(camera,true);
+ assert(colorFirst.images&&colorFirst.sdrFinalColor&&nvidiaInputsReady(colorFirst.guides,colorFirst.images,colorFirst.sdrFinalColor));
  const MCD2FGConfig on{48,1,3840,2160,2560,1440,24,61,41,34,3,1};
  assert(sameConfiguration(on,on));
  assert(sameConfiguration(configurationForPresent(on,{}),on));

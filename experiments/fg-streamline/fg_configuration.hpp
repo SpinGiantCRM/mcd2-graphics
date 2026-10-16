@@ -1,6 +1,10 @@
 #pragma once
 #include "fg_bridge_contract.h"
 namespace mcd2::fg {
+// Streamline intercepts final color; HUDless/UI images improve UI quality.
+inline bool nvidiaInputsReady(bool guides,bool composedImages,bool directFinalColor) {
+ return guides&&(composedImages||directFinalColor);
+}
 inline bool sameConfiguration(const MCD2FGConfig& a,const MCD2FGConfig& b) {
  return a.size==b.size && a.mode==b.mode && a.width==b.width && a.height==b.height &&
   a.motionWidth==b.motionWidth && a.motionHeight==b.motionHeight &&

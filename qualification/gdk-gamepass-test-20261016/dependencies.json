@@ -1,0 +1,81 @@
+{
+  "bundled": false,
+  "files": [
+    {
+      "path": "Dungeons/Binaries/WinGDK/sl.interposer.dll",
+      "sha256": "8c87c9499461da561edd529aa9bf7831d67d7b94ebb1c1a5ed54ef4934e1ea4c",
+      "source": "https://github.com/NVIDIA-RTX/Streamline/releases/download/v2.14.1/streamline-sdk-v2.14.1.zip",
+      "member": "bin/x64/sl.interposer.dll"
+    },
+    {
+      "path": "Dungeons/Binaries/WinGDK/sl.common.dll",
+      "sha256": "82924a8954dd671e09351c5de0eb87ad0eb25b944cc9f9ab955ca1d9950de15d",
+      "source": "https://github.com/NVIDIA-RTX/Streamline/releases/download/v2.14.1/streamline-sdk-v2.14.1.zip",
+      "member": "bin/x64/sl.common.dll"
+    },
+    {
+      "path": "Dungeons/Binaries/WinGDK/sl.pcl.dll",
+      "sha256": "f13d51cfa05f4cd514df2026049e2db8adf359221713170ad386fd499915b582",
+      "source": "https://github.com/NVIDIA-RTX/Streamline/releases/download/v2.14.1/streamline-sdk-v2.14.1.zip",
+      "member": "bin/x64/sl.pcl.dll"
+    },
+    {
+      "path": "Dungeons/Binaries/WinGDK/sl.reflex.dll",
+      "sha256": "0ce9725e3e03ea9e7f81d008b57f33ee365973d2e349131c8b1c3e3378fe2db0",
+      "source": "https://github.com/NVIDIA-RTX/Streamline/releases/download/v2.14.1/streamline-sdk-v2.14.1.zip",
+      "member": "bin/x64/sl.reflex.dll"
+    },
+    {
+      "path": "Dungeons/Binaries/WinGDK/sl.dlss_g.dll",
+      "sha256": "f4a6b2b14dcc0b1485989e430d3b4e3a44ac1800b92ba1ad74f476e64fb2b09c",
+      "source": "https://github.com/NVIDIA-RTX/Streamline/releases/download/v2.14.1/streamline-sdk-v2.14.1.zip",
+      "member": "bin/x64/sl.dlss_g.dll"
+    },
+    {
+      "path": "Dungeons/Binaries/WinGDK/nvngx_dlssg.dll",
+      "sha256": "ff6e90eb78b827927dff5b4ecc6b1c870c2e9bca29ed9f48c7d348cc9e170b82",
+      "source": "https://github.com/NVIDIA-RTX/Streamline/releases/download/v2.14.1/streamline-sdk-v2.14.1.zip",
+      "member": "bin/x64/nvngx_dlssg.dll"
+    },
+    {
+      "path": "Dungeons/Binaries/WinGDK/NvLowLatencyVk.dll",
+      "sha256": "2a77dc3e1c724b7eea5755be0ae7423752e79a2459fae72181a9f00e3507e5d6",
+      "source": "https://github.com/NVIDIA-RTX/Streamline/releases/download/v2.14.1/streamline-sdk-v2.14.1.zip",
+      "member": "bin/x64/NvLowLatencyVk.dll"
+    },
+    {
+      "path": "Dungeons/Binaries/WinGDK/d3d12.asi",
+      "sha256": "ce808bb1494415586cfb2ec5638a3ab0f0cea3879e45146a34976740b59fcf48",
+      "source": "https://github.com/SpinGiantCRM/mcd2-graphics/releases/download/v0.3.0-preview.1/ReShade-PR435-4eb9056-reset-epoch-msvc-x64.zip"
+    },
+    {
+      "path": "Dungeons/Binaries/WinGDK/MCD2Graphics/ngx-runtime/nvngx_dlss.dll",
+      "sha256": "3975567b8943c53acce397f2b72380092f84f162d00b0d2c7d08a1025c563983",
+      "source": "https://raw.githubusercontent.com/NVIDIA/DLSS/374959484e79a640feaba44c93ac8cfb0a03f5b5/lib/Windows_x86_64/rel/nvngx_dlss.dll"
+    },
+    {
+      "path": "Dungeons/Binaries/WinGDK/MCD2Graphics/gdk/xgameruntime.thunks.dll",
+      "sha256": "e85def0efc13c0375221bc041138be9936e81c6f8d4505509d38f60b62080ea3",
+      "source": "https://github.com/microsoft/GDK/releases/tag/October-2025-Update-5-v2510.5.6322",
+      "version": "2510.5.6322 x64"
+    },
+    {
+      "path": "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.pak",
+      "sha256": "75e7144577253917f6da7312ef5e585b12fb728226a22b0938323751a6b555cd",
+      "source": "https://www.nexusmods.com/minecraftdungeons2/mods/2?tab=files",
+      "version": "2.2"
+    },
+    {
+      "path": "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.ucas",
+      "sha256": "fded5dcf73f13aebab1e499c23b73ef75560be3b88766d756d17df599de3422c",
+      "source": "https://www.nexusmods.com/minecraftdungeons2/mods/2?tab=files",
+      "version": "2.2"
+    },
+    {
+      "path": "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.utoc",
+      "sha256": "4bde15ba531532bbed2392441ed305976964440d28facf87b3a98d3c30d2e16a",
+      "source": "https://www.nexusmods.com/minecraftdungeons2/mods/2?tab=files",
+      "version": "2.2"
+    }
+  ]
+}
