@@ -1,6 +1,7 @@
 #include "../src/gdk/save_slots.hpp"
 #include <cassert>
 #include <fstream>
+#include <filesystem>
 #include <iterator>
 std::vector<uint8_t> load(const std::filesystem::path& path){std::ifstream f(path,std::ios::binary);assert(f);return {std::istreambuf_iterator<char>(f),{}};}
 std::vector<uint8_t> field(std::vector<uint8_t> bytes,const std::string& name,unsigned value){
