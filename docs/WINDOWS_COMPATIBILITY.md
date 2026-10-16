@@ -857,3 +857,14 @@ shutdown and host exit. The complete 1f8e166 package passed restart, mission
 travel, continued SR/FG/HDR gameplay and normal game exit; see
 `qualification/gdk-gamepass-test-20261016/validation.json`. The cause of the
 earlier local fixture timeout is not established.
+
+## Native NVIDIA Multi Frame Generation candidate
+
+The [NVIDIA MFG candidate](NVIDIA_MULTI_FRAME_GENERATION.md) adds capability-gated
+2x..6x and native Dynamic selection to both legacy/GDK and consolidated menu
+transport. Preserve the 48-byte configuration ABI, zero-default 2x preference,
+GDK field bounds and AMD Single-only pairing. Cached capability discovery runs
+on the presentation path and reuses the state observed after Present rather
+than adding repeated SDK state queries to the render loop. Multiplier changes
+use the existing one-frame suspension and exact-frame guide admission.
+Actual 3x..6x and Dynamic output remain unqualified until tested on RTX 50.

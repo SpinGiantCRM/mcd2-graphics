@@ -92,8 +92,8 @@ inline bool decodeLegacyGraphics(std::span<const std::uint8_t> sr,
     // scalar is silently promoted into a persisted preference.
     constexpr std::array<std::string_view, 7> displayNames{
         "SchemaVersion", "Revision", "HDROutput", "PeakNits", "PaperWhiteNits", "UINits", "ReflexMode"};
-    constexpr std::array<std::string_view, 5> fgNames{
-        "SchemaVersion", "Revision", "Mode", "ContextReady", "SessionId"};
+    constexpr std::array<std::string_view, 8> fgNames{
+        "SchemaVersion", "Revision", "Mode", "ContextReady", "SessionId", "FGProvider", "SettingsRevision", "FrameMode"};
     Fields s, d, f;
     if (!parse(sr, "GraphicsSettingsSave", srNames, s, true) ||
         !parse(display, "DisplaySettingsSave", displayNames, d) ||
@@ -112,6 +112,12 @@ inline bool decodeLegacyGraphics(std::span<const std::uint8_t> sr,
     if (value(d, "HDROutput") > 1 || value(f, "ContextReady") > 1 ||
         value(s, "RenderContextReady") > 1 || value(s, "AppliedSourceRevision") > old.srRevision) return false;
     old.hdr = {value(d, "HDROutput") == 1, value(d, "PeakNits"), value(d, "PaperWhiteNits"), value(d, "UINits")};
-    return migrateV4(old, out);
+    const auto frameMode=value(f,"FrameMode");
+    if(value(f,"FGProvider")!=0 || frameMode>5)return false;
+    GraphicsIntent next;if(!migrateV4(old,next))return false;
+    next.fgStrategy=frameMode==5?FgStrategy::Dynamic:frameMode?FgStrategy::NativeMfg:FgStrategy::Single;
+    next.requestedMultiplier=frameMode==5?2:frameMode+2;
+    if(!validIntent(next))return false;
+    out=next;return true;
 }
 } // namespace mcd2::providers

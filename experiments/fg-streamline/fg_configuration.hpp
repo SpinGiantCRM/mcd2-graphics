@@ -1,6 +1,14 @@
 #pragma once
 #include "fg_bridge_contract.h"
 namespace mcd2::fg {
+// Saved/UI modes: 0..4 mean 2x..6x; 5 selects native Dynamic MFG.
+constexpr unsigned generatedFrames(unsigned frameMode) { return frameMode==5?0:frameMode+1; }
+constexpr bool supportsFrameMode(unsigned frameMode,unsigned maximum,bool dynamic) {
+ return frameMode<5 ? frameMode+1<=maximum : frameMode==5&&dynamic;
+}
+constexpr bool supportsGeneratedFrames(unsigned frames,unsigned maximum,bool dynamic) {
+ return frames ? frames<=5&&frames<=maximum : dynamic;
+}
 // Streamline intercepts final color; HUDless/UI images improve UI quality.
 inline bool nvidiaInputsReady(bool guides,bool composedImages,bool directFinalColor) {
  return guides&&(composedImages||directFinalColor);

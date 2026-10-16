@@ -51,10 +51,10 @@ inline bool valid(const Slot& slot, const std::vector<std::uint8_t>& bytes) {
     if(!display::parse(canonical,slot.saveClass,fields,header))return false;
     const std::set<std::string> allowed=name=="MCD2GraphicsDisplayRuntime"?
         std::set<std::string>{"SchemaVersion","Revision","SessionId","ReflexAvailable","ReflexMode","ReflexFault","HDRRevision","HDRRestartRequired"}:
-        std::set<std::string>{"SchemaVersion","Revision","SessionId","Available","Active","Phase","RestartRequired","AvailableProviders","StartupOwner"};
+        std::set<std::string>{"SchemaVersion","Revision","SessionId","Available","Active","Phase","RestartRequired","AvailableProviders","StartupOwner","MaximumGeneratedFrames","DynamicSupported","ActiveFrameMode"};
     for(const auto& [key,value]:fields)if(!allowed.contains(key))return false;
     if(name=="MCD2GraphicsDisplayRuntime")return fields["ReflexAvailable"]<=1 && fields["ReflexMode"]<=2 && fields["ReflexFault"]<=1 && fields["HDRRestartRequired"]<=1;
-    return fields["Available"]<=1 && fields["Active"]<=1 && fields["Phase"]<=6 && fields["RestartRequired"]<=1 && fields["AvailableProviders"]<=3 && fields["StartupOwner"]<=2;
+    return fields["Available"]<=1 && fields["Active"]<=1 && fields["Phase"]<=6 && fields["RestartRequired"]<=1 && fields["AvailableProviders"]<=3 && fields["StartupOwner"]<=2 && fields["MaximumGeneratedFrames"]<=16 && fields["DynamicSupported"]<=1 && fields["ActiveFrameMode"]<=5;
 }
 struct Identity { std::uint64_t user=0; std::string scid; };
 inline bool identity(std::string_view folder, Identity& out) {

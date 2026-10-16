@@ -361,12 +361,12 @@ void present(a::command_queue*q,a::swapchain*swap,const a::rect*,const a::rect*,
  auto bridge=GetModuleHandleW(L"fg-sdk-bridge.dll");using LastConfig=int(*)(MCD2FGConfig*);
  auto last=bridge?reinterpret_cast<LastConfig>(GetProcAddress(bridge,"mcd2_fg_last_config")):nullptr;
  MCD2FGConfig effective{};if(last)last(&effective);
- const MCD2FGConfig requested{sizeof(MCD2FGConfig),mode,outputWidth,outputHeight,data.camera.width?data.camera.width:outputWidth,data.camera.height?data.camera.height:outputHeight,outputFormat,61,41,34,outputBuffers,1};
+ const MCD2FGConfig requested{sizeof(MCD2FGConfig),mode,outputWidth,outputHeight,data.camera.width?data.camera.width:outputWidth,data.camera.height?data.camera.height:outputHeight,outputFormat,61,41,34,outputBuffers,fg_controls::enabled?mcd2::fg::generatedFrames(fg_controls::intent.frameMode):1};
  const auto config=mcd2::fg::configurationForPresent(requested,effective);
  if((mode||activeFGMode) && !mcd2::fg::sameConfiguration(config,effective)){using Configure=int(*)(const MCD2FGConfig*);auto configure=bridge?reinterpret_cast<Configure>(GetProcAddress(bridge,"mcd2_fg_configure")):nullptr;
   auto result=configure?configure(&config):-1;
   if(last)last(&effective);
-  std::lock_guard lock(mutex);privateLog<<"{\"kind\":\"game_fg_mode\",\"frameStamp\":"<<id<<",\"requestedMode\":"<<config.mode<<",\"SDKResult\":"<<result<<",\"matchingInputs\":"<<(ready?"true":"false")<<",\"guideWidth\":"<<effective.motionWidth<<",\"guideHeight\":"<<effective.motionHeight<<"}\n";privateLog.flush();if(!result){activeFGMode=config.mode;if(config.mode)releasedWhileOff=false;}else if(fg_controls::enabled)fg_controls::fault=1;
+  std::lock_guard lock(mutex);privateLog<<"{\"kind\":\"game_fg_mode\",\"frameStamp\":"<<id<<",\"requestedMode\":"<<config.mode<<",\"SDKResult\":"<<result<<",\"matchingInputs\":"<<(ready?"true":"false")<<",\"guideWidth\":"<<effective.motionWidth<<",\"guideHeight\":"<<effective.motionHeight<<"}\n";privateLog.flush();if(!result){activeFGMode=config.mode;fg_controls::appliedFrameMode=config.generatedFrames?config.generatedFrames-1:5;if(config.mode)releasedWhileOff=false;}else if(fg_controls::enabled)fg_controls::fault=1;
  }
  const bool permanentOff=fg_controls::enabled?mcd2::fg::permanentOff(fg_controls::intent.mode,fg_controls::intent.session==fg_controls::session,fg_controls::fault.load()):(!legacyEnable.load()||fgTrialFrames>=600);
  if(!activeFGMode && permanentOff && !releasedWhileOff){

@@ -56,8 +56,21 @@ int main(int argc,char** argv){
  for(auto strategy:{FgStrategy::NativeMfg,FgStrategy::Hybrid}){
   intent.fgStrategy=strategy;intent.requestedMultiplier=3;
   assert(encodeGraphicsRecord(intent,bytes)&&decodeGraphicsRecord(bytes,record));
-  assert(projectFgMenu(record,unqualified)&&!unqualified.pairEligible);
+  assert(projectFgMenu(record,unqualified)&&unqualified.pairEligible==(strategy==FgStrategy::NativeMfg));
  }
+ for(unsigned multiplier=2;multiplier<=7;++multiplier){
+  intent.fgStrategy=FgStrategy::NativeMfg;intent.requestedMultiplier=multiplier;
+  assert(encodeGraphicsRecord(intent,bytes)&&decodeGraphicsRecord(bytes,record));
+  assert(projectFgMenu(record,unqualified)&&unqualified.pairEligible==(multiplier<=6));
+  assert(unqualified.frameMode==multiplier-2);
+ }
+ intent.fgStrategy=FgStrategy::Dynamic;intent.requestedMultiplier=2;
+ assert(encodeGraphicsRecord(intent,bytes)&&decodeGraphicsRecord(bytes,record));
+ assert(projectFgMenu(record,unqualified)&&unqualified.pairEligible&&unqualified.frameMode==5);
+ intent.fg=FgProvider::Amd;
+ assert(encodeGraphicsRecord(intent,bytes)&&decodeGraphicsRecord(bytes,record));
+ assert(projectFgMenu(record,unqualified)&&!unqualified.pairEligible);
+ intent.fg=FgProvider::Nvidia;
  intent.fgStrategy=FgStrategy::Single;intent.requestedMultiplier=2;
  intent.latency=LatencyProvider::RadeonAntiLag2;intent.latencyMode=LatencyMode::On;
  intent.fgEnabled=true;intent.fg=FgProvider::Nvidia;

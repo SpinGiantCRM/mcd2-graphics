@@ -183,8 +183,8 @@ public class ScaleRow : UGameSettingListEntryBase {
 }
 
 // Separate display/latency intent leaves the released SR schema unchanged.
-public class FGSettingsSave : USaveGame {public int SchemaVersion;public int Revision;public int Mode;public int ContextReady;public int SessionId;public int FGProvider;public int SettingsRevision;}
-public class FGRuntimeSave : USaveGame {public int SchemaVersion;public int Revision;public int SessionId;public int Available;public int Active;public int Phase;public int RestartRequired;public int AvailableProviders;public int StartupOwner;}
+public class FGSettingsSave : USaveGame {public int SchemaVersion;public int Revision;public int Mode;public int ContextReady;public int SessionId;public int FGProvider;public int SettingsRevision;public int FrameMode;}
+public class FGRuntimeSave : USaveGame {public int SchemaVersion;public int Revision;public int SessionId;public int Available;public int Active;public int Phase;public int RestartRequired;public int AvailableProviders;public int StartupOwner;public int MaximumGeneratedFrames;public int DynamicSupported;public int ActiveFrameMode;}
 public class DisplaySettingsSave : USaveGame {
  public int SchemaVersion;public int Revision;public int HDROutput;public int PeakNits;public int PaperWhiteNits;public int UINits;public int ReflexMode;
 }
@@ -208,12 +208,12 @@ public class DisplayRow : UGameSettingListEntryBase {
  public override void Construct(){Refresh();}
  public void Refresh(){var model=Setting as DisplaySetting;if(model==null || Skin==null || Manager==null || Manager.DisplaySaved==null)return;int id=model.ControlId;
   if(configured!=id){configured=id;if(Skin.Text_SettingName!=null)Skin.Text_SettingName.SetText(Manager.DisplayLabel(id));
-   var choices=new List<FText>();if(id==0 || id==5 || id==6){choices.Add("Off");choices.Add("On");}else if(id==7){choices.Add("NVIDIA DLSS");choices.Add("AMD FSR");}else if(id==4){choices.Add("Off");choices.Add("On");choices.Add("On + Boost");}else {int max=id==1?10000:500;int step=id==1?10:1;for(int n=id==1?100:48;n<=max;n+=step)choices.Add(n+" nits");}
+   var choices=new List<FText>();if(id==8){for(int n=2;n<=6;n++)choices.Add(n+"x");choices.Add("Dynamic");}else if(id==0 || id==5 || id==6){choices.Add("Off");choices.Add("On");}else if(id==7){choices.Add("NVIDIA DLSS");choices.Add("AMD FSR");}else if(id==4){choices.Add("Off");choices.Add("On");choices.Add("On + Boost");}else {int max=id==1?10000:500;int step=id==1?10:1;for(int n=id==1?100:48;n<=max;n+=step)choices.Add(n+" nits");}
    if(Skin.Rotator_SettingValue!=null)Skin.Rotator_SettingValue.PopulateTextLabels(choices);
   }
   int value=Manager.DisplayValue(id);int index=id==1?(value-100)/10:(id==2 || id==3?value-48:value);
   if(Skin.Rotator_SettingValue!=null)Skin.Rotator_SettingValue.SetSelectedItem(index);
-  SetIsEnabled(id==6?Manager.AmdLatencyAvailable():id==7?Manager.SharedFgAvailable():id==5?Manager.SelectedFgAvailable():id==0 || (id==4?(Manager.DisplayRuntime!=null && Manager.DisplayRuntime.ReflexAvailable==1 && Manager.DisplayRuntime.ReflexFault==0):Manager.DisplaySaved.HDROutput==1));
+  SetIsEnabled(id==8?Manager.NvidiaFrameModeAvailable():id==6?Manager.AmdLatencyAvailable():id==7?Manager.SharedFgAvailable():id==5?Manager.SelectedFgAvailable():id==0 || (id==4?(Manager.DisplayRuntime!=null && Manager.DisplayRuntime.ReflexAvailable==1 && Manager.DisplayRuntime.ReflexFault==0):Manager.DisplaySaved.HDROutput==1));
  }
  void Change(int direction){var model=Setting as DisplaySetting;if(model==null || Manager==null)return;Manager.ChangeDisplay(model.ControlId,direction);Refresh();Manager.ShowDisplayHelp(model.ControlId);SetUserFocus(UGameplayStatics.GetPlayerController(this,0));}
  protected override UWidget? GetPrimaryGamepadFocusWidget(){return this;}
@@ -260,7 +260,8 @@ public class ModActor : AActor {
   var a=ProviderMenu.Authority;int reflex=(a.W35==0 || a.W35==1)?a.W36:0;
   bool changed=DisplaySaved.Revision!=a.W19 || DisplaySaved.HDROutput!=a.W37 || DisplaySaved.PeakNits!=a.W38 || DisplaySaved.PaperWhiteNits!=a.W39 || DisplaySaved.UINits!=a.W40 || DisplaySaved.ReflexMode!=reflex;
   if(changed){DisplaySaved.Revision=a.W19;DisplaySaved.HDROutput=a.W37;DisplaySaved.PeakNits=a.W38;DisplaySaved.PaperWhiteNits=a.W39;DisplaySaved.UINits=a.W40;DisplaySaved.ReflexMode=reflex;PersistDisplay();}
-  if(FGSaved!=null && (FGSaved.SettingsRevision!=a.W19 || FGSaved.Mode!=a.W31 || FGSaved.FGProvider!=a.W32)){FGSaved.SettingsRevision=a.W19;FGSaved.Revision++;FGSaved.Mode=a.W31;FGSaved.FGProvider=a.W32;PersistFG();}
+  int frameMode=a.W33==3?5:a.W33==1 && a.W34<=6?a.W34-2:0;
+  if(FGSaved!=null && (FGSaved.SettingsRevision!=a.W19 || FGSaved.Mode!=a.W31 || FGSaved.FGProvider!=a.W32 || FGSaved.FrameMode!=frameMode)){FGSaved.SettingsRevision=a.W19;FGSaved.Revision++;FGSaved.Mode=a.W31;FGSaved.FGProvider=a.W32;FGSaved.FrameMode=frameMode;PersistFG();}
  }
  public void ProjectCommittedNvidia(){
   if(!SharedControls() || ProviderMenu==null || ProviderMenu.Authority==null || Saved==null)return;
@@ -473,7 +474,7 @@ public class ModActor : AActor {
    if(!UKismetSystemLibrary.IsValid(p) || !p.IsVisible() || p.ListView_Settings==null)continue;var r=p.Registry as USpicewoodGameSettingRegistry_PrimaryPlayer;if(r==null || r.GfxSettings==null)continue;
    bool graphics=false;
    foreach(var setting in p.VisibleSettings){var current=setting;int depth=0;while(current!=null && depth<4){if(current==r.GfxSettings)graphics=true;current=current.SettingParent;depth++;}}
-   if(!graphics){if(Model!=null && p.ListView_Settings.GetListItems().Contains(Model)){p.ListView_Settings.RemoveItem(Model);if(HeaderModel!=null)p.ListView_Settings.RemoveItem(HeaderModel);if(PresetModel!=null)p.ListView_Settings.RemoveItem(PresetModel);if(ScaleModel!=null)p.ListView_Settings.RemoveItem(ScaleModel);if(FGHeaderModel!=null)p.ListView_Settings.RemoveItem(FGHeaderModel);foreach(var ds in DisplayModels)if(ds.ControlId==5 || ds.ControlId==7)p.ListView_Settings.RemoveItem(ds);Log.Write("MOD ROWS REMOVED FROM OTHER PAGE");}continue;}
+   if(!graphics){if(Model!=null && p.ListView_Settings.GetListItems().Contains(Model)){p.ListView_Settings.RemoveItem(Model);if(HeaderModel!=null)p.ListView_Settings.RemoveItem(HeaderModel);if(PresetModel!=null)p.ListView_Settings.RemoveItem(PresetModel);if(ScaleModel!=null)p.ListView_Settings.RemoveItem(ScaleModel);if(FGHeaderModel!=null)p.ListView_Settings.RemoveItem(FGHeaderModel);foreach(var ds in DisplayModels)if(ds.ControlId==5 || ds.ControlId==7 || ds.ControlId==8)p.ListView_Settings.RemoveItem(ds);Log.Write("MOD ROWS REMOVED FROM OTHER PAGE");}continue;}
    if(Model==null){
     Probe=UWidgetBlueprintLibrary.Create(this,Unreal.ClassOf<ReconstructionRow>(),UGameplayStatics.GetPlayerController(this,0)) as ReconstructionRow;
     if(Probe==null || Probe.Skin==null || Probe.WidgetTree==null || Probe.WidgetTree.RootWidget==null){Log.Write("PROBE FAILED");continue;}
@@ -492,8 +493,8 @@ public class ModActor : AActor {
    if(PresetModel!=null && !p.ListView_Settings.GetListItems().Contains(PresetModel))p.ListView_Settings.AddItem(PresetModel);if(ScaleModel!=null && !p.ListView_Settings.GetListItems().Contains(ScaleModel))p.ListView_Settings.AddItem(ScaleModel);
   }
    foreach(var p in Panels){if(!UKismetSystemLibrary.IsValid(p) || !p.IsVisible() || p.ListView_Settings==null || Model==null || !p.ListView_Settings.GetListItems().Contains(Model))continue;
-    if(SharedFgAvailable() || (!ProviderOwned && FGRuntime!=null && FGRuntime.Available==1)){if(FGHeaderModel!=null && !p.ListView_Settings.GetListItems().Contains(FGHeaderModel))p.ListView_Settings.AddItem(FGHeaderModel);foreach(var model in DisplayModels)if((model.ControlId==5 || (model.ControlId==7 && SharedFgAvailable())) && !p.ListView_Settings.GetListItems().Contains(model))p.ListView_Settings.AddItem(model);}
-    else {if(FGHeaderModel!=null)p.ListView_Settings.RemoveItem(FGHeaderModel);foreach(var model in DisplayModels)if(model.ControlId==5 || model.ControlId==7)p.ListView_Settings.RemoveItem(model);}
+    if(SharedFgAvailable() || (!ProviderOwned && FGRuntime!=null && FGRuntime.Available==1)){if(FGHeaderModel!=null && !p.ListView_Settings.GetListItems().Contains(FGHeaderModel))p.ListView_Settings.AddItem(FGHeaderModel);foreach(var model in DisplayModels)if((model.ControlId==5 || (model.ControlId==7 && SharedFgAvailable()) || (model.ControlId==8 && SelectedFgProvider()==0)) && !p.ListView_Settings.GetListItems().Contains(model))p.ListView_Settings.AddItem(model);}
+    else {if(FGHeaderModel!=null)p.ListView_Settings.RemoveItem(FGHeaderModel);foreach(var model in DisplayModels)if(model.ControlId==5 || model.ControlId==7 || model.ControlId==8)p.ListView_Settings.RemoveItem(model);}
    }
   syncing=false;
  }
@@ -568,7 +569,7 @@ public class ModActor : AActor {
  public void UpdateScale(){if(Saved==null)return;int scale=10000;if(Saved.ReconstructionMode==2){scale=6667;if(Saved.SRPreset==1)scale=5800;if(Saved.SRPreset==2)scale=5000;if(Saved.SRPreset==3)scale=3333;if(Saved.SRPreset==4)scale=Saved.CustomScaleBasisPoints;}Saved.RenderScaleBasisPoints=scale;}
  public void ChangePreset(int direction){if(ProviderOwned){if(SharedControls() && ProviderMenu!=null){int family=SelectedFamily(),quality=SelectedQuality()+direction;if(quality<0)quality=5;if(quality>5)quality=0;ProviderMenu.SelectQuality(family,quality);ProviderMenu.SelectMenuSr(family);RefreshRows();}return;}if(Saved==null || Saved.SchemaVersion!=4)return;int index=(Saved.SRPreset==5?0:Saved.SRPreset+1)+direction;if(index<0)index=5;if(index>5)index=0;int p=index==0?5:index-1;for(int attempt=0;attempt<6;attempt++){int candidate=p==4?ClampScale(Saved.LastCustomScaleBasisPoints):PresetSliderScale(p);if(ScaleSupported(candidate))break;index+=direction;if(index<0)index=5;if(index>5)index=0;p=index==0?5:index-1;}if(!ScaleSupported(10000))return;Saved.CustomScaleBasisPoints=p==4?ClampScale(Saved.LastCustomScaleBasisPoints):PresetSliderScale(p);p=PresetAtScale(Saved.CustomScaleBasisPoints);Saved.SRPreset=p;Saved.ReconstructionMode=p==5?1:2;UpdateScale();Saved.Revision++;Persist();RefreshRows();}
  public void ChangeScale(int scale){if(ProviderOwned){if(SharedControls() && ProviderMenu!=null){int family=SelectedFamily();ProviderMenu.SelectCustomScale(family,ClampScale(scale));ProviderMenu.SelectMenuSr(family);RefreshRows();}return;}if(Saved==null || Saved.SchemaVersion!=4)return;if(!ScaleSupported(10000))return;scale=ClampScale(scale);int p=PresetAtScale(scale);int mode=p==5?1:2;if(Saved.CustomScaleBasisPoints==scale && Saved.ReconstructionMode==mode && Saved.SRPreset==p)return;Saved.CustomScaleBasisPoints=scale;if(p==4)Saved.LastCustomScaleBasisPoints=scale;Saved.SRPreset=p;Saved.ReconstructionMode=mode;UpdateScale();Saved.Revision++;Persist();RefreshRows();}
- public void ResetOwned(){if(ProviderOwned){if(SharedControls() && ProviderMenu!=null){ProviderMenu.ResetDefaults();RefreshRows();}return;}if(FGSaved!=null){FGSaved.Mode=0;FGSaved.Revision++;PersistFG();}if(Saved==null || Saved.SchemaVersion!=4)return;Saved.ReconstructionMode=0;Saved.SRPreset=0;Saved.CustomScaleBasisPoints=6700;Saved.LastCustomScaleBasisPoints=7700;Saved.RenderScaleBasisPoints=10000;Saved.NativeFallback=true;Saved.Revision++;Persist();if(DisplaySaved!=null){DisplaySaved.HDROutput=0;DisplaySaved.PeakNits=1000;DisplaySaved.PaperWhiteNits=203;DisplaySaved.UINits=203;DisplaySaved.ReflexMode=1;DisplaySaved.Revision++;PersistDisplay();}RefreshRows();Log.Write("OWNED RESET");}
+ public void ResetOwned(){if(ProviderOwned){if(SharedControls() && ProviderMenu!=null){ProviderMenu.ResetDefaults();RefreshRows();}return;}if(FGSaved!=null){FGSaved.Mode=0;FGSaved.FrameMode=0;FGSaved.Revision++;PersistFG();}if(Saved==null || Saved.SchemaVersion!=4)return;Saved.ReconstructionMode=0;Saved.SRPreset=0;Saved.CustomScaleBasisPoints=6700;Saved.LastCustomScaleBasisPoints=7700;Saved.RenderScaleBasisPoints=10000;Saved.NativeFallback=true;Saved.Revision++;Persist();if(DisplaySaved!=null){DisplaySaved.HDROutput=0;DisplaySaved.PeakNits=1000;DisplaySaved.PaperWhiteNits=203;DisplaySaved.UINits=203;DisplaySaved.ReflexMode=1;DisplaySaved.Revision++;PersistDisplay();}RefreshRows();Log.Write("OWNED RESET");}
  public void Persist(){if(Saved!=null)Log.Write("SAVE="+UGameplayStatics.SaveGameToSlot(Saved,"MCD2GraphicsSettings",0)+" revision="+Saved.Revision+" mode="+Saved.ReconstructionMode);}
  public void RefreshRows(){RefreshDisplayRows();UWidgetBlueprintLibrary.GetAllWidgetsOfClass(this,out List<UUserWidget> rows,Unreal.ClassOf<ReconstructionRow>(),false);foreach(var w in rows){var row=w as ReconstructionRow;if(row!=null)row.Refresh();}UWidgetBlueprintLibrary.GetAllWidgetsOfClass(this,out List<UUserWidget> presets,Unreal.ClassOf<PresetRow>(),false);foreach(var w in presets){var row=w as PresetRow;if(row!=null)row.Refresh();}UWidgetBlueprintLibrary.GetAllWidgetsOfClass(this,out List<UUserWidget> scales,Unreal.ClassOf<ScaleRow>(),false);foreach(var w in scales){var row=w as ScaleRow;if(row!=null)row.Refresh();}}
 
@@ -584,12 +585,20 @@ public class ModActor : AActor {
  public int SelectedFgProvider(){return SharedControls() && ProviderMenu!=null?ProviderMenu.Value(20):(FGSaved==null?0:FGSaved.FGProvider);}
  public bool SharedFgAvailable(){return SharedControls() && FGRuntime!=null && FGRuntime.AvailableProviders>0 && FGRuntime.AvailableProviders<=3;}
  public bool SelectedFgAvailable(){if(!SharedControls())return FGRuntime!=null && FGRuntime.Available==1;if(!SharedFgAvailable() || FGRuntime==null || ProviderMenu==null)return false;int fg=SelectedFgProvider(),sr=SelectedProvider();return ProviderMenu.MenuFgPairEligible(sr,fg,ProviderMenu.Value(21),ProviderMenu.Value(22)) && ((fg==0 && (FGRuntime.AvailableProviders&1)!=0) || (fg==1 && (FGRuntime.AvailableProviders&2)!=0));}
- public int DisplayValue(int id){if(id==7)return SelectedFgProvider();if(id==6)return SharedControls() && ProviderMenu!=null && (ProviderMenu.Value(23)==0 || ProviderMenu.Value(23)==2) && ProviderMenu.Value(24)==1?1:0;if(SharedControls() && ProviderMenu!=null){if(id==5)return ProviderMenu.Value(19);if(id==0)return ProviderMenu.Value(25);if(id==1)return ProviderMenu.Value(26);if(id==2)return ProviderMenu.Value(27);if(id==3)return ProviderMenu.Value(28);return ProviderMenu.Value(24);}if(DisplaySaved==null)return 0;if(id==5)return FGSaved==null?0:FGSaved.Mode;if(id==0)return DisplaySaved.HDROutput;if(id==1)return DisplaySaved.PeakNits;if(id==2)return DisplaySaved.PaperWhiteNits;if(id==3)return DisplaySaved.UINits;return DisplaySaved.ReflexMode;}
- public string DisplayLabel(int id){if(id==7)return "FG Provider";if(id==6)return "AMD Anti-Lag 2";if(id==5)return "Frame Generation";if(id==0)return "HDR Output";if(id==1)return "HDR Peak Brightness";if(id==2)return "HDR Paper White";if(id==3)return "HDR UI Brightness";return "NVIDIA Reflex";}
- public void ChangeDisplay(int id,int direction){if(id==6 && !ProviderOwned)return;if(ProviderOwned){
+ public int DisplayValue(int id){if(id==8)return SharedControls() && ProviderMenu!=null?(ProviderMenu.Value(21)==3?5:ProviderMenu.Value(21)==1?ProviderMenu.Value(22)-2:0):(FGSaved==null?0:FGSaved.FrameMode);if(id==7)return SelectedFgProvider();if(id==6)return SharedControls() && ProviderMenu!=null && (ProviderMenu.Value(23)==0 || ProviderMenu.Value(23)==2) && ProviderMenu.Value(24)==1?1:0;if(SharedControls() && ProviderMenu!=null){if(id==5)return ProviderMenu.Value(19);if(id==0)return ProviderMenu.Value(25);if(id==1)return ProviderMenu.Value(26);if(id==2)return ProviderMenu.Value(27);if(id==3)return ProviderMenu.Value(28);return ProviderMenu.Value(24);}if(DisplaySaved==null)return 0;if(id==5)return FGSaved==null?0:FGSaved.Mode;if(id==0)return DisplaySaved.HDROutput;if(id==1)return DisplaySaved.PeakNits;if(id==2)return DisplaySaved.PaperWhiteNits;if(id==3)return DisplaySaved.UINits;return DisplaySaved.ReflexMode;}
+ public string DisplayLabel(int id){if(id==8)return "FG Multiplier";if(id==7)return "FG Provider";if(id==6)return "AMD Anti-Lag 2";if(id==5)return "Frame Generation";if(id==0)return "HDR Output";if(id==1)return "HDR Peak Brightness";if(id==2)return "HDR Paper White";if(id==3)return "HDR UI Brightness";return "NVIDIA Reflex";}
+ public bool NvidiaFrameModeAvailable(){return SelectedFgProvider()==0 && SelectedFgAvailable() && FGRuntime!=null && FGRuntime.MaximumGeneratedFrames>=1;}
+ public bool FrameModeSupported(int mode){return NvidiaFrameModeAvailable() && mode>=0 && (mode<5?mode+1<=FGRuntime!.MaximumGeneratedFrames:mode==5 && FGRuntime!.DynamicSupported==1);}
+ public void ChangeDisplay(int id,int direction){if(id==8){
+  if(!NvidiaFrameModeAvailable() || FGSaved==null || direction==0)return;
+  int next=DisplayValue(8);for(int n=0;n<6;n++){next=(next+(direction>0?1:5))%6;if(FrameModeSupported(next))break;}
+  if(!FrameModeSupported(next) || next==DisplayValue(8))return;
+  if(ProviderOwned){if(!SharedControls() || ProviderMenu==null)return;ProviderMenu.SelectFg(0,next==5?3:next==0?0:1,next==5?2:next+2,DisplayValue(5)==1);}
+  else {FGSaved.FrameMode=next;FGSaved.Revision++;PersistFG();}RefreshDisplayRows();return;
+ }if(id==6 && !ProviderOwned)return;if(ProviderOwned){
   if(!SharedControls() || ProviderMenu==null || direction==0)return;
   if(id==7){if(!SharedFgAvailable())return;int provider=SelectedFgProvider()==0?1:0;if(FGRuntime==null || (FGRuntime.AvailableProviders&(provider==0?1:2))==0)return;ProviderMenu.SelectFg(provider,0,2,false);}
-  else if(id==5){if(!SelectedFgAvailable())return;ProviderMenu.SelectFg(SelectedFgProvider(),0,2,ProviderMenu.Value(19)==0);}
+  else if(id==5){if(!SelectedFgAvailable())return;ProviderMenu.SelectFg(SelectedFgProvider(),ProviderMenu.Value(21),ProviderMenu.Value(22),ProviderMenu.Value(19)==0);}
   else if(id==6){if(!AmdLatencyAvailable())return;ProviderMenu.SelectAntiLag2(DisplayValue(6)==0);}
   else if(id==4){if(DisplayRuntime==null || DisplayRuntime.ReflexAvailable!=1 || DisplayRuntime.ReflexFault!=0)return;int mode=ProviderMenu.Value(24)+direction;if(mode<0)mode=2;if(mode>2)mode=0;ProviderMenu.SelectLatency(1,mode);}
   else {int enabled=ProviderMenu.Value(25),peak=ProviderMenu.Value(26),paper=ProviderMenu.Value(27),ui=ProviderMenu.Value(28);
@@ -620,9 +629,9 @@ public class ModActor : AActor {
  }
  public void InsertDisplayRows(USpicewoodGameSettingPanel panel,USpicewoodGameSettingRegistry_PrimaryPlayer registry){
   if(panel.ListView_Settings==null || registry.GfxSettings==null)return;
-  if(DisplayModels.Count==0){for(int id=0;id<8;id++){var model=UGameplayStatics.SpawnObject(Unreal.ClassOf<DisplaySetting>(),registry) as DisplaySetting;if(model!=null){model.ControlId=id;model.LocalPlayer=registry.OwningLocalPlayer;model.OwningRegistry=registry;model.SettingParent=registry.GfxSettings;DisplayModels.Add(model);}}}
+  if(DisplayModels.Count==0){for(int id=0;id<9;id++){var model=UGameplayStatics.SpawnObject(Unreal.ClassOf<DisplaySetting>(),registry) as DisplaySetting;if(model!=null){model.ControlId=id;model.LocalPlayer=registry.OwningLocalPlayer;model.OwningRegistry=registry;model.SettingParent=registry.GfxSettings;DisplayModels.Add(model);}}}
   var list=panel.ListView_Settings.GetListItems();var result=new List<UObject>();bool hdrInserted=false;bool reflexInserted=false;
-  foreach(var item in list){if(item is DisplaySetting){var own=item as DisplaySetting;if(own!=null && (own.ControlId==5 || own.ControlId==7) && (SharedFgAvailable() || (!ProviderOwned && own.ControlId==5 && FGRuntime!=null && FGRuntime.Available==1)))result.Add(item);continue;}result.Add(item);if(item==Model || item==HeaderModel || item==PresetModel || item==ScaleModel)continue;var setting=item as UGameSetting;if(setting==null)continue;string label=UKismetTextLibrary.Conv_TextToString(setting.GetDisplayName());string name=UKismetSystemLibrary.GetObjectName(setting);
+  foreach(var item in list){if(item is DisplaySetting){var own=item as DisplaySetting;if(own!=null && (own.ControlId==5 || own.ControlId==7 || own.ControlId==8) && (own.ControlId!=8 || SelectedFgProvider()==0) && (SharedFgAvailable() || (!ProviderOwned && own.ControlId!=7 && FGRuntime!=null && FGRuntime.Available==1)))result.Add(item);continue;}result.Add(item);if(item==Model || item==HeaderModel || item==PresetModel || item==ScaleModel)continue;var setting=item as UGameSetting;if(setting==null)continue;string label=UKismetTextLibrary.Conv_TextToString(setting.GetDisplayName());string name=UKismetSystemLibrary.GetObjectName(setting);
    if(!hdrInserted && (label=="Brightness" || name.Contains("Brightness"))){foreach(var model in DisplayModels)if(model.ControlId<4)result.Add(model);hdrInserted=true;}
    if(!reflexInserted && (label=="FPS Limit" || label.Contains("Frame Rate Limit") || name.Contains("FrameRateLimit") || name.Contains("FPSLimit"))){foreach(var model in DisplayModels)if(model.ControlId==4 && ((DisplayRuntime!=null && DisplayRuntime.ReflexAvailable==1 && DisplayRuntime.ReflexFault==0) || list.Contains(model)))result.Add(model);foreach(var model in DisplayModels)if(model.ControlId==6 && AmdLatencyAvailable())result.Add(model);reflexInserted=true;}
   }
@@ -637,7 +646,7 @@ public class ModActor : AActor {
  public void InitializeFG(){
   FGSaved=UGameplayStatics.LoadGameFromSlot("MCD2GraphicsFGSettings",0) as FGSettingsSave;
   if(FGSaved==null)FGSaved=UGameplayStatics.CreateSaveGameObject(Unreal.ClassOf<FGSettingsSave>()) as FGSettingsSave;
-  if(FGSaved!=null){if(FGSaved.SchemaVersion!=1 || FGSaved.Mode<0 || FGSaved.Mode>1 || FGSaved.FGProvider<0 || FGSaved.FGProvider>1)FGSaved.Mode=0;FGSaved.SchemaVersion=1;FGSaved.ContextReady=0;FGSaved.SessionId=0;FGSaved.Revision++;PersistFG();}
+  if(FGSaved!=null){if(FGSaved.SchemaVersion!=1 || FGSaved.Mode<0 || FGSaved.Mode>1 || FGSaved.FGProvider<0 || FGSaved.FGProvider>1)FGSaved.Mode=0;FGSaved.SchemaVersion=1;if(FGSaved.FrameMode<0 || FGSaved.FrameMode>5)FGSaved.FrameMode=0;FGSaved.ContextReady=0;FGSaved.SessionId=0;FGSaved.Revision++;PersistFG();}
   FGRuntime=UGameplayStatics.CreateSaveGameObject(Unreal.ClassOf<FGRuntimeSave>()) as FGRuntimeSave;
   if(FGRuntime!=null){FGRuntime.SchemaVersion=1;UGameplayStatics.SaveGameToSlot(FGRuntime,"MCD2GraphicsFGRuntime",0);}
  }
@@ -645,7 +654,7 @@ public class ModActor : AActor {
  public void PollFG(){
   if(FGSaved==null)return;
   var state=UGameplayStatics.LoadGameFromSlot("MCD2GraphicsFGRuntime",0) as FGRuntimeSave;
-  bool changed=state!=null && (FGRuntime==null || state.Available!=FGRuntime.Available || state.AvailableProviders!=FGRuntime.AvailableProviders || state.SessionId!=FGRuntime.SessionId);
+  bool changed=state!=null && (FGRuntime==null || state.Available!=FGRuntime.Available || state.AvailableProviders!=FGRuntime.AvailableProviders || state.MaximumGeneratedFrames!=FGRuntime.MaximumGeneratedFrames || state.DynamicSupported!=FGRuntime.DynamicSupported || state.SessionId!=FGRuntime.SessionId);
   if(state!=null && state.SchemaVersion==1)FGRuntime=state;
   int ready=Saved!=null && Saved.RenderContextReady==1 && !UGameplayStatics.IsGamePaused(this)?1:0;
   foreach(var layer in Layers){if(!UKismetSystemLibrary.IsValid(layer))continue;if(UKismetSystemLibrary.GetObjectName(layer)=="Activity_Stack")continue;var active=layer.DisplayedWidget;if(active==null || !UKismetSystemLibrary.IsValid(active) || !active.IsActivated())continue;string name=UKismetSystemLibrary.GetObjectName(active);if(!name.StartsWith("W_PlayerHUD_Activatable_C_") && !name.StartsWith("W_HotbarContainer_Activatable_C_") && !name.StartsWith("W_InGameNavigation_Activatable_C_")){ready=0;}}
@@ -656,7 +665,7 @@ public class ModActor : AActor {
   bool intentChanged=FGSaved.ContextReady!=ready || FGSaved.SessionId!=session;
   if(intentChanged){FGSaved.ContextReady=ready;FGSaved.SessionId=session;FGSaved.Revision++;Log.Write("FG CONTEXT ready="+ready);}
   // A current-process heartbeat prevents stale gameplay intent after travel or UI failure.
-  if(FGSaved.Mode==1 || intentChanged)PersistFG();UpdateFoliageVelocity(ready);if(changed)SyncLists();if((displayHelp==5 || displayHelp==7) && GraphicsPageOpen())ShowDisplayHelp(displayHelp);
+  if(FGSaved.Mode==1 || intentChanged)PersistFG();UpdateFoliageVelocity(ready);if(changed)SyncLists();if((displayHelp==5 || displayHelp==7 || displayHelp==8) && GraphicsPageOpen())ShowDisplayHelp(displayHelp);
  }
  public void RestoreFoliageVelocity(){
   if(!foliageVelocityOwned || foliageRestoreAttempts>=3)return;
@@ -695,6 +704,7 @@ public class ModActor : AActor {
   if(UKismetSystemLibrary.GetConsoleVariableIntValue("r.Velocity.EnableVertexDeformation")==1){foliageVelocityOriginal=original;foliageRestoreAttempts=0;foliageVelocityOwned=true;Log.Write("SR FOLIAGE VELOCITY ENABLED");}else{foliageVelocityBlocked=true;Log.Write("SR FOLIAGE APPLY FAILED");}
  }
  public void ShowDisplayHelp(int id){displayHelp=id;OwnHelpVisible=true;string help="";
+  if(id==8)help="Choose the total frame-rate multiplier. 2x adds one generated frame; 6x adds five. Dynamic lets NVIDIA target the current monitor refresh rate.\n\nOnly modes supported by the current GPU and driver can be selected.";
   if(id==7)help="Choose the frame-generation provider independently of the upscaler.\n\n• NVIDIA DLSS\n• AMD FSR\n\nRestart after changing providers.";
   if(id==5)help="Generate an extra frame between rendered frames for smoother motion.\n\n• Off — rendered frames only\n• On — rendered and generated frames\n\nRestart after changing modes.";
   if(id==0)help="Enable HDR for a compatible display with system HDR turned on.\n\n• Off — standard dynamic range\n• On — HDR output";
@@ -706,10 +716,11 @@ public class ModActor : AActor {
   if(id==6 && !AmdLatencyAvailable())help+="\n\nUnavailable in this session.";
   if(id==4 && (DisplayRuntime==null || DisplayRuntime.ReflexAvailable!=1 || DisplayRuntime.ReflexFault!=0))help+="\n\nUnavailable in this session.";
   if(id<4){if(!displayHDRSupported)help+="\n\nEnable system HDR to use this setting.";if(DisplayRuntime!=null && DisplayRuntime.HDRRestartRequired==1)help+="\n\nRestart to apply.";}
-  string recommendation=id==7?(SelectedFgProvider()==1?"AMD FSR":"NVIDIA DLSS"):id==5?"Off":id==0?(displayHDRSupported?"On":"Off"):(id==1?"Display peak":(id==2 || id==3?"203 nits":"On"));
+  if(id==8 && !FrameModeSupported(DisplayValue(8)))help+="\n\nThe saved multiplier is unavailable on this GPU/driver. Select a supported mode.";
+  string recommendation=id==8?"2x":id==7?(SelectedFgProvider()==1?"AMD FSR":"NVIDIA DLSS"):id==5?"Off":id==0?(displayHDRSupported?"On":"Off"):(id==1?"Display peak":(id==2 || id==3?"203 nits":"On"));
   if(id==6 && !AmdLatencyAvailable())recommendation="Unavailable";
   if(id==4 && (DisplayRuntime==null || DisplayRuntime.ReflexAvailable!=1 || DisplayRuntime.ReflexFault!=0))recommendation="Unavailable";
-  foreach(var p in Panels){if(!UKismetSystemLibrary.IsValid(p) || !p.IsVisible() || p.Details_Settings==null || p.ListView_Settings==null || Model==null || !p.ListView_Settings.GetListItems().Contains(Model))continue;var d=p.Details_Settings;if(d.Text_SettingName!=null)d.Text_SettingName.SetText(DisplayLabel(id));if(d.RichText_Description!=null)d.RichText_Description.SetText(help);if(d.RichText_DynamicDetails!=null)d.RichText_DynamicDetails.SetText(id==6?AmdLatencyStatus():(id==5 || id==7)?FGStatus():id==4 && DisplayRuntime!=null?"Active mode: "+(DisplayRuntime.ReflexMode==0?"Off":DisplayRuntime.ReflexMode==1?"On":"On + Boost"):"");if(d.RichText_WarningDetails!=null)d.RichText_WarningDetails.SetText("");if(d.RichText_DisabledDetails!=null)d.RichText_DisabledDetails.SetText("");ShowRecommendation(d,recommendation);}
+  foreach(var p in Panels){if(!UKismetSystemLibrary.IsValid(p) || !p.IsVisible() || p.Details_Settings==null || p.ListView_Settings==null || Model==null || !p.ListView_Settings.GetListItems().Contains(Model))continue;var d=p.Details_Settings;if(d.Text_SettingName!=null)d.Text_SettingName.SetText(DisplayLabel(id));if(d.RichText_Description!=null)d.RichText_Description.SetText(help);if(d.RichText_DynamicDetails!=null)d.RichText_DynamicDetails.SetText(id==6?AmdLatencyStatus():(id==5 || id==7 || id==8)?FGStatus():id==4 && DisplayRuntime!=null?"Active mode: "+(DisplayRuntime.ReflexMode==0?"Off":DisplayRuntime.ReflexMode==1?"On":"On + Boost"):"");if(d.RichText_WarningDetails!=null)d.RichText_WarningDetails.SetText("");if(d.RichText_DisabledDetails!=null)d.RichText_DisabledDetails.SetText("");ShowRecommendation(d,recommendation);}
  }
 
  public string AmdLatencyStatus(){
@@ -719,11 +730,12 @@ public class ModActor : AActor {
  }
  public string FGStatus(){
   if(FGRuntime==null || !SelectedFgAvailable())return "Unavailable with the current upscaler.";
+  if(SelectedFgProvider()==0 && !FrameModeSupported(DisplayValue(8)))return "Selected multiplier unavailable on this GPU/driver.";
   if(FGRuntime.RestartRequired==1)return "Restart to apply.";
   if(DisplayValue(5)==0)return "Off.";
   if(FGRuntime.Phase==6)return "Frame generation stopped after a runtime error.";
   if(DisplaySaved==null || DisplaySaved.HDROutput==0)return "Enable HDR to use this mode.";
-  return FGRuntime.Active==1?"Active.":"Resumes during gameplay.";
+  return FGRuntime.Active==1?(SelectedFgProvider()==0?"Active: "+(FGRuntime.ActiveFrameMode==5?"Dynamic":(FGRuntime.ActiveFrameMode+2)+"x")+".":"Active."):"Resumes during gameplay.";
  }
 
  protected override void ReceiveEndPlay(EEndPlayReason reason){
