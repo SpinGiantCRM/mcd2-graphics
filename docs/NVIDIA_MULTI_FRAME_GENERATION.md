@@ -71,6 +71,9 @@ the loaded NVIDIA override uses wrapper 2.14.16.0 / provider 310.9.16.0, which
 the unlocker labels general compatibility only, not release-supported Dynamic.
 See the [unlocker runtime requirements](https://github.com/mavismmg/MFGAdaUnlock-RenoDx#dynamic-multi-frame-generation).
 Native RTX 50 hardware and Dynamic adaptation under varying load remain unverified.
-Saved-Off startup and live activation passed on fb6860a. Exact normal process
-exit and retained-proxy overhead while Off remain unqualified.
+Saved-Off startup and live activation passed on fb6860a. The later 312d028 GDK
+shutdown candidate passed one normal game exit with a stopped save worker and
+no retained shipping process after SR/3x FG gameplay. The player reports no
+noticeable performance loss with FG Off and accepts that cost as non-blocking;
+instrumented overhead remains unmeasured.
 A visible selector or passing synthetic capability test is not runtime proof.

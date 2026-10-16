@@ -73,5 +73,8 @@ calls. Auxiliary swapchains and resize do not stop the transport.
 
 A private exit stack captured one remaining thread in xgameruntime XErrorReport
 while the GDK worker had never logged stopped. This motivates earlier binding
-cleanup; it is not yet proof that the candidate fixes the reported background
-process. Keep Windows/Linux ownership checks and verify real game exit.
+cleanup. Candidate 312d028 subsequently passed one real-game exit on RTX 4080 /
+WinGDK 1.1.2.0: SR/3x FG remained operational, the worker logged stopped with
+result zero, and the shipping process disappeared from CIM/tasklist. This is a
+bounded Windows pass, not cross-hardware or long-session qualification. Keep
+Windows/Linux ownership checks and the terminal guards.

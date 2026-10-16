@@ -889,4 +889,6 @@ Unreal-window swapchain destruction before final DLL teardown. Preserve auxiliar
 window/resize refusal, stop/wake/join ordering, six-slot validation and final
 NT-termination guards. The retained-process stack was inside xgameruntime error
 reporting, not an SR/FG wait; earlier shared-SDK admission logs alone did not
-identify its cause. The early GDK cleanup still requires game-exit qualification.
+identify its cause. The early GDK cleanup passed one RTX 4080 / WinGDK exit
+with an explicit stopped receipt and no retained shipping process after SR/3x FG
+gameplay. Keep that bounded evidence separate from unsupported hardware.
