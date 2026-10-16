@@ -178,7 +178,9 @@ unload with any retained generation, pin the exact addon/framework modules
 outside DllMain, unregister callbacks and refuse reuse until process restart.
 This is retained ownership, not completed retirement or hot-reload support.
 It uses the exact held proxy device supplied to NGX initialization for unshared
-`Shutdown1`. Preserve the non-null guard, verified shared ownership, fresh GPU
+`Shutdown1`. The direct driver export takes an additional writable remaining-device
+count; preserve that two-argument ABI and its actual-source fixture in both
+portable jobs. Preserve the non-null guard, verified shared ownership, fresh GPU
 completion and feature/parameter release before owned device/resource release.
 Retain the source checks on both CI platforms; Linux exit controls do not
 qualify Windows/NVIDIA NGX lifecycle or identify the mixed-provider exit delay.

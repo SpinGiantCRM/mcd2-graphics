@@ -37,7 +37,8 @@ class ProcessExitTests(unittest.TestCase):
         source = (ROOT / 'src/native/ngx_live_fixture.hpp').read_text()
         cleanup = source.split('static bool cleanup_detached_live(', 1)[1].split('static void cleanup_live_saved(', 1)[0]
         self.assertIn('cache_path.c_str(),c.proxy_device,NVSDK_NGX_Version_API', source)
-        self.assertIn('!c.proxy_device||!result("shutdown_device",fn(c.proxy_device))', cleanup)
+        self.assertIn('using F=NVSDK_NGX_Result(*)(ID3D12Device*,unsigned&)', cleanup)
+        self.assertIn('!c.proxy_device||!result("shutdown_device",fn(c.proxy_device,devicesLeft))', cleanup)
         self.assertNotIn('fn(c.resource_device)', cleanup)
         self.assertNotIn('fn(nullptr)', cleanup)
 

@@ -99,6 +99,7 @@ jobs:
       - name: Display protocol and Reflex frame identity
         run: |
           python3 tests/test_hdr_config_gate.py
+          python3 tests/test_ngx_shutdown_abi.py
           g++ -std=c++20 -pthread -Wall -Wextra -Werror tests/process_exit_lifetime_test.cpp -o /tmp/process-exit-lifetime
           /tmp/process-exit-lifetime
           g++ -std=c++20 -pthread -Wall -Wextra -Werror tests/amd_latency_test.cpp -o /tmp/amd-latency
@@ -159,6 +160,7 @@ jobs:
           ./amd-swapchain.exe
           python tests/make_synthetic_saves.py display-fixtures
           python tests/test_hdr_config_gate.py
+          python tests/test_ngx_shutdown_abi.py
           g++ -std=c++20 -static tests/display_protocol_test.cpp -o display-protocol.exe
           ./display-protocol.exe display-fixtures/display-settings.sav display-fixtures/display-runtime.sav
           g++ -std=c++20 -static -Isrc/native tests/lean_borrow_lifetime_test.cpp -o lean-borrow-lifetime.exe
