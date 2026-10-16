@@ -111,7 +111,10 @@ mission travel with resumed gameplay and normal game exit passed. The exact CI
 guide also passed isolated GPU pixel/resize/callback checks and SDK shutdown.
 See `qualification/gdk-gamepass-test-20261016/validation.json` for the bounded
 scope and checks. These results do not qualify AMD, other drivers, exclusive
-fullscreen, long sessions or HDR colour accuracy.
+fullscreen or HDR colour accuracy. The player also reports a successful long
+session on 15 October with the earlier candidate. Its exact duration and commit
+were not recorded. AMD work is proceeding separately in a SpinGiantCRM branch
+and is outside this NVIDIA PR's acceptance scope.
 
 
 A successful build or visible toggle does not prove evaluation. Runtime evidence
@@ -135,7 +138,7 @@ backed-up INIs and the previous RenoDX state as appropriate. Do not delete whole
 six-slot XGameSave bridge; graphics preferences are not automatically restored.
 
 Other GPUs/drivers, exclusive fullscreen, colour accuracy, calibration/menu
-transitions and broad long-session behaviour remain unqualified unless the
-qualification summary explicitly records otherwise. The released guided
+transitions remain outside this qualification. The successful long-session
+report applies to the earlier candidate; no exact duration or build is claimed. The released guided
 installer's platform support does not change merely because this manual package
 is available.

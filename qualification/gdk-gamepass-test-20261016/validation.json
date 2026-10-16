@@ -54,8 +54,19 @@
     "AMD/FSR runtime not qualified",
     "Other GPU/driver combinations not qualified",
     "Exclusive fullscreen not qualified",
-    "Long sessions and HDR colour accuracy/calibration transitions not qualified",
+    "HDR colour accuracy/calibration transitions not qualified",
     "FG Off retires the session and requires a restart before enabling FG again"
   ],
-  "earlierFixtureFailure": "Earlier local MSVC control and local MinGW fixture builds timed out in SDK shutdown; the exact CI guide passed. The earlier timeout cause remains unknown."
+  "earlierFixtureFailure": "Earlier local MSVC control and local MinGW fixture builds timed out in SDK shutdown; the exact CI guide passed. The earlier timeout cause remains unknown.",
+  "scopeExclusions": {
+    "AMD": "Maintainer work proceeds in a separate SpinGiantCRM branch, reported by the player; not an acceptance blocker for this NVIDIA PR"
+  },
+  "playerReportedLongSession": {
+    "date": "2026-10-15",
+    "result": "Working",
+    "candidate": "Earlier candidate tested by the player",
+    "exactCommitRecorded": false,
+    "durationRecorded": false,
+    "evidence": "Player report on 2026-10-16; not a new instrumented run of 1f8e166"
+  }
 }
