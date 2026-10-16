@@ -62,6 +62,9 @@ jobs:
           /tmp/fg-multi-frame /tmp/mcd2-fixtures
           g++ -std=c++20 tests/gdk_cache_time_test.cpp -o /tmp/gdk-cache-time
           /tmp/gdk-cache-time
+          g++ -std=c++20 tests/gdk_save_lifecycle_test.cpp -o /tmp/gdk-save-lifecycle
+          /tmp/gdk-save-lifecycle
+          python -m unittest discover -s tests -p test_gdk_save_lifecycle.py
       - name: Settings framing and semantic checks
         run: |
           g++ -std=c++20 -Wall -Wextra -Werror tests/provider_intent_test.cpp -o /tmp/provider-intent
@@ -170,6 +173,9 @@ jobs:
           ./fg-multi-frame.exe display-fixtures
           g++ -std=c++20 -static tests/gdk_cache_time_test.cpp -o gdk-cache-time.exe
           ./gdk-cache-time.exe
+          g++ -std=c++20 -static tests/gdk_save_lifecycle_test.cpp -o gdk-save-lifecycle.exe
+          ./gdk-save-lifecycle.exe
+          python -m unittest discover -s tests -p test_gdk_save_lifecycle.py
           g++ -std=c++20 -static -Isrc/native tests/lean_borrow_lifetime_test.cpp -o lean-borrow-lifetime.exe
           ./lean-borrow-lifetime.exe
           g++ -std=c++20 -static -pthread -Wall -Wextra -Werror tests/amd_latency_test.cpp -o amd-latency.exe

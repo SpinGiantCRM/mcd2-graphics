@@ -880,3 +880,13 @@ Do not change AMD startup ownership or the experimental observed-startup mirror.
 Retained NVIDIA presentation can cost memory and time while Off. Verify repeated
 On/Off, Off-startup/On, SR/HDR, mission travel and normal exit on Windows before
 claiming this behavior works; portable transition fixtures alone do not qualify it.
+
+
+## GDK save transport shutdown candidate
+
+Close the bridge's own provider/user handles and runtime binding on owned
+Unreal-window swapchain destruction before final DLL teardown. Preserve auxiliary
+window/resize refusal, stop/wake/join ordering, six-slot validation and final
+NT-termination guards. The retained-process stack was inside xgameruntime error
+reporting, not an SR/FG wait; earlier shared-SDK admission logs alone did not
+identify its cause. The early GDK cleanup still requires game-exit qualification.

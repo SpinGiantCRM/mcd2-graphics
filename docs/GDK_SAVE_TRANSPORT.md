@@ -60,3 +60,18 @@ from the current-main port. See [Game Pass test installation](GAMEPASS_TESTING.m
 for downloads, external dependencies, exact paths, hash verification and restore
 instructions. This bounded trial does not change the released installer's
 supported-platform status.
+
+
+## Shutdown candidate
+
+The bridge claims only the actual current-process UnrealWindow swapchain.
+Its non-resize destruction cooperatively stops and joins the save worker before
+final DLL teardown. Store destruction closes the provider/user handles before
+the middleware binding releases its own runtime reference. Ordinary addon unload
+uses the same idempotent stop; final process teardown still avoids joins and SDK
+calls. Auxiliary swapchains and resize do not stop the transport.
+
+A private exit stack captured one remaining thread in xgameruntime XErrorReport
+while the GDK worker had never logged stopped. This motivates earlier binding
+cleanup; it is not yet proof that the candidate fixes the reported background
+process. Keep Windows/Linux ownership checks and verify real game exit.

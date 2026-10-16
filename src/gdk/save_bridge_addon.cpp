@@ -3,6 +3,7 @@
 #include <reshade.hpp>
 #include "game_save_api.hpp"
 #include "cache_time.hpp"
+#include "save_lifecycle.hpp"
 #include "../latency/process_exit.hpp"
 #include <atomic>
 #include <chrono>
@@ -21,6 +22,30 @@ struct Worker {
     std::thread thread;
 };
 Worker* worker=nullptr;
+std::mutex lifecycleMutex;
+std::uintptr_t saveOwner=0;
+void stopWorker() {
+    std::lock_guard lock(lifecycleMutex);
+    if(!worker)return;
+    worker->stop=true;worker->wake.notify_all();
+    if(worker->thread.joinable())worker->thread.join();
+    delete worker;worker=nullptr;
+}
+void swap_init(reshade::api::swapchain* swap,bool) {
+    if(mcd2::process_exit::terminating())return;
+    const auto window=static_cast<HWND>(swap->get_hwnd());DWORD pid=0;wchar_t name[256]{};
+    GetWindowThreadProcessId(window,&pid);GetClassNameW(window,name,256);
+    if(pid!=GetCurrentProcessId()||std::wcscmp(name,L"UnrealWindow"))return;
+    std::lock_guard lock(lifecycleMutex);
+    if(worker&&!saveOwner)saveOwner=reinterpret_cast<std::uintptr_t>(swap);
+}
+void swap_destroy(reshade::api::swapchain* swap,bool resize) {
+    if(mcd2::process_exit::terminating())return;
+    bool close=false;
+    {std::lock_guard lock(lifecycleMutex);close=closesSaveOwner(false,resize,saveOwner,reinterpret_cast<std::uintptr_t>(swap));}
+    // Release save handles and our middleware binding before final DLL teardown.
+    if(close)stopWorker();
+}
 std::atomic<uint32_t> cacheClockResolution{0};
 bool readCache(const std::filesystem::path& path,const Slot& slot,std::vector<std::uint8_t>& bytes) {
     const auto attributes=GetFileAttributesW(path.c_str());
@@ -121,7 +146,7 @@ BOOL APIENTRY DllMain(HMODULE module,DWORD reason,LPVOID reserved){
     return TRUE;
 }
 extern "C" __declspec(dllexport) bool AddonInit(HMODULE module,HMODULE){
-    mcd2::process_exit::initialize();if(worker)return true;
+    mcd2::process_exit::initialize();std::lock_guard lock(lifecycleMutex);if(worker)return true;
     std::array<wchar_t,256> family{};UINT32 length=static_cast<UINT32>(family.size());
     if(GetCurrentPackageFamilyName(&length,family.data())!=ERROR_SUCCESS || std::wstring_view(family.data()).find(L"Microsoft.MinecraftDungeons2_")!=0)return true;
     try {
@@ -136,11 +161,15 @@ extern "C" __declspec(dllexport) bool AddonInit(HMODULE module,HMODULE){
         for(const auto& path:{cache,logs})if(GetFileAttributesW(path.c_str())&FILE_ATTRIBUTE_REPARSE_POINT)return false;
         auto state=std::make_unique<Worker>();
         state->thread=std::thread(run,std::ref(*state),root/L"Packages"/family.data()/L"SystemAppData"/L"wgs",cache,logs/L"gdk-save-bridge.log",binding);
-        worker=state.release();return true;
+        worker=state.release();saveOwner=0;
+        reshade::register_event<reshade::addon_event::init_swapchain>(swap_init);
+        reshade::register_event<reshade::addon_event::destroy_swapchain>(swap_destroy);
+        return true;
     }catch(const std::exception&){return false;}
 }
 extern "C" __declspec(dllexport) void AddonUninit(HMODULE,HMODULE){
-    if(mcd2::process_exit::terminating()||!worker)return;
-    worker->stop=true;worker->wake.notify_all();if(worker->thread.joinable())worker->thread.join();
-    delete worker;worker=nullptr;
+    if(mcd2::process_exit::terminating())return;
+    reshade::unregister_event<reshade::addon_event::init_swapchain>(swap_init);
+    reshade::unregister_event<reshade::addon_event::destroy_swapchain>(swap_destroy);
+    stopWorker();
 }
