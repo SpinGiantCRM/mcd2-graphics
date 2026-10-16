@@ -27,11 +27,13 @@ int main() {
  assert(capabilities.find({16,-1})==16&&capabilities.find({17,-1})==-1);
  capabilities.clear();assert(capabilities.find({1,2})==-1);
  for(unsigned available=0;available<2;++available)for(unsigned requested=0;requested<2;++requested)for(unsigned startup=0;startup<2;++startup)for(unsigned retired=0;retired<2;++retired)
-  assert(restartRequired(available,requested,startup,retired)==bool(available&&(retired||requested!=startup)));
- for(unsigned mode=0;mode<2;++mode)for(unsigned current=0;current<2;++current)for(unsigned fault=0;fault<2;++fault)
-  assert(permanentOff(mode,current,fault)==bool(fault||(current&&mode==0)));
- assert(!permanentOff(0,false,0)); // No UI acknowledgement yet.
- assert(!permanentOff(1,false,0)); // Previous-process saved On.
+  assert(restartRequired(available,requested,startup,retired)==bool(available&&(retired||(requested&&!startup))));
+ assert(!permanentOff(0));
+ assert(permanentOff(1));
+ assert(!restartRequired(true,0,1,false)); // User Off preserves the routed session.
+ assert(!restartRequired(true,1,1,false)); // It can resume without a restart.
+ assert(restartRequired(true,1,0,false)); // No presentation owner cannot enable FG.
+ assert(restartRequired(true,1,1,true)); // Fault retirement remains terminal.
  Configuration c;
  assert(!nvidiaInputsReady(false,false,false));
  assert(!nvidiaInputsReady(false,true,true));
@@ -85,6 +87,13 @@ int main() {
  assert(std::memcmp(&suspended,&expected,sizeof(expected))==0);
  c.accepted(suspended);
  assert(c.prepare(off).motionWidth==2560);
+ for(unsigned cycle=0;cycle<3;++cycle){
+  const auto resumed=configurationForPresent(on,c.last);
+  assert(sameConfiguration(resumed,on));c.accepted(resumed);
+  const auto paused=configurationForPresent(off,c.last);
+  assert(!paused.mode&&paused.motionWidth==on.motionWidth);c.accepted(paused);
+ }
+
  auto changed=on;changed.width=1920;changed.height=1080;changed.motionWidth=1280;changed.motionHeight=720;changed.backBuffers=2;
  prepared=c.prepare(changed);assert(std::memcmp(&prepared,&changed,sizeof(changed))==0);
  assert(c.prepare(off).motionWidth==2560); // Failed resize retains the accepted configuration.

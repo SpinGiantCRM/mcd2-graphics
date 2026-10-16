@@ -23,6 +23,11 @@ constexpr bool fgMenuMatches(const FgMenuProjection& current,std::uint32_t revis
                             std::uint32_t provider,std::uint32_t mode){
     return current.revision==revision&&current.provider==provider&&unsigned(current.enabled)==mode;
 }
+// NVIDIA retains its presentation route while user generation is Off.
+constexpr std::uint32_t fgStartupOwner(const FgMenuProjection& selection){
+    return selection.pairEligible&&selection.provider<2&&
+        (selection.enabled||selection.provider==0)?selection.provider+1:0;
+}
 constexpr bool fgOwnerMatches(std::uint32_t owner,std::uint32_t provider){
     return provider<2&&owner==provider+1;
 }

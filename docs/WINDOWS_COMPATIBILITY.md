@@ -868,3 +868,15 @@ on the presentation path and reuses the state observed after Present rather
 than adding repeated SDK state queries to the render loop. Multiplier changes
 use the existing one-frame suspension and exact-frame guide admission.
 Actual 3x..6x and Dynamic output remain unqualified until tested on RTX 50.
+
+
+## NVIDIA FG live toggle candidate
+
+User Off must use the existing eOff retain-resources path, not permanent feature
+release. Preserve fault retirement, owner-closing GPU/NGX shutdown, input identity
+and suspend/reset/resume guards. Valid legacy NVIDIA startup settings reserve the
+proxy even with Off; consolidated NVIDIA does so only for an eligible pairing.
+Do not change AMD startup ownership or the experimental observed-startup mirror.
+Retained NVIDIA presentation can cost memory and time while Off. Verify repeated
+On/Off, Off-startup/On, SR/HDR, mission travel and normal exit on Windows before
+claiming this behavior works; portable transition fixtures alone do not qualify it.

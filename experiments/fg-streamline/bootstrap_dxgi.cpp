@@ -53,15 +53,15 @@ unsigned shared_startup_owner(){
  mcd2::providers::GraphicsStore store(path);mcd2::providers::DecodedGraphicsRecord record;
  mcd2::providers::FgMenuProjection projection;
  if(!mcd2::providers::store_detail::directoryReady(path)||store.load(record).status!=mcd2::providers::StoreStatus::Ok||
-    !mcd2::providers::projectFgMenu(record,projection)||!projection.enabled||!projection.pairEligible)return 0;
- event("shared-FG-startup-revision",projection.revision);return projection.provider+1;
+    !mcd2::providers::projectFgMenu(record,projection))return 0;
+ event("shared-FG-startup-revision",projection.revision);return mcd2::providers::fgStartupOwner(projection);
 }
-unsigned saved_fg_mode(){
+unsigned saved_fg_route(){
  auto local=std::make_unique<wchar_t[]>(32768);auto n=GetEnvironmentVariableW(L"LOCALAPPDATA",local.get(),32768);if(!n||n>=32768)return 0;
  auto path=std::filesystem::path(local.get())/L"Dungeons2"/L"Saved"/L"SaveGames"/L"MCD2GraphicsFGSettings.sav";
  std::ifstream file(path,std::ios::binary|std::ios::ate);if(!file)return 0;auto size=file.tellg();if(size<64||size>8192)return 0;
  std::vector<uint8_t> bytes(static_cast<size_t>(size));file.seekg(0);if(!file.read(reinterpret_cast<char*>(bytes.data()),bytes.size()))return 0;
- mcd2::fgui::Intent intent{};return mcd2::fgui::decode(bytes,intent)?intent.mode:0;
+ mcd2::fgui::Intent intent{};return mcd2::fgui::decode(bytes,intent)&&intent.provider==0?1u:0u;
 }
 unsigned observed_fg_mode(){
  auto local=std::make_unique<wchar_t[]>(32768);auto n=GetEnvironmentVariableW(L"LOCALAPPDATA",local.get(),32768);if(!n||n>=32768)return 0;
@@ -201,9 +201,8 @@ BOOL CALLBACK initialize(PINIT_ONCE,void*,void**){
  }
  routeEnabled=GetPrivateProfileIntW(L"Experiment",L"FactoryRouting",1,policy.c_str())!=0;
  const bool factoryRoutingRequested=routeEnabled;
- // An Off startup must create the normal swapchain. A retained FG proxy still
- // copies/paces frames while generation is Off. Until engine-owned recreation
- // is qualified, the native toggle saves the next-launch presentation mode.
+ // Keep the selected NVIDIA presentation route available for live Off/On.
+ // Actual adapter support is checked before creating its swapchain.
  auto uiPolicy=(folder/L"FGGuideCapture.ini").wstring();
  const bool sharedMenu=GetPrivateProfileIntW(L"Providers",L"ConsolidatedMenuTransport",0,policy.c_str())==1;
  unsigned sharedOwner=0;
@@ -211,7 +210,7 @@ BOOL CALLBACK initialize(PINIT_ONCE,void*,void**){
  else if(GetPrivateProfileIntW(L"Providers",L"ObservedStartup",0,policy.c_str())==1){
   // An invalid/missing mirror must not fall back to the legacy FG-only slot.
   fgSessionMode=observed_fg_mode();routeEnabled=routeEnabled&&fgSessionMode==1;
- }else if(GetPrivateProfileIntW(L"Capture",L"NativeUIToggle",0,uiPolicy.c_str())==1){fgSessionMode=saved_fg_mode();routeEnabled=routeEnabled&&fgSessionMode==1;}
+ }else if(GetPrivateProfileIntW(L"Capture",L"NativeUIToggle",0,uiPolicy.c_str())==1){fgSessionMode=saved_fg_route();routeEnabled=routeEnabled&&fgSessionMode==1;}
  // Explicit private trial only. Ordinary startup/migration remains unchanged.
  const bool privateAmdTrial=GetPrivateProfileIntW(L"Providers",L"ExperimentalAmdFG",0,policy.c_str())==1;
  amdFgSession=privateAmdTrial||(sharedMenu&&sharedOwner==2);

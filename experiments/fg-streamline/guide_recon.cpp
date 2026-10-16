@@ -368,7 +368,7 @@ void present(a::command_queue*q,a::swapchain*swap,const a::rect*,const a::rect*,
   if(last)last(&effective);
   std::lock_guard lock(mutex);privateLog<<"{\"kind\":\"game_fg_mode\",\"frameStamp\":"<<id<<",\"requestedMode\":"<<config.mode<<",\"SDKResult\":"<<result<<",\"matchingInputs\":"<<(ready?"true":"false")<<",\"guideWidth\":"<<effective.motionWidth<<",\"guideHeight\":"<<effective.motionHeight<<"}\n";privateLog.flush();if(!result){activeFGMode=config.mode;fg_controls::appliedFrameMode=config.generatedFrames?config.generatedFrames-1:5;if(config.mode)releasedWhileOff=false;}else if(fg_controls::enabled)fg_controls::fault=1;
  }
- const bool permanentOff=fg_controls::enabled?mcd2::fg::permanentOff(fg_controls::intent.mode,fg_controls::intent.session==fg_controls::session,fg_controls::fault.load()):(!legacyEnable.load()||fgTrialFrames>=600);
+ const bool permanentOff=fg_controls::enabled?mcd2::fg::permanentOff(fg_controls::fault.load()):(!legacyEnable.load()||fgTrialFrames>=600);
  if(!activeFGMode && permanentOff && !releasedWhileOff){
   auto bridge=GetModuleHandleW(L"fg-sdk-bridge.dll");using Release=int(*)();auto release=bridge?reinterpret_cast<Release>(GetProcAddress(bridge,"mcd2_fg_release")):nullptr;auto configured=bridge?reinterpret_cast<Release>(GetProcAddress(bridge,"mcd2_fg_configured")):nullptr;
   // A full release ends this process's FG session. Re-enabling requires the

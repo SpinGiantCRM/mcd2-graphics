@@ -38,8 +38,14 @@ not silently applied as 2x or advertised as successful.
 
 Changes use the existing suspend/reconfigure/resume path. Frame identity,
 source/guide matching, UI-alpha lifetime, startup ownership and permanent-Off
-retirement guards remain in place. FG Off still requires a process restart
-before enabling FG again. No NVIDIA runtime update or driver-profile edit is
+retirement guards remain in place. On the selected NVIDIA presentation route, FG Off suspends generation without
+freeing its feature, so On can resume in the same process. Valid legacy NVIDIA
+settings also reserve this route when starting with Off. Consolidated NVIDIA
+selection reserves it only for an eligible SR/FG pairing. Missing/invalid startup
+settings, provider changes and terminal fault retirement still require restart.
+The experimental observed-startup mirror retains its startup-only routing.
+Keeping the NVIDIA proxy while Off can retain memory and presentation overhead;
+this change is not yet qualified in-game. No NVIDIA runtime update or driver-profile edit is
 required by this candidate.
 
 ## Verification

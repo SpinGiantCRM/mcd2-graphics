@@ -32,11 +32,11 @@ inline MCD2FGConfig configurationForPresent(const MCD2FGConfig& requested,const 
  return requested;
 }
 inline bool restartRequired(bool available,unsigned requested,unsigned startup,bool retired) {
- return available && (retired || requested!=startup);
+ return available && (retired || (requested && !startup));
 }
-// Unbound/stale startup intent must not permanently retire an On swapchain.
-inline bool permanentOff(unsigned requested,bool currentSession,unsigned fault) {
- return fault!=0 || (currentSession && requested==0);
+// User Off retains the NVIDIA session; faults still retire it.
+inline bool permanentOff(unsigned fault) {
+ return fault!=0;
 }
 // Menu frames do not carry world guides. Suspending must not advertise their
 // absent guide dimensions as a new output-resolution allocation.

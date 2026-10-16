@@ -51,7 +51,7 @@ void poll(a::device*device,const std::filesystem::path&policy,unsigned active){
   const bool currentRequest=snapshot&&snapshot(&current)==0&&!current.load&&!current.reserved&&current.session&&
    mcd2::providers::decodeGraphicsRecord(current.record,record)&&mcd2::providers::projectFgMenu(record,selection)&&
    mcd2::providers::fgMenuMatches(selection,intent.settingsRevision,intent.provider,intent.mode)&&selection.frameMode==intent.frameMode;
-  restartRequired=available&&((intent.mode&&!mcd2::providers::fgOwnerMatches(startupOwner,intent.provider))||(!intent.mode&&startupOwner!=0))?1:0;
+  restartRequired=available&&(retired||(intent.mode&&!mcd2::providers::fgOwnerMatches(startupOwner,intent.provider))||(!intent.mode&&startupOwner==2))?1:0;
   wanted=frameModeSupported&&currentRequest&&selection.pairEligible&&available&&intent.mode&&intent.ready&&intent.session==session&&
    mcd2::providers::fgOwnerMatches(startupOwner,intent.provider)&&!fault&&!retired;
   publish(active,false);return;

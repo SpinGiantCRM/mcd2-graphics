@@ -10,6 +10,11 @@
 #include <vector>
 using namespace mcd2::providers;
 int main(int argc,char** argv){
+ for(unsigned provider=0;provider<3;++provider)for(bool enabled:{false,true})for(bool eligible:{false,true}){
+  FgMenuProjection selection{42,provider,enabled,eligible,0};
+  const unsigned expected=eligible&&provider<2&&(enabled||provider==0)?provider+1:0;
+  assert(fgStartupOwner(selection)==expected);
+ }
  GraphicsIntent intent;intent.revision=42;intent.sr=SrProvider::AmdFsr;
  intent.srPreferences[1]={Quality::Custom,7100,7100};
  intent.hdr={true,420,203,167};
