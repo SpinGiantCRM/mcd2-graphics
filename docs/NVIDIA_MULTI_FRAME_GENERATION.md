@@ -45,7 +45,9 @@ selection reserves it only for an eligible SR/FG pairing. Missing/invalid startu
 settings, provider changes and terminal fault retirement still require restart.
 The experimental observed-startup mirror retains its startup-only routing.
 Keeping the NVIDIA proxy while Off can retain memory and presentation overhead;
-this change is not yet qualified in-game. No NVIDIA runtime update or driver-profile edit is
+the fb6860a candidate passed a player On/Off/On trial with resumed 3x output,
+zero SDK/coordinator/marker faults and no permanent feature release. Starting
+with saved Off and enabling On remains pending. No NVIDIA runtime update or driver-profile edit is
 required by this candidate.
 
 ## Verification
