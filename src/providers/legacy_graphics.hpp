@@ -46,8 +46,12 @@ inline bool parse(std::span<const std::uint8_t> bytes, std::string_view classNam
     if (r.string() != expected || r.number(1) != 0 || !r.ok) return false;
     Fields fields;
     for (unsigned n = 0; n < 32; ++n) {
-        const auto name = r.string();
+        auto name = r.string();
         if (!r.ok) return false;
+        if(className=="FGSettingsSave"){
+            auto folded=name;for(char& c:folded)if(c>='A'&&c<='Z')c=char(c-'A'+'a');
+            if(folded=="framemode")name="FrameMode";
+        }
         if (name == "None") {
             if (r.number(4) != 0 || !r.ok || r.at != bytes.size()) return false;
             out = std::move(fields); return true;

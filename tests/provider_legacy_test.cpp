@@ -62,6 +62,10 @@ int main() {
         GraphicsIntent converted;assert(decodeLegacyGraphics(sr,display,save("FGSettingsSave",mfg),converted));
         assert(converted.fgStrategy==(mode==5?FgStrategy::Dynamic:mode?FgStrategy::NativeMfg:FgStrategy::Single));
         assert(converted.requestedMultiplier==(mode==5?2:mode+2));
+        mfg.erase("FrameMode");mfg["frameMode"]=mode;
+        assert(decodeLegacyGraphics(sr,display,save("FGSettingsSave",mfg),converted));
+        assert(converted.fgStrategy==(mode==5?FgStrategy::Dynamic:mode?FgStrategy::NativeMfg:FgStrategy::Single));
+        mfg["FrameMode"]=mode;assert(!decodeLegacyGraphics(sr,display,save("FGSettingsSave",mfg),converted));
     }
     auto invalidMfg=f;invalidMfg["FrameMode"]=6;
     assert(!decodeLegacyGraphics(sr,display,save("FGSettingsSave",invalidMfg),migrated));

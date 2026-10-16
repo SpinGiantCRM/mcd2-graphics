@@ -6,9 +6,11 @@ GPT 6.1 Sol. The existing tested Game Pass prerelease remains unchanged.
 
 The NVIDIA FG section adds **FG Multiplier** with 2x, 3x, 4x, 5x, 6x and Dynamic.
 Selection skips modes unavailable on the actual GPU/driver. A 2x multiplier adds
-one frame; 6x adds five. On RTX 40 the native NVIDIA path remains 2x. Multi Frame
+one frame; 6x adds five. Without an external unlocker, RTX 40 remains 2x. Official NVIDIA Multi Frame
 Generation and Dynamic require compatible RTX 50 hardware and driver/runtime
-support. AMD selection and its 2x route retain their existing guards.
+support. The selector uses reported SDK capabilities rather than a GPU-model
+whitelist. An externally installed MFG Ada Unlock can expose higher modes on
+RTX 40; it is not bundled, and that combination is qualified separately. AMD selection and its 2x route retain their existing guards.
 
 The current Streamline 2.14.1 SDK already exposes these features. Fixed modes
 are limited by `DLSSGState::numFramesToGenerateMax`. Dynamic requires
@@ -20,7 +22,9 @@ See the [NVIDIA integration guide](https://github.com/NVIDIA-RTX/Streamline/blob
 ## Persistence and admission
 
 Legacy FG settings gain an optional `FrameMode` integer: 0..4 select 2x..6x,
-5 selects Dynamic. An absent field remains 2x, preserving old saves. Runtime
+5 selects Dynamic. An absent field remains 2x, preserving old saves. FrameMode is matched
+case-insensitively because Unreal may preserve its interned spelling as
+frameMode; differently cased duplicates are rejected. Runtime
 capabilities and the accepted mode are returned through the FG runtime slot;
 the GDK allowlist and codecs cover these fields. Consolidated settings use the
 existing Single/NativeMfg strategies plus the new Dynamic strategy value 3;

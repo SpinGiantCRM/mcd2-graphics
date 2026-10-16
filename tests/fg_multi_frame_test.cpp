@@ -16,8 +16,15 @@ int main(int argc,char** argv){
  mcd2::fgui::Intent out{};assert(mcd2::fgui::decode(settings,out)&&out.frameMode==0);
  for(unsigned mode=0;mode<=5;++mode){auto saved=field(settings,"FrameMode",mode);
   assert(mcd2::fgui::decode(saved,out)&&out.frameMode==mode);assert(mcd2::gdk::valid(mcd2::gdk::slots[2],saved));
+  for(const auto* name:{"frameMode","FRAMEMODE","framemode"}){
+   auto variant=field(settings,name,mode);
+   assert(mcd2::fgui::decode(variant,out)&&out.frameMode==mode);
+   assert(mcd2::gdk::valid(mcd2::gdk::slots[2],variant));
+   assert(!mcd2::fgui::decode(field(saved,name,mode),out));
+  }
  }
  assert(!mcd2::fgui::decode(field(settings,"FrameMode",6),out));
+ assert(!mcd2::fgui::decode(field(settings,"frameMode",6),out));
  assert(!mcd2::gdk::valid(mcd2::gdk::slots[2],field(settings,"FrameMode",6)));
  auto caps=mcd2::fgui::encode(runtime,{{"SchemaVersion",1},{"MaximumGeneratedFrames",5},{"DynamicSupported",1},{"ActiveFrameMode",5}});
  assert(mcd2::gdk::valid(mcd2::gdk::slots[5],caps));
