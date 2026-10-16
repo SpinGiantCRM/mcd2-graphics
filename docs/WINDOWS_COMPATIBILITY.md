@@ -852,5 +852,8 @@ difference is not established. This runtime check does not qualify AMD.
 The isolated GPU fixture preserved all ten red frames, resize and host/CPU
 callbacks, but its final explicit SDK shutdown timed out with both the MSVC
 control and MinGW candidate. Keep that failure visible separately from the
-successful normal game exit. A newly assembled package still needs its own
-runtime qualification before the PR becomes ready.
+successful normal game exit. The exact CI guide subsequently passed this same fixture, including SDK
+shutdown and host exit. The complete 1f8e166 package passed restart, mission
+travel, continued SR/FG/HDR gameplay and normal game exit; see
+`qualification/gdk-gamepass-test-20261016/validation.json`. The cause of the
+earlier local fixture timeout is not established.
