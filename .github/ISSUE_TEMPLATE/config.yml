@@ -3,6 +3,6 @@ contact_links:
   - name: Installation and pinned dependencies
     url: https://github.com/SpinGiantCRM/mcd2-graphics/blob/main/INSTALL.md
     about: Check the supported game build and dependencies before filing a report.
-  - name: Online-use restriction
+  - name: Online-use information
     url: https://github.com/SpinGiantCRM/mcd2-graphics/blob/main/docs/ONLINE_USE.md
-    about: This preview is supported for offline single-player only; do not test online enforcement.
+    about: Online/co-op compatibility is unverified; offline play is safer. Review the publisher terms before use.

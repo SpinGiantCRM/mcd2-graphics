@@ -1,29 +1,6 @@
 name: FG Windows candidate
 on:
   pull_request:
-    paths:
-      - '.github/workflows/fg-windows-candidate.yml'
-      - 'experiments/fg-streamline/**'
-      - 'experiments/providers/**'
-      - 'tests/test_fsr*.py'
-      - 'src/native/**'
-      - 'src/shaders/**'
-      - 'src/latency/**'
-      - 'src/providers/**'
-      - 'src/ui/**'
-      - 'tools/ModInfoBuilder/**'
-      - 'build.py'
-      - 'build_latency.py'
-      - 'build_amd_latency.py'
-      - 'third-party/AntiLag2/**'
-      - 'tests/amd_antilag*'
-      - 'build_toolchain.py'
-      - 'dependencies.lock.json'
-      - 'manifest.json'
-      - 'qualification/fg-release/own-payload.zip'
-      - 'qualification/fg-release/ui-build-receipt.json'
-      - 'qualification/fg-release/reshade-reset-epoch.patch'
-      - 'qualification/providers/**'
   workflow_dispatch:
 permissions:
   contents: read
@@ -31,7 +8,36 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
+  changes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      native: ${{ steps.scope.outputs.native }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+      - name: Select native build scope
+        id: scope
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          python3 - <<'PYTHON'
+          import fnmatch, os, subprocess
+          patterns = ['.github/workflows/fg-windows-candidate.yml', 'experiments/fg-streamline/**', 'experiments/providers/**', 'tests/test_fsr*.py', 'src/native/**', 'src/shaders/**', 'src/latency/**', 'src/providers/**', 'src/ui/**', 'tools/ModInfoBuilder/**', 'build.py', 'build_latency.py', 'build_amd_latency.py', 'third-party/AntiLag2/**', 'tests/amd_antilag*', 'build_toolchain.py', 'dependencies.lock.json', 'manifest.json', 'qualification/fg-release/own-payload.zip', 'qualification/fg-release/ui-build-receipt.json', 'qualification/fg-release/reshade-reset-epoch.patch', 'qualification/providers/**']
+          native = os.environ['EVENT_NAME'] == 'workflow_dispatch'
+          if not native:
+              changed = subprocess.check_output(['git', 'diff', '--name-only', '-z', os.environ['BASE_SHA'], os.environ['HEAD_SHA']]).decode().split('\0')
+              native = any(fnmatch.fnmatchcase(path, pattern) for path in changed if path for pattern in patterns)
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write(f'native={str(native).lower()}\n')
+          print(f'Native build required: {native}')
+          PYTHON
   build:
+    needs: changes
+    if: needs.changes.outputs.native == 'true'
     runs-on: windows-2022
     timeout-minutes: 40
     steps:
@@ -44,4 +50,26 @@ jobs:
         with:
           name: fg-windows-candidate
           path: ${{ runner.temp }}/fg-windows/artifact/
-          retention-days: 7
+          retention-days: 30
+
+  native-gate:
+    name: Native candidate checks
+    needs: [changes, build]
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Require the selected build to succeed
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: |
+          python3 - <<'PYTHON'
+          import json, os
+          jobs = json.loads(os.environ['NEEDS_JSON'])
+          if jobs['changes']['result'] != 'success':
+              raise SystemExit('Native build scope selection failed.')
+          expected = 'success' if jobs['changes']['outputs'].get('native') == 'true' else 'skipped'
+          if jobs['build']['result'] != expected:
+              raise SystemExit(f"Native build result {jobs['build']['result']}; required {expected}.")
+          print('Native candidate gate passed.')
+          PYTHON
