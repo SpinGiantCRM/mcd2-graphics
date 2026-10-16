@@ -43,7 +43,9 @@ static class ControlsTest {
   Check(r.W18==2&&r.W29==1&&r.W30==0,"FSR/NVIDIA FG pairing preserved atomically");
   for(int sr=0;sr<4;sr++)for(int fg=0;fg<3;fg++){
    Check(c.MenuFgPairEligible(sr,fg,0,2)==((fg==0&&(sr==1||sr==2))||(fg==1&&(sr==0||sr==1||sr==2))),"UI/native route matrix agrees");
-   Check(!c.MenuFgPairEligible(sr,fg,1,3)&&!c.MenuFgPairEligible(sr,fg,2,3)&&!c.MenuFgPairEligible(sr,fg,0,3),"unimplemented strategy/count refused");
+   Check(c.MenuFgPairEligible(sr,fg,1,3)==(fg==0&&(sr==1||sr==2)),"native NVIDIA MFG route");
+   Check(c.MenuFgPairEligible(sr,fg,3,2)==(fg==0&&(sr==1||sr==2)),"native NVIDIA Dynamic route");
+   Check(!c.MenuFgPairEligible(sr,fg,1,7)&&!c.MenuFgPairEligible(sr,fg,2,3)&&!c.MenuFgPairEligible(sr,fg,0,3),"unsupported strategy/count refused");
   }
   for(int quality=0;quality<6;quality++){
    a=Authority();c=Client(a);Check(c.SelectFg(0,0,2,true)&&c.SelectQuality(2,quality)&&c.SelectMenuSr(2),"FSR preset edit with NVIDIA FG");c.Poll();r=Sent();
