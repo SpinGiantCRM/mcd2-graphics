@@ -706,7 +706,7 @@ public class ModActor : AActor {
  public void ShowDisplayHelp(int id){displayHelp=id;OwnHelpVisible=true;string help="";
   if(id==8)help="Choose the total frame-rate multiplier. 2x adds one generated frame; 6x adds five. Dynamic lets NVIDIA target the current monitor refresh rate.\n\nOnly modes supported by the current GPU and driver can be selected.";
   if(id==7)help="Choose the frame-generation provider independently of the upscaler.\n\n• NVIDIA DLSS\n• AMD FSR\n\nRestart after changing providers.";
-  if(id==5)help="Generate an extra frame between rendered frames for smoother motion.\n\n• Off — rendered frames only\n• On — rendered and generated frames\n\nRestart after changing modes.";
+  if(id==5)help="Generate an extra frame between rendered frames for smoother motion.\n\n• Off — rendered frames only\n• On — rendered and generated frames\n\nNVIDIA FG can be switched Off and On without restarting. Restart after changing providers or AMD FG modes.";
   if(id==0)help="Enable HDR for a compatible display with system HDR turned on.\n\n• Off — standard dynamic range\n• On — HDR output";
   if(id==1)help="Match the peak brightness of your display’s HDR mode. Use its calibrated value.";
   if(id==2)help="Adjust the brightness of ordinary scene white in HDR. Raise it for a brighter room.";
