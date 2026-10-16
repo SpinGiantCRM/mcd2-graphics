@@ -37,7 +37,7 @@ remain visible as unavailable, allowing selection of a supported mode. They are
 not silently applied as 2x or advertised as successful.
 
 Changes use the existing suspend/reconfigure/resume path. Frame identity,
-source/guide matching, UI-alpha lifetime, startup ownership and permanent-Off
+source/guide matching, UI-alpha lifetime, startup ownership and terminal-fault
 retirement guards remain in place. On the selected NVIDIA presentation route, FG Off suspends generation without
 freeing its feature, so On can resume in the same process. Valid legacy NVIDIA
 settings also reserve this route when starting with Off. Consolidated NVIDIA
@@ -46,8 +46,9 @@ settings, provider changes and terminal fault retirement still require restart.
 The experimental observed-startup mirror retains its startup-only routing.
 Keeping the NVIDIA proxy while Off can retain memory and presentation overhead;
 the fb6860a candidate passed a player On/Off/On trial with resumed 3x output,
-zero SDK/coordinator/marker faults and no permanent feature release. Starting
-with saved Off and enabling On remains pending. No NVIDIA runtime update or driver-profile edit is
+zero SDK/coordinator/marker faults and no permanent feature release. The player
+also verified starting with saved Off and enabling On in gameplay; new-session
+SDK samples confirm 3x output without faults. No NVIDIA runtime update or driver-profile edit is
 required by this candidate.
 
 ## Verification
@@ -70,5 +71,6 @@ the loaded NVIDIA override uses wrapper 2.14.16.0 / provider 310.9.16.0, which
 the unlocker labels general compatibility only, not release-supported Dynamic.
 See the [unlocker runtime requirements](https://github.com/mavismmg/MFGAdaUnlock-RenoDx#dynamic-multi-frame-generation).
 Native RTX 50 hardware and Dynamic adaptation under varying load remain unverified.
-Normal exit and restart persistence of this candidate are still pending.
+Saved-Off startup and live activation passed on fb6860a. Exact normal process
+exit and retained-proxy overhead while Off remain unqualified.
 A visible selector or passing synthetic capability test is not runtime proof.

@@ -16,7 +16,7 @@
     "rtx4080InGame2xRegression": "passed: player reports approximately 80 rendered / 160 presented FPS",
     "rtx4080ExternalUnlockerFixedMfg": "passed: player confirms 3x through 6x; SDK samples record actualPresents 3, 4, 5, 6, each result/status 0; 3x player reports 60-70 rendered / 180-210 presented FPS",
     "rtx4080ExternalUnlockerDynamic": "request and persisted FrameMode 5 accepted; player reports working output; adaptation unverified because loaded wrapper/provider 2.14.16.0/310.9.16.0 are not release-supported Dynamic by the external unlocker",
-    "candidateNormalExitAndRestartPersistence": "old shipping process no longer listed; no Windows restart performed; restart persistence of the newly installed live-toggle candidate remains pending"
+    "candidateNormalExitAndRestartPersistence": "player completed another game launch with saved FG Off and enabled On in gameplay; exact normal process-exit completion remains unqualified"
   },
   "additionalCustomHost": "Inconclusive: timed out before completion. The standard host with the exact CI guide and SDK bridge passed. No GPU refusal/multiplier result is claimed from the custom host.",
   "unverified": [
@@ -43,7 +43,7 @@
     "portableTransitionAndOwnershipTests": "passed on Windows and Linux",
     "shutdownAndBootstrapSourceChecks": "passed",
     "inGameOnOffOn": "passed: player confirms FG disables and resumes; current fb6860a installation hashes match; resumed outcomes actualPresents 3, SDK result/status 0; no fg_permanent_release in session; coordinatorError/sdkMarkerError/reflexFault all 0",
-    "offStartupOn": "pending: next trial starts with saved Off",
+    "offStartupOn": "passed: player reports starting the game with saved FG Off, enabling FG in gameplay and increased FPS; new-session SDK samples actualPresents 3, result/status 0; no permanent feature release; coordinatorError/sdkMarkerError/reflexFault all 0; installed fb6860a hashes match",
     "fgOffOverhead": "unmeasured",
     "windowsBuildStatus": "passed",
     "isolatedOffStartupGPU": "passed on retry after the old game process disappeared: 10 red input/output frames; 10 host presents; CPU/application callbacks valid; SDK shutdown 0; process exit 0",
