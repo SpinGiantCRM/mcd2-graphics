@@ -1,6 +1,6 @@
 """Build isolated FG probes from separately acquired pinned SDK/runtime files."""
 from pathlib import Path
-import argparse, hashlib, json, re, subprocess, zipfile
+import argparse, hashlib, json, re, subprocess, sys, zipfile
 from source_receipts import provider_sources, source_hashes
 
 p=argparse.ArgumentParser(description=__doc__)
@@ -12,12 +12,14 @@ p.add_argument('--probe',choices=['owned','presentation','feature-lifetime'],def
 p.add_argument('--reshade-headers',type=Path,help='Optionally build the read-only synthetic proxy-chain observer')
 p.add_argument('--early-bootstrap',action='store_true',help='Build the separate experimental DXGI startup route')
 p.add_argument('--guide-recon',action='store_true',help='Build a separate bounded FG opt-in game observer with owned UI-alpha conversion')
+p.add_argument('--guide-mingw-cxx',type=Path,help='Build the Game Pass guide with MinGW and a Microsoft-ABI resource bridge')
 p.add_argument('--dxc',type=Path,help='Offline compiler for the owned UI-alpha shader')
 p.add_argument('--clang-cl',default='clang-cl')
 p.add_argument('--lld-link',default='lld-link')
 a=p.parse_args();src=Path(__file__).resolve().parent;repo=src.parents[1]
 if a.guide_recon and not a.reshade_headers:p.error('--guide-recon requires --reshade-headers')
 if a.guide_recon and not a.dxc:p.error('--guide-recon requires --dxc')
+if a.guide_mingw_cxx and not a.guide_recon:p.error('--guide-mingw-cxx requires --guide-recon')
 lock=json.loads((repo/'dependencies.lock.json').read_text())['dependencies']['Streamline']
 with a.runtime_archive.open('rb') as f:archive_hash=hashlib.file_digest(f,'sha256').hexdigest()
 assert archive_hash==lock['archiveSHA256'],'Unpinned Streamline archive'
@@ -55,7 +57,23 @@ if a.reshade_headers:
     for inc in ['crt/include','sdk/include/ucrt','sdk/include/shared','sdk/include/um']:cmd+=['/imsvc'+str(a.sysroot.resolve()/inc)]
     commands.append(cmd)
     commands.append(['lld-link','/dll','/out:'+str(out/'fg-chain-observer.addon64'),str(obj),'kernel32.lib','user32.lib',*[item for item in link if item.startswith('/libpath:')]])
-if a.guide_recon:
+if a.guide_recon and a.guide_mingw_cxx:
+    sys.path.insert(0,str(repo))
+    from build_toolchain import native_frame_guard, normalize_windows_header
+    inc=out/'guide-include';inc.mkdir(exist_ok=True)
+    for header in a.reshade_headers.glob('reshade*.hpp'):
+        (inc/header.name).write_bytes(normalize_windows_header(header.read_bytes()))
+    compiler=str(a.guide_mingw_cxx.resolve());bridge=out/'reshade_public_bridge.obj'
+    # ReShade virtual calls retain the Microsoft ABI across the MinGW boundary.
+    commands.append([compiler,'--target=x86_64-pc-windows-msvc','-ffreestanding','-std=c++20','-O2',
+                     '-fno-exceptions','-fno-rtti','-nostdinc++',
+                     '-I'+str(repo/'src/native/bridge-freestanding'),'-I'+str(inc),
+                     '-c',str(repo/'src/native/reshade_public_bridge.cpp'),'-o',str(bridge)])
+    commands.append([compiler,'-std=c++20','-O2',*native_frame_guard(compiler),'-shared','-static','-s',
+                     '-I'+str(inc),str(src/'guide_recon.cpp'),str(bridge),
+                     '-o',str(out/'mcd2-fg-guide-recon.addon64'),
+                     '-ld3d12','-ldxgi','-ld3dcompiler','-ldxguid','-lole32','-luuid','-luser32'])
+elif a.guide_recon:
     obj=out/'guide_recon.obj'
     cmd=[str(src/'guide_recon.cpp') if x==str(src/'chain_observer.cpp') else '/Fo'+str(obj) if x.startswith('/Fo') else x for x in cmd]
     commands.append(cmd)
@@ -75,5 +93,6 @@ own=['fg-probe.exe']+(['fg-chain-observer.addon64'] if a.reshade_headers else []
 if a.early_bootstrap:sources+=provider_sources(repo)
 if a.early_bootstrap or a.guide_recon:sources+=['../providers/fsr_fg_game_bridge.h']
 if a.guide_recon:sources+=['fg_frame_inputs.hpp','fg_camera_math.h','guide_recon.cpp','game_presentation_guides.hpp','fg_resource_bridge.hpp','gdk_cache_clock.hpp','src/gdk/cache_time.hpp','src/native/reshade_public_bridge.hpp','src/native/reshade_public_bridge.cpp','fg_alpha_copy.h','fg_ui_alpha.hlsl','fg_controls.hpp','fg_ui_protocol.hpp','src/latency/process_exit.hpp','src/latency/process_lifetime.hpp','src/providers/shared_sdk_shutdown.hpp','src/providers/bootstrap_module.hpp'];own+=['mcd2-fg-guide-recon.addon64','FG_UI_ALPHA.cso']
-(out/'build-receipt.json').write_text(json.dumps({'sdk':'2.14.1','archiveSHA256':archive_hash,'probe':a.probe,'earlyBootstrap':a.early_bootstrap,'files':files,'dxcSHA256':hashlib.sha256(a.dxc.read_bytes()).hexdigest() if a.guide_recon else None,'sourceSHA256':source_hashes(repo,src,sources),'ownBinariesSHA256':{name:hashlib.sha256((out/name).read_bytes()).hexdigest() for name in own},'executableSHA256':hashlib.sha256((out/'fg-probe.exe').read_bytes()).hexdigest()},indent=2))
+if a.guide_mingw_cxx:sources += ['src/native/bridge-freestanding/'+name for name in ('cfloat','cstddef','cstdint')]
+(out/'build-receipt.json').write_text(json.dumps({'sdk':'2.14.1','guideCompilerSHA256':hashlib.sha256(a.guide_mingw_cxx.read_bytes()).hexdigest() if a.guide_mingw_cxx else None,'archiveSHA256':archive_hash,'probe':a.probe,'earlyBootstrap':a.early_bootstrap,'files':files,'dxcSHA256':hashlib.sha256(a.dxc.read_bytes()).hexdigest() if a.guide_recon else None,'sourceSHA256':source_hashes(repo,src,sources),'ownBinariesSHA256':{name:hashlib.sha256((out/name).read_bytes()).hexdigest() for name in own},'executableSHA256':hashlib.sha256((out/'fg-probe.exe').read_bytes()).hexdigest()},indent=2))
 print('Isolated '+a.probe+' FG probe built; production runtime archive verified. No game files changed.')

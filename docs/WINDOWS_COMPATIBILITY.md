@@ -833,3 +833,24 @@ their source, compiler and output hashes. `fsr_dense.hlsl` includes the shared
 compiler outputs fail the build. Keep these owned assets in the isolated SR
 candidate, with vendor runtimes external. Both CI platforms check the recipe;
 Windows native build success still requires separate Windows GPU qualification.
+
+## Game Pass FG guide compiler qualification - 16 October 2026
+
+The Windows candidate builds the FG guide with the pinned LLVM MinGW compiler
+and a freestanding Microsoft-ABI ReShade resource bridge. The standalone probe
+keeps its existing MSVC default; `--guide-mingw-cxx` explicitly selects the
+candidate route. Preserve the source guards, frame admission and ABI boundary.
+
+On RTX 4080, WinGDK, borderless 3840x2160 HDR10, DLSS Performance and FG/Reflex On,
+replacing only the current MSVC guide recovered 70-80 rendering FPS
+from the reported 50-60 FPS, with 150-160 presented FPS in Xbox Game Bar. The
+same-source MinGW guide retained HDR10, sampled two presents in 175 outcomes,
+reported no coordinator/marker error, and exited normally from the game menu.
+This isolates the guide build route; the internal cause of the performance
+difference is not established. This runtime check does not qualify AMD.
+
+The isolated GPU fixture preserved all ten red frames, resize and host/CPU
+callbacks, but its final explicit SDK shutdown timed out with both the MSVC
+control and MinGW candidate. Keep that failure visible separately from the
+successful normal game exit. A newly assembled package still needs its own
+runtime qualification before the PR becomes ready.
