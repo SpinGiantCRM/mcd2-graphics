@@ -9,7 +9,7 @@ _pins = importlib.util.module_from_spec(_pin_spec)
 _pin_spec.loader.exec_module(_pins)
 COMMIT, HEADERS, digest = _pins.COMMIT, _pins.HEADERS, _pins.digest
 
-def build(sdk, sysroot, output, compiler='clang-cl', linker='lld-link'):
+def build(sdk, sysroot, output, compiler='clang-cl', linker='lld-link', presenter_switch_probe=False):
     for name, expected in HEADERS.items():
         if digest(sdk / name) != expected:
             raise ValueError('Pinned FSR header changed: ' + name)
@@ -39,6 +39,18 @@ def build(sdk, sysroot, output, compiler='clang-cl', linker='lld-link'):
                       'dxgi.lib', 'd3d12.lib', 'dxguid.lib', *[x for x in link if x.startswith('/libpath:')]]
         for step in [probe_compile, probe_link]:
             subprocess.run(step, stdout=log, stderr=subprocess.STDOUT, check=True)
+        if presenter_switch_probe:
+            switch_obj = output/'presenter-switch-probe.obj'
+            switch_binary = output/'presenter-switch-probe.exe'
+            switch_compile = [str(root/'presenter_switch_probe.cpp') if x == str(root/'fsr_fg_game_bridge.cpp')
+                              else '/Fo'+str(switch_obj) if x.startswith('/Fo') else x for x in command]
+            # Exercise the 4K buffer geometry used by the current Linux control.
+            switch_compile += ['/DMCD2_PROBE_WIDTH=3840', '/DMCD2_PROBE_HEIGHT=2160']
+            switch_link = [linker, '/out:'+str(switch_binary), str(switch_obj), 'kernel32.lib',
+                           'user32.lib', 'dxgi.lib', 'd3d12.lib', 'dxguid.lib',
+                           *[x for x in link if x.startswith('/libpath:')]]
+            for step in [switch_compile, switch_link]:
+                subprocess.run(step, stdout=log, stderr=subprocess.STDOUT, check=True)
     notice = root.parents[1]/'third-party/FSR-SDK-HEADERS-LICENSE.txt'
     (output/notice.name).write_bytes(notice.read_bytes())
     receipt = dict(sdkCommit=COMMIT, SDKheadersSHA256=HEADERS,
@@ -47,6 +59,12 @@ def build(sdk, sysroot, output, compiler='clang-cl', linker='lld-link'):
                    probeSHA256=digest(probe_binary),
                    runtimeBundled=False, gameIntegrationQualified=False,
                    headersLicenseSHA256=digest(notice))
+    if presenter_switch_probe:
+        receipt['presenterSwitchProbe'] = dict(
+            binarySHA256=digest(switch_binary), width=3840, height=2160,
+            sourceSHA256={name:digest(root/name) for name in
+                          ['presenter_switch_probe.cpp', 'owned_presenter_switch_probe.hpp']},
+            gameIntegrationQualified=False, performanceQualified=False)
     (output/'build-receipt.json').write_text(json.dumps(receipt, indent=2)+'\n')
     return binary
 
@@ -57,6 +75,9 @@ if __name__ == '__main__':
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--clang-cl', default='clang-cl')
     parser.add_argument('--linker', default='lld-link')
+    parser.add_argument('--presenter-switch-probe', action='store_true',
+                        help='Also build the owned-host presenter rebuild experiment; changes no runtime DLL')
     args = parser.parse_args()
-    build(args.sdk.resolve(), args.windows_sysroot.resolve(), args.output.resolve(), args.clang_cl, args.linker)
+    build(args.sdk.resolve(), args.windows_sysroot.resolve(), args.output.resolve(), args.clang_cl, args.linker,
+          args.presenter_switch_probe)
     print('FSR game bridge compiled; no runtime downloaded or packaged.')

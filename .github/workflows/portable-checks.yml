@@ -32,6 +32,7 @@ jobs:
           python3 -m unittest discover -s tests -p "test_fsr_probe.py" -v
           python3 -m unittest discover -s tests -p "test_fsr_fg_probe.py" -v
           python3 -m unittest discover -s tests -p "test_fsr_fg_game_bridge.py" -v
+          python3 -m unittest discover -s tests -p "test_fsr_presenter_switch.py" -v
           python3 -m unittest discover -s tests -p "test_sr_guide_producer.py" -v
           python3 -m unittest discover -s tests -p "test_native_fg_guides.py" -v
           python3 -m unittest discover -s tests -p "test_fg_output.py" -v
@@ -136,6 +137,7 @@ jobs:
           python -m unittest discover -s tests -p "test_fsr_probe.py" -v
           python -m unittest discover -s tests -p "test_fsr_fg_probe.py" -v
           python -m unittest discover -s tests -p "test_fsr_fg_game_bridge.py" -v
+          python -m unittest discover -s tests -p "test_fsr_presenter_switch.py" -v
           python -m unittest discover -s tests -p "test_sr_guide_producer.py" -v
           python -m unittest discover -s tests -p "test_native_fg_guides.py" -v
           python -m unittest discover -s tests -p "test_fg_output.py" -v
