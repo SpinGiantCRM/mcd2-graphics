@@ -50,6 +50,17 @@ and one-frame suspension during configuration changes. The source-matched
 NeoRune UI compiles. Windows/Linux CI and a GPU smoke test are recorded in the
 feature PR as they become available.
 
-RTX 4080 can verify the 2x regression and refusal of unsupported modes. Actual
-3x..6x output and Dynamic frame pacing still require RTX 50 in-game testing.
+The case-corrected candidate ca6d3d2 was tested on RTX 4080 with the player's
+external MFG Ada Unlock, HDR, DLSS Performance and Reflex. The 2x regression
+reported about 80 rendered / 160 presented FPS; 3x reported 60-70 / 180-210.
+The player confirmed fixed 4x, 5x and 6x output. SDK outcome samples separately
+recorded 3, 4, 5 and 6 actual presentations with result/status zero.
+
+Dynamic was selected, persisted as FrameMode 5 and accepted by the bridge;
+the player reported working output. This does not yet establish adaptive pacing:
+the loaded NVIDIA override uses wrapper 2.14.16.0 / provider 310.9.16.0, which
+the unlocker labels general compatibility only, not release-supported Dynamic.
+See the [unlocker runtime requirements](https://github.com/mavismmg/MFGAdaUnlock-RenoDx#dynamic-multi-frame-generation).
+Native RTX 50 hardware and Dynamic adaptation under varying load remain unverified.
+Normal exit and restart persistence of this candidate are still pending.
 A visible selector or passing synthetic capability test is not runtime proof.
