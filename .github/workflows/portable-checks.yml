@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Check Python syntax and public JSON
         run: |
-          python3 -m py_compile install.py build.py build_latency.py build_installer.py build_toolchain.py test_install.py tests/make_synthetic_saves.py
+          python3 -m py_compile install.py build.py build_ui.py build_latency.py build_installer.py build_toolchain.py test_install.py tests/make_synthetic_saves.py
           python3 -m json.tool manifest.json > /dev/null
           python3 -m json.tool dependencies.lock.json > /dev/null
       - name: Installer regressions
@@ -26,6 +26,7 @@ jobs:
         run: |
           python3 -m unittest discover -s tests -p "test_build_toolchain.py" -v
           python3 -m unittest discover -s tests -p "test_amd_latency_build.py" -v
+          python3 -m unittest discover -s tests -p "test_ui_build.py" -v
           python3 -m unittest discover -s tests -p "test_process_exit.py" -v
           python3 -m unittest discover -s tests -p "test_shared_sdk_shutdown.py" -v
           python3 -m unittest discover -s tests -p "test_bootstrap_lookup.py" -v
@@ -132,6 +133,7 @@ jobs:
         run: |
           python -m unittest discover -s tests -p "test_build_toolchain.py" -v
           python -m unittest discover -s tests -p "test_amd_latency_build.py" -v
+          python -m unittest discover -s tests -p "test_ui_build.py" -v
           python -m unittest discover -s tests -p "test_process_exit.py" -v
           python -m unittest discover -s tests -p "test_shared_sdk_shutdown.py" -v
           python -m unittest discover -s tests -p "test_bootstrap_lookup.py" -v
@@ -226,7 +228,7 @@ jobs:
       - name: Install pinned .NET SDK
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9
         with:
-          dotnet-version: '10.0.401'
+          dotnet-version: '10.0.402'
       - name: Temporal SR foliage ownership checks
         run: python tests/test_fg_foliage_policy.py
       - name: Consolidated provider menu controls

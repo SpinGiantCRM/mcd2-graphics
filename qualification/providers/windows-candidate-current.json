@@ -12,8 +12,8 @@
   "vendorRuntimeBundled": false,
   "windowsRadeonRuntimeQualified": false,
   "linuxFullArtifactRuntimeQualified": false,
-  "selectionNeedsRebuild": false,
-  "sourceChangedAfterSelection": false,
+  "selectionNeedsRebuild": true,
+  "sourceChangedAfterSelection": true,
   "publishedReleaseChanged": false,
   "receipt": {
     "sourceCommit": "b96d25e6b4ebce96faa9ea59f4c70076b44e876f",

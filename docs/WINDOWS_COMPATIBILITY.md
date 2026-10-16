@@ -1,3 +1,12 @@
+The UI build uses pinned NeoRune 1.0.0 and .NET SDK 10.0.402/reference pack
+10.0.13. Preserve SDK-generated versioned ModInfo and its discovery header;
+regenerating it with the older manual builder would erase Mods-tab settings.
+Keep the isolated CLI build, complete source/payload receipts, CRLF-normalized
+source hashes, explicit trial receipts and both-platform build-contract checks.
+The generated UI has not yet been qualified in the game or on Windows. Historical
+release receipts and binaries remain unchanged; select a new complete native
+artifact before installer qualification.
+
 The [native HDR Off correction](HDR_OFF_ACKNOWLEDGEMENT_2026-10-14.md) allows
 the UI to disable native HDR without a loaded RenoDX addon. Preserve missing-addon
 On refusal, loaded-addon calibration/restart admission and one wake per Off
