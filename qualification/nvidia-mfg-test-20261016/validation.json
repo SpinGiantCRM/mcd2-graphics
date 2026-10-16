@@ -16,7 +16,7 @@
     "rtx4080InGame2xRegression": "passed: player reports approximately 80 rendered / 160 presented FPS",
     "rtx4080ExternalUnlockerFixedMfg": "passed: player confirms 3x through 6x; SDK samples record actualPresents 3, 4, 5, 6, each result/status 0; 3x player reports 60-70 rendered / 180-210 presented FPS",
     "rtx4080ExternalUnlockerDynamic": "request and persisted FrameMode 5 accepted; player reports working output; adaptation unverified because loaded wrapper/provider 2.14.16.0/310.9.16.0 are not release-supported Dynamic by the external unlocker",
-    "candidateNormalExitAndRestartPersistence": "pending"
+    "candidateNormalExitAndRestartPersistence": "window closed and ReShade logged Finished exiting; OS process checks conflict: Get-Process omitted the shipping PID but tasklist/OpenProcess still found it; normal process completion and restart remain unverified"
   },
   "additionalCustomHost": "Inconclusive: timed out before completion. The standard host with the exact CI guide and SDK bridge passed. No GPU refusal/multiplier result is claimed from the custom host.",
   "unverified": [
@@ -36,5 +36,20 @@
     "sha256": "a39765ec16bc55a6f11be6e2a323c972ca7498ea1a67efc805f6e8bf646dc96a",
     "ownedFiles": 17,
     "externalUnlockerBundled": false
+  },
+  "liveToggleCandidate": {
+    "sourceCommit": "fb6860a9e5453afb5865de6a403d6c99c0f92629",
+    "windowsBuild": "https://github.com/maicol07/mcd2-graphics/actions/runs/38896212520",
+    "portableTransitionAndOwnershipTests": "passed on Windows and Linux",
+    "shutdownAndBootstrapSourceChecks": "passed",
+    "inGameOnOffOn": "pending",
+    "offStartupOn": "pending",
+    "fgOffOverhead": "unmeasured",
+    "windowsBuildStatus": "passed",
+    "isolatedOffStartupGPU": "10 red input/output frames; 10 host presents; CPU/application callbacks valid; explicit SDK shutdown timed out at 50 seconds",
+    "previousBinaryControl": "same fixture with ca6d3d2 binaries and saved On also timed out at SDK shutdown; no new-candidate-specific shutdown cause established",
+    "installed": false,
+    "packageSHA256": "38b0c6462700221e71197542486d783be24107d04be9e459719af5815174616d",
+    "restartBlocker": "previous shipping PID remains visible to tasklist; Get-Process omits it and taskkill reports no running task; clean OS restart needed before further runtime qualification"
   }
 }
