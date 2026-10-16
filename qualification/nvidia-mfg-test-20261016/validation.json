@@ -44,7 +44,7 @@
     "shutdownAndBootstrapSourceChecks": "passed",
     "inGameOnOffOn": "passed: player confirms FG disables and resumes; current fb6860a installation hashes match; resumed outcomes actualPresents 3, SDK result/status 0; no fg_permanent_release in session; coordinatorError/sdkMarkerError/reflexFault all 0",
     "offStartupOn": "passed: player reports starting the game with saved FG Off, enabling FG in gameplay and increased FPS; new-session SDK samples actualPresents 3, result/status 0; no permanent feature release; coordinatorError/sdkMarkerError/reflexFault all 0; installed fb6860a hashes match",
-    "fgOffOverhead": "unmeasured",
+    "fgOffOverhead": "player reports no noticeable performance loss; accepted as non-blocking; instrumented overhead remains unmeasured",
     "windowsBuildStatus": "passed",
     "isolatedOffStartupGPU": "passed on retry after the old game process disappeared: 10 red input/output frames; 10 host presents; CPU/application callbacks valid; SDK shutdown 0; process exit 0",
     "previousBinaryControl": "same fixture with ca6d3d2 binaries and saved On also timed out at SDK shutdown; no new-candidate-specific shutdown cause established",
@@ -52,5 +52,21 @@
     "packageSHA256": "38b0c6462700221e71197542486d783be24107d04be9e459719af5815174616d",
     "restartBlocker": "cleared without Windows restart; no game process remained before installation",
     "previousInstalledOffOnTrial": "ca6d3d2 retained the old permanent-Off behavior; SDK result 0 on fg_permanent_release confirmed, so this was not a live-toggle-candidate trial"
+  },
+  "gdkShutdownCandidate": {
+    "sourceCommit": "312d028548712f4c43cae38bda680adc9370ffa6",
+    "windowsBuild": "https://github.com/maicol07/mcd2-graphics/actions/runs/38932625566",
+    "priorExitEvidence": "one remaining thread, process exit code 0 but unsignaled; stack in xgameruntime error reporting during LdrShutdownProcess; bridge log had no stopped record",
+    "change": "stop and join owned GDK worker at the actual UnrealWindow swapchain non-resize destruction; preserve final NT guards and own-binding handle order",
+    "targetedWindowsAndLinuxChecks": "passed",
+    "localGdkBuild": "passed",
+    "inGameExit": "pending",
+    "runtimeQualified": false,
+    "windowsBuildStatus": "passed",
+    "actualWorkerThreadWakeJoinIdempotence": "passed on Windows and Linux",
+    "isolatedGPU": "10 red input/output frames; 10 host presents; CPU/application callbacks valid; SDK shutdown 0; process exit 0",
+    "installed": true,
+    "ownedFiles": 17,
+    "packageSHA256": "59679391f73b80f97df2668a6a61ae9a92c2c71190def7065113fc8496b2db99"
   }
 }
