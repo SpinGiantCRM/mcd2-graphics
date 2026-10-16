@@ -1,5 +1,9 @@
 from pathlib import Path
 import unittest
+import shutil
+import subprocess
+import tempfile
+import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -24,6 +28,38 @@ class GdkSaveLifecycleTests(unittest.TestCase):
         self.assertLess(stop.index('thread.join()'), stop.index('delete worker'))
         uninit = source.split('void AddonUninit(', 1)[1]
         self.assertLess(uninit.index('terminating()'), uninit.index('stopWorker()'))
+
+    def test_actual_worker_stop_wakes_joins_and_is_idempotent(self):
+        source = (ROOT / 'src/gdk/save_bridge_addon.cpp').read_text(encoding='utf-8')
+        worker = 'struct Worker {' + source.split('struct Worker {', 1)[1].split('void swap_init(', 1)[0]
+        harness = """
+#include <atomic>
+#include <cassert>
+#include <chrono>
+#include <condition_variable>
+#include <cstdint>
+#include <mutex>
+#include <thread>
+""" + worker + """
+int main(){
+    std::atomic<bool> waiting=false,finished=false;
+    worker=new Worker;auto* state=worker;
+    state->thread=std::thread([&]{
+        std::unique_lock lock(state->mutex);waiting=true;
+        state->wake.wait_for(lock,std::chrono::seconds(5),[&]{return state->stop.load();});
+        assert(state->stop);finished=true;
+    });
+    while(!waiting)std::this_thread::yield();
+    stopWorker();assert(!worker&&finished);stopWorker();
+}
+"""
+        compiler = shutil.which('g++') or shutil.which('clang++')
+        self.assertIsNotNone(compiler, 'C++ compiler required by both CI platforms')
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory);cpp = root / 'worker.cpp';exe = root / 'worker.exe'
+            cpp.write_text(harness, encoding='utf-8')
+            subprocess.run([compiler, '-std=c++20', *(['-static'] if sys.platform == 'win32' else []), '-pthread', str(cpp), '-o', str(exe)], check=True, capture_output=True)
+            subprocess.run([str(exe)], check=True, timeout=3, capture_output=True)
 
     def test_save_handles_close_before_own_runtime_reference(self):
         source = (ROOT / 'src/gdk/game_save_api.hpp').read_text(encoding='utf-8')
