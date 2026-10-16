@@ -786,3 +786,25 @@ their source, compiler and output hashes. `fsr_dense.hlsl` includes the shared
 compiler outputs fail the build. Keep these owned assets in the isolated SR
 candidate, with vendor runtimes external. Both CI platforms check the recipe;
 Windows native build success still requires separate Windows GPU qualification.
+
+
+### Experimental AMD presenter reset
+
+Development candidates can opt in with `AmdPresenterSwitch=1` under
+`[Providers]` in `FGBootstrap.ini`. The option is read at swapchain creation.
+The disabled path retains the existing forwarding behaviour.
+
+The Video menu waits for a committed, current-session FG selection. A bounded
+engine resolution change supplies the actual `ResizeBuffers` boundary, then
+restores the previous resolution and window mode. No presenter is replaced
+inside `Present`. Keep the shared SDK gate, fresh queue completion, callback
+drainage, one public COM identity, colour/HDR/private-data restoration and
+recovery to the previous presenter on target-creation failure. Issued waitable
+handles, exclusive fullscreen and incomplete metadata decline the handoff.
+
+`presenter-resize-probe.exe` exercises the real bridge with owned resources;
+`on-exit` additionally retires an active SDK presenter. Neither an isolated
+probe nor Linux/NVIDIA execution qualifies Windows/Radeon behaviour. Candidate
+qualification must compare warmed fresh Off against On → Off in the same scene,
+verify HDR/SR, keyboard focus, display restoration, pause/resume, travel and
+repeated normal exits. SDK frame counts do not establish physical display FPS.

@@ -39,6 +39,9 @@ extern "C" {
  int mcd2_afg_world_v2(void *nativeCommand,void *world,uint64_t engineFrame);
  int mcd2_afg_present_v2(void *nativeSubmittedQueue,uint64_t engineFrame,uint32_t wanted);
  int mcd2_afg_state_v1(MCD2AmdFgStateV1*);
+ // Actual presenter, independent of startup policy: 0 unavailable, 1 native,
+ // 2 AMD. Eligibility is not a completed switch or an activation receipt.
+ int mcd2_afg_presenter_switch_state_v1(uint32_t *route,uint32_t *eligible);
  // Actual owned FSR presenter only. Clear metadata and drain presentation
  // before the caller releases its persistent Anti-Lag context.
  int mcd2_afg_antilag_ready_v1(void *nativeDevice);

@@ -80,7 +80,7 @@ class FsrRuntimeSourceTests(unittest.TestCase):
     def test_sr_and_fg_share_actual_gameplay_widget_gate(self):
         actor = (ROOT / 'src/ui/ModActor.cs').read_text()
         sr = actor.split('public void PollProviders(){', 1)[1].split('// Keep our recommendation', 1)[0]
-        gate = actor.split('public bool GameplayRenderingAllowed(){', 1)[1].split('public void PollFG(){', 1)[0]
+        gate = actor.split('public bool GameplayRenderingAllowed(){', 1)[1].split('\n }', 1)[0]
         fg = actor.split('public void PollFG(){', 1)[1].split('public void RestoreFoliageVelocity(){', 1)[0]
         self.assertIn('World.Player(this)!=null && GameplayRenderingAllowed()', sr)
         self.assertIn('Saved.RenderContextReady==1 && GameplayRenderingAllowed()?1:0', fg)

@@ -247,7 +247,7 @@ def main():
     destination = artifact / 'isolated-fsr-fg-game-bridge'
     destination.mkdir()
     for filename in ['mcd2-fsr-fg-game-bridge.dll', 'fsr-fg-game-bridge-probe.exe',
-                     'presenter-switch-probe.exe', 'build-receipt.json', 'FSR-SDK-HEADERS-LICENSE.txt']:
+                     'presenter-switch-probe.exe', 'presenter-resize-probe.exe', 'build-receipt.json', 'FSR-SDK-HEADERS-LICENSE.txt']:
         shutil.copyfile(amd_fg_bridge / filename, destination / filename)
     probe = out / 'probe'
     run(sys.executable, scripts / 'build_probe.py', '--sdk', sdk, '--sysroot', sysroot,

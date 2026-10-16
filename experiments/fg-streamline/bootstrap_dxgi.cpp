@@ -255,3 +255,9 @@ extern "C" __declspec(dllexport) unsigned mcd2_bootstrap_fg_session_mode(){retur
 extern "C" __declspec(dllexport) unsigned mcd2_bootstrap_amd_fg_session(){return amdFgSession&&routeEnabled?1:0;}
 extern "C" __declspec(dllexport) unsigned mcd2_bootstrap_fg_owner(){return actualFgOwner.load();}
 BOOL APIENTRY DllMain(HMODULE module,DWORD reason,LPVOID){if(reason==DLL_PROCESS_ATTACH)self=module;return TRUE;}
+
+extern "C" __declspec(dllexport) int mcd2_bootstrap_factory_scope_begin_v1(void* factory,void** previous){
+ if(!factory||!previous)return -1;std::lock_guard lock(routesMutex);
+ for(auto& route:routes)if(route.base==factory&&route.original){*previous=nested;nested=&route;return 0;}return -2;
+}
+extern "C" __declspec(dllexport) void mcd2_bootstrap_factory_scope_end_v1(void* previous){nested=static_cast<Route*>(previous);}

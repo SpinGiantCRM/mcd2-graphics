@@ -22,8 +22,8 @@ def build(sdk, sysroot, output, compiler='clang-cl', linker='lld-link', presente
                '/clang:-Wframe-larger-than=16384', '/clang:-Werror=frame-larger-than']
     for folder in ['crt/include', 'sdk/include/ucrt', 'sdk/include/shared', 'sdk/include/um']:
         command.append('/imsvc'+str(sysroot/folder))
-    link = [linker, '/dll', '/out:'+str(binary), str(obj), 'kernel32.lib', 'bcrypt.lib', 'dxgi.lib', 'd3d12.lib', 'dxguid.lib']
-    for name in ['load','support','swap','output','scene','state','retire','antilag_ready','antilag']:
+    link = [linker, '/dll', '/out:'+str(binary), str(obj), 'kernel32.lib', 'user32.lib', 'bcrypt.lib', 'dxgi.lib', 'd3d12.lib', 'dxguid.lib']
+    for name in ['load','support','swap','output','scene','state','retire','antilag_ready','antilag','presenter_switch_state']:
         link.append('/export:mcd2_afg_'+name+'_v1')
     for name in ['recording_contract','guides','world','present']:
         link.append('/export:mcd2_afg_'+name+'_v2')
@@ -51,15 +51,22 @@ def build(sdk, sysroot, output, compiler='clang-cl', linker='lld-link', presente
                            *[x for x in link if x.startswith('/libpath:')]]
             for step in [switch_compile, switch_link]:
                 subprocess.run(step, stdout=log, stderr=subprocess.STDOUT, check=True)
+        if presenter_switch_probe:
+            resize_obj=output/'presenter-resize-probe.obj';resize_binary=output/'presenter-resize-probe.exe'
+            resize_compile=[str(root/'presenter_resize_probe.cpp') if x==str(root/'fsr_fg_game_bridge.cpp') else '/Fo'+str(resize_obj) if x.startswith('/Fo') else x for x in command]
+            resize_link=[linker,'/out:'+str(resize_binary),str(resize_obj),'kernel32.lib','user32.lib','dxgi.lib','d3d12.lib','dxguid.lib',*[x for x in link if x.startswith('/libpath:')]]
+            for step in [resize_compile,resize_link]:
+                subprocess.run(step,stdout=log,stderr=subprocess.STDOUT,check=True)
     notice = root.parents[1]/'third-party/FSR-SDK-HEADERS-LICENSE.txt'
     (output/notice.name).write_bytes(notice.read_bytes())
     receipt = dict(sdkCommit=COMMIT, SDKheadersSHA256=HEADERS,
-                   sourceSHA256={name:digest(root/name) for name in ['fsr_fg_game_bridge.cpp','fsr_fg_game_bridge.h','synchronized_swapchain.hpp','../../src/latency/process_exit.hpp','../../src/latency/process_lifetime.hpp', 'fsr_fg_game_bridge_probe.cpp', 'build_fsr_fg_probe.py', '../fg-streamline/fg_camera_contract.h', '../../src/native/reset_epoch_contract.hpp','../../src/latency/amd_fg_private_data.hpp','../../src/providers/fg_output_contract.hpp']},
+                   sourceSHA256={name:digest(root/name) for name in ['fsr_fg_game_bridge.cpp','fsr_fg_game_bridge.h','synchronized_swapchain.hpp','../../src/latency/process_exit.hpp','../../src/latency/process_lifetime.hpp', 'fsr_fg_game_bridge_probe.cpp', 'build_fsr_fg_probe.py', '../fg-streamline/fg_camera_contract.h', '../../src/native/reset_epoch_contract.hpp','../../src/latency/amd_fg_private_data.hpp','../../src/providers/fg_output_contract.hpp', '../../src/providers/graphics_store.hpp', '../../src/providers/graphics_record.hpp', '../../src/providers/fg_menu_projection.hpp', '../../src/providers/bootstrap_module.hpp', '../../src/providers/menu_snapshot.h']},
                    recipeSHA256=digest(Path(__file__)), binarySHA256=digest(binary),
                    probeSHA256=digest(probe_binary),
                    runtimeBundled=False, gameIntegrationQualified=False,
                    headersLicenseSHA256=digest(notice))
     if presenter_switch_probe:
+        receipt['presenterResizeProbe'] = dict(binarySHA256=digest(resize_binary),sourceSHA256=digest(root/'presenter_resize_probe.cpp'),gameIntegrationQualified=False,performanceQualified=False)
         receipt['presenterSwitchProbe'] = dict(
             binarySHA256=digest(switch_binary), width=3840, height=2160,
             sourceSHA256={name:digest(root/name) for name in
@@ -76,7 +83,7 @@ if __name__ == '__main__':
     parser.add_argument('--clang-cl', default='clang-cl')
     parser.add_argument('--linker', default='lld-link')
     parser.add_argument('--presenter-switch-probe', action='store_true',
-                        help='Also build the owned-host presenter rebuild experiment; changes no runtime DLL')
+                        help='Also build the isolated presenter rebuild and actual ResizeBuffers probes')
     args = parser.parse_args()
     build(args.sdk.resolve(), args.windows_sysroot.resolve(), args.output.resolve(), args.clang_cl, args.linker,
           args.presenter_switch_probe)

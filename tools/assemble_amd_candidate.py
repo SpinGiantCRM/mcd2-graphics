@@ -30,7 +30,7 @@ OWN = {
     **{'ui/Pak/'+n: PAK+n for n in ('MCD2Graphics_P.pak','MCD2Graphics_P.ucas','MCD2Graphics_P.utoc')},
 }
 CONFIG = {
-    BIN+'FGBootstrap.ini': b'[Experiment]\nEnableSDK=1\nFactoryRouting=1\nTraceNvapi=0\n[Providers]\nConsolidatedMenuTransport=1\nObserveLegacySettings=0\nAmdAntiLag2=1\n',
+    BIN+'FGBootstrap.ini': b'[Experiment]\nEnableSDK=1\nFactoryRouting=1\nTraceNvapi=0\n[Providers]\nConsolidatedMenuTransport=1\nObserveLegacySettings=0\nAmdAntiLag2=1\nAmdPresenterSwitch=1\n',
     BIN+'FGGuideCapture.ini': b'[Capture]\nEnabled=0\nGuideTags=1\nImageTags=1\nEnableFG=0\nTrialRevision=0\nNativeUIToggle=1\n',
 }
 FSR_COMMIT = '60f4ea81909200d8542eca14dccb2628b763a9a3'
