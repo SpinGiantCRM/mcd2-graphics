@@ -231,7 +231,32 @@ public class DisplayRow : UGameSettingListEntryBase {
  public override FEventReply OnFocusReceived(FGeometry geo,FFocusEvent ev){var m=Setting as DisplaySetting;if(Manager!=null && m!=null)Manager.ShowDisplayHelp(m.ControlId);return UWidgetBlueprintLibrary.Handled();}
 }
 
-public class ModActor : AActor {
+[ModSetting.Heading("Advanced reconstruction")]
+[ModSetting.Slider("dlss_sr_model", "DLSS SR model hint", Default=0, Min=0, Max=255, Step=1,
+ Description="0 uses the runtime default. Other values are experimental requests. Restart after changes.")]
+[ModSetting.Widget("runtime_info", typeof(AdvancedInfoWidget))]
+public class ModActor : AActor, IModSettings {
+ public AdvancedMenuClient? Advanced;
+ public void InitializeAdvanced(){
+  Advanced=UGameplayStatics.CreateSaveGameObject(Unreal.ClassOf<AdvancedMenuClient>()) as AdvancedMenuClient;
+  if(Advanced==null)return;
+  BFL_ModSettings.GetModSettingInt(this,"dlss_sr_model",0,this,out int hint,out bool found);
+  if(hint<0 || hint>255)hint=0;
+  Advanced.Hint=hint;Advanced.Migrate=!found;Advanced.Start();
+  Timer.Start(this,"PollAdvanced",0.5f,true);
+ }
+ public void OnSettingChanged(string id,string value){
+  if(id!="dlss_sr_model" || Advanced==null)return;
+  double number=ModSettings.ToNumber(value);
+  if(number>=0 && number<=255 && number==(int)number)Advanced.Select((int)number,false);
+ }
+ public void OnSettingsReset(){if(Advanced!=null)Advanced.Select(0,false);}
+ public void PollAdvanced(){
+  if(Advanced==null || ProviderMenu==null)return;
+  bool migrating=Advanced.Migrate;Advanced.Poll(ProviderMenu);
+  if(migrating && Advanced.Saved && !Advanced.Migrate)ModSettings.SetInt(this,"dlss_sr_model",Advanced.Hint);
+ }
+
  public bool ProviderOwned;
  public int ProviderUiFamily=1;
  int providerView=-1;int providerQualityView=-1;int providerScaleView=-1;int providerPhaseView=-1;
@@ -350,7 +375,7 @@ public class ModActor : AActor {
   ProviderMenu=UGameplayStatics.CreateSaveGameObject(Unreal.ClassOf<ProviderMenuClient>()) as ProviderMenuClient;
   ProviderRuntime=UGameplayStatics.CreateSaveGameObject(Unreal.ClassOf<ProviderRuntimeClient>()) as ProviderRuntimeClient;
   if(ProviderMenu!=null && ProviderRuntime!=null){ProviderMenu.Start();ProviderRuntime.Start();Timer.Start(this,"PollProviders",0.25f,true);}
-  Discover();if(LifecycleWidgets.Count==0)Timer.Start(this,"Discover",0.1f,true);
+  InitializeAdvanced();Discover();if(LifecycleWidgets.Count==0)Timer.Start(this,"Discover",0.1f,true);
  }
  public void PollRenderer(){
   RefreshResolutionBounds();
@@ -787,6 +812,6 @@ public class ModActor : AActor {
   foreach(var footer in HelpFooters)if(UKismetSystemLibrary.IsValid(footer))footer.RemoveFromParent();HelpFooters.Clear();HelpFooterPanels.Clear();
   if(Saved!=null && Saved.SchemaVersion==4 && Saved.RenderContextReady!=0){Saved.RenderContextReady=0;Saved.RenderContextSessionId=0;if(!ProviderOwned)Saved.Revision++;Persist();}
   if(FGSaved!=null){FGSaved.ContextReady=0;FGSaved.SessionId=0;FGSaved.Revision++;PersistFG();}Timer.Stop(this,"PollFG");
-  Timer.Stop(this,"Discover");Timer.Stop(this,"SyncLists");Timer.Stop(this,"PollRenderer");Timer.Stop(this,"PollDisplay");Timer.Stop(this,"RestoreOwnedFocus");Timer.Stop(this,"RestorePresenterFocus");foreach(var button in ResetButtons)button.OnButtonBaseClicked-=ResetConfirmed;foreach(var active in LifecycleWidgets){active.BP_OnWidgetActivated-=LifecycleChanged;active.BP_OnWidgetDeactivated-=LifecycleChanged;}foreach(var p in Panels){if(p.ListView_Settings==null)continue;p.ListView_Settings.BP_OnEntriesGenerated-=EntriesGenerated;p.ListView_Settings.BP_OnEntryReleased-=EntryReleased;p.ListView_Settings.BP_OnItemSelectionChanged-=SelectionChanged;p.ListView_Settings.BP_OnItemIsHoveredChanged-=HoverChanged;if(Model!=null)p.ListView_Settings.RemoveItem(Model);if(HeaderModel!=null)p.ListView_Settings.RemoveItem(HeaderModel);if(PresetModel!=null)p.ListView_Settings.RemoveItem(PresetModel);if(ScaleModel!=null)p.ListView_Settings.RemoveItem(ScaleModel);if(FGHeaderModel!=null)p.ListView_Settings.RemoveItem(FGHeaderModel);foreach(var ds in DisplayModels)p.ListView_Settings.RemoveItem(ds);}Log.Write("LIST EVENTS UNBOUND");
+  Timer.Stop(this,"PollAdvanced");Timer.Stop(this,"Discover");Timer.Stop(this,"SyncLists");Timer.Stop(this,"PollRenderer");Timer.Stop(this,"PollDisplay");Timer.Stop(this,"RestoreOwnedFocus");Timer.Stop(this,"RestorePresenterFocus");foreach(var button in ResetButtons)button.OnButtonBaseClicked-=ResetConfirmed;foreach(var active in LifecycleWidgets){active.BP_OnWidgetActivated-=LifecycleChanged;active.BP_OnWidgetDeactivated-=LifecycleChanged;}foreach(var p in Panels){if(p.ListView_Settings==null)continue;p.ListView_Settings.BP_OnEntriesGenerated-=EntriesGenerated;p.ListView_Settings.BP_OnEntryReleased-=EntryReleased;p.ListView_Settings.BP_OnItemSelectionChanged-=SelectionChanged;p.ListView_Settings.BP_OnItemIsHoveredChanged-=HoverChanged;if(Model!=null)p.ListView_Settings.RemoveItem(Model);if(HeaderModel!=null)p.ListView_Settings.RemoveItem(HeaderModel);if(PresetModel!=null)p.ListView_Settings.RemoveItem(PresetModel);if(ScaleModel!=null)p.ListView_Settings.RemoveItem(ScaleModel);if(FGHeaderModel!=null)p.ListView_Settings.RemoveItem(FGHeaderModel);foreach(var ds in DisplayModels)p.ListView_Settings.RemoveItem(ds);}Log.Write("LIST EVENTS UNBOUND");
  }
 }

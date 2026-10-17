@@ -48,6 +48,7 @@ static class Test {
   w[4]^=1;Set(a,w);probe.SentSession=0;probe.PollTransport();Require(UGameplayStatics.SaveCount==2);
   ControlsTest.Run();
   RuntimeTest.Run();
+  AdvancedTest.Run();
   if(args.Length==1){byte[] fixture=new byte[168];for(int n=0;n<42;n++)BinaryPrimitives.WriteInt32LittleEndian(fixture.AsSpan(n*4,4),ControlsTest.Fixture![n]);File.WriteAllBytes(args[0],fixture);}
   Console.WriteLine("NeoRune menu client: 4,000 CRC comparisons, signed word preservation, no-op envelope, session/ACK/corruption checks pass");
  }

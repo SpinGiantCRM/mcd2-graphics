@@ -20,6 +20,7 @@
 #include "display_protocol.hpp"
 #include "../providers/observed_settings.hpp"
 #include "../providers/menu_save_transport.hpp"
+#include "advanced_settings_transport.hpp"
 #include "../providers/display_projection.hpp"
 #include "../providers/menu_snapshot.h"
 #include "../providers/sr_runtime_snapshot.h"
@@ -98,6 +99,7 @@ mcd2::process_exit::Lifetime<std::shared_ptr<sr::TokenCoordinator>,mcd2::process
 auto& coordinator=coordinatorLifetime.get();std::atomic<uint64_t> firstFrame=0;uint64_t boundNative=0;
 std::atomic<unsigned> currentMode=0,reflexAvailable=0,reflexFault=0,hdrRevision=0,hdrRestart=0;
 std::atomic<bool> faultLogged=false;bool capabilityChecked=false;
+std::filesystem::path advancedRoot;
 void settings_loop();void apply_hdr_config();
 std::filesystem::path savesPath;std::mutex intentMutex; mcd2::display::Intent latestIntent{};
 mcd2::process_exit::Lifetime<std::thread,mcd2::process_exit::terminating> settingsWorkerLifetime;
@@ -171,14 +173,17 @@ void settings_loop(){std::map<std::string,unsigned> last;auto nextStatus=std::ch
  if(observeProviderSettings){std::error_code error;std::filesystem::create_directory(mirrorPath,error);}
  const auto authorityPath=savesPath.parent_path()/L"MCD2Graphics"/L"ProviderSettings";
  std::unique_ptr<mcd2::providers::MenuSaveTransport> menuTransport;
+ std::unique_ptr<mcd2::advanced::SaveTransport> advancedTransport;
  if(consolidatedMenuTransport){std::error_code error;std::filesystem::create_directory(authorityPath,error);
   if(!error&&mcd2::providers::store_detail::directoryReady(authorityPath))
    menuTransport=std::make_unique<mcd2::providers::MenuSaveTransport>(savesPath,authorityPath,sessionId);
  }
+ if(menuTransport)advancedTransport=std::make_unique<mcd2::advanced::SaveTransport>(savesPath,authorityPath,advancedRoot,sessionId);
  std::uint32_t contextSequence=0;
  while(!workerStop){
   mcd2::providers::MenuAuthority shared;
   if(menuTransport){try{shared=menuTransport->poll();}catch(...){/* A transport failure cannot activate a feature. */}}
+  if(advancedTransport){try{advancedTransport->poll(shared);}catch(...){/* Restart-only preferences cannot activate a feature. */}}
   if(consolidatedMenuTransport){
    MCD2MenuSnapshotV1 snapshot{sizeof(MCD2MenuSnapshotV1),sessionId,unsigned(shared.load),0,{}};
    mcd2::providers::GraphicsRecord bytes;
@@ -397,7 +402,8 @@ extern "C" __declspec(dllexport) bool AddonInit(HMODULE module,HMODULE){
  auto moduleLength=GetModuleFileNameW(module,filename.get(),32768),localLength=GetEnvironmentVariableW(L"LOCALAPPDATA",local.get(),32768);
  if(!moduleLength||moduleLength>=32768||!localLength||localLength>=32768)return true;
  auto logs=std::filesystem::path(local.get())/L"Dungeons2"/L"Saved"/L"MCD2Graphics"/L"StreamlineLogs";std::filesystem::create_directories(logs);
- auto folder=std::filesystem::path(filename.get()).parent_path()/L"MCD2Graphics"/L"streamline";if(provider.initialized)return true;auto success=provider.load(folder,logs);
+ advancedRoot=std::filesystem::path(filename.get()).parent_path()/L"MCD2Graphics";
+ auto folder=advancedRoot/L"streamline";if(provider.initialized)return true;auto success=provider.load(folder,logs);
  // Opt-in development handoff only; the released UI/renderer is unchanged.
  observeProviderSettings=GetPrivateProfileIntW(L"Providers",L"ObserveLegacySettings",0,mcd2::providers::observedPolicyPath(filename.get()).c_str())==1;
  consolidatedMenuTransport=GetPrivateProfileIntW(L"Providers",L"ConsolidatedMenuTransport",0,mcd2::providers::observedPolicyPath(filename.get()).c_str())==1;

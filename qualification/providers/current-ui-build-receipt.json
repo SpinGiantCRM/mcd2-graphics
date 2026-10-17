@@ -3,19 +3,21 @@
   "candidateOnly": true,
   "version": "0.3.0-preview.1",
   "sourceFileSHA256": {
-    "src/ui/ModActor.cs": "0ee7bff18f3c5464b47796c5e6897e4a9b7ec052e5e3a7f07eb25e8347be81ae",
+    "src/ui/ModActor.cs": "64ec70e5701e0f232d6d6e62dbec29157c1c32266f07e59eeb8c9ca0b88b68c4",
     "src/ui/ProviderSaveWords.cs": "ae796d9934e3b418e08e035d67eb1d0b3c256a30631cf37f6a710897812fdfee",
     "src/ui/ProviderMenuClient.cs": "330b9009646f8e8ab007e2e49e987424f4d1336e7b703c4387801709ef23de8d",
     "src/ui/ProviderRuntimeWords.cs": "fa5f8626af17474a0f60557050b55fbc470ac549726b0e969a810910d0bb632b",
     "src/ui/ProviderRuntimeClient.cs": "a5b606f6a58af8aaf40d3b35f92ea0e9d5de76d124ffef16cb68888c72767142",
+    "src/ui/AdvancedSettings.cs": "16312e10c07be2903efad16a2f3806534b9c9ad2ec10651b264af97a72e7ff2b",
+    "src/ui/AdvancedInfoWidget.cs": "305e760c29cdb759e382240f5cdb542ce6cbe59036d6e306358da71e937eb7ad",
     "src/ui/mod-info.json": "c6a2be6c7020c75eb71cd87df7f6f19d84615be6b7d78aded5da65736c68c0de",
-    "build_ui.py": "06e4c2f5cc6832e82824b2efa58e193cb04ec78f7acf19c8ae82565d4ba910ba",
+    "build_ui.py": "8e03d494ccbc684fceb438f3fa3a3c34caf1b9d572e4366951caa70e8d6c195e",
     "dependencies.lock.json": "816304d7cd61b9a9254980656c3b3f21495175f6cad94ef1f0520ed7c7b3b1e5"
   },
   "payloadSHA256": {
-    "MCD2Graphics_P.pak": "f2d8365234c6ef23fa0fa3e4d230a86d88c10016a1c0e316d8fd5ddd9b7c9468",
-    "MCD2Graphics_P.ucas": "35bae8947a16600506d202b3d870414bb7939bc900f7d8b9d7c55ff5e36927f2",
-    "MCD2Graphics_P.utoc": "3079c78c0bdcb5825d5cc9ab5044beb903aab184e2980af7a9a0836a28260841"
+    "MCD2Graphics_P.pak": "b1e9c49ff5bf5602440315b0499e77455e57aeb6eb5845015841f12a66d2d79b",
+    "MCD2Graphics_P.ucas": "80899e8823f7e69e936ae860cd8620b493cac1a0164d7211759f203b6022d5c6",
+    "MCD2Graphics_P.utoc": "aa1e544c6b71641f3c4411dbde1bfd6fb3a9ecfc0f961f86c3969a69b038ec10"
   },
   "metadataAPI": "Blueprint Loader 2.0 BP_ModInfo; SDK-generated versioned metadata; no popup API",
   "compiler": "NeoRune 1.0.0 / .NET reference pack 10.0.13",
@@ -69,11 +71,11 @@
   "referencePack": "10.0.13",
   "dotnetSDK": "10.0.402",
   "metadataSHA256": {
-    "ModInfo.uasset": "32a1b24d0a289708ffa56a15c6159020fdf90f70f7d333fdd902330601302a86",
-    "ModInfo.uexp": "dcfc08fb6e58d80985498e944dbd4701061246eade7af22a78f8c21b1d9643f4"
+    "ModInfo.uasset": "5f2268464d248f8d7ea9c59034bfc7f04702f7f3f8c0fc849c5eb289f0940847",
+    "ModInfo.uexp": "512134c911f28ceb9bfe50e954b1e3ed6dab51c0c839cc1095ce8e13a9eb0024"
   },
   "WindowsQualified": false,
   "LinuxRuntimeQualified": false,
   "publishedPayloadChanged": false,
-  "archiveSHA256": "520210f077019d1b5a1531f5e52f98fc1f32dfddbdb0fb15e53b2e3dff2031cd"
+  "archiveSHA256": "864c09fbc912dcc79042b7358950aea5dd4978d7336879853836cabeda4a950b"
 }

@@ -12,6 +12,6 @@ class MenuOverlay(unittest.TestCase):
   self.assertEqual((ROOT/"src/ui/ModActor.cs").read_text(),source)
  def test_changed_or_duplicated_anchor_refused(self):
   source=(ROOT/"src/ui/ModActor.cs").read_text()
-  for changed in (source.replace('public class ModActor : AActor {',''),source+source):
+  for changed in (source.replace('public class ModActor : AActor, IModSettings {',''),source+source):
    with self.assertRaises(ValueError):probe.actor_overlay(changed)
 if __name__=="__main__":unittest.main()

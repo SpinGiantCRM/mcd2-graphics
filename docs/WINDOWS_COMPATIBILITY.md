@@ -6,6 +6,15 @@ projection fixture and source checks cover this distinction on both CI platforms
 the status correction passed bounded Linux/NVIDIA runtime checks in a rebuilt
 native candidate; Windows/Radeon coverage remains required.
 
+The advanced Mods-tab page uses Blueprint Loader's existing 2.0 settings API.
+Keep the separate versioned advanced request/state slots, core session/stamp
+validation, replay refusal, loader-owned persistence, one-key native INI mirror
+and restart-only model-hint semantics. Runtime versions come from held, exact-path
+loaded modules and their in-memory version resources; inspecting them must not
+load a provider or authorize a feature. Preserve both-platform protocol/client
+checks, version-library linking and source-matched UI rebuild receipts. Native
+Windows/Radeon and in-game page qualification remain separate from those checks.
+
 The UI build uses pinned NeoRune 1.0.0 and .NET SDK 10.0.402/reference pack
 10.0.13. Preserve SDK-generated versioned ModInfo and its discovery header;
 regenerating it with the older manual builder would erase Mods-tab settings.

@@ -7,7 +7,7 @@ from build_ui import build_ui
 def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
 def actor_overlay(source):
     anchors={
-        'public class ModActor : AActor {': 'public class ModActor : AActor {\n public ProviderTransportProbe? ProviderProbe;\n public void PollProviderTransport(){if(ProviderProbe!=null)ProviderProbe.PollTransport();}',
+        'public class ModActor : AActor, IModSettings {': 'public class ModActor : AActor, IModSettings {\n public ProviderTransportProbe? ProviderProbe;\n public void PollProviderTransport(){if(ProviderProbe!=null)ProviderProbe.PollTransport();}',
         '  Timer.Start(this,"PollRenderer",0.25f,true);': '  Timer.Start(this,"PollRenderer",0.25f,true);\n  ProviderProbe=UGameplayStatics.CreateSaveGameObject(Unreal.ClassOf<ProviderTransportProbe>()) as ProviderTransportProbe;\n  if(ProviderProbe!=null){ProviderProbe.StartTransport();Timer.Start(this,"PollProviderTransport",0.5f,true);}',
     }
     for before,after in anchors.items():
