@@ -266,7 +266,13 @@ void apply_hdr_config(){
  static unsigned seen=0;static bool dirty=false;static unsigned profile=1;
  mcd2::display::Intent intent;{std::lock_guard lock(intentMutex);intent=latestIntent;}
  if(!intent.revision||seen==intent.revision)return;
- if(!GetModuleHandleW(L"renodx-ue-extended.addon64")){hdrRestart=1;hdrRevision=0;return;}
+ if(!GetModuleHandleW(L"renodx-ue-extended.addon64")){
+  // Native HDR must be allowed to turn Off without an HDR calibration addon.
+  // Enabling HDR still requires the existing RenoDX calibration/restart gate.
+  hdrRestart=intent.hdr?1u:0u;hdrRevision=intent.hdr?0u:intent.revision;
+  if(!intent.hdr){seen=intent.revision;workerWake.notify_all();}
+  return;
+ }
  if(!seen){unsigned selected=1;reshade::get_config_value(nullptr,"renodx","SelectedProfile",selected);if(selected>=1&&selected<=3)profile=selected;}
  auto section=std::string("renodx-preset")+std::to_string(profile);
  const std::array<std::pair<const char*,unsigned>,4> wanted={{{"ToneMapType",intent.hdr?1u:0u},{"ToneMapPeakNits",intent.peak},{"ToneMapGameNits",intent.paper},{"ToneMapUINits",intent.ui}}};

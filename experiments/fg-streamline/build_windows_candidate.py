@@ -66,7 +66,9 @@ def copy_current_ui(repo, artifact):
     if is_candidate:
         expected_sources = {'src/ui/' + name for name in ('ModActor.cs', 'ProviderSaveWords.cs',
                             'ProviderMenuClient.cs', 'ProviderRuntimeWords.cs', 'ProviderRuntimeClient.cs')}
-        expected_sources.add('tools/ModInfoBuilder/Program.cs')
+        expected_sources.update(('src/ui/mod-info.json', 'build_ui.py', 'dependencies.lock.json'))
+        if ui.get('schemaVersion') != 3 or ui.get('trialOnly', False):
+            raise RuntimeError('Expected production-source UI build receipt')
         if ui.get('candidateOnly') is not True or set(ui.get('sourceFileSHA256', {})) != expected_sources:
             raise RuntimeError('Incomplete candidate UI source provenance')
         source_hashes = ui['sourceFileSHA256']
@@ -243,11 +245,11 @@ def main():
     amd_fg_bridge = out / 'fsr-fg-game-bridge'
     run(sys.executable, REPO / 'experiments/providers/build_fsr_fg_game_bridge.py',
         '--sdk', fsr_sdk, '--windows-sysroot', sysroot, '--output', amd_fg_bridge,
-        '--clang-cl', llvm / 'clang-cl.exe', '--linker', llvm / 'lld-link.exe')
+        '--clang-cl', llvm / 'clang-cl.exe', '--linker', llvm / 'lld-link.exe', '--presenter-switch-probe')
     destination = artifact / 'isolated-fsr-fg-game-bridge'
     destination.mkdir()
     for filename in ['mcd2-fsr-fg-game-bridge.dll', 'fsr-fg-game-bridge-probe.exe',
-                     'build-receipt.json', 'FSR-SDK-HEADERS-LICENSE.txt']:
+                     'presenter-switch-probe.exe', 'presenter-resize-probe.exe', 'build-receipt.json', 'FSR-SDK-HEADERS-LICENSE.txt']:
         shutil.copyfile(amd_fg_bridge / filename, destination / filename)
     probe = out / 'probe'
     run(sys.executable, scripts / 'build_probe.py', '--sdk', sdk, '--sysroot', sysroot,
@@ -281,7 +283,7 @@ def main():
     for folder in [probe, latency, sr]:
         destination = artifact / folder.name
         destination.mkdir()
-        for name in ['build-receipt.json', 'FGBootstrap.ini', 'FG_UI_ALPHA.cso']:
+        for name in ['build-receipt.json', 'FGBootstrap.ini', 'FG_UI_ALPHA.cso', 'FG_SCENE_COPY.cso']:
             if (folder / name).exists():
                 shutil.copyfile(folder / name, destination / name)
         if folder == sr:

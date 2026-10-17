@@ -184,7 +184,7 @@ public class ScaleRow : UGameSettingListEntryBase {
 
 // Separate display/latency intent leaves the released SR schema unchanged.
 public class FGSettingsSave : USaveGame {public int SchemaVersion;public int Revision;public int Mode;public int ContextReady;public int SessionId;public int FGProvider;public int SettingsRevision;}
-public class FGRuntimeSave : USaveGame {public int SchemaVersion;public int Revision;public int SessionId;public int Available;public int Active;public int Phase;public int RestartRequired;public int AvailableProviders;public int StartupOwner;}
+public class FGRuntimeSave : USaveGame {public int SchemaVersion;public int Revision;public int SessionId;public int Available;public int Active;public int Phase;public int RestartRequired;public int AvailableProviders;public int StartupOwner;public int PresenterRoute;public int PresenterCanSwitch;public int PresenterSettingsRevision;}
 public class DisplaySettingsSave : USaveGame {
  public int SchemaVersion;public int Revision;public int HDROutput;public int PeakNits;public int PaperWhiteNits;public int UINits;public int ReflexMode;
 }
@@ -282,7 +282,7 @@ public class ModActor : AActor {
   if(ProviderMenu==null || ProviderRuntime==null)return;
   ProviderMenu.Poll();
   var level=UGameplayStatics.GetCurrentLevelName(this,true);
-  bool ready=level!="" && level!="Menu_Spicewood" && World.Player(this)!=null;
+  bool ready=level!="" && level!="Menu_Spicewood" && World.Player(this)!=null && GameplayRenderingAllowed();
   float units=0;var worlds=World.FindAll(this,Unreal.ClassOf<AWorldSettings>());
   if(worlds.Count>0){var settings=worlds[0] as AWorldSettings;if(settings!=null)units=settings.WorldToMeters;}
   float percentage=UKismetSystemLibrary.GetConsoleVariableFloatValue("r.ScreenPercentage");
@@ -639,16 +639,71 @@ public class ModActor : AActor {
   if(FGRuntime!=null){FGRuntime.SchemaVersion=1;UGameplayStatics.SaveGameToSlot(FGRuntime,"MCD2GraphicsFGRuntime",0);}
  }
  public void PersistFG(){if(FGSaved!=null)UGameplayStatics.SaveGameToSlot(FGSaved,"MCD2GraphicsFGSettings",0);}
+ public bool GameplayRenderingAllowed(){
+  if(UGameplayStatics.IsGamePaused(this))return false;
+  foreach(var layer in Layers){if(!UKismetSystemLibrary.IsValid(layer))continue;if(UKismetSystemLibrary.GetObjectName(layer)=="Activity_Stack")continue;var active=layer.DisplayedWidget;if(active==null || !UKismetSystemLibrary.IsValid(active) || !active.IsActivated())continue;if(!ProviderRuntimeClient.GameplayWidgetAllowed(UKismetSystemLibrary.GetObjectName(active),true))return false;}
+  // Navigation roots stay active around their Inventory/System children.
+  foreach(var active in LifecycleWidgets){if(!UKismetSystemLibrary.IsValid(active) || !active.IsActivated())continue;if(!ProviderRuntimeClient.GameplayWidgetAllowed(UKismetSystemLibrary.GetObjectName(active),false))return false;}
+  return true;
+ }
+
+ EWindowMode PresenterOriginalMode;FIntPoint PresenterOriginalResolution;FIntPoint PresenterTemporaryResolution;EWindowMode PresenterTemporaryMode;
+ uint PresenterOriginalConfirmedX;uint PresenterOriginalConfirmedY;int PresenterOriginalConfirmedMode;bool PresenterConfirmationPending;
+ int PresenterResetPhase;int PresenterResetTicks;int PresenterAttemptRevision;int PresenterTargetRoute;int PresenterResetSession;bool PresenterResetFailed;bool PresenterRestoreFGFocus;
+ public void RestorePresenterConfirmation(bool final){
+  if(!PresenterConfirmationPending)return;var settings=UGameUserSettings.GetGameUserSettings();if(settings==null){if(final)PresenterConfirmationPending=false;return;}
+  var resolution=settings.GetScreenResolution();var confirmed=settings.GetLastConfirmedScreenResolution();
+  // Restore only confirmation values produced by our temporary display mode.
+  // A later user mode, resolution or confirmation takes precedence.
+  if(settings.GetFullscreenMode()==PresenterOriginalMode && resolution.X==PresenterOriginalResolution.X && resolution.Y==PresenterOriginalResolution.Y &&
+     confirmed.X==PresenterTemporaryResolution.X && confirmed.Y==PresenterTemporaryResolution.Y && settings.LastConfirmedFullscreenMode==(int)PresenterTemporaryMode){
+   settings.LastUserConfirmedResolutionSizeX=PresenterOriginalConfirmedX;settings.LastUserConfirmedResolutionSizeY=PresenterOriginalConfirmedY;
+   settings.LastConfirmedFullscreenMode=PresenterOriginalConfirmedMode;settings.SaveSettings();
+  }
+  if(final)PresenterConfirmationPending=false;
+ }
+ public void RestorePresenterDisplay(){
+  if(PresenterResetPhase==0)return;PresenterResetPhase=0;var settings=UGameUserSettings.GetGameUserSettings();if(settings==null)return;
+  // A subsequent user display change takes precedence over our temporary mode.
+  if(settings.GetFullscreenMode()!=PresenterTemporaryMode){PresenterResetFailed=true;PresenterConfirmationPending=false;return;}
+  var resolution=settings.GetScreenResolution();if(resolution.X!=PresenterTemporaryResolution.X || resolution.Y!=PresenterTemporaryResolution.Y){PresenterResetFailed=true;PresenterConfirmationPending=false;return;}
+  PresenterResetFailed=FGRuntime==null || FGRuntime.SessionId!=PresenterResetSession || FGRuntime.PresenterRoute!=PresenterTargetRoute;
+  settings.SetScreenResolution(PresenterOriginalResolution);settings.SetFullscreenMode(PresenterOriginalMode);settings.ApplyResolutionSettings(false);
+  RestorePresenterConfirmation(false);
+  Timer.Start(this,"RestorePresenterFocus",0.2f,false);
+  Log.Write("PRESENTER DISPLAY RESTORED");
+ }
+ public void RestorePresenterFocus(){
+  RestorePresenterConfirmation(true);
+  if(!PresenterRestoreFGFocus || !GraphicsPageOpen())return;PresenterRestoreFGFocus=false;foreach(var model in DisplayModels)if(model.ControlId==5){SelectOwned(model);return;}
+ }
+ public void PollPresenterSwitch(){
+  if(PresenterResetPhase!=0){
+   PresenterResetTicks++;
+   if(FGRuntime==null || FGRuntime.SessionId!=PresenterResetSession || FGRuntime.PresenterRoute==PresenterTargetRoute || PresenterResetTicks>=6)RestorePresenterDisplay();
+   return;
+  }
+  if(!SharedControls() || ProviderMenu==null || ProviderMenu.Authority==null || ProviderMenu.Pending!=null || ProviderMenu.Dirty!=0 || FGRuntime==null || FGSaved==null || FGRuntime.SessionId!=FGSaved.SessionId || FGRuntime.PresenterCanSwitch!=1)return;
+  var authority=ProviderMenu.Authority;int revision=authority.W19;
+  if(authority.W32!=1 || revision==PresenterAttemptRevision || FGRuntime.PresenterSettingsRevision!=revision)return;
+  int target=authority.W31==0?1:2;if(FGRuntime.PresenterRoute==target)return;
+  var settings=UGameUserSettings.GetGameUserSettings();if(settings==null)return;
+  var mode=settings.GetFullscreenMode();if(mode==EWindowMode.Fullscreen)return;
+  RestorePresenterConfirmation(true);Timer.Stop(this,"RestorePresenterFocus");
+  PresenterOriginalMode=mode;PresenterOriginalResolution=settings.GetScreenResolution();PresenterTemporaryMode=EWindowMode.Windowed;
+  if(PresenterOriginalResolution.X<=656 || PresenterOriginalResolution.Y<=496 || PresenterOriginalResolution.X>7680 || PresenterOriginalResolution.Y>4320)return;
+  PresenterOriginalConfirmedX=settings.LastUserConfirmedResolutionSizeX;PresenterOriginalConfirmedY=settings.LastUserConfirmedResolutionSizeY;PresenterOriginalConfirmedMode=settings.LastConfirmedFullscreenMode;PresenterConfirmationPending=true;
+  PresenterRestoreFGFocus=GraphicsPageOpen() && displayHelp==5;PresenterTargetRoute=target;PresenterResetFailed=false;PresenterResetSession=FGRuntime.SessionId;PresenterAttemptRevision=revision;PresenterResetTicks=0;PresenterResetPhase=1;
+  PresenterTemporaryResolution=settings.GetScreenResolution();PresenterTemporaryResolution.X=PresenterTemporaryResolution.X-16;PresenterTemporaryResolution.Y=PresenterTemporaryResolution.Y-16;settings.SetScreenResolution(PresenterTemporaryResolution);settings.SetFullscreenMode(PresenterTemporaryMode);settings.ApplyResolutionSettings(false);
+  Log.Write("PRESENTER ENGINE RESET requested="+target+" revision="+revision);
+ }
  public void PollFG(){
+
   if(FGSaved==null)return;
   var state=UGameplayStatics.LoadGameFromSlot("MCD2GraphicsFGRuntime",0) as FGRuntimeSave;
   bool changed=state!=null && (FGRuntime==null || state.Available!=FGRuntime.Available || state.AvailableProviders!=FGRuntime.AvailableProviders || state.SessionId!=FGRuntime.SessionId);
-  if(state!=null && state.SchemaVersion==1)FGRuntime=state;
-  int ready=Saved!=null && Saved.RenderContextReady==1 && !UGameplayStatics.IsGamePaused(this)?1:0;
-  foreach(var layer in Layers){if(!UKismetSystemLibrary.IsValid(layer))continue;if(UKismetSystemLibrary.GetObjectName(layer)=="Activity_Stack")continue;var active=layer.DisplayedWidget;if(active==null || !UKismetSystemLibrary.IsValid(active) || !active.IsActivated())continue;string name=UKismetSystemLibrary.GetObjectName(active);if(!name.StartsWith("W_PlayerHUD_Activatable_C_") && !name.StartsWith("W_HotbarContainer_Activatable_C_") && !name.StartsWith("W_InGameNavigation_Activatable_C_")){ready=0;}}
-  // The navigation root stays active around its Inventory/System children.
-  // Check those children's activation too; a root-only gate admits menus.
-  foreach(var active in LifecycleWidgets){if(!UKismetSystemLibrary.IsValid(active) || !active.IsActivated())continue;string name=UKismetSystemLibrary.GetObjectName(active);if(name=="Hotbar" || name=="MiniInventory" || name.StartsWith("W_ActivityLayer_Activatable_C_") || name.StartsWith("W_PlayerHUD_Activatable_C_") || name.StartsWith("W_HotbarContainer_Activatable_C_") || name.StartsWith("W_InGameNavigation_Activatable_C_") || name.Contains("Notification_Activatable_C_"))continue;ready=0;}
+  if(state!=null && state.SchemaVersion==1)FGRuntime=state;PollPresenterSwitch();
+  int ready=Saved!=null && Saved.RenderContextReady==1 && GameplayRenderingAllowed()?1:0;
   int session=FGRuntime==null?0:FGRuntime.SessionId;
   bool intentChanged=FGSaved.ContextReady!=ready || FGSaved.SessionId!=session;
   if(intentChanged){FGSaved.ContextReady=ready;FGSaved.SessionId=session;FGSaved.Revision++;Log.Write("FG CONTEXT ready="+ready);}
@@ -693,7 +748,7 @@ public class ModActor : AActor {
  }
  public void ShowDisplayHelp(int id){displayHelp=id;OwnHelpVisible=true;string help="";
   if(id==7)help="Choose the frame-generation provider independently of the upscaler.\n\n• NVIDIA DLSS\n• AMD FSR\n\nRestart after changing providers.";
-  if(id==5)help="Generate an extra frame between rendered frames for smoother motion.\n\n• Off — rendered frames only\n• On — rendered and generated frames\n\nRestart after changing modes.";
+  if(id==5)help="Generate an extra frame between rendered frames for smoother motion.\n\n• Off — rendered frames only\n• On — rendered and generated frames\n\n"+(FGRuntime!=null && FGRuntime.PresenterCanSwitch==1?"Changes briefly reset the display.":"Restart after changing modes.");
   if(id==0)help="Enable HDR for a compatible display with system HDR turned on.\n\n• Off — standard dynamic range\n• On — HDR output";
   if(id==1)help="Match the peak brightness of your display’s HDR mode. Use its calibrated value.";
   if(id==2)help="Adjust the brightness of ordinary scene white in HDR. Raise it for a brighter room.";
@@ -715,20 +770,23 @@ public class ModActor : AActor {
   return applied<0?"Applying change...":"Active mode: "+(applied==0?"Off":"On");
  }
  public string FGStatus(){
+  if(PresenterResetPhase!=0)return "Applying frame generation...";
+  if(PresenterResetFailed && ProviderMenu!=null && ProviderMenu.Authority!=null && ProviderMenu.Authority.W19==PresenterAttemptRevision)return "Restart to apply.";
   if(FGRuntime==null || !SelectedFgAvailable())return "Unavailable with the current upscaler.";
   if(FGRuntime.RestartRequired==1)return "Restart to apply.";
   if(DisplayValue(5)==0)return "Off.";
   if(FGRuntime.Phase==6)return "Frame generation stopped after a runtime error.";
-  if(DisplaySaved==null || DisplaySaved.HDROutput==0)return "Enable HDR to use this mode.";
+  if(SelectedFgProvider()==0 && (DisplaySaved==null || DisplaySaved.HDROutput==0))return "Enable HDR to use this mode.";
   return FGRuntime.Active==1?"Active.":"Resumes during gameplay.";
  }
 
  protected override void ReceiveEndPlay(EEndPlayReason reason){
+  RestorePresenterDisplay();RestorePresenterConfirmation(true);
   if(ProviderRuntime!=null)ProviderRuntime.Stop();Timer.Stop(this,"PollProviders");
   RestoreFoliageVelocity();
   foreach(var footer in HelpFooters)if(UKismetSystemLibrary.IsValid(footer))footer.RemoveFromParent();HelpFooters.Clear();HelpFooterPanels.Clear();
   if(Saved!=null && Saved.SchemaVersion==4 && Saved.RenderContextReady!=0){Saved.RenderContextReady=0;Saved.RenderContextSessionId=0;if(!ProviderOwned)Saved.Revision++;Persist();}
   if(FGSaved!=null){FGSaved.ContextReady=0;FGSaved.SessionId=0;FGSaved.Revision++;PersistFG();}Timer.Stop(this,"PollFG");
-  Timer.Stop(this,"Discover");Timer.Stop(this,"SyncLists");Timer.Stop(this,"PollRenderer");Timer.Stop(this,"PollDisplay");Timer.Stop(this,"RestoreOwnedFocus");foreach(var button in ResetButtons)button.OnButtonBaseClicked-=ResetConfirmed;foreach(var active in LifecycleWidgets){active.BP_OnWidgetActivated-=LifecycleChanged;active.BP_OnWidgetDeactivated-=LifecycleChanged;}foreach(var p in Panels){if(p.ListView_Settings==null)continue;p.ListView_Settings.BP_OnEntriesGenerated-=EntriesGenerated;p.ListView_Settings.BP_OnEntryReleased-=EntryReleased;p.ListView_Settings.BP_OnItemSelectionChanged-=SelectionChanged;p.ListView_Settings.BP_OnItemIsHoveredChanged-=HoverChanged;if(Model!=null)p.ListView_Settings.RemoveItem(Model);if(HeaderModel!=null)p.ListView_Settings.RemoveItem(HeaderModel);if(PresetModel!=null)p.ListView_Settings.RemoveItem(PresetModel);if(ScaleModel!=null)p.ListView_Settings.RemoveItem(ScaleModel);if(FGHeaderModel!=null)p.ListView_Settings.RemoveItem(FGHeaderModel);foreach(var ds in DisplayModels)p.ListView_Settings.RemoveItem(ds);}Log.Write("LIST EVENTS UNBOUND");
+  Timer.Stop(this,"Discover");Timer.Stop(this,"SyncLists");Timer.Stop(this,"PollRenderer");Timer.Stop(this,"PollDisplay");Timer.Stop(this,"RestoreOwnedFocus");Timer.Stop(this,"RestorePresenterFocus");foreach(var button in ResetButtons)button.OnButtonBaseClicked-=ResetConfirmed;foreach(var active in LifecycleWidgets){active.BP_OnWidgetActivated-=LifecycleChanged;active.BP_OnWidgetDeactivated-=LifecycleChanged;}foreach(var p in Panels){if(p.ListView_Settings==null)continue;p.ListView_Settings.BP_OnEntriesGenerated-=EntriesGenerated;p.ListView_Settings.BP_OnEntryReleased-=EntryReleased;p.ListView_Settings.BP_OnItemSelectionChanged-=SelectionChanged;p.ListView_Settings.BP_OnItemIsHoveredChanged-=HoverChanged;if(Model!=null)p.ListView_Settings.RemoveItem(Model);if(HeaderModel!=null)p.ListView_Settings.RemoveItem(HeaderModel);if(PresetModel!=null)p.ListView_Settings.RemoveItem(PresetModel);if(ScaleModel!=null)p.ListView_Settings.RemoveItem(ScaleModel);if(FGHeaderModel!=null)p.ListView_Settings.RemoveItem(FGHeaderModel);foreach(var ds in DisplayModels)p.ListView_Settings.RemoveItem(ds);}Log.Write("LIST EVENTS UNBOUND");
  }
 }

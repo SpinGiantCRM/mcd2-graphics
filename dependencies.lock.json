@@ -114,12 +114,13 @@
     }
   },
   "buildDependencies": {
-    "NeoRuneSDK": "0.1.2",
-    "NeoRuneTool": "0.1.2",
-    "dotnetSDK": "10.0.401",
+    "NeoRuneSDK": "1.0.0",
+    "NeoRuneTool": "1.0.0",
+    "dotnetSDK": "10.0.402",
     "ReShadeSDK": "PR435 4eb9056c76016aad6f98495d3bbda2d721106104",
     "NVIDIASDKCommit": "374959484e79a640feaba44c93ac8cfb0a03f5b5",
     "StreamlineSDK": "2.14.1",
-    "Avalonia": "11.3.22"
+    "Avalonia": "11.3.22",
+    "dotnetReferencePack": "10.0.13"
   }
 }

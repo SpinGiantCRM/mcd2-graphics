@@ -6,8 +6,16 @@ on:
       - 'tools/assemble_amd_candidate.py'
       - 'src/installer/**'
       - 'build_installer.py'
+      - 'dependencies.lock.json'
       - 'tests/test_installer_amd_candidate.py'
+      - 'qualification/providers/windows-candidate-*.json'
   workflow_dispatch:
+    inputs:
+      qualification_receipt:
+        description: Repository receipt containing exact native archive and source pins
+        default: qualification/providers/windows-candidate-current.json
+        required: true
+        type: string
 permissions:
   contents: read
   actions: read
@@ -22,15 +30,24 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9
         with:
-          dotnet-version: '10.0.401'
+          dotnet-version: '10.0.402'
       - name: Verify and assemble pinned Windows native inputs
+        id: candidate
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
+          CANDIDATE_RECEIPT: ${{ inputs.qualification_receipt || 'qualification/providers/windows-candidate-current.json' }}
         run: |
           @'
-          import json,pathlib,subprocess,sys
-          p=json.loads(pathlib.Path('qualification/providers/windows-candidate-pr52-2026-10-12.json').read_text())
+          import json,os,pathlib,re,subprocess,sys
+          selected=os.environ['CANDIDATE_RECEIPT']
+          if not re.fullmatch(r'qualification/providers/windows-candidate-[a-zA-Z0-9.-]+\.json',selected):
+              raise ValueError('Select a repository qualification receipt; arbitrary paths are refused')
+          p=json.loads(pathlib.Path(selected).read_text())
+          if p.get('selectionNeedsRebuild',False) or p.get('sourceChangedAfterSelection',False):
+              print('No installer built: selected artifact needs a source-matched rebuild.')
+              with open(os.environ['GITHUB_OUTPUT'],'a') as out: out.write('ready=false\n')
+              sys.exit(0)
           stage=pathlib.Path('dist/amd');stage.mkdir(parents=True)
           artifact=stage/'native-input.zip'
           with artifact.open('wb') as out:
@@ -39,8 +56,10 @@ jobs:
               '--archive-sha256',p['archiveSHA256'],'--source-commit',p['sourceCommit'],
               '--artifact-url',f'https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/{p["run"]}/artifacts/{p["artifact"]}',
               '--version',p['candidateVersion'],'--output',str(stage/'inputs')],check=True)
+          with open(os.environ['GITHUB_OUTPUT'],'a') as out: out.write('ready=true\n')
           '@ | python
       - name: Build visible installer folders
+        if: steps.candidate.outputs.ready == 'true'
         shell: pwsh
         run: |
           $sdk = (Get-Command dotnet).Source
@@ -49,6 +68,7 @@ jobs:
           python build_installer.py --dotnet $sdk --payload dist/amd/inputs/payload --rid win-x64 --manifest dist/amd/inputs/manifest.json --dependency-lock dist/amd/inputs/dependencies.lock.json --output dist/amd/installers/windows
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Upload development installers and provenance (not a release)
+        if: steps.candidate.outputs.ready == 'true'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: amd-development-installers

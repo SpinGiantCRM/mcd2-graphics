@@ -1,0 +1,267 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-12",
+  "scope": "SDR output and draw-boundary metadata; no SDR Frame Generation activation or pixel readback",
+  "productionSourceCommit": "4d5a5ebd993c0e59bacd0833788128f7d0565c3e",
+  "nativeArchiveSHA256": "71fc9e563a31de90878e35b66c23f841e39ea9ce9284a066a8aa1a6266639622",
+  "frameworkSHA256": "382332f44744487bea10e2dc8c68755d440dcb8188f9ce8b2b043894e4939cb0",
+  "environment": {
+    "OS": "CachyOS KDE Wayland",
+    "GPU": "RTX 4080 SUPER",
+    "driver": "615.78.08",
+    "Proton": "CachyOS Proton SLR 11.0-20261005",
+    "gameBuild": 25754144,
+    "gameVersion": "1.1.2.0_52301090",
+    "FSRQualityInput": [
+      2560,
+      1440
+    ],
+    "output": [
+      3840,
+      2160
+    ],
+    "savedNativeHDR": false,
+    "FG": "Off",
+    "HDRAddonLoadedInGeometryRun": false
+  },
+  "diagnosticBuild": {
+    "purpose": "Private bounded presentation colour and draw-coverage metadata; no FG rendering implementation change",
+    "sourceSHA256": {
+      "experiments/fg-streamline/guide_recon.cpp": "ddb2302d21a8247f7654435c79b48c658fdebd52decb1a139e076925ab5ac0bb",
+      "experiments/fg-streamline/fg_alpha_copy.h": "848a4b4ead57159e27ba1d0f7f5c51ac8d3d33218c34a90f16dd577761b12c59",
+      "experiments/fg-streamline/fg_controls.hpp": "f62b5de03ca4bef769cdc4e00754d4a3d8c1da638ac0b4fbb9bc0717729c1099",
+      "experiments/providers/fsr_fg_game_bridge.h": "aa9f60046dc1e5067158a09bd6c3c1ae2f3d259d1f3ce2ad3323d200e50b5767",
+      "src/latency/process_exit.hpp": "6f4c757e12cfa967c738edf1b19994ce18dad675b2a9fa70d05a516e7e3ada02",
+      "src/latency/process_lifetime.hpp": "c7f6cdf7317c916598bbe556cb6f1cbb3a4574b75aa86afe72ecbabb4fd7a92b",
+      "src/providers/shared_sdk_shutdown.hpp": "8ab289ef5d62cccfe8d850f6c9a4cc2a11b8229d41baec52114d20901b2660a2",
+      "src/providers/bootstrap_module.hpp": "56a2d6a5819ec3c0658e66f2930db00832ccc64187258f2f28f967ed88cc18b7"
+    },
+    "compiler": "clang-cl Microsoft ABI",
+    "stackGuardBytes": 16384,
+    "binarySHA256": "91288794e993981b4a199ff062a5ac03d289a25e5641119bfcd0fdc4cabc6225",
+    "matchingProductionCandidateQualified": false
+  },
+  "boundary": {
+    "actualOutput": "sRGB (ReShade colour_space value 1)",
+    "format": 24,
+    "dimensions": [
+      3840,
+      2160
+    ],
+    "candidateToneMapCRC32": "0x088c6818",
+    "indexedElements": 3,
+    "instances": 1,
+    "viewport": [
+      0,
+      0,
+      3840,
+      2160
+    ],
+    "scissor": [
+      0,
+      0,
+      3840,
+      2160
+    ],
+    "blendDisabled": true,
+    "RGBWriteMask": 7,
+    "alphaWritten": false,
+    "nextUiCRC32": "0x90a70e52",
+    "UIBlendEnabled": true,
+    "FGEnabled": false,
+    "HUDlessPixelsCaptured": false,
+    "SDKContextChanged": false,
+    "nextRequired": "Owned pre-UI RGB snapshot with explicit alpha handling and GPU lifetime; output colour/resize context recreation; preserve HDR"
+  },
+  "metadata": {
+    "presentationColour": [
+      {
+        "kind": "presentation_colour",
+        "frame": 54889,
+        "colourSpace": 1,
+        "width": 3840,
+        "height": 2160,
+        "format": 24
+      }
+    ],
+    "swapchains": [
+      {
+        "kind": "swapchain",
+        "resize": false,
+        "width": 3840,
+        "height": 2160,
+        "format": 24,
+        "colourSpace": 1,
+        "buffers": 3
+      },
+      {
+        "kind": "swapchain",
+        "resize": true,
+        "width": 3840,
+        "height": 2160,
+        "format": 24,
+        "colourSpace": 1,
+        "buffers": 3
+      }
+    ],
+    "toneGeometry": [
+      {
+        "kind": "compositor_geometry",
+        "frame": 54960,
+        "shader": 143419416,
+        "indexed": 1,
+        "elements": 3,
+        "instances": 1,
+        "blendKnown": 1,
+        "blendEnabled": 0,
+        "writeMask": 7,
+        "viewportKnown": 1,
+        "scissorKnown": 1,
+        "viewport": [
+          0,
+          0,
+          3840,
+          2160
+        ],
+        "scissor": [
+          0,
+          0,
+          3840,
+          2160
+        ]
+      }
+    ],
+    "uiGeometry": [
+      {
+        "kind": "compositor_geometry",
+        "frame": 54960,
+        "shader": 2426867282,
+        "indexed": 1,
+        "elements": 6,
+        "instances": 1,
+        "blendKnown": 1,
+        "blendEnabled": 1,
+        "writeMask": 15,
+        "viewportKnown": 1,
+        "scissorKnown": 1,
+        "viewport": [
+          0,
+          0,
+          3840,
+          2160
+        ],
+        "scissor": [
+          0,
+          0,
+          3840,
+          2160
+        ]
+      },
+      {
+        "kind": "compositor_geometry",
+        "frame": 54960,
+        "shader": 2426867282,
+        "indexed": 1,
+        "elements": 78,
+        "instances": 1,
+        "blendKnown": 1,
+        "blendEnabled": 1,
+        "writeMask": 15,
+        "viewportKnown": 1,
+        "scissorKnown": 1,
+        "viewport": [
+          0,
+          0,
+          3840,
+          2160
+        ],
+        "scissor": [
+          0,
+          0,
+          3840,
+          2160
+        ]
+      },
+      {
+        "kind": "compositor_geometry",
+        "frame": 54960,
+        "shader": 2426867282,
+        "indexed": 1,
+        "elements": 6,
+        "instances": 1,
+        "blendKnown": 1,
+        "blendEnabled": 1,
+        "writeMask": 15,
+        "viewportKnown": 1,
+        "scissorKnown": 1,
+        "viewport": [
+          0,
+          0,
+          3840,
+          2160
+        ],
+        "scissor": [
+          0,
+          0,
+          3840,
+          2160
+        ]
+      }
+    ],
+    "counts": {
+      "compositor_geometry": 119,
+      "compositor_inputs": 119,
+      "temporal_inputs": 1
+    }
+  },
+  "ordinaryExits": [
+    {
+      "route": "Setup main-menu exit with HDR addon; calibration pending restart",
+      "gameExitCode": 3221226505,
+      "gameExitHex": "0xc0000409",
+      "processGone": true,
+      "confirmationToGoneSeconds": 2.846983712999645,
+      "samplerInstalled": false
+    },
+    {
+      "route": "Restarted native HDR Off with HDR addon present",
+      "gameExitCode": 3221226505,
+      "gameExitHex": "0xc0000409",
+      "processGone": true,
+      "confirmationToGoneSeconds": 2.227692696000304,
+      "samplerInstalled": false
+    },
+    {
+      "route": "Original candidate SDR gameplay with HDR addon absent",
+      "gameExitCode": 0,
+      "gameExitHex": "0x0",
+      "processGone": true,
+      "confirmationToGoneSeconds": 3.4630723310001486,
+      "samplerInstalled": false
+    },
+    {
+      "route": "Private geometry diagnostic SDR gameplay with HDR addon absent",
+      "gameExitCode": 0,
+      "gameExitHex": "0x0",
+      "processGone": true,
+      "confirmationToGoneSeconds": 4.9063893479979015,
+      "samplerInstalled": false
+    }
+  ],
+  "rollback": {
+    "ownFilesModSlotsAndRendererConfigRestored": true,
+    "HDRAddonRestored": true,
+    "originalHdrCalibrationValuesRestored": true,
+    "geometryRunReShadeIniByteRestorationVerified": true,
+    "initialSetupExternalIniOriginalByteSnapshotAvailable": false,
+    "initialSetupCalibrationRecovery": "Original values from native before-write receipts; preserved other settings",
+    "playerAccountSavesCopiedOrEdited": false
+  },
+  "remaining": [
+    "Owned post-tone-map/pre-UI snapshot with explicit alpha and GPU lifetime",
+    "Correct SDR/HDR creation flags and transfer function for actual output",
+    "FG context recreation for output dimensions/colour changes",
+    "HDR/native Windows/Radeon regression and active Anti-Lag2",
+    "Intermittent 0xc0000409 shutdown remains unexplained"
+  ]
+}

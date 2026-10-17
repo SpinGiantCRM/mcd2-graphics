@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "candidateOnly": true,
+  "candidateVersion": "0.4.0-amd.dev.10",
+  "implementationCommit": "9483952ec9896633c58685493e0c101757c004a2",
+  "testMergeCommit": "87078dbab5f3658267300796046f709ede96d3ef",
+  "sourceTree": "d1a0d7128bf91a914cbc125f99947f2b2a326b6f",
+  "run": 38497329826,
+  "artifact": 11863879034,
+  "archiveSHA256": "0146aa19f2e71c87dd2f303f7b0526a188325f6c8a8a66fe6aa24d61d5936751",
+  "artifactMembersVerified": 44,
+  "exactOwnPayloadFilesInstalled": 17,
+  "externalFilesVerified": 15,
+  "privateAddonSubstitutions": 0,
+  "privateSamplersInstalled": 0,
+  "host": "Linux / RTX 4080 SUPER / Proton SLR / native Wayland HDR",
+  "loaderVersion": "2.3",
+  "fsrPresetIndicesPassed": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "fsrPresetRoutesPassed": [
+    "FG Off",
+    "AMD FG On",
+    "NVIDIA FG On"
+  ],
+  "amdFgNativeFallbackAndFsrReturnPassed": true,
+  "amdFgDlssQualityAndDlaaPassed": true,
+  "nvidiaFgDlssQualityAndDlaaPassed": true,
+  "amdLiveOffOnPassed": true,
+  "amdReactivationMenuHoldSeconds": 28.02926115,
+  "amdPauseHoldSeconds": 56.306696342,
+  "amdPauseCountersStable": true,
+  "amdResumeGeneratedDelta": 1901,
+  "nvidiaPauseHoldSeconds": 59.718929852,
+  "nvidiaPausePresentStampStable": true,
+  "nvidiaResumeFreshPresentStamp": true,
+  "nvidiaPermanentOffReenableRefusalPassed": true,
+  "amdOutputResizePassed": [
+    [
+      1920,
+      1080
+    ],
+    [
+      2560,
+      1440
+    ],
+    [
+      3840,
+      2160
+    ]
+  ],
+  "freshOffMenuRequestHoldSeconds": 28.094453059,
+  "freshOffMenuRequestStayedInactiveThenResumed": true,
+  "exits": [
+    {
+      "run": "off",
+      "shippingExitCode": 0,
+      "shippingExitHex": "0x0",
+      "normalQuitSeconds": 3.774814147000143,
+      "setupRestoredByteForByte": true
+    },
+    {
+      "run": "amd",
+      "shippingExitCode": 0,
+      "shippingExitHex": "0x0",
+      "normalQuitSeconds": 5.217966018997686,
+      "setupRestoredByteForByte": true
+    },
+    {
+      "run": "nvidia",
+      "shippingExitCode": 3221226505,
+      "shippingExitHex": "0xc0000409",
+      "normalQuitSeconds": 2.3313953610013414,
+      "setupRestoredByteForByte": true
+    }
+  ],
+  "requiredThreeCleanExitsPassed": false,
+  "nvidiaShutdownAlphaAndSharedSdkRetirementResults": 0,
+  "shutdownFailureRootCauseEstablished": false,
+  "excludedMalformedContextSamples": 1,
+  "dev10PerformanceQualified": false,
+  "physicalDisplayFPSMeasured": false,
+  "longSession30MinutesQualified": false,
+  "nativeWindowsRadeonQualified": false,
+  "activeAntiLag2Qualified": false,
+  "rawCapturesPublished": false,
+  "publishedReleaseChanged": false
+}

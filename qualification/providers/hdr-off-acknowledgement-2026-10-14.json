@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "sourceFile": "src/latency/latency_addon.cpp",
+  "sourceSHA256": "d1f22096becb9a1824039926da819797e2e7f0f8a1d6d70cac87f7703f8458c2",
+  "actualSourceFixture": "tests/test_hdr_config_gate.py",
+  "actualSourceCasesPassed": 13,
+  "oldSourceCompiled": true,
+  "oldFixtureExecutableExit": 2,
+  "newFixtureExecutableExit": 0,
+  "bothPlatformsCIRequired": true,
+  "gameRegressionPending": true,
+  "nativeWindowsRadeonQualified": false,
+  "fullArtifactRebuildRequired": true,
+  "priorCandidate": "0.4.0-amd.dev.10",
+  "publishedReleaseChanged": false
+}

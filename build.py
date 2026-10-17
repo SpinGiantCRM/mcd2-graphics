@@ -40,19 +40,6 @@ if a.native_only:
  sys.exit(0)
 subprocess.run([str(a.dxc),'-T','cs_6_0','-E','main',str(r/'src/shaders/live_dense.hlsl'),'-Fo',str(o/'live_dense.cso')],check=True)
 subprocess.run([str(a.dxc),'-T','cs_6_0','-E','main',str(r/'src/shaders/fsr_dense.hlsl'),'-Fo',str(o/'fsr_dense.cso')],check=True)
-assert '<version>0.1.2</version>' in (a.neorune_sdk/'NeoRune.Sdk.nuspec').read_text(encoding='utf-8-sig'),'Expected NeoRune 0.1.2'
-dotnet_root=a.dotnet.resolve().parent
-refs=dotnet_root/'packs/Microsoft.NETCore.App.Ref/10.0.12/ref/net10.0'
-assert refs.is_dir(),'Expected .NET 10.0.12 reference pack'
-args=['build','--mod=MCD2Graphics','--out='+str(o/'ui'),'--tools='+str(a.pack_tools.resolve())]
-args += ['--source='+str(a.neorune_sdk/'src'/f)for f in ('Log.cs','Timer.cs','World.cs')]
-args += ['--ref='+str(f)for f in sorted(refs.glob('*.dll'))]
-args += ['--ref='+str(a.neorune_sdk/'ref'/f)for f in ('NeoRune.Abstractions.dll','NeoRune.Game.dll')]
-args += ['--source='+str(r/'src/ui'/f) for f in ('ModActor.cs','ProviderSaveWords.cs','ProviderMenuClient.cs','ProviderRuntimeWords.cs','ProviderRuntimeClient.cs')]
-rsp=o/'ui-build.rsp';rsp.write_text('\n'.join(args)+'\n')
-c=subprocess.run([str(a.dotnet),str(a.neorune_sdk/'tools/neorune.dll'),'@'+str(rsp)],capture_output=True,text=True)
-(o/'ui-build.log').write_text(c.stdout+c.stderr)
-assert c.returncode==0 and not re.search(r'\berror\s+\w+\d+:',c.stdout+c.stderr,re.I),'NeoRune build diagnostic failure'
-subprocess.run([str(a.dotnet),'build',str(r/'tools/ModInfoBuilder/ModInfoBuilder.csproj'),'-p:NeoRuneSdk='+str(a.neorune_sdk.resolve()),'-c','Release','--nologo'],check=True)
-subprocess.run([str(a.dotnet),str(r/'tools/ModInfoBuilder/bin/Release/net10.0/ModInfoBuilder.dll'),str(o/'ui/Assets'),str(a.pack_tools.resolve()),str(o/'ui/Pak'),str(r/'manifest.json')],check=True)
+from build_ui import build_ui
+build_ui(a.dotnet, a.neorune_sdk, a.pack_tools, o/'ui')
 print('Build completed. Rebuilt artifacts require gameplay qualification before replacing the published payload.')

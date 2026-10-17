@@ -1,12 +1,40 @@
 # Windows/Radeon development qualification
 
-Use the AMD development installer artifact built from the pinned native archive.
-The native inputs are run 38185912901, artifact 11719049992, implementation
-4d5a5ebd993c0e59bacd0833788128f7d0565c3e. Archive SHA-256:
-`71fc9e563a31de90878e35b66c23f841e39ea9ce9284a066a8aa1a6266639622`.
-Its receipt source is GitHub test merge
-`79538debe04b9b49d3360509a1fded2f8883e936`; its runtime source tree matches
-that implementation. Keep these pins distinct from later documentation commits.
+**Rebuild pending:** the [native HDR Off correction](HDR_OFF_ACKNOWLEDGEMENT_2026-10-14.md)
+changes runtime source after the dev.10 selection. The selector now marks that
+artifact stale; installer CI skips assembly until a new source-matched artifact
+is selected. Do not use dev.10 to qualify this correction. The dev.10 inputs below
+remain historical evidence, not the next testing selection.
+
+**Selection update, 14 October:** use the complete **0.4.0-amd.dev.10**
+[candidate receipt](../qualification/providers/windows-candidate-current.json).
+It includes the Anti-Lag shutdown, FSR owned-resource and shared gameplay-gate
+corrections, including the real rebuilt UI. Earlier dev.8/dev.9 artifacts do not.
+
+Native inputs:
+[run 38497329826 / artifact 11863879034](https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/38497329826/artifacts/11863879034).
+Archive SHA-256 `0146aa19f2e71c87dd2f303f7b0526a188325f6c8a8a66fe6aa24d61d5936751`.
+Test merge `87078dbab5f3658267300796046f709ede96d3ef` matches implementation
+`9483952ec9896633c58685493e0c101757c004a2` by tree. All 44 artifact members were
+verified. The separate framework SHA-256 is
+`1b5d71669299aa06dae2b27bf51f554fb59e2cd2f6a406a7447d59caf385c71b`.
+Use its accompanying dependency lock; do not inherit earlier binary results.
+Visible installer folders now match this selection:
+[run 38502849822 / artifact 11865709322](https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/38502849822/artifacts/11865709322),
+archive SHA-256 `d6e50cd6058759fcb07db7883d3bd5bb3a5b9c1224314cc34b2f7fb967d0f51f`.
+The [file verification receipt](../qualification/providers/amd-dev10-installers-2026-10-14.json)
+records both visible folders, their identical manifest/dependency-lock bytes and
+all 17 own payload files matching the game-tested selection. They use no embedded
+payload archive or self-extraction; framework/vendor runtimes remain separate.
+This verifies packaging, not installer GUI transactions or Windows execution.
+
+**Not cleared for qualification or release:** [dev.10 Linux checks](AMD_DEV10_LINUX_2026-10-14.md)
+passed all six FSR presets with each FG route, AMD transitions/resize and NVIDIA
+DLSS/DLAA checks. Two normal quits returned 0; the third returned `0xc0000409`
+after NVIDIA retirement/re-enable refusal. Successful SDK cleanup does not clear
+that process failure. Its cause remains unresolved. Earlier failure records are
+preserved. Native Windows/Radeon and actual Anti-Lag driver results also remain
+outstanding; the AMD laptop is currently unavailable.
 
 ## Preparation
 
@@ -39,6 +67,11 @@ that implementation. Keep these pins distinct from later documentation commits.
 - **Lifecycle:** main/pause menus, hub/level travel, cuts/death/respawn,
   pause/resume, source/output resolution and window changes. Provider owner
   changes require restart; no two presenter proxies may be active.
+- **HDR/SDR output:** with RenoDX absent and the native setting initially HDR On,
+  request HDR Off. Require matching HDR revision, restart flag 0, native HDR Off
+  and actual SDR swapchain metadata before recording SDR benchmarks. Missing-addon
+  HDR On must remain refused. Reinstall the pinned addon and check the existing
+  HDR calibration/restart sequence; never qualify colour space from a preference.
 - **Shutdown:** hold the shipping process handle through three normal quits.
   Require code 0 and completed owning presenter/shared SDK retirement, not
   merely a closed window. Preserve SDK errors and delayed exits as failures.

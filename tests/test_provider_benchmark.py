@@ -21,6 +21,28 @@ def fixture(enabled=True, owned=True):
 
 
 class ProviderBenchmarkTests(unittest.TestCase):
+    def test_guide_records_actual_colour_and_indexed_draw_metadata(self):
+        source = (path.parent.parent / 'fg-streamline/guide_recon.cpp').read_text()
+        self.assertIn('unsigned(swap->get_color_space())', source)
+        self.assertIn('if(captureEnabled){static unsigned lastColour=UINT32_MAX;', source)
+        self.assertIn('draw_common(cmd,{vertices,instances,first,0,firstInstance,false})', source)
+        self.assertIn('draw_common(cmd,{indices,instances,first,base,firstInstance,true})', source)
+        self.assertIn('observe(cmd,false,call.elements,call.instances,call.indexed)', source)
+        self.assertIn('blend.blend_enable[0]', source)
+        self.assertIn('blend.render_target_write_mask[0]', source)
+
+    def test_coverage_observation_is_optional_and_guards_locks(self):
+        source = (path.parent.parent / 'fg-streamline/guide_recon.cpp').read_text()
+        for name in ('diagnostic_viewports', 'diagnostic_scissors'):
+            body = source.split('void ' + name + '(', 1)[1].split('\n', 1)[0]
+            self.assertLess(body.index('if(mcd2::process_exit::terminating())return;'),
+                            body.index('std::lock_guard lock(mutex);'))
+            self.assertLess(body.index('if((!captureEnabled&&!snapshotTracking)||first!=0)return;'),
+                            body.index('std::lock_guard lock(mutex);'))
+            self.assertIn('count==1&&values', body)
+            self.assertNotIn('cmd->', body)
+        self.assertIn('diagnosticViewportKnown=false,diagnosticScissorKnown=false', source)
+
     def test_sampler_skips_terminal_callbacks_and_preserves_ordinary_unregister(self):
         source = (path.parent / 'present_sampler.cpp').read_text()
         finish = source.split('void finish(', 1)[1].split('extern "C"', 1)[0]
@@ -36,12 +58,27 @@ class ProviderBenchmarkTests(unittest.TestCase):
         self.assertEqual(result['applicationPresentRate'], 100)
         self.assertEqual(result['SDKCountEquivalentTotal'], 200)
         self.assertFalse(result['physicalDisplayFPSMeasured'])
+        self.assertEqual(result['SDKGeneratedPerRealPresent'], 1)
+        self.assertTrue(result['FGModeObservedOnlyAtCaptureBoundaries'])
+        self.assertFalse(result['continuousFGActivationMeasured'])
+
+    def test_partial_generation_is_reported_without_assuming_continuous_on(self):
+        rows = fixture()
+        for key in ('providerFrame', 'prepared', 'images', 'generatedPresents'):
+            rows[2][key] = rows[1][key] + 14
+        result = samples.analyze(rows, True)
+        self.assertAlmostEqual(result['SDKGeneratedPerRealPresent'], 14 / 29)
+        self.assertAlmostEqual(result['SDKPreparedPerRealPresent'], 14 / 29)
+        self.assertAlmostEqual(result['SDKImagesPerRealPresent'], 14 / 29)
+        self.assertLess(result['SDKCountEquivalentTotal'], 200)
+        self.assertFalse(result['continuousFGActivationMeasured'])
 
     def test_retained_off_has_real_counts_but_no_generated_total_claim(self):
         result = samples.analyze(fixture(False), False)
         self.assertEqual(result['SDKRealPresentRate'], 100)
         self.assertEqual(result['SDKGeneratedPresentRate'], 0)
         self.assertIsNone(result['SDKCountEquivalentTotal'])
+        self.assertIsNone(result['SDKGeneratedPerRealPresent'])
 
     def test_clean_off_does_not_report_unowned_sdk_zero_as_measured_fps(self):
         result = samples.analyze(fixture(False, False), False)

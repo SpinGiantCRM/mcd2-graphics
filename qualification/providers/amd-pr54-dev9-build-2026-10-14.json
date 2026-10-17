@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "candidateOnly": true,
+  "implementationCommit": "734e29d7a786989e6c18742330e6db5153aaaf7f",
+  "testMergeCommit": "e8360e6d9d5862bccc327abb8179910c61bbe7ad",
+  "treeMatchesImplementation": true,
+  "run": 38490399017,
+  "artifact": 11861616444,
+  "archiveSHA256": "2f29e52ce9c227c62c73d5ebab77a11c924c94a054af1c95a0b1d50e6c1170ca",
+  "membersVerified": 44,
+  "frameworkSHA256": "3e20f93d28136bae9b55f72218cc599294035f4e2538ef2f1eacff81d7ce8cd2",
+  "changedBinaryHashesDoNotInheritRuntimeQualification": true,
+  "antiLagBridgeIncludesShutdownCorrection": true,
+  "nativeWindowsRadeonQualified": false,
+  "linuxRuntimeQualified": false,
+  "windowsHardwareCurrentlyUnavailable": true,
+  "frameworkBundled": false,
+  "vendorRuntimeBundled": false,
+  "selectionUpdated": false,
+  "ci": {
+    "portable": 38490399007,
+    "installers": 38490399008,
+    "native": 38490399017,
+    "allCompletedSuccessfully": true
+  },
+  "candidateVersion": "0.4.0-amd.dev.9",
+  "artifactUrl": "https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/38490399017/artifacts/11861616444",
+  "ownPayloadFilesAssembled": 17
+}

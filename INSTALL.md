@@ -5,7 +5,7 @@ Download the compiled **Windows** or **Linux** installer from the [release Asset
 ## Install
 
 1. Use a legally obtained Steam game that already launches and signs in normally. Launch once, then close it. Xbox app / Microsoft Store PC compatibility remains unverified.
-2. Run **MCD2-Graphics-Installer.exe** on Windows or **mcd2-graphics-installer** on Linux.
+2. Run **MCD2-Graphics-Installer.exe** on Windows or **mcd2-graphics-installer** on Linux. If Linux reports “Permission denied,” enable **Allow executing file as program** in the file properties, or run `chmod +x mcd2-graphics-installer` from the extracted folder.
 3. **Game:** choose the detected Steam installation or Browse. The supported executable and build are verified.
 4. **Requirements:** select official Blueprint Loader, RenoDX and NVIDIA dependency downloads. Select the separate **ReShade-PR435-4eb9056-reset-epoch-msvc-x64.zip** from the same release under ReShade. The installer verifies and places each dependency; downloads and license acceptance stay under your control.
 5. **Install:** install, then launch normally through Steam. Controls are in **Settings → Video**; the Mods page shows version and help.

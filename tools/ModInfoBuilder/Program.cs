@@ -12,7 +12,7 @@ const string type="/Game/Mods/BlueprintLoader/BP_ModInfo.BP_ModInfo_C";
 var e=new NormalExport { ObjectName=p.Name("ModInfo"), ClassIndex=p.ImportClass(type), TemplateIndex=p.ImportDefaultObject(type), ObjectFlags=EObjectFlags.RF_Public|EObjectFlags.RF_Standalone, bIsAsset=true, Data=new(), Extras=Array.Empty<byte>() };
 foreach(var pair in new Dictionary<string,string> {
  ["ModName"]="MCD2 Graphics", ["Version"]=version, ["Author"]="SpinGiantCRM", ["AuthorUrl"]="https://github.com/SpinGiantCRM/mcd2-graphics",
- ["Description"]="DLSS Super Resolution, DLAA, Frame Generation, HDR controls and NVIDIA Reflex on supported hardware. Settings: Settings → Video.\n\nHelp: https://github.com/SpinGiantCRM/mcd2-graphics\nOnline compatibility is unverified. Offline play is safer; follow the publisher’s terms."
+ ["Description"]="DLSS/DLAA, FSR upscaling, frame generation, HDR and low-latency controls on supported hardware. Settings: Settings → Video.\n\nHelp: https://github.com/SpinGiantCRM/mcd2-graphics\nOnline compatibility is unverified. Offline play is safer; follow the publisher’s terms."
 })e.Data.Add(new StrPropertyData(p.Name(pair.Key)){Value=new FString(pair.Value),PropertyTypeName=p.TypeName(("StrProperty",0))});
 p.AddExport(e);p.Write(args[0],"ModInfo");
 var temporary=Path.Combine(args[2],"MetadataTemp");

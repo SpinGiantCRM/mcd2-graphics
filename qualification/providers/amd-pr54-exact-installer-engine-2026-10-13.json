@@ -1,0 +1,23 @@
+{
+  "passed": true,
+  "exactCoreAssembly": "b50797b1dc8c13402639353d90f99dcd7a7253c8817a596f68ba0a97e71342e8",
+  "candidate": "0.4.0-amd.dev.8",
+  "GUIQualified": false,
+  "WindowsQualified": false,
+  "fixtureOnly": true,
+  "actualPlayerAccountSavesRead": false,
+  "checks": [
+    "Fresh install: 17 exact payload hashes",
+    "Recognized complete dependency sets; overrides Off",
+    "Receipt integrity",
+    "Modified-file uninstall refusal with no writes",
+    "Repair and reinstall",
+    "Own payload and managed DLSS runtime removal",
+    "External framework, Blueprint Loader and provider runtime retention",
+    "Synthetic save/account/other-mod/executable preservation",
+    "Fixture renderer configuration restored exactly"
+  ],
+  "coreArtifactRun": 38340596287,
+  "coreArtifactArchiveSHA256": "2605460e66a8fb4336a75e9c22da8899a873dd1d22ce5471b9f52d6d6beeabc3",
+  "modifiedLiveGame": false
+}

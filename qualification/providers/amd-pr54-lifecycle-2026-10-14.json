@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-14",
+  "candidate": "0.4.0-amd.dev.8",
+  "implementationCommit": "c9f011a5bdc8dd6fd50885eeb8c2986764183755",
+  "productionNativeArchiveSHA256": "9574ec28b096f35e484af61e066835a1815178070d96e390c4c24ddd599c9e64",
+  "frameworkSHA256": "5ab60fb92385c774bb5f61d668676556c32fc91d989a18679129cdb32031bb84",
+  "productionPayloadOnly": true,
+  "samplerOrPrivateProviderInstalled": false,
+  "host": "Linux/NVIDIA RTX 4080 SUPER",
+  "route": "FSR Quality + AMD FG + native HDR",
+  "mainMenuGenerationStopped": true,
+  "mainMenuObservedGeneratedCounter": 8838,
+  "mainMenuCounterObservationSeconds": 33.368354872,
+  "worldRecreationAndResumePassed": true,
+  "mainMenuWorldEpoch": 4,
+  "resumedWorldEpoch": 5,
+  "operationalResizeSamples": [
+    {
+      "checkpoint": "lifecycle-initial",
+      "world": 2,
+      "renderResolution": [
+        2560,
+        1440
+      ],
+      "outputResolution": [
+        3840,
+        2160
+      ],
+      "fgActive": true,
+      "sdkFaults": 0
+    },
+    {
+      "checkpoint": "lifecycle-world-return",
+      "world": 5,
+      "renderResolution": [
+        2560,
+        1440
+      ],
+      "outputResolution": [
+        3840,
+        2160
+      ],
+      "fgActive": true,
+      "sdkFaults": 0
+    },
+    {
+      "checkpoint": "lifecycle-windowed-settled",
+      "world": 5,
+      "renderResolution": [
+        2134,
+        1200
+      ],
+      "outputResolution": [
+        3200,
+        1800
+      ],
+      "fgActive": true,
+      "sdkFaults": 0
+    },
+    {
+      "checkpoint": "lifecycle-1080p-a",
+      "world": 5,
+      "renderResolution": [
+        1280,
+        720
+      ],
+      "outputResolution": [
+        1920,
+        1080
+      ],
+      "fgActive": true,
+      "sdkFaults": 0
+    },
+    {
+      "checkpoint": "lifecycle-1440p-a",
+      "world": 5,
+      "renderResolution": [
+        1707,
+        960
+      ],
+      "outputResolution": [
+        2560,
+        1440
+      ],
+      "fgActive": true,
+      "sdkFaults": 0
+    },
+    {
+      "checkpoint": "lifecycle-restored-4k-a",
+      "world": 5,
+      "renderResolution": [
+        2560,
+        1440
+      ],
+      "outputResolution": [
+        3840,
+        2160
+      ],
+      "fgActive": true,
+      "sdkFaults": 0
+    }
+  ],
+  "allFormatsPhotometricallyQualified": false,
+  "retainedFgOffOnAfterResizePassed": false,
+  "failedReactivation": {
+    "srPhase": 8,
+    "srError": 22,
+    "requestedFgMode": 1,
+    "actualFgActive": 0,
+    "restartRequired": 0,
+    "sourceScale": 100.0,
+    "sdkFault": 0
+  },
+  "srTimeoutCauseEstablished": false,
+  "actualDungeonTravelTested": false,
+  "physicalLatencyMeasured": false,
+  "shippingProcessExitCode": 0,
+  "normalQuitConfirmationToGoneSeconds": 5.57957448200068,
+  "setupRestoredByteForByte": true,
+  "productionQualificationPassed": false,
+  "nativeWindowsRadeonQualified": false,
+  "changedAntiLagBridgeInstalled": false,
+  "newAntiLagBridgeQualificationInherited": false,
+  "rawCapturesOrLogsPublished": false
+}

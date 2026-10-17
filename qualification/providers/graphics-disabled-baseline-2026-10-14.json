@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "host": "Linux / RTX 4080 SUPER / Proton SLR / native Wayland HDR",
+  "normalSteamLaunch": true,
+  "scope": "MCD2 graphics UI/native addons and ReShade/RenoDX/bootstrap entrypoints disabled; Blueprint Loader retained",
+  "disabledEntryFiles": 9,
+  "otherPakAssetsUnchanged": 3,
+  "disabledEntrypointsAbsentFromFilesAndNamedOSMappings": true,
+  "originalVideoMenuAndGameplayObserved": true,
+  "shippingExitCode": 0,
+  "normalQuitSeconds": 1.9186746619998303,
+  "entrypointsAndRendererConfigRestoredByteForByte": true,
+  "modSlotsUnchanged": true,
+  "playerAccountSavesCopiedOrEdited": false,
+  "externalProcessMemoryRead": false,
+  "previousCandidateFailureRootCauseEstablished": false,
+  "nativeWindowsQualified": false,
+  "rawCapturesPublished": false,
+  "publishedReleaseChanged": false
+}

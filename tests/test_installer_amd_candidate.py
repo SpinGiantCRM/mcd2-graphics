@@ -59,6 +59,24 @@ class CandidateAssemblyTests(unittest.TestCase):
         for ident,(n,pin) in assembler.FSR_RUNTIME.items():self.assertEqual(lock['dependencies'][ident]['sha256'],pin)
         self.assertFalse(any(p.name.startswith(('amd_fidelityfx_','nvngx_','sl.')) or p.name in ['ReShade64.dll','fg-chain-observer.addon64'] or p.suffix=='.exe' for p in (self.out/'payload').rglob('*')))
         for n,b in before.items():self.assertEqual((self.root/n).read_bytes(),b)
+    def test_workflow_uses_a_bounded_selectable_current_receipt(self):
+        workflow=(ROOT/'.github/workflows/amd-installer-candidate.yml').read_text()
+        self.assertIn('qualification_receipt:',workflow)
+        self.assertIn('qualification/providers/windows-candidate-current.json',workflow)
+        self.assertIn("qualification/providers/windows-candidate-*.json",workflow)
+        self.assertIn('re.fullmatch(',workflow)
+        self.assertNotIn('windows-candidate-pr52-2026-10-12.json',workflow)
+        self.assertIn("p.get('selectionNeedsRebuild',False)",workflow)
+        self.assertIn("p.get('sourceChangedAfterSelection',False)",workflow)
+        self.assertEqual(workflow.count("if: steps.candidate.outputs.ready == 'true'"),2)
+        pin=json.loads((ROOT/'qualification/providers/windows-candidate-current.json').read_text())
+        self.assertRegex(pin['archiveSHA256'],r'^[0-9a-f]{64}$')
+        self.assertRegex(pin['sourceCommit'],r'^[0-9a-f]{40}$')
+        self.assertGreater(pin['artifact'],0)
+        self.assertGreater(pin['run'],0)
+        self.assertIn('probe/FG_SCENE_COPY.cso',pin['receipt']['files'])
+        self.assertFalse(pin['windowsRadeonRuntimeQualified'])
+
     def test_archive_and_source_mismatch_before_output(self):
         pin=self.write()
         for kwargs in [{'pin':'0'*64},{'pin':pin,'source':'0'*40}]:

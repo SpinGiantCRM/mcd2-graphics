@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "run": 38340596287,
+  "artifact": 11786647889,
+  "archiveSHA256": "2605460e66a8fb4336a75e9c22da8899a873dd1d22ce5471b9f52d6d6beeabc3",
+  "archiveMembers": 500,
+  "candidate": "0.4.0-amd.dev.8",
+  "platforms": {
+    "linux": {
+      "ownPayloadFilesVerified": 17,
+      "version": "0.4.0-amd.dev.8",
+      "manifestSemanticMatch": true,
+      "dependencyLockSemanticMatch": true,
+      "frameworkBundled": false,
+      "vendorRuntimeBundled": false,
+      "GUIExecutionQualified": false
+    },
+    "windows": {
+      "ownPayloadFilesVerified": 17,
+      "version": "0.4.0-amd.dev.8",
+      "manifestSemanticMatch": true,
+      "dependencyLockSemanticMatch": true,
+      "frameworkBundled": false,
+      "vendorRuntimeBundled": false,
+      "GUIExecutionQualified": false
+    }
+  },
+  "nativeWindowsGPUQualified": false,
+  "publishedReleaseChanged": false
+}

@@ -1,0 +1,41 @@
+{
+  "candidate": "0.4.0-amd.dev.10",
+  "samePayload": true,
+  "normalSteamLaunch": true,
+  "exceptionLogging": false,
+  "controls": [
+    {
+      "run": "full-a",
+      "shippingExitCode": 0,
+      "normalQuitSeconds": 6.041622798999015,
+      "validatedCheckpoints": 21,
+      "menuHoldSeconds": 62.021826398,
+      "setupRestored": true
+    },
+    {
+      "run": "full-b",
+      "shippingExitCode": 0,
+      "normalQuitSeconds": 4.801257066999824,
+      "validatedCheckpoints": 19,
+      "menuHoldSeconds": 62.017749246,
+      "setupRestored": true
+    }
+  ],
+  "earlierFatalCleared": false,
+  "schemaVersion": 1,
+  "candidateOnly": true,
+  "candidateVersion": "0.4.0-amd.dev.10",
+  "nativeArtifact": 11863879034,
+  "binarySubstitutions": 0,
+  "extraAddons": 0,
+  "host": "Linux / RTX 4080 SUPER / Proton SLR / native Wayland HDR",
+  "allSixFsrQualitiesPassedTwice": true,
+  "dlssQualityDlaaAndFsrReturnPassedTwice": true,
+  "permanentFgOffOnRefusalPassedTwice": true,
+  "statusCRCFramingAndSemanticsValidated": true,
+  "earlierFatalRootCauseEstablished": false,
+  "performanceQualified": false,
+  "nativeWindowsRadeonQualified": false,
+  "rawCapturesPublished": false,
+  "publishedReleaseChanged": false
+}

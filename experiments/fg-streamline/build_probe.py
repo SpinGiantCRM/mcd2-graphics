@@ -27,7 +27,9 @@ for key,value in [('MAJOR',2),('MINOR',14),('PATCH',1)]:
 out=a.output.resolve();out.mkdir(parents=True,exist_ok=True)
 host={'owned':'owned_inputs_probe.cpp','presentation':'presentation_probe.cpp','feature-lifetime':'feature_lifetime_probe.cpp'}[a.probe]
 commands=[];objects=[]
-if a.guide_recon:commands.append([str(a.dxc.resolve()),'-T','cs_6_0','-E','main',str(src/'fg_ui_alpha.hlsl'),'-Fo',str(out/'FG_UI_ALPHA.cso')])
+if a.guide_recon:
+    for shader,binary in [('fg_ui_alpha.hlsl','FG_UI_ALPHA.cso'),('fg_scene_copy.hlsl','FG_SCENE_COPY.cso')]:
+        commands.append([str(a.dxc.resolve()),'-T','cs_6_0','-E','main',str(src/shader),'-Fo',str(out/binary)])
 for name in ['streamline_probe_bridge.cpp',host]:
     obj=out/(Path(name).stem+'.obj');objects.append(str(obj))
     cmd=['clang-cl','/nologo','/std:c++20','/O2','/MT','/EHsc','/c',str(src/name),'/Fo'+str(obj),'/I'+str(a.sdk.resolve()/'include'),'/clang:-fms-compatibility-version=19.44','/clang:-Wframe-larger-than=16384','/clang:-Werror=frame-larger-than']
@@ -44,7 +46,7 @@ if a.early_bootstrap:
     exports.append('mcd2_fg_shared_shutdown_ready_v1')
     bridge=['lld-link','/dll','/out:'+str(out/'fg-sdk-bridge.dll'),'/implib:'+str(out/'fg-sdk-bridge.lib'),objects[0],*['/export:'+x for x in exports],*[x for x in link[3:] if not x.endswith('.obj')]]
     shimobj=out/'bootstrap_dxgi.obj'
-    compile_shim=[*commands[1 if a.guide_recon else 0], '/I'+str(a.sdk.resolve()/'external/nvapi')]
+    compile_shim=[*next(c for c in commands if str(src/'streamline_probe_bridge.cpp') in c), '/I'+str(a.sdk.resolve()/'external/nvapi')]
     compile_shim=[str(src/'bootstrap_dxgi.cpp') if x==str(src/'streamline_probe_bridge.cpp') else '/Fo'+str(shimobj) if x.startswith('/Fo') else x for x in compile_shim]
     shim=['lld-link','/dll','/out:'+str(out/'dxgi.dll'),'/implib:'+str(out/'bootstrap-dxgi.lib'),str(shimobj),str(out/'fg-sdk-bridge.lib'),*['/export:'+x for x in ['CreateDXGIFactory','CreateDXGIFactory1','CreateDXGIFactory2','DXGIDeclareAdapterRemovalSupport','DXGIGetDebugInterface1']],*[x for x in link[3:] if not x.endswith('.obj')]]
     hostlink=[x for x in link if x!=objects[0] and x!='dxgi.lib']+[str(out/'fg-sdk-bridge.lib'),str(out/'bootstrap-dxgi.lib')]
@@ -60,6 +62,9 @@ if a.guide_recon:
     cmd=[str(src/'guide_recon.cpp') if x==str(src/'chain_observer.cpp') else '/Fo'+str(obj) if x.startswith('/Fo') else x for x in cmd]
     commands.append(cmd)
     commands.append(['lld-link','/dll','/out:'+str(out/'mcd2-fg-guide-recon.addon64'),str(obj),'kernel32.lib','user32.lib','dxguid.lib','d3d12.lib','d3dcompiler.lib',*[item for item in link if item.startswith('/libpath:')]])
+    scene_obj=out/'fg_scene_copy_probe.obj'
+    commands.append([str(src/'fg_scene_copy_probe.cpp') if x==str(src/'guide_recon.cpp') else '/Fo'+str(scene_obj) if x.startswith('/Fo') else x for x in cmd])
+    commands.append(['lld-link','/out:'+str(out/'fg-scene-copy-probe.exe'),str(scene_obj),'kernel32.lib','user32.lib','dxguid.lib','d3d12.lib','d3dcompiler.lib',*[item for item in link if item.startswith('/libpath:')]])
 with (out/'build-private.log').open('w') as log:
     for cmd in commands:
         if cmd[0]=='clang-cl':cmd[0]=a.clang_cl
@@ -73,6 +78,6 @@ sources=['streamline_probe_bridge.cpp','fg_bridge_contract.h','fg_camera_contrac
 own=['fg-probe.exe']+(['fg-chain-observer.addon64'] if a.reshade_headers else [])+(['fg-sdk-bridge.dll','dxgi.dll'] if a.early_bootstrap else [])
 if a.early_bootstrap:sources+=provider_sources(repo)
 if a.early_bootstrap or a.guide_recon:sources+=['../providers/fsr_fg_game_bridge.h']
-if a.guide_recon:sources+=['guide_recon.cpp','fg_alpha_copy.h','fg_ui_alpha.hlsl','fg_controls.hpp','fg_ui_protocol.hpp','src/latency/process_exit.hpp','src/latency/process_lifetime.hpp','src/providers/shared_sdk_shutdown.hpp','src/providers/bootstrap_module.hpp'];own+=['mcd2-fg-guide-recon.addon64','FG_UI_ALPHA.cso']
+if a.guide_recon:sources+=['guide_recon.cpp','fg_camera_math.h','fg_scene_identity.h','fg_alpha_copy.h','fg_ui_alpha.hlsl','fg_scene_copy.h','fg_scene_copy.hlsl','fg_scene_copy_probe.cpp','src/providers/fg_output_contract.hpp','src/native/reset_epoch_contract.hpp','fg_controls.hpp','fg_ui_protocol.hpp','src/latency/process_exit.hpp','src/latency/process_lifetime.hpp','src/providers/shared_sdk_shutdown.hpp','src/providers/bootstrap_module.hpp'];own+=['mcd2-fg-guide-recon.addon64','FG_UI_ALPHA.cso','FG_SCENE_COPY.cso','fg-scene-copy-probe.exe']
 (out/'build-receipt.json').write_text(json.dumps({'sdk':'2.14.1','archiveSHA256':archive_hash,'probe':a.probe,'earlyBootstrap':a.early_bootstrap,'files':files,'dxcSHA256':hashlib.sha256(a.dxc.read_bytes()).hexdigest() if a.guide_recon else None,'sourceSHA256':source_hashes(repo,src,sources),'ownBinariesSHA256':{name:hashlib.sha256((out/name).read_bytes()).hexdigest() for name in own},'executableSHA256':hashlib.sha256((out/'fg-probe.exe').read_bytes()).hexdigest()},indent=2))
 print('Isolated '+a.probe+' FG probe built; production runtime archive verified. No game files changed.')

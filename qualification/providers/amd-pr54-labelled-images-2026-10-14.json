@@ -1,0 +1,163 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-14",
+  "candidateBase": "0.4.0-amd.dev.8",
+  "host": "Linux/NVIDIA RTX 4080 SUPER",
+  "privateAmdBridgeSubstitution": true,
+  "privateBridgeSHA256": "6df98228b97a8618b3623790e4f2bbb18e818eb8f097844e30180b93c650324f",
+  "privateCaptureHeaderSHA256": "20f07290678f6ec4c03ea236b8bbe5edf76b9856ab618e27db2f0759a77988fb",
+  "productionNativeArchiveSHA256": "9574ec28b096f35e484af61e066835a1815178070d96e390c4c24ddd599c9e64",
+  "frameworkSHA256": "5ab60fb92385c774bb5f61d668676556c32fc91d989a18679129cdb32031bb84",
+  "sdkCommit": "60f4ea81909200d8542eca14dccb2628b763a9a3",
+  "sdkRuntimeSHA256": "02297beedd285e822d3a64f314cf00faf378dcec0edc47ff0c4dd71b3a8c2f18",
+  "method": "SDK presentation callback isGeneratedFrame/frameID; cropped output after composition; successful generation+UI disable and wait-for-presents before CPU Map",
+  "capturePattern": "4 consecutive SDK frame pairs per 64 real frames",
+  "datasets": [
+    {
+      "case": "fsr-hdr-world",
+      "images": 48,
+      "completeSdkLabelledPairs": 24,
+      "consecutiveTriplets": 18,
+      "cropDimensions": [
+        1280,
+        720
+      ],
+      "sameSdkAndEngineFrameIds": true,
+      "allMapsAfterSdkCompletion": true,
+      "allPq2020": true,
+      "captureRefusals": 0,
+      "signalNits": {
+        "real": {
+          "images": 24,
+          "maxChannelNitsMinimum": 416.40262849976875,
+          "maxChannelNitsMaximum": 416.40262849976875,
+          "allOpaqueAlpha": false
+        },
+        "generated": {
+          "images": 24,
+          "maxChannelNitsMinimum": 412.62865981022173,
+          "maxChannelNitsMaximum": 416.40262849976875,
+          "allOpaqueAlpha": false
+        }
+      },
+      "allRawImagesDistinct": true
+    },
+    {
+      "case": "fsr-hdr-hud",
+      "images": 48,
+      "completeSdkLabelledPairs": 24,
+      "consecutiveTriplets": 18,
+      "cropDimensions": [
+        1280,
+        256
+      ],
+      "sameSdkAndEngineFrameIds": true,
+      "allMapsAfterSdkCompletion": true,
+      "allPq2020": true,
+      "captureRefusals": 0,
+      "signalNits": {
+        "real": {
+          "images": 24,
+          "maxChannelNitsMinimum": 202.91510536212263,
+          "maxChannelNitsMaximum": 202.91510536212263,
+          "allOpaqueAlpha": false
+        },
+        "generated": {
+          "images": 24,
+          "maxChannelNitsMinimum": 202.91510536212263,
+          "maxChannelNitsMaximum": 202.91510536212263,
+          "allOpaqueAlpha": false
+        }
+      },
+      "allRawImagesDistinct": true
+    },
+    {
+      "case": "fsr-hdr-moving",
+      "images": 48,
+      "completeSdkLabelledPairs": 24,
+      "consecutiveTriplets": 18,
+      "cropDimensions": [
+        1280,
+        720
+      ],
+      "sameSdkAndEngineFrameIds": true,
+      "allMapsAfterSdkCompletion": true,
+      "allPq2020": true,
+      "captureRefusals": 0,
+      "signalNits": {
+        "real": {
+          "images": 24,
+          "maxChannelNitsMinimum": 387.12554999664036,
+          "maxChannelNitsMaximum": 416.40262849976875,
+          "allOpaqueAlpha": false
+        },
+        "generated": {
+          "images": 24,
+          "maxChannelNitsMinimum": 363.1543357612773,
+          "maxChannelNitsMaximum": 416.40262849976875,
+          "allOpaqueAlpha": false
+        }
+      },
+      "allRawImagesDistinct": true
+    },
+    {
+      "case": "dlss-hdr-world",
+      "images": 48,
+      "completeSdkLabelledPairs": 24,
+      "consecutiveTriplets": 18,
+      "cropDimensions": [
+        1280,
+        720
+      ],
+      "sameSdkAndEngineFrameIds": true,
+      "allMapsAfterSdkCompletion": true,
+      "allPq2020": true,
+      "captureRefusals": 0,
+      "signalNits": {
+        "real": {
+          "images": 24,
+          "maxChannelNitsMinimum": 405.1801646755268,
+          "maxChannelNitsMaximum": 412.62865981022173,
+          "allOpaqueAlpha": false
+        },
+        "generated": {
+          "images": 24,
+          "maxChannelNitsMinimum": 390.67285136279156,
+          "maxChannelNitsMaximum": 412.62865981022173,
+          "allOpaqueAlpha": false
+        }
+      },
+      "allRawImagesDistinct": true
+    }
+  ],
+  "totalImages": 192,
+  "sdkLabelledPairs": 96,
+  "motionPointerActionsObservedInScreenshots": true,
+  "continuousNormalSpeedFootageQualified": false,
+  "nativeWindowsRadeonQualified": false,
+  "activeAntiLag2Qualified": false,
+  "physicalDisplayFpsMeasured": false,
+  "physicalInputLatencyMeasured": false,
+  "officialHdrMasterAccuracyEstablished": false,
+  "shippingProcessExitCode": 0,
+  "quitConfirmationTimingRecorded": false,
+  "exitTriggerNotRecordedAfterInterruption": true,
+  "setupRestoredByteForByte": true,
+  "productionQualificationPassed": false,
+  "rawImagesOrLogsPublished": false,
+  "syntheticCaptureControl": {
+    "exitCode": 0,
+    "sameSdkLabelledPairs": 4,
+    "allMapsSucceeded": true,
+    "offOnOffCountersAndRetirementPassed": true,
+    "explicitProtonNativeDllOverrides": [
+      "dxgi",
+      "d3d12",
+      "d3d12core"
+    ],
+    "initialDefaultBuiltinDeviceCreationFailuresRetained": true,
+    "initialCaptureOffCounterFailureRetained": true,
+    "diagnosticCallbackRestoreCorrectionVerified": true
+  },
+  "completionContractReference": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK/blob/60f4ea81909200d8542eca14dccb2628b763a9a3/Kits/FidelityFX/docs/techniques/frame-interpolation-api.md"
+}

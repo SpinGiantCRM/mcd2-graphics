@@ -33,7 +33,7 @@ def gate(rows, code, timeout):
         if row.get('phase')!=index or row.get('enabled') is not (index==1): return False
         if row.get('real')!=count or row.get('generated')!=(count if index==1 else 0): return False
         if any(row.get(key)!=0 for key in ['fault','errors','warnings']): return False
-    counts={'owned-recording-contract':1,'load-verified-runtime':1,'create-bridge-swapchain':1,'set-PQ-output':1,
+    counts={'owned-recording-contract':1,'load-verified-runtime':1,'create-bridge-swapchain':1,'set-presentation-colour':1,'configure-output-contract':1,
             'reject-unrelated-submission-queue':1,'owned-presenter-antilag-ready':1,'clear-antilag-before-presentation':1,'clear-antilag-after-presentation':1,
             'prepare-game-bridge-inputs':60,'copy-hudless-world':60,'configure-bridge-present':120,
             'retire-with-replayable-host-recording':1,'host-recording-replay-after-SDK-retirement':1,
@@ -46,7 +46,7 @@ def gate(rows, code, timeout):
     indices=[next(i for i,r in enumerate(rows) if r.get('stage')==name) for name in ordered]
     return indices==sorted(indices)
 
-def run(proton, prefix, steam, output):
+def run(proton, prefix, steam, output, sdr=False):
     validate(output,prefix)
     env=os.environ.copy()
     for key in ['LD_PRELOAD','VKD3D_CONFIG','VKD3D_FEATURE_LEVEL','VKD3D_SHADER_DEBUG','PROTON_ENABLE_HDR',
@@ -58,7 +58,7 @@ def run(proton, prefix, steam, output):
     application=output/'fsr-fg-game-bridge-probe.jsonl';application.unlink(missing_ok=True)
     timeout=False;start=time.monotonic()
     with (output/'run-private.log').open('w') as log:
-        process=subprocess.Popen([str(proton),'runinprefix',str(output/'fsr-fg-game-bridge-probe.exe')],
+        process=subprocess.Popen([str(proton),'runinprefix',str(output/'fsr-fg-game-bridge-probe.exe'),*(['sdr'] if sdr else [])],
                                  cwd=output,env=env,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
         try:code=process.wait(timeout=50)
         except subprocess.TimeoutExpired:
@@ -68,7 +68,7 @@ def run(proton, prefix, steam, output):
     rows=[json.loads(line) for line in application.read_text().splitlines()] if application.exists() else []
     result=dict(exitCode=code,timeout=timeout,seconds=round(time.monotonic()-start,3),
                 passed=gate(rows,code,timeout),applicationRows=rows,gameIntegrationQualified=False,
-                runtimeBundled=False,bridgeSHA256=digest(output/'mcd2-fsr-fg-game-bridge.dll'),
+                runtimeBundled=False,presentationColour='sRGB' if sdr else 'PQ',bridgeSHA256=digest(output/'mcd2-fsr-fg-game-bridge.dll'),
                 probeSHA256=digest(output/'fsr-fg-game-bridge-probe.exe'),runtimeSHA256=RUNTIME)
     (output/'run-result.json').write_text(json.dumps(result,indent=2)+'\n')
     return result
@@ -76,6 +76,7 @@ def run(proton, prefix, steam, output):
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
     for name in ['proton','prefix','steam','output']:parser.add_argument('--'+name,required=True,type=Path)
-    args=parser.parse_args();result=run(*(getattr(args,n).resolve() for n in ['proton','prefix','steam','output']))
+    parser.add_argument('--sdr',action='store_true')
+    args=parser.parse_args();result=run(*(getattr(args,n).resolve() for n in ['proton','prefix','steam','output']),sdr=args.sdr)
     print(json.dumps({k:v for k,v in result.items() if k!='applicationRows'}))
     raise SystemExit(0 if result['passed'] else 1)

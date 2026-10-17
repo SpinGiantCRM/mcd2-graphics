@@ -15,6 +15,8 @@
 #include <cmath>
 #include <atomic>
 #include "fg_camera_contract.h"
+#include "fg_camera_math.h"
+#include "fg_scene_identity.h"
 #include "fg_bridge_contract.h"
 #include "../providers/fsr_fg_game_bridge.h"
 #include "../../src/latency/process_exit.hpp"
@@ -22,6 +24,9 @@
 #include "../../src/providers/bootstrap_module.hpp"
 namespace a=reshade::api;
 #include "fg_alpha_copy.h"
+#include "fg_scene_copy.h"
+#include "../../src/providers/fg_output_contract.hpp"
+#include "../../src/native/reset_epoch_contract.hpp"
 #include "fg_controls.hpp"
 namespace {
 std::recursive_mutex mutex;
@@ -30,18 +35,31 @@ unsigned frame=0,samples=0;
 std::filesystem::path capturePolicy;
 struct Binding {a::descriptor_type type{};a::resource_view view{};a::buffer_range cb{};};
 struct Root {uint64_t layout=0;std::map<unsigned,uint64_t> tables;std::map<unsigned,std::map<unsigned,Binding>> pushed;std::map<unsigned,std::map<unsigned,uint32_t>> constants;bool dynamicOffsets=false;};
-struct Cmd {unsigned ps=0,cs=0;uint64_t graphicsPipeline=0,computePipeline=0;Root graphics,compute;bool backbuffer=false,usesAlpha=false;uint32_t imageFrame=UINT32_MAX;std::map<uint64_t,a::resource_usage> states;};
-struct Pipe {unsigned ps=0,cs=0;};
+struct Cmd {a::viewport diagnosticViewport{};a::rect diagnosticScissor{};bool diagnosticViewportKnown=false,diagnosticScissorKnown=false;unsigned ps=0,cs=0;uint64_t graphicsPipeline=0,computePipeline=0;Root graphics,compute;mcd2::providers::FgSceneReset sceneReset{};bool backbuffer=false,usesAlpha=false,usesScene=false;uint64_t primaryBackbuffer=0;unsigned targetCount=0,activeTargets=0;bool passKnown=false,passActive=false,passStores=false;uint32_t pendingScene=UINT32_MAX;MCD2FGCamera pendingView{};uint32_t imageFrame=UINT32_MAX;std::map<uint64_t,a::resource_usage> states;};
+struct Pipe {unsigned ps=0,cs=0;bool blendKnown=false,blendEnabled=false;unsigned writeMask=0;};
 std::map<uint64_t,Pipe> pipelines;
 std::map<uint64_t,std::vector<std::vector<a::descriptor_range>>> layouts;
 std::map<std::pair<uint64_t,unsigned>,Binding> descriptors;
 std::map<a::command_list*,Cmd> commands;
+bool scene_epoch(a::command_list*cmd,uint64_t&epoch,bool arm=false){
+ auto raw=reinterpret_cast<ID3D12GraphicsCommandList*>(cmd->get_native());if(!raw)return false;UINT size=sizeof(epoch);epoch=0;
+ const auto result=raw->GetPrivateData(mcd2_reset_epoch_guid,&size,&epoch);
+ if(result==DXGI_ERROR_NOT_FOUND)return arm&&SUCCEEDED(raw->SetPrivateData(mcd2_reset_epoch_guid,sizeof(epoch),&epoch));
+ return SUCCEEDED(result)&&size==sizeof(epoch);
+}
+// Caller holds the observer lock. No SDK calls occur in reset confirmation.
+void confirm_scene_reset(a::command_list*cmd,Cmd&state){
+ if(!state.sceneReset.pending)return;uint64_t epoch=0;
+ const bool known=scene_epoch(cmd,epoch);if(state.sceneReset.confirmed(known,epoch))state=Cmd{};
+}
+Cmd& recording(a::command_list*cmd){auto&state=commands[cmd];confirm_scene_reset(cmd,state);return state;}
+
 std::map<uint64_t,a::resource_usage> initial,submitted;
 std::set<uint64_t> backbuffers;
 using Frame=uint64_t(*)();
 using Visit=int(*)(uint64_t,int(*)(void*,unsigned,void*),void*);
 Frame renderFrame=nullptr,presentFrame=nullptr,renderMarker=nullptr,threadRenderMarker=nullptr;Visit visitFrame=nullptr;
-struct FrameData{MCD2FGCamera camera{};bool guides=false,images=false;};
+struct FrameData{MCD2FGCamera camera{};bool guides=false,images=false;ID3D12Resource*scene=nullptr;MCD2FGCamera sceneView{};bool sceneSubmitted=false;};
 std::map<uint32_t,FrameData> gameFrames;
 unsigned imageSamples=0,fgTrialFrames=0;std::atomic<unsigned> activeFGMode{0};uint32_t presentedFrame=UINT32_MAX;
 bool releasedWhileOff=false;
@@ -51,12 +69,14 @@ uint64_t outcomeSample=0;
 int outcomeResult=-1;
 unsigned outcomeStatus=0,outcomePresents=0;
 std::atomic<unsigned> guideSamples{0};unsigned trialRevision=0;
-unsigned outputWidth=0,outputHeight=0,outputBuffers=0,outputFormat=0;HWND outputWindow=nullptr;
+unsigned outputWidth=0,outputHeight=0,outputBuffers=0,outputFormat=0,outputColour=0;
+mcd2::providers::FgOutputContract sceneOutput{};
+std::atomic<bool> snapshotTracking{false},outputReady{false};HWND outputWindow=nullptr;
 thread_local bool internalGPU=false;
 bool retiring=false,ownerClosing=false;
 bool amdRetiredForClose=false;
 bool nvidiaAlphaRetiredForClose=false;
-std::atomic<bool> sharedQuiesceIssued{false};
+std::atomic<bool> sharedQuiesceIssued{false},retainedUnload{false};
 std::atomic<bool> captureEnabled{false},guideTags{false},imageTags{false},legacyEnable{false};unsigned cachedRevision=0;
 bool amd_owner(){auto bootstrap=mcd2::providers::bootstrapModule();auto owner=bootstrap?reinterpret_cast<unsigned(*)()>(GetProcAddress(bootstrap,"mcd2_bootstrap_amd_fg_session")):nullptr;return owner&&owner()==1;}
 HMODULE amd_bridge(){return amd_owner()?GetModuleHandleW(L"mcd2-fsr-fg-game-bridge.dll"):nullptr;}
@@ -117,11 +137,16 @@ void try_nvidia_shared_sdk_quiesce(bool closingBoundary){if(mcd2::process_exit::
 }
 void try_retirement(){if(mcd2::process_exit::terminating())return;
  if(auto module=amd_bridge()){
-  bool close=false,sharedReady=false;{std::lock_guard lock(mutex);close=retiring;sharedReady=ownerClosing&&amdRetiredForClose;}if(!close){if(sharedReady)try_shared_sdk_quiesce();return;}
-  using Retire=int(*)(void*,uint64_t);auto retire=reinterpret_cast<Retire>(GetProcAddress(module,"mcd2_afg_retire_v1"));
-  const int result=retire?retire(nullptr,0):-1;
-  {std::lock_guard lock(mutex);privateLog<<"{\"kind\":\"amd_retirement\",\"SDKResult\":"<<result<<"}\n";privateLog.flush();if(!result){retiring=false;amdRetiredForClose=ownerClosing;}}
-  if(!result)try_shared_sdk_quiesce();return;
+  bool close=false,closing=false,sharedReady=false;unsigned recordings=0;
+  {std::lock_guard lock(mutex);close=retiring;closing=ownerClosing;sharedReady=ownerClosing&&amdRetiredForClose;for(auto&[cmd,state]:commands){confirm_scene_reset(cmd,state);recordings+=state.usesScene;}}
+  if(!close){if(sharedReady)try_shared_sdk_quiesce();return;}
+  int result=0;
+  if(closing){using Retire=int(*)(void*,uint64_t);auto retire=reinterpret_cast<Retire>(GetProcAddress(module,"mcd2_afg_retire_v1"));result=retire?retire(nullptr,0):-1;}
+  // Host recordings may still legally replay the snapshot's descriptors. Do
+  // not reset somebody else's list or confuse queue completion with no replay.
+  const bool complete=!result&&!recordings&&fg_scene::cleanup();
+  {std::lock_guard lock(mutex);privateLog<<"{\"kind\":\"amd_retirement\",\"SDKResult\":"<<result<<",\"recordedSceneLeases\":"<<recordings<<",\"sceneGPUComplete\":"<<complete<<"}\n";privateLog.flush();if(complete){retiring=false;amdRetiredForClose=ownerClosing;}}
+  if(complete&&closing)try_shared_sdk_quiesce();return;
  }
  bool ready=false;unsigned recordings=0;
  {std::lock_guard lock(mutex);for(auto&[cmd,state]:commands)recordings+=state.usesAlpha;ready=retiring&&!recordings;}
@@ -168,10 +193,11 @@ std::pair<uint64_t,unsigned> key(a::device*device,a::descriptor_table table,unsi
 void init_device(a::device*){mcd2::process_exit::initialize();if(mcd2::process_exit::terminating())return;std::lock_guard lock(mutex);open();}
 void init_pipeline(a::device*,a::pipeline_layout,unsigned count,const a::pipeline_subobject* sub,a::pipeline p){if(mcd2::process_exit::terminating())return;
  Pipe pipe;for(unsigned i=0;i<count;++i)if(sub[i].type==a::pipeline_subobject_type::pixel_shader||sub[i].type==a::pipeline_subobject_type::compute_shader){auto& shader=*static_cast<const a::shader_desc*>(sub[i].data);auto hash=crc(shader.code,shader.code_size);if(sub[i].type==a::pipeline_subobject_type::pixel_shader)pipe.ps=hash;else pipe.cs=hash;}
+ for(unsigned i=0;i<count;++i)if(sub[i].type==a::pipeline_subobject_type::blend_state&&sub[i].count==1&&sub[i].data){auto& blend=*static_cast<const a::blend_desc*>(sub[i].data);pipe.blendKnown=true;pipe.blendEnabled=blend.blend_enable[0];pipe.writeMask=blend.render_target_write_mask[0];}
  std::lock_guard lock(mutex);pipelines[p.handle]=pipe;
 }
 void destroy_pipeline(a::device*,a::pipeline p){if(mcd2::process_exit::terminating())return;std::lock_guard lock(mutex);pipelines.erase(p.handle);}
-void bind_pipeline(a::command_list* cmd,a::pipeline_stage stages,a::pipeline p){if(mcd2::process_exit::terminating())return;if(!tracking())return;std::lock_guard lock(mutex);auto it=pipelines.find(p.handle);auto& state=commands[cmd];if(unsigned(stages&a::pipeline_stage::pixel_shader)){state.graphicsPipeline=p.handle;state.ps=it==pipelines.end()?0:it->second.ps;}if(unsigned(stages&a::pipeline_stage::compute_shader)){state.computePipeline=p.handle;state.cs=it==pipelines.end()?0:it->second.cs;}}
+void bind_pipeline(a::command_list* cmd,a::pipeline_stage stages,a::pipeline p){if(mcd2::process_exit::terminating())return;if(!tracking())return;std::lock_guard lock(mutex);auto it=pipelines.find(p.handle);auto& state=recording(cmd);if(unsigned(stages&a::pipeline_stage::pixel_shader)){state.graphicsPipeline=p.handle;state.ps=it==pipelines.end()?0:it->second.ps;}if(unsigned(stages&a::pipeline_stage::compute_shader)){state.computePipeline=p.handle;state.cs=it==pipelines.end()?0:it->second.cs;}}
 void init_layout(a::device*,unsigned count,const a::pipeline_layout_param* param,a::pipeline_layout handle){if(mcd2::process_exit::terminating())return;
  std::lock_guard lock(mutex);auto& out=layouts[handle.handle];out.resize(count);
  for(unsigned i=0;i<count;++i){auto& p=param[i];if(p.type==a::pipeline_layout_param_type::push_descriptors)out[i].push_back(p.push_descriptors);
@@ -179,17 +205,21 @@ void init_layout(a::device*,unsigned count,const a::pipeline_layout_param* param
  else if(p.type==a::pipeline_layout_param_type::descriptor_table_with_flags||p.type==a::pipeline_layout_param_type::push_descriptors_with_ranges_and_flags)for(unsigned j=0;j<p.descriptor_table_with_flags.count;++j)out[i].push_back(p.descriptor_table_with_flags.ranges[j]);}
 }
 void destroy_layout(a::device*,a::pipeline_layout handle){if(mcd2::process_exit::terminating())return;std::lock_guard lock(mutex);layouts.erase(handle.handle);}
-void push(a::command_list*cmd,a::shader_stage stage,a::pipeline_layout handle,unsigned param,const a::descriptor_table_update& update){if(mcd2::process_exit::terminating())return;if(!tracking())return;std::lock_guard lock(mutex);auto& root=compute(stage)?commands[cmd].compute:commands[cmd].graphics;layout(root,handle.handle);root.tables.erase(param);for(unsigned i=0;i<update.count;++i)root.pushed[param][update.binding+i]=unpack(update,i);}
-void tables(a::command_list*cmd,a::shader_stage stage,a::pipeline_layout handle,unsigned first,unsigned count,const a::descriptor_table* table,unsigned dynamicCount,const unsigned*){if(mcd2::process_exit::terminating())return;if(!tracking())return;std::lock_guard lock(mutex);auto& root=compute(stage)?commands[cmd].compute:commands[cmd].graphics;layout(root,handle.handle);root.dynamicOffsets|=dynamicCount!=0;for(unsigned i=0;i<count;++i){root.tables[first+i]=table[i].handle;root.pushed.erase(first+i);}}
-void constants(a::command_list*cmd,a::shader_stage stage,a::pipeline_layout handle,unsigned param,unsigned first,unsigned count,const void*data){if(mcd2::process_exit::terminating())return;if(!tracking())return;std::lock_guard lock(mutex);auto&root=compute(stage)?commands[cmd].compute:commands[cmd].graphics;layout(root,handle.handle);auto values=static_cast<const uint32_t*>(data);for(unsigned i=0;i<count;++i)root.constants[param][first+i]=values[i];}
+void push(a::command_list*cmd,a::shader_stage stage,a::pipeline_layout handle,unsigned param,const a::descriptor_table_update& update){if(mcd2::process_exit::terminating())return;if(!tracking())return;std::lock_guard lock(mutex);auto& root=compute(stage)?recording(cmd).compute:recording(cmd).graphics;layout(root,handle.handle);root.tables.erase(param);for(unsigned i=0;i<update.count;++i)root.pushed[param][update.binding+i]=unpack(update,i);}
+void tables(a::command_list*cmd,a::shader_stage stage,a::pipeline_layout handle,unsigned first,unsigned count,const a::descriptor_table* table,unsigned dynamicCount,const unsigned*){if(mcd2::process_exit::terminating())return;if(!tracking())return;std::lock_guard lock(mutex);auto& root=compute(stage)?recording(cmd).compute:recording(cmd).graphics;layout(root,handle.handle);root.dynamicOffsets|=dynamicCount!=0;for(unsigned i=0;i<count;++i){root.tables[first+i]=table[i].handle;root.pushed.erase(first+i);}}
+void constants(a::command_list*cmd,a::shader_stage stage,a::pipeline_layout handle,unsigned param,unsigned first,unsigned count,const void*data){if(mcd2::process_exit::terminating())return;if(!tracking())return;std::lock_guard lock(mutex);auto&root=compute(stage)?recording(cmd).compute:recording(cmd).graphics;layout(root,handle.handle);auto values=static_cast<const uint32_t*>(data);for(unsigned i=0;i<count;++i)root.constants[param][first+i]=values[i];}
 bool update(a::device*device,unsigned count,const a::descriptor_table_update* updates){if(mcd2::process_exit::terminating())return false;std::lock_guard lock(mutex);for(unsigned j=0;j<count;++j)for(unsigned i=0;i<updates[j].count;++i)descriptors[key(device,updates[j].table,updates[j].binding+i)]=unpack(updates[j],i);return false;}
 bool copy(a::device*device,unsigned count,const a::descriptor_table_copy* copies){if(mcd2::process_exit::terminating())return false;std::lock_guard lock(mutex);for(unsigned j=0;j<count;++j){auto& c=copies[j];std::vector<Binding> snapshot(c.count);for(unsigned i=0;i<c.count;++i){auto it=descriptors.find(key(device,c.source_table,c.source_binding+i));if(it!=descriptors.end())snapshot[i]=it->second;}for(unsigned i=0;i<c.count;++i)descriptors[key(device,c.dest_table,c.dest_binding+i)]=snapshot[i];}return false;}
 void resource_init(a::device*,const a::resource_desc&,const a::subresource_data*,a::resource_usage state,a::resource resource){if(mcd2::process_exit::terminating())return;std::lock_guard lock(mutex);initial[resource.handle]=state;}
 void resource_destroy(a::device*,a::resource resource){if(mcd2::process_exit::terminating())return;std::lock_guard lock(mutex);initial.erase(resource.handle);submitted.erase(resource.handle);for(auto& [cmd,state]:commands)state.states.erase(resource.handle);}
-void barrier(a::command_list*cmd,unsigned count,const a::resource*resources,const a::resource_usage*,const a::resource_usage*after){if(mcd2::process_exit::terminating())return;if(!captureEnabled)return;std::lock_guard lock(mutex);for(unsigned i=0;i<count;++i)commands[cmd].states[resources[i].handle]=after[i];}
-void execute(a::command_queue*q,a::command_list*cmd){if(mcd2::process_exit::terminating())return;bool tagged=false;{std::lock_guard lock(mutex);if(captureEnabled)for(auto& [resource,state]:commands[cmd].states)submitted[resource]=state;tagged=commands[cmd].imageFrame!=UINT32_MAX;}if(tagged)fg_alpha::submission_queue(q);}
-void reset(a::command_list*cmd){if(mcd2::process_exit::terminating())return;{std::lock_guard lock(mutex);commands.erase(cmd);}try_retirement();}
-void swap_init(a::swapchain*swap,bool resize){if(mcd2::process_exit::terminating())return;std::lock_guard lock(mutex);open();for(unsigned i=0;i<swap->get_back_buffer_count();++i)backbuffers.insert(swap->get_back_buffer(i).handle);auto d=swap->get_device()->get_resource_desc(swap->get_current_back_buffer());outputWidth=d.texture.width;outputHeight=d.texture.height;outputFormat=unsigned(d.texture.format);outputBuffers=swap->get_back_buffer_count();outputWindow=static_cast<HWND>(swap->get_hwnd());privateLog<<"{\"kind\":\"swapchain\",\"resize\":"<<(resize?"true":"false")<<",\"width\":"<<d.texture.width<<",\"height\":"<<d.texture.height<<",\"format\":"<<unsigned(d.texture.format)<<",\"buffers\":"<<swap->get_back_buffer_count()<<"}\n";privateLog.flush();}
+void barrier(a::command_list*cmd,unsigned count,const a::resource*resources,const a::resource_usage*,const a::resource_usage*after){if(mcd2::process_exit::terminating())return;if(!captureEnabled)return;std::lock_guard lock(mutex);for(unsigned i=0;i<count;++i)recording(cmd).states[resources[i].handle]=after[i];}
+void execute(a::command_queue*q,a::command_list*cmd){if(mcd2::process_exit::terminating())return;bool tagged=false,scene=false;{std::lock_guard lock(mutex);if(captureEnabled)for(auto& [resource,state]:recording(cmd).states)submitted[resource]=state;tagged=recording(cmd).imageFrame!=UINT32_MAX;scene=recording(cmd).usesScene;}if(scene){const bool matched=fg_scene::submission_queue(q);std::lock_guard lock(mutex);auto c=commands.find(cmd);if(c!=commands.end()&&c->second.imageFrame!=UINT32_MAX){auto f=gameFrames.find(c->second.imageFrame);if(f!=gameFrames.end())f->second.sceneSubmitted=matched;}}if(tagged)fg_alpha::submission_queue(q);}
+void reset(a::command_list*cmd){if(mcd2::process_exit::terminating())return;
+ {std::lock_guard lock(mutex);auto found=commands.find(cmd);if(found!=commands.end()&&found->second.usesScene){uint64_t epoch=0;const bool known=scene_epoch(cmd,epoch,true);found->second.sceneReset.request(known,epoch);}else commands.erase(cmd);}
+ try_retirement();
+}
+void destroy_cmd(a::command_list*cmd){if(mcd2::process_exit::terminating())return;{std::lock_guard lock(mutex);commands.erase(cmd);}try_retirement();}
+void swap_init(a::swapchain*swap,bool resize){if(mcd2::process_exit::terminating())return;std::lock_guard lock(mutex);open();for(unsigned i=0;i<swap->get_back_buffer_count();++i)backbuffers.insert(swap->get_back_buffer(i).handle);auto d=swap->get_device()->get_resource_desc(swap->get_current_back_buffer());outputWidth=d.texture.width;outputHeight=d.texture.height;outputFormat=unsigned(d.texture.format);outputColour=unsigned(swap->get_color_space());outputBuffers=swap->get_back_buffer_count();outputWindow=static_cast<HWND>(swap->get_hwnd());privateLog<<"{\"kind\":\"swapchain\",\"resize\":"<<(resize?"true":"false")<<",\"width\":"<<d.texture.width<<",\"height\":"<<d.texture.height<<",\"format\":"<<unsigned(d.texture.format)<<",\"colourSpace\":"<<unsigned(swap->get_color_space())<<",\"buffers\":"<<swap->get_back_buffer_count()<<"}\n";privateLog.flush();}
 void swap_destroy(a::swapchain*swap,bool resize){if(mcd2::process_exit::terminating())return;
  bool owner=false;unsigned recordings=0;
  {std::lock_guard lock(mutex);owner=swap->get_hwnd()==outputWindow;for(unsigned i=0;i<swap->get_back_buffer_count();++i)backbuffers.erase(swap->get_back_buffer(i).handle);
@@ -201,7 +231,7 @@ void swap_destroy(a::swapchain*swap,bool resize){if(mcd2::process_exit::terminat
   if(disable)disable(nullptr,UINT64_MAX,0);activeFGMode=0;
   // ReShade recreates its wrapper on ResizeBuffers; the SDK presenter remains
   // the same native object. Do not destroy it beneath the game's live COM ref.
-  if(resize){std::lock_guard lock(mutex);retiring=false;return;}
+  if(resize){outputReady=false;snapshotTracking=false;try_retirement();return;}
   try_retirement();return;
  }
  auto bridge=GetModuleHandleW(L"fg-sdk-bridge.dll");using Configure=int(*)(const MCD2FGConfig*);auto configure=bridge?reinterpret_cast<Configure>(GetProcAddress(bridge,"mcd2_fg_configure")):nullptr;
@@ -210,11 +240,17 @@ void swap_destroy(a::swapchain*swap,bool resize){if(mcd2::process_exit::terminat
  // acknowledges feature release before the shared SDK may be shut down.
  try_retirement();
 }
-void targets(a::command_list*cmd,unsigned count,const a::resource_view*views,a::resource_view){if(mcd2::process_exit::terminating())return;if(!tracking())return;std::lock_guard lock(mutex);auto& state=commands[cmd];state.backbuffer=false;for(unsigned i=0;i<count;++i)if(backbuffers.count(cmd->get_device()->get_resource_from_view(views[i]).handle))state.backbuffer=true;}
-bool pass(a::command_list*cmd,unsigned count,const a::render_pass_render_target_desc*rt,const a::render_pass_depth_stencil_desc*,a::render_pass_flags){if(mcd2::process_exit::terminating())return false;std::vector<a::resource_view> views;for(unsigned i=0;i<count;++i)views.push_back(rt[i].view);targets(cmd,count,views.data(),{});return false;}
-void observe(a::command_list*cmd,bool cs){
- if(!capturing())return;auto& state=commands[cmd];auto& root=cs?state.compute:state.graphics;auto found=layouts.find(root.layout);if(found==layouts.end())return;
+void targets(a::command_list*cmd,unsigned count,const a::resource_view*views,a::resource_view){if(mcd2::process_exit::terminating())return;if(!tracking())return;std::lock_guard lock(mutex);auto& state=recording(cmd);state.backbuffer=false;state.primaryBackbuffer=0;state.targetCount=count;state.activeTargets=0;state.passKnown=true;for(unsigned i=0;i<count;++i){auto resource=views[i].handle?cmd->get_device()->get_resource_from_view(views[i]).handle:0;if(resource)++state.activeTargets;if(backbuffers.count(resource)){state.backbuffer=true;if(i==0)state.primaryBackbuffer=resource;}}}
+bool pass(a::command_list*cmd,unsigned count,const a::render_pass_render_target_desc*rt,const a::render_pass_depth_stencil_desc*,a::render_pass_flags){if(mcd2::process_exit::terminating())return false;if(!tracking())return false;std::vector<a::resource_view> views;for(unsigned i=0;i<count;++i)views.push_back(rt[i].view);targets(cmd,count,views.data(),{});{std::lock_guard lock(mutex);auto&c=recording(cmd);c.passKnown=true;c.passActive=true;c.passStores=count>0&&rt&&rt[0].store_op==a::render_pass_store_op::store&&c.primaryBackbuffer!=0;}return false;}
+// Diagnostic geometry is recorded only while bounded capture is explicitly enabled.
+void diagnostic_viewports(a::command_list*cmd,unsigned first,unsigned count,const a::viewport*values){if(mcd2::process_exit::terminating())return;if((!captureEnabled&&!snapshotTracking)||first!=0)return;std::lock_guard lock(mutex);auto& c=recording(cmd);c.diagnosticViewportKnown=count==1&&values&&std::isfinite(values[0].x)&&std::isfinite(values[0].y)&&std::isfinite(values[0].width)&&std::isfinite(values[0].height);if(c.diagnosticViewportKnown)c.diagnosticViewport=values[0];}
+void diagnostic_scissors(a::command_list*cmd,unsigned first,unsigned count,const a::rect*values){if(mcd2::process_exit::terminating())return;if((!captureEnabled&&!snapshotTracking)||first!=0)return;std::lock_guard lock(mutex);auto& c=recording(cmd);c.diagnosticScissorKnown=count==1&&values;if(c.diagnosticScissorKnown)c.diagnosticScissor=values[0];}
+void observe(a::command_list*cmd,bool cs,unsigned elements=0,unsigned instances=0,bool indexed=false){
+ if(!capturing())return;auto& state=recording(cmd);auto& root=cs?state.compute:state.graphics;auto found=layouts.find(root.layout);if(found==layouts.end())return;
  identity_receipt(cs?"temporal":"compositor");
+ if(!cs){auto p=pipelines.find(state.graphicsPipeline);privateLog<<"{\"kind\":\"compositor_geometry\",\"frame\":"<<frame<<",\"shader\":"<<state.ps<<",\"indexed\":"<<indexed<<",\"elements\":"<<elements<<",\"instances\":"<<instances<<",\"blendKnown\":"<<(p!=pipelines.end()&&p->second.blendKnown)<<",\"blendEnabled\":"<<(p!=pipelines.end()&&p->second.blendEnabled)<<",\"writeMask\":"<<(p!=pipelines.end()?p->second.writeMask:0)<<",\"passActive\":"<<state.passActive<<",\"passKnown\":"<<state.passKnown<<",\"viewportKnown\":"<<state.diagnosticViewportKnown<<",\"scissorKnown\":"<<state.diagnosticScissorKnown;
+  if(state.diagnosticViewportKnown){auto& v=state.diagnosticViewport;privateLog<<",\"viewport\":["<<v.x<<','<<v.y<<','<<v.width<<','<<v.height<<']';}
+  if(state.diagnosticScissorKnown){auto& r=state.diagnosticScissor;privateLog<<",\"scissor\":["<<r.left<<','<<r.top<<','<<r.right<<','<<r.bottom<<']';}privateLog<<"}\n";}
  privateLog<<"{\"kind\":\""<<(cs?"temporal_inputs":"compositor_inputs")<<"\",\"frame\":"<<frame<<",\"shader\":"<<(cs?state.cs:state.ps)<<",\"backbufferTarget\":"<<(state.backbuffer?"true":"false")<<",\"bindings\":[";bool first=true;
  for(unsigned param=0;param<found->second.size();++param)for(auto& range:found->second[param]){
   if(range.type==a::descriptor_type::sampler||range.count>=128||range.dx_register_space!=0||!(unsigned(range.visibility&(cs?a::shader_stage::compute:a::shader_stage::pixel))))continue;
@@ -246,10 +282,10 @@ void observe(a::command_list*cmd,bool cs){
  }
  privateLog<<"]}\n";privateLog.flush();++samples;
 }
-Binding binding(a::command_list*cmd,const Root&root,unsigned slot){
+Binding binding(a::command_list*cmd,const Root&root,unsigned slot,a::descriptor_type type=a::descriptor_type::shader_resource_view){
  auto found=layouts.find(root.layout);if(found==layouts.end())return {};
  for(unsigned param=0;param<found->second.size();++param)for(auto&range:found->second[param]){
-  if(range.dx_register_space||range.count>=128||range.type!=a::descriptor_type::shader_resource_view||!(unsigned(range.visibility&a::shader_stage::pixel))||slot<range.dx_register_index||slot>=range.dx_register_index+range.count)continue;
+  if(range.dx_register_space||range.count>=128||range.type!=type||!(unsigned(range.visibility&a::shader_stage::pixel))||slot<range.dx_register_index||slot>=range.dx_register_index+range.count)continue;
   auto index=range.binding+slot-range.dx_register_index;auto p=root.pushed.find(param);if(p!=root.pushed.end()){auto v=p->second.find(index);if(v!=p->second.end()&&v->second.type==range.type)return v->second;}
   auto t=root.tables.find(param);if(t!=root.tables.end()){auto v=descriptors.find(key(cmd->get_device(),{t->second},index));if(v!=descriptors.end()&&v->second.type==range.type)return v->second;}
  }
@@ -265,7 +301,7 @@ void compositor(a::command_list*cmd){
  if(internalGPU||!imageTags||(fg_controls::enabled&&!fg_controls::wanted))return;Cmd saved;Binding ui,world;uint32_t stamp=UINT32_MAX;unsigned sample=0;
  {
   std::lock_guard lock(mutex);if(retiring||ownerClosing||capturePolicy.empty()||!imageTags||(!fg_controls::enabled&&imageSamples>=900)|| (fg_controls::enabled&&!fg_controls::wanted))return;
-  saved=commands[cmd];if(saved.ps!=0x378df900||!saved.backbuffer||saved.graphics.dynamicOffsets||saved.compute.dynamicOffsets||!saved.graphicsPipeline)return;
+  saved=recording(cmd);if(saved.ps!=0x378df900||!saved.backbuffer||saved.graphics.dynamicOffsets||saved.compute.dynamicOffsets||!saved.graphicsPipeline)return;
   auto id=renderMarker?renderMarker():UINT64_MAX;if(id>=UINT32_MAX)return;stamp=uint32_t(id);auto f=gameFrames.find(stamp);if(f==gameFrames.end()||!f->second.guides)return;
   ui=binding(cmd,saved.graphics,0);world=binding(cmd,saved.graphics,1);if(!ui.view.handle||!world.view.handle)return;sample=imageSamples++;
  }
@@ -275,11 +311,12 @@ void compositor(a::command_list*cmd){
  auto uiResource=reinterpret_cast<ID3D12Resource*>(cmd->get_device()->get_resource_from_view(ui.view).handle);auto worldResource=reinterpret_cast<ID3D12Resource*>(cmd->get_device()->get_resource_from_view(world.view).handle);
  internalGPU=true;
  if(auto module=amd_bridge()){
+  if(!outputReady||outputColour!=3){internalGPU=false;proxy->Release();return;}
   using World=int(*)(void*,void*,uint64_t);auto copy=reinterpret_cast<World>(GetProcAddress(module,"mcd2_afg_world_v2"));auto raw=native_command(proxy);
   sdkResult=raw&&copy?copy(raw,worldResource,stamp):-100;tokenResult=sdkResult;sdkIndex=stamp;if(raw)raw->Release();
   restore_root(cmd,saved.compute,true);if(saved.computePipeline)cmd->bind_pipeline(a::pipeline_stage::all_compute,{saved.computePipeline});restore_root(cmd,saved.graphics,false);cmd->bind_pipeline(a::pipeline_stage::all_graphics,{saved.graphicsPipeline});internalGPU=false;proxy->Release();
-  std::lock_guard lock(mutex);commands[cmd]=saved;
-  if(!sdkResult){commands[cmd].imageFrame=stamp;gameFrames[stamp].images=true;}
+  std::lock_guard lock(mutex);recording(cmd)=saved;
+  if(!sdkResult){recording(cmd).imageFrame=stamp;gameFrames[stamp].images=true;}
   if(sample<120||sample%60==0)privateLog<<"{\"kind\":\"amd_world_copy\",\"frameStamp\":"<<stamp<<",\"SDKResult\":"<<sdkResult<<"}\n";privateLog.flush();return;
  }
  auto alpha=fg_alpha::copy(proxy,uiResource,DXGI_FORMAT(cmd->get_device()->get_resource_view_desc(ui.view).format),outputWidth,outputHeight);
@@ -290,12 +327,80 @@ void compositor(a::command_list*cmd){
   sdkResult=context.result;sdkIndex=context.index;
  }
  restore_root(cmd,saved.compute,true);if(saved.computePipeline)cmd->bind_pipeline(a::pipeline_stage::all_compute,{saved.computePipeline});restore_root(cmd,saved.graphics,false);cmd->bind_pipeline(a::pipeline_stage::all_graphics,{saved.graphicsPipeline});internalGPU=false;proxy->Release();
- std::lock_guard lock(mutex);commands[cmd]=saved;commands[cmd].usesAlpha|=alpha!=nullptr;if(!tokenResult&&!sdkResult){commands[cmd].imageFrame=stamp;gameFrames[stamp].images=true;}
+ std::lock_guard lock(mutex);recording(cmd)=saved;recording(cmd).usesAlpha|=alpha!=nullptr;if(!tokenResult&&!sdkResult){recording(cmd).imageFrame=stamp;gameFrames[stamp].images=true;}
  if(!fg_controls::enabled||sample<120||sample%60==0)privateLog<<"{\"kind\":\"game_image_tags\",\"sample\":"<<sample<<",\"frameStamp\":"<<stamp<<",\"SDKIndex\":"<<sdkIndex<<",\"tokenResult\":"<<tokenResult<<",\"SDKResult\":"<<sdkResult<<",\"alphaReady\":"<<(alpha?"true":"false")<<",\"alphaStage\":"<<fg_alpha::stage.load()<<",\"alphaHRESULT\":"<<uint32_t(fg_alpha::lastHR.load())<<",\"UIViewFormat\":"<<unsigned(cmd->get_device()->get_resource_view_desc(ui.view).format)<<"}\n";privateLog.flush();
 }
-bool dispatch(a::command_list*cmd,unsigned,unsigned,unsigned){if(mcd2::process_exit::terminating())return false;if(internalGPU||!captureEnabled)return false;std::lock_guard lock(mutex);auto cs=commands[cmd].cs;if(cs==0x03645dc9||cs==0xf56e10f9)observe(cmd,true);return false;}
-bool draw(a::command_list*cmd,unsigned,unsigned,unsigned,unsigned){if(mcd2::process_exit::terminating())return false;if(!tracking())return false;{std::lock_guard lock(mutex);auto& state=commands[cmd];if(!internalGPU&&(state.backbuffer||state.ps==0x378df900))observe(cmd,false);}compositor(cmd);return false;}
-bool indexed(a::command_list*cmd,unsigned,unsigned,unsigned,int,unsigned){if(mcd2::process_exit::terminating())return false;return draw(cmd,0,0,0,0);}
+bool dispatch(a::command_list*cmd,unsigned,unsigned,unsigned){if(mcd2::process_exit::terminating())return false;if(internalGPU||!captureEnabled)return false;std::lock_guard lock(mutex);auto cs=recording(cmd).cs;if(cs==0x03645dc9||cs==0xf56e10f9)observe(cmd,true);return false;}
+// Called after the original opaque scene draw, before any UI draw. Snapshot
+// RGB is unchanged; alpha is explicit because the game writes only RGB here.
+void snapshot_scene(a::command_list*cmd,uint32_t stamp){
+ Cmd saved;unsigned width=0,height=0;
+ {std::lock_guard lock(mutex);if(retiring||ownerClosing||!outputReady||!snapshotTracking)return;saved=recording(cmd);width=outputWidth;height=outputHeight;}
+ if(!saved.primaryBackbuffer||saved.passActive||saved.graphics.dynamicOffsets||saved.compute.dynamicOffsets)return;
+ if(!amd_bridge())return;auto proxy=fg_alpha::proxy(cmd);if(!proxy)return;
+ internalGPU=true;auto image=fg_scene::copy(proxy,reinterpret_cast<ID3D12Resource*>(saved.primaryBackbuffer),width,height);
+ const auto result=image?0:-116;
+ restore_root(cmd,saved.compute,true);if(saved.computePipeline)cmd->bind_pipeline(a::pipeline_stage::all_compute,{saved.computePipeline});restore_root(cmd,saved.graphics,false);if(saved.graphicsPipeline)cmd->bind_pipeline(a::pipeline_stage::all_graphics,{saved.graphicsPipeline});internalGPU=false;proxy->Release();
+ std::lock_guard lock(mutex);recording(cmd)=saved;recording(cmd).usesScene|=image!=nullptr;
+ if(!result){recording(cmd).imageFrame=stamp;auto&f=gameFrames[stamp];f.scene=image;f.sceneView=saved.pendingView;f.sceneSubmitted=false;while(gameFrames.size()>16)gameFrames.erase(gameFrames.begin());}
+ const auto sample=imageSamples++;if(sample<120||sample%60==0)privateLog<<"{\"kind\":\"amd_sdr_scene\",\"frameStamp\":"<<stamp<<",\"SDKResult\":"<<result<<",\"opaqueAlpha\":"<<(image!=nullptr)<<",\"width\":"<<width<<",\"height\":"<<height<<"}\n";privateLog.flush();
+}
+bool end_pass(a::command_list*cmd){if(mcd2::process_exit::terminating())return false;if(!tracking())return false;
+ uint32_t stamp=UINT32_MAX;
+ {std::lock_guard lock(mutex);auto found=commands.find(cmd);if(found==commands.end())return false;auto&c=found->second;if(c.passStores)stamp=c.pendingScene;c.pendingScene=UINT32_MAX;c.passActive=false;}
+ if(stamp==UINT32_MAX)return false;
+ // The pinned framework's end-pass callback precedes its raw EndRenderPass.
+ // Own that call exactly once so compute/copies occur outside the native pass.
+ auto raw=reinterpret_cast<ID3D12GraphicsCommandList*>(cmd->get_native());ID3D12GraphicsCommandList4*list=nullptr;
+ if(!raw||FAILED(raw->QueryInterface(IID_PPV_ARGS(&list))))return false;
+ list->EndRenderPass();list->Release();snapshot_scene(cmd,stamp);return true;
+}
+// Pinned build's scene tone-map b1 is the same View uniform layout used by
+// the validated temporal guide producer. Read only its CPU-upload allocation,
+// and require full camera identity parity before consuming the stamped frame.
+int scene_view_frame(a::command_list*cmd,Cmd&state,uint32_t&stamp){
+ auto cb=binding(cmd,state.graphics,1,a::descriptor_type::constant_buffer);if(!cb.cb.buffer.handle)return -1;
+ auto resource=reinterpret_cast<ID3D12Resource*>(cb.cb.buffer.handle);auto d=resource->GetDesc();D3D12_HEAP_PROPERTIES hp{};D3D12_HEAP_FLAGS flags{};
+ constexpr size_t bytes=662*sizeof(float);
+ if(d.Dimension!=D3D12_RESOURCE_DIMENSION_BUFFER||FAILED(resource->GetHeapProperties(&hp,&flags))||hp.Type!=D3D12_HEAP_TYPE_UPLOAD)return -2;
+ if(cb.cb.offset>d.Width||d.Width-cb.cb.offset<bytes||(cb.cb.size!=UINT64_MAX&&cb.cb.size<bytes))return -3;
+ void*data=nullptr;D3D12_RANGE range{SIZE_T(cb.cb.offset),SIZE_T(cb.cb.offset+bytes)};if(FAILED(resource->Map(0,&range,&data))||!data)return -4;
+ std::array<float,662>view{};memcpy(view.data(),static_cast<char*>(data)+cb.cb.offset,bytes);D3D12_RANGE none{};resource->Unmap(0,&none);memcpy(&stamp,view.data()+661,sizeof(stamp));
+ if(stamp>=UINT32_MAX)return -5;
+ MCD2FGCamera decoded{};if(!mcd2_fg::camera(view.data(),stamp,1,1,false,decoded))return -7;
+ state.pendingView=decoded;
+ return 0;
+}
+bool matching_scene_view(const FrameData&f){return f.scene&&f.sceneSubmitted&&f.guides&&mcd2_fg::same_scene_view(f.sceneView,f.camera);}
+struct DrawCall{unsigned elements,instances,first;int base;unsigned firstInstance;bool indexed;};
+bool draw_common(a::command_list*cmd,const DrawCall&call){
+ if(mcd2::process_exit::terminating()||internalGPU||!tracking())return false;
+ bool capture=false,passActive=false;uint32_t stamp=UINT32_MAX;
+ {std::lock_guard lock(mutex);auto&state=recording(cmd);if(state.backbuffer||state.ps==0x378df900)observe(cmd,false,call.elements,call.instances,call.indexed);
+  // A subsequent draw inside the same pass may contain UI. Never label its
+  // end-of-pass image HUDless; defer generation for that unqualified frame.
+  state.pendingScene=UINT32_MAX;
+  if(snapshotTracking&&outputReady&&!retiring&&!ownerClosing&&!state.sceneReset.pending&&state.passKnown&&!state.graphics.dynamicOffsets&&!state.compute.dynamicOffsets){
+   uint32_t id=UINT32_MAX;auto pipe=pipelines.find(state.graphicsPipeline);const auto viewResult=state.ps==0x088c6818?scene_view_frame(cmd,state,id):-9;
+   if(state.ps==0x088c6818&&capturing())privateLog<<"{\"kind\":\"sdr_view_identity\",\"viewResult\":"<<viewResult<<",\"frameStamp\":"<<id<<"}\n";
+   if(pipe!=pipelines.end()&&!viewResult){
+    const auto&v=state.diagnosticViewport;const auto&r=state.diagnosticScissor;
+    mcd2::providers::SdrSceneDraw d{id,state.ps,call.elements,call.instances,pipe->second.writeMask,call.indexed,pipe->second.blendKnown,pipe->second.blendEnabled,state.primaryBackbuffer!=0,state.diagnosticViewportKnown,state.diagnosticScissorKnown,v.x,v.y,v.width,v.height,r.left,r.top,r.right,r.bottom};
+    capture=mcd2::providers::admitSdrSceneDraw(sceneOutput,d);stamp=uint32_t(id);passActive=state.passActive;
+    if(capturing())privateLog<<"{\"kind\":\"sdr_scene_admission\",\"accepted\":"<<capture<<",\"targetCount\":"<<state.targetCount<<",\"activeTargets\":"<<state.activeTargets<<",\"primaryBackbuffer\":"<<(state.primaryBackbuffer!=0)<<",\"viewportKnown\":"<<d.viewportKnown<<",\"scissorKnown\":"<<d.scissorKnown<<",\"sceneStage\":"<<unsigned(sceneOutput.stage)<<",\"colourSpace\":"<<unsigned(sceneOutput.colour)<<",\"format\":"<<sceneOutput.backbufferFormat<<"}\n";
+   }
+  }
+ }
+ if(!capture){compositor(cmd);return false;}
+ // API implementation draws directly on the original list, without dispatching
+ // addon draw callbacks. Return true to suppress the wrapper's second draw.
+ if(call.indexed)cmd->draw_indexed(call.elements,call.instances,call.first,call.base,call.firstInstance);else cmd->draw(call.elements,call.instances,call.first,call.firstInstance);
+ if(passActive){std::lock_guard lock(mutex);recording(cmd).pendingScene=stamp;}else snapshot_scene(cmd,stamp);
+ return true;
+}
+bool draw(a::command_list*cmd,unsigned vertices,unsigned instances,unsigned first,unsigned firstInstance){if(mcd2::process_exit::terminating())return false;return draw_common(cmd,{vertices,instances,first,0,firstInstance,false});}
+bool indexed(a::command_list*cmd,unsigned indices,unsigned instances,unsigned first,int base,unsigned firstInstance){if(mcd2::process_exit::terminating())return false;return draw_common(cmd,{indices,instances,first,base,firstInstance,true});}
+
 void finish(a::command_queue*,a::swapchain*){if(mcd2::process_exit::terminating())return;
  auto bridge=GetModuleHandleW(L"fg-sdk-bridge.dll");using State=int(*)(unsigned*,unsigned*,unsigned*,unsigned*);auto state=bridge?reinterpret_cast<State>(GetProcAddress(bridge,"mcd2_fg_state")):nullptr;
  if(auto module=amd_bridge()){
@@ -311,19 +416,41 @@ void finish(a::command_queue*,a::swapchain*){if(mcd2::process_exit::terminating(
 }
 void present(a::command_queue*q,a::swapchain*swap,const a::rect*,const a::rect*,unsigned,const a::rect*){if(mcd2::process_exit::terminating())return;
  poll_policy();fg_controls::poll(swap->get_device(),capturePolicy,activeFGMode);
+ if(auto module=amd_bridge()){
+  auto d=swap->get_device()->get_resource_desc(swap->get_current_back_buffer());
+  mcd2::providers::FgOutputContract next{d.texture.width,d.texture.height,unsigned(d.texture.format),unsigned(d.texture.format)==87?28u:unsigned(d.texture.format),mcd2::providers::FgOutputColour(swap->get_color_space()),swap->get_color_space()==a::color_space::srgb?mcd2::providers::FgSceneStage::SdrOpaqueSnapshot:mcd2::providers::FgSceneStage::HdrCompositor};
+  bool changed=false,closing=false;
+  {std::lock_guard lock(mutex);changed=!(next==sceneOutput);closing=ownerClosing;if(changed){sceneOutput=next;outputWidth=next.width;outputHeight=next.height;outputFormat=next.backbufferFormat;outputColour=unsigned(next.colour);gameFrames.clear();outputReady=false;snapshotTracking=false;retiring=true;}}
+  using Present=int(*)(void*,uint64_t,uint32_t);auto disable=reinterpret_cast<Present>(GetProcAddress(module,"mcd2_afg_present_v2"));
+  if(changed&&disable){disable(nullptr,UINT64_MAX,0);activeFGMode=0;}
+  try_retirement();bool pending=false;{std::lock_guard lock(mutex);pending=retiring;}
+  using Output=int(*)(const MCD2AmdFgOutputV1*);auto configure=reinterpret_cast<Output>(GetProcAddress(module,"mcd2_afg_output_v1"));
+  MCD2AmdFgOutputV1 out{sizeof(out),next.width,next.height,next.backbufferFormat,next.sceneFormat,unsigned(next.colour),unsigned(next.stage),0};
+  const auto result=!closing&&!pending&&configure?configure(&out):MCD2_AFG_BUSY_V2;
+  outputReady=result==0;snapshotTracking=outputReady&&outputColour==1&&fg_controls::wanted.load();
+  if(changed||(!result&&frame<4)){std::lock_guard lock(mutex);privateLog<<"{\"kind\":\"amd_output\",\"SDKResult\":"<<result<<",\"colourSpace\":"<<unsigned(next.colour)<<",\"format\":"<<next.backbufferFormat<<",\"sceneFormat\":"<<next.sceneFormat<<",\"width\":"<<next.width<<",\"height\":"<<next.height<<"}\n";privateLog.flush();}
+ }
+
+ if(captureEnabled){static unsigned lastColour=UINT32_MAX;auto colour=unsigned(swap->get_color_space());if(colour!=lastColour){std::lock_guard lock(mutex);privateLog<<"{\"kind\":\"presentation_colour\",\"frame\":"<<frame<<",\"colourSpace\":"<<colour<<",\"width\":"<<outputWidth<<",\"height\":"<<outputHeight<<",\"format\":"<<outputFormat<<"}\n";privateLog.flush();lastColour=colour;}}
+ struct SceneRelease{void operator()(ID3D12Resource*p)const{if(p&&!mcd2::process_exit::terminating())p->Release();}};
+ std::unique_ptr<ID3D12Resource,SceneRelease> sceneBorrow;
  FrameData data{};bool ready=false,wanted=false;uint64_t id=UINT64_MAX;
  {
   std::lock_guard lock(mutex);if(capturing()){identity_receipt("present");privateLog.flush();}id=presentFrame?presentFrame():UINT64_MAX;
   const unsigned revision=cachedRevision;
   if(revision&&revision!=trialRevision&&!activeFGMode){guideSamples=0;imageSamples=0;fgTrialFrames=0;gameFrames.clear();trialRevision=revision;privateLog<<"{\"kind\":\"trial_revision\",\"revision\":"<<revision<<"}\n";privateLog.flush();}
-  if(id<UINT32_MAX){auto f=gameFrames.find(uint32_t(id));if(f!=gameFrames.end()){data=f->second;ready=data.guides&&data.images;}}
+  if(id<UINT32_MAX&&!retiring&&!ownerClosing){auto f=gameFrames.find(uint32_t(id));if(f!=gameFrames.end()){data=f->second;ready=data.guides&&data.images;if(data.scene){data.scene->AddRef();sceneBorrow.reset(data.scene);}}}
   wanted=fg_controls::enabled?fg_controls::wanted.load()&&GetForegroundWindow()==outputWindow:legacyEnable.load()&&fgTrialFrames<600&&GetForegroundWindow()==outputWindow;
  }
  const unsigned mode=ready&&wanted&&fg_alpha::submission_queue(q)?1:0;
  if(auto module=amd_bridge()){
+  if(outputReady&&outputColour==1&&wanted&&matching_scene_view(data)){
+   using Scene=int(*)(void*,void*,uint64_t);auto scene=reinterpret_cast<Scene>(GetProcAddress(module,"mcd2_afg_scene_v1"));ID3D12Device*device=nullptr;auto queue=reinterpret_cast<ID3D12CommandQueue*>(q->get_native());
+   const auto owner=queue->GetDevice(IID_PPV_ARGS(&device));const auto staged=SUCCEEDED(owner)&&scene?scene(device,data.scene,id):-119;if(device)device->Release();ready=staged==0;
+  }
   using Present=int(*)(void*,uint64_t,uint32_t);auto configure=reinterpret_cast<Present>(GetProcAddress(module,"mcd2_afg_present_v2"));auto result=configure?configure(reinterpret_cast<void*>(q->get_native()),id,ready&&wanted?1:0):-1;
   activeFGMode=!result&&ready&&wanted?1:0;
-  if(fg_controls::enabled&&result&&result!=MCD2_AFG_BUSY_V2)fg_controls::fault=1;
+  if(fg_controls::enabled&&result&&result!=MCD2_AFG_BUSY_V2&&result!=MCD2_AFG_OUTPUT_UNSUPPORTED_V3)fg_controls::fault=1;
   if(fg_controls::enabled)fg_controls::publish(activeFGMode,ready);
   if(activeFGMode){++fgTrialFrames;presentedFrame=uint32_t(id);}return;
  }
@@ -371,7 +498,7 @@ extern "C" __declspec(dllexport) void mcd2_fg_observe_sr(void*cmd,void*depth,voi
   MCD2AmdFgGuidesV1 p{};p.size=sizeof(p);p.camera=*camera;p.worldToMeters=.01f;
   p.frameTimeMs=previous.QuadPart&&frequency.QuadPart?float(double(now.QuadPart-previous.QuadPart)*1000./frequency.QuadPart):0.f;previous=now;previousFrame=camera->frame;
   auto raw=native_command(cmd);const auto result=raw&&prepare&&p.frameTimeMs>0?prepare(raw,depth,motion,&p):-101;if(raw)raw->Release();
-  std::lock_guard lock(mutex);gameFrames[camera->frame]={*camera,result==0,false};while(gameFrames.size()>16)gameFrames.erase(gameFrames.begin());
+  std::lock_guard lock(mutex);auto&f=gameFrames[camera->frame];f.camera=*camera;f.guides=result==0;f.images=false;while(gameFrames.size()>16)gameFrames.erase(gameFrames.begin());
   if(sample<120||sample%60==0)privateLog<<"{\"kind\":\"amd_guides\",\"frameStamp\":"<<camera->frame<<",\"SDKResult\":"<<result<<",\"frameTimeMs\":"<<p.frameTimeMs<<",\"width\":"<<camera->width<<",\"height\":"<<camera->height<<",\"cameraBytes\":"<<camera->size<<",\"reset\":"<<camera->reset<<"}\n";privateLog.flush();return;
  }
  auto latency=GetModuleHandleW(L"mcd2-display-latency.addon64"),bridge=GetModuleHandleW(L"fg-sdk-bridge.dll");
@@ -398,11 +525,19 @@ extern "C" __declspec(dllexport) void mcd2_fg_sr_retired(){if(mcd2::process_exit
 extern "C" __declspec(dllexport) const char*DESCRIPTION="Private bounded game-input and frame-generation experiment; disabled by default";
 BOOL APIENTRY DllMain(HMODULE module,DWORD reason,LPVOID reserved){if(reason==DLL_PROCESS_ATTACH){if(!reshade::register_addon(module))return FALSE;
 #define E(e,f) reshade::register_event<reshade::addon_event::e>(f)
- E(init_device,init_device);E(init_pipeline,init_pipeline);E(destroy_pipeline,destroy_pipeline);E(bind_pipeline,bind_pipeline);E(init_pipeline_layout,init_layout);E(destroy_pipeline_layout,destroy_layout);E(push_descriptors,push);E(push_constants,constants);E(bind_descriptor_tables,tables);E(update_descriptor_tables,update);E(copy_descriptor_tables,copy);E(init_resource,resource_init);E(destroy_resource,resource_destroy);E(barrier,barrier);E(execute_command_list,execute);E(reset_command_list,reset);E(destroy_command_list,reset);E(init_swapchain,swap_init);E(destroy_swapchain,swap_destroy);E(bind_render_targets_and_depth_stencil,targets);E(begin_render_pass,pass);E(dispatch,dispatch);E(draw,draw);E(draw_indexed,indexed);E(present,present);E(finish_present,finish);
+ E(bind_viewports,diagnostic_viewports);E(bind_scissor_rects,diagnostic_scissors);E(init_device,init_device);E(init_pipeline,init_pipeline);E(destroy_pipeline,destroy_pipeline);E(bind_pipeline,bind_pipeline);E(init_pipeline_layout,init_layout);E(destroy_pipeline_layout,destroy_layout);E(push_descriptors,push);E(push_constants,constants);E(bind_descriptor_tables,tables);E(update_descriptor_tables,update);E(copy_descriptor_tables,copy);E(init_resource,resource_init);E(destroy_resource,resource_destroy);E(barrier,barrier);E(execute_command_list,execute);E(reset_command_list,reset);E(destroy_command_list,destroy_cmd);E(init_swapchain,swap_init);E(destroy_swapchain,swap_destroy);E(bind_render_targets_and_depth_stencil,targets);E(begin_render_pass,pass);E(end_render_pass,end_pass);E(dispatch,dispatch);E(draw,draw);E(draw_indexed,indexed);E(present,present);E(finish_present,finish);
 #undef E
  }else if(reason==DLL_PROCESS_DETACH){if(reserved)mcd2::process_exit::mark_terminating();else reshade::unregister_addon(module);}return TRUE;}
-extern "C" __declspec(dllexport) bool AddonInit(HMODULE,HMODULE){mcd2::process_exit::initialize();return true;}
-extern "C" __declspec(dllexport) void AddonUninit(HMODULE,HMODULE){
+extern "C" __declspec(dllexport) bool AddonInit(HMODULE,HMODULE){mcd2::process_exit::initialize();return !retainedUnload.load();}
+extern "C" __declspec(dllexport) void AddonUninit(HMODULE addon,HMODULE framework){
  if(mcd2::process_exit::terminating())return;
  {std::lock_guard lock(mutex);retiring=true;ownerClosing=true;}try_retirement();
+ bool retained=false;{std::lock_guard lock(mutex);retained=retiring;}
+ if(retained){
+  // Retained recordings/resources must not outlive their implementing code.
+  // This runs outside DllMain; refuse hot reload until process restart.
+  retainedUnload=true;HMODULE held=nullptr;
+  GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS|GET_MODULE_HANDLE_EX_FLAG_PIN,reinterpret_cast<LPCWSTR>(addon),&held);
+  GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS|GET_MODULE_HANDLE_EX_FLAG_PIN,reinterpret_cast<LPCWSTR>(framework),&held);
+ }
 }

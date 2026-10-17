@@ -7,6 +7,12 @@ selects an SDK instance by device. The correction passes the same held proxy
 used at initialization and rejects a missing pointer. It never passes null,
 which would request shutdown of every device's instance.
 
+The direct driver export `NVSDK_NGX_D3D12_Shutdown1` also requires a writable
+second argument for the remaining device count. This differs from the public
+SDK wrapper signature. The installed driver forwards and writes that output;
+the direct call now supplies it. An actual-source fixture type-checks the
+export and exercises success, failure and shared-owner paths.
+
 Shared Streamline ownership remains device-verified and defers NGX shutdown to
 Streamline. Unverified ownership retains the generation. Feature/parameter
 release, fresh GPU completion, recording invalidation and reverse-order owned
