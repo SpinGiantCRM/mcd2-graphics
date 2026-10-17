@@ -3,7 +3,8 @@ current, available, fault-free, non-retired AMD Off request has reached the nati
 presenter and the bridge confirms switching remains available. Preserve the
 existing On admission and NVIDIA permanent-retirement rules. The shared
 projection fixture and source checks cover this distinction on both CI platforms;
-the status correction still requires a rebuilt artifact and runtime checks.
+the status correction passed bounded Linux/NVIDIA runtime checks in a rebuilt
+native candidate; Windows/Radeon coverage remains required.
 
 The UI build uses pinned NeoRune 1.0.0 and .NET SDK 10.0.402/reference pack
 10.0.13. Preserve SDK-generated versioned ModInfo and its discovery header;
@@ -13,8 +14,9 @@ source hashes, explicit trial receipts and both-platform build-contract checks.
 The dev.12 UI passed bounded Linux/NVIDIA startup, Video-menu and gameplay checks
 with Blueprint Loader 2.3 and 2.5. All six FSR quality selections activated with
 AMD FG; live Off/On and pause suspension also worked. These checks do not qualify
-Windows/Radeon, physical controllers or long sessions. Initial Off recovery still
-misses the frame-time limit, so performance qualification remains incomplete.
+Windows/Radeon, physical controllers or long sessions. A warmed Off-recovery
+comparison narrowly missed the throughput limit, so performance qualification
+remains incomplete.
 Historical release receipts and binaries remain unchanged; select a new complete
 native artifact before installer qualification after further native changes.
 
@@ -816,9 +818,15 @@ The disabled path retains the existing forwarding behaviour.
 
 The Video menu waits for a committed, current-session FG selection. A bounded
 engine resolution change supplies the actual `ResizeBuffers` boundary, then
-restores the previous resolution and window mode. No presenter is replaced
-inside `Present`. Keep the shared SDK gate, fresh queue completion, callback
-drainage, one public COM identity, colour/HDR/private-data restoration and
+restores the previous resolution and window mode. Preserve the exact prior
+last-confirmed resolution and fullscreen mode as well: the temporary mode must
+not become the saved confirmation. Restore only confirmation still owned by
+that handoff; subsequent user display changes take precedence. Finish deferred
+confirmation ownership before starting another handoff and on actor teardown.
+The actual-source confirmation fixture runs on both CI platforms. Bounded
+Linux/NVIDIA main-menu and gameplay checks do not qualify Windows/Radeon.
+No presenter is replaced inside `Present`. Keep the shared SDK gate, fresh queue
+completion, callback drainage, one public COM identity, colour/HDR/private-data restoration and
 recovery to the previous presenter on target-creation failure. Issued waitable
 handles, exclusive fullscreen and incomplete metadata decline the handoff.
 

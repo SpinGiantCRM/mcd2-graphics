@@ -648,18 +648,33 @@ public class ModActor : AActor {
  }
 
  EWindowMode PresenterOriginalMode;FIntPoint PresenterOriginalResolution;FIntPoint PresenterTemporaryResolution;EWindowMode PresenterTemporaryMode;
+ uint PresenterOriginalConfirmedX;uint PresenterOriginalConfirmedY;int PresenterOriginalConfirmedMode;bool PresenterConfirmationPending;
  int PresenterResetPhase;int PresenterResetTicks;int PresenterAttemptRevision;int PresenterTargetRoute;int PresenterResetSession;bool PresenterResetFailed;bool PresenterRestoreFGFocus;
+ public void RestorePresenterConfirmation(bool final){
+  if(!PresenterConfirmationPending)return;var settings=UGameUserSettings.GetGameUserSettings();if(settings==null){if(final)PresenterConfirmationPending=false;return;}
+  var resolution=settings.GetScreenResolution();var confirmed=settings.GetLastConfirmedScreenResolution();
+  // Restore only confirmation values produced by our temporary display mode.
+  // A later user mode, resolution or confirmation takes precedence.
+  if(settings.GetFullscreenMode()==PresenterOriginalMode && resolution.X==PresenterOriginalResolution.X && resolution.Y==PresenterOriginalResolution.Y &&
+     confirmed.X==PresenterTemporaryResolution.X && confirmed.Y==PresenterTemporaryResolution.Y && settings.LastConfirmedFullscreenMode==(int)PresenterTemporaryMode){
+   settings.LastUserConfirmedResolutionSizeX=PresenterOriginalConfirmedX;settings.LastUserConfirmedResolutionSizeY=PresenterOriginalConfirmedY;
+   settings.LastConfirmedFullscreenMode=PresenterOriginalConfirmedMode;settings.SaveSettings();
+  }
+  if(final)PresenterConfirmationPending=false;
+ }
  public void RestorePresenterDisplay(){
   if(PresenterResetPhase==0)return;PresenterResetPhase=0;var settings=UGameUserSettings.GetGameUserSettings();if(settings==null)return;
   // A subsequent user display change takes precedence over our temporary mode.
-  if(settings.GetFullscreenMode()!=PresenterTemporaryMode){PresenterResetFailed=true;return;}
-  var resolution=settings.GetScreenResolution();if(resolution.X!=PresenterTemporaryResolution.X || resolution.Y!=PresenterTemporaryResolution.Y){PresenterResetFailed=true;return;}
+  if(settings.GetFullscreenMode()!=PresenterTemporaryMode){PresenterResetFailed=true;PresenterConfirmationPending=false;return;}
+  var resolution=settings.GetScreenResolution();if(resolution.X!=PresenterTemporaryResolution.X || resolution.Y!=PresenterTemporaryResolution.Y){PresenterResetFailed=true;PresenterConfirmationPending=false;return;}
   PresenterResetFailed=FGRuntime==null || FGRuntime.SessionId!=PresenterResetSession || FGRuntime.PresenterRoute!=PresenterTargetRoute;
   settings.SetScreenResolution(PresenterOriginalResolution);settings.SetFullscreenMode(PresenterOriginalMode);settings.ApplyResolutionSettings(false);
+  RestorePresenterConfirmation(false);
   Timer.Start(this,"RestorePresenterFocus",0.2f,false);
   Log.Write("PRESENTER DISPLAY RESTORED");
  }
  public void RestorePresenterFocus(){
+  RestorePresenterConfirmation(true);
   if(!PresenterRestoreFGFocus || !GraphicsPageOpen())return;PresenterRestoreFGFocus=false;foreach(var model in DisplayModels)if(model.ControlId==5){SelectOwned(model);return;}
  }
  public void PollPresenterSwitch(){
@@ -674,8 +689,10 @@ public class ModActor : AActor {
   int target=authority.W31==0?1:2;if(FGRuntime.PresenterRoute==target)return;
   var settings=UGameUserSettings.GetGameUserSettings();if(settings==null)return;
   var mode=settings.GetFullscreenMode();if(mode==EWindowMode.Fullscreen)return;
+  RestorePresenterConfirmation(true);Timer.Stop(this,"RestorePresenterFocus");
   PresenterOriginalMode=mode;PresenterOriginalResolution=settings.GetScreenResolution();PresenterTemporaryMode=EWindowMode.Windowed;
   if(PresenterOriginalResolution.X<=656 || PresenterOriginalResolution.Y<=496 || PresenterOriginalResolution.X>7680 || PresenterOriginalResolution.Y>4320)return;
+  PresenterOriginalConfirmedX=settings.LastUserConfirmedResolutionSizeX;PresenterOriginalConfirmedY=settings.LastUserConfirmedResolutionSizeY;PresenterOriginalConfirmedMode=settings.LastConfirmedFullscreenMode;PresenterConfirmationPending=true;
   PresenterRestoreFGFocus=GraphicsPageOpen() && displayHelp==5;PresenterTargetRoute=target;PresenterResetFailed=false;PresenterResetSession=FGRuntime.SessionId;PresenterAttemptRevision=revision;PresenterResetTicks=0;PresenterResetPhase=1;
   PresenterTemporaryResolution=settings.GetScreenResolution();PresenterTemporaryResolution.X=PresenterTemporaryResolution.X-16;PresenterTemporaryResolution.Y=PresenterTemporaryResolution.Y-16;settings.SetScreenResolution(PresenterTemporaryResolution);settings.SetFullscreenMode(PresenterTemporaryMode);settings.ApplyResolutionSettings(false);
   Log.Write("PRESENTER ENGINE RESET requested="+target+" revision="+revision);
@@ -764,7 +781,7 @@ public class ModActor : AActor {
  }
 
  protected override void ReceiveEndPlay(EEndPlayReason reason){
-  RestorePresenterDisplay();
+  RestorePresenterDisplay();RestorePresenterConfirmation(true);
   if(ProviderRuntime!=null)ProviderRuntime.Stop();Timer.Stop(this,"PollProviders");
   RestoreFoliageVelocity();
   foreach(var footer in HelpFooters)if(UKismetSystemLibrary.IsValid(footer))footer.RemoveFromParent();HelpFooters.Clear();HelpFooterPanels.Clear();

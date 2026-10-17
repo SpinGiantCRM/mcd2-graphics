@@ -70,5 +70,5 @@
     "crtVersion": "14.44.35207",
     "windowsSDK": "10.0.26100.0"
   },
-  "sourceChangeReason": "AMD native-Off restart-status correction requires a new complete native build."
+  "sourceChangeReason": "AMD native-Off restart-status and temporary display-confirmation corrections require a source-matched complete build."
 }

@@ -231,6 +231,8 @@ jobs:
           dotnet-version: '10.0.402'
       - name: Temporal SR foliage ownership checks
         run: python tests/test_fg_foliage_policy.py
+      - name: Presenter confirmation preservation
+        run: python tests/test_presenter_confirmation.py
       - name: Consolidated provider menu controls
         run: dotnet run --project tests/provider-menu-client/ProviderMenuClient.Tests.csproj -c Release
       - name: Guided installer file-safety checks
