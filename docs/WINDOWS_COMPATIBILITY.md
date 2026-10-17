@@ -1,3 +1,121 @@
+The HDR controls retain their native Brightness placement when available.
+If that anchor is absent, use the existing owned Upscaler row, and refuse
+insertion when that row is absent too. Keep the managed fallback fixture on
+Windows/Linux and rebuild all three UI archives with matching source receipts.
+A stored HDR Off request can otherwise disable manually enabled Unreal HDR even
+when the old menu hides the control. UI visibility and actual HDR10 output need
+separate runtime verification; do not infer either from a successful build.
+
+Windows NGX discovery must include the 64-bit `NGXCore/FullPath` registry location:
+the installed driver DLL can be outside ordinary DLL search paths. Both the
+capability probe and live SR initialization use the same loader. Keep existing
+Wine discovery and use the registered module's directory for dependency loading.
+The Windows smoke test checks driver loading and exports; it does not qualify
+NGX initialization, evaluation or frame generation.
+
+The driver-level `NVSDK_NGX_D3D12_Shutdown1` export takes the initialization
+device and a remaining-device count by reference. The public SDK wrapper hides
+that output argument; its one-argument signature cannot be used with
+`GetProcAddress`. Preserve the initialized proxy device identity for shutdown.
+The isolated `experiments/gdk-graphics/ngx_lifetime_probe.cpp` checks repeated
+real-driver init/shutdown cycles without game hooks or frame generation.
+
+The opt-in [GDK save transport](GDK_SAVE_TRANSPORT.md) bridges only the six legacy
+MCD2Graphics slots through the official Xbox API. Keep it separate from frozen
+release assets and consolidated provider channels. Preserve strict payload
+validation, ambiguous-user refusal, middleware lifetime and synthetic slot checks
+on Windows/Linux. A successful transport does not qualify GDK engine hooks or FG.
+
+The NVIDIA bootstrap on native Windows wraps the ReShade factory with a
+Streamline presentation factory instead of shadowing the native DXGI factory
+vtable. The isolated `experiments/gdk-graphics/fg_reshade_resize_probe.cpp`
+reproduces `E_ABORT` in the old proxy order, including without resize, and passes
+creation, resize, presentation and shutdown with the new order on NVIDIA 617.42.
+Bind the actual rendering adapter and initialize FG-Off options before SDK
+swapchain creation. Keep the existing Wine and AMD routes. These are FG-Off
+presentation checks; game startup, guide inputs, FG transitions and shutdown
+still require in-game verification. A direct Streamline probe alone does not
+qualify the ReShade integration.
+
+Presentation success also does not prove image delivery. The ReShade probe clears
+the rendering buffer red and reads a pixel from both that buffer and the physical
+swapchain. With the new factory order, the pinned UE Extended RenoDX addon
+produces ten red input pixels but ten black physical output pixels; removing it
+passes both readbacks. The experimental Windows FG trial therefore disables
+RenoDX and loses its HDR modifications. Do not qualify the combined RenoDX/FG
+configuration from API success or advertise HDR support for that trial.
+
+A later bounded [native HDR/RenoDX trial](GAMEPASS_HDR.md) passed using
+RenoDX `Set_Path=0`, Unreal HDR output CVars and the saved
+`bUseHDRDisplayOutput=True` preference. The SDR-upgrade proxy remains
+incompatible. Preserve this distinction: changing only `r.AllowHDR` or loading
+RenoDX does not qualify HDR. The HDR runtime capture used extra FG admission
+logging with unchanged guards; the normal guide was restored afterwards.
+
+The outer Windows NVIDIA swapchain also advances SR on the application's queue.
+Internal NVIDIA/ReShade presents can use a different queue; initializing SR there
+causes the existing submission-queue guard to stop evaluation. The application
+callback resolves only a registered live ReShade queue, holds the incoming queue
+identity and leases the addon module for each call. Internal present callbacks
+are suppressed while that owner is active; destruction retires only that owner.
+An isolated callback fixture checks ten calls, native queue identity and one
+retirement alongside both red-pixel readbacks. This is proxy verification;
+NGX evaluations and active FG still require a separate in-game check.
+
+FG must register those public backbuffers too: the NVIDIA FG-Off proxy test
+finds no public buffer in the physical pool. Route guide consumption and outcome
+sampling around the application's Present using its registered rendering queue.
+Admission still requires an unambiguous same-device Unreal HWND swapchain, valid
+SDK buffers, matching engine tokens and guides. The isolated GPU check verifies
+nine subsequent public render-target bindings, ten host presents, red input/output
+pixels and clean shutdown. It does not qualify generated frames.
+MinGW guide builds must link SR's Microsoft-ABI ReShade resource bridge; direct
+aggregate-return calls crash during swapchain initialization. Check its layouts
+before registering callbacks. MSVC builds retain their direct public API calls.
+
+Complete the CPU Present interval on the application's successful `Present` or
+`Present1` return. Suppress the physical SDK callback's CPU completion while
+that owner is active; generated presents can run on an internal thread.
+`DXGI_PRESENT_TEST` must not advance callbacks, and a failed application Present
+must retain the engine's missing-completion fault.
+
+WinGDK 1.1.2.0 uses an independently inspected CPU marker layout (PE timestamp
+`c4bf592a`, image size `bc81000`). Selection requires all five dispatch/getter
+guards, four registry/name prologues and both counter-access instructions.
+The actual registry pointer and vtable are checked again before registration.
+Do not substitute Steam offsets, synthesize simulation markers or qualify FG
+from layout selection alone. Token generation, matching GPU guides and real
+generated presents still require in-game verification.
+
+The WinGDK SDR trial observes tonemapper `088c6818` writing directly to the
+backbuffer before Slate UI draws; HDR compositor `378df900` is absent in that
+capture. Admit this NVIDIA path only with same-frame accepted guides, the known
+full-resolution float-colour input and the matching 10-bit output. Streamline
+intercepts final colour automatically. This path supplies no separate HUDless/UI
+mask, so UI interpolation quality across scenes remains unqualified.
+AMD retains its existing separate-image requirement.
+Read the SDR draw's frame from its bound View upload constant buffer, with
+resource, heap and range checks. The latest CPU render marker can already refer
+to another frame. Preserve exact token/guide matching; do not admit a neighbouring
+frame to smooth missing inputs.
+Record SDR colour and guide acceptance independently under the same frame key:
+their CPU callbacks can arrive in either order. Updating guides must preserve
+previously recorded colour. Require both at Present, keep the cache bounded to
+sixteen frame keys and reject a failed guide update even when colour is present.
+
+The current WinGDK trial uses borderless mode. Exclusive-fullscreen focus loss
+produced a stale-fullscreen-state warning and an asynchronous NVIDIA Present
+failure; that transition remains unqualified.
+
+A bounded WinGDK 1.1.2.0 / RTX 4080 / driver 617.42 trial at 3840x2160 with DLSS
+Performance, FG On and Reflex On produced two actual presents per host frame
+without SDK or coordinator errors after merging input arrivals. The user reported
+smooth motion at approximately 100 FPS on the game counter and 180 FPS on Xbox
+Game Bar. This trial used the repaired `v0.3.0-preview.1` candidate with the
+RenoDX addon disabled; coexistence with that HDR addon, exclusive fullscreen and
+long-session/cross-adapter behaviour are not qualified. Main-source variants
+compile, but the complete current release package was not used for this trial.
+
 The [FSR SR / NVIDIA FG route](FSR_NVIDIA_FG_2026-10-12.md) admits FSR through the
 shared guide producer without equating SR vendor with FG vendor. Preserve exact
 record and startup-owner matching, actual-adapter SDK checks, input readiness,
@@ -715,3 +833,62 @@ their source, compiler and output hashes. `fsr_dense.hlsl` includes the shared
 compiler outputs fail the build. Keep these owned assets in the isolated SR
 candidate, with vendor runtimes external. Both CI platforms check the recipe;
 Windows native build success still requires separate Windows GPU qualification.
+
+## Game Pass FG guide compiler qualification - 16 October 2026
+
+The Windows candidate builds the FG guide with the pinned LLVM MinGW compiler
+and a freestanding Microsoft-ABI ReShade resource bridge. The standalone probe
+keeps its existing MSVC default; `--guide-mingw-cxx` explicitly selects the
+candidate route. Preserve the source guards, frame admission and ABI boundary.
+
+On RTX 4080, WinGDK, borderless 3840x2160 HDR10, DLSS Performance and FG/Reflex On,
+replacing only the current MSVC guide recovered 70-80 rendering FPS
+from the reported 50-60 FPS, with 150-160 presented FPS in Xbox Game Bar. The
+same-source MinGW guide retained HDR10, sampled two presents in 175 outcomes,
+reported no coordinator/marker error, and exited normally from the game menu.
+This isolates the guide build route; the internal cause of the performance
+difference is not established. This runtime check does not qualify AMD.
+
+The isolated GPU fixture preserved all ten red frames, resize and host/CPU
+callbacks, but its final explicit SDK shutdown timed out with both the MSVC
+control and MinGW candidate. Keep that failure visible separately from the
+successful normal game exit. The exact CI guide subsequently passed this same fixture, including SDK
+shutdown and host exit. The complete 1f8e166 package passed restart, mission
+travel, continued SR/FG/HDR gameplay and normal game exit; see
+`qualification/gdk-gamepass-test-20261016/validation.json`. The cause of the
+earlier local fixture timeout is not established.
+
+## Native NVIDIA Multi Frame Generation candidate
+
+The [NVIDIA MFG candidate](NVIDIA_MULTI_FRAME_GENERATION.md) adds capability-gated
+2x..6x and native Dynamic selection to both legacy/GDK and consolidated menu
+transport. Preserve the 48-byte configuration ABI, zero-default 2x preference,
+GDK field bounds and AMD Single-only pairing. Cached capability discovery runs
+on the presentation path and reuses the state observed after Present rather
+than adding repeated SDK state queries to the render loop. Multiplier changes
+use the existing one-frame suspension and exact-frame guide admission.
+Actual 3x..6x and Dynamic output remain unqualified until tested on RTX 50.
+
+
+## NVIDIA FG live toggle candidate
+
+User Off must use the existing eOff retain-resources path, not permanent feature
+release. Preserve fault retirement, owner-closing GPU/NGX shutdown, input identity
+and suspend/reset/resume guards. Valid legacy NVIDIA startup settings reserve the
+proxy even with Off; consolidated NVIDIA does so only for an eligible pairing.
+Do not change AMD startup ownership or the experimental observed-startup mirror.
+Retained NVIDIA presentation can cost memory and time while Off. Verify repeated
+On/Off, Off-startup/On, SR/HDR, mission travel and normal exit on Windows before
+claiming this behavior works; portable transition fixtures alone do not qualify it.
+
+
+## GDK save transport shutdown candidate
+
+Close the bridge's own provider/user handles and runtime binding on owned
+Unreal-window swapchain destruction before final DLL teardown. Preserve auxiliary
+window/resize refusal, stop/wake/join ordering, six-slot validation and final
+NT-termination guards. The retained-process stack was inside xgameruntime error
+reporting, not an SR/FG wait; earlier shared-SDK admission logs alone did not
+identify its cause. The early GDK cleanup passed one RTX 4080 / WinGDK exit
+with an explicit stopped receipt and no retained shipping process after SR/3x FG
+gameplay. Keep that bounded evidence separate from unsupported hardware.

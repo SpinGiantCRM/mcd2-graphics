@@ -253,6 +253,7 @@ def main():
     run(sys.executable, scripts / 'build_probe.py', '--sdk', sdk, '--sysroot', sysroot,
         '--runtime-archive', sdk_zip, '--output', probe, '--reshade-headers', reshade / 'include',
         '--early-bootstrap', '--guide-recon', '--dxc', out / 'dxc/bin/x64/dxc.exe',
+        '--guide-mingw-cxx', mingw,
         '--clang-cl', llvm / 'clang-cl.exe', '--lld-link', llvm / 'lld-link.exe')
     latency = out / 'latency'
     run(sys.executable, scripts / 'build_game_candidate.py', '--probe-output', probe,

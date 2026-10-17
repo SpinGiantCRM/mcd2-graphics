@@ -10,6 +10,11 @@
 #include <vector>
 using namespace mcd2::providers;
 int main(int argc,char** argv){
+ for(unsigned provider=0;provider<3;++provider)for(bool enabled:{false,true})for(bool eligible:{false,true}){
+  FgMenuProjection selection{42,provider,enabled,eligible,0};
+  const unsigned expected=eligible&&provider<2&&(enabled||provider==0)?provider+1:0;
+  assert(fgStartupOwner(selection)==expected);
+ }
  GraphicsIntent intent;intent.revision=42;intent.sr=SrProvider::AmdFsr;
  intent.srPreferences[1]={Quality::Custom,7100,7100};
  intent.hdr={true,420,203,167};
@@ -56,8 +61,21 @@ int main(int argc,char** argv){
  for(auto strategy:{FgStrategy::NativeMfg,FgStrategy::Hybrid}){
   intent.fgStrategy=strategy;intent.requestedMultiplier=3;
   assert(encodeGraphicsRecord(intent,bytes)&&decodeGraphicsRecord(bytes,record));
-  assert(projectFgMenu(record,unqualified)&&!unqualified.pairEligible);
+  assert(projectFgMenu(record,unqualified)&&unqualified.pairEligible==(strategy==FgStrategy::NativeMfg));
  }
+ for(unsigned multiplier=2;multiplier<=7;++multiplier){
+  intent.fgStrategy=FgStrategy::NativeMfg;intent.requestedMultiplier=multiplier;
+  assert(encodeGraphicsRecord(intent,bytes)&&decodeGraphicsRecord(bytes,record));
+  assert(projectFgMenu(record,unqualified)&&unqualified.pairEligible==(multiplier<=6));
+  assert(unqualified.frameMode==multiplier-2);
+ }
+ intent.fgStrategy=FgStrategy::Dynamic;intent.requestedMultiplier=2;
+ assert(encodeGraphicsRecord(intent,bytes)&&decodeGraphicsRecord(bytes,record));
+ assert(projectFgMenu(record,unqualified)&&unqualified.pairEligible&&unqualified.frameMode==5);
+ intent.fg=FgProvider::Amd;
+ assert(encodeGraphicsRecord(intent,bytes)&&decodeGraphicsRecord(bytes,record));
+ assert(projectFgMenu(record,unqualified)&&!unqualified.pairEligible);
+ intent.fg=FgProvider::Nvidia;
  intent.fgStrategy=FgStrategy::Single;intent.requestedMultiplier=2;
  intent.latency=LatencyProvider::RadeonAntiLag2;intent.latencyMode=LatencyMode::On;
  intent.fgEnabled=true;intent.fg=FgProvider::Nvidia;

@@ -2,6 +2,14 @@
 #include <cassert>
 #include <array>
 int main(){
+ std::array<char,mcd2_fg::viewFrameOffset+sizeof(uint32_t)+1> bytes{};uint32_t frame=99,expectedFrame=42;
+ assert(!mcd2_fg::view_frame(nullptr,bytes.size(),frame)&&frame==99);
+ assert(!mcd2_fg::view_frame(bytes.data(),mcd2_fg::viewFrameOffset+3,frame)&&frame==99);
+ assert(!mcd2_fg::view_frame(bytes.data(),bytes.size(),frame)&&frame==99);
+ std::memcpy(bytes.data()+1+mcd2_fg::viewFrameOffset,&expectedFrame,sizeof(expectedFrame));
+ assert(mcd2_fg::view_frame(bytes.data()+1,bytes.size()-1,frame)&&frame==42);
+ expectedFrame=UINT32_MAX;std::memcpy(bytes.data()+1+mcd2_fg::viewFrameOffset,&expectedFrame,sizeof(expectedFrame));
+ assert(!mcd2_fg::view_frame(bytes.data()+1,bytes.size()-1,frame)&&frame==42);
  std::array<float,632> v{};v[128]=2.41421356f;v[133]=4.29193522f;v[139]=1;v[142]=10;
  for(unsigned i=0;i<4;++i)v[544+i*5]=1;
  v[292+2]=1;v[296+1]=1;v[300]=1;v[576]=.0002f;v[577]=-.0004f;

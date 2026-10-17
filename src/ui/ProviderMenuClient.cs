@@ -22,7 +22,7 @@ public class ProviderMenuClient : USaveGame {
   for(int first=21;first<=27;first+=3)if(a.Word(first)<0 || a.Word(first)>5 ||
      !ScaleValid(a.Word(first+1)) || !ScaleValid(a.Word(first+2)))return false;
   if(a.W30<0 || a.W30>1 || a.W31<0 || a.W31>1 || a.W32<0 || a.W32>2 ||
-     a.W33<0 || a.W33>2 || a.W34<2 || a.W34>16 || (a.W33==0 && a.W34!=2) ||
+     a.W33<0 || a.W33>3 || a.W34<2 || a.W34>16 || (a.W33==0 && a.W34!=2) ||
      a.W35<0 || a.W35>3 || a.W36<0 || a.W36>2 || a.W37<0 || a.W37>1 ||
      a.W38<100 || a.W38>10000 || a.W38%10!=0 || a.W39<48 || a.W39>500 ||
      a.W40<48 || a.W40>500 || a.W17!=(a.W31==0?0:a.W32+1))return false;
@@ -77,8 +77,8 @@ public class ProviderMenuClient : USaveGame {
  }
  public bool SelectSr(int provider){if(provider<0 || provider>3)return false;return Edit(8,provider);}
  public bool MenuFgPairEligible(int sr,int fg,int strategy,int multiplier){
-  return strategy==0 && multiplier==2 && ((fg==0 && (sr==1 || sr==2)) ||
-   (fg==1 && (sr==0 || sr==1 || sr==2)));
+  return (fg==0 && (sr==1 || sr==2) && ((strategy==0 && multiplier==2) || (strategy==1 && multiplier>=2 && multiplier<=6) || strategy==3)) ||
+   (fg==1 && strategy==0 && multiplier==2 && (sr==0 || sr==1 || sr==2));
  }
  public bool SelectMenuSr(int provider){
   if(provider<0 || provider>2 || !Ready)return false;
@@ -109,7 +109,7 @@ public class ProviderMenuClient : USaveGame {
   return Edit(word+1,scale) && Edit(word+2,scale) && Edit(word,5);
  }
  public bool SelectFg(int provider,int strategy,int multiplier,bool enabled){
-  if(provider<0 || provider>2 || strategy<0 || strategy>2 || multiplier<2 || multiplier>16 ||
+  if(provider<0 || provider>2 || strategy<0 || strategy>3 || multiplier<2 || multiplier>16 ||
      (strategy==0 && multiplier!=2) || !Ready)return false;
   return Edit(20,provider) && Edit(21,strategy) && Edit(22,multiplier) && Edit(19,enabled?1:0);
  }

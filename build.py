@@ -32,7 +32,7 @@ for f in a.ngx_include.glob('nvsdk_ngx*.h'):(ngx/f.name).write_bytes(f.read_byte
 commands=[
  [a.clang_cxx,'--target=x86_64-pc-windows-msvc','-std=c++20','-O2','-fno-exceptions','-fno-rtti','-I'+str(ngx),'-c',str(native/'ngx_parameter_bridge.cpp'),'-o',str(o/'ngx_parameter_bridge.obj')],
  [a.clang_cxx,'--target=x86_64-pc-windows-msvc','-ffreestanding','-std=c++20','-O2','-fno-exceptions','-fno-rtti','-nostdinc++','-I'+str(native/'bridge-freestanding'),'-I'+str(inc),'-c',str(native/'reshade_public_bridge.cpp'),'-o',str(o/'reshade_public_bridge.obj')],
- [a.mingw_cxx,'-DMCD2_FSR_BRIDGE_SHA256=\"'+a.fsr_bridge_sha256+'\"','-DMCD2_ENABLE_DIAGNOSTICS='+('1' if a.developer_controls else '0'),'-std=c++20','-O2',*native_frame_guard(a.mingw_cxx),'-shared','-static','-I'+str(inc),'-I'+str(o),str(native/'observer.cpp'),str(o/'ngx_parameter_bridge.obj'),str(o/'reshade_public_bridge.obj'),'-o',str(o/'mcd2-graphics.addon64'),'-ld3d12','-ldxgi','-ld3dcompiler','-lole32','-luuid','-lbcrypt']
+ [a.mingw_cxx,'-DMCD2_FSR_BRIDGE_SHA256=\"'+a.fsr_bridge_sha256+'\"','-DMCD2_ENABLE_DIAGNOSTICS='+('1' if a.developer_controls else '0'),'-std=c++20','-O2',*native_frame_guard(a.mingw_cxx),'-shared','-static','-I'+str(inc),'-I'+str(o),str(native/'observer.cpp'),str(o/'ngx_parameter_bridge.obj'),str(o/'reshade_public_bridge.obj'),'-o',str(o/'mcd2-graphics.addon64'),'-ld3d12','-ldxgi','-ld3dcompiler','-lole32','-luuid','-lbcrypt','-ladvapi32']
 ]
 for cmd in commands:subprocess.run(cmd,check=True)
 if a.native_only:
