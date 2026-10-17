@@ -14,9 +14,12 @@ source hashes, explicit trial receipts and both-platform build-contract checks.
 The dev.12 UI passed bounded Linux/NVIDIA startup, Video-menu and gameplay checks
 with Blueprint Loader 2.3 and 2.5. All six FSR quality selections activated with
 AMD FG; live Off/On and pause suspension also worked. These checks do not qualify
-Windows/Radeon, physical controllers or long sessions. A warmed Off-recovery
-comparison narrowly missed the throughput limit, so performance qualification
-remains incomplete.
+Windows/Radeon, physical controllers or long sessions. The complete dev.14
+candidate also passed bounded Loader 2.5 startup, all six FSR presets with AMD FG,
+pause/resume, display-confirmation preservation and normal exits with native and
+AMD presenters on Linux/NVIDIA. Its stationary Off-recovery comparison met the
+1% throughput and frame-time limits across five switching cycles. This does not
+complete FG-On collector calibration or the wider benchmark qualification.
 Historical release receipts and binaries remain unchanged; select a new complete
 native artifact before installer qualification after further native changes.
 

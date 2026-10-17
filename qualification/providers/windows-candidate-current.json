@@ -70,5 +70,5 @@
     "crtVersion": "14.44.35207",
     "windowsSDK": "10.0.26100.0"
   },
-  "linuxBoundedRuntimeChecks": "Pending on this exact artifact; complete Windows/Radeon qualification remains required."
+  "linuxBoundedRuntimeChecks": "Passed startup, six FSR presets with AMD FG, pause/resume, display confirmation preservation, five native-Off recovery cycles and normal native/AMD presenter exits on Linux/NVIDIA with Loader 2.5. Windows/Radeon and full benchmark qualification remain pending."
 }
