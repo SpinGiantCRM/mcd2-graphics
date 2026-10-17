@@ -19,6 +19,14 @@ are limited by `DLSSGState::numFramesToGenerateMax`. Dynamic requires
 not an application loop that duplicates presents or a replacement for Reflex.
 See the [NVIDIA integration guide](https://github.com/NVIDIA-RTX/Streamline/blob/v2.14.1/docs/ProgrammingGuideDLSS_G.md#63-enabling-dynamic-multi-frame-generation).
 
+## Prerelease download
+
+The [17 October NVIDIA MFG prerelease](https://github.com/maicol07/mcd2-graphics/releases/tag/nvidia-mfg-test-20261017)
+provides the tested 312d028 payload, checksums and a source snapshot. Follow
+[installation and restore instructions](NVIDIA_MFG_TESTING.md), also included as
+INSTALL.md in the ZIP. External dependencies remain separate; Dynamic stays
+experimental and this release does not change the PR's draft status.
+
 ## Persistence and admission
 
 Legacy FG settings gain an optional `FrameMode` integer: 0..4 select 2x..6x,
