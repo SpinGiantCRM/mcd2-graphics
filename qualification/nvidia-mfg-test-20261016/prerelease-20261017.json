@@ -20,5 +20,7 @@
     "Dynamic adaptive behavior unqualified",
     "Native RTX 50 untested",
     "One normal exit verified after GDK shutdown fix"
-  ]
+  ],
+  "published": true,
+  "downloadVerification": "all four checksum entries and five GitHub server asset digests match downloaded files; all 17 payload files remain byte-identical to the tested package"
 }
