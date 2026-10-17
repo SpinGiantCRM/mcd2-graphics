@@ -1,11 +1,22 @@
+The AMD presenter status clears a stale restart requirement only after a
+current, available, fault-free, non-retired AMD Off request has reached the native
+presenter and the bridge confirms switching remains available. Preserve the
+existing On admission and NVIDIA permanent-retirement rules. The shared
+projection fixture and source checks cover this distinction on both CI platforms;
+the status correction still requires a rebuilt artifact and runtime checks.
+
 The UI build uses pinned NeoRune 1.0.0 and .NET SDK 10.0.402/reference pack
 10.0.13. Preserve SDK-generated versioned ModInfo and its discovery header;
 regenerating it with the older manual builder would erase Mods-tab settings.
 Keep the isolated CLI build, complete source/payload receipts, CRLF-normalized
 source hashes, explicit trial receipts and both-platform build-contract checks.
-The generated UI has not yet been qualified in the game or on Windows. Historical
-release receipts and binaries remain unchanged; select a new complete native
-artifact before installer qualification.
+The dev.12 UI passed bounded Linux/NVIDIA startup, Video-menu and gameplay checks
+with Blueprint Loader 2.3 and 2.5. All six FSR quality selections activated with
+AMD FG; live Off/On and pause suspension also worked. These checks do not qualify
+Windows/Radeon, physical controllers or long sessions. Initial Off recovery still
+misses the frame-time limit, so performance qualification remains incomplete.
+Historical release receipts and binaries remain unchanged; select a new complete
+native artifact before installer qualification after further native changes.
 
 The [native HDR Off correction](HDR_OFF_ACKNOWLEDGEMENT_2026-10-14.md) allows
 the UI to disable native HDR without a loaded RenoDX addon. Preserve missing-addon

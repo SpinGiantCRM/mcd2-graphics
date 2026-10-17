@@ -12,8 +12,8 @@
   "vendorRuntimeBundled": false,
   "windowsRadeonRuntimeQualified": false,
   "linuxFullArtifactRuntimeQualified": false,
-  "selectionNeedsRebuild": false,
-  "sourceChangedAfterSelection": false,
+  "selectionNeedsRebuild": true,
+  "sourceChangedAfterSelection": true,
   "publishedReleaseChanged": false,
   "receipt": {
     "sourceCommit": "09cac189bfb5f89ed78765b5a5a902048f773727",
@@ -69,5 +69,6 @@
     "vendorRuntimeBundled": false,
     "crtVersion": "14.44.35207",
     "windowsSDK": "10.0.26100.0"
-  }
+  },
+  "sourceChangeReason": "AMD native-Off restart-status correction requires a new complete native build."
 }

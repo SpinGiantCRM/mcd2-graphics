@@ -48,6 +48,8 @@ void poll(a::device*device,const std::filesystem::path&policy,unsigned active){
    mcd2::providers::fgMenuMatches(selection,intent.settingsRevision,intent.provider,intent.mode);
   presenterSettingsRevision=currentRequest?record.intent.revision:0;
   restartRequired=mcd2::providers::fgMenuRestartRequired(available,intent.mode!=0,startupOwner,intent.provider,retired.load())?1:0;
+  if(mcd2::providers::fgMenuNativeOffRecovered(currentRequest&&intent.session==session,available,intent.mode!=0,
+      intent.provider,presenterRoute,presenterCanSwitch,fault.load(),retired.load()))restartRequired=0;
   wanted=currentRequest&&selection.pairEligible&&available&&intent.mode&&intent.ready&&intent.session==session&&
    mcd2::providers::fgOwnerMatches(startupOwner,intent.provider)&&!fault&&!retired;
   publish(active,false);return;

@@ -3,6 +3,14 @@ import unittest
 
 
 class SharedRestartChecks(unittest.TestCase):
+    def test_completed_amd_off_handoff_only_clears_the_restart_status(self):
+        source = Path(__file__).with_name('fg_controls.hpp').read_text()
+        shared = source.split('if(shared){', 1)[1].split('publish(active,false);return;', 1)[0]
+        self.assertIn('fgMenuNativeOffRecovered(currentRequest&&intent.session==session,available,intent.mode!=0,', shared)
+        self.assertIn('intent.provider,presenterRoute,presenterCanSwitch,fault.load(),retired.load()))restartRequired=0;', shared)
+        self.assertLess(shared.index('fgMenuRestartRequired('), shared.index('fgMenuNativeOffRecovered('))
+        self.assertLess(shared.index('fgMenuNativeOffRecovered('), shared.index('wanted=currentRequest'))
+
     def test_shared_status_keeps_permanent_retirement_restart_requirement(self):
         source = Path(__file__).with_name('fg_controls.hpp').read_text()
         shared = source.split('if(shared){', 1)[1].split('publish(active,false);return;', 1)[0]
