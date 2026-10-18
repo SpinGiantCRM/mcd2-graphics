@@ -24,6 +24,7 @@ jobs:
         run: python3 -m unittest discover -s tests -p "test_installer_*.py" -v
       - name: Native build recipe regressions
         run: |
+          python3 -m unittest discover -s tests -p "test_ci_contracts.py" -v
           python3 -m unittest discover -s tests -p "test_build_toolchain.py" -v
           python3 -m unittest discover -s tests -p "test_amd_latency_build.py" -v
           python3 -m unittest discover -s tests -p "test_process_exit.py" -v
@@ -111,12 +112,16 @@ jobs:
     name: Windows installer checks
     runs-on: windows-latest
     timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Installer regressions
         run: python -m unittest discover -s tests -p "test_installer_*.py" -v
       - name: Native build recipe regressions
         run: |
+          python -m unittest discover -s tests -p "test_ci_contracts.py" -v
           python -m unittest discover -s tests -p "test_build_toolchain.py" -v
           python -m unittest discover -s tests -p "test_amd_latency_build.py" -v
           python -m unittest discover -s tests -p "test_process_exit.py" -v
