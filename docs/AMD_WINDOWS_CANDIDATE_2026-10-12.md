@@ -1,85 +1,96 @@
 # Windows/Radeon development qualification
 
-**Rebuild pending:** the [native HDR Off correction](HDR_OFF_ACKNOWLEDGEMENT_2026-10-14.md)
-changes runtime source after the dev.10 selection. The selector now marks that
-artifact stale; installer CI skips assembly until a new source-matched artifact
-is selected. Do not use dev.10 to qualify this correction. The dev.10 inputs below
-remain historical evidence, not the next testing selection.
+## Current candidate: 0.4.0-amd.dev.15
 
-**Selection update, 14 October:** use the complete **0.4.0-amd.dev.10**
-[candidate receipt](../qualification/providers/windows-candidate-current.json).
-It includes the Anti-Lag shutdown, FSR owned-resource and shared gameplay-gate
-corrections, including the real rebuilt UI. Earlier dev.8/dev.9 artifacts do not.
+Use the [current candidate receipt](../qualification/providers/windows-candidate-current.json).
+The selected native artifact includes the approved advanced settings page,
+independent latency controls, sharpness, model/version selection and current
+provider integration. All 46 artifact members were hash-verified. The CI merge
+commit and implementation head have identical source trees.
 
-Native inputs:
-[run 38497329826 / artifact 11863879034](https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/38497329826/artifacts/11863879034).
-Archive SHA-256 `0146aa19f2e71c87dd2f303f7b0526a188325f6c8a8a66fe6aa24d61d5936751`.
-Test merge `87078dbab5f3658267300796046f709ede96d3ef` matches implementation
-`9483952ec9896633c58685493e0c101757c004a2` by tree. All 44 artifact members were
-verified. The separate framework SHA-256 is
-`1b5d71669299aa06dae2b27bf51f554fb59e2cd2f6a406a7447d59caf385c71b`.
-Use its accompanying dependency lock; do not inherit earlier binary results.
-Visible installer folders now match this selection:
-[run 38502849822 / artifact 11865709322](https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/38502849822/artifacts/11865709322),
-archive SHA-256 `d6e50cd6058759fcb07db7883d3bd5bb3a5b9c1224314cc34b2f7fb967d0f51f`.
-The [file verification receipt](../qualification/providers/amd-dev10-installers-2026-10-14.json)
-records both visible folders, their identical manifest/dependency-lock bytes and
-all 17 own payload files matching the game-tested selection. They use no embedded
-payload archive or self-extraction; framework/vendor runtimes remain separate.
-This verifies packaging, not installer GUI transactions or Windows execution.
+- Implementation: `7c251b7a66846f909d7f50617dc7bfc48a086636`.
+- CI source: `98f1cec1c7f4bea677a297c86c4b69b07b6ac749`.
+- Native inputs: [run 39097048611 / artifact 12124244671](https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/39097048611/artifacts/12124244671).
+- Native archive SHA-256: `2f9051ee3a34a58ed55a1b85794469810130afd0a4411a707ea0f72ace144f3b`.
 
-**Not cleared for qualification or release:** [dev.10 Linux checks](AMD_DEV10_LINUX_2026-10-14.md)
-passed all six FSR presets with each FG route, AMD transitions/resize and NVIDIA
-DLSS/DLAA checks. Two normal quits returned 0; the third returned `0xc0000409`
-after NVIDIA retirement/re-enable refusal. Successful SDK cleanup does not clear
-that process failure. Its cause remains unresolved. Earlier failure records are
-preserved. Native Windows/Radeon and actual Anti-Lag driver results also remain
-outstanding; the AMD laptop is currently unavailable.
+Installer folders must contain this candidate's manifest and dependency lock;
+verify their hashes and all 17 owned payload files against the selected receipt.
+Do not use an older dev.10/dev.14 installer to qualify this candidate. Framework
+and vendor runtimes remain separate dependencies. CI success establishes build
+checks, not GPU activation, correct images or clean process exits.
+
+The in-game metadata currently identifies the preview UI as 0.3.0-preview.1;
+the installer/assembly receipt identifies dev.15. Align the public release
+version and freeze its final hashes before release qualification is closed.
+Earlier qualification reports remain historical; their failures are not erased.
 
 ## Preparation
 
-1. Close the game. Use verified Steam build 25754144, shipping SHA-256
+1. Close the game. Use Steam build 25754144, shipping SHA-256
    `3a8703406fd50520f83c4f70a0212c000cb3b584ef28eb38032902230c01ebdd`.
 2. Back up replaced mod files and only mod settings/runtime slots and authority.
-   Preserve other mods and player/account saves. Use the visible installer folder.
+   Preserve other mods and player/account saves. Extract the complete visible
+   installer folder; do not run the EXE out of the ZIP.
 3. Select external dependencies matching the accompanying candidate lock.
-   The exact artifact ReShade remains separate; no vendor DLL or probe is payload.
-   Loader 2.3 is recognised under the existing 2.0+ API policy. No popup API is used.
-4. Record exact installed hashes, actual rendering GPU/LUID, driver and OS.
-   Unknown executables and SDK/runtime versions must fail their normal gates.
+   For ReShade, use `experimental-reshade/ReShade64.dll` from the exact native
+   artifact; the installer places it as `d3d12.asi`. Stock ReShade is not a
+   substitute for the required interfaces. Do not place it over the mod's
+   `dxgi.dll` bootstrap.
+4. Use a complete recognized Blueprint Loader set. The 2.0+ API minimum remains;
+   no popup API is required. Record the actual Loader release and all files.
+5. Record installed payload/dependency hashes, GPU, driver, OS and game build.
+   Executable identity and runtime/hardware admission checks remain mandatory.
 
-## Required runs
+## Pre-release checks
 
-- **Native control:** 100% Native, FG Off, both vendor low-latency modes Off.
-  Verify ordinary temporal output, source scale and stable native limiting.
-- **FSR:** Native AA, Quality, Balanced, Performance, Ultra Performance, Custom.
-  Require actual reconstruction, correct scale and no stale-frame/colour damage.
-- **AMD FG:** independent provider selection plus restart, Off/On, active real
-  and generated counts, no errors, paused/loading generation stopped, resumed
-  fresh guides. Repeat with FSR, Native and NVIDIA SR where supported.
-- **Anti-Lag 2:** require actual Radeon driver/API eligibility. Off/On in the
-  Video menu with FG Off and AMD FG On, matching revision, correct pre-input
-  timing and FG metadata. Measure latency independently; a toggled row is not
-  proof of activation or benefit. On an unsupported adapter it must stay hidden.
-- **NVIDIA routes:** test only on a supporting NVIDIA GPU. FSR + NVIDIA FG
-  must retain FG through all FSR presets; DLSS/DLAA + NVIDIA FG must remain
-  functional. AMD laptops qualify refusal/fallback, not active NVIDIA features.
-- **Lifecycle:** main/pause menus, hub/level travel, cuts/death/respawn,
-  pause/resume, source/output resolution and window changes. Provider owner
-  changes require restart; no two presenter proxies may be active.
-- **HDR/SDR output:** with RenoDX absent and the native setting initially HDR On,
-  request HDR Off. Require matching HDR revision, restart flag 0, native HDR Off
-  and actual SDR swapchain metadata before recording SDR benchmarks. Missing-addon
-  HDR On must remain refused. Reinstall the pinned addon and check the existing
-  HDR calibration/restart sequence; never qualify colour space from a preference.
-- **Shutdown:** hold the shipping process handle through three normal quits.
-  Require code 0 and completed owning presenter/shared SDK retirement, not
-  merely a closed window. Preserve SDK errors and delayed exits as failures.
-- **Installer:** fresh install, repair, modified-file refusal, uninstall/reinstall,
-  external-dependency retention, and unchanged player/account/other-mod files.
+Record Pass, Fail or Unavailable for each check. Include the exact candidate
+and effective settings. Stop on a new unexplained crash, hang or image corruption.
 
-Report requested and effective routes separately. Keep SDK real/generated
-counts separate from displayed FPS and input latency. Preserve raw diagnostics
-locally; share only sanitised numeric results and failures. UI metadata currently
-reports 0.3.0-preview.1 despite the development installer version; align it before
-any public release. Windows active-provider/driver results are still required.
+- **Native control:** Native, 100% scale, FG Off, vendor low latency Off. Verify
+  ordinary temporal output and stable limiting.
+- **FSR SR:** Native AA, Quality, Balanced, Performance, Ultra Performance and
+  Custom. Confirm successful evaluations and actual render/output dimensions.
+  Exercise analytical 3.1 and official 4.1 on a compatible Radeon/driver. A saved
+  version or loaded DLL does not establish the selected implementation.
+- **AMD FG:** Native and FSR inputs, On/Off, pause/resume and travel. Require
+  advancing successful generation counters, fresh guides and no SDK errors.
+  Check analytical 3.1; test ML 4.0 only where the device actually supports it.
+- **FG Off recovery:** compare warmed fresh Off with returned Off in the same
+  scene and settings, repeat the cycle, and confirm generation stops. Retained
+  memory is not proof of continuing work. Investigate persistent throughput or
+  frame-time loss; this short regression check remains before release.
+- **Anti-Lag 2:** prove actual Radeon driver/API eligibility and active timing
+  counters. Test independently with FG Off, then with AMD FG. A visible toggle
+  is not activation proof. Unsupported hardware must not report it active.
+- **NVIDIA routes:** on suitable NVIDIA hardware, check DLSS/DLAA, independent
+  Reflex and both SR/FG pairings. An AMD laptop qualifies refusal/fallback only.
+  Native Windows preset C/profile restoration requires a Windows NVIDIA system;
+  never claim that an AMD or Proton run qualified that driver-profile path.
+- **Advanced Mods page:** all three tabs and exclusive glow, mouse/keyboard
+  navigation, saved overrides, Auto/reset, relaunch, and independent FSR SR/FG
+  choices. Record physical-controller checks separately if unavailable.
+- **Diagnostics:** details stay within Diagnostics; gameplay overlay follows
+  fresh successful activity and clears on pause, disabled features or stale data.
+  Separate requested presets, implementation versions and actual activity.
+- **Sharpness:** 0–100% below Render Scale, DLSS and FSR, reset/relaunch,
+  Native fallback and preservation of a later external value change.
+- **Lifecycle/output:** hub/level travel, pause/resume, source/output resolution,
+  window changes and SDR/HDR. Require actual swapchain colour space/format;
+  preferences alone do not qualify HDR or SDR. Preserve display confirmation.
+- **Shutdown:** hold the shipping process handle through three ordinary quits.
+  Require exit code 0, completed presenter/shared-runtime retirement, and no
+  unexplained delayed exit. A closed window is insufficient.
+- **Installer:** fresh install, repair, upgrade, verify, modified-file refusal,
+  uninstall/reinstall and preserved external dependencies/player/other-mod files.
+
+## Release and measurements
+
+Complete the functional/platform and installer checks before releasing. The full
+performance and image benchmark suite runs **after the mod release**, with
+results published separately. Do not delay release for the extensive matrix or
+publish old measurements as results for this candidate.
+
+Do not infer display FPS by multiplying an overlay number. SDK generation counts,
+rendered FPS and physical presentation/latency are different measurements.
+Keep raw logs and captures private; share sanitized results and reproducible
+failures. Preserve earlier failed evidence and its affected scope.

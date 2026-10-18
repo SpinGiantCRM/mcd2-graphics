@@ -85,7 +85,13 @@ Other GPUs show **4.1 — INT8 (Experimental)**, and Auto uses 3.1.5. Their expl
 4.1 choice uses the separately acquired
 [portable 4.1.1r11 build](https://github.com/daniel-h-0/bc250-fsr4-fork/tree/v4/dll).
 This community implementation is not bundled in installer archives. Keep its
-source, notices and exact external runtime identity. Unknown devices are treated
+source, notices and exact external runtime identity. To try the pinned community
+build, obtain `amd_fidelityfx_upscaler_dx12.dll` externally and place it under
+`Dungeons/Binaries/Win64/MCD2Graphics/fsr/portable/` while the game is closed.
+Keep the accompanying notices. The pinned DLL SHA-256 is
+`8192ea97620f8e6407bff346bf905f0d555ff73d89fe14616eb1fa5e41ab3175`.
+Keep the official runtime in the parent `fsr/` folder. Select explicit 4.1 and
+restart; a missing or rejected portable runtime does not silently select 3.1. Unknown devices are treated
 conservatively. Explicit implementation choices never silently substitute 3.1.
 Restart after changing versions. See
 [AMD's hardware requirements](https://gpuopen.com/learn/amd-fsr-sdk-2-3-blog/).
