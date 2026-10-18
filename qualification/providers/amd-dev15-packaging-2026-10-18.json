@@ -110,5 +110,26 @@
       "cleanupCompleted": true,
       "generationRetained": false
     }
+  },
+  "longerErrorOnlySteamReplay": {
+    "route": "Original Steam launch, unchanged installed dev15",
+    "debuggerAttached": false,
+    "relayEnabled": false,
+    "heldShippingProcessExitCode": 0,
+    "observedProcessSeconds": 770.211,
+    "advancingFgObservedSeconds": 520.0,
+    "longestConsecutiveObservedFgSeconds": 370.0,
+    "samplingIntervalSeconds": 5,
+    "successfulTwoPresentSamples": 718,
+    "sdkErrorSamples": 0,
+    "briefSuspensionAndRecoveryObserved": true,
+    "continuousEightMinuteFgClaim": false,
+    "fatalExceptionsLogged": 0,
+    "temporarySettingsRestored": true,
+    "originalFailureReproduced": false,
+    "establishesFix": false,
+    "traceRaceFixInstalled": false,
+    "performanceBenchmark": false,
+    "windowsRadeonQualified": false
   }
 }
