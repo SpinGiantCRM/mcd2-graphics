@@ -5,8 +5,12 @@ save keys, independent SR/FG choices, keyboard/controller navigation and reset.
 The advanced page leases only its own Loader page padding to include the header
 and master toggle in the left column. Restore padding only while owned, retire
 the sibling help pane on exit, and preserve the structure/active-page checks.
-Its native category strip must use exclusive selection and leave Q/E with the
-main game tabs. This UI path still requires native Windows menu qualification.
+Its category bar borrows only the initialized native Settings strip’s display
+brush and owns its exclusive button group. Do not instantiate the native strip
+controller or call visibility methods that assume optional child bindings;
+standalone creation left its background null and caused a GameThread access
+violation. Preserve null-checked style lookup and leave Q/E with the main game
+tabs. This UI path still requires native Windows menu qualification.
 FSR SR create_v2 explicitly distinguishes analytical 3.1.5 from the separately
 pinned portable INT8 4.1.1r11 DLL and official 4.1.1. Auto uses official 4.1.1
 only on recognized Radeon RX 7000/9000 desktop hardware; other devices retain

@@ -1,6 +1,7 @@
 // MIT licensed reusable helpers for Blueprint Loader custom settings widgets.
 // References the game's existing widgets; no game assets are redistributed.
 using NeoRune;
+using System.Collections.Generic;
 using UE.CoreUObject;
 using UE.UMG;
 using UE.GameSettings;
@@ -13,14 +14,21 @@ public static class NativeSettingsWidgets {
   if(tab.ButtonTemplate!=null){tab.ButtonTemplate.bIsButtonTextCentered=true;tab.ButtonTemplate.PreConstruct(false);}
   SetText(tab.TextBlockWidget,title);return tab;
  }
- // Keep the native strip's gradient, border and layout instead of rebuilding
- // its background with a flat colour. Q/E remain owned by the game's main tabs.
- public static UE.SpicewoodUI.USpicewoodTabListWidget? CategoryStrip(UObject owner){
-  var strip=Ui.GameWidget(owner,"/OreUI/UI/Widget/TabList/W_SpicewoodTabList.W_SpicewoodTabList_C") as UE.SpicewoodUI.USpicewoodTabListWidget;
-  if(strip==null)return null;strip.SetListeningForInput(false);strip.SetTabBackgroundVisibility(true);strip.SetTabActionPromptVisibility(false);
-  if(strip.PreviousTabAction!=null)strip.PreviousTabAction.SetVisibility(ESlateVisibility.Collapsed);
-  if(strip.NextTabAction!=null)strip.NextTabAction.SetVisibility(ESlateVisibility.Collapsed);
-  if(strip.TabButtonBox!=null)strip.TabButtonBox.ClearChildren();return strip;
+ // A native strip controller expects screen-specific bindings and registration.
+ // Borrow only its display brush from an initialized Settings screen. Do not
+ // instantiate the controller or call its optional-child visibility methods.
+ public static bool CopyCategoryStripStyle(UObject owner,UImage? target){
+  if(target==null)return false;
+  UWidgetBlueprintLibrary.GetAllWidgetsOfClass(owner,out List<UUserWidget> screens,Unreal.ClassOf<UE.SpicewoodSettings.Spicewood.UI.SettingsScreen.W_SettingsScreen_Activatable.UW_SettingsScreen_Activatable_C>(),false);
+  foreach(var screen in screens){if(!screen.IsVisible()||screen.WidgetTree==null)continue;var source=FindCategoryStripImage(screen.WidgetTree.RootWidget,0);if(source==null||source.Brush.ResourceObject==null)continue;target.SetBrush(source.Brush);target.SetColorAndOpacity(source.ColorAndOpacity);target.SetVisibility(ESlateVisibility.HitTestInvisible);return true;}
+  return false;
+ }
+ public static UImage? FindCategoryStripImage(UWidget? widget,int depth){
+  if(widget==null||depth>32)return null;
+  var strip=widget as UE.SpicewoodUI.USpicewoodTabListWidget;if(strip!=null&&strip.TabButtonBoxBackground!=null)return strip.TabButtonBoxBackground;
+  var nested=widget as UUserWidget;if(nested!=null&&nested.WidgetTree!=null&&nested.WidgetTree.RootWidget!=widget){var image=FindCategoryStripImage(nested.WidgetTree.RootWidget,depth+1);if(image!=null)return image;}
+  var panel=widget as UPanelWidget;if(panel!=null)for(int i=0;i<panel.GetChildrenCount();i++){var image=FindCategoryStripImage(panel.GetChildAt(i),depth+1);if(image!=null)return image;}
+  return null;
  }
  // The frame is owned by W_SettingsPanel, not W_SettingsDetailView. Reparent
  // only the newly created shell's images; never touch a live game settings page.

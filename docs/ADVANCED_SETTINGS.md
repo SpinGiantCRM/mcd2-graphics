@@ -2,7 +2,9 @@
 
 Open **Mods → MCD2 Graphics → Settings** for model overrides and runtime
 information. The page has **Upscaling**, **Frame Generation** and **Diagnostics**
-tabs, using the game’s top-page tab strip, including its gradient and borders.
+tabs, using native top-page buttons and the initialized Settings strip’s
+gradient/border brush. The mod owns the exclusive selection group; it does not
+instantiate a screen-specific tab controller or bind the main Q/E actions.
 The mod title, description, master toggle and rows occupy the left two thirds;
 the native framed help pane occupies the right third from the top of the page.
 Category selection uses a single native button group and clears on page exit.

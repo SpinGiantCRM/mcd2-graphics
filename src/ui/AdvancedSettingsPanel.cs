@@ -14,7 +14,7 @@ using UE.CommonUI;
 public class AdvancedSettingsPanel : ModWidget, IModResettable {
  public ModActor? Manager;public UVerticalBox? Controls;
  public UHorizontalBox? Body;public UHorizontalBoxSlot? LeftSlot;public UOverlay? HelpPane;
- public UE.SpicewoodUI.USpicewoodTabListWidget? TabStrip;public UCommonButtonGroupBase? TabGroup;
+ public UImage? TabBackground;public bool TabStyleApplied;public UCommonButtonGroupBase? TabGroup;
  public UE.Game.Mods.BlueprintLoader.W_ModsTabContent.UW_ModsTabContent_C? LoaderPage;
  public UPanelSlot? PageSlot;public UOverlaySlot? HelpRootSlot;public UWidget? LeasedPage;
  public FMargin OriginalPagePadding,OwnedPagePadding;public bool LayoutMounted,LayoutYielded,LayoutShapeLogged;public int LayoutBindAttempts;
@@ -23,12 +23,12 @@ public class AdvancedSettingsPanel : ModWidget, IModResettable {
  public AdvancedInfoWidget? Details;public UGameSettingDetailView? NativeHelp;public List<UAS_SpicewoodButtonTabAction> Tabs=new List<UAS_SpicewoodButtonTabAction>();
  protected override UWidget? Build(UWidgetTree tree){
   var column=Ui.Column(tree);if(column==null)return null;
-  var left=Ui.Column(tree);Controls=Ui.Column(tree);TabStrip=NativeSettingsWidgets.CategoryStrip(this);
-  if(TabStrip!=null&&TabStrip.TabButtonBox!=null){
-   TabGroup=TabStrip.TabButtonGroup;if(TabGroup==null){TabGroup=UGameplayStatics.SpawnObject(Unreal.ClassOf<UCommonButtonGroupBase>(),this) as UCommonButtonGroupBase;TabStrip.TabButtonGroup=TabGroup;}
-   if(TabGroup!=null)TabGroup.SetSelectionRequired(true);
-   AddTab(TabStrip.TabButtonBox,"UPSCALING");AddTab(TabStrip.TabButtonBox,"FRAME GENERATION");AddTab(TabStrip.TabButtonBox,"DIAGNOSTICS");
-   if(left!=null)left.AddChild(TabStrip);
+  var left=Ui.Column(tree);Controls=Ui.Column(tree);var tabs=Ui.Row(tree);
+  TabGroup=UGameplayStatics.SpawnObject(Unreal.ClassOf<UCommonButtonGroupBase>(),this) as UCommonButtonGroupBase;if(TabGroup!=null)TabGroup.SetSelectionRequired(true);
+  if(tabs!=null){AddTab(tabs,"UPSCALING");AddTab(tabs,"FRAME GENERATION");AddTab(tabs,"DIAGNOSTICS");
+   var bar=UGameplayStatics.SpawnObject(Unreal.ClassOf<UOverlay>(),tree) as UOverlay;TabBackground=UGameplayStatics.SpawnObject(Unreal.ClassOf<UImage>(),tree) as UImage;
+   if(bar!=null){if(TabBackground!=null){TabBackground.SetVisibility(ESlateVisibility.Collapsed);var bg=bar.AddChildToOverlay(TabBackground);if(bg!=null){bg.SetHorizontalAlignment(EHorizontalAlignment.HAlign_Fill);bg.SetVerticalAlignment(EVerticalAlignment.VAlign_Fill);}}
+    var content=bar.AddChildToOverlay(tabs);if(content!=null){content.SetHorizontalAlignment(EHorizontalAlignment.HAlign_Fill);content.SetPadding(Ui.Margin(8));}if(left!=null)left.AddChild(bar);}
   }
   if(left!=null&&Controls!=null)left.AddChild(Controls);
   HelpShell=Ui.GameWidget(this,"/SpicewoodSettings/Spicewood/UI/SettingsScreen/W_SettingsPanel.W_SettingsPanel_C") as UE.SpicewoodSettings.Spicewood.UI.SettingsScreen.W_SettingsPanel.UW_SettingsPanel_C;
@@ -40,14 +40,14 @@ public class AdvancedSettingsPanel : ModWidget, IModResettable {
    column.AddChild(Body);}
   return column;
  }
- void AddTab(UScrollBox parent,string title){
+ void AddTab(UHorizontalBox parent,string title){
   var tab=NativeSettingsWidgets.CategoryTab(this,title);if(tab==null)return;
-  tab.SetIsSelectable(true);var slot=parent.AddChild(tab) as UScrollBoxSlot;if(slot!=null)slot.SetPadding(Ui.Margin(4));Tabs.Add(tab);if(TabGroup!=null)TabGroup.AddWidget(tab);
+  tab.SetIsSelectable(true);var slot=parent.AddChildToHorizontalBox(tab);if(slot!=null)slot.SetPadding(Ui.Margin(4));Tabs.Add(tab);if(TabGroup!=null)TabGroup.AddWidget(tab);
  }
  public void TabClicked(UCommonButtonBase button){for(int i=0;i<Tabs.Count;i++)if(Tabs[i]==button){Category=i;Populate();return;}}
  public override void Construct(){UGameplayStatics.GetAllActorsOfClass(this,Unreal.ClassOf<ModActor>(),out List<AActor> actors);if(actors.Count>0)Manager=actors[0] as ModActor;if(Manager!=null)Manager.DiagnosticObservers++;foreach(var tab in Tabs)tab.OnButtonBaseClicked+=TabClicked;
   BindLoaderPage();
-  if(TabStrip!=null)TabStrip.SetListeningForInput(false);Populate();Timer.Start(this,"Refresh",0.5f,true);Timer.Start(this,"LayoutRefresh",0.1f,true);}
+  ApplyTabStyle();Populate();Timer.Start(this,"Refresh",0.5f,true);Timer.Start(this,"LayoutRefresh",0.1f,true);}
  public override void Destruct(){Timer.Stop(this,"LayoutRefresh");RestorePageLayout();LoaderPage=null;LayoutBindAttempts=0;LayoutYielded=false;ClearTabs();Timer.Stop(this,"Refresh");Rows.Clear();if(Manager!=null&&Manager.DiagnosticObservers>0)Manager.DiagnosticObservers--;foreach(var tab in Tabs)tab.OnButtonBaseClicked-=TabClicked;Manager=null;}
  public void Upscaling(){Category=0;Populate();}public void FrameGeneration(){Category=1;Populate();}public void Diagnostics(){Category=2;Populate();}
  public void Populate(){
@@ -59,7 +59,8 @@ public class AdvancedSettingsPanel : ModWidget, IModResettable {
  void Add(int setting){if(Controls==null)return;var row=Ui.Create(this,Unreal.ClassOf<AdvancedSettingRow>()) as AdvancedSettingRow;if(row==null)return;row.Panel=this;row.Setting=setting;Rows.Add(row);Controls.AddChild(row);row.Refresh();}
  public void ClearTabs(){if(TabGroup!=null){TabGroup.SetSelectionRequired(false);TabGroup.DeselectAll();}foreach(var tab in Tabs)tab.ClearSelection();}
  public void SelectCategory(){if(TabGroup!=null)TabGroup.SetSelectionRequired(true);for(int i=0;i<Tabs.Count;i++)if(i!=Category)Tabs[i].ClearSelection();if(TabGroup!=null)TabGroup.SelectButtonAtIndex(Category,false);else if(Category>=0&&Category<Tabs.Count)Tabs[Category].SetIsSelected(true,false);}
- public void Refresh(){foreach(var row in Rows)row.Refresh();ShowHelp(Selected);}
+ public void ApplyTabStyle(){if(!TabStyleApplied)TabStyleApplied=NativeSettingsWidgets.CopyCategoryStripStyle(this,TabBackground);}
+ public void Refresh(){ApplyTabStyle();foreach(var row in Rows)row.Refresh();ShowHelp(Selected);}
  // A bounded, reversible layout lease on this mod's Loader page. Header widgets
  // and the master toggle stay Loader-owned; only their page slot is narrowed.
  public bool DescendantOf(UWidget? widget,UWidget? ancestor){for(int i=0;widget!=null&&i<64;i++){if(widget==ancestor)return true;widget=widget.GetParent();}return false;}
