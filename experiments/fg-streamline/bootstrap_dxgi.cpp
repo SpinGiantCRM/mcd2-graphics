@@ -37,6 +37,9 @@ HMODULE self=nullptr,systemDxgi=nullptr,reshade=nullptr;
 INIT_ONCE once=INIT_ONCE_STATIC_INIT,systemOnce=INIT_ONCE_STATIC_INIT;
 thread_local bool initializing=false;
 bool sdkReady=false,routeEnabled=true;FILE* receipt=nullptr;
+// Factory calls and quiescent teardown can run on different engine threads.
+// Serialize ownership as well as stdio: checking receipt before fclose races.
+std::mutex receiptMutex;
 unsigned fgSessionMode=1;
 bool amdFgSession=false;HMODULE amdFgBridge=nullptr;
 std::atomic<unsigned> actualFgOwner{0};
@@ -73,7 +76,7 @@ unsigned observed_fg_mode(){
  // Actual rendering-adapter/SDK approval still occurs in create_swap.
  return selection.valid&&selection.bootstrap.requested==mcd2::providers::PresentationOwner::NvidiaStreamline?1u:0u;
 }
-void event(const char* stage,long result){if(receipt){fprintf(receipt,"{\"stage\":\"%s\",\"result\":%ld}\n",stage,result);fflush(receipt);}}
+void event(const char* stage,long result){std::lock_guard traceGuard(receiptMutex);if(receipt){fprintf(receipt,"{\"stage\":\"%s\",\"result\":%ld}\n",stage,result);fflush(receipt);}}
 BOOL CALLBACK system_init(PINIT_ONCE,void*,void**){
  auto path=std::make_unique<wchar_t[]>(32768);auto n=GetSystemDirectoryW(path.get(),32768);
  if(!n||n>=32750)return FALSE;wcscat_s(path.get(),32768,L"\\dxgi.dll");
@@ -137,7 +140,7 @@ HRESULT STDMETHODCALLTYPE create_swap(IDXGIFactory2* factory,IUnknown* queue,HWN
    if(!p.width&&client.right>client.left)p.width=unsigned(client.right-client.left);
    if(!p.height&&client.bottom>client.top)p.height=unsigned(client.bottom-client.top);
   }
-  if(receipt){fprintf(receipt,"{\"stage\":\"AMD-swap-description\",\"width\":%u,\"height\":%u,\"format\":%u,\"samples\":%u,\"buffers\":%u}\n",p.width,p.height,p.format,p.samples,p.buffers);fflush(receipt);}
+  {std::lock_guard traceGuard(receiptMutex);if(receipt){fprintf(receipt,"{\"stage\":\"AMD-swap-description\",\"width\":%u,\"height\":%u,\"format\":%u,\"samples\":%u,\"buffers\":%u}\n",p.width,p.height,p.format,p.samples,p.buffers);fflush(receipt);}}
   ID3D12CommandQueue* nativeQueue=nullptr;if(!queue||FAILED(queue->QueryInterface(IID_PPV_ARGS(&nativeQueue))))return E_INVALIDARG;
   auto previous=nested;nested=route;
   void* out=nullptr;const auto status=amdSwap(factory,nativeQueue,hwnd,&p,&out);nativeQueue->Release();nested=previous;
@@ -184,7 +187,7 @@ BOOL CALLBACK initialize(PINIT_ONCE,void*,void**){
  auto filename=std::make_unique<wchar_t[]>(32768);auto n=GetModuleFileNameW(self,filename.get(),32768);
  if(!n||n>=32768){initializing=false;return FALSE;}
  auto folder=std::filesystem::path(filename.get()).parent_path();
- fopen_s(&receipt,(folder/"bootstrap.jsonl").string().c_str(),"w");
+ {std::lock_guard traceGuard(receiptMutex);fopen_s(&receipt,(folder/"bootstrap.jsonl").string().c_str(),"w");}
  // Local isolation controls are intentionally absent from the released UI.
  auto policy=mcd2::providers::observedPolicyPath(filename.get()).wstring();
  if(GetPrivateProfileIntW(L"Experiment",L"TraceNvapi",0,policy.c_str())){
@@ -253,7 +256,7 @@ extern "C" HRESULT WINAPI CreateDXGIFactory1(REFIID iid,void** out){auto f=reint
 extern "C" HRESULT WINAPI CreateDXGIFactory2(UINT flags,REFIID iid,void** out){auto f=reinterpret_cast<HRESULT(WINAPI*)(UINT,REFIID,void**)>(factory("CreateDXGIFactory2"));if(!f)return E_NOINTERFACE;auto hr=f(flags,iid,out);if(!initializing)route_result(hr,out,_ReturnAddress());return hr;}
 extern "C" HRESULT WINAPI DXGIDeclareAdapterRemovalSupport(){auto f=reinterpret_cast<HRESULT(WINAPI*)()>(native("DXGIDeclareAdapterRemovalSupport"));return f?f():E_NOINTERFACE;}
 extern "C" HRESULT WINAPI DXGIGetDebugInterface1(UINT flags,REFIID iid,void** out){auto f=reinterpret_cast<HRESULT(WINAPI*)(UINT,REFIID,void**)>(native("DXGIGetDebugInterface1"));return f?f(flags,iid,out):E_NOINTERFACE;}
-extern "C" __declspec(dllexport) void mcd2_bootstrap_detach(){std::lock_guard guard(routesMutex);for(auto& r:routes)r.detach();event("factory-routes-detached",0);if(receipt){fclose(receipt);receipt=nullptr;}}
+extern "C" __declspec(dllexport) void mcd2_bootstrap_detach(){std::lock_guard guard(routesMutex);for(auto& r:routes)r.detach();event("factory-routes-detached",0);std::lock_guard traceGuard(receiptMutex);if(receipt){fclose(receipt);receipt=nullptr;}}
 extern "C" __declspec(dllexport) unsigned mcd2_bootstrap_fg_session_mode(){return fgSessionMode;}
 extern "C" __declspec(dllexport) unsigned mcd2_bootstrap_amd_fg_session(){return amdFgSession&&routeEnabled?1:0;}
 extern "C" __declspec(dllexport) unsigned mcd2_bootstrap_fg_owner(){return actualFgOwner.load();}

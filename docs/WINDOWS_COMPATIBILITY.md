@@ -1,3 +1,15 @@
+The bootstrap trace uses one mutex for opening, event/AMD-description writes,
+flushing and closing. Factory creation and route teardown can run on different
+threads; stdio's internal locking does not own a handle passed by another caller.
+Preserve late-event refusal and idempotent close. The actual-source concurrency
+fixture runs on both CI platforms and reproduces a closed-handle write with the
+old source. Linux and an isolated Windows executable under Proton pass with the
+correction; the Microsoft-ABI bootstrap also compiles. This establishes a trace
+lifetime defect, not the cause of the game's intermittent `0xC0000409` quit.
+The [offline receipt](../qualification/providers/bootstrap-shutdown-trace-2026-10-18.json)
+keeps that distinction. Select a complete rebuilt artifact and repeat native
+Windows/Radeon and Linux shutdown qualification before release.
+
 The advanced page embeds a tabbed custom widget through Blueprint Loader 2.0,
 with native stepper shells, native category buttons and the native bordered detail
 card on hover/focus. Loader and SDK sources remain unmodified. Preserve Loader
