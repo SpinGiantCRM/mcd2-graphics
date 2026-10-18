@@ -82,5 +82,33 @@
     "substantiallyChangedTiming": true,
     "retainedLogsBounded": true,
     "establishesFix": false
+  },
+  "errorOnlySteamReplay": {
+    "route": "Original Steam launch, unchanged installed dev15",
+    "gamePayloadFilesVerified": 17,
+    "debuggerAttached": false,
+    "relayEnabled": false,
+    "wineExceptionTrace": "error-level SEH only, with module-load metadata",
+    "traceBytes": 96441,
+    "fatalExceptionsLogged": 0,
+    "heldShippingProcessExitCode": 0,
+    "nvidiaFgActivatedAfterInitialSnapshot": true,
+    "fgOutcomeSamples": 38,
+    "sdkTwoPresentSuccessSamples": 30,
+    "fgSampledFrameRange": [
+      11444,
+      11481
+    ],
+    "continuousFgDurationQualified": false,
+    "sharedSdkRetirementResult": 0,
+    "temporarySettingsRestored": true,
+    "originalFailureReproduced": false,
+    "establishesFix": false,
+    "traceRaceFixInstalled": false,
+    "windowsRadeonQualified": false,
+    "queueTeardown": {
+      "cleanupCompleted": true,
+      "generationRetained": false
+    }
   }
 }
