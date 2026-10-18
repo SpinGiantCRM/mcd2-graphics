@@ -71,5 +71,8 @@
     "windowsSDK": "10.0.26100.0"
   },
   "linuxBoundedRuntimeChecks": "Earlier dev.14 startup, preset, presenter recovery and exit evidence remains historical. The dev.15 UI was accepted visually on Linux/NVIDIA with Loader 2.5; full current-artifact Linux and Windows/Radeon qualification remain pending.",
-  "pendingChange": "Gameplay diagnostics overlay moved from top right to top left; new UI/source-matched artifact required before final release selection."
+  "pendingChange": "Gameplay diagnostics overlay moved from top right to top left; new UI/source-matched artifact required before final release selection.",
+  "linuxReleaseBlockers": [
+    "Uninstrumented dev15 normal quit returned 0xC0000409 despite successful reported SDK/resource retirement; cause not established."
+  ]
 }

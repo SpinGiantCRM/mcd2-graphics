@@ -30,6 +30,13 @@ the installer/assembly receipt identifies dev.15. Align the public release
 version and freeze its final hashes before release qualification is closed.
 Earlier qualification reports remain historical; their failures are not erased.
 
+The current dev.15 Linux/NVIDIA session verified advancing DLSS/FG/Reflex
+activity, but a held process handle recorded `0xC0000409` on normal quit.
+Reported GPU/shared-runtime cleanup success does not clear that failure. See the
+[packaging and bounded runtime record](../qualification/providers/amd-dev15-packaging-2026-10-18.json).
+Linux runtime clearance remains blocked; this does not establish the Windows
+result or the failing component.
+
 ## Preparation
 
 1. Close the game. Use Steam build 25754144, shipping SHA-256
