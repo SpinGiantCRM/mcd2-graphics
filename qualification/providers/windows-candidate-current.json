@@ -82,5 +82,5 @@
     "checkoutLineEndingsNormalizedForComparison": true,
     "onlySubsequentChanges": "dev15 qualification records; no runtime implementation changes"
   },
-  "selectionNote": "Render-scale UI changed after dev.16 selection. Rebuild a complete native candidate before installer assembly or qualification."
+  "selectionNote": "Render-scale UI and AMD FG capability-cache implementation changed after dev.16 selection. Rebuild a complete native candidate before installer assembly or qualification."
 }

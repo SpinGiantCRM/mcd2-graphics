@@ -4,6 +4,7 @@
 #include "fg_configuration.hpp"
 #include "../../src/providers/menu_snapshot.h"
 #include "../../src/providers/fg_menu_projection.hpp"
+#include "../../src/providers/fg_capability_cache.hpp"
 // Experimental UI bridge: current-process heartbeat, supported rendering LUID,
 // explicit opt-in. All file reads/writes are rate limited and all paths heap backed.
 namespace fg_controls {
@@ -13,6 +14,8 @@ std::atomic<bool> enabled{false},wanted{false};std::atomic<unsigned> fault{0};
 std::atomic<bool> retired{false};
 unsigned presenterRoute=0,presenterCanSwitch=0,presenterSettingsRevision=0;
 unsigned session=0,available=0,availableProviders=0,startupOwner=0,previousMode=0,sessionMode=0,restartRequired=0;ULONGLONG nextPoll=0,nextSupport=0;
+mcd2::providers::FgCapabilityCache amdCapabilities;
+void forget_device(a::device* device){amdCapabilities.forget(reinterpret_cast<std::uintptr_t>(device));}
 std::vector<uint8_t> read(const std::filesystem::path&p){std::ifstream f(p,std::ios::binary|std::ios::ate);if(!f)return {};auto n=f.tellg();if(n<64||n>8192)return {};std::vector<uint8_t>b(static_cast<size_t>(n));f.seekg(0);if(!f.read(reinterpret_cast<char*>(b.data()),b.size()))return {};return b;}
 bool fresh(const std::filesystem::path&p){WIN32_FILE_ATTRIBUTE_DATA a{};if(!GetFileAttributesExW(p.c_str(),GetFileExInfoStandard,&a))return false;FILETIME now{};GetSystemTimeAsFileTime(&now);ULARGE_INTEGER n{},v{};n.LowPart=now.dwLowDateTime;n.HighPart=now.dwHighDateTime;v.LowPart=a.ftLastWriteTime.dwLowDateTime;v.HighPart=a.ftLastWriteTime.dwHighDateTime;return v.QuadPart<=n.QuadPart && n.QuadPart-v.QuadPart<15000000;}
 void init(const std::filesystem::path&folder){settingsPath=folder.parent_path()/L"SaveGames"/L"MCD2GraphicsFGSettings.sav";runtimePath=folder.parent_path()/L"SaveGames"/L"MCD2GraphicsFGRuntime.sav";session=(GetCurrentProcessId()^unsigned(GetTickCount64()))&0x7fffffff;if(!session)session=1;}
@@ -29,7 +32,7 @@ void poll(a::device*device,const std::filesystem::path&policy,unsigned active){
  if(now>=nextSupport){nextSupport=now+1000;availableProviders=0;auto bridge=GetModuleHandleW(L"fg-sdk-bridge.dll");using Support=int(*)(void*,unsigned);auto support=bridge?reinterpret_cast<Support>(GetProcAddress(bridge,"mcd2_fg_support")):nullptr;auto native=reinterpret_cast<ID3D12Device*>(device->get_native());if(native&&support){auto luid=native->GetAdapterLuid();if(support(&luid,sizeof(luid))==0)availableProviders|=1;}
   auto amd=shared?GetModuleHandleW(L"mcd2-fsr-fg-game-bridge.dll"):nullptr;
   auto amdSupport=amd?reinterpret_cast<int(*)(void*)>(GetProcAddress(amd,"mcd2_afg_support_v1")):nullptr;
-  if(native&&amdSupport&&amdSupport(native)==0)availableProviders|=2;
+  if(native&&amdSupport&&amdCapabilities.query(reinterpret_cast<std::uintptr_t>(device),reinterpret_cast<std::uintptr_t>(amd),[&]{return amdSupport(native);})==0)availableProviders|=2;
  }
  mcd2::fgui::Intent next{};if(!mcd2::fgui::decode(read(settingsPath),next)||!fresh(settingsPath)){intent.ready=0;wanted=false;publish(active,false);return;}
  presenterRoute=presenterCanSwitch=presenterSettingsRevision=0;

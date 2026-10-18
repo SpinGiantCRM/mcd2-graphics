@@ -1,4 +1,5 @@
 #include "../experiments/fg-streamline/fg_ui_protocol.hpp"
+#include "../src/providers/fg_capability_cache.hpp"
 #include <cassert>
 #include <iostream>
 
@@ -13,6 +14,21 @@ std::vector<uint8_t> fixture(std::vector<std::pair<std::string,unsigned>> fields
  for(auto& [name,value]:fields){str(name);str("IntProperty");num(0,4);num(4,4);num(0,1);num(value,4);}str("None");num(0,4);return b;
 }
 int main(){
+ mcd2::providers::FgCapabilityCache cache;unsigned probes=0;
+ auto supported=[&]{++probes;return 0;};auto unsupported=[&]{++probes;return -5;};
+ assert(cache.query(0,2,supported)==-1&&cache.query(1,0,supported)==-1&&probes==0);
+ for(unsigned frame=0;frame<10000;++frame)assert(cache.query(1,2,supported)==0);
+ assert(probes==1); // No repeated driver query while FG is Off or On.
+ assert(cache.query(3,2,unsupported)==-5&&probes==2);
+ for(unsigned frame=0;frame<10000;++frame)assert(cache.query(3,2,supported)==-5);
+ assert(probes==2); // Unsupported results cannot become claimed support.
+ cache.forget(1);assert(cache.query(3,2,supported)==-5&&probes==2);
+ cache.forget(3);assert(cache.query(3,2,supported)==0&&probes==3); // Reused device address.
+ assert(cache.query(3,4,unsupported)==-5&&probes==4); // Changed runtime module.
+ auto notReady=[&]{++probes;return -1;};
+ assert(cache.query(5,4,notReady)==-1&&cache.query(5,4,notReady)==-1&&probes==6);
+ assert(cache.query(5,4,supported)==0&&probes==7); // Delayed SDK initialization retries.
+ std::cout<<"FG capability cache: bounded queries, device/runtime identity, unsupported and not-ready checks pass\n";
  mcd2::fgui::Intent i;
  for(const char* field:{"FGProvider","fgProvider","Provider","provider"}){
   auto b=fixture({{field,1}});assert(mcd2::fgui::decode(b,i));

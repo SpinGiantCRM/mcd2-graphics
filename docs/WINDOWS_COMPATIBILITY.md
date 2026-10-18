@@ -1,3 +1,14 @@
+AMD FG provider enumeration must not run repeatedly on the render thread. On
+Windows/Radeon 860M the unchanged SDK support query took 127-278 ms per call,
+and its once-per-second polling stalled Native menus with FG Off. Cache the
+result by framework device and loaded bridge, including unsupported results;
+retry the bridge's not-initialized response and forget on device init/destruction.
+The cache owns no COM references and does not replace the SDK activation,
+current intent/session/world, input, presenter or retirement gates. Preserve the
+portable cache fixture in both CI jobs and the complete guide/header build receipt.
+The polling-disabled control removed the observed stutter; the rebuilt addon
+requires its own Windows runtime check and does not repair FSR timeout 22.
+
 The render-scale slider always displays a numeric selected percentage, including
 FSR named presets before gameplay and during menu suspension/fallback. The display
 uses FSR preset ratios, or the matching error-free SDK plan while applying or
