@@ -170,14 +170,14 @@ public class ScaleRow : UGameSettingListEntryBase {
   if(Skin.Slider_SettingValue!=null){Skin.Slider_SettingValue.SetMinValue(0);Skin.Slider_SettingValue.SetMaxValue(1);Skin.Slider_SettingValue.SetStepSize(1f/99f);Skin.Slider_SettingValue.SetLocked(true);}Refresh();
  }
  public override void Construct(){Refresh();}
- public void Refresh(){if(Skin==null || Manager==null || Manager.Saved==null)return;int span=100-Manager.MinimumScalePercent;float value=span>0?((Manager.SelectedScale()==0?6700:Manager.SelectedScale())/100-Manager.MinimumScalePercent)/(float)span:1f;if(value<0)value=0;if(value>1)value=1;if(Skin.Slider_SettingValue!=null){Skin.Slider_SettingValue.SetStepSize(span>0?1f/span:1f);Skin.Slider_SettingValue.SetValue(value);}if(Skin.Slider_Bar!=null){var material=Skin.Slider_Bar.GetDynamicMaterial();if(material!=null)material.SetScalarParameterValue("Value",value);}if(Skin.Text_SettingValue!=null)Skin.Text_SettingValue.SetText(Manager.SelectedScale()==0?"Auto":(Manager.SelectedScale()/100)+"%");}
+ public void Refresh(){if(Skin==null || Manager==null || Manager.Saved==null)return;int scale=Manager.SelectedScale();int span=100-Manager.MinimumScalePercent;float value=span>0?(scale/100-Manager.MinimumScalePercent)/(float)span:1f;if(value<0)value=0;if(value>1)value=1;if(Skin.Slider_SettingValue!=null){Skin.Slider_SettingValue.SetStepSize(span>0?1f/span:1f);Skin.Slider_SettingValue.SetValue(value);}if(Skin.Slider_Bar!=null){var material=Skin.Slider_Bar.GetDynamicMaterial();if(material!=null)material.SetScalarParameterValue("Value",value);}if(Skin.Text_SettingValue!=null)Skin.Text_SettingValue.SetText((scale/100)+"%");}
  void AtPointer(FPointerEvent ev){if(Manager==null || Skin==null || Skin.Slider_SettingValue==null)return;var geo=Skin.Slider_SettingValue.GetCachedGeometry();var size=USlateBlueprintLibrary.GetLocalSize(geo);if(size.X<=0)return;var pos=USlateBlueprintLibrary.AbsoluteToLocal(geo,UKismetInputLibrary.PointerEvent_GetScreenSpacePosition(ev));int percent=Manager.MinimumScalePercent+(int)(pos.X/size.X*(100-Manager.MinimumScalePercent)+0.5);if(percent<Manager.MinimumScalePercent)percent=Manager.MinimumScalePercent;if(percent>100)percent=100;Manager.ChangeScale(percent*100);Refresh();Manager.ShowScaleHelp();}
  protected override UWidget? GetPrimaryGamepadFocusWidget(){return this;}
  public override FEventReply OnPreviewMouseButtonDown(FGeometry geo,FPointerEvent ev){if(Manager!=null)Manager.SelectOwned(Manager.ScaleModel);if(UKismetInputLibrary.PointerEvent_GetEffectingButton(ev).KeyName!="LeftMouseButton")return UWidgetBlueprintLibrary.Unhandled();SetUserFocus(UGameplayStatics.GetPlayerController(this,0));if(Manager!=null)Manager.ShowScaleHelp();if(Skin!=null && Skin.Slider_SettingValue!=null && USlateBlueprintLibrary.IsUnderLocation(Skin.Slider_SettingValue.GetCachedGeometry(),UKismetInputLibrary.PointerEvent_GetScreenSpacePosition(ev))){dragging=true;AtPointer(ev);var reply=UWidgetBlueprintLibrary.Handled();reply=UWidgetBlueprintLibrary.SetUserFocus(ref reply,this,false);return UWidgetBlueprintLibrary.CaptureMouse(ref reply,this);}var focusReply=UWidgetBlueprintLibrary.Handled();return UWidgetBlueprintLibrary.SetUserFocus(ref focusReply,this,false);}
  public override FEventReply OnMouseMove(FGeometry geo,FPointerEvent ev){if(!dragging)return UWidgetBlueprintLibrary.Unhandled();AtPointer(ev);return UWidgetBlueprintLibrary.Handled();}
  public override FEventReply OnMouseButtonDoubleClick(FGeometry geo,FPointerEvent ev){return OnPreviewMouseButtonDown(geo,ev);}
  public override FEventReply OnMouseButtonUp(FGeometry geo,FPointerEvent ev){if(!dragging)return UWidgetBlueprintLibrary.Unhandled();dragging=false;AtPointer(ev);var reply=UWidgetBlueprintLibrary.Handled();return UWidgetBlueprintLibrary.ReleaseMouseCapture(ref reply);}
- public override FEventReply OnPreviewKeyDown(FGeometry geo,FKeyEvent ev){var k=UKismetInputLibrary.GetKey(ev).KeyName;int d=0;if(k=="Left" || k=="Gamepad_DPad_Left")d=-1;if(k=="Right" || k=="Gamepad_DPad_Right")d=1;if(d==0 || Manager==null || Manager.Saved==null)return UWidgetBlueprintLibrary.Unhandled();Manager.ChangeScale((Manager.SelectedScale()==0?6700:Manager.SelectedScale())+d*100);Refresh();Manager.ShowScaleHelp();return UWidgetBlueprintLibrary.Handled();}
+ public override FEventReply OnPreviewKeyDown(FGeometry geo,FKeyEvent ev){var k=UKismetInputLibrary.GetKey(ev).KeyName;int d=0;if(k=="Left" || k=="Gamepad_DPad_Left")d=-1;if(k=="Right" || k=="Gamepad_DPad_Right")d=1;if(d==0 || Manager==null || Manager.Saved==null)return UWidgetBlueprintLibrary.Unhandled();Manager.ChangeScale(Manager.SelectedScale()+d*100);Refresh();Manager.ShowScaleHelp();return UWidgetBlueprintLibrary.Handled();}
  public override void OnMouseEnter(FGeometry geo,FPointerEvent ev){if(Manager!=null)Manager.ShowScaleHelp();}
  public override FEventReply OnFocusReceived(FGeometry geo,FFocusEvent ev){if(Manager!=null)Manager.ShowScaleHelp();return UWidgetBlueprintLibrary.Handled();}
 }
@@ -357,10 +357,9 @@ public class ModActor : AActor, IModSettings {
  public int SelectedScale(){
   if(SharedControls() && ProviderMenu!=null){int family=SelectedFamily();int quality=SelectedQuality();
    if(quality==0)return 10000;if(quality==5)return ProviderMenu.Value(ProviderMenu.PreferenceWord(family)+1);
-   if(family==1)return quality==1?6700:quality==2?5800:quality==3?5000:3300;
-   if(ProviderRuntime!=null && ProviderRuntime.State!=null){var state=ProviderRuntime.State;
-    if(state.W18==family && state.W19==quality && state.W10==5)return ((state.W16+500000)/1000000)*100;}
-   return 0; // SDK-derived named ratio is pending, never borrowed from NVIDIA.
+   if(family==2 && ProviderRuntime!=null && ProviderRuntime.State!=null){var state=ProviderRuntime.State;
+    if(state.W18==family && state.W19==quality && state.W10>=2 && state.W10<=5 && state.W11==0)return ((state.W16+500000)/1000000)*100;}
+   return ProviderRuntimeClient.PresetScale(family,quality,0);
   }
   return Saved==null?6700:Saved.CustomScaleBasisPoints;
  }

@@ -11,6 +11,11 @@ static class RuntimeTest {
   s.W16=66666667;s.W18=2;s.W19=1;s.W20=1;s.W4=s.Checksum(0,32);return s;
  }
  public static void Run(){
+  // The preset remains numeric in menus, before a runtime plan exists.
+  foreach(int family in new[]{1,2}){
+   int[] expected={10000,6700,family==2?5900:5800,5000,3300,7700};
+   for(int quality=0;quality<expected.Length;quality++)Check(ProviderRuntimeClient.PresetScale(family,quality,7700)==expected[quality]);
+  }
   ReadinessChecks();
   FoliageChecks();
   Check(ProviderRuntimeClient.CanRestoreNvidiaSource(7,2,123,1,7,123,3));

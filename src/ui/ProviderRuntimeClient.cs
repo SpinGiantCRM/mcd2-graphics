@@ -9,6 +9,12 @@ public class ProviderRuntimeClient : USaveGame {
  public int Sequence;public int Session;public int WorldGeneration;
  public string? Level;
  public bool Enabled;
+ // Display the selected preset even before gameplay/preflight. Only the native
+ // SDK plan authorizes a source-resolution change; this is a slider value.
+ public static int PresetScale(int family,int quality,int custom){
+  if(quality==0)return 10000;if(quality==5)return custom;
+  return quality==1?6700:quality==2?(family==2?5900:5800):quality==3?5000:3300;
+ }
  public static bool GameplayWidgetAllowed(string name,bool layer){
   if(name.StartsWith("W_PlayerHUD_Activatable_C_") || name.StartsWith("W_HotbarContainer_Activatable_C_") || name.StartsWith("W_InGameNavigation_Activatable_C_"))return true;
   return !layer && (name=="Hotbar" || name=="MiniInventory" || name.StartsWith("W_ActivityLayer_Activatable_C_") || name.Contains("Notification_Activatable_C_"));

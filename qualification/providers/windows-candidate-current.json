@@ -12,8 +12,8 @@
   "vendorRuntimeBundled": false,
   "windowsRadeonRuntimeQualified": false,
   "linuxFullArtifactRuntimeQualified": false,
-  "selectionNeedsRebuild": false,
-  "sourceChangedAfterSelection": false,
+  "selectionNeedsRebuild": true,
+  "sourceChangedAfterSelection": true,
   "publishedReleaseChanged": false,
   "receipt": {
     "sourceCommit": "a140afb6e04913b039b5113a97c12f11661166d7",
@@ -81,5 +81,6 @@
     "uiAndBootstrapConsumedSourceFilesVerified": 62,
     "checkoutLineEndingsNormalizedForComparison": true,
     "onlySubsequentChanges": "dev15 qualification records; no runtime implementation changes"
-  }
+  },
+  "selectionNote": "Render-scale UI changed after dev.16 selection. Rebuild a complete native candidate before installer assembly or qualification."
 }

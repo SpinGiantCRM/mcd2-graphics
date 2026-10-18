@@ -1,3 +1,12 @@
+The render-scale slider always displays a numeric selected percentage, including
+FSR named presets before gameplay and during menu suspension/fallback. The display
+uses FSR preset ratios, or the matching error-free SDK plan while applying or
+evaluating; it never authorizes source scaling. Preserve the native preflight,
+source acknowledgement and current-session/world checks. Keep keyboard/controller
+edits relative to the displayed value and rebuild the real UI/ModInfo after edits.
+The 19 October source/build checks do not qualify the rebuilt UI in game or fix
+the separately observed Windows FSR timeout, stutter or access violation.
+
 The bootstrap trace uses one mutex for opening, event/AMD-description writes,
 flushing and closing. Factory creation and route teardown can run on different
 threads; stdio's internal locking does not own a handle passed by another caller.
