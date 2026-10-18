@@ -10,9 +10,17 @@ public static class NativeSettingsWidgets {
  public static UAS_SpicewoodButtonTabAction? CategoryTab(UObject owner,string title){
   var tab=Ui.GameWidget(owner,"/OreUI/UI/Button/W_SpicewoodTabButton.W_SpicewoodTabButton_C") as UAS_SpicewoodButtonTabAction;if(tab==null)return null;
   tab.SetButtonText(title);tab.PreConstruct(false);tab.UpdateButtonText(title);
-  tab.SetShouldDeselectUponUnhover(false);tab.SetShouldDeselectUponLosingFocus(false);
   if(tab.ButtonTemplate!=null){tab.ButtonTemplate.bIsButtonTextCentered=true;tab.ButtonTemplate.PreConstruct(false);}
   SetText(tab.TextBlockWidget,title);return tab;
+ }
+ // Keep the native strip's gradient, border and layout instead of rebuilding
+ // its background with a flat colour. Q/E remain owned by the game's main tabs.
+ public static UE.SpicewoodUI.USpicewoodTabListWidget? CategoryStrip(UObject owner){
+  var strip=Ui.GameWidget(owner,"/OreUI/UI/Widget/TabList/W_SpicewoodTabList.W_SpicewoodTabList_C") as UE.SpicewoodUI.USpicewoodTabListWidget;
+  if(strip==null)return null;strip.SetListeningForInput(false);strip.SetTabBackgroundVisibility(true);strip.SetTabActionPromptVisibility(false);
+  if(strip.PreviousTabAction!=null)strip.PreviousTabAction.SetVisibility(ESlateVisibility.Collapsed);
+  if(strip.NextTabAction!=null)strip.NextTabAction.SetVisibility(ESlateVisibility.Collapsed);
+  if(strip.TabButtonBox!=null)strip.TabButtonBox.ClearChildren();return strip;
  }
  // The frame is owned by W_SettingsPanel, not W_SettingsDetailView. Reparent
  // only the newly created shell's images; never touch a live game settings page.

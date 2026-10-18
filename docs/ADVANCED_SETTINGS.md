@@ -2,10 +2,18 @@
 
 Open **Mods → MCD2 Graphics → Settings** for model overrides and runtime
 information. The page has **Upscaling**, **Frame Generation** and **Diagnostics**
-tabs, using the game’s top-page tab buttons. Rows occupy the left two thirds;
-the native framed help pane occupies the right third, with a viewport-sized
-height. The frame and background come from a newly created settings-panel shell;
-the game’s existing pages are not reparented. Mouse, keyboard arrows
+tabs, using the game’s top-page tab strip, including its gradient and borders.
+The mod title, description, master toggle and rows occupy the left two thirds;
+the native framed help pane occupies the right third from the top of the page.
+Category selection uses a single native button group and clears on page exit.
+The frame and background come from newly created native widget shells.
+
+Blueprint Loader still owns the header and toggle. This mod temporarily narrows
+only its own active page slot and mounts its help pane alongside it. It validates
+the page structure first, adapts to the page geometry, and restores the original
+padding on exit or unloading only while still owned. An unexpected Loader layout
+or external padding change leaves the embedded layout available without
+rewriting another mod’s page. Loader’s code and saved preferences are unchanged. Mouse, keyboard arrows
 and controller directions change values. Popup tooltips are not used. Everyday upscaler, quality, render scale, sharpness, frame generation,
 HDR and independent low-latency controls remain under **Settings → Video**.
 
