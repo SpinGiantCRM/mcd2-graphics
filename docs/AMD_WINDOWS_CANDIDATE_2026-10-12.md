@@ -1,6 +1,12 @@
 # Windows/Radeon development qualification
 
-## Current candidate: 0.4.0-amd.dev.15
+## Provider test candidate: 0.4.0-amd.dev.15
+
+A UI-only revision moves the gameplay overlay to the top left. Its replacement
+artifact is being built; the current selector is marked for rebuild. Dev.15
+remains the identified provider/installer test baseline, not the final UI
+artifact for release. Final selection and affected UI checks must use the new
+receipt.
 
 Use the [current candidate receipt](../qualification/providers/windows-candidate-current.json).
 The selected native artifact includes the approved advanced settings page,

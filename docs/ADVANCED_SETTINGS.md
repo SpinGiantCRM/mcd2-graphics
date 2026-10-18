@@ -116,7 +116,7 @@ the Diagnostics section. It is off by default so model controls remain compact.
 The independent overlay control below does not expand the page.
 
 
-**Show In-Game Diagnostics** enables a small, noninteractive overlay during
+**Show In-Game Diagnostics** enables a small, noninteractive overlay at the top left during
 unpaused gameplay. It is off by default and saved by Blueprint Loader.
 
 The overlay samples successful SR evaluations, provider-generated frame counters

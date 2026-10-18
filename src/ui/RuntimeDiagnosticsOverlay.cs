@@ -14,6 +14,6 @@ public class RuntimeDiagnosticsOverlay : ScreenWidget {
  }
  public static RuntimeDiagnosticsOverlay? Open(ModActor manager){
   var view=Ui.Create(manager,Unreal.ClassOf<RuntimeDiagnosticsOverlay>()) as RuntimeDiagnosticsOverlay;
-  if(view!=null)view.ShowAt(new FVector2D{X=-24,Y=24},new FVector2D{X=1,Y=0},ScreenWidget.UnderGameUI);return view;
+  if(view!=null)view.ShowAt(new FVector2D{X=24,Y=24},new FVector2D{X=0,Y=0},ScreenWidget.UnderGameUI);return view;
  }
 }

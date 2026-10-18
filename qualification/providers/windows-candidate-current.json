@@ -12,8 +12,8 @@
   "vendorRuntimeBundled": false,
   "windowsRadeonRuntimeQualified": false,
   "linuxFullArtifactRuntimeQualified": false,
-  "selectionNeedsRebuild": false,
-  "sourceChangedAfterSelection": false,
+  "selectionNeedsRebuild": true,
+  "sourceChangedAfterSelection": true,
   "publishedReleaseChanged": false,
   "receipt": {
     "sourceCommit": "98f1cec1c7f4bea677a297c86c4b69b07b6ac749",
@@ -70,5 +70,6 @@
     "crtVersion": "14.44.35207",
     "windowsSDK": "10.0.26100.0"
   },
-  "linuxBoundedRuntimeChecks": "Earlier dev.14 startup, preset, presenter recovery and exit evidence remains historical. The dev.15 UI was accepted visually on Linux/NVIDIA with Loader 2.5; full current-artifact Linux and Windows/Radeon qualification remain pending."
+  "linuxBoundedRuntimeChecks": "Earlier dev.14 startup, preset, presenter recovery and exit evidence remains historical. The dev.15 UI was accepted visually on Linux/NVIDIA with Loader 2.5; full current-artifact Linux and Windows/Radeon qualification remain pending.",
+  "pendingChange": "Gameplay diagnostics overlay moved from top right to top left; new UI/source-matched artifact required before final release selection."
 }
