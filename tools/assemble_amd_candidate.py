@@ -119,7 +119,7 @@ def assemble(archive, archive_sha, source_commit, output, version, artifact_url)
         for ident,(path,pin) in FSR_RUNTIME.items():
             lock['dependencies'][ident] = {'version':('3.1.5 / official 4.1.1' if ident == 'FSRUpscaler' else '3.1.6 / ML 4.0.1'), 'file':path, 'sha256':pin,
                 'sdkCommit': FSR_COMMIT, 'bundled':False,
-                'url':'https://github.com/amd/FidelityFX-SDK/tree/'+FSR_COMMIT,
+                'url':'https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK/tree/'+FSR_COMMIT,
                 'compatibilityNote':('Official pinned FSR upscaling runtime: analytical 3.1.5, plus official 4.1.1 on supported Radeon hardware. The optional community INT8 runtime is installed separately; see Advanced Settings.' if ident == 'FSRUpscaler' else 'Official pinned FSR Frame Generation runtime: analytical 3.1.6; ML 4.0.1 requires actual device approval. Portable upscaling does not enable ML frame generation.') + ' An installer override does not relax runtime hash/API or hardware checks.'}
         metadata = {'schemaVersion':1, 'candidateOnly':True, 'sourceCommit':source_commit,
             'artifactUrl':artifact_url, 'archiveSHA256':archive_sha,

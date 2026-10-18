@@ -1,0 +1,275 @@
+{
+  "date": "2026-10-18",
+  "decision": "FAIL - FSR Quality fallback followed by unexplained access-violation exit; runtime testing stopped",
+  "candidate": "0.4.0-amd.dev.16",
+  "methodology": "docs/AMD_WINDOWS_CANDIDATE_2026-10-12.md at a51312544309f9b76ac298ce112fe34f320b6dff",
+  "sourceImplementation": "9fb44f41160bc51cee202a0106fedf6eeccd5fe4",
+  "nativeCISource": "a140afb6e04913b039b5113a97c12f11661166d7",
+  "installerSource": "a51312544309f9b76ac298ce112fe34f320b6dff",
+  "nativeArtifact": {
+    "run": 39109623985,
+    "id": 12130026833,
+    "sha256": "6228b83788991b5a3b6f38e3f67ca730d81b62ee620798660117f6440f9fc56f"
+  },
+  "installerArtifact": {
+    "run": 39112444365,
+    "id": 12130843372,
+    "sha256": "cf109522da7a722746a2782f2a13240638b2dc0d56ed4167de85768402353443"
+  },
+  "inputVerification": {
+    "version": "0.4.0-amd.dev.16",
+    "installerSHA256": "8916b346bb7c51d0cf2c59246c1ed5e0373ccbc845080f4534491c3aa6c5d55f",
+    "manifestSHA256": "049112f0d115abb184771e829b146cba89a387b1d4207a26a43b944763fc6eb0",
+    "lockSHA256": "7441f4c7c7867627d3f3ecba4739687c7fff9675d57bd7bea428c76f825e71d6",
+    "ownedFiles": 17,
+    "nativeFiles": 46,
+    "installerReceiptFiles": 242,
+    "independentAssemblyMatches": true
+  },
+  "machine": {
+    "os": "Windows 11 Pro",
+    "version": "10.0.26200",
+    "gpu": "AMD Radeon(TM) 860M Graphics",
+    "driver": "32.0.31041.1004",
+    "gameStore": "Steam",
+    "gameBuild": "25754144",
+    "exeSHA256": "3a8703406fd50520f83c4f70a0212c000cb3b584ef28eb38032902230c01ebdd",
+    "savedOutput": "1920x1200",
+    "savedHDR": false,
+    "savedVSync": false,
+    "savedFrameRateLimit": 0,
+    "actualOutputVerified": false
+  },
+  "gates": {
+    "installation": "PASS",
+    "survivalBeyond10Seconds": "PASS - 27.3 seconds; complete six-module FG chain hashes verified",
+    "qualification": "FAIL"
+  },
+  "checks": {
+    "Native control": {
+      "status": "PARTIAL PASS",
+      "observation": "Native 100% requested, FG Off, Anti-Lag Off and Reflex unavailable/off. Hub scene and mouse movement responsive with intact observed output; overlay reported Native Active, zero SR evaluations and zero generated frames. FPS limit remained None; stable limiting not qualified."
+    },
+    "FSR SR": {
+      "status": "FAIL",
+      "observation": "Analytical 3.1 preference persisted on relaunch. FSR Quality selected via Video menu. Current-session runtime reached Fallback phase 8/error 22 with zero evaluations and restored observed source scale 100%. Source error 22 is the 15-second Preflight/ApplySource/Create/Evaluate timeout; the captured record does not identify which stage timed out. All six FSR quality modes and official 4.1 activation are unqualified. Shipping process subsequently exited 0xC0000005; causality not established."
+    },
+    "AMD FG": {
+      "status": "NOT RUN",
+      "observation": "Stopped after access violation before enabling AMD generation. Native/NVIDIA FG stayed Off in tested scenes; no successful generated-frame counters observed."
+    },
+    "FG Off recovery": {
+      "status": "NOT RUN",
+      "observation": "No successful AMD FG On state, so Off/On/Off throughput and generation-stop comparison could not be run."
+    },
+    "Anti-Lag 2": {
+      "status": "PARTIAL - activation NOT RUN",
+      "observation": "Device/API probe reported available=true on this Radeon/driver. Mode stayed disabled; renderedFrames=0. Availability is not active timing evidence. FG Off/On activation comparisons not run."
+    },
+    "NVIDIA routes": {
+      "status": "NOT AVAILABLE / partial refusal observation",
+      "observation": "AMD laptop. NVIDIA requests caused adapter_declined vendor 4098 in the native receipt; DLSS SR diagnostics said Not loaded, FG control was disabled for NVIDIA and Reflex unavailable. No supported NVIDIA SR/FG/profile restoration qualification."
+    },
+    "Advanced Mods page": {
+      "status": "PARTIAL PASS",
+      "observation": "Name, author, description and known 0.3.0-preview.1 metadata label visible. Upscaling, Frame Generation and Diagnostics tabs rendered with exclusive glow and side help. FSR SR analytical 3.1 and diagnostics On choices persisted on relaunch. Mouse input and End-key menu navigation worked. Full keyboard/Auto-reset matrix, independent FSR FG changes and physical controller checks not completed."
+    },
+    "Diagnostics": {
+      "status": "UNRESOLVED",
+      "observation": "Runtime details remained in Diagnostics, separately distinguishing selected presets and unloaded DLSS runtime. Gameplay overlay at top left showed Native Active, FG/Reflex Off, Anti-Lag Off/unsupported and SR/generated counters zero. Automated Escape did not open pause while overlay enabled. Overlay was disabled on second run for comparison, but pause comparison did not complete before the fatal exit; no product or tool root cause established. Full active/stale/pause clearing not qualified."
+    },
+    "Sharpness": {
+      "status": "PARTIAL - remaining checks NOT RUN",
+      "observation": "0% row rendered directly below Render Scale; disabled in Native and enabled for FSR. Slider upper range, external-value ownership, reset/relaunch and active post-upscale output not qualified. Render Scale reached 100% with DLAA synchronization, and a 97% value displayed Custom; these were UI observations and AMD DLSS fallback, not active NVIDIA reconstruction."
+    },
+    "Lifecycle/output": {
+      "status": "PARTIAL - output discrepancy unresolved",
+      "observation": "Main menu to hub completed in both launches; hub mouse movement responsive. Video HDR preference was Off, but observed swapchain was 1920x1200, ReShade format 24/R10G10B10A2_UNORM, colourSpace 3/HDR10 PQ, three buffers. SDR parity cannot be inferred from HDR Off. Physical HDR/calibration, dungeon travel, resolution and window matrix not qualified."
+    },
+    "Shutdown": {
+      "status": "FAIL",
+      "observation": "One requested normal window close returned shipping code 0. Second launch exited unexpectedly with shipping code -1073741819 / 0xC0000005 and no matching exit request. Only one of three required ordinary clean exits obtained; presenter/shared-runtime retirement not fully established."
+    },
+    "Installer": {
+      "status": "PASS for observed checks",
+      "observation": "Prior GUI upgrade/fresh install/repair/modified-file refusal/uninstall/reinstall and independent tests retained. Running-game intact Verify performed a read-only verification; Uninstall refused with Close Minecraft Dungeons II before changing files. After failure, all 17 candidate payload hashes matched and normal GUI uninstall succeeded. Baseline restoration independently hash-verified."
+    }
+  },
+  "installerChecks": {
+    "upgrade": "PASS",
+    "intactVerify": "PASS",
+    "missingOwnedShaderRepair": "PASS; original bytes restored; no unexpected payload/dependency changes",
+    "modifiedRepairRefusal": "PASS",
+    "modifiedUninstallRefusal": "PASS; no unexpected payload/dependency changes",
+    "intactUninstall": "PASS; owned files/private DLSS removed; original dxgi framework restored; external Loader/RenoDX retained",
+    "freshReinstall": "PASS; all 17 owned payload hashes match",
+    "runningGameGUIRefusal": "Uninstall PASS; intact Verify read-only success (no mutation)",
+    "overrideGUIAcknowledgement": "NOT RUN; all seven controls initially unchecked",
+    "coreFixtureChecks": 132,
+    "packagingTests": 10,
+    "processGuardTests": 4
+  },
+  "installedOwnedSHA256": {
+    "Dungeons/Binaries/Win64/FGBootstrap.ini": "486d64f34c6b9e95be96bae8dc511d699aa96026cbdc2bfd1f8792c552ef6cba",
+    "Dungeons/Binaries/Win64/FGGuideCapture.ini": "492c4233a4803fe3bcf1b472727ec142ec1d242669030bb7d95b735c22398ca0",
+    "Dungeons/Binaries/Win64/FG_SCENE_COPY.cso": "57416d6e20dc6cfcd66f99f4a5c660ba654c9a94500f729e91e85586fa432373",
+    "Dungeons/Binaries/Win64/FG_UI_ALPHA.cso": "fce79e558c20bfafd859f37e397b8a04b5d820670f6aa0214522cef276cca8c1",
+    "Dungeons/Binaries/Win64/MCD2Graphics/fsr/mcd2-fsr-game-bridge.dll": "f9f0e891d1251e7a5880df0103dd6fc69be8c01fcc1d387aea6edd24607ee865",
+    "Dungeons/Binaries/Win64/MCD2Graphics/fsr_dense.cso": "089cef22d81092bd9ed2bdf0ec7a9bb6fcfe10268c52e0a57273dc69df68da68",
+    "Dungeons/Binaries/Win64/MCD2Graphics/live_dense.cso": "4a65a33ba983124b7c47d5822507613231abef7ec1fca8fa7fc51437fd0c29d2",
+    "Dungeons/Binaries/Win64/dxgi.dll": "80ff6b239cbbccfa07a58a543568ff154032d7036bb517ac7b504cc112c3cbf7",
+    "Dungeons/Binaries/Win64/fg-sdk-bridge.dll": "8acef4c3955c71c9a068ee0e31aeff5a63abdd8bdf35b19ebcffdb83474639d3",
+    "Dungeons/Binaries/Win64/mcd2-antilag2-bridge.dll": "2464d8f8bae3261340d9325fe6439228338c14d791a62a6a3fbefbaba40611be",
+    "Dungeons/Binaries/Win64/mcd2-display-latency.addon64": "41c2d7df147b1f89380cd03b3c4411bf47c233db6afc5a67047023d2df1addee",
+    "Dungeons/Binaries/Win64/mcd2-fg-guide-recon.addon64": "4e773dc1aa81c998544664dcbba9221609343a20be059e802555612e7a632c57",
+    "Dungeons/Binaries/Win64/mcd2-fsr-fg-game-bridge.dll": "5aece717f020005af363586aeac0a7558848210b3129d04a3fb7ab732c57c427",
+    "Dungeons/Binaries/Win64/mcd2-graphics.addon64": "0d16c5a41c80cea853c09d27bb0cb7024a37e32a951e333ab0da651a46b7d644",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.pak": "a0a4c57d7357c98155c7649676d47d70500b36e07b4d20e7bd8188e143104a1d",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.ucas": "00fa4bd4299ec63654b423d6832db3ea3e49ca32e0e475afa1b5787b6f66577e",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.utoc": "d8ac082ee637277b707d4a3ea67f58d9b4ec16bf5b61798684e66285f1ed427d"
+  },
+  "dependencies": {
+    "ReShade": {
+      "recognizedVersion": "PR435 / exact Windows candidate build",
+      "actualSHA256": {
+        "Dungeons/Binaries/Win64/d3d12.asi": "0938f481825b4fd2eb69d91ae37dbb8dc8876f1c2dfc1daffce0a82cc6b979bb"
+      }
+    },
+    "RenoDXUEExtended": {
+      "recognizedVersion": "nightly-20260928",
+      "actualSHA256": {
+        "Dungeons/Binaries/Win64/renodx-ue-extended.addon64": "7941e06607c90f187688382fd259d483cde78f54ccb72099b239e8d45f5f87ac"
+      }
+    },
+    "BlueprintLoader": {
+      "recognizedVersion": "2.0",
+      "actualSHA256": {
+        "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.pak": "75e7144577253917f6da7312ef5e585b12fb728226a22b0938323751a6b555cd",
+        "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.ucas": "7eae0158199637ea3dfe25996f16328dbac8bb67ef44a08d9c08052a39a28f5c",
+        "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.utoc": "e4d888db70ea0138c033569fbc410907a29bf8a90508b9f854d61f3d4fbeaad3"
+      }
+    },
+    "DLSSRuntime": {
+      "recognizedVersion": "310.9.1",
+      "actualSHA256": {
+        "Dungeons/Binaries/Win64/MCD2Graphics/ngx-runtime/nvngx_dlss.dll": "3975567b8943c53acce397f2b72380092f84f162d00b0d2c7d08a1025c563983"
+      }
+    },
+    "Streamline": {
+      "recognizedVersion": "2.14.1",
+      "actualSHA256": {
+        "Dungeons/Binaries/Win64/sl.interposer.dll": "8c87c9499461da561edd529aa9bf7831d67d7b94ebb1c1a5ed54ef4934e1ea4c",
+        "Dungeons/Binaries/Win64/sl.common.dll": "82924a8954dd671e09351c5de0eb87ad0eb25b944cc9f9ab955ca1d9950de15d",
+        "Dungeons/Binaries/Win64/sl.pcl.dll": "f13d51cfa05f4cd514df2026049e2db8adf359221713170ad386fd499915b582",
+        "Dungeons/Binaries/Win64/sl.reflex.dll": "0ce9725e3e03ea9e7f81d008b57f33ee365973d2e349131c8b1c3e3378fe2db0",
+        "Dungeons/Binaries/Win64/sl.dlss_g.dll": "f4a6b2b14dcc0b1485989e430d3b4e3a44ac1800b92ba1ad74f476e64fb2b09c",
+        "Dungeons/Binaries/Win64/nvngx_dlssg.dll": "ff6e90eb78b827927dff5b4ecc6b1c870c2e9bca29ed9f48c7d348cc9e170b82",
+        "Dungeons/Binaries/Win64/NvLowLatencyVk.dll": "2a77dc3e1c724b7eea5755be0ae7423752e79a2459fae72181a9f00e3507e5d6"
+      }
+    },
+    "FSRUpscaler": {
+      "recognizedVersion": "3.1.5 / official 4.1.1",
+      "actualSHA256": {
+        "Dungeons/Binaries/Win64/MCD2Graphics/fsr/amd_fidelityfx_upscaler_dx12.dll": "d0dcccc74a43c44ba435b7a369b456e0970d8a4464e4bd683119b374f2c9fb46"
+      }
+    },
+    "FSRFrameGeneration": {
+      "recognizedVersion": "3.1.6 / ML 4.0.1",
+      "actualSHA256": {
+        "Dungeons/Binaries/Win64/amd_fidelityfx_framegeneration_dx12.dll": "02297beedd285e822d3a64f314cf00faf378dcec0edc47ff0c4dd71b3a8c2f18"
+      }
+    }
+  },
+  "normalExits": [
+    {
+      "run": 1,
+      "route": "Normal window close (Alt+F4)",
+      "shippingCode": 0,
+      "elapsedSeconds": 9.735,
+      "timingMethod": "Timestamp immediately before input tool dispatch to held-handle process exit observed by two-second polling; includes tool-dispatch latency and polling granularity",
+      "heldShippingHandle": true
+    }
+  ],
+  "baseline": {
+    "recoveryEntries": 41,
+    "preferencesAndModStateEntries": 13,
+    "preferencesUnchanged": false,
+    "playerAndAccountSavesRead": false,
+    "playerAndAccountSavesRestored": false,
+    "fixtureRemoved": true,
+    "finalState": "Original 0.2.0-rc.1 installation and all 41 baseline entries restored; no game running; dev.16 artifact retained offline",
+    "restoration": {
+      "baselineEntries": 41,
+      "restoredFileEntries": 41,
+      "mismatches": [],
+      "removedKnownNewFiles": 36,
+      "playerAccountSavesRead": false,
+      "playerAccountSavesRestored": false,
+      "restoredVersion": "0.2.0-rc.1",
+      "sourceBuildUnchanged": true
+    },
+    "preferencesRestored": true
+  },
+  "blockers": [
+    "Unexplained held-handle shipping access-violation exit on run 2.",
+    "FSR Quality timed out with error 22 and produced no successful evaluations."
+  ],
+  "findings": [
+    "Candidate dependency lock links amd/FidelityFX-SDK, which returns 404. The identical pinned SDK commit and exact matching two DLLs were retrieved from official GPUOpen-LibrariesAndSDKs/FidelityFX-SDK.",
+    "Prior Linux fatal exit and prior Windows shutdown delays are historical; this run provides no evidence resolving them.",
+    "Known UI metadata label 0.3.0-preview.1 confirmed in game; manifest and payload identify dev.16.",
+    "Automated pause-key failure with gameplay overlay enabled remains unresolved; overlay-disabled comparison ended at fatal exit.",
+    "HDR Off preference did not establish SDR: swapchain reported HDR10 PQ.",
+    "The monitor retained the previous request route string in raw run-2 evidence despite request.run mismatch; run-2 exitElapsedSeconds was null. The final aggregate correctly classifies it as an unexpected exit, not another Alt+F4 pass."
+  ],
+  "scopeLimit": "FAIL. Stop-on-crash rule followed; incomplete checks remain explicit. No rendering/build/installer code changed, no new candidate built, no release/merge/publication performed. Raw logs and mod slots retained privately, excluded from outputs and repository report.",
+  "unexpectedExits": [
+    {
+      "run": 2,
+      "shippingCode": -1073741819,
+      "hex": "0xC0000005",
+      "heldShippingHandle": true,
+      "matchingExitRequest": false,
+      "elapsedRunObservationSeconds": 261.38,
+      "faultModule": "Not established",
+      "trigger": "Not established; FSR Quality had fallen back before exit"
+    }
+  ],
+  "startupProbe": {
+    "observationSeconds": 27.3,
+    "exitedDuringObservation": false,
+    "mcd2AddonLoaded": true,
+    "displayLatencyAddonLoaded": true,
+    "fgBootstrapLoaded": true,
+    "fgFrameworkLoaded": true,
+    "fgBridgeLoaded": true,
+    "fgGuideAddonLoaded": true,
+    "fgModuleSHA256": {
+      "mcd2-fg-guide-recon.addon64": "4e773dc1aa81c998544664dcbba9221609343a20be059e802555612e7a632c57",
+      "fg-sdk-bridge.dll": "8acef4c3955c71c9a068ee0e31aeff5a63abdd8bdf35b19ebcffdb83474639d3",
+      "dxgi.dll": "80ff6b239cbbccfa07a58a543568ff154032d7036bb517ac7b504cc112c3cbf7",
+      "d3d12.asi": "0938f481825b4fd2eb69d91ae37dbb8dc8876f1c2dfc1daffce0a82cc6b979bb",
+      "mcd2-display-latency.addon64": "41c2d7df147b1f89380cd03b3c4411bf47c233db6afc5a67047023d2df1addee",
+      "mcd2-graphics.addon64": "0d16c5a41c80cea853c09d27bb0cb7024a37e32a951e333ab0da651a46b7d644"
+    },
+    "renoDXLoaded": true
+  },
+  "fsrFailure": {
+    "session": 441490874,
+    "revision": 101,
+    "checksum": 8852296,
+    "world": 2,
+    "phase": 8,
+    "error": 22,
+    "evaluations": 0,
+    "provider": 2,
+    "quality": 1,
+    "sourceScalePercent": 100.0,
+    "renderWidth": 0,
+    "renderHeight": 0,
+    "outputWidth": 0,
+    "outputHeight": 0,
+    "contextReady": true,
+    "sourceRestorationAcknowledgement": 6
+  }
+}
