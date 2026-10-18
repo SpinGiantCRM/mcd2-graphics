@@ -1,41 +1,45 @@
 # Windows/Radeon development qualification
 
-## Provider test candidate: 0.4.0-amd.dev.15
+## Provider test candidate: 0.4.0-amd.dev.16
 
-A UI-only revision moves the gameplay overlay to the top left. Its replacement
-artifact is being built; the current selector is marked for rebuild. Dev.15
-remains the identified provider/installer test baseline, not the final UI
-artifact for release. Final selection and affected UI checks must use the new
-receipt.
+Dev.16 is ready for Windows qualification. It includes the confirmed bootstrap
+trace write/close race correction and the gameplay diagnostics overlay at the
+top left. No completed dev.15 check qualifies these changed candidate bytes.
 
 Use the [current candidate receipt](../qualification/providers/windows-candidate-current.json).
-The selected native artifact includes the approved advanced settings page,
-independent latency controls, sharpness, model/version selection and current
-provider integration. All 46 artifact members were hash-verified. The CI merge
-commit and implementation head have identical source trees.
+All 46 recorded native-artifact files were hash-verified, including the separate
+framework. The CI merge and implementation head have identical source trees;
+62 UI/bootstrap consumed source files also match the current implementation,
+allowing only checkout line-ending differences. Subsequent changes record dev.15
+qualification results and do not change runtime code.
 
-- Implementation: `7c251b7a66846f909d7f50617dc7bfc48a086636`.
-- CI source: `98f1cec1c7f4bea677a297c86c4b69b07b6ac749`.
-- Native inputs: [run 39097048611 / artifact 12124244671](https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/39097048611/artifacts/12124244671).
-- Native archive SHA-256: `2f9051ee3a34a58ed55a1b85794469810130afd0a4411a707ea0f72ace144f3b`.
+- Implementation: `9fb44f41160bc51cee202a0106fedf6eeccd5fe4`.
+- CI source: `a140afb6e04913b039b5113a97c12f11661166d7`.
+- Native inputs and required framework: [run 39109623985 / artifact 12130026833](https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/39109623985/artifacts/12130026833).
+- Native archive SHA-256: `6228b83788991b5a3b6f38e3f67ca730d81b62ee620798660117f6440f9fc56f`.
 
-Installer folders must contain this candidate's manifest and dependency lock;
-verify their hashes and all 17 owned payload files against the selected receipt.
-Do not use an older dev.10/dev.14 installer to qualify this candidate. Framework
-and vendor runtimes remain separate dependencies. CI success establishes build
-checks, not GPU activation, correct images or clean process exits.
+Use the **dev.16** visible installer folder. Verify its manifest, dependency lock
+and all 17 owned payload files against its assembly receipt. Older dev.15 or
+released installers do not qualify dev.16. Framework and vendor runtimes remain
+separate dependencies; extract the native archive above and select
+`experimental-reshade/ReShade64.dll` when the installer asks for ReShade.
+Do not mix a different candidate's framework with this lock. CI success is build
+and packaging evidence; actual Radeon activation, image quality and clean exits
+still require the checklist below.
 
-The in-game metadata currently identifies the preview UI as 0.3.0-preview.1;
-the installer/assembly receipt identifies dev.15. Align the public release
-version and freeze its final hashes before release qualification is closed.
-Earlier qualification reports remain historical; their failures are not erased.
+The game's mod metadata still identifies the preview UI as 0.3.0-preview.1;
+the installer and assembly receipt identify dev.16. Record the manifest and
+payload hashes rather than relying on that in-game label. Align the public
+release version and freeze its final hashes before release qualification closes.
 
-The current dev.15 Linux/NVIDIA session verified advancing DLSS/FG/Reflex
-activity, but a held process handle recorded `0xC0000409` on normal quit.
-Reported GPU/shared-runtime cleanup success does not clear that failure. See the
-[packaging and bounded runtime record](../qualification/providers/amd-dev15-packaging-2026-10-18.json).
-Linux runtime clearance remains blocked; this does not establish the Windows
-result or the failing component.
+Linux release clearance remains pending. Earlier uninstrumented dev.15 quit
+with `0xC0000409`; two later unchanged Steam controls exited 0, including a longer
+FG-active run. The source correction fixes a reproduced logging lifetime defect,
+but is not established as the original game's fatal-exit cause. The complete
+dev.16 artifact has not yet run on Linux. See the
+[bounded runtime record](../qualification/providers/amd-dev15-packaging-2026-10-18.json).
+Windows qualification can proceed independently; these Linux results do not
+establish a Windows/Radeon result.
 
 ## Preparation
 
