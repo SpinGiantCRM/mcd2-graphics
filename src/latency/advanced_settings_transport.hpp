@@ -77,7 +77,8 @@ public:
         if(!versionAt_||now-versionAt_>=1000){
             versions_={};
             moduleVersion(root_/L"ngx-runtime"/L"nvngx_dlss.dll",0,versions_);
-            moduleVersion(root_/L"streamline"/L"sl.interposer.dll",1,versions_);
+            moduleVersion(root_.parent_path()/L"sl.interposer.dll",1,versions_);
+            if(!(versions_.modules&2))moduleVersion(root_/L"streamline"/L"sl.interposer.dll",1,versions_);
             moduleVersion(root_/L"fsr"/L"amd_fidelityfx_upscaler_dx12.dll",2,versions_);
             moduleVersion(root_.parent_path()/L"amd_fidelityfx_framegeneration_dx12.dll",3,versions_);
             versionAt_=now;

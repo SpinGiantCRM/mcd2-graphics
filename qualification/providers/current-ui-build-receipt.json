@@ -3,21 +3,21 @@
   "candidateOnly": true,
   "version": "0.3.0-preview.1",
   "sourceFileSHA256": {
-    "src/ui/ModActor.cs": "64ec70e5701e0f232d6d6e62dbec29157c1c32266f07e59eeb8c9ca0b88b68c4",
+    "src/ui/ModActor.cs": "4bfd0221fa7d31398162631c3f65054fd71f9e6385d259bbf1e6f23acd173513",
     "src/ui/ProviderSaveWords.cs": "ae796d9934e3b418e08e035d67eb1d0b3c256a30631cf37f6a710897812fdfee",
     "src/ui/ProviderMenuClient.cs": "330b9009646f8e8ab007e2e49e987424f4d1336e7b703c4387801709ef23de8d",
     "src/ui/ProviderRuntimeWords.cs": "fa5f8626af17474a0f60557050b55fbc470ac549726b0e969a810910d0bb632b",
     "src/ui/ProviderRuntimeClient.cs": "a5b606f6a58af8aaf40d3b35f92ea0e9d5de76d124ffef16cb68888c72767142",
-    "src/ui/AdvancedSettings.cs": "16312e10c07be2903efad16a2f3806534b9c9ad2ec10651b264af97a72e7ff2b",
-    "src/ui/AdvancedInfoWidget.cs": "305e760c29cdb759e382240f5cdb542ce6cbe59036d6e306358da71e937eb7ad",
+    "src/ui/AdvancedSettings.cs": "2ddd93307a4d569b7a8bb113b3893cfa360b1c6ea4ad38c8d2e1a31883aea458",
+    "src/ui/AdvancedInfoWidget.cs": "ab77045f1f18d2098c4f3d0d585eafdab6f43a6e1426febc67f8ef20c77f693b",
     "src/ui/mod-info.json": "c6a2be6c7020c75eb71cd87df7f6f19d84615be6b7d78aded5da65736c68c0de",
     "build_ui.py": "8e03d494ccbc684fceb438f3fa3a3c34caf1b9d572e4366951caa70e8d6c195e",
     "dependencies.lock.json": "816304d7cd61b9a9254980656c3b3f21495175f6cad94ef1f0520ed7c7b3b1e5"
   },
   "payloadSHA256": {
-    "MCD2Graphics_P.pak": "b1e9c49ff5bf5602440315b0499e77455e57aeb6eb5845015841f12a66d2d79b",
-    "MCD2Graphics_P.ucas": "80899e8823f7e69e936ae860cd8620b493cac1a0164d7211759f203b6022d5c6",
-    "MCD2Graphics_P.utoc": "aa1e544c6b71641f3c4411dbde1bfd6fb3a9ecfc0f961f86c3969a69b038ec10"
+    "MCD2Graphics_P.pak": "738a161d73413a10a18f7975dfde930141673a6189cfde762b8e9da9e629c029",
+    "MCD2Graphics_P.ucas": "82dc55ebff54a7f299b6e37052fbefa51f6c1ea88770f62d8883b85adf869f92",
+    "MCD2Graphics_P.utoc": "67f37b36120f4b34f8d2d6de8a2d34f17ec94af251acf962bbdb737112089dd6"
   },
   "metadataAPI": "Blueprint Loader 2.0 BP_ModInfo; SDK-generated versioned metadata; no popup API",
   "compiler": "NeoRune 1.0.0 / .NET reference pack 10.0.13",
@@ -71,11 +71,11 @@
   "referencePack": "10.0.13",
   "dotnetSDK": "10.0.402",
   "metadataSHA256": {
-    "ModInfo.uasset": "5f2268464d248f8d7ea9c59034bfc7f04702f7f3f8c0fc849c5eb289f0940847",
-    "ModInfo.uexp": "512134c911f28ceb9bfe50e954b1e3ed6dab51c0c839cc1095ce8e13a9eb0024"
+    "ModInfo.uasset": "826249fc3f1ddf4d2202b2064de9deafff30c3728dad91dfc91d151e3f08ea99",
+    "ModInfo.uexp": "0da974925d3f508d1bb9241e590adf6fed97e5b9021f82ae8afbf234b411e54f"
   },
   "WindowsQualified": false,
   "LinuxRuntimeQualified": false,
   "publishedPayloadChanged": false,
-  "archiveSHA256": "864c09fbc912dcc79042b7358950aea5dd4978d7336879853836cabeda4a950b"
+  "archiveSHA256": "82979c1bbba746ed8fcb464755beae8aeb6ecf260d785fdb8e30679e15e26e7c"
 }

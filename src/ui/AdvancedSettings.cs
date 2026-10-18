@@ -104,6 +104,24 @@ public class AdvancedStateSave : USaveGame {
 }
 
 public class AdvancedMenuClient : USaveGame {
+ // Loader choice indices are not NGX preset numbers. Keep the old numeric save
+ // key and wire format intact when migrating to the named selector.
+ public static int PresetValue(int choice,int current){
+  if(choice==0)return 0;if(choice==1)return 11;if(choice==2)return 10;
+  if(choice==3)return 13;if(choice==4)return 12;if(choice==5)return 5;if(choice==6)return 6;
+  return choice==7?current:-1;
+ }
+ public static int PresetChoice(int value){
+  if(value==0)return 0;if(value==11)return 1;if(value==10)return 2;
+  if(value==13)return 3;if(value==12)return 4;if(value==5)return 5;if(value==6)return 6;return 7;
+ }
+ public static string PresetName(int value){
+  if(value==0)return "Auto (quality-dependent)";
+  if(value==11)return "Transformer - Preset K";if(value==10)return "Transformer - Preset J";
+  if(value==13)return "Transformer 2nd Gen - Preset M";if(value==12)return "Transformer 2nd Gen - Preset L";
+  if(value==5)return "CNN - Preset E (legacy)";if(value==6)return "CNN - Preset F (legacy)";
+  return "Custom (manual override: "+value+")";
+ }
  public AdvancedStateSave? State;
  public AdvancedRequestSave? Pending;
  public int Hint;public bool Migrate;public bool Saved;public int Failure;
@@ -167,7 +185,7 @@ public class AdvancedMenuClient : USaveGame {
   int first=14+index*4;return ""+State.Word(first)+"."+State.Word(first+1)+"."+State.Word(first+2)+"."+State.Word(first+3);
  }
  public string Summary(){
-  string text=Failure!=0?"Could not save model hint. Reset or retry.":State==null?"Waiting for settings connection.":!Saved?"Saving model hint...":State.W10!=State.W11?"Model hint saved. Restart to apply.":"Model hint saved.";
-  return text+"\nRequested hint: "+Hint+" (0 = runtime default)\nDLSS SR: "+Version(0)+"\nStreamline: "+Version(1)+"\nFSR SR: "+Version(2)+"\nFSR FG: "+Version(3);
+  string text=Failure!=0?"Could not save model preset. Reset or retry.":State==null?"Waiting for settings connection.":!Saved?"Saving model preset...":State.W10!=State.W11?"Model preset saved. Restart to apply.":"Model preset saved.";
+  return text+"\nSelected: "+PresetName(Hint)+"\nDLSS SR: "+Version(0)+"\nStreamline: "+Version(1)+"\nFSR SR: "+Version(2)+"\nFSR FG: "+Version(3);
  }
 }

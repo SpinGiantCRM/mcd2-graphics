@@ -7,6 +7,16 @@ static class AdvancedTest {
   s.W4=s.Checksum();UGameplayStatics.Slots["MCD2GraphicsAdvancedState"]=s;return s;
  }
  public static void Run(){
+  int[] presets={0,11,10,13,12,5,6};
+  for(int i=0;i<presets.Length;i++){
+   Need(AdvancedMenuClient.PresetValue(i,99)==presets[i]);
+   Need(AdvancedMenuClient.PresetChoice(presets[i])==i);
+  }
+  Need(AdvancedMenuClient.PresetChoice(99)==7&&AdvancedMenuClient.PresetValue(7,99)==99);
+  Need(AdvancedMenuClient.PresetValue(-1,11)==-1&&AdvancedMenuClient.PresetValue(8,11)==-1);
+  Need(AdvancedMenuClient.PresetName(0)=="Auto (quality-dependent)");
+  Need(AdvancedMenuClient.PresetName(11)=="Transformer - Preset K");
+  Need(AdvancedMenuClient.PresetName(99)=="Custom (manual override: 99)");
   UGameplayStatics.Slots.Clear();UGameplayStatics.SaveCount=0;UGameplayStatics.FailSave=false;
   var core=new ProviderMenuClient{Ready=true,Authority=new ProviderAuthoritySave{W5=123,W19=7,W16=unchecked((int)0xfedcba98)}};
   var c=new AdvancedMenuClient{Hint=0,Migrate=true};c.Start();Need(UGameplayStatics.SaveCount==1);
@@ -19,6 +29,7 @@ static class AdvancedTest {
   c.Poll(core);Need(UGameplayStatics.SaveCount==writes);
   c.Select(0,false);c.Poll(core);Need(c.Pending!=null&&c.Pending.W6==2&&c.Pending.W9==0&&c.Pending.W10==0);
   State(sequence:2,status:1,hint:0);c.Poll(core);Need(c.Saved&&c.Hint==0);
+  Need(c.Summary().Contains("Selected: Auto (quality-dependent)")&&!c.Summary().Contains("hint"));
   c.Select(256,false);Need(c.Hint==0&&c.Saved);
   c.Select(30,false);c.Poll(core);Need(c.Pending!=null&&c.Pending.W6==3);
   c.Select(31,false);State(sequence:3,status:1,hint:30);c.Poll(core);Need(!c.Saved&&c.Pending!=null&&c.Pending.W6==4&&c.Pending.W9==31);

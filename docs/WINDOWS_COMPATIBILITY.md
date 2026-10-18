@@ -9,7 +9,11 @@ native candidate; Windows/Radeon coverage remains required.
 The advanced Mods-tab page uses Blueprint Loader's existing 2.0 settings API.
 Keep the separate versioned advanced request/state slots, core session/stamp
 validation, replay refusal, loader-owned persistence, one-key native INI mirror
-and restart-only model-hint semantics. Runtime versions come from held, exact-path
+and restart-only model-override semantics. The named Mods-page selector has its
+own Loader key; preserve the previous numeric key and unknown manual values
+without reinterpreting NGX preset numbers as choice indices. Auto leaves all
+NGX model-preset overrides unset and follows the selected DLSS quality mode.
+Runtime versions come from held, exact-path
 loaded modules and their in-memory version resources; inspecting them must not
 load a provider or authorize a feature. Preserve both-platform protocol/client
 checks, version-library linking and source-matched UI rebuild receipts. Native

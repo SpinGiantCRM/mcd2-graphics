@@ -10,6 +10,24 @@ import build_ui as ui
 
 
 class UIBuildTests(unittest.TestCase):
+    def test_named_dlss_presets_keep_auto_quality_dependent(self):
+        actor = (ui.ROOT / 'src/ui/ModActor.cs').read_text()
+        self.assertIn('ModSetting.Select("dlss_sr_model_preset", "DLSS Model Preset"', actor)
+        self.assertNotIn('ModSetting.Slider("dlss_sr_model"', actor)
+        self.assertIn('"Auto"', actor)
+        # The renderer must allocate fresh NGX parameters and supply the quality
+        # mode while leaving every model-preset override unset for Auto (zero).
+        renderer = (ui.ROOT / 'src/native/ngx_live_fixture.hpp').read_text()
+        create = renderer.split('result=allocate(&c.params);', 1)[1].split('result=create(cmd,', 1)[0]
+        self.assertIn('NVSDK_NGX_Parameter_PerfQualityValue', create)
+        for mode in ('DLAA', 'UltraPerformance', 'MaxPerf', 'Balanced', 'MaxQuality'):
+            self.assertIn('NVSDK_NGX_PerfQuality_Value_' + mode, create)
+        override = create.split('if(model){', 1)[1].split('})ui(c.params,key,model);}', 1)[0]
+        for mode in ('DLAA', 'Quality', 'Balanced', 'Performance', 'UltraPerformance', 'UltraQuality'):
+            key = 'NVSDK_NGX_Parameter_DLSS_Hint_Render_Preset_' + mode
+            self.assertIn(key, override)
+            self.assertEqual(create.count(key), 1)
+
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)
