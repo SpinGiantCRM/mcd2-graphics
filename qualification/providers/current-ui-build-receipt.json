@@ -10,8 +10,8 @@
     "src/ui/ProviderRuntimeClient.cs": "a5b606f6a58af8aaf40d3b35f92ea0e9d5de76d124ffef16cb68888c72767142",
     "src/ui/AdvancedSettings.cs": "582e633d931b016d41c9ae2589376366c8f0cd00a9f055b453f2a6c061ba3ec3",
     "src/ui/AdvancedInfoWidget.cs": "0de0d9e909cb0cf55c19d6cdbf0f08e3cebd62c69e0f6bf572dff9862b9d4295",
-    "src/ui/AdvancedSettingsPanel.cs": "95990f21b32b576d737a844d7939042cae9cadc39359562d824faa3725040a51",
-    "src/ui/NativeSettingsWidgets.cs": "75a41c6b458befcc8654e3e8a5fa926fe73010fbea578d0ced4c3a9494d531bc",
+    "src/ui/AdvancedSettingsPanel.cs": "9f1fee8fb7d9cad2667d7896977de155868a46407e2b3bb385400f4b7f9505a3",
+    "src/ui/NativeSettingsWidgets.cs": "3110705bf8733224e2926b8553e18ff0cefcaac3df579d7dfe6405ec1f679c4d",
     "src/ui/RuntimeDiagnostics.cs": "08ecf4381ce98bedd4dbf235f634f8816d5ad4ebce128073646cd8b138118579",
     "src/ui/RuntimeDiagnosticsOverlay.cs": "c7f6d6eaff561cd5555250223eba124efb3bea0bc95b439f25337c38c5030fa0",
     "src/ui/UpscalingSharpness.cs": "070afd9cfdcf99a1ddc11d8d9cb321235e7daea7933b7e7c31dd824111e60cc8",
@@ -21,8 +21,8 @@
   },
   "payloadSHA256": {
     "MCD2Graphics_P.pak": "a0a4c57d7357c98155c7649676d47d70500b36e07b4d20e7bd8188e143104a1d",
-    "MCD2Graphics_P.ucas": "ef474022a026f3b9867ca6d6dd1185bd865873e57b53a1cbcb5942f2392cc40f",
-    "MCD2Graphics_P.utoc": "baa1382a9218e6884454dd0f7b95993e57f4b45c0b3621366bd2a84e0e74e20b"
+    "MCD2Graphics_P.ucas": "23a8b0163476572dcd9f74a715819ec4f82b4e806afe564282ffeb3be9e3277c",
+    "MCD2Graphics_P.utoc": "68cea2a04b85f0eb07a71370cdc4b4e96c7f8074719c1e6ddb575ec2631ee04a"
   },
   "metadataAPI": "Blueprint Loader 2.0 BP_ModInfo; SDK-generated versioned metadata; no popup API",
   "compiler": "NeoRune 1.0.0 / .NET reference pack 10.0.13",
@@ -82,5 +82,5 @@
   "WindowsQualified": false,
   "LinuxRuntimeQualified": false,
   "publishedPayloadChanged": false,
-  "archiveSHA256": "8b145f0a4c6b261b97d4509afe5b2d89a673e5d8bac62c7a3e4628fabaeb2a8d"
+  "archiveSHA256": "207f757f2dbadbbb3610a7f53a68b2b0a9c10bbbf38c77ec1592efbe4cab52b1"
 }

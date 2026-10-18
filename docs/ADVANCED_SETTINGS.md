@@ -2,12 +2,14 @@
 
 Open **Mods → MCD2 Graphics → Settings** for model overrides and runtime
 information. The page has **Upscaling**, **Frame Generation** and **Diagnostics**
-tabs. A compact, mod-owned navigation row uses the game font, a warm orange
-selection line and a subtle teal hover background. The three categories share
-the available width; no copied main-page strip or screen-specific controller is
-needed. Category selection clears on page exit. The help card fills the available
-space above the bottom action bar, keeping its recommendation footer low; its
-height budget reduces when the outer Loader menu reports overflow.
+tabs. Compact native tab labels sit on a transparent background above a thin
+muted divider. The selected category uses the game's amber underline and soft
+orange glow; inactive categories retain native hover and focus feedback. A
+mod-owned selection group keeps one category active and clears on page exit.
+No main-page backdrop, copied gradient or screen-specific tab controller is
+needed. The help card fills the available space above the bottom action bar,
+keeping its recommendation footer low; its height budget reduces when the outer
+Loader menu reports overflow.
 The mod title, description, master toggle and rows occupy the left two thirds;
 the native framed help pane occupies the right third from the top of the page.
 The frame and background come from newly created native widget shells.

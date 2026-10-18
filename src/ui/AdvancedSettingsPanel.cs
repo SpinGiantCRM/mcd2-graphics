@@ -15,23 +15,25 @@ public class AdvancedSettingsPanel : ModWidget, IModResettable {
  public ModActor? Manager;public UVerticalBox? Controls;
  public USizeBox? BodySizer;public float PaneHeight,PaneHeightLimit;public double PaneViewportHeight;
  public UHorizontalBox? Body;public UHorizontalBoxSlot? LeftSlot;public UOverlay? HelpPane;
- public List<UTextBlock?> TabLabels=new List<UTextBlock?>();public List<UBorder?> TabMarkers=new List<UBorder?>();
+ public UCommonButtonGroupBase? TabGroup;public int StyledCategory;
  public UE.Game.Mods.BlueprintLoader.W_ModsTabContent.UW_ModsTabContent_C? LoaderPage;
  public UPanelSlot? PageSlot;public UOverlaySlot? HelpRootSlot;public UWidget? LeasedPage;
  public FMargin OriginalPagePadding,OwnedPagePadding;public bool LayoutMounted,LayoutYielded,LayoutShapeLogged;public int LayoutBindAttempts;
  public int Category;public int Selected;public List<AdvancedSettingRow> Rows=new List<AdvancedSettingRow>();
  public UE.SpicewoodSettings.Spicewood.UI.SettingsScreen.W_SettingsPanel.UW_SettingsPanel_C? HelpShell;
- public AdvancedInfoWidget? Details;public UGameSettingDetailView? NativeHelp;public List<UButton> Tabs=new List<UButton>();
+ public AdvancedInfoWidget? Details;public UGameSettingDetailView? NativeHelp;public List<UAS_SpicewoodButtonTabAction> Tabs=new List<UAS_SpicewoodButtonTabAction>();
  protected override UWidget? Build(UWidgetTree tree){
+  StyledCategory=-1;
   var column=Ui.Column(tree);if(column==null)return null;
   var left=Ui.Column(tree);Controls=Ui.Column(tree);var tabs=Ui.Row(tree);
+  TabGroup=UGameplayStatics.SpawnObject(Unreal.ClassOf<UCommonButtonGroupBase>(),this) as UCommonButtonGroupBase;if(TabGroup!=null)TabGroup.SetSelectionRequired(true);
   if(tabs!=null){AddTab(tabs,"UPSCALING");AddTab(tabs,"FRAME GENERATION");AddTab(tabs,"DIAGNOSTICS");
-   if(left!=null){var navigation=left.AddChildToVerticalBox(tabs);if(navigation!=null)navigation.SetPadding(new FMargin{Bottom=12});}}
+   if(left!=null){var navigation=left.AddChildToVerticalBox(tabs);if(navigation!=null){navigation.SetHorizontalAlignment(EHorizontalAlignment.HAlign_Left);navigation.SetPadding(new FMargin{Bottom=6});}
+    var divider=NativeSettingsWidgets.CategoryDivider(tree);if(divider!=null){var rule=left.AddChildToVerticalBox(divider);if(rule!=null)rule.SetPadding(new FMargin{Bottom=14});}}}
   if(left!=null&&Controls!=null)left.AddChild(Controls);
   HelpShell=Ui.GameWidget(this,"/SpicewoodSettings/Spicewood/UI/SettingsScreen/W_SettingsPanel.W_SettingsPanel_C") as UE.SpicewoodSettings.Spicewood.UI.SettingsScreen.W_SettingsPanel.UW_SettingsPanel_C;
   NativeHelp=HelpShell==null?NativeSettingsWidgets.HelpCard(this):HelpShell.Details_Settings;
   if(NativeHelp==null)NativeHelp=NativeSettingsWidgets.HelpCard(this);
-  if(NativeHelp!=null&&NativeHelp.Text_SettingName!=null){var font=NativeHelp.Text_SettingName.Font;font.Size=22;foreach(var label in TabLabels)if(label!=null)label.SetFont(font);}
   HelpPane=NativeSettingsWidgets.HelpFrame(tree,HelpShell,NativeHelp);Body=Ui.Row(tree);
   if(Body!=null){if(left!=null){LeftSlot=Body.AddChildToHorizontalBox(left);if(LeftSlot!=null){LeftSlot.SetSize(new FSlateChildSize{SizeRule=ESlateSizeRule.Fill,Value=2});LeftSlot.SetPadding(Ui.Margin(8));}}
    if(HelpPane!=null){var slot=Body.AddChildToHorizontalBox(HelpPane);if(slot!=null){slot.SetSize(new FSlateChildSize{SizeRule=ESlateSizeRule.Fill,Value=1});slot.SetPadding(Ui.Margin(8));}}
@@ -39,14 +41,15 @@ public class AdvancedSettingsPanel : ModWidget, IModResettable {
   return column;
  }
  void AddTab(UHorizontalBox parent,string title){
-  var tab=NativeSettingsWidgets.CategoryButton(WidgetTree,title,out UTextBlock? label,out UBorder? marker);if(tab==null)return;
-  var slot=parent.AddChildToHorizontalBox(tab);if(slot!=null){slot.SetSize(new FSlateChildSize{SizeRule=ESlateSizeRule.Fill,Value=1});slot.SetPadding(new FMargin{Right=6});}Tabs.Add(tab);TabLabels.Add(label);TabMarkers.Add(marker);
+  var tab=NativeSettingsWidgets.CategoryTab(this,title);if(tab==null)return;tab.SetIsSelectable(true);
+  var slot=parent.AddChildToHorizontalBox(tab);if(slot!=null)slot.SetPadding(new FMargin{Right=18});Tabs.Add(tab);if(TabGroup!=null)TabGroup.AddWidget(tab);
  }
+ public void TabClicked(UCommonButtonBase button){for(int i=0;i<Tabs.Count;i++)if(Tabs[i]==button){Category=i;Populate();return;}}
  public override void Construct(){UGameplayStatics.GetAllActorsOfClass(this,Unreal.ClassOf<ModActor>(),out List<AActor> actors);if(actors.Count>0)Manager=actors[0] as ModActor;if(Manager!=null)Manager.DiagnosticObservers++;
-  if(Tabs.Count==3){Tabs[0].OnClicked+=Upscaling;Tabs[1].OnClicked+=FrameGeneration;Tabs[2].OnClicked+=Diagnostics;}
+  foreach(var tab in Tabs)tab.OnButtonBaseClicked+=TabClicked;
   BindLoaderPage();Populate();Timer.Start(this,"Refresh",0.5f,true);Timer.Start(this,"LayoutRefresh",0.1f,true);}
  public override void Destruct(){Timer.Stop(this,"LayoutRefresh");RestorePageLayout();LoaderPage=null;LayoutBindAttempts=0;LayoutYielded=false;ClearTabs();Timer.Stop(this,"Refresh");Rows.Clear();if(Manager!=null&&Manager.DiagnosticObservers>0)Manager.DiagnosticObservers--;
-  if(Tabs.Count==3){Tabs[0].OnClicked-=Upscaling;Tabs[1].OnClicked-=FrameGeneration;Tabs[2].OnClicked-=Diagnostics;}Manager=null;}
+  foreach(var tab in Tabs)tab.OnButtonBaseClicked-=TabClicked;Manager=null;}
  public void Upscaling(){Category=0;Populate();}public void FrameGeneration(){Category=1;Populate();}public void Diagnostics(){Category=2;Populate();}
  public void Populate(){
   if(Controls==null||Manager==null)return;Controls.ClearChildren();Rows.Clear();Details=null;
@@ -55,8 +58,12 @@ public class AdvancedSettingsPanel : ModWidget, IModResettable {
   Selected=Category==0?0:Category==1?2:4;ShowHelp(Selected);Refresh();
  }
  void Add(int setting){if(Controls==null)return;var row=Ui.Create(this,Unreal.ClassOf<AdvancedSettingRow>()) as AdvancedSettingRow;if(row==null)return;row.Panel=this;row.Setting=setting;Rows.Add(row);Controls.AddChild(row);row.Refresh();}
- public void ClearTabs(){for(int i=0;i<Tabs.Count;i++)NativeSettingsWidgets.SetCategorySelected(Tabs[i],TabLabels[i],TabMarkers[i],false);}
- public void SelectCategory(){for(int i=0;i<Tabs.Count;i++)NativeSettingsWidgets.SetCategorySelected(Tabs[i],TabLabels[i],TabMarkers[i],i==Category);}
+ public void ClearTabs(){if(StyledCategory<0)return;if(TabGroup!=null){TabGroup.SetSelectionRequired(false);TabGroup.DeselectAll();}foreach(var tab in Tabs)tab.ClearSelection();StyledCategory=-1;}
+ public void SelectCategory(){
+  if(StyledCategory==Category&&(TabGroup==null||TabGroup.GetSelectedButtonIndex()==Category))return;
+  if(TabGroup!=null)TabGroup.SetSelectionRequired(true);for(int i=0;i<Tabs.Count;i++)if(i!=Category)Tabs[i].ClearSelection();
+  if(TabGroup!=null)TabGroup.SelectButtonAtIndex(Category,false);else if(Category>=0&&Category<Tabs.Count)Tabs[Category].SetIsSelected(true,false);StyledCategory=Category;
+ }
  public void Refresh(){if(ActiveBranch(this))SelectCategory();foreach(var row in Rows)row.Refresh();ShowHelp(Selected);}
  // A bounded, reversible layout lease on this mod's Loader page. Header widgets
  // and the master toggle stay Loader-owned; only their page slot is narrowed.

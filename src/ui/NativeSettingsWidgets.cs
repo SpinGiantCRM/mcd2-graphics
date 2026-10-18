@@ -8,25 +8,18 @@ using UE.GameSettings;
 using UE.Angelscript;
 public static class NativeSettingsWidgets {
  public static UGameSettingDetailView? HelpCard(UObject owner){return Ui.GameWidget(owner,"/SpicewoodSettings/Spicewood/UI/SettingsScreen/W_SettingsDetailView.W_SettingsDetailView_C") as UGameSettingDetailView;}
- // A mod-owned navigation row. Native fonts and restrained colour keep this
- // distinct from the main page tabs; no screen controller or asset lookup.
- public static UButton? CategoryButton(UWidgetTree tree,string title,out UTextBlock? label,out UBorder? marker){
-  var button=UE.Engine.UGameplayStatics.SpawnObject(Unreal.ClassOf<UButton>(),tree) as UButton;
-  label=Ui.Text(tree,title,22);marker=Ui.Panel(tree,null,Ui.Color(0.03f,0.065f,0.075f,1),0);
-  var column=Ui.Column(tree);if(button==null||column==null)return button;button.IsFocusable=true;
-  if(label!=null){var text=column.AddChildToVerticalBox(label);if(text!=null){text.SetHorizontalAlignment(UE.SlateCore.EHorizontalAlignment.HAlign_Center);text.SetVerticalAlignment(UE.SlateCore.EVerticalAlignment.VAlign_Center);text.SetPadding(new UE.SlateCore.FMargin{Left=16,Right=16,Top=14,Bottom=14});}}
-  var line=UE.Engine.UGameplayStatics.SpawnObject(Unreal.ClassOf<USizeBox>(),tree) as USizeBox;
-  if(line!=null&&marker!=null){line.SetHeightOverride(3);line.AddChild(marker);column.AddChild(line);marker.SetVisibility(ESlateVisibility.HitTestInvisible);}
-  var content=button.AddChild(column) as UButtonSlot;if(content!=null){content.SetPadding(Ui.Margin(0));content.SetHorizontalAlignment(UE.SlateCore.EHorizontalAlignment.HAlign_Fill);content.SetVerticalAlignment(UE.SlateCore.EVerticalAlignment.VAlign_Fill);}
-  SetCategorySelected(button,label,marker,false);return button;
+ // Reuse the native label, focus response and amber selection glow without
+ // a copied main-page backdrop or screen-specific tab controller.
+ public static UAS_SpicewoodButtonTabAction? CategoryTab(UObject owner,string title){
+  var tab=Ui.GameWidget(owner,"/OreUI/UI/Button/W_SpicewoodTabButton.W_SpicewoodTabButton_C") as UAS_SpicewoodButtonTabAction;if(tab==null)return null;
+  tab.SetButtonText(title);tab.PreConstruct(false);tab.UpdateButtonText(title);
+  if(tab.ButtonTemplate!=null){tab.ButtonTemplate.bIsButtonTextCentered=true;tab.ButtonTemplate.PreConstruct(false);}
+  SetText(tab.TextBlockWidget,title);return tab;
  }
- static UE.SlateCore.FSlateBrush CategoryBrush(float r,float g,float b,float a){return new UE.SlateCore.FSlateBrush{DrawAs=UE.SlateCore.ESlateBrushDrawType.Image,TintColor=Ui.SlateColor(Ui.Color(r,g,b,a))};}
- public static void SetCategorySelected(UButton button,UTextBlock? label,UBorder? marker,bool selected){
-  var style=button.WidgetStyle;style.Normal=selected?CategoryBrush(0.012f,0.035f,0.045f,0.9f):CategoryBrush(0,0,0,0);
-  style.Hovered=CategoryBrush(0.035f,0.075f,0.085f,0.8f);style.Pressed=CategoryBrush(0.055f,0.10f,0.11f,0.9f);
-  style.NormalPadding=Ui.Margin(0);style.PressedPadding=Ui.Margin(0);button.SetStyle(style);button.SetBackgroundColor(Ui.Color(1,1,1,1));
-  if(label!=null)label.SetColorAndOpacity(Ui.SlateColor(selected?Ui.Color(1,0.93f,0.80f,1):Ui.Color(0.48f,0.59f,0.62f,1)));
-  if(marker!=null)marker.SetBrushColor(selected?Ui.Color(1,0.36f,0.006f,1):Ui.Color(0.03f,0.065f,0.075f,1));
+ public static USizeBox? CategoryDivider(UWidgetTree tree){
+  var line=UE.Engine.UGameplayStatics.SpawnObject(Unreal.ClassOf<USizeBox>(),tree) as USizeBox;
+  var ink=Ui.Panel(tree,null,Ui.Color(0.035f,0.065f,0.075f,0.65f),0);if(line==null||ink==null)return null;
+  line.SetHeightOverride(1);line.AddChild(ink);line.SetVisibility(ESlateVisibility.HitTestInvisible);return line;
  }
  // The frame is owned by W_SettingsPanel, not W_SettingsDetailView. Reparent
  // only the newly created shell's images; never touch a live game settings page.
