@@ -24,7 +24,7 @@ static_assert(sizeof(MCD2FsrQualityV1)==40);
 extern "C" {
  int mcd2_fsr_create_v1(void *device,const wchar_t *verifiedRuntime,
   uint32_t renderWidth,uint32_t renderHeight,uint32_t outputWidth,uint32_t outputHeight,void **session);
- // Explicit implementation: 1 = analytical 3.1.5; 2 = portable INT8 4.1.1r11.
+ // Explicit implementation: 1 = analytical 3.1.5; 2 = portable INT8 4.1.1r11; 3 = official AMD 4.1.1.
  // An explicit selection never falls back to a differently named provider.
  int mcd2_fsr_create_v2(void *device,const wchar_t *verifiedRuntime,uint32_t implementation,
   uint32_t renderWidth,uint32_t renderHeight,uint32_t outputWidth,uint32_t outputHeight,void **session);

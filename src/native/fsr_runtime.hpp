@@ -1,6 +1,7 @@
 #pragma once
 #include <bcrypt.h>
 #include "../providers/runtime_diagnostics.h"
+#include "../providers/fsr_hardware_policy.hpp"
 #include "../../experiments/providers/fsr_game_bridge.h"
 #include "../providers/sr_runtime_protocol.hpp"
 #include "../providers/sr_runtime_snapshot.h"
@@ -12,7 +13,7 @@
 namespace fsr_runtime {
 namespace p=mcd2::providers;
 static p::SrRuntimeState state;
-static unsigned verifiedImplementation=0;
+static unsigned verifiedImplementation=0,officialHardware=0;static a::device* identifiedDevice=nullptr;
 static p::SrContext context;
 static std::uint32_t requestSequence=0;
 static bool requested=false,current=false,contextAvailable=false,restoring=false;
@@ -208,7 +209,7 @@ static int load(Generation& c){
  const auto folder=asset_root/L"fsr";
  static const unsigned preference=GetPrivateProfileIntW(L"FSR",L"UpscalingVersion",0,(asset_root/L"DependencyOverrides.ini").c_str());
  if(preference>2)return -4;
- c.implementationChoice=preference==2?2:1;
+ c.implementationChoice=preference==1?1:(officialHardware&1)?3:preference==2?2:1;
  c.runtimePath=(c.implementationChoice==2?folder/L"portable":folder)/L"amd_fidelityfx_upscaler_dx12.dll";
  if(!hash_matches(folder/L"mcd2-fsr-game-bridge.dll",MCD2_FSR_BRIDGE_SHA256)||
   !hash_matches(c.runtimePath,c.implementationChoice==2?"8192ea97620f8e6407bff346bf905f0d555ff73d89fe14616eb1fa5e41ab3175":"d0dcccc74a43c44ba435b7a369b456e0970d8a4464e4bd683119b374f2c9fb46"))return -1;
@@ -223,6 +224,9 @@ static int load(Generation& c){
  return c.create&&c.dispatch&&c.quality&&c.destroy&&c.info&&c.implementation?0:-3;
 }
 static void present(a::command_queue *q,std::unique_lock<std::recursive_mutex>& guard){
+ auto device=q->get_device();if(device!=identifiedDevice){identifiedDevice=device;officialHardware=0;unsigned vendor=0,id=0;char name[256]{};
+  if(device&&device->get_property(a::device_properties::vendor_id,&vendor)&&device->get_property(a::device_properties::device_id,&id)&&device->get_property(a::device_properties::description,name)){name[255]=0;officialHardware=p::fsrOfficialHardware(vendor,id,name);}}
+
  auto module=GetModuleHandleW(L"mcd2-display-latency.addon64");
  auto enabled=module?reinterpret_cast<decltype(&mcd2_menu_enabled_v1)>(GetProcAddress(module,"mcd2_menu_enabled_v1")):nullptr;
  if(enabled&&enabled()==1)menuOwner=true; // Never revert to legacy preferences on a transport failure.
@@ -356,7 +360,7 @@ static void fsr_runtime_reset(a::command_list *cmd){if(!fsr_runtime::generation)
 static void fsr_runtime_forget(a::command_list *cmd){if(fsr_runtime::generation){auto &cache=fsr_runtime::generation->borrows;
  cache.reset_pending.erase(cmd);cache.reset_epochs.erase(cmd);cache.forget(cmd);}}
 static void fsr_runtime_submit(a::command_queue *q,a::command_list *cmd){if(fsr_runtime::generation&&fsr_runtime::generation->borrows.recordings.contains(cmd)&&fsr_runtime::generation->queue!=q){fsr_runtime::generation->borrows.blocked=true;fsr_runtime::stop(18);}}
-static void fsr_runtime_destroy_queue(a::command_queue *q){if(fsr_runtime::generation&&fsr_runtime::generation->queue==q){
+static void fsr_runtime_destroy_queue(a::command_queue *q){if(q->get_device()==fsr_runtime::identifiedDevice){fsr_runtime::identifiedDevice=nullptr;fsr_runtime::officialHardware=0;}if(fsr_runtime::generation&&fsr_runtime::generation->queue==q){
  fsr_runtime::generation->borrows.blocked=true;fsr_runtime::generation->queue=nullptr;fsr_runtime::stop(27);}}
 extern "C" __declspec(dllexport) int mcd2_sr_runtime_v1(MCD2SrRuntimeSnapshotV1* out){
  if(!out||out->size!=sizeof(*out))return -1;std::unique_lock guard(lock,std::try_to_lock);if(!guard.owns_lock())return -2;
@@ -367,11 +371,11 @@ extern "C" __declspec(dllexport) int mcd2_sr_runtime_v1(MCD2SrRuntimeSnapshotV1*
 extern "C" __declspec(dllexport) int mcd2_sr_diagnostics_v1(MCD2SrDiagnosticsV1* out){
  if(!out||out->size!=sizeof(*out)||mcd2::process_exit::terminating())return -1;
  std::unique_lock guard(lock,std::try_to_lock);if(!guard.owns_lock())return -2;
- *out={sizeof(*out),0,0,fsr_runtime::menuWorld,fsr_runtime::verifiedImplementation,0,0};
+ *out={sizeof(*out),0,0,fsr_runtime::menuWorld,fsr_runtime::verifiedImplementation,fsr_runtime::officialHardware,0};
  if(fsr_runtime::generation&&fsr_runtime::state.phase==mcd2::providers::SrPhase::Active&&!fsr_runtime::state.error){
   out->provider=2;out->revision=fsr_runtime::state.intent.revision;out->world=fsr_runtime::state.world;
   // The active context's provider ID was queried and matched to this explicitly
-  // selected implementation by create_v1, before the first successful dispatch.
+  // selected implementation by create_v2, before the first successful dispatch.
   out->implementation=fsr_runtime::generation->implementationVersion;out->evaluations=fsr_runtime::state.evaluations;
  }else if(ui_control.phase==2&&lean.wanted&&!lean.failed&&!lean.stop){
   out->provider=1;out->revision=ui_control.applied_revision;out->evaluations=lean.evaluations;

@@ -6,7 +6,7 @@ using UE.Engine;
 public class DiagnosticsRequestSave : USaveGame {public int SchemaVersion,SessionId,Enabled;}
 public class DiagnosticsStateSave : USaveGame {
  public int SchemaVersion,SessionId,Revision,Sample,WorldGeneration,SrProvider,SrFrames,FsrSrVersion;
- public int FgProvider,FgActive,FgFault,FgRendered,FgGenerated,FsrFgVersion,ReflexMode,ReflexFrames,AmdMode,AmdFrames,FgPresetStatus;
+ public int FgProvider,FgActive,FgFault,FgRendered,FgGenerated,FsrFgVersion,ReflexMode,ReflexFrames,AmdMode,AmdFrames,FgPresetStatus,FsrHardware;
 }
 public class RuntimeDiagnosticsClient : USaveGame {
  public DiagnosticsStateSave? State;
@@ -25,7 +25,7 @@ public class RuntimeDiagnosticsClient : USaveGame {
   if(!enabled||session==0||menu==null||menu.Authority==null){State=null;return;}
   var next=UGameplayStatics.LoadGameFromSlot("MCD2GraphicsDiagnosticsState",0) as DiagnosticsStateSave;
   if(next==null||next.SchemaVersion!=1||next.SessionId!=session||next.Revision!=menu.Authority.W19||next.Sample<1||next.WorldGeneration<0||next.SrFrames<0||next.FgRendered<0||next.FgGenerated<0||next.ReflexFrames<0||next.AmdFrames<0||next.FgActive<0||next.FgActive>1||
-     next.SrProvider<0||next.SrProvider>2||next.FgProvider<0||next.FgProvider>2||next.FgFault<0||next.ReflexMode<0||next.ReflexMode>2||next.AmdMode<0||next.AmdMode>1){State=null;return;}
+     next.FsrHardware<0||next.FsrHardware>3||next.FsrHardware==2||next.SrProvider<0||next.SrProvider>2||next.FgProvider<0||next.FgProvider>2||next.FgFault<0||next.ReflexMode<0||next.ReflexMode>2||next.AmdMode<0||next.AmdMode>1){State=null;return;}
   int world=manager.ProviderRuntime==null?0:manager.ProviderRuntime.WorldGeneration;
   bool same=lastSession==session&&lastRevision==next.Revision&&lastWorld==world;
   if(!same){sample=0;age=0;}

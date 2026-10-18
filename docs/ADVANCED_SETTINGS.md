@@ -2,7 +2,7 @@
 
 Open **Mods → MCD2 Graphics → Settings** for model overrides and runtime
 information. The page has **Upscaling**, **Frame Generation** and **Diagnostics**
-tabs, with persistent help beside the selected control. Mouse, keyboard arrows
+tabs, using the game’s own tab buttons and bordered help card beside the selected control. Mouse, keyboard arrows
 and controller directions change values. Popup tooltips are not used. Everyday upscaler, quality, render scale, sharpness, frame generation,
 HDR and independent low-latency controls remain under **Settings → Video**.
 
@@ -60,16 +60,21 @@ See [NVIDIA's driver preset definitions](https://github.com/NVIDIA/nvapi/blob/ma
 
 ## FSR versions
 
-The Upscaling tab offers **Auto**, **3.1 — Analytical** and **4.1 — INT8
-(Experimental)**. Auto uses 3.1.5. The explicit 4.1 choice uses the separately
-acquired [portable 4.1.1r11 build](https://github.com/daniel-h-0/bc250-fsr4-fork/tree/v4/dll),
-whose INT8 implementation can run on a wider range of GPUs. It is not bundled in
-installer archives. Its source, notices and exact external runtime identity must
-be retained. An explicit selection requires the exact queried implementation;
-it never silently substitutes 3.1. Restart after changing it.
+The Upscaling tab offers **Auto**, **3.1 — Analytical** and **4.1**.
+On recognized Radeon RX 7000/9000 desktop GPUs, Auto and explicit 4.1 select
+AMD's official 4.1.1 implementation from the official runtime. A compatible
+AMD driver is still required; hardware recognition does not prove activation.
+Other GPUs show **4.1 — INT8 (Experimental)**, and Auto uses 3.1.5. Their explicit
+4.1 choice uses the separately acquired
+[portable 4.1.1r11 build](https://github.com/daniel-h-0/bc250-fsr4-fork/tree/v4/dll).
+This community implementation is not bundled in installer archives. Keep its
+source, notices and exact external runtime identity. Unknown devices are treated
+conservatively. Explicit implementation choices never silently substitute 3.1.
+Restart after changing versions. See
+[AMD's hardware requirements](https://gpuopen.com/learn/amd-fsr-sdk-2-3-blog/).
 
 The Frame Generation tab independently offers **Auto**, **3.1 — Analytical**
-and **4.0 — ML (Experimental)**. Auto uses 3.1.6. ML FG requires a compatible GPU,
+and **4.0 — ML**, labelled unsupported on GPUs outside the recognized Radeon RX 9000 desktop families. Auto uses 3.1.6. ML FG requires a compatible GPU,
 driver and device-reported 4.0.1 provider. Portable FSR 4 upscaling does not make
 ML FG portable. Unsupported explicit selections are refused.
 
@@ -119,3 +124,11 @@ that change. Selecting a new sharpness value permits it to take control again.
 **Reset graphics** resets the sharpness slider along with the Video settings.
 Reflex and Anti-Lag 2 remain independently selectable with FG Off on supported
 hardware; unsupported driver APIs are not represented as active features.
+
+## Reusing the native menu widgets
+
+Blueprint Loader and NeoRune remain unmodified. The reusable MIT-licensed
+[`NativeSettingsWidgets.cs`](../src/ui/NativeSettingsWidgets.cs) helper creates
+the game's settings tabs and detail card through Loader's existing custom-widget
+API. It references installed game widgets and redistributes no game assets. Other
+mod authors can reuse it; no Loader fork or Loader API extension is required.

@@ -21,7 +21,7 @@ inline void publish(const std::filesystem::path& saves,unsigned session,unsigned
  auto getFg=module?reinterpret_cast<Fg>(GetProcAddress(module,"mcd2_fg_diagnostics_v1")):nullptr;
  if(!getFg||getFg(&fg))fg={sizeof(fg),0,0,0,0,0,0,0};
  std::map<std::string,unsigned> fields={{"SchemaVersion",1},{"SessionId",session},{"Revision",revision},{"Sample",++sample},
-  {"WorldGeneration",sr.world},{"SrProvider",sr.provider},{"SrFrames",counter(sr.evaluations)},{"FsrSrVersion",sr.implementation},
+  {"WorldGeneration",sr.world},{"SrProvider",sr.provider},{"SrFrames",counter(sr.evaluations)},{"FsrSrVersion",sr.implementation},{"FsrHardware",sr.capabilities},
   {"FgProvider",fg.provider},{"FgActive",fg.active},{"FgFault",fg.fault},{"FgRendered",counter(fg.rendered)},{"FgGenerated",counter(fg.generated)},
   {"FsrFgVersion",fg.implementation},{"FgPresetStatus",GetPrivateProfileIntW(L"Runtime",L"FrameGenerationPresetStatus",0,ini.c_str())},{"ReflexMode",reflexMode},{"ReflexFrames",counter(reflexFrames)},{"AmdMode",amdMode},{"AmdFrames",counter(amdFrames)}};
  const auto path=saves/L"MCD2GraphicsDiagnosticsState.sav";auto seed=read(path);std::map<std::string,unsigned> old;

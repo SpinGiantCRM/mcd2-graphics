@@ -6,43 +6,51 @@ using UE.Engine;
 using UE.UMG;
 using UE.SlateCore;
 using UE.Angelscript;
+using UE.GameSettings;
+using UE.CommonUI;
 
 // Embedded in Blueprint Loader's Mods page. Each category has a bounded list;
 // help stays visible beside it rather than adding a paragraph below every row.
 public class AdvancedSettingsPanel : ModWidget, IModResettable {
- public ModActor? Manager;public UVerticalBox? Controls;public UTextBlock? HelpTitle;public UTextBlock? HelpBody;public UTextBlock? Footer;
+ public ModActor? Manager;public UVerticalBox? Controls;
  public int Category;public int Selected;public List<AdvancedSettingRow> Rows=new List<AdvancedSettingRow>();
- public AdvancedInfoWidget? Details;
+ public AdvancedInfoWidget? Details;public UGameSettingDetailView? NativeHelp;public List<UAS_TabButton_Settings> Tabs=new List<UAS_TabButton_Settings>();
  protected override UWidget? Build(UWidgetTree tree){
   var column=Ui.Column(tree);if(column==null)return null;
-  var tabs=Ui.Row(tree);if(tabs!=null){var up=WithSounds(Ui.Button(tree,"UPSCALING",22));var fg=WithSounds(Ui.Button(tree,"FRAME GENERATION",22));var diag=WithSounds(Ui.Button(tree,"DIAGNOSTICS",22));
-   if(up!=null){up.OnClicked+=Upscaling;tabs.AddChild(up);}if(fg!=null){fg.OnClicked+=FrameGeneration;tabs.AddChild(fg);}if(diag!=null){diag.OnClicked+=Diagnostics;}column.AddChild(tabs);}
-  var body=Ui.Row(tree);Controls=Ui.Column(tree);var help=Ui.Column(tree);
-  HelpTitle=Ui.Text(tree,"ADVANCED GRAPHICS",26);HelpBody=Ui.Text(tree,"Select a setting to see its description.",22);Footer=Ui.Text(tree,"",22);
-  if(HelpBody!=null)HelpBody.SetAutoWrapText(true);if(Footer!=null)Footer.SetAutoWrapText(true);
-  if(help!=null){if(HelpTitle!=null)help.AddChild(HelpTitle);if(HelpBody!=null)help.AddChild(HelpBody);if(Footer!=null)help.AddChild(Footer);}
+  var tabs=Ui.Row(tree);if(tabs!=null){AddTab(tabs,"UPSCALING");AddTab(tabs,"FRAME GENERATION");AddTab(tabs,"DIAGNOSTICS");column.AddChild(tabs);}
+  var body=Ui.Row(tree);Controls=Ui.Column(tree);
+  NativeHelp=NativeSettingsWidgets.HelpCard(this);
   if(body!=null){if(Controls!=null){var slot=body.AddChildToHorizontalBox(Controls);if(slot!=null){slot.SetSize(new FSlateChildSize{SizeRule=ESlateSizeRule.Fill,Value=0.60f});slot.SetPadding(Ui.Margin(10));}}
-   var panel=Ui.Panel(tree,help,Ui.Color(0.02f,0.06f,0.08f,0.70f),24);if(panel!=null){var slot=body.AddChildToHorizontalBox(panel);if(slot!=null){slot.SetSize(new FSlateChildSize{SizeRule=ESlateSizeRule.Fill,Value=0.40f});slot.SetPadding(Ui.Margin(10));}}
+   if(NativeHelp!=null){var slot=body.AddChildToHorizontalBox(NativeHelp);if(slot!=null){slot.SetSize(new FSlateChildSize{SizeRule=ESlateSizeRule.Fill,Value=0.40f});slot.SetPadding(Ui.Margin(10));}}
    var size=UGameplayStatics.SpawnObject(Unreal.ClassOf<USizeBox>(),tree) as USizeBox;if(size!=null){size.SetMinDesiredHeight(470);size.AddChild(body);column.AddChild(size);}else column.AddChild(body);}
   return column;
  }
- public override void Construct(){UGameplayStatics.GetAllActorsOfClass(this,Unreal.ClassOf<ModActor>(),out List<AActor> actors);if(actors.Count>0)Manager=actors[0] as ModActor;Populate();Timer.Start(this,"Refresh",0.5f,true);}
- public override void Destruct(){Timer.Stop(this,"Refresh");Rows.Clear();Manager=null;}
+ void AddTab(UHorizontalBox parent,string title){
+  var tab=NativeSettingsWidgets.CategoryTab(this,title);if(tab==null)return;
+  tab.SetIsSelectable(true);tab.SetIsSelected(Tabs.Count==Category,false);
+  var slot=parent.AddChildToHorizontalBox(tab);if(slot!=null){slot.SetSize(new FSlateChildSize{SizeRule=ESlateSizeRule.Fill,Value=1});slot.SetPadding(Ui.Margin(4));}Tabs.Add(tab);
+ }
+ public void TabClicked(UCommonButtonBase button){for(int i=0;i<Tabs.Count;i++)if(Tabs[i]==button){Category=i;Populate();return;}}
+ public override void Construct(){UGameplayStatics.GetAllActorsOfClass(this,Unreal.ClassOf<ModActor>(),out List<AActor> actors);if(actors.Count>0)Manager=actors[0] as ModActor;if(Manager!=null)Manager.DiagnosticObservers++;foreach(var tab in Tabs)tab.OnButtonBaseClicked+=TabClicked;Populate();Timer.Start(this,"Refresh",0.5f,true);}
+ public override void Destruct(){Timer.Stop(this,"Refresh");Rows.Clear();if(Manager!=null&&Manager.DiagnosticObservers>0)Manager.DiagnosticObservers--;foreach(var tab in Tabs)tab.OnButtonBaseClicked-=TabClicked;Manager=null;}
  public void Upscaling(){Category=0;Populate();}public void FrameGeneration(){Category=1;Populate();}public void Diagnostics(){Category=2;Populate();}
  public void Populate(){
   if(Controls==null||Manager==null)return;Controls.ClearChildren();Rows.Clear();Details=null;
   if(Category==0){Add(0);Add(1);}else if(Category==1){Add(2);Add(3);}else{Add(4);Add(5);Details=Ui.Create(this,Unreal.ClassOf<AdvancedInfoWidget>()) as AdvancedInfoWidget;if(Details!=null){var scroll=UGameplayStatics.SpawnObject(Unreal.ClassOf<UScrollBox>(),WidgetTree) as UScrollBox;if(scroll!=null){scroll.AddChild(Details);var box=UGameplayStatics.SpawnObject(Unreal.ClassOf<USizeBox>(),WidgetTree) as USizeBox;if(box!=null){box.SetHeightOverride(300);box.AddChild(scroll);Controls.AddChild(box);}}}}
+  for(int i=0;i<Tabs.Count;i++)Tabs[i].SetIsSelected(i==Category,false);
   Selected=Category==0?0:Category==1?2:4;ShowHelp(Selected);Refresh();
  }
  void Add(int setting){if(Controls==null)return;var row=Ui.Create(this,Unreal.ClassOf<AdvancedSettingRow>()) as AdvancedSettingRow;if(row==null)return;row.Panel=this;row.Setting=setting;Rows.Add(row);Controls.AddChild(row);row.Refresh();}
- public void Refresh(){foreach(var row in Rows)row.Refresh();}
+ public void Refresh(){foreach(var row in Rows)row.Refresh();ShowHelp(Selected);}
  public void FocusRow(int setting,int direction){for(int i=0;i<Rows.Count;i++)if(Rows[i].Setting==setting){int target=i+direction;if(target<0)target=Rows.Count-1;if(target>=Rows.Count)target=0;Rows[target].SetUserFocus(World.PlayerController(this));ShowHelp(Rows[target].Setting);return;}}
  public string Title(int setting){if(setting==0)return "DLSS Model Preset";if(setting==1)return "FSR Upscaling Version";if(setting==2)return "DLSS FG Preset";if(setting==3)return "FSR FG Version";if(setting==4)return "Show Runtime Details";return "Show In-Game Diagnostics";}
+ public bool OfficialSr(){return Manager!=null&&Manager.Diagnostics!=null&&Manager.Diagnostics.Fresh&&Manager.Diagnostics.State!=null&&(Manager.Diagnostics.State.FsrHardware&1)!=0;}
+ public bool OfficialFg(){return Manager!=null&&Manager.Diagnostics!=null&&Manager.Diagnostics.Fresh&&Manager.Diagnostics.State!=null&&(Manager.Diagnostics.State.FsrHardware&2)!=0;}
  public List<FText> Choices(int setting){
   if(setting==0)return new List<FText>{"Auto","E - CNN (Legacy)","F - CNN (Legacy)","J - Transformer","K - Transformer","L - Transformer 2nd Gen","M - Transformer 2nd Gen"};
-  if(setting==1)return new List<FText>{"Auto","3.1 - Analytical","4.1 - INT8 (Experimental)"};
+  if(setting==1)return new List<FText>{"Auto","3.1 - Analytical",OfficialSr()?"4.1 - Official AMD":"4.1 - INT8 (Experimental)"};
   if(setting==2)return new List<FText>{"Auto","A - Standard","B - UI Recomposition","C - Performance"};
-  if(setting==3)return new List<FText>{"Auto","3.1 - Analytical","4.0 - ML (Experimental)"};return new List<FText>{"Off","On"};
+  if(setting==3)return new List<FText>{"Auto","3.1 - Analytical",OfficialFg()?"4.0 - ML":"4.0 - ML (Unsupported GPU)"};return new List<FText>{"Off","On"};
  }
  public int Value(int setting){if(Manager==null)return 0;if(setting==0)return Manager.Advanced==null?0:AdvancedMenuClient.PresetChoice(Manager.Advanced.Hint);if(setting==1)return Manager.AdvancedFSR==null?0:Manager.AdvancedFSR.Hint;if(setting==2)return Manager.AdvancedFG==null?0:Manager.AdvancedFG.Hint;if(setting==3)return Manager.AdvancedFSRFG==null?0:Manager.AdvancedFSRFG.Hint;if(setting==4)return Manager.ShowMenuDiagnostics?1:0;return Manager.ShowDiagnostics?1:0;}
  public void Change(int setting,int direction){
@@ -52,15 +60,18 @@ public class AdvancedSettingsPanel : ModWidget, IModResettable {
   ShowHelp(setting);Refresh();Sounds.Click(this);
  }
  public void ShowHelp(int setting){
-  Selected=setting;if(HelpTitle!=null)HelpTitle.SetText(Title(setting).ToUpper());if(HelpBody==null)return;
+  Selected=setting;if(NativeHelp==null)return;
+  if(NativeHelp.VisualData==null&&Manager!=null)foreach(var panel in Manager.Panels)if(panel!=null&&panel.ListView_Settings!=null&&panel.ListView_Settings.VisualData!=null){NativeHelp.VisualData=panel.ListView_Settings.VisualData;break;}if(NativeHelp.Text_SettingName!=null)NativeHelp.Text_SettingName.SetText(Title(setting).ToUpper());
   string body="";string footer="Recommended: AUTO";
   if(setting==0)body="Auto follows the DLSS quality mode.\n\nE / F: legacy CNN\nJ / K: Transformer\nL / M: second-generation Transformer\n\nAn explicit preset overrides Auto. Restart after changes. The driver may supersede your choice.";
-  if(setting==1)body="Choose the FSR upscaling implementation.\n\n3.1: analytical upscaling.\n4.1 INT8: experimental community build for a wider range of GPUs.\n\nAuto currently uses 3.1. An explicit 4.1 selection never silently falls back to 3.1. Restart after changes.";
+  if(setting==1)body=OfficialSr()?"Choose the FSR upscaling implementation.\n\n• 3.1\nAnalytical upscaling.\n\n• 4.1\nOfficial AMD machine-learning upscaling for this GPU. Auto selects this path. Requires a compatible AMD driver.\n\nRestart after changes.":"Choose the FSR upscaling implementation.\n\n• 3.1\nAnalytical upscaling.\n\n• 4.1 INT8\nExperimental community build for this GPU. Auto uses 3.1.\n\nRestart after changes.";
   if(setting==2)body="Choose the DLSS frame-generation model.\n\nA: standard path.\nB: separate scene and UI interpolation.\nC: lighter optical-flow path.\n\nRestart after changes. C uses a driver override; see Diagnostics for whether the request was accepted.";
-  if(setting==3)body="Choose the FSR frame-generation implementation independently of upscaling.\n\n3.1: analytical frame generation.\n4.0 ML: requires a supported GPU and driver.\n\nPortable FSR 4.1 upscaling does not add portable ML frame generation. Auto uses 3.1. Restart after changes.";
+  if(setting==3)body=OfficialFg()?"Choose FSR frame generation independently of upscaling.\n\n• 3.1\nAnalytical frame generation.\n\n• 4.0 ML\nOfficial AMD machine-learning frame generation. Requires a compatible driver.\n\nRestart after changes.":"Choose FSR frame generation independently of upscaling.\n\n• 3.1\nAnalytical frame generation.\n\n• 4.0 ML\nRequires a supported Radeon GPU. Portable FSR upscaling does not add this support.\n\nRestart after changes.";
   if(setting==4){body="Show runtime library versions, requested presets and the last verified FSR implementations in this Diagnostics section.\n\nA loaded library or saved setting does not prove a model is active.";footer="Recommended: OFF";}
   if(setting==5){body="Show runtime activity while playing.\n\nReports advancing upscaler, generated-frame and low-latency counters. Stale or suspended activity is shown as waiting.\n\nReflex and AMD Anti-Lag 2 remain independently selectable in Video when supported.";footer="Recommended: OFF";}
-  HelpBody.SetText("\n"+body+"\n");if(Footer!=null)Footer.SetText("\n"+footer);
+  if(NativeHelp.RichText_Description!=null)NativeHelp.RichText_Description.SetText(body);
+  if(NativeHelp.RichText_DynamicDetails!=null)NativeHelp.RichText_DynamicDetails.SetText("");if(NativeHelp.RichText_WarningDetails!=null)NativeHelp.RichText_WarningDetails.SetText("");if(NativeHelp.RichText_DisabledDetails!=null)NativeHelp.RichText_DisabledDetails.SetText("");
+  if(Manager!=null)Manager.ShowRecommendation(NativeHelp,footer=="Recommended: OFF"?"Off":"Auto");
  }
 }
 public class AdvancedSettingRow : ModWidget {

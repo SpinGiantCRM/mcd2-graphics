@@ -1,8 +1,13 @@
 The advanced page embeds a tabbed custom widget through Blueprint Loader 2.0,
-with native stepper shells and persistent help on hover/focus. Preserve Loader
+with native stepper shells, game settings tabs and the native bordered detail
+card on hover/focus. Loader and SDK sources remain unmodified. Preserve Loader
 save keys, independent SR/FG choices, keyboard/controller navigation and reset.
 FSR SR create_v2 explicitly distinguishes analytical 3.1.5 from the separately
-pinned portable INT8 4.1.1r11 DLL; create_v1 retains its analytical contract.
+pinned portable INT8 4.1.1r11 DLL and official 4.1.1. Auto uses official 4.1.1
+only on recognized Radeon RX 7000/9000 desktop hardware; other devices retain
+analytical Auto. Explicit 4.1 chooses official or portable according to that
+hardware classification. Recognition is not driver/provider activation proof.
+create_v1 retains its analytical contract.
 Preserve exact provider-name matching, active-ID/resource checks, failed-create
 ownership and returned implementation metadata. FSR FG 4.0.1 is an independent
 experimental device-approved selection; portable SR is not proof of ML FG support.

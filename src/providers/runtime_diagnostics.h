@@ -3,7 +3,7 @@
 // Read-only snapshots. A loaded module or requested mode is never an activity
 // claim. Callers sample monotonic counters and expire stale/session-mismatched data.
 struct MCD2SrDiagnosticsV1 {
- std::uint32_t size,provider,revision,world,implementation,requestedPreset;
+ std::uint32_t size,provider,revision,world,implementation,capabilities;
  std::uint64_t evaluations;
 };
 struct MCD2FgDiagnosticsV1 {
