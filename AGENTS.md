@@ -30,3 +30,12 @@ its version-library link; the standalone latency build is not a substitute.
 Upscaling Sharpness uses one post-upscale game filter for both providers. Restore
 its prior value only while still owned, yield to external changes, and retain
 mouse, keyboard and controller paths with a 0-100 percent bound.
+
+The advanced page has separate Upscaling, Frame Generation and Diagnostics tabs
+with persistent side help. Preserve Loader-owned keys and the independent FSR
+SR/FG slots. Explicit portable FSR 4.1 INT8 and ML FG selections must never be
+reported as analytical fallback, and ML FG still needs actual device approval.
+DLSS FG C uses driver DRS; never map it to A/B recomposition or edit a global/
+shared NVIDIA profile. Preserve original-setting receipts, ownership checks and
+Auto restoration, plus the distinction between an accepted request and a model
+readback. Native Windows qualification is required for the Windows DRS path.

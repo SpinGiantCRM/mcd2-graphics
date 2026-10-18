@@ -23,7 +23,7 @@ def build(sdk, sysroot, output, compiler='clang-cl', linker='lld-link', presente
     for folder in ['crt/include', 'sdk/include/ucrt', 'sdk/include/shared', 'sdk/include/um']:
         command.append('/imsvc'+str(sysroot/folder))
     link = [linker, '/dll', '/out:'+str(binary), str(obj), 'kernel32.lib', 'user32.lib', 'bcrypt.lib', 'dxgi.lib', 'd3d12.lib', 'dxguid.lib']
-    for name in ['load','support','swap','output','scene','state','retire','antilag_ready','antilag','presenter_switch_state']:
+    for name in ['implementation','load','support','swap','output','scene','state','retire','antilag_ready','antilag','presenter_switch_state']:
         link.append('/export:mcd2_afg_'+name+'_v1')
     for name in ['recording_contract','guides','world','present']:
         link.append('/export:mcd2_afg_'+name+'_v2')

@@ -20,6 +20,7 @@
 #include "../providers/fsr_fg_game_bridge.h"
 #include "fg_ui_protocol.hpp"
 #include "wine_reflex_pacing.hpp"
+#include "fg_preset_override.hpp"
 #include "../../src/providers/observed_settings.hpp"
 #include "../../src/providers/fg_menu_projection.hpp"
 #include <fstream>
@@ -217,6 +218,8 @@ BOOL CALLBACK initialize(PINIT_ONCE,void*,void**){
   if(amdFgSession){routeEnabled=factoryRoutingRequested&&!loaded&&(privateAmdTrial||sharedOwner==2);fgSessionMode=routeEnabled?1:0;}
  }
  event("FG-session-mode",fgSessionMode);
+ const auto presetStatus=mcd2::fg_preset::configure(folder);event("DLSS-FG-preset-request",presetStatus);
+ WritePrivateProfileStringW(L"Runtime",L"FrameGenerationPresetStatus",std::to_wstring(presetStatus).c_str(),(folder/L"MCD2Graphics"/L"DependencyOverrides.ini").c_str());
  auto enableSdk=GetPrivateProfileIntW(L"Experiment",L"EnableSDK",1,policy.c_str())!=0;
  auto result=!enableSdk?-100:(mcd2_fg_initialized()?0:mcd2_sl_init_for_owner_v1((folder/L"sl.interposer.dll").c_str(),folder.c_str(),folder.c_str(),sharedOwner));
  event("Streamline-NVIDIA-FG-plugin-requested",sharedOwner==2?0:1);

@@ -6,7 +6,7 @@ using UE.Engine;
 public class DiagnosticsRequestSave : USaveGame {public int SchemaVersion,SessionId,Enabled;}
 public class DiagnosticsStateSave : USaveGame {
  public int SchemaVersion,SessionId,Revision,Sample,WorldGeneration,SrProvider,SrFrames,FsrSrVersion;
- public int FgProvider,FgActive,FgFault,FgRendered,FgGenerated,FsrFgVersion,ReflexMode,ReflexFrames,AmdMode,AmdFrames;
+ public int FgProvider,FgActive,FgFault,FgRendered,FgGenerated,FsrFgVersion,ReflexMode,ReflexFrames,AmdMode,AmdFrames,FgPresetStatus;
 }
 public class RuntimeDiagnosticsClient : USaveGame {
  public DiagnosticsStateSave? State;

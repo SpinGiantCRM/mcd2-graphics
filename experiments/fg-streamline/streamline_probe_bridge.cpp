@@ -189,11 +189,11 @@ extern "C" int mcd2_fg_configure(const MCD2FGConfig* config){
   auto self=GetModuleHandleW(L"fg-sdk-bridge.dll");auto n=GetModuleFileNameW(self,file.get(),32768);
   if(!n||n>=32768)return 0u;
   const auto ini=std::filesystem::path(file.get()).parent_path()/L"MCD2Graphics"/L"DependencyOverrides.ini";
-  const auto value=GetPrivateProfileIntW(L"DLSS",L"FrameGenerationPreset",0,ini.c_str());return value<=2?value:0u;
+  const auto value=GetPrivateProfileIntW(L"DLSS",L"FrameGenerationPreset",0,ini.c_str());return value<=3?value:0u;
  }();
  // Auto retains the SDK default. A/B select the documented UI recomposition path;
  // NVIDIA App overrides can still supersede this request.
- if(uiPreset)o.enableUserInterfaceRecomposition=uiPreset==2?sl::Boolean::eTrue:sl::Boolean::eFalse;
+ if(uiPreset&&uiPreset<=2)o.enableUserInterfaceRecomposition=uiPreset==2?sl::Boolean::eTrue:sl::Boolean::eFalse;
  o.onErrorCallback=apiError;
  auto result=set(sl::ViewportHandle(0),o);if(result==sl::Result::eOk){fgConfigured=true;fgConfiguration.accepted(*config);}return int(result);
 }

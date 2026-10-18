@@ -1,7 +1,9 @@
 # Advanced settings
 
 Open **Mods → MCD2 Graphics → Settings** for model overrides and runtime
-information. Everyday upscaler, quality, render scale, sharpness, frame generation,
+information. The page has **Upscaling**, **Frame Generation** and **Diagnostics**
+tabs, with persistent help beside the selected control. Mouse, keyboard arrows
+and controller directions change values. Popup tooltips are not used. Everyday upscaler, quality, render scale, sharpness, frame generation,
 HDR and independent low-latency controls remain under **Settings → Video**.
 
 ## DLSS Model Preset
@@ -34,6 +36,8 @@ to Auto rather than exposed as a nonfunctional Custom choice.
 - **Auto** keeps Streamline's default UI recomposition setting.
 - **A — Standard** requests the standard composition path.
 - **B — UI Recomposition** requests separate interpolation of the scene and UI.
+- **C — Performance** requests NVIDIA's lighter optical-flow path through the
+  driver preset override. It is not an alias for A or B.
 
 Restart after changes. The setting uses the documented
 [`enableUserInterfaceRecomposition` option](https://github.com/NVIDIA-RTX/Streamline/blob/v2.14.1/include/sl_dlss_g.h).
@@ -43,18 +47,39 @@ cost. NVIDIA App overrides can supersede the request. The menu labels it as a
 **requested** preset because the pinned runtime does not report the final active
 model. The corresponding DLL version appears in Diagnostics.
 
+On Linux, explicit A/B/C choices are process-local DXVK-NVAPI DRS overrides
+applied before Streamline initialization. Auto preserves external driver settings.
+On Windows, C requires an existing NVIDIA profile dedicated to this executable;
+base/global and shared profiles are refused. The prior two profile settings are
+saved before any write. Returning to Auto/A/B and restarting restores settings
+still owned by the mod; external changes are preserved. Select Auto and restart
+before removing a Windows installation that used C. Diagnostics reports request
+acceptance or the need for a dedicated profile. Acceptance is not active-model
+readback. Windows profile behaviour still needs native Windows qualification.
+See [NVIDIA's driver preset definitions](https://github.com/NVIDIA/nvapi/blob/main/NvApiDriverSettings.h).
+
 ## FSR versions
 
-Diagnostics separates **implementation version** from **library version**.
-Implementation versions come from the context validated by the bridge: currently
-FSR SR 3.1.5 and FSR FG 3.1.6. The last successfully evaluated/validated context version is retained for the
-current process so it remains readable in menus; it is not inferred from a
-saved provider choice. The loaded DLL may have a different
-version. A component that is not loaded is labelled accordingly.
+The Upscaling tab offers **Auto**, **3.1 — Analytical** and **4.1 — INT8
+(Experimental)**. Auto uses 3.1.5. The explicit 4.1 choice uses the separately
+acquired [portable 4.1.1r11 build](https://github.com/daniel-h-0/bc250-fsr4-fork/tree/v4/dll),
+whose INT8 implementation can run on a wider range of GPUs. It is not bundled in
+installer archives. Its source, notices and exact external runtime identity must
+be retained. An explicit selection requires the exact queried implementation;
+it never silently substitutes 3.1. Restart after changing it.
 
-This page does not invent DLSS-style letter presets or CNN/Transformer labels
-for FSR. Device-specific implementation selection must use the
-[FidelityFX API's version queries](https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK/blob/main/Kits/FidelityFX/api/include/ffx_api.h).
+The Frame Generation tab independently offers **Auto**, **3.1 — Analytical**
+and **4.0 — ML (Experimental)**. Auto uses 3.1.6. ML FG requires a compatible GPU,
+driver and device-reported 4.0.1 provider. Portable FSR 4 upscaling does not make
+ML FG portable. Unsupported explicit selections are refused.
+
+Diagnostics separates the implementation selected and validated by a context
+from the loaded library's file version. The last verified implementation remains
+readable in menus; it is not inferred from a saved provider choice. This page
+does not invent DLSS-style letter presets or CNN/Transformer labels for FSR.
+Selection uses the [FidelityFX API version queries](https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK/blob/main/Kits/FidelityFX/api/include/ffx_api.h).
+The experimental choices still require game, quality, performance and native
+Windows/Radeon qualification before a support claim.
 
 ## Diagnostics
 
@@ -90,7 +115,7 @@ returning to Native, leaving gameplay or unloading the mod. If another tool
 changes the value while the mod owns it, the mod yields instead of overwriting
 that change. Selecting a new sharpness value permits it to take control again.
 
-**Reset mod** restores both model overrides to Auto and turns diagnostics off.
+**Reset mod** restores all model/version overrides to Auto and turns diagnostics off.
 **Reset graphics** resets the sharpness slider along with the Video settings.
 Reflex and Anti-Lag 2 remain independently selectable with FG Off on supported
 hardware; unsupported driver APIs are not represented as active features.

@@ -7,10 +7,10 @@ namespace mcd2::advanced {
 namespace p=mcd2::providers;
 struct IniHint {
     std::filesystem::path path;
-    const wchar_t* key=L"ModelPreset";unsigned maximum=255;
+    const wchar_t* key=L"ModelPreset";unsigned maximum=255;const wchar_t* section=L"DLSS";
     bool read(std::uint32_t& value)const{
         wchar_t text[64]{};
-        const auto n=GetPrivateProfileStringW(L"DLSS",key,L"0",text,64,path.c_str());
+        const auto n=GetPrivateProfileStringW(section,key,L"0",text,64,path.c_str());
         if(!n||n>=63)return false;
         std::uint32_t next=0;
         for(unsigned i=0;i<n;++i){if(text[i]<L'0'||text[i]>L'9')return false;next=next*10+unsigned(text[i]-L'0');if(next>maximum)return false;}
@@ -21,7 +21,7 @@ struct IniHint {
         // Update one key through the same profile API used by the renderer.
         // Unrelated sections/overrides are retained. Never called on a frame callback.
         const auto text=std::to_wstring(value);
-        if(!WritePrivateProfileStringW(L"DLSS",key,text.c_str(),path.c_str()))return false;
+        if(!WritePrivateProfileStringW(section,key,text.c_str(),path.c_str()))return false;
         // The profile API returns zero for a cache flush, including success.
         // Success requires the actual key write and independent readback.
         WritePrivateProfileStringW(nullptr,nullptr,nullptr,path.c_str());
@@ -59,9 +59,9 @@ class SaveTransport {
     std::wstring slot_;
     static unsigned startup(const IniHint& ini){std::uint32_t hint=0;return ini.read(hint)?hint:0;}
 public:
-    SaveTransport(std::filesystem::path saves,std::filesystem::path authority,std::filesystem::path root,unsigned session,bool frameGeneration=false)
+    SaveTransport(std::filesystem::path saves,std::filesystem::path authority,std::filesystem::path root,unsigned session,unsigned kind=0)
         :saves_(std::move(saves)),root_(std::move(root)),store_(std::move(authority)),
-         ini_{root_/L"DependencyOverrides.ini",frameGeneration?L"FrameGenerationPreset":L"ModelPreset",frameGeneration?2u:255u},requests_(session,startup(ini_)),slot_(frameGeneration?L"MCD2GraphicsAdvancedFG":L"MCD2GraphicsAdvanced"){}
+         ini_{root_/L"DependencyOverrides.ini",kind==3?L"FrameGenerationVersion":kind==2?L"UpscalingVersion":kind==1?L"FrameGenerationPreset":L"ModelPreset",kind>=2?2u:kind==1?3u:255u,kind>=2?L"FSR":L"DLSS"},requests_(session,startup(ini_)),slot_(kind==3?L"MCD2GraphicsAdvancedFSRFG":kind==2?L"MCD2GraphicsAdvancedFSR":kind==1?L"MCD2GraphicsAdvancedFG":L"MCD2GraphicsAdvanced"){}
     void poll(const p::MenuAuthority& core){
         if(core.load!=p::StoreStatus::Ok)return;
         p::SlotBytes save;p::AdvancedRequestBytes words;p::AdvancedRequest request;
@@ -82,7 +82,8 @@ public:
             moduleVersion(root_/L"ngx-runtime"/L"nvngx_dlss.dll",0,versions_);
             moduleVersion(root_.parent_path()/L"sl.interposer.dll",1,versions_);
             if(!(versions_.modules&2))moduleVersion(root_/L"streamline"/L"sl.interposer.dll",1,versions_);
-            moduleVersion(root_/L"fsr"/L"amd_fidelityfx_upscaler_dx12.dll",2,versions_);
+            moduleVersion(root_/L"fsr"/L"portable"/L"amd_fidelityfx_upscaler_dx12.dll",2,versions_);
+            if(!(versions_.modules&p::advancedLoadedBit(2)))moduleVersion(root_/L"fsr"/L"amd_fidelityfx_upscaler_dx12.dll",2,versions_);
             moduleVersion(root_.parent_path()/L"amd_fidelityfx_framegeneration_dx12.dll",3,versions_);
             moduleVersion(root_.parent_path()/L"nvngx_dlssg.dll",4,versions_);
             if(!(versions_.modules&p::advancedLoadedBit(4)))moduleVersion(root_/L"streamline"/L"nvngx_dlssg.dll",4,versions_);

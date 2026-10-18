@@ -28,8 +28,8 @@ public class AdvancedInfoWidget : ModWidget {
   if(!Manager.ShowMenuDiagnostics){Label.SetText("");Label.SetVisibility(UE.UMG.ESlateVisibility.Collapsed);if(observing&&Manager.DiagnosticObservers>0)Manager.DiagnosticObservers--;observing=false;return;}
   Label.SetVisibility(UE.UMG.ESlateVisibility.Visible);if(!observing){Manager.DiagnosticObservers++;observing=true;}
   var d=Manager.Diagnostics==null?null:Manager.Diagnostics.State;var fg=Manager.AdvancedFG;
-  Label.SetText(a.Status()+"\nDLSS SR version: "+a.Version(0)+"\n\nDLSS FG preset (requested): "+(fg==null?"Waiting":fg.Hint==1?"A - Standard":fg.Hint==2?"B - UI Recomposition":"Auto")+
-   "\nDLSS FG version: "+a.Version(4)+"\nActive DLSS models: not exposed by the runtime."+
+  Label.SetText(a.Status()+"\nDLSS SR version: "+a.Version(0)+"\n\nDLSS FG preset (requested): "+(fg==null?"Waiting":fg.Hint==1?"A - Standard":fg.Hint==2?"B - UI Recomposition":fg.Hint==3?"C - Performance":"Auto")+
+   "\nDLSS FG driver request: "+(fg!=null&&fg.State!=null&&fg.Hint!=fg.State.W11?"Restart to apply":d==null?"Waiting":d.FgPresetStatus==1?"Accepted (model not reported)":d.FgPresetStatus==-20||d.FgPresetStatus==-21?"Requires a dedicated per-game NVIDIA profile":d.FgPresetStatus<0?"Not applied":"SDK default / unchanged")+"\nDLSS FG version: "+a.Version(4)+"\nActive DLSS models: not exposed by the runtime."+
    "\n\nFSR SR implementation (last verified): "+RuntimeDiagnosticsClient.Implementation(d==null?0:d.FsrSrVersion)+"\nFSR SR library: "+a.Version(2)+
    "\nFSR FG implementation (last verified): "+RuntimeDiagnosticsClient.Implementation(d==null?0:d.FsrFgVersion)+"\nFSR FG library: "+a.Version(3)+"\nStreamline version: "+a.Version(1));
  }

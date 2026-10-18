@@ -231,20 +231,11 @@ public class DisplayRow : UGameSettingListEntryBase {
  public override FEventReply OnFocusReceived(FGeometry geo,FFocusEvent ev){var m=Setting as DisplaySetting;if(Manager!=null && m!=null)Manager.ShowDisplayHelp(m.ControlId);return UWidgetBlueprintLibrary.Handled();}
 }
 
-[ModSetting.Heading("Advanced upscaling")]
-[ModSetting.Select("dlss_sr_preset", "DLSS Model Preset", new string[]{"Auto", "E - CNN (Legacy)", "F - CNN (Legacy)", "J - Transformer", "K - Transformer", "L - Transformer 2nd Gen", "M - Transformer 2nd Gen"}, Default=0,
- Description="Auto follows the DLSS quality mode. Other presets override it. Restart after changes. Legacy CNN presets may be ignored by newer runtimes.")]
-[ModSetting.Heading("Advanced frame generation")]
-[ModSetting.Select("dlss_fg_preset", "DLSS FG Preset", new string[]{"Auto", "A - Standard", "B - UI Recomposition"}, Default=0,
- Description="Auto keeps the SDK default. B interpolates the scene and UI separately. Restart after changes. Driver overrides may supersede this request.")]
-[ModSetting.Heading("Diagnostics")]
-[ModSetting.Toggle("show_runtime_details", "Show Runtime Details", Default=false, Description="Expand runtime versions, requested presets and status below.")]
-[ModSetting.Widget("runtime_info", typeof(AdvancedInfoWidget))]
-[ModSetting.Toggle("show_runtime_info", "Show In-Game Diagnostics", Default=false,
- Description="Show an overlay during gameplay with verified upscaler, frame generation and low-latency activity.")]
+[ModSetting.Widget("advanced_graphics", typeof(AdvancedSettingsPanel))]
 public class ModActor : AActor, IModSettings {
  public AdvancedMenuClient? Advanced;
  public AdvancedMenuClient? AdvancedFG;
+ public AdvancedMenuClient? AdvancedFSR;public AdvancedMenuClient? AdvancedFSRFG;
  public RuntimeDiagnosticsClient? Diagnostics;
  public RuntimeDiagnosticsOverlay? DiagnosticOverlay;
  public int DiagnosticObservers;
@@ -289,7 +280,7 @@ public class ModActor : AActor, IModSettings {
    if(provider==1&&Advanced!=null)text+="\nDLSS SR preset requested: "+AdvancedMenuClient.PresetName(Advanced.Hint);
    if(provider==2)text+="\nFSR SR: "+RuntimeDiagnosticsClient.Implementation(state.FsrSrVersion);
    text+="\nFrame Generation: "+(DisplayValue(5)==0?"Off":state.FgFault!=0?"Error / inactive":DiagnosticFgActive?(state.FgProvider==2?"FSR Active":"DLSS Active"):"Waiting / suspended");
-   if(DisplayValue(5)==1&&SelectedFgProvider()==0&&AdvancedFG!=null)text+="\nDLSS FG preset requested: "+(AdvancedFG.Hint==1?"A":AdvancedFG.Hint==2?"B":"Auto");
+   if(DisplayValue(5)==1&&SelectedFgProvider()==0&&AdvancedFG!=null)text+="\nDLSS FG preset requested: "+(AdvancedFG.Hint==1?"A":AdvancedFG.Hint==2?"B":AdvancedFG.Hint==3?"C":"Auto");
    if(state.FsrFgVersion>0)text+="\nFSR FG: "+RuntimeDiagnosticsClient.Implementation(state.FsrFgVersion);
    text+="\nReflex: "+(DiagnosticReflexActive?(state.ReflexMode==2?"On + Boost":"On"):state.ReflexMode>0?"Waiting / suspended":"Off");
    text+="\nAnti-Lag 2: "+(DiagnosticAmdActive?"On":state.AmdMode==1?"Waiting / suspended":"Off / unsupported");
@@ -308,7 +299,11 @@ public class ModActor : AActor, IModSettings {
   Sharpness=ModSettings.GetInt(this,"upscaling_sharpness",0);if(Sharpness<0||Sharpness>100)Sharpness=0;
   Diagnostics=UGameplayStatics.CreateSaveGameObject(Unreal.ClassOf<RuntimeDiagnosticsClient>()) as RuntimeDiagnosticsClient;if(Diagnostics!=null)Diagnostics.Start();
   AdvancedFG=UGameplayStatics.CreateSaveGameObject(Unreal.ClassOf<AdvancedMenuClient>()) as AdvancedMenuClient;
-  if(AdvancedFG!=null){AdvancedFG.Slot="MCD2GraphicsAdvancedFG";int fg=ModSettings.GetInt(this,"dlss_fg_preset",0);AdvancedFG.Hint=fg>=0&&fg<=2?fg:0;AdvancedFG.Start();}
+  if(AdvancedFG!=null){AdvancedFG.Slot="MCD2GraphicsAdvancedFG";int fg=ModSettings.GetInt(this,"dlss_fg_preset",0);AdvancedFG.Hint=fg>=0&&fg<=3?fg:0;AdvancedFG.Start();}
+  AdvancedFSR=UGameplayStatics.CreateSaveGameObject(Unreal.ClassOf<AdvancedMenuClient>()) as AdvancedMenuClient;
+  if(AdvancedFSR!=null){AdvancedFSR.Slot="MCD2GraphicsAdvancedFSR";int value=ModSettings.GetInt(this,"fsr_sr_version",0);AdvancedFSR.Hint=value>=0&&value<=2?value:0;AdvancedFSR.Start();}
+  AdvancedFSRFG=UGameplayStatics.CreateSaveGameObject(Unreal.ClassOf<AdvancedMenuClient>()) as AdvancedMenuClient;
+  if(AdvancedFSRFG!=null){AdvancedFSRFG.Slot="MCD2GraphicsAdvancedFSRFG";int value=ModSettings.GetInt(this,"fsr_fg_version",0);AdvancedFSRFG.Hint=value>=0&&value<=2?value:0;AdvancedFSRFG.Start();}
   BFL_ModSettings.GetModSettingInt(this,"dlss_sr_model",0,this,out int hint,out bool found);
   if(hint<0 || hint>255)hint=0;
   BFL_ModSettings.GetModSettingInt(this,"dlss_sr_preset",0,this,out int choice,out bool choiceFound);
@@ -324,7 +319,9 @@ public class ModActor : AActor, IModSettings {
  public void OnSettingChanged(string id,string value){
   if(id=="show_runtime_details"){ShowMenuDiagnostics=ModSettings.ToBool(value);return;}
   if(id=="show_runtime_info"){ShowDiagnostics=ModSettings.ToBool(value);return;}
-  if(id=="dlss_fg_preset"&&AdvancedFG!=null){double fg=ModSettings.ToNumber(value);if(fg>=0&&fg<=2&&fg==(int)fg)AdvancedFG.Select((int)fg,false);return;}
+  if(id=="dlss_fg_preset"&&AdvancedFG!=null){double fg=ModSettings.ToNumber(value);if(fg>=0&&fg<=3&&fg==(int)fg)AdvancedFG.Select((int)fg,false);return;}
+  if(id=="fsr_sr_version"&&AdvancedFSR!=null){int v=ModSettings.ToInt(value);if(v>=0&&v<=2)AdvancedFSR.Select(v,false);return;}
+  if(id=="fsr_fg_version"&&AdvancedFSRFG!=null){int v=ModSettings.ToInt(value);if(v>=0&&v<=2)AdvancedFSRFG.Select(v,false);return;}
   if(id!="dlss_sr_preset" || Advanced==null)return;
   double number=ModSettings.ToNumber(value);
   if(number<0 || number>6 || number!=(int)number)return;
@@ -334,10 +331,10 @@ public class ModActor : AActor, IModSettings {
   // arbitrary numeric preset. Reconcile a no-op selection to its actual name.
   if((int)number!=AdvancedMenuClient.PresetChoice(hint))publishedAdvancedChoice=-1;
  }
- public void OnSettingsReset(){ShowDiagnostics=false;ShowMenuDiagnostics=false;Sharpness=0;sharpnessBlocked=false;ModSettings.SetInt(this,"upscaling_sharpness",0);if(Advanced!=null)Advanced.Select(0,false);if(AdvancedFG!=null)AdvancedFG.Select(0,false);}
+ public void OnSettingsReset(){ModSettings.SetInt(this,"dlss_sr_preset",0);ModSettings.SetInt(this,"dlss_fg_preset",0);ModSettings.SetInt(this,"fsr_sr_version",0);ModSettings.SetInt(this,"fsr_fg_version",0);ModSettings.SetBool(this,"show_runtime_info",false);ModSettings.SetBool(this,"show_runtime_details",false);ShowDiagnostics=false;ShowMenuDiagnostics=false;Sharpness=0;sharpnessBlocked=false;ModSettings.SetInt(this,"upscaling_sharpness",0);if(Advanced!=null)Advanced.Select(0,false);if(AdvancedFG!=null)AdvancedFG.Select(0,false);if(AdvancedFSR!=null)AdvancedFSR.Select(0,false);if(AdvancedFSRFG!=null)AdvancedFSRFG.Select(0,false);}
  public void PollAdvanced(){
   if(Advanced==null || ProviderMenu==null)return;
-  Advanced.Poll(ProviderMenu);if(AdvancedFG!=null)AdvancedFG.Poll(ProviderMenu);UpdateDiagnostics();ApplySharpness();
+  Advanced.Poll(ProviderMenu);if(AdvancedFG!=null)AdvancedFG.Poll(ProviderMenu);if(AdvancedFSR!=null)AdvancedFSR.Poll(ProviderMenu);if(AdvancedFSRFG!=null)AdvancedFSRFG.Poll(ProviderMenu);UpdateDiagnostics();ApplySharpness();
   if(Advanced.Saved&&!Advanced.Migrate&&AdvancedMenuClient.PresetChoice(Advanced.Hint)==7){Advanced.Select(0,false);}
   if(Advanced.Saved && !Advanced.Migrate){
    int choice=AdvancedMenuClient.PresetChoice(Advanced.Hint);

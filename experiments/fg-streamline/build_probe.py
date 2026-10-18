@@ -74,7 +74,7 @@ files={}
 with zipfile.ZipFile(a.runtime_archive) as archive:
     for name in ['sl.interposer.dll','sl.common.dll','sl.pcl.dll','sl.reflex.dll','sl.dlss_g.dll','nvngx_dlssg.dll','NvLowLatencyVk.dll']:
         data=archive.read('bin/x64/'+name);(out/name).write_bytes(data);files[name]=hashlib.sha256(data).hexdigest()
-sources=['streamline_probe_bridge.cpp','fg_bridge_contract.h','fg_camera_contract.h','fg_configuration.hpp','streamline_feature_policy.hpp',host]+(['factory_route.hpp'] if a.probe=='owned' else [])+(['chain_observer.cpp'] if a.reshade_headers else [])+(['bootstrap_dxgi.cpp','fg_ui_protocol.hpp','wine_reflex_pacing.hpp'] if a.early_bootstrap else [])
+sources=['streamline_probe_bridge.cpp','fg_bridge_contract.h','fg_camera_contract.h','fg_configuration.hpp','streamline_feature_policy.hpp',host]+(['factory_route.hpp'] if a.probe=='owned' else [])+(['chain_observer.cpp'] if a.reshade_headers else [])+(['bootstrap_dxgi.cpp','fg_ui_protocol.hpp','wine_reflex_pacing.hpp','fg_preset_override.hpp'] if a.early_bootstrap else [])
 own=['fg-probe.exe']+(['fg-chain-observer.addon64'] if a.reshade_headers else [])+(['fg-sdk-bridge.dll','dxgi.dll'] if a.early_bootstrap else [])
 if a.early_bootstrap:sources+=provider_sources(repo)
 if a.early_bootstrap or a.guide_recon:sources+=['../providers/fsr_fg_game_bridge.h']

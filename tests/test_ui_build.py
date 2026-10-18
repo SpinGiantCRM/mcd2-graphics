@@ -12,14 +12,21 @@ import build_ui as ui
 class UIBuildTests(unittest.TestCase):
     def test_named_dlss_presets_keep_auto_quality_dependent(self):
         actor = (ui.ROOT / 'src/ui/ModActor.cs').read_text()
-        self.assertIn('ModSetting.Select("dlss_sr_preset", "DLSS Model Preset"', actor)
+        self.assertIn('ModSetting.Widget("advanced_graphics", typeof(AdvancedSettingsPanel))', actor)
+        panel = (ui.ROOT / "src/ui/AdvancedSettingsPanel.cs").read_text()
         self.assertNotIn('ModSetting.Slider("dlss_sr_model"', actor)
-        self.assertIn('"Auto"', actor)
-        choices = actor.split('[ModSetting.Select("dlss_sr_preset"', 1)[1].split('}, Default=0', 1)[0]
+        self.assertIn('"Auto"', panel)
+        choices = panel.split('if(setting==0)return new List<FText>', 1)[1].split(';', 1)[0]
         labels = ['"Auto"', 'E - CNN', 'F - CNN', 'J - Transformer',
                   'K - Transformer', 'L - Transformer 2nd Gen', 'M - Transformer 2nd Gen']
         self.assertEqual(sorted(choices.index(label) for label in labels), [choices.index(label) for label in labels])
-        self.assertIn('ModSetting.Toggle("show_runtime_info", "Show In-Game Diagnostics", Default=false', actor)
+        self.assertIn('return "Show In-Game Diagnostics"', panel)
+        self.assertIn('C - Performance', panel)
+        self.assertNotIn('Custom (manual override)', panel)
+        self.assertIn('4.1 - INT8 (Experimental)', panel)
+        self.assertIn('4.0 - ML (Experimental)', panel)
+        self.assertIn('OnFocusReceived', panel)
+        self.assertNotIn('SetToolTip', panel)
         # The renderer must allocate fresh NGX parameters and supply the quality
         # mode while leaving every model-preset override unset for Auto (zero).
         renderer = (ui.ROOT / 'src/native/ngx_live_fixture.hpp').read_text()

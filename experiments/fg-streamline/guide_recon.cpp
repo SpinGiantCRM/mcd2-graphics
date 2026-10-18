@@ -407,8 +407,9 @@ void finish(a::command_queue*,a::swapchain*){if(mcd2::process_exit::terminating(
  auto bridge=GetModuleHandleW(L"fg-sdk-bridge.dll");using State=int(*)(unsigned*,unsigned*,unsigned*,unsigned*);auto state=bridge?reinterpret_cast<State>(GetProcAddress(bridge,"mcd2_fg_state")):nullptr;
  if(auto module=amd_bridge()){
   using State=int(*)(MCD2AmdFgStateV1*);auto get=reinterpret_cast<State>(GetProcAddress(module,"mcd2_afg_state_v1"));MCD2AmdFgStateV1 state{};state.size=sizeof(state);auto result=get?get(&state):-1;
+  using Implementation=unsigned(*)();auto implementation=reinterpret_cast<Implementation>(GetProcAddress(module,"mcd2_afg_implementation_v1"));const auto version=!result&&implementation?implementation():0u;
   std::lock_guard lock(mutex);++outcomeSample;outcomeResult=result;outcomeStatus=state.fault;outcomePresents=0;
-  diagnostics={sizeof(diagnostics),2,state.active,state.fault,state.ready?30106u:diagnostics.implementation,0,state.realPresents,state.generatedPresents};
+  diagnostics={sizeof(diagnostics),2,state.active,state.fault,version?version:diagnostics.implementation,0,state.realPresents,state.generatedPresents};
   if(frame<120||frame%60==0)privateLog<<"{\"kind\":\"amd_fg_outcome\",\"SDKResult\":"<<result<<",\"active\":"<<state.active<<",\"fault\":"<<state.fault<<",\"engineFrame\":"<<state.engineFrame<<",\"providerFrame\":"<<state.providerFrame<<",\"prepared\":"<<state.prepared<<",\"images\":"<<state.images<<",\"realPresents\":"<<state.realPresents<<",\"generatedPresents\":"<<state.generatedPresents<<",\"errors\":"<<state.errors<<",\"warnings\":"<<state.warnings<<"}\n";privateLog.flush();++frame;return;
  }
  unsigned max=0,status=0,min=0,presents=0;int result=activeFGMode&&state?state(&max,&status,&min,&presents):-1;

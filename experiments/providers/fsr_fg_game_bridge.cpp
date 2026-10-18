@@ -143,13 +143,21 @@ int configure(bool enabled,bool teardown=false){
  if(s.worldInitialized&&!teardown)c.HUDLessColor=ffxApiGetResourceDX12(s.world,FFX_API_RESOURCE_STATE_PIXEL_COMPUTE_READ);
  const auto r=s.configure(&s.fg,&c.header);s.active=!r&&enabled;if(r)s.fault=unsigned(r);return int(r);
 }
+unsigned requestedFgImplementation(){
+ static const unsigned choice=[](){
+  auto path=std::make_unique<wchar_t[]>(32768);const auto module=GetModuleHandleW(L"mcd2-fsr-fg-game-bridge.dll");
+  const auto n=module?GetModuleFileNameW(module,path.get(),32768):0;if(!n||n>=32768)return 0u;
+  return GetPrivateProfileIntW(L"FSR",L"FrameGenerationVersion",0,(std::filesystem::path(path.get()).parent_path()/L"MCD2Graphics"/L"DependencyOverrides.ini").c_str());
+ }();return choice;
+}
+const char* requestedFgName(){return requestedFgImplementation()==2?"4.0.1":"3.1.6";}
 int createGeneration(const mcd2::providers::FgOutputContract& output){
  auto& s=*session;s.width=output.width;s.height=output.height;
  ffxQueryDescGetVersions versions{};versions.header.type=FFX_API_QUERY_DESC_TYPE_GET_VERSIONS;versions.createDescType=FFX_API_CREATE_CONTEXT_DESC_TYPE_FRAMEGENERATION;versions.device=s.device;
  uint64_t count=0;versions.outputCount=&count;auto code=s.query(nullptr,&versions.header);if(code||!count||count>32)return -12;
  std::vector<uint64_t> ids(count);std::vector<const char*> names(count);versions.versionIds=ids.data();versions.versionNames=names.data();code=s.query(nullptr,&versions.header);if(code||count>ids.size())return -13;
- bool found=false;for(size_t i=0;i<count;++i)found|=ids[i]==17726168133342859270ull&&names[i]&&!strcmp(names[i],"3.1.6");if(!found)return -14;
- ffxOverrideVersion selected{};selected.header.type=FFX_API_DESC_TYPE_OVERRIDE_VERSION;selected.versionId=17726168133342859270ull;
+ uint64_t provider=0;for(size_t i=0;i<count;++i)if(names[i]&&!strcmp(names[i],requestedFgName()))provider=ids[i];if(!provider||requestedFgImplementation()>2)return -14;
+ ffxOverrideVersion selected{};selected.header.type=FFX_API_DESC_TYPE_OVERRIDE_VERSION;selected.versionId=provider;
  ffxCreateBackendDX12Desc backend{};backend.header.type=FFX_API_CREATE_CONTEXT_DESC_TYPE_BACKEND_DX12;backend.device=s.device;backend.header.pNext=&selected.header;
  ffxCreateContextDescFrameGenerationVersion version{};version.header.type=FFX_API_CREATE_CONTEXT_DESC_TYPE_FRAMEGENERATION_VERSION;version.version=FFX_FRAMEGENERATION_VERSION;version.header.pNext=&backend.header;
  ffxCreateContextDescFrameGenerationHudless hud{};hud.header.type=FFX_API_CREATE_CONTEXT_DESC_TYPE_FRAMEGENERATION_HUDLESS;hud.hudlessBackBufferFormat=ffxApiGetSurfaceFormatDX12(DXGI_FORMAT(output.sceneFormat));hud.header.pNext=&version.header;
@@ -177,6 +185,7 @@ int loadUnlocked(const wchar_t* path){
  retainedRuntime=s->module;errors=warnings=0;session=s;return 0;
 }
 extern "C" int mcd2_afg_load_v1(const wchar_t* path){std::lock_guard lock(guard);return loadUnlocked(path);}
+extern "C" unsigned mcd2_afg_implementation_v1(){std::lock_guard lock(guard);return session&&session->fg?(requestedFgImplementation()==2?40001u:30106u):0u;}
 extern "C" int mcd2_afg_support_v1(void* opaque){
  std::lock_guard lock(guard);if(!session||!opaque)return -1;
  auto* device=static_cast<ID3D12Device*>(opaque);
@@ -189,7 +198,7 @@ extern "C" int mcd2_afg_support_v1(void* opaque){
  std::vector<uint64_t> ids(count);std::vector<const char*> names(count);
  versions.versionIds=ids.data();versions.versionNames=names.data();
  if(session->query(nullptr,&versions.header)||count>ids.size())return -4;
- for(size_t i=0;i<count;++i)if(ids[i]==17726168133342859270ull&&names[i]&&!strcmp(names[i],"3.1.6"))return 0;
+ for(size_t i=0;i<count;++i)if(names[i]&&!strcmp(names[i],requestedFgName())&&requestedFgImplementation()<=2)return 0;
  return -5;
 }
 int swapRawUnlocked(void* factory,void* queue,void* hwnd,const MCD2AmdFgSwapV1* p,void** result){

@@ -1,3 +1,19 @@
+The advanced page embeds a tabbed custom widget through Blueprint Loader 2.0,
+with native stepper shells and persistent help on hover/focus. Preserve Loader
+save keys, independent SR/FG choices, keyboard/controller navigation and reset.
+FSR SR create_v2 explicitly distinguishes analytical 3.1.5 from the separately
+pinned portable INT8 4.1.1r11 DLL; create_v1 retains its analytical contract.
+Preserve exact provider-name matching, active-ID/resource checks, failed-create
+ownership and returned implementation metadata. FSR FG 4.0.1 is an independent
+experimental device-approved selection; portable SR is not proof of ML FG support.
+Keep the native SR bridge hash binding and all header/build source receipts.
+Preset C uses DRS rather than the Streamline A/B UI-recomposition flag. Proton
+sets process-local overrides before SDK initialization. Windows permits only an
+existing one-application game profile, saves original settings first, restores
+only values still owned, and refuses base/shared profiles or external edits.
+Record driver request acceptance separately from active model identification.
+These changed paths require new native Windows/Radeon and runtime qualification.
+
 The AMD presenter status clears a stale restart requirement only after a
 current, available, fault-free, non-retired AMD Off request has reached the native
 presenter and the bridge confirms switching remains available. Preserve the

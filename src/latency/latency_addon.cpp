@@ -174,17 +174,21 @@ void settings_loop(){std::map<std::string,unsigned> last;auto nextStatus=std::ch
  if(observeProviderSettings){std::error_code error;std::filesystem::create_directory(mirrorPath,error);}
  const auto authorityPath=savesPath.parent_path()/L"MCD2Graphics"/L"ProviderSettings";
  std::unique_ptr<mcd2::providers::MenuSaveTransport> menuTransport;
- std::unique_ptr<mcd2::advanced::SaveTransport> advancedTransport,advancedFgTransport;
+ std::unique_ptr<mcd2::advanced::SaveTransport> advancedTransport,advancedFgTransport,advancedFsrTransport,advancedFsrFgTransport;
  if(consolidatedMenuTransport){std::error_code error;std::filesystem::create_directory(authorityPath,error);
   if(!error&&mcd2::providers::store_detail::directoryReady(authorityPath))
    menuTransport=std::make_unique<mcd2::providers::MenuSaveTransport>(savesPath,authorityPath,sessionId);
  }
  if(menuTransport)advancedFgTransport=std::make_unique<mcd2::advanced::SaveTransport>(savesPath,authorityPath,advancedRoot,sessionId,true);
+ if(menuTransport)advancedFsrFgTransport=std::make_unique<mcd2::advanced::SaveTransport>(savesPath,authorityPath,advancedRoot,sessionId,3);
+ if(menuTransport)advancedFsrTransport=std::make_unique<mcd2::advanced::SaveTransport>(savesPath,authorityPath,advancedRoot,sessionId,2);
  if(menuTransport)advancedTransport=std::make_unique<mcd2::advanced::SaveTransport>(savesPath,authorityPath,advancedRoot,sessionId);
  std::uint32_t contextSequence=0;
  while(!workerStop){
   mcd2::providers::MenuAuthority shared;
   if(menuTransport){try{shared=menuTransport->poll();}catch(...){/* A transport failure cannot activate a feature. */}}
+  if(advancedFsrFgTransport){try{advancedFsrFgTransport->poll(shared);}catch(...){/* Restart-only FSR FG selection. */}}
+  if(advancedFsrTransport){try{advancedFsrTransport->poll(shared);}catch(...){/* Restart-only FSR selection. */}}
   if(advancedFgTransport){try{advancedFgTransport->poll(shared);}catch(...){/* No renderer admission. */}}
   if(advancedTransport){try{advancedTransport->poll(shared);}catch(...){/* Restart-only preferences cannot activate a feature. */}}
   if(consolidatedMenuTransport){
@@ -252,7 +256,7 @@ void settings_loop(){std::map<std::string,unsigned> last;auto nextStatus=std::ch
    state["AmdAntiLagFault"]=amdState.fault?1u:0u;
    state["AmdAntiLagRevision"]=amdState.revision;
    state["AmdAntiLagFgCompatible"]=amdState.fgCompatible&&!amdState.fault?1u:0u;
-   if(consolidatedMenuTransport)mcd2::diagnostics::publish(savesPath,sessionId,intent.revision,applied,c?c->completed():0,amdState.enabled?1u:0u,amdState.inputFrames);
+   if(consolidatedMenuTransport)mcd2::diagnostics::publish(savesPath,sessionId,intent.revision,applied,c?c->completed():0,amdState.enabled?1u:0u,amdState.inputFrames,advancedRoot/L"DependencyOverrides.ini");
    auto file=savesPath/L"MCD2GraphicsDisplayRuntime.sav";auto seed=read_slot(file);std::map<std::string,unsigned> existing;size_t h=0;
    if(state!=last||!mcd2::display::parse(seed,"DisplayRuntimeSave",existing,h)||existing["SessionId"]!=sessionId){auto data=mcd2::display::encode_runtime(seed,state);if(!data.empty()){
      auto temp=savesPath/L"MCD2GraphicsDisplayRuntime.pending";{std::ofstream f(temp,std::ios::binary|std::ios::trunc);f.write(reinterpret_cast<const char*>(data.data()),data.size());f.flush();if(!f)throw std::runtime_error("Runtime state write failed");}

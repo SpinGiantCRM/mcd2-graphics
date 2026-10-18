@@ -3,7 +3,7 @@
 #include "../providers/runtime_diagnostics.h"
 namespace mcd2::diagnostics {
 inline unsigned counter(std::uint64_t value){return unsigned(value&0x7fffffff);}
-inline void publish(const std::filesystem::path& saves,unsigned session,unsigned revision,unsigned reflexMode,std::uint64_t reflexFrames,unsigned amdMode,std::uint64_t amdFrames){
+inline void publish(const std::filesystem::path& saves,unsigned session,unsigned revision,unsigned reflexMode,std::uint64_t reflexFrames,unsigned amdMode,std::uint64_t amdFrames,const std::filesystem::path& ini){
  static ULONGLONG next=0;static unsigned sample=0;
  const auto now=GetTickCount64();if(now<next)return;next=now+500;
  auto read=[](const std::filesystem::path& path){std::error_code error;const auto size=std::filesystem::file_size(path,error);if(error||size>8192)return std::vector<std::uint8_t>{};std::ifstream file(path,std::ios::binary);return std::vector<std::uint8_t>(std::istreambuf_iterator<char>(file),{});};
@@ -23,7 +23,7 @@ inline void publish(const std::filesystem::path& saves,unsigned session,unsigned
  std::map<std::string,unsigned> fields={{"SchemaVersion",1},{"SessionId",session},{"Revision",revision},{"Sample",++sample},
   {"WorldGeneration",sr.world},{"SrProvider",sr.provider},{"SrFrames",counter(sr.evaluations)},{"FsrSrVersion",sr.implementation},
   {"FgProvider",fg.provider},{"FgActive",fg.active},{"FgFault",fg.fault},{"FgRendered",counter(fg.rendered)},{"FgGenerated",counter(fg.generated)},
-  {"FsrFgVersion",fg.implementation},{"ReflexMode",reflexMode},{"ReflexFrames",counter(reflexFrames)},{"AmdMode",amdMode},{"AmdFrames",counter(amdFrames)}};
+  {"FsrFgVersion",fg.implementation},{"FgPresetStatus",GetPrivateProfileIntW(L"Runtime",L"FrameGenerationPresetStatus",0,ini.c_str())},{"ReflexMode",reflexMode},{"ReflexFrames",counter(reflexFrames)},{"AmdMode",amdMode},{"AmdFrames",counter(amdFrames)}};
  const auto path=saves/L"MCD2GraphicsDiagnosticsState.sav";auto seed=read(path);std::map<std::string,unsigned> old;
  if(!display::parse(seed,"DiagnosticsStateSave",old,header))return;
  // Reuse the bounded named-int serializer with an explicit class identity.
