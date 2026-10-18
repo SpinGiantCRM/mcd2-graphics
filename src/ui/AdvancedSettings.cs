@@ -107,13 +107,18 @@ public class AdvancedMenuClient : USaveGame {
  // Loader choice indices are not NGX preset numbers. Keep the old numeric save
  // key and wire format intact when migrating to the named selector.
  public static int PresetValue(int choice,int current){
+  if(choice==0)return 0;if(choice==1)return 5;if(choice==2)return 6;
+  if(choice==3)return 10;if(choice==4)return 11;if(choice==5)return 12;if(choice==6)return 13;
+  return choice==7?current:-1;
+ }
+ public static int PreviousPresetValue(int choice,int current){
   if(choice==0)return 0;if(choice==1)return 11;if(choice==2)return 10;
   if(choice==3)return 13;if(choice==4)return 12;if(choice==5)return 5;if(choice==6)return 6;
   return choice==7?current:-1;
  }
  public static int PresetChoice(int value){
-  if(value==0)return 0;if(value==11)return 1;if(value==10)return 2;
-  if(value==13)return 3;if(value==12)return 4;if(value==5)return 5;if(value==6)return 6;return 7;
+  if(value==0)return 0;if(value==5)return 1;if(value==6)return 2;
+  if(value==10)return 3;if(value==11)return 4;if(value==12)return 5;if(value==13)return 6;return 7;
  }
  public static string PresetName(int value){
   if(value==0)return "Auto (quality-dependent)";
@@ -136,8 +141,11 @@ public class AdvancedMenuClient : USaveGame {
   Hint=hint;Migrate=migrate;Saved=false;Failure=0;retries=0;
  }
  public bool Valid(AdvancedStateSave a){
-  if(a.W0!=843334477 || a.W1!=3232321 || a.W2!=1 || a.W3!=128 || a.W4!=a.Checksum() || a.W5<1 ||
-     a.W6<0 || a.W7<0 || a.W7>7 || a.W10<0 || a.W10>255 || a.W11<0 || a.W11>255 || a.W12<0 || a.W12>1 || a.W13<0 || a.W13>255 || a.W30!=0 || a.W31!=0)return false;
+  if(a.W0!=843334477 || a.W1!=3232321 || (a.W2!=1 && a.W2!=2) || a.W3!=128 || a.W4!=a.Checksum() || a.W5<1 ||
+     a.W6<0 || a.W7<0 || a.W7>7 || a.W10<0 || a.W10>255 || a.W11<0 || a.W11>255 || a.W12<0 || a.W12>1 || a.W13<0 || a.W13>1023)return false;
+  if(a.W2==1 && (a.W13>255 || a.W30!=0 || a.W31!=0))return false;
+  if((a.W13&512)!=0 && (a.W13&256)==0)return false;
+  if((a.W13&512)==0 && (a.W30!=0 || a.W31!=0))return false;
   if(a.W6==0 && (a.W7!=0 || a.W8!=0 || a.W9!=0 || a.W12!=0))return false;
   if(a.W6!=0 && a.W8<1)return false;
   for(int i=0;i<4;i++){
@@ -179,13 +187,23 @@ public class AdvancedMenuClient : USaveGame {
   Pending=r;sentHint=Hint;sentMigration=Migrate;ticks=0;
  }
  public string Version(int index){
+  if(index<0 || index>4)return "Not reported";
   if(State==null)return "Waiting";
+  if(index==4){
+   if(State.W2<2)return "Not reported";
+   if((State.W13&256)==0)return "Not loaded";
+   if((State.W13&512)==0)return "Version unavailable";
+   return ""+(State.W30&65535)+"."+((State.W30>>16)&65535)+"."+(State.W31&65535)+"."+((State.W31>>16)&65535);
+  }
   if((State.W13&(1<<index))==0)return "Not loaded";
   if((State.W13&(1<<(index+4)))==0)return "Version unavailable";
   int first=14+index*4;return ""+State.Word(first)+"."+State.Word(first+1)+"."+State.Word(first+2)+"."+State.Word(first+3);
  }
- public string Summary(){
+ public string Status(){
   string text=Failure!=0?"Could not save model preset. Reset or retry.":State==null?"Waiting for settings connection.":!Saved?"Saving model preset...":State.W10!=State.W11?"Model preset saved. Restart to apply.":"Model preset saved.";
-  return text+"\nSelected: "+PresetName(Hint)+"\nDLSS SR: "+Version(0)+"\nStreamline: "+Version(1)+"\nFSR SR: "+Version(2)+"\nFSR FG: "+Version(3);
+  return text+"\nSelected: "+PresetName(Hint);
+ }
+ public string Summary(){
+  return Status()+"\n\nDLSS SR preset (active): Not reported\nDLSS FG preset (active): Not reported\n\nLoaded runtime versions\nNVIDIA DLSS Super Resolution: "+Version(0)+"\nNVIDIA DLSS Frame Generation: "+Version(4)+"\nAMD FSR Upscaling: "+Version(2)+"\nAMD FSR Frame Generation: "+Version(3)+"\nNVIDIA Streamline: "+Version(1);
  }
 }

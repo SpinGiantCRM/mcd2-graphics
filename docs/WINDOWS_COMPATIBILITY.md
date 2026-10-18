@@ -13,6 +13,13 @@ and restart-only model-override semantics. The named Mods-page selector has its
 own Loader key; preserve the previous numeric key and unknown manual values
 without reinterpreting NGX preset numbers as choice indices. Auto leaves all
 NGX model-preset overrides unset and follows the selected DLSS quality mode.
+Preserve migration from the earlier, differently ordered choice-index key.
+Advanced state v2 keeps the 128-byte layout and original module bits, adding
+the fifth (DLSS FG) module in bits 8/9 and its packed version in words 30/31.
+The UI accepts v1 states without inventing that missing version. Signed packed
+words must retain all bits, with version metadata requiring a loaded identity.
+Diagnostics are opt-in and separate selected presets from unavailable active-model
+readbacks. Do not label a framework/DLL version as an SDK-selected model.
 Runtime versions come from held, exact-path
 loaded modules and their in-memory version resources; inspecting them must not
 load a provider or authorize a feature. Preserve both-platform protocol/client

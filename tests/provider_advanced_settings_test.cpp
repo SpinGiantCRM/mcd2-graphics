@@ -32,5 +32,12 @@ int main(){
     auto invalid=requests.state();invalid.modules=16;assert(!encodeAdvancedState(invalid,state));
     invalid.modules=17;invalid.versions[0]=310;assert(encodeAdvancedState(invalid,state));
     invalid.versions[0]=65536;assert(!encodeAdvancedState(invalid,state));
+    auto fg=requests.state();fg.modules=768;fg.versions[16]=310;fg.versions[17]=9;fg.versions[18]=65535;fg.versions[19]=65535;
+    assert(encodeAdvancedState(fg,state));assert(recordWord(state,8)==2);
+    assert(recordWord(state,120)==(310u|(9u<<16))&&recordWord(state,124)==0xffffffffu);
+    fg.modules=512;assert(!encodeAdvancedState(fg,state));
+    fg.modules=256;assert(!encodeAdvancedState(fg,state)); // No metadata bit with nonzero version.
+    fg.versions={};assert(encodeAdvancedState(fg,state));
+    fg.modules=1024;assert(!encodeAdvancedState(fg,state));
     std::cout<<"Advanced settings: "<<rejects<<" corrupt/truncated requests rejected; session/CAS/replay/migration/reset/readback gates pass\n";
 }

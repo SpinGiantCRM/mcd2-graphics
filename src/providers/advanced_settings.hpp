@@ -18,10 +18,13 @@ struct AdvancedState {
     AdvancedStatus status=AdvancedStatus::Ready;
     RecordStamp expected;
     std::uint32_t hint=0,startupHint=0,migrated=0;
-    // Lower four bits: loaded module identities; next four: version metadata.
+    // V1 identities/readable bits 0..3/4..7 are unchanged. V2 adds DLSS FG
+    // identity/readable bits 8/9 and packs its version in the two reserved words.
     std::uint32_t modules=0;
-    std::array<std::uint32_t,16> versions{};
+    std::array<std::uint32_t,20> versions{};
 };
+inline unsigned advancedLoadedBit(unsigned index){return index<4?1u<<index:index==4?256u:0u;}
+inline unsigned advancedVersionBit(unsigned index){return index<4?1u<<(index+4):index==4?512u:0u;}
 template<std::size_t N>inline void advancedWord(std::array<std::uint8_t,N>& b,std::size_t word,std::uint32_t value){
     for(unsigned n=0;n<4;++n)b[word*4+n]=std::uint8_t(value>>(8*n));
 }
@@ -42,19 +45,21 @@ inline bool encodeAdvancedRequest(const AdvancedRequest& r,AdvancedRequestBytes&
     out=b;return true;
 }
 inline bool encodeAdvancedState(const AdvancedState& a,AdvancedStateBytes& out){
-    if(!validRevision(a.session)||unsigned(a.status)>7||a.hint>255||a.startupHint>255||a.migrated>1||a.modules>255)return false;
+    if(!validRevision(a.session)||unsigned(a.status)>7||a.hint>255||a.startupHint>255||a.migrated>1||a.modules>1023)return false;
     if(a.sequence && (!validRevision(a.sequence)||!validRevision(a.expected.revision)))return false;
     if(!a.sequence && (a.status!=AdvancedStatus::Ready||a.expected!=RecordStamp{}||a.migrated))return false;
-    for(unsigned i=0;i<4;++i){
-        const bool version=(a.modules&(1u<<(i+4)))!=0;
-        if(version && !(a.modules&(1u<<i)))return false;
+    for(unsigned i=0;i<5;++i){
+        const bool version=(a.modules&advancedVersionBit(i))!=0;
+        if(version && !(a.modules&advancedLoadedBit(i)))return false;
         for(unsigned n=0;n<4;++n)if(a.versions[i*4+n]>65535||(!version&&a.versions[i*4+n]))return false;
     }
-    AdvancedStateBytes b{};advancedWord(b,0,0x3244434d);advancedWord(b,1,0x00315241);advancedWord(b,2,1);advancedWord(b,3,128);
+    AdvancedStateBytes b{};advancedWord(b,0,0x3244434d);advancedWord(b,1,0x00315241);advancedWord(b,2,2);advancedWord(b,3,128);
     advancedWord(b,5,a.session);advancedWord(b,6,a.sequence);advancedWord(b,7,unsigned(a.status));
     advancedWord(b,8,a.expected.revision);advancedWord(b,9,a.expected.checksum);
     advancedWord(b,10,a.hint);advancedWord(b,11,a.startupHint);advancedWord(b,12,a.migrated);advancedWord(b,13,a.modules);
     for(unsigned n=0;n<16;++n)advancedWord(b,14+n,a.versions[n]);
+    advancedWord(b,30,a.versions[16]|(a.versions[17]<<16));
+    advancedWord(b,31,a.versions[18]|(a.versions[19]<<16));
     advancedWord(b,4,recordChecksum(b));out=b;return true;
 }
 

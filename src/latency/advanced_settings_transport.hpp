@@ -28,6 +28,7 @@ struct IniHint {
     }
 };
 inline void moduleVersion(const std::filesystem::path& path,unsigned index,p::AdvancedState& state){
+    if(index>=5)return;
     HMODULE held=nullptr;
     // GetModuleHandleEx never loads a provider. Hold only an already loaded,
     // exact-path module while inspecting its in-memory version resource.
@@ -36,14 +37,14 @@ inline void moduleVersion(const std::filesystem::path& path,unsigned index,p::Ad
     auto text=std::make_unique<wchar_t[]>(32768);
     const auto length=GetModuleFileNameW(held,text.get(),32768);
     if(!length||length>=32768||CompareStringOrdinal(text.get(),int(length),path.c_str(),int(path.native().size()),TRUE)!=CSTR_EQUAL)return;
-    state.modules|=1u<<index;
+    state.modules|=p::advancedLoadedBit(index);
     auto resource=FindResourceW(held,MAKEINTRESOURCEW(VS_VERSION_INFO),MAKEINTRESOURCEW(16));
     if(!resource)return;
     const auto bytes=SizeofResource(held,resource);auto loaded=LoadResource(held,resource);auto data=loaded?LockResource(loaded):nullptr;
     VS_FIXEDFILEINFO* info=nullptr;UINT size=0;
     if(bytes<sizeof(VS_FIXEDFILEINFO)||!data||!VerQueryValueW(data,L"\\",reinterpret_cast<void**>(&info),&size)||
        !info||size<sizeof(VS_FIXEDFILEINFO)||info->dwSignature!=0xfeef04bd)return;
-    state.modules|=1u<<(index+4);
+    state.modules|=p::advancedVersionBit(index);
     state.versions[index*4]=HIWORD(info->dwFileVersionMS);state.versions[index*4+1]=LOWORD(info->dwFileVersionMS);
     state.versions[index*4+2]=HIWORD(info->dwFileVersionLS);state.versions[index*4+3]=LOWORD(info->dwFileVersionLS);
 }
@@ -81,6 +82,8 @@ public:
             if(!(versions_.modules&2))moduleVersion(root_/L"streamline"/L"sl.interposer.dll",1,versions_);
             moduleVersion(root_/L"fsr"/L"amd_fidelityfx_upscaler_dx12.dll",2,versions_);
             moduleVersion(root_.parent_path()/L"amd_fidelityfx_framegeneration_dx12.dll",3,versions_);
+            moduleVersion(root_.parent_path()/L"nvngx_dlssg.dll",4,versions_);
+            if(!(versions_.modules&p::advancedLoadedBit(4)))moduleVersion(root_/L"streamline"/L"nvngx_dlssg.dll",4,versions_);
             versionAt_=now;
         }
         auto state=requests_.state();state.modules=versions_.modules;state.versions=versions_.versions;

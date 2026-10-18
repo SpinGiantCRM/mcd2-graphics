@@ -232,24 +232,34 @@ public class DisplayRow : UGameSettingListEntryBase {
 }
 
 [ModSetting.Heading("Advanced upscaling")]
-[ModSetting.Select("dlss_sr_model_preset", "DLSS Model Preset", new string[]{"Auto", "Transformer - Preset K", "Transformer - Preset J", "Transformer 2nd Gen - Preset M", "Transformer 2nd Gen - Preset L", "CNN - Preset E (legacy)", "CNN - Preset F (legacy)", "Custom (manual override)"}, Default=0,
+[ModSetting.Select("dlss_sr_preset", "DLSS Model Preset", new string[]{"Auto", "CNN - Preset E (legacy)", "CNN - Preset F (legacy)", "Transformer - Preset J", "Transformer - Preset K", "Transformer 2nd Gen - Preset L", "Transformer 2nd Gen - Preset M", "Custom (manual override)"}, Default=0,
  Description="Auto follows the DLSS quality mode. Other presets override it. Restart after changes. Legacy CNN presets may be ignored by newer runtimes. Custom preserves an existing manual override.")]
+[ModSetting.Heading("Diagnostics")]
+[ModSetting.Toggle("show_runtime_info", "Show Runtime Diagnostics", Default=false,
+ Description="Show loaded runtime versions, preset reporting and frame-generation status. Saved choices do not prove which model is active.")]
 [ModSetting.Widget("runtime_info", typeof(AdvancedInfoWidget))]
 public class ModActor : AActor, IModSettings {
  public AdvancedMenuClient? Advanced;
+ public bool ShowDiagnostics;
  int publishedAdvancedChoice=-1;int publishedAdvancedValue=-1;
  public void InitializeAdvanced(){
   Advanced=UGameplayStatics.CreateSaveGameObject(Unreal.ClassOf<AdvancedMenuClient>()) as AdvancedMenuClient;
   if(Advanced==null)return;
+  ShowDiagnostics=ModSettings.GetBool(this,"show_runtime_info",false);
   BFL_ModSettings.GetModSettingInt(this,"dlss_sr_model",0,this,out int hint,out bool found);
   if(hint<0 || hint>255)hint=0;
-  BFL_ModSettings.GetModSettingInt(this,"dlss_sr_model_preset",0,this,out int choice,out bool choiceFound);
+  BFL_ModSettings.GetModSettingInt(this,"dlss_sr_preset",0,this,out int choice,out bool choiceFound);
+  if(!choiceFound){
+   BFL_ModSettings.GetModSettingInt(this,"dlss_sr_model_preset",0,this,out int oldChoice,out bool oldFound);
+   if(oldFound && oldChoice>=0 && oldChoice<7){hint=AdvancedMenuClient.PreviousPresetValue(oldChoice,hint);found=true;}
+  }
   if(choiceFound && choice>=0 && choice<7){hint=AdvancedMenuClient.PresetValue(choice,hint);found=true;}
   Advanced.Hint=hint;Advanced.Migrate=!found;Advanced.Start();
   Timer.Start(this,"PollAdvanced",0.5f,true);
  }
  public void OnSettingChanged(string id,string value){
-  if(id!="dlss_sr_model_preset" || Advanced==null)return;
+  if(id=="show_runtime_info"){ShowDiagnostics=ModSettings.ToBool(value);return;}
+  if(id!="dlss_sr_preset" || Advanced==null)return;
   double number=ModSettings.ToNumber(value);
   if(number<0 || number>7 || number!=(int)number)return;
   int hint=AdvancedMenuClient.PresetValue((int)number,Advanced.Hint);
@@ -258,14 +268,14 @@ public class ModActor : AActor, IModSettings {
   // arbitrary numeric preset. Reconcile a no-op selection to its actual name.
   if((int)number!=AdvancedMenuClient.PresetChoice(hint))publishedAdvancedChoice=-1;
  }
- public void OnSettingsReset(){if(Advanced!=null)Advanced.Select(0,false);}
+ public void OnSettingsReset(){ShowDiagnostics=false;if(Advanced!=null)Advanced.Select(0,false);}
  public void PollAdvanced(){
   if(Advanced==null || ProviderMenu==null)return;
   Advanced.Poll(ProviderMenu);
   if(Advanced.Saved && !Advanced.Migrate){
    int choice=AdvancedMenuClient.PresetChoice(Advanced.Hint);
    if(publishedAdvancedValue!=Advanced.Hint){publishedAdvancedValue=Advanced.Hint;ModSettings.SetInt(this,"dlss_sr_model",Advanced.Hint);}
-   if(publishedAdvancedChoice!=choice){publishedAdvancedChoice=choice;ModSettings.SetInt(this,"dlss_sr_model_preset",choice);}
+   if(publishedAdvancedChoice!=choice){publishedAdvancedChoice=choice;ModSettings.SetInt(this,"dlss_sr_preset",choice);}
   }
  }
 

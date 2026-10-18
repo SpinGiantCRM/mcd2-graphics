@@ -20,6 +20,15 @@ public class AdvancedInfoWidget : ModWidget {
   if(Label==null)return;
   UGameplayStatics.GetAllActorsOfClass(this,Unreal.ClassOf<ModActor>(),out List<AActor> actors);
   if(actors.Count==0)return;var manager=actors[0] as ModActor;
-  if(manager!=null && manager.Advanced!=null)Label.SetText(manager.Advanced.Summary());
+  if(manager!=null && manager.Advanced!=null){
+   string text=manager.ShowDiagnostics?manager.Advanced.Summary():manager.Advanced.Status();
+   if(manager.ShowDiagnostics && manager.ProviderMenu!=null && manager.ProviderMenu.Ready){
+    int provider=manager.SelectedProvider();
+    text+="\n\nSelected upscaler: "+(provider==1?"NVIDIA DLSS":provider==2?"AMD FSR":"Native");
+    if(provider!=0)text+="\nSelected render scale: "+(manager.SelectedScale()/100)+"%";
+    text+="\nFrame Generation ("+(manager.SelectedFgProvider()==1?"AMD FSR":"NVIDIA DLSS")+"): "+manager.FGStatus();
+   }
+   Label.SetText(text);
+  }
  }
 }

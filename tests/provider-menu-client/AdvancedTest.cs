@@ -7,10 +7,12 @@ static class AdvancedTest {
   s.W4=s.Checksum();UGameplayStatics.Slots["MCD2GraphicsAdvancedState"]=s;return s;
  }
  public static void Run(){
-  int[] presets={0,11,10,13,12,5,6};
+  int[] presets={0,5,6,10,11,12,13};
+  int[] previous={0,11,10,13,12,5,6};
   for(int i=0;i<presets.Length;i++){
    Need(AdvancedMenuClient.PresetValue(i,99)==presets[i]);
    Need(AdvancedMenuClient.PresetChoice(presets[i])==i);
+   Need(AdvancedMenuClient.PreviousPresetValue(i,99)==previous[i]);
   }
   Need(AdvancedMenuClient.PresetChoice(99)==7&&AdvancedMenuClient.PresetValue(7,99)==99);
   Need(AdvancedMenuClient.PresetValue(-1,11)==-1&&AdvancedMenuClient.PresetValue(8,11)==-1);
@@ -40,8 +42,16 @@ static class AdvancedTest {
   core.Authority.W5=124;c.Poll(core);Need(c.Pending!=null&&c.Pending.W5==124&&c.Pending.W6==1);
   s=State(session:124,sequence:1,status:1,hint:0);s.W13=17;s.W14=310;s.W15=9;s.W16=1;s.W4=s.Checksum();
   c.Poll(core);Need(c.Version(0)=="310.9.1.0"&&c.Version(1)=="Not loaded");
+  Need(c.Version(4)=="Not reported");
   s.W13=16;s.W4=s.Checksum();Need(!c.Valid(s));
   s.W13=1;s.W14=0;s.W15=0;s.W16=0;s.W4=s.Checksum();Need(c.Valid(s));
+  s.W2=2;s.W13=769;s.W30=310|(9<<16);s.W31=-1;s.W4=s.Checksum();Need(c.Valid(s));
+  Need(c.Version(4)=="310.9.65535.65535");
+  s.W13=513;s.W4=s.Checksum();Need(!c.Valid(s));
+  s.W13=257;s.W4=s.Checksum();Need(!c.Valid(s));
+  s.W30=0;s.W31=0;s.W4=s.Checksum();Need(c.Valid(s)&&c.Version(4)=="Version unavailable");
+  s.W13=1;s.W4=s.Checksum();Need(c.Valid(s)&&c.Version(4)=="Not loaded");
+  Need(c.Summary().Contains("DLSS FG preset (active): Not reported"));
   var travel=new AdvancedMenuClient();State(session:124,sequence:19,status:1);travel.Poll(core);Need(travel.Pending!=null&&travel.Pending.W6==20);
   Console.WriteLine("Advanced menu: migration, reset, latest-edit ACK, stale session, retry, version validation and travel sequence checks pass");
  }

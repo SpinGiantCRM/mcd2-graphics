@@ -23,6 +23,9 @@ int main(){
     auto kernel=GetModuleHandleW(L"kernel32.dll");wchar_t module[32768]{};assert(GetModuleFileNameW(kernel,module,32768));
     mcd2::advanced::moduleVersion(module,1,state);assert(state.modules&2);
     assert(GetModuleHandleW(L"kernel32.dll")==kernel);
+    mcd2::advanced::moduleVersion(module,4,state);assert(state.modules&256);
+    assert(GetModuleHandleW(L"kernel32.dll")==kernel);
+    auto before=state.modules;mcd2::advanced::moduleVersion(module,5,state);assert(state.modules==before);
     std::filesystem::remove_all(folder);
     std::cout<<"Advanced Windows INI: single-key writes, override retention, invalid values, exact loaded-module metadata and missing-module no-load checks pass\n";
 }
