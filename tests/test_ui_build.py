@@ -16,10 +16,10 @@ class UIBuildTests(unittest.TestCase):
         self.assertNotIn('ModSetting.Slider("dlss_sr_model"', actor)
         self.assertIn('"Auto"', actor)
         choices = actor.split('[ModSetting.Select("dlss_sr_preset"', 1)[1].split('}, Default=0', 1)[0]
-        labels = ['"Auto"', 'CNN - Preset E', 'CNN - Preset F', 'Transformer - Preset J',
-                  'Transformer - Preset K', 'Transformer 2nd Gen - Preset L', 'Transformer 2nd Gen - Preset M']
+        labels = ['"Auto"', 'E - CNN', 'F - CNN', 'J - Transformer',
+                  'K - Transformer', 'L - Transformer 2nd Gen', 'M - Transformer 2nd Gen']
         self.assertEqual(sorted(choices.index(label) for label in labels), [choices.index(label) for label in labels])
-        self.assertIn('ModSetting.Toggle("show_runtime_info", "Show Runtime Diagnostics", Default=false', actor)
+        self.assertIn('ModSetting.Toggle("show_runtime_info", "Show In-Game Diagnostics", Default=false', actor)
         # The renderer must allocate fresh NGX parameters and supply the quality
         # mode while leaving every model-preset override unset for Auto (zero).
         renderer = (ui.ROOT / 'src/native/ngx_live_fixture.hpp').read_text()

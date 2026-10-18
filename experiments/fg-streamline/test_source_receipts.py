@@ -27,13 +27,14 @@ class SourceReceiptTests(unittest.TestCase):
             experiment.mkdir(parents=True)
             (repository / 'src/providers').mkdir(parents=True)
             (repository / 'src/providers/test.hpp').write_bytes(b'header')
+            (repository / 'src/providers/runtime_diagnostics.h').write_bytes(b'ABI')
             (experiment / 'bootstrap.cpp').write_bytes(b'bootstrap')
             hashes = source_hashes(repository, experiment,
                 ['src\\providers\\test.hpp', 'bootstrap.cpp'])
             self.assertEqual(hashes, {
                 'src/providers/test.hpp': hashlib.sha256(b'header').hexdigest(),
                 'bootstrap.cpp': hashlib.sha256(b'bootstrap').hexdigest()})
-            self.assertEqual(provider_sources(repository), ['src/providers/test.hpp'])
+            self.assertEqual(provider_sources(repository), ['src/providers/runtime_diagnostics.h', 'src/providers/test.hpp'])
 
 
 if __name__ == '__main__':

@@ -122,18 +122,20 @@ public class AdvancedMenuClient : USaveGame {
  }
  public static string PresetName(int value){
   if(value==0)return "Auto (quality-dependent)";
-  if(value==11)return "Transformer - Preset K";if(value==10)return "Transformer - Preset J";
-  if(value==13)return "Transformer 2nd Gen - Preset M";if(value==12)return "Transformer 2nd Gen - Preset L";
-  if(value==5)return "CNN - Preset E (legacy)";if(value==6)return "CNN - Preset F (legacy)";
+  if(value==11)return "K - Transformer";if(value==10)return "J - Transformer";
+  if(value==13)return "M - Transformer 2nd Gen";if(value==12)return "L - Transformer 2nd Gen";
+  if(value==5)return "E - CNN (Legacy)";if(value==6)return "F - CNN (Legacy)";
   return "Custom (manual override: "+value+")";
  }
+ public string? Slot;
+ public string SlotName(){return Slot==null||Slot==""?"MCD2GraphicsAdvanced":Slot;}
  public AdvancedStateSave? State;
  public AdvancedRequestSave? Pending;
  public int Hint;public bool Migrate;public bool Saved;public int Failure;
  int session;int sequence;int ticks;int retries;int sentHint;bool sentMigration;
  public void Start(){
-  var seed=UGameplayStatics.LoadGameFromSlot("MCD2GraphicsAdvancedState",0) as AdvancedStateSave;
-  if(seed==null){seed=UGameplayStatics.CreateSaveGameObject(Unreal.ClassOf<AdvancedStateSave>()) as AdvancedStateSave;if(seed!=null)UGameplayStatics.SaveGameToSlot(seed,"MCD2GraphicsAdvancedState",0);}
+  var seed=UGameplayStatics.LoadGameFromSlot(SlotName()+"State",0) as AdvancedStateSave;
+  if(seed==null){seed=UGameplayStatics.CreateSaveGameObject(Unreal.ClassOf<AdvancedStateSave>()) as AdvancedStateSave;if(seed!=null)UGameplayStatics.SaveGameToSlot(seed,SlotName()+"State",0);}
  }
  public void Select(int hint,bool migrate){
   if(hint<0 || hint>255)return;
@@ -158,11 +160,11 @@ public class AdvancedMenuClient : USaveGame {
  public void Poll(ProviderMenuClient core){
   if(!core.Ready || core.Authority==null){State=null;Saved=false;return;}
   var authority=core.Authority;
-  var next=UGameplayStatics.LoadGameFromSlot("MCD2GraphicsAdvancedState",0) as AdvancedStateSave;
+  var next=UGameplayStatics.LoadGameFromSlot(SlotName()+"State",0) as AdvancedStateSave;
   if(next==null || !Valid(next) || next.W5!=authority.W5){State=null;Saved=false;return;}
   State=next;
   if(session!=authority.W5){session=authority.W5;sequence=next.W6;Pending=null;Saved=false;Failure=0;retries=0;
-   var old=UGameplayStatics.LoadGameFromSlot("MCD2GraphicsAdvancedRequest",0) as AdvancedRequestSave;
+   var old=UGameplayStatics.LoadGameFromSlot(SlotName()+"Request",0) as AdvancedRequestSave;
    if(old!=null && old.W0==843334477 && old.W1==3232065 && old.W2==1 && old.W3==64 && old.W4==old.Checksum() && old.W5==session && old.W6>sequence)sequence=old.W6;
   }
   if(Pending!=null){
@@ -183,7 +185,7 @@ public class AdvancedMenuClient : USaveGame {
   if(r==null){Failure=8;return;}
   r.W0=843334477;r.W1=3232065;r.W2=1;r.W3=64;r.W5=session;r.W6=++sequence;
   r.W7=authority.W19;r.W8=authority.W16;r.W9=Hint;r.W10=Migrate?1:0;r.W4=r.Checksum();
-  if(!UGameplayStatics.SaveGameToSlot(r,"MCD2GraphicsAdvancedRequest",0)){Failure=8;return;}
+  if(!UGameplayStatics.SaveGameToSlot(r,SlotName()+"Request",0)){Failure=8;return;}
   Pending=r;sentHint=Hint;sentMigration=Migrate;ticks=0;
  }
  public string Version(int index){

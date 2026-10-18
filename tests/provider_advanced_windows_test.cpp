@@ -17,6 +17,9 @@ int main(){
     assert(WritePrivateProfileStringW(L"DLSS",L"ModelPreset",L"invalid",path.c_str()));assert(!ini.read(hint));
     assert(WritePrivateProfileStringW(L"DLSS",L"ModelPreset",L"256",path.c_str()));assert(!ini.read(hint));
     assert(WritePrivateProfileStringW(L"DLSS",L"ModelPreset",L"0",path.c_str()));assert(ini.read(hint)&&hint==0);
+    mcd2::advanced::IniHint fg{ini.path,L"FrameGenerationPreset",2};
+    assert(fg.write(2));unsigned fgValue=0;assert(fg.read(fgValue)&&fgValue==2);
+    assert(!fg.write(3));unsigned modelAfter=0;assert(ini.read(modelAfter)&&modelAfter==0);
     mcd2::providers::AdvancedState state;
     const auto missing=folder/L"missing-provider.dll";assert(!GetModuleHandleW(missing.c_str()));
     mcd2::advanced::moduleVersion(missing,0,state);assert(state.modules==0&&!GetModuleHandleW(missing.c_str()));

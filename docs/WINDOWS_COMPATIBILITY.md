@@ -18,13 +18,29 @@ Advanced state v2 keeps the 128-byte layout and original module bits, adding
 the fifth (DLSS FG) module in bits 8/9 and its packed version in words 30/31.
 The UI accepts v1 states without inventing that missing version. Signed packed
 words must retain all bits, with version metadata requiring a loaded identity.
-Diagnostics are opt-in and separate selected presets from unavailable active-model
+The visible Custom entry is removed; unsupported legacy values normalize to
+Auto. Popup tooltips are removed and details stay in Diagnostics. Diagnostics
+are opt-in and separate selected presets from unavailable active-model
 readbacks. Do not label a framework/DLL version as an SDK-selected model.
 Runtime versions come from held, exact-path
 loaded modules and their in-memory version resources; inspecting them must not
 load a provider or authorize a feature. Preserve both-platform protocol/client
 checks, version-library linking and source-matched UI rebuild receipts. Native
 Windows/Radeon and in-game page qualification remain separate from those checks.
+
+The FG preset request has separate AdvancedFG slots, preserving SR replay/CAS
+and migration behavior. It writes only the FrameGenerationPreset INI key;
+Auto retains the Streamline default, A/B request UI recomposition Off/On, and
+no active-model readback is inferred. The gameplay diagnostics transport is
+opt-in, uses bounded mod-owned files and read-only snapshots, and requires
+advancing counters with current session/revision/world checks. FSR implementation
+versions retained from validated contexts must be labelled as last verified.
+Use the shared FG latency recipe and keep its root-path rewrite and version
+library link intact. Substituting the standalone adapter drops access to the
+already-initialized shared Streamline owner and hides independent Reflex.
+Preserve independent latency with FG Off. The sharpness slider uses one existing
+post-upscale game filter and yields/restores only while it still owns that value.
+New UI/native artifacts require fresh runtime qualification on each platform.
 
 The UI build uses pinned NeoRune 1.0.0 and .NET SDK 10.0.402/reference pack
 10.0.13. Preserve SDK-generated versioned ModInfo and its discovery header;

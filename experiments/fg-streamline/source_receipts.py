@@ -4,7 +4,7 @@ import hashlib
 
 def provider_sources(repository):
     return [path.relative_to(repository).as_posix()
-            for path in sorted((repository / 'src/providers').glob('*.hpp'))]
+            for path in sorted(set([*(repository / 'src/providers').glob('*.hpp'), *(repository / 'src/providers').glob('*.h')]))]
 
 
 def source_hashes(repository, experiment, names):

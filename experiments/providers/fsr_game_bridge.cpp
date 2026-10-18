@@ -56,7 +56,7 @@ extern "C" int mcd2_fsr_create_v1(void *device,const wchar_t *runtime,
  std::vector<uint64_t> ids(count);std::vector<const char*> names(count);
  versions.versionIds=ids.data();versions.versionNames=names.data();code=s->query(nullptr,&versions.header);
  if(code)return int(code);if(count>ids.size())return -1006;
- for(size_t i=0;i<count;++i)if(names[i]&&std::strstr(names[i],"3.1.5"))s->provider=ids[i];
+ for(size_t i=0;i<count;++i)if(names[i]&&!std::strcmp(names[i],"3.1.5"))s->provider=ids[i];
  if(!s->provider)return -1007;s->stage=2;
  ffxOverrideVersion selected{};selected.header.type=FFX_API_DESC_TYPE_OVERRIDE_VERSION;selected.versionId=s->provider;
  ffxCreateBackendDX12Desc backend{};backend.header.type=FFX_API_CREATE_CONTEXT_DESC_TYPE_BACKEND_DX12;

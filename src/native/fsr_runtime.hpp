@@ -1,5 +1,6 @@
 #pragma once
 #include <bcrypt.h>
+#include "../providers/runtime_diagnostics.h"
 #include "../../experiments/providers/fsr_game_bridge.h"
 #include "../providers/sr_runtime_protocol.hpp"
 #include "../providers/sr_runtime_snapshot.h"
@@ -11,6 +12,7 @@
 namespace fsr_runtime {
 namespace p=mcd2::providers;
 static p::SrRuntimeState state;
+static unsigned verifiedImplementation=0;
 static p::SrContext context;
 static std::uint32_t requestSequence=0;
 static bool requested=false,current=false,contextAvailable=false,restoring=false;
@@ -198,7 +200,7 @@ static bool record(a::command_list *cmd,uint32_t x,uint32_t y,uint32_t z){
  if(result)return fail(16);
  MCD2FsrInfoV1 info{};info.size=sizeof(info);if(c.info(c.session,&info)||info.errors)return fail(28);
  if(!copy_output(c,native,go))return fail(17);
- c.force_reset=false;
+ c.force_reset=false;verifiedImplementation=30105;
  if(state.evaluations<0x7fffffffu)++state.evaluations;phase(p::SrPhase::Active);return true;
 }
 static int load(Generation& c){
@@ -353,4 +355,19 @@ extern "C" __declspec(dllexport) int mcd2_sr_runtime_v1(MCD2SrRuntimeSnapshotV1*
  if(!out||out->size!=sizeof(*out))return -1;std::unique_lock guard(lock,std::try_to_lock);if(!guard.owns_lock())return -2;
  mcd2::providers::SrRuntimeBytes bytes;if(!mcd2::providers::encodeSrRuntimeState(fsr_runtime::state,bytes))return -3;
  out->reserved=0;std::copy(bytes.begin(),bytes.end(),out->state);return 0;
+}
+
+extern "C" __declspec(dllexport) int mcd2_sr_diagnostics_v1(MCD2SrDiagnosticsV1* out){
+ if(!out||out->size!=sizeof(*out)||mcd2::process_exit::terminating())return -1;
+ std::unique_lock guard(lock,std::try_to_lock);if(!guard.owns_lock())return -2;
+ *out={sizeof(*out),0,0,fsr_runtime::menuWorld,fsr_runtime::verifiedImplementation,0,0};
+ if(fsr_runtime::generation&&fsr_runtime::state.phase==mcd2::providers::SrPhase::Active&&!fsr_runtime::state.error){
+  out->provider=2;out->revision=fsr_runtime::state.intent.revision;out->world=fsr_runtime::state.world;
+  // The active context's provider ID was queried and matched to this explicitly
+  // selected implementation by create_v1, before the first successful dispatch.
+  out->implementation=30105;out->evaluations=fsr_runtime::state.evaluations;
+ }else if(ui_control.phase==2&&lean.wanted&&!lean.failed&&!lean.stop){
+  out->provider=1;out->revision=ui_control.applied_revision;out->evaluations=lean.evaluations;
+ }
+ return 0;
 }

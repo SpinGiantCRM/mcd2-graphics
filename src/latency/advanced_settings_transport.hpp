@@ -7,20 +7,21 @@ namespace mcd2::advanced {
 namespace p=mcd2::providers;
 struct IniHint {
     std::filesystem::path path;
+    const wchar_t* key=L"ModelPreset";unsigned maximum=255;
     bool read(std::uint32_t& value)const{
         wchar_t text[64]{};
-        const auto n=GetPrivateProfileStringW(L"DLSS",L"ModelPreset",L"0",text,64,path.c_str());
+        const auto n=GetPrivateProfileStringW(L"DLSS",key,L"0",text,64,path.c_str());
         if(!n||n>=63)return false;
         std::uint32_t next=0;
-        for(unsigned i=0;i<n;++i){if(text[i]<L'0'||text[i]>L'9')return false;next=next*10+unsigned(text[i]-L'0');if(next>255)return false;}
+        for(unsigned i=0;i<n;++i){if(text[i]<L'0'||text[i]>L'9')return false;next=next*10+unsigned(text[i]-L'0');if(next>maximum)return false;}
         value=next;return true;
     }
     bool write(std::uint32_t value)const{
-        if(value>255)return false;
+        if(value>maximum)return false;
         // Update one key through the same profile API used by the renderer.
         // Unrelated sections/overrides are retained. Never called on a frame callback.
         const auto text=std::to_wstring(value);
-        if(!WritePrivateProfileStringW(L"DLSS",L"ModelPreset",text.c_str(),path.c_str()))return false;
+        if(!WritePrivateProfileStringW(L"DLSS",key,text.c_str(),path.c_str()))return false;
         // The profile API returns zero for a cache flush, including success.
         // Success requires the actual key write and independent readback.
         WritePrivateProfileStringW(nullptr,nullptr,nullptr,path.c_str());
@@ -55,15 +56,16 @@ class SaveTransport {
     p::AdvancedRequests requests_;
     std::uint64_t versionAt_=0;
     p::AdvancedState versions_;
+    std::wstring slot_;
     static unsigned startup(const IniHint& ini){std::uint32_t hint=0;return ini.read(hint)?hint:0;}
 public:
-    SaveTransport(std::filesystem::path saves,std::filesystem::path authority,std::filesystem::path root,unsigned session)
+    SaveTransport(std::filesystem::path saves,std::filesystem::path authority,std::filesystem::path root,unsigned session,bool frameGeneration=false)
         :saves_(std::move(saves)),root_(std::move(root)),store_(std::move(authority)),
-         ini_{root_/L"DependencyOverrides.ini"},requests_(session,startup(ini_)){}
+         ini_{root_/L"DependencyOverrides.ini",frameGeneration?L"FrameGenerationPreset":L"ModelPreset",frameGeneration?2u:255u},requests_(session,startup(ini_)),slot_(frameGeneration?L"MCD2GraphicsAdvancedFG":L"MCD2GraphicsAdvanced"){}
     void poll(const p::MenuAuthority& core){
         if(core.load!=p::StoreStatus::Ok)return;
         p::SlotBytes save;p::AdvancedRequestBytes words;p::AdvancedRequest request;
-        const auto requestPath=saves_/L"MCD2GraphicsAdvancedRequest.sav";
+        const auto requestPath=saves_/(slot_+L"Request.sav");
         if(p::readObservedSlot(requestPath,save)&&p::menu_save_detail::parse(save,"AdvancedRequestSave",words)&&p::decodeAdvancedRequest(words,request)){
             p::store_detail::WriterLock lock(store_.lockPath());
             p::DecodedGraphicsRecord current;auto loaded=store_.load(current);
@@ -88,12 +90,12 @@ public:
         }
         auto state=requests_.state();state.modules=versions_.modules;state.versions=versions_.versions;
         p::AdvancedStateBytes bytes;p::SlotBytes seed,encoded;
-        const auto path=saves_/L"MCD2GraphicsAdvancedState.sav";
+        const auto path=saves_/(slot_+L"State.sav");
         if(!p::encodeAdvancedState(state,bytes)||!p::readObservedSlot(path,seed)||
            !p::menu_save_detail::encode(seed,"AdvancedStateSave",bytes,encoded)||seed==encoded)return;
-        p::store_detail::WriterLock lock(saves_/L"MCD2GraphicsAdvancedState.lock");p::SlotBytes fresh;
+        p::store_detail::WriterLock lock(saves_/(slot_+L"State.lock"));p::SlotBytes fresh;
         if(lock.status!=p::StoreStatus::Ok||!p::readObservedSlot(path,fresh)||fresh!=seed)return;
-        const auto pending=saves_/L"MCD2GraphicsAdvancedState.pending";
+        const auto pending=saves_/(slot_+L"State.pending");
         if(!p::store_detail::discardPending(pending)||!p::store_detail::writeFlushed(pending,encoded))return;
         p::SlotBytes staged;
         if(p::readObservedSlot(pending,staged)&&staged==encoded&&p::store_detail::replace(pending,path))p::store_detail::syncDirectory(saves_);

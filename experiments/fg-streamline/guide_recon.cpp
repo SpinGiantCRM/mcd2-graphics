@@ -26,6 +26,7 @@ namespace a=reshade::api;
 #include "fg_alpha_copy.h"
 #include "fg_scene_copy.h"
 #include "../../src/providers/fg_output_contract.hpp"
+#include "../../src/providers/runtime_diagnostics.h"
 #include "../../src/native/reset_epoch_contract.hpp"
 #include "fg_controls.hpp"
 namespace {
@@ -68,6 +69,7 @@ bool releasedWhileOff=false;
 uint64_t outcomeSample=0;
 int outcomeResult=-1;
 unsigned outcomeStatus=0,outcomePresents=0;
+MCD2FgDiagnosticsV1 diagnostics{sizeof(MCD2FgDiagnosticsV1),0,0,0,0,0,0,0};
 std::atomic<unsigned> guideSamples{0};unsigned trialRevision=0;
 unsigned outputWidth=0,outputHeight=0,outputBuffers=0,outputFormat=0,outputColour=0;
 mcd2::providers::FgOutputContract sceneOutput{};
@@ -406,12 +408,15 @@ void finish(a::command_queue*,a::swapchain*){if(mcd2::process_exit::terminating(
  if(auto module=amd_bridge()){
   using State=int(*)(MCD2AmdFgStateV1*);auto get=reinterpret_cast<State>(GetProcAddress(module,"mcd2_afg_state_v1"));MCD2AmdFgStateV1 state{};state.size=sizeof(state);auto result=get?get(&state):-1;
   std::lock_guard lock(mutex);++outcomeSample;outcomeResult=result;outcomeStatus=state.fault;outcomePresents=0;
+  diagnostics={sizeof(diagnostics),2,state.active,state.fault,state.ready?30106u:diagnostics.implementation,0,state.realPresents,state.generatedPresents};
   if(frame<120||frame%60==0)privateLog<<"{\"kind\":\"amd_fg_outcome\",\"SDKResult\":"<<result<<",\"active\":"<<state.active<<",\"fault\":"<<state.fault<<",\"engineFrame\":"<<state.engineFrame<<",\"providerFrame\":"<<state.providerFrame<<",\"prepared\":"<<state.prepared<<",\"images\":"<<state.images<<",\"realPresents\":"<<state.realPresents<<",\"generatedPresents\":"<<state.generatedPresents<<",\"errors\":"<<state.errors<<",\"warnings\":"<<state.warnings<<"}\n";privateLog.flush();++frame;return;
  }
  unsigned max=0,status=0,min=0,presents=0;int result=activeFGMode&&state?state(&max,&status,&min,&presents):-1;
  if(fg_controls::enabled && activeFGMode && (result!=0||status!=0))fg_controls::fault=1;
  std::lock_guard lock(mutex);++outcomeSample;
  outcomeResult=activeFGMode?result:0;outcomeStatus=activeFGMode?status:0;outcomePresents=activeFGMode?presents:1;
+ diagnostics.provider=1;diagnostics.active=activeFGMode?1u:0u;diagnostics.fault=outcomeStatus;
+ if(!result&&!status&&activeFGMode){++diagnostics.rendered;if(presents>1)diagnostics.generated+=presents-1;}
  if(activeFGMode && (!fg_controls::enabled||fgTrialFrames<120||fgTrialFrames%60==0)){privateLog<<"{\"kind\":\"fg_present_outcome\",\"frameStamp\":"<<presentedFrame<<",\"SDKResult\":"<<result<<",\"status\":"<<status<<",\"actualPresents\":"<<presents<<"}\n";privateLog.flush();}++frame;
 }
 void present(a::command_queue*q,a::swapchain*swap,const a::rect*,const a::rect*,unsigned,const a::rect*){if(mcd2::process_exit::terminating())return;
@@ -540,4 +545,10 @@ extern "C" __declspec(dllexport) void AddonUninit(HMODULE addon,HMODULE framewor
   GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS|GET_MODULE_HANDLE_EX_FLAG_PIN,reinterpret_cast<LPCWSTR>(addon),&held);
   GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS|GET_MODULE_HANDLE_EX_FLAG_PIN,reinterpret_cast<LPCWSTR>(framework),&held);
  }
+}
+
+extern "C" __declspec(dllexport) int mcd2_fg_diagnostics_v1(MCD2FgDiagnosticsV1* out){
+ if(!out||out->size!=sizeof(*out)||mcd2::process_exit::terminating())return -1;
+ std::unique_lock guard(mutex,std::try_to_lock);if(!guard.owns_lock())return -2;
+ *out=diagnostics;return 0;
 }

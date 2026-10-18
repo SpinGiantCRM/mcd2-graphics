@@ -19,8 +19,8 @@ inline bool decode(const std::vector<uint8_t>&bytes,Intent&intent){std::map<std:
  Intent s{v["Revision"],v["HDROutput"],v["PeakNits"],v["PaperWhiteNits"],v["UINits"],v["ReflexMode"]};
  if(!s.revision||s.hdr>1||s.reflex>2||s.peak<100||s.peak>10000||s.peak%10||s.paper<48||s.paper>500||s.ui<48||s.ui>500)return false;intent=s;return true;
 }
-inline std::vector<uint8_t> encode_runtime(const std::vector<uint8_t>&seed,const std::map<std::string,unsigned>&fields){
- std::map<std::string,unsigned> old;size_t h=0;if(!parse(seed,"DisplayRuntimeSave",old,h))return {};
+inline std::vector<uint8_t> encode_runtime(const std::vector<uint8_t>&seed,const std::map<std::string,unsigned>&fields,const char* className="DisplayRuntimeSave"){
+ std::map<std::string,unsigned> old;size_t h=0;if(!parse(seed,className,old,h))return {};
  std::vector<uint8_t> out(seed.begin(),seed.begin()+h);auto u32=[&](unsigned x){for(unsigned i=0;i<4;++i)out.push_back(uint8_t(x>>(8*i)));};auto str=[&](const std::string&s){u32(unsigned(s.size()+1));out.insert(out.end(),s.begin(),s.end());out.push_back(0);};
  for(auto&f:fields){if(!f.second)continue;str(f.first);str("IntProperty");u32(0);u32(4);out.push_back(0);u32(f.second);}str("None");u32(0);return out;
 }

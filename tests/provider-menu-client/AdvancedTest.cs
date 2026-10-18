@@ -17,7 +17,7 @@ static class AdvancedTest {
   Need(AdvancedMenuClient.PresetChoice(99)==7&&AdvancedMenuClient.PresetValue(7,99)==99);
   Need(AdvancedMenuClient.PresetValue(-1,11)==-1&&AdvancedMenuClient.PresetValue(8,11)==-1);
   Need(AdvancedMenuClient.PresetName(0)=="Auto (quality-dependent)");
-  Need(AdvancedMenuClient.PresetName(11)=="Transformer - Preset K");
+  Need(AdvancedMenuClient.PresetName(11)=="K - Transformer");
   Need(AdvancedMenuClient.PresetName(99)=="Custom (manual override: 99)");
   UGameplayStatics.Slots.Clear();UGameplayStatics.SaveCount=0;UGameplayStatics.FailSave=false;
   var core=new ProviderMenuClient{Ready=true,Authority=new ProviderAuthoritySave{W5=123,W19=7,W16=unchecked((int)0xfedcba98)}};
@@ -53,6 +53,10 @@ static class AdvancedTest {
   s.W13=1;s.W4=s.Checksum();Need(c.Valid(s)&&c.Version(4)=="Not loaded");
   Need(c.Summary().Contains("DLSS FG preset (active): Not reported"));
   var travel=new AdvancedMenuClient();State(session:124,sequence:19,status:1);travel.Poll(core);Need(travel.Pending!=null&&travel.Pending.W6==20);
+  var separate=new AdvancedMenuClient{Slot="MCD2GraphicsAdvancedFG",Hint=2};separate.Start();
+  var fgState=State(session:124);UGameplayStatics.Slots["MCD2GraphicsAdvancedFGState"]=fgState;
+  separate.Poll(core);Need(separate.Pending!=null&&separate.Pending.W9==2&&UGameplayStatics.Slots.ContainsKey("MCD2GraphicsAdvancedFGRequest"));
+  Need(!ReferenceEquals(separate.Pending,UGameplayStatics.Slots["MCD2GraphicsAdvancedRequest"]));
   Console.WriteLine("Advanced menu: migration, reset, latest-edit ACK, stale session, retry, version validation and travel sequence checks pass");
  }
 }
