@@ -1,15 +1,16 @@
 The advanced page embeds a tabbed custom widget through Blueprint Loader 2.0,
-with native stepper shells, game settings tabs and the native bordered detail
+with native stepper shells, custom category buttons and the native bordered detail
 card on hover/focus. Loader and SDK sources remain unmodified. Preserve Loader
 save keys, independent SR/FG choices, keyboard/controller navigation and reset.
 The advanced page leases only its own Loader page padding to include the header
 and master toggle in the left column. Restore padding only while owned, retire
 the sibling help pane on exit, and preserve the structure/active-page checks.
-Its category bar borrows only the initialized native Settings strip’s display
-brush and owns its exclusive button group. Do not instantiate the native strip
+Its category bar uses focusable UMG buttons, a font from its own native detail
+card and explicit exclusive selection styling. Retire click handlers on teardown
+and clear styling on page exit. Do not instantiate the native strip
 controller or call visibility methods that assume optional child bindings;
 standalone creation left its background null and caused a GameThread access
-violation. Preserve null-checked style lookup and leave Q/E with the main game
+violation. No native strip lookup or controller is needed. Leave Q/E with the main game
 tabs. This UI path still requires native Windows menu qualification.
 FSR SR create_v2 explicitly distinguishes analytical 3.1.5 from the separately
 pinned portable INT8 4.1.1r11 DLL and official 4.1.1. Auto uses official 4.1.1

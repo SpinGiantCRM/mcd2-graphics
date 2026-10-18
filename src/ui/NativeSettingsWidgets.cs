@@ -8,41 +8,25 @@ using UE.GameSettings;
 using UE.Angelscript;
 public static class NativeSettingsWidgets {
  public static UGameSettingDetailView? HelpCard(UObject owner){return Ui.GameWidget(owner,"/SpicewoodSettings/Spicewood/UI/SettingsScreen/W_SettingsDetailView.W_SettingsDetailView_C") as UGameSettingDetailView;}
- public static UAS_SpicewoodButtonTabAction? CategoryTab(UObject owner,string title){
-  var tab=Ui.GameWidget(owner,"/OreUI/UI/Button/W_SpicewoodTabButton.W_SpicewoodTabButton_C") as UAS_SpicewoodButtonTabAction;if(tab==null)return null;
-  tab.SetButtonText(title);tab.PreConstruct(false);tab.UpdateButtonText(title);
-  if(tab.ButtonTemplate!=null){tab.ButtonTemplate.bIsButtonTextCentered=true;tab.ButtonTemplate.PreConstruct(false);}
-  SetText(tab.TextBlockWidget,title);return tab;
+ // A mod-owned navigation row. Native fonts and restrained colour keep this
+ // distinct from the main page tabs; no screen controller or asset lookup.
+ public static UButton? CategoryButton(UWidgetTree tree,string title,out UTextBlock? label,out UBorder? marker){
+  var button=UE.Engine.UGameplayStatics.SpawnObject(Unreal.ClassOf<UButton>(),tree) as UButton;
+  label=Ui.Text(tree,title,22);marker=Ui.Panel(tree,null,Ui.Color(0.03f,0.065f,0.075f,1),0);
+  var column=Ui.Column(tree);if(button==null||column==null)return button;button.IsFocusable=true;
+  if(label!=null){var text=column.AddChildToVerticalBox(label);if(text!=null){text.SetHorizontalAlignment(UE.SlateCore.EHorizontalAlignment.HAlign_Center);text.SetVerticalAlignment(UE.SlateCore.EVerticalAlignment.VAlign_Center);text.SetPadding(new UE.SlateCore.FMargin{Left=16,Right=16,Top=14,Bottom=14});}}
+  var line=UE.Engine.UGameplayStatics.SpawnObject(Unreal.ClassOf<USizeBox>(),tree) as USizeBox;
+  if(line!=null&&marker!=null){line.SetHeightOverride(3);line.AddChild(marker);column.AddChild(line);marker.SetVisibility(ESlateVisibility.HitTestInvisible);}
+  var content=button.AddChild(column) as UButtonSlot;if(content!=null){content.SetPadding(Ui.Margin(0));content.SetHorizontalAlignment(UE.SlateCore.EHorizontalAlignment.HAlign_Fill);content.SetVerticalAlignment(UE.SlateCore.EVerticalAlignment.VAlign_Fill);}
+  SetCategorySelected(button,label,marker,false);return button;
  }
- // Sampled native header colours, converted to Slate linear colour. This
- // code-drawn fallback carries no game texture and needs no tab controller.
- // Three small steps cut the lower corners, matching the native strip's
- // silhouette without stretching a rectangular border across unused space.
- public static UVerticalBox? CategoryGradient(UWidgetTree tree){
-  var gradient=Ui.Column(tree);if(gradient==null)return null;
-  for(int i=0;i<64;i++){
-   float t=i/63f;float r=0.011f+0.005f*t,g=0.0075f+0.0035f*t,b=0.006f+0.003f*t;
-   if(i>=62){r=0.006f;g=0.004f;b=0.003f;}
-   var band=Ui.Panel(tree,null,Ui.Color(r,g,b,1),0);if(band==null)continue;band.SetVisibility(ESlateVisibility.HitTestInvisible);
-   var slot=gradient.AddChildToVerticalBox(band);if(slot!=null){slot.SetSize(new UE.UMG.FSlateChildSize{SizeRule=UE.UMG.ESlateSizeRule.Fill,Value=1});float inset=i>=62?12:i>=59?8:i>=56?4:0;slot.SetPadding(new UE.SlateCore.FMargin{Left=inset,Right=inset});}
-  }
-  return gradient;
- }
- // A native strip controller expects screen-specific bindings and registration.
- // Borrow only its display brush from an initialized Settings screen. Do not
- // instantiate the controller or call its optional-child visibility methods.
- public static bool CopyCategoryStripStyle(UObject owner,UImage? target){
-  if(target==null)return false;
-  UWidgetBlueprintLibrary.GetAllWidgetsOfClass(owner,out List<UUserWidget> screens,Unreal.ClassOf<UE.SpicewoodSettings.Spicewood.UI.SettingsScreen.W_SettingsScreen_Activatable.UW_SettingsScreen_Activatable_C>(),false);
-  foreach(var screen in screens){if(!screen.IsVisible()||screen.WidgetTree==null)continue;var source=FindCategoryStripImage(screen.WidgetTree.RootWidget,0);if(source==null||source.Brush.ResourceObject==null)continue;target.SetBrush(source.Brush);target.SetColorAndOpacity(source.ColorAndOpacity);target.SetVisibility(ESlateVisibility.HitTestInvisible);return true;}
-  return false;
- }
- public static UImage? FindCategoryStripImage(UWidget? widget,int depth){
-  if(widget==null||depth>32)return null;
-  var strip=widget as UE.SpicewoodUI.USpicewoodTabListWidget;if(strip!=null&&strip.TabButtonBoxBackground!=null)return strip.TabButtonBoxBackground;
-  var nested=widget as UUserWidget;if(nested!=null&&nested.WidgetTree!=null&&nested.WidgetTree.RootWidget!=widget){var image=FindCategoryStripImage(nested.WidgetTree.RootWidget,depth+1);if(image!=null)return image;}
-  var panel=widget as UPanelWidget;if(panel!=null)for(int i=0;i<panel.GetChildrenCount();i++){var image=FindCategoryStripImage(panel.GetChildAt(i),depth+1);if(image!=null)return image;}
-  return null;
+ static UE.SlateCore.FSlateBrush CategoryBrush(float r,float g,float b,float a){return new UE.SlateCore.FSlateBrush{DrawAs=UE.SlateCore.ESlateBrushDrawType.Image,TintColor=Ui.SlateColor(Ui.Color(r,g,b,a))};}
+ public static void SetCategorySelected(UButton button,UTextBlock? label,UBorder? marker,bool selected){
+  var style=button.WidgetStyle;style.Normal=selected?CategoryBrush(0.012f,0.035f,0.045f,0.9f):CategoryBrush(0,0,0,0);
+  style.Hovered=CategoryBrush(0.035f,0.075f,0.085f,0.8f);style.Pressed=CategoryBrush(0.055f,0.10f,0.11f,0.9f);
+  style.NormalPadding=Ui.Margin(0);style.PressedPadding=Ui.Margin(0);button.SetStyle(style);button.SetBackgroundColor(Ui.Color(1,1,1,1));
+  if(label!=null)label.SetColorAndOpacity(Ui.SlateColor(selected?Ui.Color(1,0.93f,0.80f,1):Ui.Color(0.48f,0.59f,0.62f,1)));
+  if(marker!=null)marker.SetBrushColor(selected?Ui.Color(1,0.36f,0.006f,1):Ui.Color(0.03f,0.065f,0.075f,1));
  }
  // The frame is owned by W_SettingsPanel, not W_SettingsDetailView. Reparent
  // only the newly created shell's images; never touch a live game settings page.
