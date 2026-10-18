@@ -21,7 +21,9 @@ struct IniHint {
         // Unrelated sections/overrides are retained. Never called on a frame callback.
         const auto text=std::to_wstring(value);
         if(!WritePrivateProfileStringW(L"DLSS",L"ModelPreset",text.c_str(),path.c_str()))return false;
-        if(!WritePrivateProfileStringW(nullptr,nullptr,nullptr,path.c_str()))return false;
+        // The profile API returns zero for a cache flush, including success.
+        // Success requires the actual key write and independent readback.
+        WritePrivateProfileStringW(nullptr,nullptr,nullptr,path.c_str());
         std::uint32_t readback=0;return read(readback)&&readback==value;
     }
 };

@@ -6,7 +6,7 @@
 #include <fstream>
 #include <iostream>
 int main(){
-    const auto folder=std::filesystem::temp_directory_path()/(L"mcd2-advanced-"+std::to_wstring(GetCurrentProcessId()));
+    const auto folder=std::filesystem::temp_directory_path()/(L"mcd2-advanced-"+std::to_wstring(GetCurrentProcessId())+L"-"+std::to_wstring(GetTickCount64()));
     assert(!std::filesystem::exists(folder));std::filesystem::create_directory(folder);
     const auto path=folder/L"DependencyOverrides.ini";
     {std::ofstream f(path);f<<"[Overrides]\nAllowUntestedReShade=1\n[DLSS]\nModelPreset=12\nKeepMe=unchanged\n";}
