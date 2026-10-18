@@ -10,8 +10,8 @@
     "src/ui/ProviderRuntimeClient.cs": "a5b606f6a58af8aaf40d3b35f92ea0e9d5de76d124ffef16cb68888c72767142",
     "src/ui/AdvancedSettings.cs": "582e633d931b016d41c9ae2589376366c8f0cd00a9f055b453f2a6c061ba3ec3",
     "src/ui/AdvancedInfoWidget.cs": "0de0d9e909cb0cf55c19d6cdbf0f08e3cebd62c69e0f6bf572dff9862b9d4295",
-    "src/ui/AdvancedSettingsPanel.cs": "3ee91daa7a7e369a948fe6f40104d3b8d9f2c7c040b902b4f3294f027772e80d",
-    "src/ui/NativeSettingsWidgets.cs": "c8c728563cfc72fd6a147d01b132c7071f9f85b0cf2cf73db95020d86089fcf8",
+    "src/ui/AdvancedSettingsPanel.cs": "4ae89bf8b4cf0044eb357ec253f77732d96deca26b2964c1c05a82556857aada",
+    "src/ui/NativeSettingsWidgets.cs": "479be0ce6dbd5771d33a3d974dda18fef828055111950d336ff0dbbb5e79b770",
     "src/ui/RuntimeDiagnostics.cs": "08ecf4381ce98bedd4dbf235f634f8816d5ad4ebce128073646cd8b138118579",
     "src/ui/RuntimeDiagnosticsOverlay.cs": "c7f6d6eaff561cd5555250223eba124efb3bea0bc95b439f25337c38c5030fa0",
     "src/ui/UpscalingSharpness.cs": "070afd9cfdcf99a1ddc11d8d9cb321235e7daea7933b7e7c31dd824111e60cc8",
@@ -21,8 +21,8 @@
   },
   "payloadSHA256": {
     "MCD2Graphics_P.pak": "a0a4c57d7357c98155c7649676d47d70500b36e07b4d20e7bd8188e143104a1d",
-    "MCD2Graphics_P.ucas": "c7723fae64ca484dca736e779c08837895bb6da265d72960395f8b9c4b7e7bfc",
-    "MCD2Graphics_P.utoc": "2351fa538a70b3f90e78cddc96db5e0c6ebe739f3e0c9145a648894c1faf3e7b"
+    "MCD2Graphics_P.ucas": "fdc629d2a2f4e6be14e46fba76e9a3c4d343347f56bfd3949e8304c9238764c8",
+    "MCD2Graphics_P.utoc": "2eb89756b078077b093b20a5842028d31da107900d7683f52b6e3ac38c2c9810"
   },
   "metadataAPI": "Blueprint Loader 2.0 BP_ModInfo; SDK-generated versioned metadata; no popup API",
   "compiler": "NeoRune 1.0.0 / .NET reference pack 10.0.13",
@@ -82,5 +82,5 @@
   "WindowsQualified": false,
   "LinuxRuntimeQualified": false,
   "publishedPayloadChanged": false,
-  "archiveSHA256": "49c788695fe5668f128cbd18c79c705f5fc1138baa621a3a3f5e7da54fc3e53f"
+  "archiveSHA256": "791bf04effb83f20fd0409a13e42ecee428ab931a5a013c8792b3d725299447d"
 }

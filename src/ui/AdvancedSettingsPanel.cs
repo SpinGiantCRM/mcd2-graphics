@@ -14,21 +14,30 @@ using UE.CommonUI;
 public class AdvancedSettingsPanel : ModWidget, IModResettable {
  public ModActor? Manager;public UVerticalBox? Controls;
  public int Category;public int Selected;public List<AdvancedSettingRow> Rows=new List<AdvancedSettingRow>();
- public AdvancedInfoWidget? Details;public UGameSettingDetailView? NativeHelp;public List<UAS_TabButton_Settings> Tabs=new List<UAS_TabButton_Settings>();
+ public UE.SpicewoodSettings.Spicewood.UI.SettingsScreen.W_SettingsPanel.UW_SettingsPanel_C? HelpShell;
+ public AdvancedInfoWidget? Details;public UGameSettingDetailView? NativeHelp;public List<UAS_SpicewoodButtonTabAction> Tabs=new List<UAS_SpicewoodButtonTabAction>();
  protected override UWidget? Build(UWidgetTree tree){
   var column=Ui.Column(tree);if(column==null)return null;
-  var tabs=Ui.Row(tree);if(tabs!=null){AddTab(tabs,"UPSCALING");AddTab(tabs,"FRAME GENERATION");AddTab(tabs,"DIAGNOSTICS");column.AddChild(tabs);}
-  var body=Ui.Row(tree);Controls=Ui.Column(tree);
-  NativeHelp=NativeSettingsWidgets.HelpCard(this);
-  if(body!=null){if(Controls!=null){var slot=body.AddChildToHorizontalBox(Controls);if(slot!=null){slot.SetSize(new FSlateChildSize{SizeRule=ESlateSizeRule.Fill,Value=0.60f});slot.SetPadding(Ui.Margin(10));}}
-   if(NativeHelp!=null){var slot=body.AddChildToHorizontalBox(NativeHelp);if(slot!=null){slot.SetSize(new FSlateChildSize{SizeRule=ESlateSizeRule.Fill,Value=0.40f});slot.SetPadding(Ui.Margin(10));}}
-   var size=UGameplayStatics.SpawnObject(Unreal.ClassOf<USizeBox>(),tree) as USizeBox;if(size!=null){size.SetMinDesiredHeight(470);size.AddChild(body);column.AddChild(size);}else column.AddChild(body);}
+  var left=Ui.Column(tree);Controls=Ui.Column(tree);var tabs=Ui.Row(tree);
+  if(tabs!=null){AddTab(tabs,"UPSCALING");AddTab(tabs,"FRAME GENERATION");AddTab(tabs,"DIAGNOSTICS");
+   var bar=Ui.Panel(tree,tabs,Ui.Color(0.02f,0.015f,0.01f,1),0);if(left!=null&&bar!=null)left.AddChild(bar);}
+  if(left!=null&&Controls!=null)left.AddChild(Controls);
+  HelpShell=Ui.GameWidget(this,"/SpicewoodSettings/Spicewood/UI/SettingsScreen/W_SettingsPanel.W_SettingsPanel_C") as UE.SpicewoodSettings.Spicewood.UI.SettingsScreen.W_SettingsPanel.UW_SettingsPanel_C;
+  NativeHelp=HelpShell==null?NativeSettingsWidgets.HelpCard(this):HelpShell.Details_Settings;
+  if(NativeHelp==null)NativeHelp=NativeSettingsWidgets.HelpCard(this);
+  var help=NativeSettingsWidgets.HelpFrame(tree,HelpShell,NativeHelp);var body=Ui.Row(tree);
+  if(body!=null){if(left!=null){var slot=body.AddChildToHorizontalBox(left);if(slot!=null){slot.SetSize(new FSlateChildSize{SizeRule=ESlateSizeRule.Fill,Value=2});slot.SetPadding(Ui.Margin(8));}}
+   if(help!=null){var slot=body.AddChildToHorizontalBox(help);if(slot!=null){slot.SetSize(new FSlateChildSize{SizeRule=ESlateSizeRule.Fill,Value=1});slot.SetPadding(Ui.Margin(8));}}
+   var size=UGameplayStatics.SpawnObject(Unreal.ClassOf<USizeBox>(),tree) as USizeBox;if(size!=null){
+    var viewport=UWidgetLayoutLibrary.GetViewportSize(this);float dpi=UWidgetLayoutLibrary.GetViewportScale(this);float height=dpi>0?(float)(viewport.Y/dpi)-500:550;if(height<340)height=340;
+    size.SetHeightOverride(height);size.AddChild(body);column.AddChild(size);
+   }else column.AddChild(body);}
   return column;
  }
  void AddTab(UHorizontalBox parent,string title){
   var tab=NativeSettingsWidgets.CategoryTab(this,title);if(tab==null)return;
   tab.SetIsSelectable(true);tab.SetIsSelected(Tabs.Count==Category,false);
-  var slot=parent.AddChildToHorizontalBox(tab);if(slot!=null){slot.SetSize(new FSlateChildSize{SizeRule=ESlateSizeRule.Fill,Value=1});slot.SetPadding(Ui.Margin(4));}Tabs.Add(tab);
+  var slot=parent.AddChildToHorizontalBox(tab);if(slot!=null){slot.SetSize(new FSlateChildSize{SizeRule=ESlateSizeRule.Automatic,Value=1});slot.SetPadding(Ui.Margin(4));}Tabs.Add(tab);
  }
  public void TabClicked(UCommonButtonBase button){for(int i=0;i<Tabs.Count;i++)if(Tabs[i]==button){Category=i;Populate();return;}}
  public override void Construct(){UGameplayStatics.GetAllActorsOfClass(this,Unreal.ClassOf<ModActor>(),out List<AActor> actors);if(actors.Count>0)Manager=actors[0] as ModActor;if(Manager!=null)Manager.DiagnosticObservers++;foreach(var tab in Tabs)tab.OnButtonBaseClicked+=TabClicked;Populate();Timer.Start(this,"Refresh",0.5f,true);}

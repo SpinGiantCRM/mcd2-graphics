@@ -2,7 +2,10 @@
 
 Open **Mods → MCD2 Graphics → Settings** for model overrides and runtime
 information. The page has **Upscaling**, **Frame Generation** and **Diagnostics**
-tabs, using the game’s own tab buttons and bordered help card beside the selected control. Mouse, keyboard arrows
+tabs, using the game’s top-page tab buttons. Rows occupy the left two thirds;
+the native framed help pane occupies the right third, with a viewport-sized
+height. The frame and background come from a newly created settings-panel shell;
+the game’s existing pages are not reparented. Mouse, keyboard arrows
 and controller directions change values. Popup tooltips are not used. Everyday upscaler, quality, render scale, sharpness, frame generation,
 HDR and independent low-latency controls remain under **Settings → Video**.
 
