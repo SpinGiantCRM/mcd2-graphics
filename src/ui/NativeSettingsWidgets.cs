@@ -14,6 +14,18 @@ public static class NativeSettingsWidgets {
   if(tab.ButtonTemplate!=null){tab.ButtonTemplate.bIsButtonTextCentered=true;tab.ButtonTemplate.PreConstruct(false);}
   SetText(tab.TextBlockWidget,title);return tab;
  }
+ // Sampled native header colours, converted to Slate linear colour. This
+ // code-drawn fallback carries no game texture and needs no tab controller.
+ public static UVerticalBox? CategoryGradient(UWidgetTree tree){
+  var gradient=Ui.Column(tree);if(gradient==null)return null;
+  for(int i=0;i<64;i++){
+   float t=i/63f;float r=0.011f+0.005f*t,g=0.0075f+0.0035f*t,b=0.006f+0.003f*t;
+   if(i==0||i==63){r=0.006f;g=0.004f;b=0.003f;}
+   var band=Ui.Panel(tree,null,Ui.Color(r,g,b,1),0);if(band==null)continue;band.SetVisibility(ESlateVisibility.HitTestInvisible);
+   var slot=gradient.AddChildToVerticalBox(band);if(slot!=null)slot.SetSize(new UE.UMG.FSlateChildSize{SizeRule=UE.UMG.ESlateSizeRule.Fill,Value=1});
+  }
+  return gradient;
+ }
  // A native strip controller expects screen-specific bindings and registration.
  // Borrow only its display brush from an initialized Settings screen. Do not
  // instantiate the controller or call its optional-child visibility methods.
@@ -35,8 +47,21 @@ public static class NativeSettingsWidgets {
  public static UOverlay? HelpFrame(UWidgetTree tree,UE.SpicewoodSettings.Spicewood.UI.SettingsScreen.W_SettingsPanel.UW_SettingsPanel_C? shell,UGameSettingDetailView? details){
   var frame=UE.Engine.UGameplayStatics.SpawnObject(Unreal.ClassOf<UOverlay>(),tree) as UOverlay;if(frame==null)return null;
   if(shell!=null){AddFrameLayer(frame,shell.BG);AddFrameLayer(frame,shell.Deco);}
-  if(details!=null){details.RemoveFromParent();var slot=frame.AddChildToOverlay(details);if(slot!=null){slot.SetHorizontalAlignment(UE.SlateCore.EHorizontalAlignment.HAlign_Fill);slot.SetVerticalAlignment(UE.SlateCore.EVerticalAlignment.VAlign_Fill);slot.SetPadding(Ui.Margin(30));}}
+  if(details!=null){StretchHelpBody(details);details.RemoveFromParent();var slot=frame.AddChildToOverlay(details);if(slot!=null){slot.SetHorizontalAlignment(UE.SlateCore.EHorizontalAlignment.HAlign_Fill);slot.SetVerticalAlignment(UE.SlateCore.EVerticalAlignment.VAlign_Fill);slot.SetPadding(Ui.Margin(30));}}
   return frame;
+ }
+ // Grow the description branch, keeping the native recommendation extension
+ // at the bottom of this newly created help card. Live game pages are untouched.
+ public static void StretchHelpBody(UGameSettingDetailView details){
+  var description=details.RichText_Description;var footer=details.Box_DetailsExtension;if(description==null||footer==null)return;
+  UWidget? ancestor=footer.GetParent();for(int depth=0;ancestor!=null&&depth<32;depth++,ancestor=ancestor.GetParent()){
+   var column=ancestor as UVerticalBox;if(column==null)continue;
+   UWidget? body=description;for(int i=0;body!=null&&body.GetParent()!=column&&i<32;i++)body=body.GetParent();
+   UWidget? bottom=footer;for(int i=0;bottom!=null&&bottom.GetParent()!=column&&i<32;i++)bottom=bottom.GetParent();
+   if(body==null||bottom==null||body==bottom)continue;
+   var bodySlot=body.Slot as UVerticalBoxSlot;var footerSlot=bottom.Slot as UVerticalBoxSlot;if(bodySlot==null||footerSlot==null)continue;
+   bodySlot.SetSize(new UE.UMG.FSlateChildSize{SizeRule=UE.UMG.ESlateSizeRule.Fill,Value=1});footerSlot.SetSize(new UE.UMG.FSlateChildSize{SizeRule=UE.UMG.ESlateSizeRule.Automatic,Value=1});return;
+  }
  }
  static void AddFrameLayer(UOverlay frame,UWidget? layer){
   if(layer==null)return;layer.RemoveFromParent();layer.SetVisibility(UE.UMG.ESlateVisibility.HitTestInvisible);

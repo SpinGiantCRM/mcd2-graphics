@@ -13,6 +13,7 @@ using UE.CommonUI;
 // help stays visible beside it rather than adding a paragraph below every row.
 public class AdvancedSettingsPanel : ModWidget, IModResettable {
  public ModActor? Manager;public UVerticalBox? Controls;
+ public USizeBox? BodySizer;public float PaneHeight,PaneHeightLimit;public double PaneViewportHeight;
  public UHorizontalBox? Body;public UHorizontalBoxSlot? LeftSlot;public UOverlay? HelpPane;
  public UImage? TabBackground;public bool TabStyleApplied;public UCommonButtonGroupBase? TabGroup;
  public UE.Game.Mods.BlueprintLoader.W_ModsTabContent.UW_ModsTabContent_C? LoaderPage;
@@ -27,7 +28,8 @@ public class AdvancedSettingsPanel : ModWidget, IModResettable {
   TabGroup=UGameplayStatics.SpawnObject(Unreal.ClassOf<UCommonButtonGroupBase>(),this) as UCommonButtonGroupBase;if(TabGroup!=null)TabGroup.SetSelectionRequired(true);
   if(tabs!=null){AddTab(tabs,"UPSCALING");AddTab(tabs,"FRAME GENERATION");AddTab(tabs,"DIAGNOSTICS");
    var bar=UGameplayStatics.SpawnObject(Unreal.ClassOf<UOverlay>(),tree) as UOverlay;TabBackground=UGameplayStatics.SpawnObject(Unreal.ClassOf<UImage>(),tree) as UImage;
-   if(bar!=null){if(TabBackground!=null){TabBackground.SetVisibility(ESlateVisibility.Collapsed);var bg=bar.AddChildToOverlay(TabBackground);if(bg!=null){bg.SetHorizontalAlignment(EHorizontalAlignment.HAlign_Fill);bg.SetVerticalAlignment(EVerticalAlignment.VAlign_Fill);}}
+   if(bar!=null){var gradient=NativeSettingsWidgets.CategoryGradient(tree);if(gradient!=null){var background=bar.AddChildToOverlay(gradient);if(background!=null){background.SetHorizontalAlignment(EHorizontalAlignment.HAlign_Fill);background.SetVerticalAlignment(EVerticalAlignment.VAlign_Fill);}}
+    if(TabBackground!=null){TabBackground.SetVisibility(ESlateVisibility.Collapsed);var bg=bar.AddChildToOverlay(TabBackground);if(bg!=null){bg.SetHorizontalAlignment(EHorizontalAlignment.HAlign_Fill);bg.SetVerticalAlignment(EVerticalAlignment.VAlign_Fill);}}
     var content=bar.AddChildToOverlay(tabs);if(content!=null){content.SetHorizontalAlignment(EHorizontalAlignment.HAlign_Fill);content.SetPadding(Ui.Margin(8));}if(left!=null)left.AddChild(bar);}
   }
   if(left!=null&&Controls!=null)left.AddChild(Controls);
@@ -37,7 +39,7 @@ public class AdvancedSettingsPanel : ModWidget, IModResettable {
   HelpPane=NativeSettingsWidgets.HelpFrame(tree,HelpShell,NativeHelp);Body=Ui.Row(tree);
   if(Body!=null){if(left!=null){LeftSlot=Body.AddChildToHorizontalBox(left);if(LeftSlot!=null){LeftSlot.SetSize(new FSlateChildSize{SizeRule=ESlateSizeRule.Fill,Value=2});LeftSlot.SetPadding(Ui.Margin(8));}}
    if(HelpPane!=null){var slot=Body.AddChildToHorizontalBox(HelpPane);if(slot!=null){slot.SetSize(new FSlateChildSize{SizeRule=ESlateSizeRule.Fill,Value=1});slot.SetPadding(Ui.Margin(8));}}
-   column.AddChild(Body);}
+   BodySizer=UGameplayStatics.SpawnObject(Unreal.ClassOf<USizeBox>(),tree) as USizeBox;if(BodySizer!=null){BodySizer.AddChild(Body);column.AddChild(BodySizer);}else column.AddChild(Body);}
   return column;
  }
  void AddTab(UHorizontalBox parent,string title){
@@ -74,10 +76,25 @@ public class AdvancedSettingsPanel : ModWidget, IModResettable {
   UWidgetBlueprintLibrary.GetAllWidgetsOfClass(this,out List<UUserWidget> pages,Unreal.ClassOf<UE.Game.Mods.BlueprintLoader.W_ModsTabContent.UW_ModsTabContent_C>(),false);
   foreach(var page in pages){var loader=page as UE.Game.Mods.BlueprintLoader.W_ModsTabContent.UW_ModsTabContent_C;if(loader!=null&&(loader.PageWidgets.Contains(this)||DescendantOf(this,loader.ModPage))){LoaderPage=loader;break;}}
  }
+ // The outer menu stays within the viewport. Increase only this widget's
+ // height, reserve the action-bar area, and reduce the budget if the Loader
+ // reports overflow after layout. Never raise the menu's scroll extent.
+ public void UpdatePaneHeight(){
+  if(BodySizer==null||Body==null||LoaderPage==null||LoaderPage.PageScroll==null)return;
+  if(LayoutMounted){BodySizer.ClearHeightOverride();return;}
+  var viewport=UWidgetLayoutLibrary.GetViewportWidgetGeometry(this);var size=USlateBlueprintLibrary.GetLocalSize(viewport);var body=BodySizer.GetCachedGeometry();var bodySize=USlateBlueprintLibrary.GetLocalSize(body);if(!(bodySize.X>=200&&bodySize.Y>=100&&size.Y>=240&&size.Y<=32768))return;
+  var end=USlateBlueprintLibrary.AbsoluteToLocal(body,USlateBlueprintLibrary.LocalToAbsolute(viewport,new FVector2D{X=0,Y=size.Y}));
+  float available=(float)end.Y-100-LoaderPage.PageScroll.GetScrollOffset();if(!(available>=240&&available<=2400))return;
+  if(PaneHeightLimit==0||size.Y!=PaneViewportHeight){PaneHeightLimit=available;PaneViewportHeight=size.Y;}
+  float overflow=LoaderPage.PageScroll.GetScrollOffsetOfEnd();if(PaneHeight>0&&overflow>1){PaneHeightLimit=PaneHeight-overflow-2;if(PaneHeightLimit<240)PaneHeightLimit=240;}
+  float height=available<PaneHeightLimit?available:PaneHeightLimit;
+  if(PaneHeight==height)return;PaneHeight=height;BodySizer.SetHeightOverride(height);
+ }
  public void LayoutRefresh(){
   BindLoaderPage();var loader=LoaderPage;if(loader==null||HelpPane==null||Body==null||loader.Pages==null||loader.Root==null)return;
   var page=loader.ModPage;var active=loader.Pages.GetActiveWidget();
   if(!ActiveBranch(loader)||!DescendantOf(this,active)){RestorePageLayout();ClearTabs();return;}
+  UpdatePaneHeight();
   if(!DescendantOf(this,page)||!DescendantOf(loader.TitleRow,page)||!DescendantOf(loader.PageDescription,page)||!DescendantOf(loader.ToggleBackground,page)){if(!LayoutShapeLogged){Log.Write("Advanced layout: unexpected Loader page structure; using embedded layout.");LayoutShapeLogged=true;}RestorePageLayout();return;}
   if(TabGroup!=null&&TabGroup.GetSelectedButtonIndex()!=Category)SelectCategory();
   if(LayoutYielded)return;

@@ -3,7 +3,10 @@
 Open **Mods → MCD2 Graphics → Settings** for model overrides and runtime
 information. The page has **Upscaling**, **Frame Generation** and **Diagnostics**
 tabs, using native top-page buttons and the initialized Settings strip’s
-gradient/border brush. The mod owns the exclusive selection group; it does not
+gradient/border brush when available, with a matching brown gradient drawn in
+code as a fallback. The help card fills the available space above the bottom
+action bar, keeping its recommendation footer low; its height budget reduces
+when the outer Loader menu reports overflow. The mod owns the exclusive selection group; it does not
 instantiate a screen-specific tab controller or bind the main Q/E actions.
 The mod title, description, master toggle and rows occupy the left two thirds;
 the native framed help pane occupies the right third from the top of the page.

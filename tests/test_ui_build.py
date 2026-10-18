@@ -49,6 +49,12 @@ class UIBuildTests(unittest.TestCase):
         self.assertNotIn('SetTabActionPromptVisibility(', helper)
         self.assertNotIn('Ui.GameWidget(owner,"/OreUI/UI/Widget/TabList', helper)
         self.assertIn('SetButtonText(title)', helper)
+        self.assertIn('NativeSettingsWidgets.CategoryGradient(tree)', panel)
+        self.assertIn('for(int i=0;i<64;i++)', helper)
+        self.assertIn('StretchHelpBody(details)', helper)
+        self.assertIn('BodySizer.SetHeightOverride(height)', panel)
+        self.assertIn('LoaderPage.PageScroll.GetScrollOffsetOfEnd()', panel)
+        self.assertIn('PaneHeight-overflow-2', panel)
         self.assertIn('OnFocusReceived', panel)
         self.assertNotIn('SetToolTip', panel)
         # The renderer must allocate fresh NGX parameters and supply the quality
