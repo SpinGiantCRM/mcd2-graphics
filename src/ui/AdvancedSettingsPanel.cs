@@ -30,7 +30,7 @@ public class AdvancedSettingsPanel : ModWidget, IModResettable {
    var bar=UGameplayStatics.SpawnObject(Unreal.ClassOf<UOverlay>(),tree) as UOverlay;TabBackground=UGameplayStatics.SpawnObject(Unreal.ClassOf<UImage>(),tree) as UImage;
    if(bar!=null){var gradient=NativeSettingsWidgets.CategoryGradient(tree);if(gradient!=null){var background=bar.AddChildToOverlay(gradient);if(background!=null){background.SetHorizontalAlignment(EHorizontalAlignment.HAlign_Fill);background.SetVerticalAlignment(EVerticalAlignment.VAlign_Fill);}}
     if(TabBackground!=null){TabBackground.SetVisibility(ESlateVisibility.Collapsed);var bg=bar.AddChildToOverlay(TabBackground);if(bg!=null){bg.SetHorizontalAlignment(EHorizontalAlignment.HAlign_Fill);bg.SetVerticalAlignment(EVerticalAlignment.VAlign_Fill);}}
-    var content=bar.AddChildToOverlay(tabs);if(content!=null){content.SetHorizontalAlignment(EHorizontalAlignment.HAlign_Fill);content.SetPadding(Ui.Margin(8));}if(left!=null)left.AddChild(bar);}
+    var content=bar.AddChildToOverlay(tabs);if(content!=null){content.SetHorizontalAlignment(EHorizontalAlignment.HAlign_Fill);content.SetPadding(new FMargin{Left=12,Right=12,Bottom=6});}if(left!=null){var stripSlot=left.AddChildToVerticalBox(bar);if(stripSlot!=null)stripSlot.SetHorizontalAlignment(EHorizontalAlignment.HAlign_Left);}}
   }
   if(left!=null&&Controls!=null)left.AddChild(Controls);
   HelpShell=Ui.GameWidget(this,"/SpicewoodSettings/Spicewood/UI/SettingsScreen/W_SettingsPanel.W_SettingsPanel_C") as UE.SpicewoodSettings.Spicewood.UI.SettingsScreen.W_SettingsPanel.UW_SettingsPanel_C;
@@ -44,7 +44,7 @@ public class AdvancedSettingsPanel : ModWidget, IModResettable {
  }
  void AddTab(UHorizontalBox parent,string title){
   var tab=NativeSettingsWidgets.CategoryTab(this,title);if(tab==null)return;
-  tab.SetIsSelectable(true);var slot=parent.AddChildToHorizontalBox(tab);if(slot!=null)slot.SetPadding(Ui.Margin(4));Tabs.Add(tab);if(TabGroup!=null)TabGroup.AddWidget(tab);
+  tab.SetIsSelectable(true);var slot=parent.AddChildToHorizontalBox(tab);if(slot!=null)slot.SetPadding(new FMargin{Left=4,Right=12});Tabs.Add(tab);if(TabGroup!=null)TabGroup.AddWidget(tab);
  }
  public void TabClicked(UCommonButtonBase button){for(int i=0;i<Tabs.Count;i++)if(Tabs[i]==button){Category=i;Populate();return;}}
  public override void Construct(){UGameplayStatics.GetAllActorsOfClass(this,Unreal.ClassOf<ModActor>(),out List<AActor> actors);if(actors.Count>0)Manager=actors[0] as ModActor;if(Manager!=null)Manager.DiagnosticObservers++;foreach(var tab in Tabs)tab.OnButtonBaseClicked+=TabClicked;

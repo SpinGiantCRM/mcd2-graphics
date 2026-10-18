@@ -16,13 +16,15 @@ public static class NativeSettingsWidgets {
  }
  // Sampled native header colours, converted to Slate linear colour. This
  // code-drawn fallback carries no game texture and needs no tab controller.
+ // Three small steps cut the lower corners, matching the native strip's
+ // silhouette without stretching a rectangular border across unused space.
  public static UVerticalBox? CategoryGradient(UWidgetTree tree){
   var gradient=Ui.Column(tree);if(gradient==null)return null;
   for(int i=0;i<64;i++){
    float t=i/63f;float r=0.011f+0.005f*t,g=0.0075f+0.0035f*t,b=0.006f+0.003f*t;
-   if(i==0||i==63){r=0.006f;g=0.004f;b=0.003f;}
+   if(i>=62){r=0.006f;g=0.004f;b=0.003f;}
    var band=Ui.Panel(tree,null,Ui.Color(r,g,b,1),0);if(band==null)continue;band.SetVisibility(ESlateVisibility.HitTestInvisible);
-   var slot=gradient.AddChildToVerticalBox(band);if(slot!=null)slot.SetSize(new UE.UMG.FSlateChildSize{SizeRule=UE.UMG.ESlateSizeRule.Fill,Value=1});
+   var slot=gradient.AddChildToVerticalBox(band);if(slot!=null){slot.SetSize(new UE.UMG.FSlateChildSize{SizeRule=UE.UMG.ESlateSizeRule.Fill,Value=1});float inset=i>=62?12:i>=59?8:i>=56?4:0;slot.SetPadding(new UE.SlateCore.FMargin{Left=inset,Right=inset});}
   }
   return gradient;
  }
