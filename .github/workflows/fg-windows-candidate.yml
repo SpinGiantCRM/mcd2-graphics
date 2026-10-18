@@ -68,7 +68,10 @@ jobs:
           jobs = json.loads(os.environ['NEEDS_JSON'])
           if jobs['changes']['result'] != 'success':
               raise SystemExit('Native build scope selection failed.')
-          expected = 'success' if jobs['changes']['outputs'].get('native') == 'true' else 'skipped'
+          selection = jobs['changes']['outputs'].get('native')
+          if selection not in ('true', 'false'):
+              raise SystemExit('Native build scope selection is missing or invalid.')
+          expected = 'success' if selection == 'true' else 'skipped'
           if jobs['build']['result'] != expected:
               raise SystemExit(f"Native build result {jobs['build']['result']}; required {expected}.")
           print('Native candidate gate passed.')

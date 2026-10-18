@@ -1,3 +1,15 @@
+# MCD2 Graphics working agreements
+
+Preserve the native in-game Video menu, visual parity except intended shadows,
+safe Native fallback, and Linux/Proton and Windows/AMD compatibility. Check the
+current roadmap and overlapping PRs before changing priorities or support claims.
+
+Preserve dirty work. Use [the check map](docs/agent-efficiency/v1/CONTEXT.md) and
+[task templates](docs/agent-efficiency/v1/TASKS.md) for scoped validation.
+Game launches, installed-mod changes, disruptive local builds, Actions, pushes,
+merges, releases and system-wide changes need authorization for that action.
+Continue already-authorized work without asking again.
+
 # Cross-platform changes
 
 Read [docs/WINDOWS_COMPATIBILITY.md](docs/WINDOWS_COMPATIBILITY.md) before changing
@@ -18,3 +30,11 @@ The maintainer authorized one exception on 6 October 2026: the exact tested,
 source-built PR435 ReShade framework may be offered as a separate dependency
 download, with its source, build provenance and license. Keep it outside the
 mod installer archives. NVIDIA runtimes remain external dependencies.
+
+## Evidence
+
+Separate source/fixture checks, exact-package runtime evidence and player
+observations. Saved choices and SDK/CI success do not prove active rendering,
+visual parity, clean process exit or another platform's qualification. Record
+unrun gates and exact artifact identities; retain failed controls. Keep public
+support replies short and private diagnostics out of public artifacts.

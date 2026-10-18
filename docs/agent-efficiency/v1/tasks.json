@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "model": "gpt-6.1-sol",
+  "efforts": [
+    "medium",
+    "high",
+    "xhigh"
+  ],
+  "repetitions": 3,
+  "model_attempts_executed": 0,
+  "tasks": [
+    {
+      "id": "R1",
+      "stratum": "routine",
+      "title": "Windows executable-name process guard",
+      "base_commit": "a16df0762eb94712009fd9bfd549ac4d2c8860fd",
+      "acceptance": "Refuse the running shipping executable using complete case-insensitive CSV image names; query failure must not authorize install.",
+      "oracle_reference": "tests/test_installer_process.py",
+      "status": "candidate_requires_red_green_grader_validation",
+      "runtime_claim_allowed": false
+    },
+    {
+      "id": "R2",
+      "stratum": "routine",
+      "title": "Unreal FG provider property identity",
+      "base_commit": "404bdcd58fabedbb123bafd2f747270bab26390b",
+      "acceptance": "Accept case variants and legacy aliases; reject duplicates across aliases, invalid values and stale ownership.",
+      "oracle_reference": "tests/fg_provider_protocol_test.cpp",
+      "status": "candidate_requires_red_green_grader_validation",
+      "runtime_claim_allowed": false
+    },
+    {
+      "id": "R3",
+      "stratum": "routine",
+      "title": "Native CI gate output validity",
+      "base_commit": "6aeff7729d74d0b2e497205d2aef74d3c8473230",
+      "acceptance": "Accept native success or explicit docs skip; reject missing/invalid scope, failed selector and failed/cancelled required build.",
+      "oracle_reference": "tests/test_ci_contracts.py (grader supplied separately)",
+      "status": "candidate_requires_red_green_grader_validation",
+      "runtime_claim_allowed": false
+    },
+    {
+      "id": "H1",
+      "stratum": "hard",
+      "title": "Isolated Windows source include closure",
+      "base_commit": "ee85ab037052d6426ff94f46d0feb55ca79245b4",
+      "acceptance": "Copy complete native/provider ABI include closure in an isolated source tree; resolve every quoted relative include inside that tree; retain external SDK boundaries and Windows paths.",
+      "oracle_reference": "experiments/fg-streamline/test_windows_build.py",
+      "status": "candidate_requires_red_green_grader_validation",
+      "runtime_claim_allowed": false
+    },
+    {
+      "id": "H2",
+      "stratum": "hard",
+      "title": "Closing owner and shared SDK retirement",
+      "base_commit": "858bda0aa721d32809d976867fb3af718817f5a2",
+      "acceptance": "Preserve both notification orders, callbacks outside locks, retained generation deferral, one-shot cleanup and resize/unsupported-owner refusal.",
+      "oracle_reference": "tests/shared_sdk_shutdown_test.cpp",
+      "status": "candidate_requires_red_green_grader_validation",
+      "runtime_claim_allowed": false
+    },
+    {
+      "id": "H3",
+      "stratum": "hard",
+      "title": "Latency candidate source transformation drift",
+      "base_commit": "a8c60c36ebaf227e89e87099a913b6f0e3701d38",
+      "acceptance": "Reproduce the source-boundary rejection after advanced settings changed folder construction; preserve generated candidate behavior and fail-closed refusal for genuinely unexpected boundaries.",
+      "oracle_reference": "experiments/fg-streamline/build_game_candidate.py (isolated source-generation grader required)",
+      "status": "candidate_requires_red_green_grader_validation",
+      "runtime_claim_allowed": false
+    }
+  ]
+}
