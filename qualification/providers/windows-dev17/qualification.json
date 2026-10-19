@@ -1,0 +1,254 @@
+{
+  "date": "2026-10-19",
+  "candidateVersion": "0.4.0-amd.dev.17",
+  "nativeSourceCommit": "cbc34b8d78ba77933ebc491da851acc615b8af55",
+  "installerSourceCommit": "e1fa173",
+  "nativeWorkflow": 39191593403,
+  "nativeArtifact": 12160128654,
+  "nativeArchiveSHA256": "1999d45fab0248b512517fbc8be6871d0f39bcf7669b3af9ae998643797cc483",
+  "installerSHA256": "db072fdba86b0be8710e2593db822e682842bc575ccb4a417a9f963666c3a056",
+  "manifestSHA256": "6b9c6c4fd48c6383c2d76ac7093402dffc8faaa5c9a83735354b170533479974",
+  "dependencyLockSHA256": "a1ae112c8b5c33054f4f754da9e60a93cbc1f9dcb9ea414c3be154e858fb4f87",
+  "installerFolderFilesVerified": 242,
+  "ownedPayloadFiles": 17,
+  "installedOwnedFiles": 18,
+  "dependencyOverrides": {},
+  "frameworkBundled": false,
+  "vendorRuntimeBundled": false,
+  "windowsRuntimeQualified": false,
+  "status": "FAIL: ordinary quit access violation; clean-game isolation in progress",
+  "installerChecks": {
+    "freshGuiInstall": "PASS",
+    "duplicateInstallRefusal": "PASS",
+    "intactRepairVerify": "PASS",
+    "missingOwnedShaderRepair": "PASS",
+    "modifiedOwnedShaderRepairRefusal": "PASS",
+    "modifiedOwnedShaderUninstallRefusal": "PASS",
+    "exactFixtureRestoration": "PASS",
+    "runningUninstallWriteRefusal": "PASS",
+    "runningIntactVerification": "PASS read-only; not a modifying repair test",
+    "coreDisposableFixtures": "PASS 132 checks",
+    "nativeDownloadedFilePicker": "NOT RUN: automation helper refused the native owned picker as a different target window",
+    "dependencyPreparation": "Official hash-verified external files preinstalled separately, including private DLSS; normal GUI installation adopted and recorded its ownership",
+    "intactUninstall": "PASS normal GUI: all18 owned/privateDLSS removed, originalproxy restored, all14 external dependencies retained and verified before private control hold"
+  },
+  "hardwareUnavailable": [
+    "Windows NVIDIA feature activation and DRS profile path",
+    "Physical controller not identified"
+  ],
+  "remaining": [
+    "SR presets and actual evaluations",
+    "AMD FG and Anti-Lag activity/Off recovery",
+    "Advanced keyboard/reset/persistence",
+    "Actual output lifecycle SDR/HDR",
+    "Three ordinary exit codes and retirement/timing",
+    "Final uninstall/reinstall"
+  ],
+  "normalExits": [
+    {
+      "run": 1,
+      "route": "starting-menu Quit confirmation after Native hub gameplay and return",
+      "exitCodeHex": "C0000005",
+      "elapsedToObserverSeconds": 9.993,
+      "observerIntervalSeconds": 2,
+      "clockGapObserved": false,
+      "dumpSHA256": "320445e04124b9406c9bc1dc04da9feaccd7d5e1f3a2420733a8e5cb02b40360"
+    }
+  ],
+  "diagnosticControls": [
+    {
+      "run": 2,
+      "variant": "Clean Steam, no mod, Loader, framework or vendor chain",
+      "route": "Normal window close from hub",
+      "exitCodeHex": "00000000",
+      "clockGapObserved": false,
+      "loadedGraphicsModules": {}
+    },
+    {
+      "run": 3,
+      "variant": "Clean Steam, no mod, Loader, framework or vendor chain",
+      "route": "Starting-menu Quit confirmation",
+      "exitCodeHex": "00000000",
+      "clockGapObserved": false,
+      "loadedGraphicsModules": {}
+    },
+    {
+      "run": 4,
+      "variant": "Loader 2.6 and exact production UI only; all native graphics components absent",
+      "route": "Starting-menu Quit confirmation after opening mod page",
+      "exitCodeHex": "00000000",
+      "clockGapObserved": false,
+      "loadedGraphicsModules": {}
+    },
+    {
+      "run": 5,
+      "variant": "Original ReShade proxy and current RenoDX plus Loader 2.6; all own payload absent; candidate d3d12.asi not loaded",
+      "route": "Normal window close from hub",
+      "exitCodeHex": "C0000005",
+      "clockGapObserved": false,
+      "loadedGraphicsModules": {
+        "dxgi.dll": "0cee63f9c9f13f3ac909c5b4903f4dbb4b719a7ab3b4f13b0deaf83c814b94f7",
+        "renodx-ue-extended.addon64": "f828bb9ced6cba8843842c10c59c57460e8c3d8243a715c40ec752c6c4c2f568"
+      }
+    }
+  ],
+  "controlLimitations": "Small unmatched-duration component samples do not identify the intermittent crash cause or qualify the full candidate. Injected gameplay Escape was also ignored with the clean game.",
+  "exitFaultComparison": {
+    "fullCandidateRun": 1,
+    "externalOnlyRun": 5,
+    "exception": "C0000005",
+    "externalOnlyReadAddress": "null",
+    "fullCandidateReadAddress": "0x10",
+    "gameWorkerIdentified": false,
+    "gameThread": "CRT execute_onexit_table/common_exit",
+    "explicitAnchorReturnChainGameRvas": [
+      "0x8bf8e9a",
+      "0x8b10e87",
+      "0x8aeda25",
+      "0x8af02cf"
+    ],
+    "externalOnlyDumpSHA256": "042b4e79a409bec5e4083d57a75d956bd2fc2e5fa686a715a5ebf843649f5b0a",
+    "offlineAnalysisOnly": true,
+    "liveDebuggerAttached": false,
+    "rootCauseProven": false,
+    "rawDumpPublished": false
+  },
+  "checklist": {
+    "B1": {
+      "status": "NOT RUN",
+      "observation": "GPU/driver, Steam build/shipping hash and 1920x1200 observed; physical HDR/output state not established"
+    },
+    "B2": {
+      "status": "PASS",
+      "observation": "Closed baseline, mod/dependency/preferences recovery copies and hashes retained privately; no player/account save read or rollback"
+    },
+    "B3": {
+      "status": "PASS",
+      "observation": "Previous candidate normally uninstalled; shared dependencies retained"
+    },
+    "B4": {
+      "status": "PASS",
+      "observation": "Self-contained installer ran from ordinary path containing spaces"
+    },
+    "I1": {
+      "status": "NOT RUN",
+      "observation": "Supported Steam identity and dependency cards passed; wrong-folder GUI case not run"
+    },
+    "I2": {
+      "status": "NOT RUN",
+      "observation": "Normal GUI install and all18 owned hashes passed with overrides Off and current inputs; native picker automation blocked, verified external files prepared separately"
+    },
+    "I3": {
+      "status": "NOT RUN",
+      "observation": "Running Uninstall refused writes and intact Verify passed read-only; modifying Repair while running not exercised"
+    },
+    "I4": {
+      "status": "PASS",
+      "observation": "Intact normal GUI verification passed"
+    },
+    "I5": {
+      "status": "PASS",
+      "observation": "Missing owned live_dense.cso restored to exact hash through normal GUI Repair"
+    },
+    "I6": {
+      "status": "PASS",
+      "observation": "Changed shader refused by Repair and Uninstall without mutation; exact bytes restored before launch"
+    },
+    "I7": {
+      "status": "NOT RUN",
+      "observation": "All dependency override acknowledgement/default-reset GUI paths pending"
+    },
+    "I8": {
+      "status": "PASS",
+      "observation": "132 Windows installer-core checks, including disposable dependency/ownership/unsafe-archive fixtures"
+    },
+    "I9": {
+      "status": "PASS",
+      "observation": "Intact normal GUI uninstall removed all18 owned/privateDLSS files, restored original proxy, retained14 verified external files"
+    },
+    "I10": {
+      "status": "NOT RUN",
+      "observation": "Final reinstall/Verify/launch pending after component isolation"
+    },
+    "U1": {
+      "status": "NOT RUN",
+      "observation": "Main-menu Loader2.6 and production metadata observed; pause-menu route and metadata defects remain"
+    },
+    "U2": {
+      "status": "NOT RUN",
+      "observation": "Main-menu mouse controls/tabs observed; full keyboard and pause-menu coverage incomplete"
+    },
+    "U3": {
+      "status": "NOT RUN",
+      "observation": "AMD selector skips DLSS, shared Quality/67% menu state observed; full custom/minimum/100% matrix pending"
+    },
+    "U4": {
+      "status": "NOT RUN",
+      "observation": "Saved state observed across controls; full current-session runtime/persistence matrix pending"
+    },
+    "U5": {
+      "status": "NOT RUN",
+      "observation": "Hub entered; matched five-minute gameplay plus dungeon travel not completed"
+    },
+    "U6": {
+      "status": "NOT AVAILABLE",
+      "observation": "Physical controller not identified"
+    },
+    "A1": {
+      "status": "PASS",
+      "observation": "Native FGOff AntiLagOff full-candidate startup, actual14 loaded native component hashes matched frozen inputs"
+    },
+    "A2": {
+      "status": "NOT RUN",
+      "observation": "AMD DLSS selection skipped in menu; complete gameplay fallback/preset matrix pending"
+    },
+    "A3": {
+      "status": "NOT RUN",
+      "observation": "Seeded unsupported NVIDIA FG/Reflex startup fixture not repeated for this package"
+    },
+    "A4": {
+      "status": "NOT RUN",
+      "observation": "Native Windows guard retained; fresh sanitized runtime event not recorded for this package"
+    },
+    "A5": {
+      "status": "NOT RUN",
+      "observation": "Explicit model-hint fallback not repeated for current package"
+    },
+    "N1": {
+      "status": "NOT AVAILABLE",
+      "observation": "Windows NVIDIA hardware unavailable; no activation/performance/HDR claim"
+    },
+    "N2": {
+      "status": "NOT AVAILABLE",
+      "observation": "Windows NVIDIA hardware unavailable; no activation/performance/HDR claim"
+    },
+    "N3": {
+      "status": "NOT AVAILABLE",
+      "observation": "Windows NVIDIA hardware unavailable; no activation/performance/HDR claim"
+    },
+    "N4": {
+      "status": "NOT AVAILABLE",
+      "observation": "Windows NVIDIA hardware unavailable; no activation/performance/HDR claim"
+    },
+    "N5": {
+      "status": "NOT AVAILABLE",
+      "observation": "Windows NVIDIA hardware unavailable; no activation/performance/HDR claim"
+    },
+    "E1": {
+      "status": "FAIL",
+      "observation": "First full-package ordinary quit C0000005; clean controls do not replace failed candidate exits"
+    },
+    "E2": {
+      "status": "PASS",
+      "observation": "Actual held process exited within120 seconds; no game force-kill, no clock gap"
+    },
+    "E3": {
+      "status": "NOT RUN",
+      "observation": "Diagnostic files guarded and partly restored; final supported candidate installation pending"
+    },
+    "E4": {
+      "status": "PASS",
+      "observation": "Sanitized partial report and aggregate retain exact inputs, failed gates and limitations; no release approval"
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "lookupDate": "2026-10-19",
+  "BlueprintLoader": {
+    "version": "2.6",
+    "fileId": 506,
+    "source": "https://www.nexusmods.com/minecraftdungeons2/mods/2?tab=files&file_id=506",
+    "archiveAvailableLocally": true,
+    "status": "Official archive SHA-256 matched Nexus file506; all three files installed and version2.6 observed in game",
+    "archiveSHA256": "803cbcd502a3a2e2a0219989ee8560192847a852f74650efc8996fdc96fb1dfa",
+    "files": {
+      "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.pak": "75e7144577253917f6da7312ef5e585b12fb728226a22b0938323751a6b555cd",
+      "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.ucas": "53ce0001a8c4077323a9342b42bc9d1bb9645116963cdb78fcdf9055336a1235",
+      "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.utoc": "847206e561dddce54be8a3f3868558597728e2affa4b697b84dbd0dbb8f30e1b"
+    }
+  },
+  "Streamline": {
+    "version": "2.14.16",
+    "source": "https://github.com/NVIDIA-RTX/Streamline/releases/tag/v2.14.16",
+    "archiveSHA256": "32041e51db0cab709a271b72a352281b690c2abbd669a827809401a5dd23956b",
+    "files": {
+      "sl.interposer.dll": "b1d7395aebd7b9722841d64dcf7433680020b6a8e421f851c16d5ba0c2182edf",
+      "sl.common.dll": "38eea3b4209afc455636ea372b5933d65fcc13becec6c84d101dcfc4d8648f75",
+      "sl.pcl.dll": "5698c38e722318681f215c9fe68e45b9bedd51378acc699d8eee26e961e57770",
+      "sl.reflex.dll": "443577e869352436ff7ec8f4d9c90418d3e95368436ce219261e0f4f07a38122",
+      "sl.dlss_g.dll": "3ed9538df724993bea8a050195a6a78b9c8c8a566d5b05ade477aab3c390e90f",
+      "nvngx_dlssg.dll": "8d59d49b36410dd6b62fef2503a5871d347415bd85d943fa0848563a95dd50c7",
+      "NvLowLatencyVk.dll": "2a77dc3e1c724b7eea5755be0ae7423752e79a2459fae72181a9f00e3507e5d6"
+    }
+  },
+  "DLSSRuntime": {
+    "version": "310.9.16",
+    "source": "https://github.com/NVIDIA/DLSS/commit/9981c6350dc58c0ce21f024fd65e31e851c31689",
+    "gitBlobSHA1": "23c4672e4a31ef303e8f98ff4f0d146bd1718ccf",
+    "sha256": "d00b5b0ab29c3ca101b70c3a5ecb3a01b7ef33766a3383a28a18623083e6123e"
+  },
+  "RenoDXUEExtended": {
+    "version": "0.2026.1008.1941",
+    "releaseTag": "snapshot",
+    "assetUpdatedAt": "2026-10-08T21:03:17Z",
+    "source": "https://github.com/marat569/renodx/releases/tag/snapshot",
+    "sha256": "f828bb9ced6cba8843842c10c59c57460e8c3d8243a715c40ec752c6c4c2f568"
+  },
+  "FidelityFX": {
+    "latestSourceCommit": "60f4ea81909200d8542eca14dccb2628b763a9a3",
+    "unchangedFromPin": true,
+    "source": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK"
+  },
+  "AntiLag2": {
+    "latestVersion": "2.0.5",
+    "unchangedFromPin": true,
+    "source": "https://gpuopen.com/anti-lag-2/"
+  },
+  "ReShade": {
+    "currentPublicStockVersion": "6.8.0",
+    "source": "https://reshade.me/",
+    "requiredCandidateFrameworkSHA256": "47d415dd919854b143e942b203e2b595a932a00d543bdb25c971609f4e17427c",
+    "note": "Candidate still requires the separately built native device/queue and successful-Reset interfaces plus heap-lifetime patch. A stock version number does not establish these interfaces."
+  },
+  "runtimeQualified": false
+}

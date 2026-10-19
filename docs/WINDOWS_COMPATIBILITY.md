@@ -1,3 +1,13 @@
+The [19 October dev.17 qualification](WINDOWS_DEV17_QUALIFICATION_2026-10-19.md)
+pins current publisher Loader 2.6, Streamline 2.14.16, DLSS 310.9.16 and RenoDX
+snapshot inputs separately from the frozen older packages. Its first full-package
+ordinary quit reproduced the intermittent game-worker AV. A control also
+reproduced the matching return chain with the original framework and current
+RenoDX, while all our native/UI payload was absent. Two clean-game controls and
+one UI-only control exited 0. These bounded controls do not identify the precise
+cause or qualify Windows shutdown. Preserve the explicit failed qualification,
+exact loaded hashes, private recovery data and remaining runtime gates.
+
 The Windows candidate framework also applies upstream ReShade
 [`64017f98`](https://github.com/crosire/reshade/commit/64017f98cc1393db51d9f5b1307c64350680f41c)
 for descriptor heaps that outlive their device. Registration follows proxy

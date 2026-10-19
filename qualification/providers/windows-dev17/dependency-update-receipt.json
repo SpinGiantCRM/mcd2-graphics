@@ -1,0 +1,29 @@
+{
+  "candidateOnly": true,
+  "runtimeQualified": false,
+  "version": "0.4.0-amd.dev.17",
+  "originalAssemblyLockSHA256": "b9bbd5bd11bb088637f44f7d358ffcbd001de63ffb655d9d241b1fd3a2d7c427",
+  "updatedLockSHA256": "a1ae112c8b5c33054f4f754da9e60a93cbc1f9dcb9ea414c3be154e858fb4f87",
+  "ownManifestUnchanged": true,
+  "changedExternalInputs": [
+    "Streamline 2.14.16 complete production set",
+    "DLSS 310.9.16 publisher blob",
+    "RenoDX 0.2026.1008.1941 snapshot",
+    "Blueprint Loader 2.6 Nexus main file 506"
+  ],
+  "loader26PendingNexusAccountDownload": false,
+  "currentLoaderStillRecognizedOnlyAsBaseline": false,
+  "frameworkSeparateDependency": true,
+  "vendorRuntimesBundled": false,
+  "previousIntermediateLockSHA256": "b6774b90314e97320ec4ef11f88ba6b02467685456a8fb8462e8db5c9ee722cd",
+  "blueprintLoader": {
+    "version": "2.6",
+    "nexusFileId": 506,
+    "archiveSHA256": "803cbcd502a3a2e2a0219989ee8560192847a852f74650efc8996fdc96fb1dfa",
+    "files": {
+      "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.pak": "75e7144577253917f6da7312ef5e585b12fb728226a22b0938323751a6b555cd",
+      "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.ucas": "53ce0001a8c4077323a9342b42bc9d1bb9645116963cdb78fcdf9055336a1235",
+      "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.utoc": "847206e561dddce54be8a3f3868558597728e2affa4b697b84dbd0dbb8f30e1b"
+    }
+  }
+}
