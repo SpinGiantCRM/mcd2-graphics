@@ -71,7 +71,7 @@
     "windowsSDK": "10.0.26100.0"
   },
   "linuxBoundedRuntimeChecks": "Historical dev15 (without the trace race fix or top-left overlay) passed two error-only Steam exit controls with shipping exit code 0; the longer control recorded 520 seconds of advancing FG samples with a brief suspension/recovery. This does not qualify dev16 or establish a cure for the earlier fatal exit.",
-  "pendingChange": "None for dev16 Windows test packaging. Public release metadata/version alignment and exact-artifact Linux/Windows runtime qualification remain pending.",
+  "pendingChange": "Rebuild the complete candidate with the numeric UI, capability cache, temporal-quality lease and additional ReShade descriptor-heap lifetime patch. Public release metadata/version alignment and exact-artifact Linux/Windows runtime qualification remain pending.",
   "linuxReleaseBlockers": [
     "Earlier uninstrumented dev15 normal quit returned 0xC0000409; two later controls exited 0, but the intermittent cause remains unestablished.",
     "The complete dev16 artifact, including trace ownership correction and top-left overlay, has not run in the game on Linux."
@@ -82,5 +82,5 @@
     "checkoutLineEndingsNormalizedForComparison": true,
     "onlySubsequentChanges": "dev15 qualification records; no runtime implementation changes"
   },
-  "selectionNote": "Numeric scale UI, AMD FG capability cache and FSR temporal-quality ownership changed after dev.16 selection. Rebuild a complete native candidate before installer assembly or qualification."
+  "selectionNote": "Numeric scale UI, AMD FG capability cache, FSR temporal-quality ownership and the ReShade descriptor-heap lifetime patch changed after dev.16 selection. Rebuild a complete native candidate before installer assembly or qualification."
 }

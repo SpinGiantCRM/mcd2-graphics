@@ -3,7 +3,7 @@ from pathlib import Path
 import argparse, hashlib, json, shutil, sys
 sys.path.insert(0,str(Path(__file__).resolve().parents[2]))
 from install import require_closed
-from framework_provenance import source_matches
+from framework_provenance import source_matches, DESCRIPTOR_HEAP_PATCH
 
 p=argparse.ArgumentParser(description=__doc__)
 p.add_argument('action',choices=['install','restore'])
@@ -36,7 +36,9 @@ if a.action=='install':
     if a.experimental_reshade:
         framework_receipt=json.loads(a.experimental_reshade_receipt.read_text())
         patch=Path(__file__).resolve().parents[2]/'qualification/fg-release/reshade-reset-epoch.patch'
-        assert source_matches(framework_receipt,sha(patch) if patch.is_file() else None)
+        heap_patch=Path(__file__).resolve().parents[2]/DESCRIPTOR_HEAP_PATCH
+        assert source_matches(framework_receipt,sha(patch) if patch.is_file() else None,
+                              {DESCRIPTOR_HEAP_PATCH:sha(heap_patch)})
         assert sha(a.experimental_reshade)==framework_receipt['binarySHA256']
         framework=a.experimental_reshade
     pr=json.loads((a.probe/'build-receipt.json').read_text())

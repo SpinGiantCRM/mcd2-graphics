@@ -188,11 +188,44 @@ class WindowsBuildChecks(unittest.TestCase):
             self.assertFalse(artifact.exists())
 
     def test_framework_patch_has_canonical_checkout_and_hash_bytes(self):
-        relative = 'qualification/fg-release/reshade-reset-epoch.patch'
-        self.assertNotIn(b'\r', (candidate.REPO / relative).read_bytes())
-        attributes = subprocess.check_output(
-            ['git', '-C', str(candidate.REPO), 'check-attr', 'eol', relative], text=True)
-        self.assertEqual(attributes.strip(), relative + ': eol: lf')
+        for relative in ('qualification/fg-release/reshade-reset-epoch.patch', candidate.DESCRIPTOR_HEAP_PATCH):
+            self.assertNotIn(b'\r', (candidate.REPO / relative).read_bytes())
+            attributes = subprocess.check_output(
+                ['git', '-C', str(candidate.REPO), 'check-attr', 'eol', relative], text=True)
+            self.assertEqual(attributes.strip(), relative + ': eol: lf')
+        self.assertEqual(candidate.sha(candidate.REPO / candidate.DESCRIPTOR_HEAP_PATCH),
+                         'e3a5a1d142628dd6247320769e71dc356b22671f80f6a77e591cbb34242fa7f8')
+        workflow = (candidate.REPO / '.github/workflows/fg-windows-candidate.yml').read_text()
+        patterns = ast.literal_eval(re.search(r'^\s+patterns = (\[.*\])$', workflow, re.MULTILINE).group(1))
+        self.assertTrue(any(fnmatch.fnmatchcase(candidate.DESCRIPTOR_HEAP_PATCH, p) for p in patterns))
+
+    def test_framework_patch_transaction_applies_both_and_refuses_dirty_sources(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            checkout = root / 'checkout'
+            checkout.mkdir()
+            git = lambda *args: subprocess.run(['git', '-C', str(checkout), *args], check=True, capture_output=True)
+            git('init', '-q')
+            git('config', 'core.autocrlf', 'false')
+            (checkout / 'reset.txt').write_bytes(b'old reset\n')
+            (checkout / 'heap.txt').write_bytes(b'old heap\n')
+            git('add', '.')
+            git('-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '-qm', 'base')
+            for name, relative in [('reset', 'qualification/fg-release/reshade-reset-epoch.patch'),
+                                   ('heap', candidate.DESCRIPTOR_HEAP_PATCH)]:
+                destination = root / relative
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                destination.write_bytes(f'--- a/{name}.txt\n+++ b/{name}.txt\n@@ -1 +1 @@\n-old {name}\n+new {name}\n'.encode())
+            diff, status = candidate.apply_framework_patches(root, checkout)
+            self.assertIn(b'+new reset', diff)
+            self.assertIn(b'+new heap', diff)
+            self.assertIn(b'M  reset.txt', status)
+            self.assertIn(b'M  heap.txt', status)
+            git('reset', '--hard', '-q', 'HEAD')
+            (checkout / 'unreviewed.txt').write_text('unrelated source')
+            with self.assertRaisesRegex(RuntimeError, 'not clean'):
+                candidate.apply_framework_patches(root, checkout)
+            self.assertEqual((checkout / 'reset.txt').read_text(), 'old reset\n')
 
     def test_unversioned_components_and_incomplete_versions_are_ignored(self):
         with tempfile.TemporaryDirectory() as temporary:

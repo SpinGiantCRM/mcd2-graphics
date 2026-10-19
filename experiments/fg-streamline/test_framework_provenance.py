@@ -1,5 +1,5 @@
 import unittest
-from framework_provenance import RESHADE_COMMIT, source_matches
+from framework_provenance import RESHADE_COMMIT, DESCRIPTOR_HEAP_PATCH, source_matches
 
 
 class FrameworkProvenanceChecks(unittest.TestCase):
@@ -20,6 +20,18 @@ class FrameworkProvenanceChecks(unittest.TestCase):
             del incomplete[key]
             self.assertFalse(source_matches(incomplete, 'approved'), key)
         self.assertFalse(source_matches(dict(receipt, approvedPatchOnly='true'), 'approved'))
+
+    def test_candidate_requires_the_complete_approved_patch_set(self):
+        extra = {DESCRIPTOR_HEAP_PATCH: 'heap-fix'}
+        receipt = {'commit': RESHADE_COMMIT, 'sourceClean': False,
+                   'baseCleanBeforePatch': True, 'approvedPatchOnly': True,
+                   'patchSHA256': 'reset', 'additionalPatchSHA256': extra}
+        self.assertTrue(source_matches(receipt, 'reset', extra))
+        self.assertFalse(source_matches(receipt, 'reset'))
+        self.assertFalse(source_matches(receipt, 'reset', {DESCRIPTOR_HEAP_PATCH: 'wrong'}))
+        self.assertFalse(source_matches(dict(receipt, additionalPatchSHA256={}), 'reset', extra))
+        self.assertFalse(source_matches(dict(receipt, sourceClean=True), 'reset', extra))
+        self.assertFalse(source_matches(dict(receipt, additionalPatchSHA256=dict(extra, unknown='x')), 'reset', extra))
 
 
 if __name__ == '__main__':

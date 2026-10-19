@@ -1,3 +1,18 @@
+The Windows candidate framework also applies upstream ReShade
+[`64017f98`](https://github.com/crosire/reshade/commit/64017f98cc1393db51d9f5b1307c64350680f41c)
+for descriptor heaps that outlive their device. Registration follows proxy
+construction/destruction rather than a deferred raw-heap destruction callback
+holding the device pointer. Preserve the existing successful-Reset patch, exact
+additional-patch hashes, clean-base/diff checks and both CI platforms. Candidate
+trials require both patches; the historical separately pinned release remains
+unchanged. This corrects a dependency lifetime defect, not a proven cause of the
+intermittent game exit failure. The 19 October original-context capture still
+showed an AV on an unidentified game worker with GameThread in CRT exit; its
+explicit-anchor return chain matches the old build after the build's RVA shift.
+One current-framework-only control exited 0. A private retained MSVC build with
+the exact combined source diff is being retested with the full mod. Neither that
+source match nor an isolated clean exit establishes shutdown qualification.
+
 FSR preflight requires the validated single-output TAA permutation. On Steam
 build 25754144, `r.TemporalAA.Quality=1` used shader `62de03a8`, whose otherwise
 matching constant-buffer and input layout includes a second UAV output. Merely

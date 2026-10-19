@@ -1,0 +1,249 @@
+diff --git a/source/d3d12/d3d12_descriptor_heap.cpp b/source/d3d12/d3d12_descriptor_heap.cpp
+index 8c5be57d..b568173b 100644
+--- a/source/d3d12/d3d12_descriptor_heap.cpp
++++ b/source/d3d12/d3d12_descriptor_heap.cpp
+@@ -10,11 +10,17 @@
+ #include "dll_log.hpp"
+ #include "com_utils.hpp"
+ 
+-D3D12DescriptorHeap::D3D12DescriptorHeap(ID3D12Device *device, ID3D12DescriptorHeap *original) :
++D3D12DescriptorHeap::D3D12DescriptorHeap(D3D12Device *device, ID3D12DescriptorHeap *original) :
+ 	_orig(original),
+ 	_device(device)
+ {
+ 	assert(_orig != nullptr && _device != nullptr);
++
++	_device->register_descriptor_heap(this);
++}
++D3D12DescriptorHeap::~D3D12DescriptorHeap()
++{
++	_device->unregister_descriptor_heap(this);
+ }
+ 
+ bool D3D12DescriptorHeap::check_and_upgrade_interface(REFIID riid)
+diff --git a/source/d3d12/d3d12_descriptor_heap.hpp b/source/d3d12/d3d12_descriptor_heap.hpp
+index ca598358..fe99441f 100644
+--- a/source/d3d12/d3d12_descriptor_heap.hpp
++++ b/source/d3d12/d3d12_descriptor_heap.hpp
+@@ -7,12 +7,13 @@
+ 
+ #if RESHADE_ADDON >= 2
+ 
+-class D3D12Device;
++#include "d3d12_device.hpp"
+ 
+ class DECLSPEC_UUID("8628AD68-6047-4D27-9D87-3E5F386E0231") D3D12DescriptorHeap final : public ID3D12DescriptorHeap
+ {
+ public:
+-	D3D12DescriptorHeap(ID3D12Device *device, ID3D12DescriptorHeap *original);
++	D3D12DescriptorHeap(D3D12Device *device, ID3D12DescriptorHeap *original);
++	~D3D12DescriptorHeap();
+ 
+ 	D3D12DescriptorHeap(const D3D12DescriptorHeap &) = delete;
+ 	D3D12DescriptorHeap &operator=(const D3D12DescriptorHeap &) = delete;
+@@ -39,8 +40,6 @@ public:
+ 
+ 	bool check_and_upgrade_interface(REFIID riid);
+ 
+-	void initialize_descriptor_base_handle(size_t heap_index);
+-
+ 	ID3D12DescriptorHeap *_orig;
+ 	LONG _ref = 1;
+ 
+@@ -49,7 +48,7 @@ public:
+ 	D3D12_CPU_DESCRIPTOR_HANDLE _internal_base_cpu_handle = { 0 };
+ 
+ private:
+-	ID3D12Device *const _device;
++	D3D12Device *const _device;
+ };
+ 
+ #endif
+diff --git a/source/d3d12/d3d12_device.cpp b/source/d3d12/d3d12_device.cpp
+index 1493c6a8..f29efa3b 100644
+--- a/source/d3d12/d3d12_device.cpp
++++ b/source/d3d12/d3d12_device.cpp
+@@ -404,12 +404,6 @@ HRESULT STDMETHODCALLTYPE D3D12Device::CreateDescriptorHeap(const D3D12_DESCRIPT
+ 			// Upgrade to the actual interface version requested here
+ 			if (descriptor_heap_proxy->check_and_upgrade_interface(riid))
+ 			{
+-				register_descriptor_heap(descriptor_heap_proxy);
+-
+-				register_destruction_callback_d3dx(descriptor_heap_proxy, [this, descriptor_heap_proxy]() {
+-					unregister_descriptor_heap(descriptor_heap_proxy);
+-				});
+-
+ #if RESHADE_VERBOSE_LOG
+ 				reshade::log::message(reshade::log::level::debug, "Returning ID3D12DescriptorHeap object %p (%p).", descriptor_heap_proxy, descriptor_heap_proxy->_orig);
+ #endif
+@@ -1138,11 +1132,12 @@ HRESULT STDMETHODCALLTYPE D3D12Device::CreatePipelineLibrary(const void *pLibrar
+ 	assert(_interface_version >= 1);
+ 
+ 	const HRESULT hr = static_cast<ID3D12Device1 *>(_orig)->CreatePipelineLibrary(pLibraryBlob, BlobLength, riid, ppPipelineLibrary);
+-	if (SUCCEEDED(hr) && ppPipelineLibrary != nullptr)
++	if (SUCCEEDED(hr))
+ 	{
+ #if RESHADE_ADDON >= 2
+-		if (reshade::has_addon_event<reshade::addon_event::init_pipeline>() ||
+-			reshade::has_addon_event<reshade::addon_event::destroy_pipeline>())
++		if (ppPipelineLibrary != nullptr && (
++			reshade::has_addon_event<reshade::addon_event::init_pipeline>() ||
++			reshade::has_addon_event<reshade::addon_event::destroy_pipeline>()))
+ 		{
+ 			const auto pipeline_library_proxy = new D3D12PipelineLibrary(this, static_cast<ID3D12PipelineLibrary *>(*ppPipelineLibrary));
+ 
+diff --git a/source/d3d12/d3d12_device.hpp b/source/d3d12/d3d12_device.hpp
+index 065e55fd..6917cb31 100644
+--- a/source/d3d12/d3d12_device.hpp
++++ b/source/d3d12/d3d12_device.hpp
+@@ -12,6 +12,7 @@ class D3D12DeviceDownlevel;
+ class DECLSPEC_UUID("2523AFF4-978B-4939-BA16-8EE876A4CB2A") D3D12Device final : public ID3D12Device15, public reshade::d3d12::device_impl
+ {
+ 	friend class D3D12DeviceDownlevel;
++	friend class D3D12DescriptorHeap;
+ 
+ public:
+ 	D3D12Device(ID3D12Device *original);
+diff --git a/source/d3d12/d3d12_impl_device.cpp b/source/d3d12/d3d12_impl_device.cpp
+index b1bbfc02..3dff278b 100644
+--- a/source/d3d12/d3d12_impl_device.cpp
++++ b/source/d3d12/d3d12_impl_device.cpp
+@@ -80,11 +80,8 @@ reshade::d3d12::device_impl::device_impl(ID3D12Device *device) :
+ 	// Make some space in the descriptor heap array, so that it is unlikely to need reallocation
+ 	_descriptor_heaps.reserve(4096);
+ 
+-	const auto gpu_view_heap = new D3D12DescriptorHeap(device, _gpu_view_heap.get());
+-	register_descriptor_heap(gpu_view_heap);
+-	const auto gpu_sampler_heap = new D3D12DescriptorHeap(device, _gpu_sampler_heap.get());
+-	register_descriptor_heap(gpu_sampler_heap);
+-
++	new D3D12DescriptorHeap(static_cast<D3D12Device *>(this), _gpu_view_heap.get());
++	new D3D12DescriptorHeap(static_cast<D3D12Device *>(this), _gpu_sampler_heap.get());
+ 	assert(_descriptor_heaps.size() == 2);
+ #endif
+ 
+@@ -114,13 +111,8 @@ reshade::d3d12::device_impl::~device_impl()
+ 	assert(_queues.empty()); // All queues should have been unregistered and destroyed by the application at this point
+ 
+ #if RESHADE_ADDON >= 2
+-	const auto gpu_view_heap = _descriptor_heaps[0];
+-	unregister_descriptor_heap(gpu_view_heap);
+-	delete gpu_view_heap;
+-	const auto gpu_sampler_heap = _descriptor_heaps[1];
+-	unregister_descriptor_heap(gpu_sampler_heap);
+-	delete gpu_sampler_heap;
+-
++	delete _descriptor_heaps[0];
++	delete _descriptor_heaps[1];
+ 	assert(_descriptor_heaps.empty());
+ #endif
+ }
+@@ -2235,12 +2227,52 @@ void reshade::d3d12::device_impl::register_descriptor_heap(D3D12DescriptorHeap *
+ {
+ 	const auto it = _descriptor_heaps.push_back(heap);
+ 
+-	heap->initialize_descriptor_base_handle(std::distance(_descriptor_heaps.begin(), it));
++	// Generate a descriptor handle of the following format:
++	//   Bit  0 -  2: Heap type
++	//   Bit  3 -  3: Heap flags
++	//   Bit  4 - 27: Descriptor index
++	//   Bit 28 - 55: Heap index
++	//   Bit 56 - 64: Extra data
++
++	heap->_orig_base_cpu_handle = heap->_orig->GetCPUDescriptorHandleForHeapStart();
++	heap->_internal_base_cpu_handle = { 0 };
+ 
+-	const D3D12_DESCRIPTOR_HEAP_DESC desc = heap->_orig->GetDesc();
++	const size_t heap_index = std::distance(_descriptor_heaps.begin(), it);
++	assert(heap_index < (1ull << std::min(sizeof(SIZE_T) * 8 - heap_index_start, heap_index_start)));
++	heap->_internal_base_cpu_handle.ptr |= static_cast<SIZE_T>(heap_index) << heap_index_start;
++
++	const D3D12_DESCRIPTOR_HEAP_DESC heap_desc = heap->_orig->GetDesc();
++	assert(heap_desc.Type <= 0x3);
++	heap->_internal_base_cpu_handle.ptr |= heap_desc.Type;
++	assert(heap_desc.Flags <= 0x1);
++	heap->_internal_base_cpu_handle.ptr |= static_cast<SIZE_T>(heap_desc.Flags) << 2;
++
++#ifndef _WIN64
++	if (heap_index >= (1ull << std::min(sizeof(SIZE_T) * 8 - heap_index_start, heap_index_start)))
++	{
++		reshade::log::message(reshade::log::level::error, "Descriptor heap index is too big to fit into handle!");
++	}
++#else
++	static_assert((D3D12_MAX_SHADER_VISIBLE_DESCRIPTOR_HEAP_SIZE_TIER_2 * 32) < (1 << heap_index_start));
++#endif
++	if (_descriptor_handle_size[heap_desc.Type] < (1 << 3))
++	{
++		assert(false);
++		reshade::log::message(reshade::log::level::error, "Descriptor heap contains descriptors that are too small!");
++	}
++	if ((heap_desc.NumDescriptors * _descriptor_handle_size[heap_desc.Type]) >= (1 << heap_index_start))
++	{
++		assert(false);
++		reshade::log::message(reshade::log::level::error, "Descriptor heap contains too many descriptors to fit into handle!");
++	}
++
++	if (heap_desc.Flags & D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE)
++	{
++		heap->_orig_base_gpu_handle = heap->_orig->GetGPUDescriptorHandleForHeapStart();
++	}
+ 
+ 	const UINT64 beg_gpu_handle = heap->_orig_base_gpu_handle.ptr;
+-	const UINT64 end_gpu_handle = beg_gpu_handle + static_cast<UINT64>(desc.NumDescriptors) * _descriptor_handle_size[desc.Type];
++	const UINT64 end_gpu_handle = beg_gpu_handle + static_cast<UINT64>(heap_desc.NumDescriptors) * _descriptor_handle_size[heap_desc.Type];
+ 
+ 	const std::unique_lock<std::shared_mutex> lock(_heap_gpu_ranges_mutex);
+ 
+@@ -2273,52 +2305,6 @@ void reshade::d3d12::device_impl::unregister_descriptor_heap(D3D12DescriptorHeap
+ 
+ 	_heap_gpu_ranges.erase(heap->_orig_base_gpu_handle.ptr);
+ }
+-
+-void D3D12DescriptorHeap::initialize_descriptor_base_handle(size_t heap_index)
+-{
+-	// Generate a descriptor handle of the following format:
+-	//   Bit  0 -  2: Heap type
+-	//   Bit  3 -  3: Heap flags
+-	//   Bit  4 - 27: Descriptor index
+-	//   Bit 28 - 55: Heap index
+-	//   Bit 56 - 64: Extra data
+-
+-	_orig_base_cpu_handle = _orig->GetCPUDescriptorHandleForHeapStart();
+-	_internal_base_cpu_handle = { 0 };
+-
+-	assert(heap_index < (1ull << std::min(sizeof(SIZE_T) * 8 - heap_index_start, heap_index_start)));
+-	_internal_base_cpu_handle.ptr |= static_cast<SIZE_T>(heap_index) << heap_index_start;
+-
+-	const D3D12_DESCRIPTOR_HEAP_DESC heap_desc = _orig->GetDesc();
+-	assert(heap_desc.Type <= 0x3);
+-	_internal_base_cpu_handle.ptr |= heap_desc.Type;
+-	assert(heap_desc.Flags <= 0x1);
+-	_internal_base_cpu_handle.ptr |= static_cast<SIZE_T>(heap_desc.Flags) << 2;
+-
+-#ifndef _WIN64
+-	if (heap_index >= (1ull << std::min(sizeof(SIZE_T) * 8 - heap_index_start, heap_index_start)))
+-	{
+-		reshade::log::message(reshade::log::level::error, "Descriptor heap index is too big to fit into handle!");
+-	}
+-#else
+-	static_assert((D3D12_MAX_SHADER_VISIBLE_DESCRIPTOR_HEAP_SIZE_TIER_2 * 32) < (1 << heap_index_start));
+-#endif
+-	if (_device->GetDescriptorHandleIncrementSize(heap_desc.Type) < (1 << 3))
+-	{
+-		assert(false);
+-		reshade::log::message(reshade::log::level::error, "Descriptor heap contains descriptors that are too small!");
+-	}
+-	if ((heap_desc.NumDescriptors * _device->GetDescriptorHandleIncrementSize(heap_desc.Type)) >= (1 << heap_index_start))
+-	{
+-		assert(false);
+-		reshade::log::message(reshade::log::level::error, "Descriptor heap contains too many descriptors to fit into handle!");
+-	}
+-
+-	if (heap_desc.Flags & D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE)
+-	{
+-		_orig_base_gpu_handle = _orig->GetGPUDescriptorHandleForHeapStart();
+-	}
+-}
+ #endif
+ 
+ #if RESHADE_ADDON >= 2
