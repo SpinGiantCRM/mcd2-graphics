@@ -1050,3 +1050,15 @@ probe nor Linux/NVIDIA execution qualifies Windows/Radeon behaviour. Candidate
 qualification must compare warmed fresh Off against On → Off in the same scene,
 verify HDR/SR, keyboard focus, display restoration, pause/resume, travel and
 repeated normal exits. SDK frame counts do not establish physical display FPS.
+
+### Bounded guide observer resource lifetime
+
+The optional guide capture must check the existing init/destroy resource registry
+before querying native metadata or mapping a cached binding. A nonzero view lookup
+can still resolve an expired resource; cached descriptors do not own its lifetime.
+The observer already holds its mutex for this check and inspection. Unknown or
+destroyed resources are skipped. The actual observer regression covers retained
+view/constant-buffer bindings after destruction, unknown/null bindings and live
+recovery in both portable CI jobs. This source correction requires a fresh full
+Windows candidate and runtime retest; handled Unreal crashes can exit with code
+zero and must never count as successful gameplay or normal shutdown.
