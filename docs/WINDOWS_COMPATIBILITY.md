@@ -1,3 +1,16 @@
+FSR preflight requires the validated single-output TAA permutation. On Steam
+build 25754144, `r.TemporalAA.Quality=1` used shader `62de03a8`, whose otherwise
+matching constant-buffer and input layout includes a second UAV output. Merely
+allowlisting it would skip an output the current replacement does not populate.
+The bounded quality-2 control reached Active with advancing SDK evaluations.
+Acquire quality 2 only for matching current-world FSR preflight; retain it until
+native retirement/source rollback and across actor level transitions, then
+restore only the still-owned value. The volatile receipt must reject a previous
+renderer session, yield to external edits and bound restoration retries. Native
+selection never acquires the lease. Preserve all shader/resource/SDK/source-ACK
+gates, managed ownership checks, both CI platforms and a real UI/ModInfo rebuild.
+The control does not qualify the final lease, wider lifecycle or shutdown.
+
 AMD FG provider enumeration must not run repeatedly on the render thread. On
 Windows/Radeon 860M the unchanged SDK support query took 127-278 ms per call,
 and its once-per-second polling stalled Native menus with FG Off. Cache the

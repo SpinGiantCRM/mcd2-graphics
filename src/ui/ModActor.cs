@@ -388,6 +388,37 @@ public class ModActor : AActor, IModSettings {
 
  public ProviderMenuClient? ProviderMenu;
  public ProviderRuntimeClient? ProviderRuntime;
+ public TemporalAaQualityLeaseSave? TemporalQuality;
+ public void UpdateTemporalQuality(){
+  if(ProviderMenu==null || ProviderMenu.Authority==null || ProviderRuntime==null || ProviderRuntime.Session<=0)return;
+  if(TemporalQuality==null){TemporalQuality=UGameplayStatics.LoadGameFromSlot("MCD2GraphicsTemporalQualityLease",0) as TemporalAaQualityLeaseSave;
+   if(TemporalQuality==null)TemporalQuality=UGameplayStatics.CreateSaveGameObject(Unreal.ClassOf<TemporalAaQualityLeaseSave>()) as TemporalAaQualityLeaseSave;}
+  if(TemporalQuality==null)return;
+  var player=World.PlayerController(this);if(player==null)return;
+  string exists=UKismetSystemLibrary.GetConsoleVariableStringValue("r.TemporalAA.Quality");
+  int observed=UKismetSystemLibrary.GetConsoleVariableIntValue("r.TemporalAA.Quality");
+  var state=ProviderRuntime.State;
+  // A missing/new-world snapshot cannot prove that an old generation retired.
+  // Retain through retirement, including errors, until source rollback/fallback.
+  bool retain=state==null || (state.W10>=1 && state.W10<=6) || state.W10==9;
+  int session=TemporalQuality.Session,owned=TemporalQuality.Owned,blocked=TemporalQuality.Blocked,revision=TemporalQuality.Revision,checksum=TemporalQuality.Checksum;
+  var a=ProviderMenu.Authority;
+  int command=TemporalQuality.Command(ProviderRuntime.Session,a.W19,a.W16,exists!="",observed,ProviderRuntime.TemporalShaderPreflight(ProviderMenu),retain);
+  if(command>=0){
+   UKismetSystemLibrary.ExecuteConsoleCommand(this,"r.TemporalAA.Quality "+command,player);
+   TemporalQuality.Observed(command,UKismetSystemLibrary.GetConsoleVariableIntValue("r.TemporalAA.Quality"));}
+  if(command>=0 || session!=TemporalQuality.Session || owned!=TemporalQuality.Owned || blocked!=TemporalQuality.Blocked || revision!=TemporalQuality.Revision || checksum!=TemporalQuality.Checksum)
+   UGameplayStatics.SaveGameToSlot(TemporalQuality,"MCD2GraphicsTemporalQualityLease",0);
+ }
+ public void RestoreTemporalQuality(){
+  if(TemporalQuality==null || TemporalQuality.Owned!=1)return;
+  if(UKismetSystemLibrary.GetConsoleVariableStringValue("r.TemporalAA.Quality")!="" && UKismetSystemLibrary.GetConsoleVariableIntValue("r.TemporalAA.Quality")==2){
+   var player=World.PlayerController(this);if(player==null)return;
+   UKismetSystemLibrary.ExecuteConsoleCommand(this,"r.TemporalAA.Quality "+TemporalQuality.Original,player);
+   if(UKismetSystemLibrary.GetConsoleVariableIntValue("r.TemporalAA.Quality")!=TemporalQuality.Original)return;
+  }
+  TemporalQuality.Owned=0;UGameplayStatics.SaveGameToSlot(TemporalQuality,"MCD2GraphicsTemporalQualityLease",0);
+ }
  public void PollProviders(){
   if(ProviderMenu==null || ProviderRuntime==null)return;
   ProviderMenu.Poll();
@@ -399,6 +430,7 @@ public class ModActor : AActor, IModSettings {
   if(!(units>0 && units<=1000000)){units=0;ready=false;}
   if(!(percentage>=1 && percentage<=100)){percentage=0;ready=false;}
   ProviderRuntime.Poll(ProviderMenu,level,ready,(int)(units*1000),(int)(percentage*1000000));
+  UpdateTemporalQuality();
   if(ProviderMenu.Ready && ProviderRuntime.Enabled)ProviderOwned=true;
   if(SharedControls()){
    ProjectCommittedDisplay();
@@ -892,6 +924,7 @@ public class ModActor : AActor, IModSettings {
  }
 
  protected override void ReceiveEndPlay(EEndPlayReason reason){
+  if(reason!=EEndPlayReason.LevelTransition)RestoreTemporalQuality();
   RestoreSharpness();if(DiagnosticOverlay!=null)DiagnosticOverlay.Hide();
   RestorePresenterDisplay();RestorePresenterConfirmation(true);
   if(ProviderRuntime!=null)ProviderRuntime.Stop();Timer.Stop(this,"PollProviders");

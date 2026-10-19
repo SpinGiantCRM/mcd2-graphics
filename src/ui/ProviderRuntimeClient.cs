@@ -15,6 +15,17 @@ public class ProviderRuntimeClient : USaveGame {
   if(quality==0)return 10000;if(quality==5)return custom;
   return quality==1?6700:quality==2?(family==2?5900:5800):quality==3?5000:3300;
  }
+ // Acquire the validated single-output TAA producer before source preflight.
+ // This does not acknowledge source scale or authorize SDK evaluation.
+ public bool TemporalShaderPreflight(ProviderMenuClient menu){
+  if(!menu.Ready || menu.Authority==null || !Enabled || Context==null || State==null ||
+     !ContextValid(Context) || !StateValid(State))return false;
+  var a=menu.Authority;var c=Context;var s=State;
+  return a.W20==2 && c.W10==1 && s.W18==2 && s.W10==1 && s.W11==0 &&
+   Session==a.W5 && c.W5==Session && s.W5==Session &&
+   c.W9==WorldGeneration && s.W9==WorldGeneration &&
+   c.W7==a.W19 && s.W7==a.W19 && c.W8==a.W16 && s.W8==a.W16;
+ }
  public static bool GameplayWidgetAllowed(string name,bool layer){
   if(name.StartsWith("W_PlayerHUD_Activatable_C_") || name.StartsWith("W_HotbarContainer_Activatable_C_") || name.StartsWith("W_InGameNavigation_Activatable_C_"))return true;
   return !layer && (name=="Hotbar" || name=="MiniInventory" || name.StartsWith("W_ActivityLayer_Activatable_C_") || name.Contains("Notification_Activatable_C_"));
@@ -121,4 +132,26 @@ public class ProviderRuntimeClient : USaveGame {
  public void Stop(){if(Context!=null){Context.W10=0;Context.W13=0;Context.W14=0;Context.W15=0;
   if(Sequence<2147483646)Context.W6=++Sequence;Context.W4=Context.Checksum(0,32);
   UGameplayStatics.SaveGameToSlot(Context,"MCD2GraphicsProviderSrContext",0);}}
+}
+
+// Volatile ownership receipt survives actor travel, but a new renderer session
+// cannot adopt the old process's lease. Only the observed owned value is restored.
+public class TemporalAaQualityLeaseSave : USaveGame {
+ public int SchemaVersion,Session,Original,Owned,Blocked,Revision,Checksum,RestoreAttempts;
+ public int Command(int session,int revision,int checksum,bool exists,int observed,bool acquire,bool retain){
+  if(session<=0 || revision<=0)return -1;
+  if(SchemaVersion!=1 || Session!=session){SchemaVersion=1;Session=session;Owned=0;Blocked=0;RestoreAttempts=0;}
+  if(Revision!=revision || Checksum!=checksum){Revision=revision;Checksum=checksum;Blocked=0;}
+  if(Owned==1){
+   if(!exists || observed!=2){Owned=0;Blocked=1;return -1;}
+   if(retain || RestoreAttempts>=3)return -1;
+   RestoreAttempts++;return Original;
+  }
+  if(!acquire || Blocked==1 || !exists || observed<0 || observed>1)return -1;
+  Original=observed;RestoreAttempts=0;return 2;
+ }
+ public void Observed(int command,int value){
+  if(command==2){Owned=value==2?1:0;if(Owned==0)Blocked=1;}
+  else if(value==Original)Owned=0;
+ }
 }

@@ -95,6 +95,17 @@ class FsrRuntimeSourceTests(unittest.TestCase):
         self.assertNotIn('foreach(var layer', fg)
         self.assertIn('GetTickCount64()-c.started>15000', self.present)
 
+    def test_temporal_quality_lease_does_not_change_native_shader_admission(self):
+        actor=(ROOT/'src/ui/ModActor.cs').read_text()
+        self.assertIn('ProviderRuntime.TemporalShaderPreflight(ProviderMenu)', actor)
+        self.assertIn('"r.TemporalAA.Quality "+command', actor)
+        self.assertIn('state.W10>=1 && state.W10<=6', actor)
+        self.assertIn('reason!=EEndPlayReason.LevelTransition', actor)
+        self.assertIn('MCD2GraphicsTemporalQualityLease', actor)
+        observer=(ROOT/'src/native/observer.cpp').read_text()
+        self.assertIn('return shader==TAA || shader==TAA_SR;', observer)
+        self.assertIn('native_reset(c,cmd,saved,*pass,pc,x,y,z)', self.record)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -18,6 +18,7 @@ static class RuntimeTest {
   }
   ReadinessChecks();
   FoliageChecks();
+  TemporalQualityChecks();
   Check(ProviderRuntimeClient.CanRestoreNvidiaSource(7,2,123,1,7,123,3));
   Check(!ProviderRuntimeClient.CanRestoreNvidiaSource(7,2,123,1,7,124,3));
   Check(!ProviderRuntimeClient.CanRestoreNvidiaSource(7,2,123,1,8,123,3));
@@ -106,5 +107,36 @@ static class RuntimeTest {
   client.WorldGeneration++;Check(!client.FoliageMotionReady(menu,false));client.WorldGeneration--;
   Check(client.FoliageMotionReady(menu,true));
   Console.WriteLine("FSR foliage admission: active output, current world/request, scale, corruption and retirement gates pass");
+ }
+ static void TemporalQualityChecks(){
+  UGameplayStatics.Slots.Clear();var menu=Menu();menu.Authority!.W20=2;
+  var client=new ProviderRuntimeClient();client.Start();var s=Plan(1,1);
+  UGameplayStatics.Slots["MCD2GraphicsProviderSrRuntime"]=s;
+  Check(client.Poll(menu,"Hub",true,100000,100000000)&&client.TemporalShaderPreflight(menu));
+  foreach(int word in new[]{4,5,7,8,9,18}){int old=s.Word(word);s.SetWord(word,old^1);if(word!=4)s.W4=s.Checksum(0,32);
+   Check(!client.TemporalShaderPreflight(menu));s.SetWord(word,old);s.W4=s.Checksum(0,32);}
+  s.W11=22;s.W4=s.Checksum(0,32);Check(!client.TemporalShaderPreflight(menu));s.W11=0;
+  foreach(int phase in new[]{0,2,3,4,5,6,7,8,9}){s.W10=phase;s.W4=s.Checksum(0,32);Check(!client.TemporalShaderPreflight(menu));}
+  s.W10=1;s.W4=s.Checksum(0,32);client.Context!.W10=0;client.Context.W4=client.Context.Checksum(0,32);Check(!client.TemporalShaderPreflight(menu));
+  foreach(int original in new[]{0,1}){
+   var lease=new TemporalAaQualityLeaseSave();
+   Check(lease.Command(123,7,99,true,original,false,true)==-1&&lease.Owned==0); // Native never acquires.
+   Check(lease.Command(123,7,99,false,original,true,true)==-1);
+   Check(lease.Command(123,7,99,true,original,true,true)==2);lease.Observed(2,2);
+   Check(lease.Owned==1&&lease.Original==original);
+   Check(lease.Command(123,7,99,true,2,false,true)==-1&&lease.Owned==1); // World travel/retirement retain.
+   var traveled=new TemporalAaQualityLeaseSave{SchemaVersion=1,Session=lease.Session,Original=lease.Original,Owned=lease.Owned,Revision=lease.Revision,Checksum=lease.Checksum};
+   Check(traveled.Command(123,7,99,true,2,false,true)==-1&&traveled.Owned==1);
+   Check(traveled.Command(123,8,100,true,2,false,false)==original);traveled.Observed(original,original);Check(traveled.Owned==0);
+   Check(lease.Command(123,7,99,true,0,false,true)==-1&&lease.Owned==0&&lease.Blocked==1); // External edit wins.
+   Check(lease.Command(123,7,99,true,0,true,true)==-1);
+   Check(lease.Command(123,8,100,true,0,true,true)==2);lease.Observed(2,1);Check(lease.Owned==0&&lease.Blocked==1); // Failed command.
+   var stale=new TemporalAaQualityLeaseSave{SchemaVersion=1,Session=123,Owned=1,Original=original};
+   Check(stale.Command(124,7,99,true,2,false,false)==-1&&stale.Owned==0); // No cross-process restore.
+  }
+  var retry=new TemporalAaQualityLeaseSave{SchemaVersion=1,Session=123,Owned=1,Original=1};
+  for(int n=0;n<3;n++){Check(retry.Command(123,7,99,true,2,false,false)==1);retry.Observed(1,2);}
+  Check(retry.Command(123,7,99,true,2,false,false)==-1&&retry.Owned==1);
+  Console.WriteLine("Temporal producer quality: preflight identity, travel, rollback, external edits and bounded restoration pass");
  }
 }
