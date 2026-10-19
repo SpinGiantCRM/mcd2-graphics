@@ -308,7 +308,8 @@ extern "C" int mcd2_afg_scene_v1(void* device,void* world,uint64_t id){
 extern "C" int mcd2_afg_present_v2(void* queue,uint64_t id,uint32_t wanted){
  std::lock_guard lock(guard);if(!session||session->closing||wanted>1)return -40;
  auto& s=*session;
- if(!wanted||s.diagnosticBinding.engineFrame!=id)s.diagnosticFrames.select({});
+ // An explicit owner invalidation ends the epoch; an unready frame does not.
+ if(!queue&&id==UINT64_MAX)s.diagnosticFrames.select({});
  auto* supplied=queue?identity(static_cast<ID3D12CommandQueue*>(queue)):nullptr;
  auto* expected=identity(s.queue);const bool matched=supplied&&supplied==expected;release(supplied);release(expected);
  if(wanted&&!matched){s.historyLost=true;clearInputs(s.inputs);s.preparedCurrent=s.imageCurrent=false;configure(false);return -41;}
@@ -340,7 +341,7 @@ extern "C" int mcd2_afg_present_v2(void* queue,uint64_t id,uint32_t wanted){
  work->fence=value;s.nextWork=(s.nextWork+1)%s.work.size();++s.prepared;++s.images;s.historyLost=false;s.preparedCurrent=s.imageCurrent=false;
  const auto configured=configure(true);
  if(!configured&&s.diagnosticBinding.engineFrame==id)s.diagnosticFrames.admit(s.ordinal,s.diagnosticBinding.identity);
- else if(configured)s.diagnosticFrames.select({});
+
  return configured;
 }
 extern "C" int mcd2_afg_diagnostic_bind_v1(const MCD2FgDiagnosticBindingV1* binding){

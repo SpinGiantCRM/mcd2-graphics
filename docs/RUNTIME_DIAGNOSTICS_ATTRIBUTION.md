@@ -50,3 +50,17 @@ world across SR, FG and latency, plus recovery and opt-out baselines, per-channe
 resets, and continued FG/latency activity while SR is unavailable. These
 fixtures and compilation are separate from fresh Windows/Linux game
 qualification of the rebuilt complete artifact.
+
+## Frame admission does not replace epoch identity
+
+FG attribution selects the validated session/revision/checksum/world independently
+of one frame being ready. Missing guides, a mismatched binding or a failed SDK
+configuration skip that frame without erasing earlier outcomes in the same epoch.
+Only admitted SDK frame IDs may contribute actual outcomes or refresh their
+timestamp. Invalid/inactive requests, identity changes and explicit owner
+invalidation/retirement still clear the epoch. Native active/fault fields, bounded
+outcome freshness and UI advancement baselines remain required; retained totals
+with active zero are historical counts. The portable regression extracts both
+providers' actual binding/selection/admission decisions and checks gap recovery,
+Off, changed identities, reused IDs and inactive/expired projections. This source
+fix requires a fresh complete artifact and Windows runtime verification.

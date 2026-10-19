@@ -483,7 +483,7 @@ void present(a::command_queue*q,a::swapchain*swap,const a::rect*,const a::rect*,
    const auto owner=queue->GetDevice(IID_PPV_ARGS(&device));const auto staged=SUCCEEDED(owner)&&scene?scene(device,data.scene,id):-119;if(device)device->Release();ready=staged==0;
   }
   auto bind=reinterpret_cast<int(*)(const MCD2FgDiagnosticBindingV1*)>(GetProcAddress(module,"mcd2_afg_diagnostic_bind_v1"));
-  MCD2FgDiagnosticBindingV1 binding{sizeof(binding),0,id,ready&&wanted?identity:MCD2DiagnosticIdentityV1{}};if(bind)bind(&binding);
+  MCD2FgDiagnosticBindingV1 binding{sizeof(binding),0,id,identity};if(bind)bind(&binding);
   using Present=int(*)(void*,uint64_t,uint32_t);auto configure=reinterpret_cast<Present>(GetProcAddress(module,"mcd2_afg_present_v2"));auto result=configure?configure(reinterpret_cast<void*>(q->get_native()),id,ready&&wanted?1:0):-1;
   activeFGMode=!result&&ready&&wanted?1:0;
   if(fg_controls::enabled&&result&&result!=MCD2_AFG_BUSY_V2&&result!=MCD2_AFG_OUTPUT_UNSUPPORTED_V3)fg_controls::fault=1;
@@ -512,7 +512,7 @@ void present(a::command_queue*q,a::swapchain*swap,const a::rect*,const a::rect*,
  }
  if(fg_controls::enabled && (fgTrialFrames%30==0 || mode!=activeFGMode))fg_controls::publish(activeFGMode,ready);
  if(activeFGMode){++fgTrialFrames;presentedFrame=uint32_t(id);}
- nvidiaDiagnosticFrames.select(mode&&activeFGMode?identity:MCD2DiagnosticIdentityV1{});
+ nvidiaDiagnosticFrames.select(identity);
  if(mode&&activeFGMode)nvidiaDiagnosticFrames.admit(id,identity);
 }
 }
