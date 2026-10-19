@@ -261,3 +261,46 @@ and all other preferences were preserved. All 18 installed owned files and 15
 dependencies were reverified, with overrides empty. Player/account saves were
 not read or restored. A future matched per-game Steam-overlay comparison is
 recorded as an unperformed diagnostic, not a workaround or release gate pass.
+
+## Resumed per-game overlay comparison
+
+The user subsequently authorized launches again. The
+[overlay comparison record](../qualification/providers/windows-dev17/overlay-comparison.json)
+adds two ordinary hub closes on the same installed candidate:
+
+| Run | Steam per-game overlay setting | Held-process exit | Seconds to observer |
+| --- | --- | --- | --- |
+| O1 | Off | 0 | 185.572 |
+| O2 | Original On setting restored | 0 | 6.332 |
+
+Both runs established active FSR Quality at 1280×800 into 1920×1200 with matching
+current session/world/authority and error 0. O1 advanced from 1133 to 3085
+evaluations over 47.587 seconds; O2 advanced from 824 to 3679 over 67.955 seconds.
+One stable-gameplay enumeration per run verified backing-file hashes for 16
+loaded candidate modules, including both the SR game bridge and upscaler DLL.
+This is not a reconstructed memory-image hash. The overlay DLL remained loaded
+in both runs despite the per-game setting being Off in O1. Hook absence has not
+been established.
+
+O1 triggered a read-only external minidump at close +15 seconds, taking 0.641
+seconds, without a debugger. Its GameThread waited through Microsoft's
+`xgameruntime.dll` (10.0.26100.9449) on one unnamed auto-reset event. The exact
+internal function and event producer are unidentified; the nearest export's
+`XErrorReport` label is not a function identity. This sampled wait differs from
+F3's Present wait and does not establish a common cause with it or the CRT AV.
+O2 exited before the snapshot trigger. Both observers retained actual exit codes
+and recorded no clock gap; timing includes input dispatch, nominal two-second
+polling and, for O1, the snapshot intervention.
+
+These single observations, different startup dwell times and snapshot
+intervention prevent causal attribution. Disabling the per-game overlay is not
+a demonstrated workaround. O1's delayed exit remains a failure, and the earlier
+AV remains unresolved. No production payload changed and Windows remains
+unqualified.
+
+The original per-game overlay setting was restored through Steam's UI. Native,
+FG Off and Anti-Lag Off were restored through the normal locked provider store
+at monotonic revision 171; all other preference bytes match the original record
+except its revision and checksum. All 18 owned files and 15 dependency files
+were reverified with no overrides. The game is closed and observers finished;
+no player/account saves were read or restored.

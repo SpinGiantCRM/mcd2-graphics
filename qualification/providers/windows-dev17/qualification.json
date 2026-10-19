@@ -351,6 +351,22 @@
     "unexplainedExitDelays": true,
     "exitCrashFixed": false,
     "windowsRuntimeQualified": false,
-    "launchesOnHold": true
+    "launchesOnHold": false
+  },
+  "overlayComparison": {
+    "record": "overlay-comparison.json",
+    "ordinaryHubExitCodes": [
+      "00000000",
+      "00000000"
+    ],
+    "closeToObserverSeconds": [
+      185.572,
+      6.332
+    ],
+    "overlaySettingRestored": true,
+    "overlayDllPresentBothRuns": true,
+    "overlayDisabledFixEstablished": false,
+    "exitCrashFixed": false,
+    "windowsRuntimeQualified": false
   }
 }

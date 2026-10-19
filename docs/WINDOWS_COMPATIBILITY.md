@@ -17,7 +17,16 @@ A delayed-exit snapshot identifies a real swapchain Present waiting in the AMD
 driver through the framework/Steam-overlay/DXGI call chain, before the CRT stage
 of the earlier AV. This is not a root-cause attribution or shutdown repair. Keep
 the failed game-exit evidence and incomplete runtime gates; the renewed user
-launch hold leaves the game closed with Native/FG Off preferences restored.
+launch hold left the game closed with Native/FG Off preferences restored.
+
+After launches resumed, a per-game Steam-overlay comparison exited 0 with the
+setting Off after 185.572 seconds and with the original On setting after 6.332
+seconds. Both had active FSR Quality and verified loaded candidate backing files.
+The overlay DLL remained resident in both; hook absence is unproven. The delayed
+run sampled a GameThread event wait through Microsoft xgameruntime, distinct
+from the earlier sampled Present wait. No shared root cause or overlay workaround
+is established. The overlay and Native/FG Off settings were restored. Keep the
+failed qualification and unresolved AV; these observations are not a repair.
 
 The Windows candidate framework also applies upstream ReShade
 [`64017f98`](https://github.com/crosire/reshade/commit/64017f98cc1393db51d9f5b1307c64350680f41c)
