@@ -27,6 +27,8 @@ namespace a=reshade::api;
 #include "fg_scene_copy.h"
 #include "../../src/providers/fg_output_contract.hpp"
 #include "../../src/providers/runtime_diagnostics.h"
+#include "../../src/providers/runtime_diagnostics_projection.hpp"
+#include "../../src/providers/sr_runtime_snapshot.h"
 #include "../../src/native/reset_epoch_contract.hpp"
 #include "fg_controls.hpp"
 namespace {
@@ -70,6 +72,11 @@ uint64_t outcomeSample=0;
 int outcomeResult=-1;
 unsigned outcomeStatus=0,outcomePresents=0;
 MCD2FgDiagnosticsV1 diagnostics{sizeof(MCD2FgDiagnosticsV1),0,0,0,0,0,0,0};
+mcd2::diagnostics::FgAttribution nvidiaDiagnosticFrames;
+// present/finish_present belong to the same host call. Another presentation
+// thread must not replace the identity associated with this SDK outcome.
+thread_local MCD2FgDiagnosticBindingV1 diagnosticPresent{};
+MCD2FgDiagnosticsV2 attributedDiagnostics{};
 std::atomic<unsigned> guideSamples{0};unsigned trialRevision=0;
 unsigned outputWidth=0,outputHeight=0,outputBuffers=0,outputFormat=0,outputColour=0;
 mcd2::providers::FgOutputContract sceneOutput{};
@@ -95,6 +102,20 @@ void poll_policy(){static ULONGLONG next=0;auto now=GetTickCount64();if(now<next
  cachedRevision=GetPrivateProfileIntW(L"Capture",L"TrialRevision",0,capturePolicy.c_str());
 }
 bool tracking(){return captureEnabled || (fg_controls::enabled?fg_controls::wanted.load():guideTags.load()&&guideSamples<900);}
+MCD2DiagnosticIdentityV1 diagnostic_identity(){
+ if(!fg_controls::enabled||!fg_controls::wanted)return {};
+ auto latency=GetModuleHandleW(L"mcd2-display-latency.addon64");
+ auto get=latency?reinterpret_cast<decltype(&mcd2_sr_context_v1)>(GetProcAddress(latency,"mcd2_sr_context_v1")):nullptr;
+ auto menu=latency?reinterpret_cast<decltype(&mcd2_menu_snapshot_v1)>(GetProcAddress(latency,"mcd2_menu_snapshot_v1")):nullptr;
+ MCD2SrContextSnapshotV1 packet{};packet.size=sizeof(packet);MCD2MenuSnapshotV1 current{};current.size=sizeof(current);
+ mcd2::providers::DecodedGraphicsRecord record;mcd2::providers::SrContext context;mcd2::providers::FgMenuProjection selection;
+ if(!get||get(&packet)||!menu||menu(&current)||packet.reserved||current.reserved||current.load||packet.authority.load||
+    packet.authority.session!=current.session||memcmp(packet.authority.record,current.record,sizeof(current.record))||
+    !mcd2::providers::decodeGraphicsRecord(current.record,record)||!mcd2::providers::decodeSrContext(packet.context,context)||
+    !mcd2::providers::projectFgMenu(record,selection)||!selection.pairEligible||
+    !mcd2::providers::fgMenuMatches(selection,fg_controls::intent.settingsRevision,fg_controls::intent.provider,fg_controls::intent.mode))return {};
+ return mcd2::diagnostics::contextIdentity(current.session,record,context,packet.observedAtMs,GetTickCount64());
+}
 
 void try_shared_sdk_quiesce(){
  if(mcd2::process_exit::terminating())return;
@@ -411,6 +432,8 @@ void finish(a::command_queue*,a::swapchain*){if(mcd2::process_exit::terminating(
   using Implementation=unsigned(*)();auto implementation=reinterpret_cast<Implementation>(GetProcAddress(module,"mcd2_afg_implementation_v1"));const auto version=!result&&implementation?implementation():0u;
   std::lock_guard lock(mutex);++outcomeSample;outcomeResult=result;outcomeStatus=state.fault;outcomePresents=0;
   diagnostics={sizeof(diagnostics),2,state.active,state.fault,version?version:diagnostics.implementation,0,state.realPresents,state.generatedPresents};
+  auto attributed=reinterpret_cast<int(*)(MCD2FgDiagnosticsV2*)>(GetProcAddress(module,"mcd2_afg_diagnostics_v2"));MCD2FgDiagnosticsV2 current{};current.size=sizeof(current);
+  attributedDiagnostics=attributed&&!attributed(&current)?current:MCD2FgDiagnosticsV2{};attributedDiagnostics.implementation=diagnostics.implementation;
   if(frame<120||frame%60==0)privateLog<<"{\"kind\":\"amd_fg_outcome\",\"SDKResult\":"<<result<<",\"active\":"<<state.active<<",\"fault\":"<<state.fault<<",\"engineFrame\":"<<state.engineFrame<<",\"providerFrame\":"<<state.providerFrame<<",\"prepared\":"<<state.prepared<<",\"images\":"<<state.images<<",\"realPresents\":"<<state.realPresents<<",\"generatedPresents\":"<<state.generatedPresents<<",\"errors\":"<<state.errors<<",\"warnings\":"<<state.warnings<<"}\n";privateLog.flush();++frame;return;
  }
  unsigned max=0,status=0,min=0,presents=0;int result=activeFGMode&&state?state(&max,&status,&min,&presents):-1;
@@ -419,6 +442,8 @@ void finish(a::command_queue*,a::swapchain*){if(mcd2::process_exit::terminating(
  outcomeResult=activeFGMode?result:0;outcomeStatus=activeFGMode?status:0;outcomePresents=activeFGMode?presents:1;
  diagnostics.provider=1;diagnostics.active=activeFGMode?1u:0u;diagnostics.fault=outcomeStatus;
  if(!result&&!status&&activeFGMode){++diagnostics.rendered;if(presents>1)diagnostics.generated+=presents-1;}
+ if(!result&&!status&&activeFGMode){nvidiaDiagnosticFrames.outcome(diagnosticPresent.engineFrame,false,1,GetTickCount64());if(presents>1)nvidiaDiagnosticFrames.outcome(diagnosticPresent.engineFrame,true,presents-1,GetTickCount64());}
+ attributedDiagnostics=nvidiaDiagnosticFrames.snapshot();attributedDiagnostics.provider=1;attributedDiagnostics.active=diagnostics.active;attributedDiagnostics.fault=diagnostics.fault;
  if(activeFGMode && (!fg_controls::enabled||fgTrialFrames<120||fgTrialFrames%60==0)){privateLog<<"{\"kind\":\"fg_present_outcome\",\"frameStamp\":"<<presentedFrame<<",\"SDKResult\":"<<result<<",\"status\":"<<status<<",\"actualPresents\":"<<presents<<"}\n";privateLog.flush();}++frame;
 }
 void present(a::command_queue*q,a::swapchain*swap,const a::rect*,const a::rect*,unsigned,const a::rect*){if(mcd2::process_exit::terminating())return;
@@ -450,11 +475,15 @@ void present(a::command_queue*q,a::swapchain*swap,const a::rect*,const a::rect*,
   wanted=fg_controls::enabled?fg_controls::wanted.load()&&GetForegroundWindow()==outputWindow:legacyEnable.load()&&fgTrialFrames<600&&GetForegroundWindow()==outputWindow;
  }
  const unsigned mode=ready&&wanted&&fg_alpha::submission_queue(q)?1:0;
+ const auto identity=wanted?diagnostic_identity():MCD2DiagnosticIdentityV1{};
+ {std::lock_guard lock(mutex);diagnosticPresent={sizeof(diagnosticPresent),0,id,identity};}
  if(auto module=amd_bridge()){
   if(outputReady&&outputColour==1&&wanted&&matching_scene_view(data)){
    using Scene=int(*)(void*,void*,uint64_t);auto scene=reinterpret_cast<Scene>(GetProcAddress(module,"mcd2_afg_scene_v1"));ID3D12Device*device=nullptr;auto queue=reinterpret_cast<ID3D12CommandQueue*>(q->get_native());
    const auto owner=queue->GetDevice(IID_PPV_ARGS(&device));const auto staged=SUCCEEDED(owner)&&scene?scene(device,data.scene,id):-119;if(device)device->Release();ready=staged==0;
   }
+  auto bind=reinterpret_cast<int(*)(const MCD2FgDiagnosticBindingV1*)>(GetProcAddress(module,"mcd2_afg_diagnostic_bind_v1"));
+  MCD2FgDiagnosticBindingV1 binding{sizeof(binding),0,id,ready&&wanted?identity:MCD2DiagnosticIdentityV1{}};if(bind)bind(&binding);
   using Present=int(*)(void*,uint64_t,uint32_t);auto configure=reinterpret_cast<Present>(GetProcAddress(module,"mcd2_afg_present_v2"));auto result=configure?configure(reinterpret_cast<void*>(q->get_native()),id,ready&&wanted?1:0):-1;
   activeFGMode=!result&&ready&&wanted?1:0;
   if(fg_controls::enabled&&result&&result!=MCD2_AFG_BUSY_V2&&result!=MCD2_AFG_OUTPUT_UNSUPPORTED_V3)fg_controls::fault=1;
@@ -483,6 +512,8 @@ void present(a::command_queue*q,a::swapchain*swap,const a::rect*,const a::rect*,
  }
  if(fg_controls::enabled && (fgTrialFrames%30==0 || mode!=activeFGMode))fg_controls::publish(activeFGMode,ready);
  if(activeFGMode){++fgTrialFrames;presentedFrame=uint32_t(id);}
+ nvidiaDiagnosticFrames.select(mode&&activeFGMode?identity:MCD2DiagnosticIdentityV1{});
+ if(mode&&activeFGMode)nvidiaDiagnosticFrames.admit(id,identity);
 }
 }
 extern "C" __declspec(dllexport) int mcd2_fg_active(){if(mcd2::process_exit::terminating())return 0;return activeFGMode.load()?1:0;}
@@ -553,4 +584,9 @@ extern "C" __declspec(dllexport) int mcd2_fg_diagnostics_v1(MCD2FgDiagnosticsV1*
  if(!out||out->size!=sizeof(*out)||mcd2::process_exit::terminating())return -1;
  std::unique_lock guard(mutex,std::try_to_lock);if(!guard.owns_lock())return -2;
  *out=diagnostics;return 0;
+}
+extern "C" __declspec(dllexport) int mcd2_fg_diagnostics_v2(MCD2FgDiagnosticsV2* out){
+ if(!out||out->size!=sizeof(*out)||mcd2::process_exit::terminating())return -1;
+ std::unique_lock guard(mutex,std::try_to_lock);if(!guard.owns_lock())return -2;
+ *out=attributedDiagnostics;out->size=sizeof(*out);return 0;
 }

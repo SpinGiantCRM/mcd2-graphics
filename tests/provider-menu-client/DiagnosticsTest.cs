@@ -22,15 +22,30 @@ static class DiagnosticsTest {
   Poll(c,m);Need(c.Fresh&&c.SrAdvancing); // Bounded retention between producer samples.
   s.Sample++;Poll(c,m);Need(c.Fresh&&!c.SrAdvancing&&!c.FgAdvancing&&!c.ReflexAdvancing);
   for(int i=0;i<4;i++)Poll(c,m);Need(!c.Fresh&&c.State==null); // Frozen producer expires.
+  Poll(c,m);Need(!c.Fresh&&c.State==null); // The same frozen sample cannot recover freshness.
   s.Sample++;s.SrFrames=0;s.FgGenerated=0;Poll(c,m);Need(!c.SrAdvancing&&!c.FgAdvancing); // Context reset is not progress.
   s.Sample++;s.SrFrames++;s.WorldGeneration=3;Poll(c,m);Need(!c.SrAdvancing);
-  s.WorldGeneration=4;s.Sample++;s.SrFrames++;s.FgGenerated++;s.FgFault=1;Poll(c,m);Need(c.Fresh&&c.SrAdvancing&&!c.FgAdvancing); // FG fault cannot erase SR.
+  s.WorldGeneration=4;s.Sample++;s.SrFrames++;s.FgGenerated++;s.FgFault=1;Poll(c,m);Need(c.Fresh&&!c.SrAdvancing&&!c.FgAdvancing); // Recovery establishes a new baseline.
+  s.Sample++;s.SrFrames++;s.FgGenerated++;Poll(c,m);Need(c.Fresh&&c.SrAdvancing&&!c.FgAdvancing); // FG fault cannot erase SR.
   s.FgFault=0;s.Sample++;s.SrFrames++;s.FgGenerated++;m.FgMode=0;Poll(c,m);Need(c.SrAdvancing&&!c.FgAdvancing);
   int currentSample=s.Sample;s.Sample--;Poll(c,m);Need(!c.Fresh);s.Sample=currentSample;
   s.SessionId=122;Poll(c,m);Need(!c.Fresh);s.SessionId=123;s.Revision=6;Poll(c,m);Need(!c.Fresh);
   s.Revision=7;s.Sample++;s.SrFrames++;Poll(c,m,false);Need(!c.Fresh&&c.State==null);
   var request=(DiagnosticsRequestSave)UGameplayStatics.Slots["MCD2GraphicsDiagnosticsRequest"];Need(request.Enabled==0&&request.SessionId==123);
   Need(RuntimeDiagnosticsClient.Implementation(30105)=="3.1.5"&&RuntimeDiagnosticsClient.Implementation(30106)=="3.1.6");
-  Console.WriteLine("Live diagnostics: advancing counters, first sample, stale producer, stopped/reset counters, session/world/revision, isolated FG faults and opt-out checks pass");
+  // Wrong/zero producer world must suppress every channel, including Native SR.
+  m.Provider=0;m.FgMode=1;s.SrProvider=0;s.SrFrames=0;s.SessionId=123;s.Revision=7;s.WorldGeneration=4;s.AmdMode=1;s.AmdFrames=100;
+  s.Sample++;Poll(c,m);s.Sample++;s.FgGenerated++;s.ReflexFrames++;s.AmdFrames++;Poll(c,m);
+  Need(c.FgAdvancing&&c.ReflexAdvancing&&c.AmdAdvancing&&!c.SrAdvancing);
+  s.Sample++;s.SrFrames=100;Poll(c,m);Need(!c.SrAdvancing); // Native never reports reconstruction activity.
+  foreach(int wrongWorld in new[]{0,3}){s.WorldGeneration=wrongWorld;s.Sample++;s.FgGenerated++;s.ReflexFrames++;s.AmdFrames++;Poll(c,m);Need(!c.FgAdvancing&&!c.ReflexAdvancing&&!c.AmdAdvancing);}
+  s.WorldGeneration=4;s.Sample++;s.FgGenerated++;s.ReflexFrames++;s.AmdFrames++;Poll(c,m);Need(!c.FgAdvancing&&!c.ReflexAdvancing&&!c.AmdAdvancing);
+  s.Sample++;s.FgGenerated++;s.ReflexFrames++;s.AmdFrames++;Poll(c,m);Need(c.FgAdvancing&&c.ReflexAdvancing&&c.AmdAdvancing);
+  // Turning diagnostics off or losing producer freshness invalidates the baseline.
+  Poll(c,m,false);s.Sample++;s.FgGenerated+=10;s.ReflexFrames+=10;s.AmdFrames+=10;Poll(c,m);Need(!c.FgAdvancing&&!c.ReflexAdvancing&&!c.AmdAdvancing);
+  s.Sample++;s.FgGenerated++;s.ReflexFrames++;s.AmdFrames++;Poll(c,m);Need(c.FgAdvancing&&c.ReflexAdvancing&&c.AmdAdvancing);
+  for(int i=0;i<4;i++)Poll(c,m);Need(!c.Fresh);
+  s.Sample++;s.FgGenerated+=10;s.ReflexFrames+=10;s.AmdFrames+=10;Poll(c,m);Need(!c.FgAdvancing&&!c.ReflexAdvancing&&!c.AmdAdvancing);
+  Console.WriteLine("Live diagnostics: advancing counters, Native independence, all-channel world validation and invalid/stale/opt-out baseline recovery pass");
  }
 }

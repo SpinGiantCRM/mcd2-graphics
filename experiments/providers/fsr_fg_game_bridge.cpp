@@ -26,6 +26,7 @@
 #include "../../src/latency/process_exit.hpp"
 #include "../../src/latency/amd_fg_private_data.hpp"
 #include "../../src/providers/fg_output_contract.hpp"
+#include "../../src/providers/fg_diagnostics_attribution.hpp"
 #include "api/include/dx12/ffx_api_dx12.h"
 #include "framegeneration/include/ffx_framegeneration.h"
 #include "framegeneration/include/dx12/ffx_api_framegeneration_dx12.h"
@@ -49,6 +50,8 @@ struct Session {
  ID3D12Fence* outputFence=nullptr;uint64_t outputFenceValue=0,pendingOutputFence=0;
  uint32_t width=0,height=0;uint64_t engine=UINT64_MAX,ordinal=0,prepared=0,images=0;
  std::atomic<uint64_t> real{0},generated{0};std::atomic<unsigned> fault{0},active{0};
+ mcd2::diagnostics::FgAttribution diagnosticFrames;
+ MCD2FgDiagnosticBindingV1 diagnosticBinding{};
  // SDK work never enters a game-owned command recording. Inputs are staged
  // with strong refs and consumed only after game submissions, at Present.
  struct Inputs {
@@ -134,7 +137,8 @@ ffxReturnCode_t compose(ffxCallbackDescFrameGenerationPresent* p,void* user){
  auto* cmd=static_cast<ID3D12GraphicsCommandList*>(p->commandList);auto* src=static_cast<ID3D12Resource*>(p->currentBackBuffer.resource);auto* dst=static_cast<ID3D12Resource*>(p->outputSwapChainBuffer.resource);
  const auto a=state(p->currentBackBuffer.state),b=state(p->outputSwapChainBuffer.state);
  if(src!=dst){transition(cmd,src,a,D3D12_RESOURCE_STATE_COPY_SOURCE);transition(cmd,dst,b,D3D12_RESOURCE_STATE_COPY_DEST);cmd->CopyResource(dst,src);transition(cmd,dst,D3D12_RESOURCE_STATE_COPY_DEST,b);transition(cmd,src,D3D12_RESOURCE_STATE_COPY_SOURCE,a);}
- if(p->isGeneratedFrame)++s.generated;else ++s.real;return FFX_API_RETURN_OK;
+ if(p->isGeneratedFrame)++s.generated;else ++s.real;
+ s.diagnosticFrames.outcome(p->frameID,p->isGeneratedFrame,1,GetTickCount64());return FFX_API_RETURN_OK;
 }
 int configure(bool enabled,bool teardown=false){
  auto& s=*session;if(!s.fg){s.active=0;return 0;}ffxConfigureDescFrameGeneration c{};c.header.type=FFX_API_CONFIGURE_DESC_TYPE_FRAMEGENERATION;
@@ -304,6 +308,7 @@ extern "C" int mcd2_afg_scene_v1(void* device,void* world,uint64_t id){
 extern "C" int mcd2_afg_present_v2(void* queue,uint64_t id,uint32_t wanted){
  std::lock_guard lock(guard);if(!session||session->closing||wanted>1)return -40;
  auto& s=*session;
+ if(!wanted||s.diagnosticBinding.engineFrame!=id)s.diagnosticFrames.select({});
  auto* supplied=queue?identity(static_cast<ID3D12CommandQueue*>(queue)):nullptr;
  auto* expected=identity(s.queue);const bool matched=supplied&&supplied==expected;release(supplied);release(expected);
  if(wanted&&!matched){s.historyLost=true;clearInputs(s.inputs);s.preparedCurrent=s.imageCurrent=false;configure(false);return -41;}
@@ -333,7 +338,20 @@ extern "C" int mcd2_afg_present_v2(void* queue,uint64_t id,uint32_t wanted){
  // Signal failure cannot be interpreted as an unsubmitted list or safe Reset.
  const auto value=++s.workSequence;if(FAILED(s.queue->Signal(s.workFence,value))){s.unconfirmedSubmission=true;return fail(-78);}
  work->fence=value;s.nextWork=(s.nextWork+1)%s.work.size();++s.prepared;++s.images;s.historyLost=false;s.preparedCurrent=s.imageCurrent=false;
- return configure(true);
+ const auto configured=configure(true);
+ if(!configured&&s.diagnosticBinding.engineFrame==id)s.diagnosticFrames.admit(s.ordinal,s.diagnosticBinding.identity);
+ else if(configured)s.diagnosticFrames.select({});
+ return configured;
+}
+extern "C" int mcd2_afg_diagnostic_bind_v1(const MCD2FgDiagnosticBindingV1* binding){
+ if(!binding||binding->size!=sizeof(*binding)||binding->reserved)return -1;
+ std::lock_guard lock(guard);if(!session||session->closing)return -2;
+ session->diagnosticBinding=*binding;session->diagnosticFrames.select(binding->identity);return 0;
+}
+extern "C" int mcd2_afg_diagnostics_v2(MCD2FgDiagnosticsV2* out){
+ if(!out||out->size!=sizeof(*out))return -1;
+ std::lock_guard lock(guard);if(!session||session->closing)return -2;
+ *out=session->diagnosticFrames.snapshot();out->size=sizeof(*out);out->provider=2;out->active=session->active.load();out->fault=session->fault.load();return 0;
 }
 extern "C" int mcd2_afg_state_v1(MCD2AmdFgStateV1* out){
  std::lock_guard lock(guard);if(!session||!out||out->size!=sizeof(*out))return -50;auto& s=*session;
@@ -362,7 +380,7 @@ int retireUnlocked(void* fence,uint64_t value){if(!session)return 0;auto& s=*ses
  // ReShade can retire temporary startup devices before the game creates its
  // world swapchain. No presenter/recording exists to retire in that case.
  if(!s.fg&&!s.presenter&&!s.queue)return 0;
- if(!s.closing){if(s.fg){const auto r=configure(false,true);if(r)return r;}s.closing=true;}
+ if(!s.closing){s.diagnosticFrames.select({});if(s.fg){const auto r=configure(false,true);if(r)return r;}s.closing=true;}
  clearInputs(s.inputs);
  // Always obtain fresh queue completion before invalidating our private lists.
  // An external fence is supplemental evidence only.

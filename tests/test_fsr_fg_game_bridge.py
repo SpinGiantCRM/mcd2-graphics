@@ -61,10 +61,12 @@ class BridgeTests(unittest.TestCase):
                 recipe.build(root,root,root/'output','compiler','linker')
             receipt=json.loads((root/'output/build-receipt.json').read_text())
             for name in ['fsr_fg_game_bridge.cpp','fsr_fg_game_bridge.h','fsr_fg_game_bridge_probe.cpp','build_fsr_fg_probe.py',
-                         '../fg-streamline/fg_camera_contract.h','../../src/native/reset_epoch_contract.hpp']:
+                         '../fg-streamline/fg_camera_contract.h','../../src/native/reset_epoch_contract.hpp',
+                         '../../src/providers/runtime_diagnostics.h','../../src/providers/fg_diagnostics_attribution.hpp']:
                 self.assertEqual(receipt['sourceSHA256'][name],recipe.digest(ROOT/'experiments/providers'/name))
             self.assertFalse(receipt['runtimeBundled']);self.assertFalse(receipt['gameIntegrationQualified'])
             for command in calls[::2]:self.assertIn('/MT',command);self.assertIn('/clang:-Werror=frame-larger-than',command)
+            self.assertIn('/export:mcd2_afg_diagnostic_bind_v1',calls[1]);self.assertIn('/export:mcd2_afg_diagnostics_v2',calls[1])
             self.assertEqual({p.name for p in (root/'output').glob('*.dll')},{'mcd2-fsr-fg-game-bridge.dll'})
     def test_sdk_recordings_are_private_and_retirement_is_independent(self):
         source=(ROOT/'experiments/providers/fsr_fg_game_bridge.cpp').read_text()

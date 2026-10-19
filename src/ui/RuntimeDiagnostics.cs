@@ -12,6 +12,8 @@ public class RuntimeDiagnosticsClient : USaveGame {
  public DiagnosticsStateSave? State;
  public bool Fresh,SrAdvancing,FgAdvancing,ReflexAdvancing,AmdAdvancing;
  int sample,age,lastSr,lastFg,lastReflex,lastAmd,lastSession,lastRevision,lastWorld;
+ int producerSession,producerRevision,producerWorld,producerSample;bool requireNewSample;
+ void Invalidate(){State=null;sample=0;age=0;lastSr=lastFg=lastReflex=lastAmd=0;lastSession=lastRevision=lastWorld=0;requireNewSample=true;}
  public void Start(){
   var state=UGameplayStatics.CreateSaveGameObject(Unreal.ClassOf<DiagnosticsStateSave>()) as DiagnosticsStateSave;
   if(state!=null){state.SchemaVersion=1;UGameplayStatics.SaveGameToSlot(state,"MCD2GraphicsDiagnosticsState",0);}
@@ -22,17 +24,21 @@ public class RuntimeDiagnosticsClient : USaveGame {
   var request=UGameplayStatics.LoadGameFromSlot("MCD2GraphicsDiagnosticsRequest",0) as DiagnosticsRequestSave;
   if(request==null)request=UGameplayStatics.CreateSaveGameObject(Unreal.ClassOf<DiagnosticsRequestSave>()) as DiagnosticsRequestSave;
   if(request!=null && (request.SchemaVersion!=1||request.SessionId!=session||request.Enabled!=(enabled?1:0))){request.SchemaVersion=1;request.SessionId=session;request.Enabled=enabled?1:0;UGameplayStatics.SaveGameToSlot(request,"MCD2GraphicsDiagnosticsRequest",0);}
-  if(!enabled||session==0||menu==null||menu.Authority==null){State=null;return;}
+  if(!enabled||session==0||menu==null||menu.Authority==null){Invalidate();return;}
   var next=UGameplayStatics.LoadGameFromSlot("MCD2GraphicsDiagnosticsState",0) as DiagnosticsStateSave;
   if(next==null||next.SchemaVersion!=1||next.SessionId!=session||next.Revision!=menu.Authority.W19||next.Sample<1||next.WorldGeneration<0||next.SrFrames<0||next.FgRendered<0||next.FgGenerated<0||next.ReflexFrames<0||next.AmdFrames<0||next.FgActive<0||next.FgActive>1||
-     next.FsrHardware<0||next.FsrHardware>3||next.FsrHardware==2||next.SrProvider<0||next.SrProvider>2||next.FgProvider<0||next.FgProvider>2||next.FgFault<0||next.ReflexMode<0||next.ReflexMode>2||next.AmdMode<0||next.AmdMode>1){State=null;return;}
+     next.FsrHardware<0||next.FsrHardware>3||next.FsrHardware==2||next.SrProvider<0||next.SrProvider>2||next.FgProvider<0||next.FgProvider>2||next.FgFault<0||next.ReflexMode<0||next.ReflexMode>2||next.AmdMode<0||next.AmdMode>1){Invalidate();return;}
   int world=manager.ProviderRuntime==null?0:manager.ProviderRuntime.WorldGeneration;
+  if(world<1||next.WorldGeneration!=world){Invalidate();return;}
+  bool sameProducer=producerSession==session&&producerRevision==next.Revision&&producerWorld==world;
+  if(sameProducer&&(next.Sample<producerSample||(requireNewSample&&next.Sample<=producerSample))){Invalidate();return;}
+  producerSession=session;producerRevision=next.Revision;producerWorld=world;producerSample=next.Sample;requireNewSample=false;
   bool same=lastSession==session&&lastRevision==next.Revision&&lastWorld==world;
   if(!same){sample=0;age=0;}
-  if(same&&next.Sample<sample){State=null;return;}
-  if(next.Sample==sample){age++;if(age>3){State=null;return;}}
+  if(same&&next.Sample<sample){Invalidate();return;}
+  if(next.Sample==sample){age++;if(age>3){Invalidate();return;}}
   else{
-   SrAdvancing=same&&next.SrFrames>lastSr&&next.SrProvider==manager.SelectedProvider()&&next.WorldGeneration==world;
+   SrAdvancing=same&&next.SrFrames>lastSr&&next.SrProvider>0&&next.SrProvider==manager.SelectedProvider();
    FgAdvancing=same&&next.FgGenerated>lastFg&&next.FgActive==1&&next.FgFault==0&&next.FgProvider==(manager.SelectedFgProvider()==1?2:1)&&manager.DisplayValue(5)==1;
    ReflexAdvancing=same&&next.ReflexFrames>lastReflex&&next.ReflexMode>0;
    AmdAdvancing=same&&next.AmdFrames>lastAmd&&next.AmdMode==1;

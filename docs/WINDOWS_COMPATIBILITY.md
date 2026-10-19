@@ -1,3 +1,13 @@
+The [diagnostics attribution correction](RUNTIME_DIAGNOSTICS_ATTRIBUTION.md)
+separates current ready game context from SR activity. Native keeps zero SR
+activity while independent provider diagnostics require the current full
+authority stamp and world. FG V2 attributes asynchronous SDK outcomes to their
+admitted frame epochs; V1 remains unchanged. AMD timing requires its applied
+revision and checksum. Preserve the all-channel UI identity/expiry checks,
+bounded callback retention and anti-replay tests on both CI platforms. Offline
+checks and code review do not qualify a new artifact or repair the exit fault;
+the changed complete package still requires fresh Windows runtime testing.
+
 The [19 October dev.17 qualification](WINDOWS_DEV17_QUALIFICATION_2026-10-19.md)
 pins current publisher Loader 2.6, Streamline 2.14.16, DLSS 310.9.16 and RenoDX
 snapshot inputs separately from the frozen older packages. Its first full-package

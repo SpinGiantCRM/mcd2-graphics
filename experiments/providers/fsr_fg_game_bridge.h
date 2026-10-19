@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include "../fg-streamline/fg_camera_contract.h"
+#include "../../src/providers/runtime_diagnostics.h"
 // Plain C boundary. The caller supplies native COM objects, never vendor structs.
 struct MCD2AmdFgSwapV1 {
  uint32_t size,width,height,format,samples,sampleQuality,usage,buffers,scaling,effect,alpha,flags;
@@ -24,6 +25,8 @@ static_assert(sizeof(MCD2AmdFgOutputV1)==32);
 inline constexpr int MCD2_AFG_BUSY_V2=1000001;
 inline constexpr int MCD2_AFG_OUTPUT_UNSUPPORTED_V3=1000002;
 extern "C" {
+ int mcd2_afg_diagnostic_bind_v1(const MCD2FgDiagnosticBindingV1*);
+ int mcd2_afg_diagnostics_v2(MCD2FgDiagnosticsV2*);
  int mcd2_afg_load_v1(const wchar_t *absoluteVerifiedRuntime);
  // Eligibility query only; does not create contexts, wrap or activate FG.
  int mcd2_afg_support_v1(void *nativeDevice);

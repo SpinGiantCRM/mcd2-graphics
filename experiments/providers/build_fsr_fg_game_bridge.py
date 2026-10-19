@@ -27,6 +27,7 @@ def build(sdk, sysroot, output, compiler='clang-cl', linker='lld-link', presente
         link.append('/export:mcd2_afg_'+name+'_v1')
     for name in ['recording_contract','guides','world','present']:
         link.append('/export:mcd2_afg_'+name+'_v2')
+    link += ['/export:mcd2_afg_diagnostic_bind_v1', '/export:mcd2_afg_diagnostics_v2']
     for folder in ['crt/lib/x86_64', 'sdk/lib/ucrt/x86_64', 'sdk/lib/um/x86_64']:
         link.append('/libpath:'+str(sysroot/folder))
     with (output/'build-private.log').open('w') as log:
@@ -65,6 +66,8 @@ def build(sdk, sysroot, output, compiler='clang-cl', linker='lld-link', presente
                    probeSHA256=digest(probe_binary),
                    runtimeBundled=False, gameIntegrationQualified=False,
                    headersLicenseSHA256=digest(notice))
+    for name in ['../../src/providers/runtime_diagnostics.h','../../src/providers/fg_diagnostics_attribution.hpp']:
+        receipt['sourceSHA256'][name]=digest(root/name)
     if presenter_switch_probe:
         receipt['presenterResizeProbe'] = dict(binarySHA256=digest(resize_binary),sourceSHA256=digest(root/'presenter_resize_probe.cpp'),gameIntegrationQualified=False,performanceQualified=False)
         receipt['presenterSwitchProbe'] = dict(
