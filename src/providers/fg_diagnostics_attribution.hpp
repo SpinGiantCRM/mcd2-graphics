@@ -21,7 +21,8 @@ public:
   admitted_=true;lastFrame_=frame;entries_[nextEntry_++%entries_.size()]={frame,0,true};
  }
  void outcome(std::uint64_t frame,bool generated,unsigned count,std::uint64_t now){std::lock_guard lock(mutex_);
-  if(!valid(identity_)||!count)return;const unsigned bit=generated?2:1;
+  if(!valid(identity_)||!count)return;
+  const unsigned bit=generated?2:1;
   for(auto& entry:entries_)if(entry.valid&&entry.frame==frame){if(entry.seen&bit)return;
    entry.seen|=bit;if(generated)state_.generated+=count;else state_.rendered+=count;state_.observedAtMs=now;return;}
  }
