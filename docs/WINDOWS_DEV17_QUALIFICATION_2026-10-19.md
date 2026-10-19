@@ -304,3 +304,13 @@ at monotonic revision 171; all other preference bytes match the original record
 except its revision and checksum. All 18 owned files and 15 dependency files
 were reverified with no overrides. The game is closed and observers finished;
 no player/account saves were read or restored.
+
+A third Native control (O3) attempted Windows' on-screen keyboard to reach the
+hub pause menu. It did not open the menu, so the requested hub → main menu → Quit
+route remains **Not Run**. Activation/focus and key delivery remain confounded;
+no game input defect is inferred. The actual ordinary Alt+F4 hub close exited 0
+after 9.366 seconds, before the snapshot trigger. Native revision 171 remained
+selected, and installed files were reverified. The temporary keyboard remained
+open after UI close attempts; Windows denied process cleanup with Access denied.
+The user was asked to close it, and no privilege elevation was attempted.
+This additional window-close result does not qualify the unperformed menu route.

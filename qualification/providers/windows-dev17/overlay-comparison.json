@@ -151,5 +151,22 @@
     "observersFinished": true,
     "playerAccountSavesRead": false,
     "playerAccountSavesRestored": false
+  },
+  "nativeMenuRouteDiagnostic": {
+    "run": "O3",
+    "requestedRoute": "Native hub pause menu, return to main menu, Quit",
+    "requestedRouteStatus": "NOT RUN: on-screen keyboard attempt did not open pause menu",
+    "observedRoute": "Ordinary Alt+F4 from Native hub",
+    "exitCodeHex": "00000000",
+    "closeToHeldObserverSeconds": 9.366,
+    "immutableExitReceiptSHA256": "cbe169d2732287dcec14c9f90e7e619e7f6d0bb1d8c4037fdeb55e7e56510d23",
+    "debuggerAttached": false,
+    "snapshotTriggered": false,
+    "clockGapObserved": false,
+    "provider": "Native",
+    "authorityRevision": 171,
+    "onScreenKeyboardClosed": false,
+    "onScreenKeyboardCleanupStatus": "User action requested after Windows denied process cleanup; no elevation attempted",
+    "limitation": "The temporary on-screen keyboard did not enable the menu route. Its window was activated during input; focus and delivery remain confounded. No game input defect or menu-quit pass is inferred."
   }
 }
