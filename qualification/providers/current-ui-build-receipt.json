@@ -3,11 +3,11 @@
   "candidateOnly": true,
   "version": "0.3.0-preview.1",
   "sourceFileSHA256": {
-    "src/ui/ModActor.cs": "ab0481ef6ea0c3a16ecebf5451f4c7ded4e519ac63c014468008f0d74c956f1c",
+    "src/ui/ModActor.cs": "6595bffe39bcea2193617513fe82690854d5236fdeaf07aefdc26224e60eb44d",
     "src/ui/ProviderSaveWords.cs": "ae796d9934e3b418e08e035d67eb1d0b3c256a30631cf37f6a710897812fdfee",
-    "src/ui/ProviderMenuClient.cs": "330b9009646f8e8ab007e2e49e987424f4d1336e7b703c4387801709ef23de8d",
+    "src/ui/ProviderMenuClient.cs": "f229bf11b22ef13f6bdae191fc08afdc867ff3d6c654559b0f67e090997f282b",
     "src/ui/ProviderRuntimeWords.cs": "fa5f8626af17474a0f60557050b55fbc470ac549726b0e969a810910d0bb632b",
-    "src/ui/ProviderRuntimeClient.cs": "ea36bb344e3bd7340e0c252b810eac2afb723bb0eb50b2f398108128fc84e2ee",
+    "src/ui/ProviderRuntimeClient.cs": "236237272b0df7334df1a3a8399a26adbac972651337994b231d5767a13db1d7",
     "src/ui/AdvancedSettings.cs": "582e633d931b016d41c9ae2589376366c8f0cd00a9f055b453f2a6c061ba3ec3",
     "src/ui/AdvancedInfoWidget.cs": "0de0d9e909cb0cf55c19d6cdbf0f08e3cebd62c69e0f6bf572dff9862b9d4295",
     "src/ui/AdvancedSettingsPanel.cs": "9f1fee8fb7d9cad2667d7896977de155868a46407e2b3bb385400f4b7f9505a3",
@@ -20,9 +20,9 @@
     "dependencies.lock.json": "816304d7cd61b9a9254980656c3b3f21495175f6cad94ef1f0520ed7c7b3b1e5"
   },
   "payloadSHA256": {
-    "MCD2Graphics_P.pak": "2e24d47b7dc17c3bffc3d60903c4bab3b2e8999b8ddbf441bd4f773c919dce61",
-    "MCD2Graphics_P.ucas": "118cab28da95e32c02e95c1c32aa93f017574c88cdb42bedc3c7ad94cee43205",
-    "MCD2Graphics_P.utoc": "9a29e7b23e5322c82471331299cd819a46d649761a3f0dc7a92421942a221001"
+    "MCD2Graphics_P.pak": "415d12911107bd7d66f205ba576995a61dfb6c870893a6f782ac0af94376d594",
+    "MCD2Graphics_P.ucas": "51f16518e69588156b094caa6629938db8fb1761e9653f924f4e2e9ef1cea53c",
+    "MCD2Graphics_P.utoc": "8d3ef6347ccd716467483888397fae1aab4c3dcc7d30443e5ac59720ae78983d"
   },
   "metadataAPI": "Blueprint Loader 2.0 BP_ModInfo; SDK-generated versioned metadata; no popup API",
   "compiler": "NeoRune 1.0.0 / .NET reference pack 10.0.13",
@@ -82,5 +82,5 @@
   "WindowsQualified": false,
   "LinuxRuntimeQualified": false,
   "publishedPayloadChanged": false,
-  "archiveSHA256": "f13f14aa52d7df05e577945c89a28466ee9deed026f93cec39ec805c5623be78"
+  "archiveSHA256": "47101486e6d21192d6bc5e566e0e57b6b98883b811fabcc85b37e428b592ed31"
 }

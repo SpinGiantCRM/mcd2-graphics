@@ -9,9 +9,27 @@ unchanged. This corrects a dependency lifetime defect, not a proven cause of the
 intermittent game exit failure. The 19 October original-context capture still
 showed an AV on an unidentified game worker with GameThread in CRT exit; its
 explicit-anchor return chain matches the old build after the build's RVA shift.
-One current-framework-only control exited 0. A private retained MSVC build with
-the exact combined source diff is being retested with the full mod. Neither that
-source match nor an isolated clean exit establishes shutdown qualification.
+An isolated Windows WARP reproduction released the proxy heap/device while a
+raw heap survived: the old framework failed with heap corruption, and the fresh
+patched framework exited 0. This proves the dependency defect, not the game AV's
+cause. One framework-only control, one retained-MSVC full-mod control and two
+fresh exact-source full-mod runs exited 0. The latter included advancing FSR
+evaluations and Native/source/AA-quality restoration, without a debugger or
+capture addon. A sleep/resume-interrupted run is excluded. Keep the
+[bounded follow-up](../qualification/providers/windows-exit-heap-fix-2026-10-19.json);
+the small sample and remaining exit delay do not establish complete shutdown or
+installer qualification.
+
+The SR menu shares its quality, custom percentage and last-Custom preference
+across DLSS/FSR and Native. Preset/percentage edits never implicitly select an
+upscaler. Keep the underlying SR/FG transport records independent and preserve
+FG pairing validation. Skip DLSS on a known incompatible rendering vendor, and
+gate its legacy source projection with current-session device metadata. Query
+the actual D3D12 device LUID once at initialization, independently of latency
+opt-in; never infer SR support from FG/Reflex or poll SDK capabilities each frame.
+Unknown/stale metadata cannot authorize reduced DLSS source resolution or erase
+a saved choice. NVIDIA vendor identity alone is not active DLSS/RTX capability;
+the existing backend capability/source/resource gates remain mandatory.
 
 FSR preflight requires the validated single-output TAA permutation. On Steam
 build 25754144, `r.TemporalAA.Quality=1` used shader `62de03a8`, whose otherwise

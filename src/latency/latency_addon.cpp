@@ -96,6 +96,7 @@ auto& amdCoordinator=amdCoordinatorLifetime.get();
 std::mutex amdRequestMutex;mcd2::amd_latency::Request amdRequest;
 bool amdLatencyOptIn=false;
 std::atomic<unsigned> amdCandidateRejected=0;
+std::atomic<unsigned> renderingVendorId=0;std::atomic<uint64_t> renderingVendorDevice=0;
 mcd2::process_exit::Lifetime<std::shared_ptr<sr::TokenCoordinator>,mcd2::process_exit::terminating> coordinatorLifetime;
 auto& coordinator=coordinatorLifetime.get();std::atomic<uint64_t> firstFrame=0;uint64_t boundNative=0;
 std::atomic<unsigned> currentMode=0,reflexAvailable=0,reflexFault=0,hdrRevision=0,hdrRestart=0;
@@ -251,6 +252,7 @@ void settings_loop(){std::map<std::string,unsigned> last;auto nextStatus=std::ch
    // Capability comes from the actual driver interface and installed timing
    // owner, never a requested preference or adapter name in a save.
    auto amd=amd_controller();if(amd)amd->refresh_capabilities();auto amdState=amd?amd->state():mcd2::amd_latency::State{};
+   state["RenderingVendorId"]=renderingVendorId.load();
    state["AmdAntiLagAvailable"]=amdLatencyOptIn&&installed&&amdState.available&&!amdState.fault;
    state["AmdAntiLagMode"]=amdState.enabled?1u:0u;
    state["AmdAntiLagFault"]=amdState.fault?1u:0u;
@@ -304,20 +306,28 @@ void init_swapchain(a::swapchain*swapchain,bool){
  log<<"{\"kind\":\"pcl_message_hook\",\"installed\":"<<(messageHook?"true":"false")<<",\"thread\":"<<messageThread<<"}\n";log.flush();
 }
 void init(a::device*device){
+ if(mcd2::process_exit::terminating())return;
  auto bootstrap=mcd2::providers::bootstrapModule();auto amdFg=bootstrap?reinterpret_cast<unsigned(*)()>(GetProcAddress(bootstrap,"mcd2_bootstrap_amd_fg_session")):nullptr;
  const bool frameIdentityOnly=amdFg&&amdFg()==1;
- if(installed||registry||(!provider.initialized&&!amdLatencyOptIn&&!frameIdentityOnly)||device->get_api()!=a::device_api::d3d12)return;
- // The actual rendering device LUID determines the AMD route. Never use the
- // display/default adapter and never attempt to load an AMD driver on Wine.
- bool useAmd=false;
- if(amdLatencyOptIn){unsigned vendor=0;IDXGIFactory4* factory=nullptr;IDXGIAdapter1* adapter=nullptr;
-  auto native=reinterpret_cast<ID3D12Device*>(device->get_native());DXGI_ADAPTER_DESC1 desc{};
+ if(device->get_api()!=a::device_api::d3d12)return;
+ // Query once per actual rendering device, even when latency is disabled.
+ // The candidate calls init only for the Unreal HWND swapchain. No SDK support
+ // enumeration runs in periodic menu/render polling.
+ const auto nativeIdentity=device->get_native();
+ if(renderingVendorDevice!=nativeIdentity){unsigned vendor=0;IDXGIFactory4* factory=nullptr;IDXGIAdapter1* adapter=nullptr;
+  auto native=reinterpret_cast<ID3D12Device*>(nativeIdentity);DXGI_ADAPTER_DESC1 desc{};
   if(SUCCEEDED(CreateDXGIFactory1(IID_PPV_ARGS(&factory)))){
    if(SUCCEEDED(factory->EnumAdapterByLuid(native->GetAdapterLuid(),IID_PPV_ARGS(&adapter)))){
     if(SUCCEEDED(adapter->GetDesc1(&desc))&&!(desc.Flags&DXGI_ADAPTER_FLAG_SOFTWARE))vendor=desc.VendorId;
     adapter->Release();
    }factory->Release();
   }
+  renderingVendorId=vendor;renderingVendorDevice=nativeIdentity;workerWake.notify_all();
+ }
+ if(installed||registry||(!provider.initialized&&!amdLatencyOptIn&&!frameIdentityOnly))return;
+ // Never use a display/default adapter or load an AMD driver on Wine.
+ bool useAmd=false;
+ if(amdLatencyOptIn){const unsigned vendor=renderingVendorId.load();
   const auto ntdll=GetModuleHandleW(L"ntdll.dll");const bool wine=ntdll&&GetProcAddress(ntdll,"wine_get_version");
   useAmd=mcd2::amd_latency::Eligibility{true,!wine,GetModuleHandleW(L"amdxc64.dll")!=nullptr,vendor}.candidate();
   if(!useAmd)amdCandidateRejected=1;
@@ -382,7 +392,12 @@ void cleanup(){
  auto amd=std::atomic_exchange(&amdCoordinator,std::shared_ptr<mcd2::amd_latency::Controller>{});if(amd)amd->shutdown();
  auto c=std::atomic_exchange(&coordinator,std::shared_ptr<sr::TokenCoordinator>{});if(c){c->shutdown();c->drain();}provider.shutdown();reflexAvailable=0;boundNative=0;registry=nullptr;firstFrame=0;capabilityChecked=false;workerWake.notify_all();
 }
-void destroy(a::device*device){if(device->get_native()==boundNative)cleanup();}
+void destroy(a::device*device){
+ if(mcd2::process_exit::terminating())return;
+ const auto nativeIdentity=device->get_native();
+ if(nativeIdentity==renderingVendorDevice){renderingVendorId=0;renderingVendorDevice=0;workerWake.notify_all();}
+ if(nativeIdentity==boundNative)cleanup();
+}
 
 }
 extern "C" __declspec(dllexport) int mcd2_menu_snapshot_v1(MCD2MenuSnapshotV1* snapshot){

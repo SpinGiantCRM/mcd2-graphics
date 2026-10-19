@@ -1,0 +1,104 @@
+{
+  "date": "2026-10-19",
+  "sourceCommit": "0d7251314fff8afa5227adf33793188e932ff596",
+  "branch": "development/amd-colour-resize",
+  "decision": "Descriptor-heap lifetime defect reproduced and fixed. Two fresh exact-source Windows game exits passed; intermittent game AV root cause is not established. Complete Windows qualification remains incomplete.",
+  "machine": {
+    "gpu": "AMD Radeon(TM) 860M Graphics",
+    "driver": "32.0.31041.1004",
+    "steamBuild": 25754144,
+    "shippingSHA256": "3a8703406fd50520f83c4f70a0212c000cb3b584ef28eb38032902230c01ebdd"
+  },
+  "originalFault": {
+    "normalQuit": true,
+    "exception": "0xC0000005",
+    "operation": "read",
+    "address": "null",
+    "instruction": "mov rax,[rcx]",
+    "workerIdentified": false,
+    "gameThread": "CRT execute_onexit_table/common_exit",
+    "originalExceptionContextPreserved": true,
+    "returnChainGameRvas": [
+      "0x8bf8e9a",
+      "0x8b10e87",
+      "0x8aeda25",
+      "0x8af02cf"
+    ],
+    "historicalChainBuildRvaShift": "0x1bf40",
+    "privateDumpPublished": false,
+    "causeProven": false
+  },
+  "fix": {
+    "upstreamCommit": "64017f98cc1393db51d9f5b1307c64350680f41c",
+    "behavior": "Register/unregister descriptor heaps with proxy lifetime, removing a deferred callback on the raw heap that captured a destroyed device. Existing successful-Reset patch remains applied."
+  },
+  "isolatedRegression": {
+    "actualWindowsD3D12Warp": true,
+    "gameAttached": false,
+    "gpuCommandsSubmitted": false,
+    "fixtureSHA256": "6b2221b60168a50e5ce057199c7b10187d1a2188d2eaf67afb0801f4a2634dc9",
+    "sequence": "Retain raw heap; release proxy heap and proxy device to zero; release surviving raw heap.",
+    "oldFrameworkSHA256": "0938f481825b4fd2eb69d91ae37dbb8dc8876f1c2dfc1daffce0a82cc6b979bb",
+    "oldExit": "0xC0000374",
+    "patchedFrameworkSHA256": "bb2225511017f399956b3945965db9d8c0598caedd7dc35924c3a907be0f3abb",
+    "patchedExit": 0,
+    "provesGameFaultCause": false
+  },
+  "artifact": {
+    "run": 39186039193,
+    "artifact": 12158116699,
+    "archiveSHA256": "bd2cc492cd7a8c019a2a6708b47db15f789ef5b11b8bde61181204d98c27a490",
+    "membersVerified": 46,
+    "frameworkSeparateDependency": true,
+    "vendorRuntimesBundled": false
+  },
+  "controls": [
+    {
+      "variant": "current framework only; distinct standalone loader layout",
+      "exitCode": 0
+    },
+    {
+      "variant": "full mod with retained MSVC framework; exact combined source diff reproduced",
+      "exitCode": 0
+    }
+  ],
+  "freshExactSourceRuns": [
+    {
+      "procedure": "FSR Quality gameplay about one minute; quit with FSR selected",
+      "exitCode": 0,
+      "heldProcessHandle": true,
+      "clockGapObserved": false,
+      "privateCaptureInstalled": false,
+      "debuggerAttached": false,
+      "matchingSessionEvaluations": 1836,
+      "moduleCensusLimitation": "First monitor version cached module list; install hashes and ReShade load log verified."
+    },
+    {
+      "procedure": "Native 10 seconds -> FSR Quality 30 seconds -> Native 10 seconds; normal quit",
+      "exitCode": 0,
+      "heldProcessHandle": true,
+      "clockGapObserved": false,
+      "privateCaptureInstalled": false,
+      "debuggerAttached": false,
+      "actualModuleHashesVerified": true,
+      "strictActiveSamples": 101,
+      "sdkEvaluationRange": [
+        71,
+        2230
+      ],
+      "nativeRestorationSamples": 13,
+      "nativeSourcePercentage": 100,
+      "originalTemporalQuality": 1,
+      "leaseOwnedAfterRestore": false,
+      "leaseBlockedAfterRestore": false,
+      "restoreAttempts": 1
+    }
+  ],
+  "excluded": "One earlier process overlapped host sleep/resume and lost its held monitor result; it is not counted as a clean exit.",
+  "limits": [
+    "Few bounded runs cannot rule out the intermittent game AV.",
+    "Exit latency remains a material observation; one transition run took about 90 seconds after window close.",
+    "The complete installer, Linux runtime, NVIDIA hardware, FG/HDR, all SR presets and broader lifecycle coverage remain unqualified.",
+    "Latest user report requires shared SR preset and unsupported DLSS selection fixes; recorded tests predate those changes."
+  ]
+}

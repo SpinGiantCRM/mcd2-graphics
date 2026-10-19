@@ -11,6 +11,15 @@ static class RuntimeTest {
   s.W16=66666667;s.W18=2;s.W19=1;s.W20=1;s.W4=s.Checksum(0,32);return s;
  }
  public static void Run(){
+  foreach(int vendor in new[]{0,4098,32902}){
+   Check(!ProviderRuntimeClient.SrChoiceAvailable(1,true,123,1,123,vendor));
+   Check(ProviderRuntimeClient.SrChoiceAvailable(0,true,123,1,123,vendor));
+   Check(ProviderRuntimeClient.SrChoiceAvailable(2,true,123,1,123,vendor));
+  }
+  Check(ProviderRuntimeClient.SrChoiceAvailable(1,true,123,1,123,4318));
+  Check(!ProviderRuntimeClient.SrChoiceAvailable(1,true,123,1,122,4318));
+  Check(!ProviderRuntimeClient.SrChoiceAvailable(1,false,123,1,123,4318));
+  Check(!ProviderRuntimeClient.SrChoiceAvailable(1,true,123,0,123,4318));
   // The preset remains numeric in menus, before a runtime plan exists.
   foreach(int family in new[]{1,2}){
    int[] expected={10000,6700,family==2?5900:5800,5000,3300,7700};

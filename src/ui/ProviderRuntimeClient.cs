@@ -9,6 +9,12 @@ public class ProviderRuntimeClient : USaveGame {
  public int Sequence;public int Session;public int WorldGeneration;
  public string? Level;
  public bool Enabled;
+ // Vendor compatibility comes from the current rendering device, separately
+ // from FG/Reflex support. NVIDIA's backend still validates its SR capability.
+ public static bool SrChoiceAvailable(int provider,bool ready,int session,int schema,int runtimeSession,int vendor){
+  if(provider==0 || provider==2)return true;
+  return provider==1 && ready && session>0 && schema==1 && runtimeSession==session && vendor==4318;
+ }
  // Display the selected preset even before gameplay/preflight. Only the native
  // SDK plan authorizes a source-resolution change; this is a slider value.
  public static int PresetScale(int family,int quality,int custom){

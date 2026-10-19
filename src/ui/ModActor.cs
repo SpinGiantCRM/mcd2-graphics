@@ -191,7 +191,7 @@ public class DisplaySettingsSave : USaveGame {
 public class DisplayRuntimeSave : USaveGame {
  public int SchemaVersion;public int Revision;public int SessionId;public int ReflexAvailable;public int ReflexMode;public int ReflexFault;public int HDRRevision;public int HDRRestartRequired;
  public int AmdAntiLagAvailable;public int AmdAntiLagMode;public int AmdAntiLagFault;public int AmdAntiLagRevision;
- public int AmdAntiLagFgCompatible;
+ public int AmdAntiLagFgCompatible;public int RenderingVendorId;
 }
 public class DisplaySetting : UGameSetting {public int ControlId;}
 public class DisplayRow : UGameSettingListEntryBase {
@@ -352,7 +352,14 @@ public class ModActor : AActor, IModSettings {
    ProviderRuntimeClient.AmdLatencyAvailable(true,ProviderMenu.Authority.W5,DisplayRuntime.SchemaVersion,DisplayRuntime.SessionId,DisplayRuntime.AmdAntiLagAvailable,DisplayRuntime.AmdAntiLagFault,ProviderMenu.Value(19)!=0,ProviderMenu.Value(20),DisplayRuntime.AmdAntiLagFgCompatible);
  }
  public int SelectedProvider(){return SharedControls() && ProviderMenu!=null?ProviderMenu.Value(8):(Saved!=null && Saved.ReconstructionMode!=0?1:0);}
- public int SelectedFamily(){int provider=SelectedProvider();if(provider==1 || provider==2)ProviderUiFamily=provider;return ProviderUiFamily;}
+ public bool SrChoiceAvailable(int provider){
+  return ProviderRuntimeClient.SrChoiceAvailable(provider,ProviderMenu!=null && ProviderMenu.Ready,
+   ProviderMenu==null || ProviderMenu.Authority==null?0:ProviderMenu.Authority.W5,
+   DisplayRuntime==null?0:DisplayRuntime.SchemaVersion,DisplayRuntime==null?0:DisplayRuntime.SessionId,
+   DisplayRuntime==null?0:DisplayRuntime.RenderingVendorId);
+ }
+ public int SelectedFamily(){int provider=SelectedProvider();if(provider==1 || provider==2)ProviderUiFamily=provider;
+  else if(!SrChoiceAvailable(1))ProviderUiFamily=2;return ProviderUiFamily;}
  public int SelectedQuality(){if(SharedControls() && ProviderMenu!=null)return ProviderMenu.Value(ProviderMenu.PreferenceWord(SelectedFamily()));return Saved==null?1:Saved.SRPreset==5?0:Saved.SRPreset==4?5:Saved.SRPreset+1;}
  public int SelectedScale(){
   if(SharedControls() && ProviderMenu!=null){int family=SelectedFamily();int quality=SelectedQuality();
@@ -375,7 +382,7 @@ public class ModActor : AActor, IModSettings {
  public void ProjectCommittedNvidia(){
   if(!SharedControls() || ProviderMenu==null || ProviderMenu.Authority==null || Saved==null)return;
   var a=ProviderMenu.Authority;int quality=a.W21;int custom=quality==0?10000:quality==1?6700:quality==2?5800:quality==3?5000:quality==4?3300:a.W22;
-  int mode=a.W20==1?(quality==0?1:2):0;int preset=quality==0?5:quality==5?4:quality-1;
+  int mode=a.W20==1 && SrChoiceAvailable(1)?(quality==0?1:2):0;int preset=quality==0?5:quality==5?4:quality-1;
   int ready=ProviderRuntime!=null && ProviderRuntime.Context!=null?ProviderRuntime.Context.W10:0;
   bool changed=Saved.SchemaVersion!=4 || Saved.Revision!=a.W19 || Saved.SRPreset!=preset || Saved.CustomScaleBasisPoints!=custom || Saved.LastCustomScaleBasisPoints!=a.W23 || Saved.ReconstructionMode!=mode || Saved.NativeFallback!=(a.W30==1) || Saved.RenderContextReady!=ready;
   if(!changed)return;
@@ -433,6 +440,13 @@ public class ModActor : AActor, IModSettings {
   UpdateTemporalQuality();
   if(ProviderMenu.Ready && ProviderRuntime.Enabled)ProviderOwned=true;
   if(SharedControls()){
+   // Migrate an old incompatible DLSS selection only after fresh device data.
+   // Unknown/stale metadata cannot rewrite the user's stored choice.
+   if(ProviderMenu.Authority!=null && DisplayRuntime!=null && DisplayRuntime.SchemaVersion==1 &&
+      DisplayRuntime.SessionId==ProviderMenu.Authority.W5 && DisplayRuntime.RenderingVendorId!=0 &&
+      SelectedProvider()==1 && !SrChoiceAvailable(1)){
+    if(ProviderMenu.ShareSrPreferences(1))ProviderMenu.SelectMenuSr(0);
+   }
    ProjectCommittedDisplay();
    int provider=SelectedProvider(),quality=SelectedQuality(),scale=SelectedScale();int phase=ProviderRuntime.State==null?0:ProviderRuntime.State.W10;
    if(provider!=providerView || quality!=providerQualityView || scale!=providerScaleView || phase!=providerPhaseView){
@@ -703,14 +717,16 @@ public class ModActor : AActor, IModSettings {
   RefreshRows();ShowHelp();
  }
  public void ChangeMode(int direction){
-  if(ProviderOwned){if(SharedControls() && ProviderMenu!=null && direction!=0){int next=SelectedProvider()+direction;if(next<0)next=2;if(next>2)next=0;ProviderMenu.SelectMenuSr(next);SyncLists();RefreshRows();}return;}
+  if(ProviderOwned){if(SharedControls() && ProviderMenu!=null && direction!=0){int family=SelectedFamily(),next=SelectedProvider();
+   for(int attempt=0;attempt<3;attempt++){next+=direction<0?-1:1;if(next<0)next=2;if(next>2)next=0;if(SrChoiceAvailable(next))break;}
+   if(ProviderMenu.ShareSrPreferences(family))ProviderMenu.SelectMenuSr(next);SyncLists();RefreshRows();}return;}
   if(Saved==null || Saved.SchemaVersion!=4 || direction==0)return;
   if(!ScaleSupported(10000))return;
   Saved.ReconstructionMode=Saved.ReconstructionMode==0?(Saved.SRPreset==5?1:2):0;UpdateScale();Saved.Revision++;Persist();RefreshRows();
  }
  public void UpdateScale(){if(Saved==null)return;int scale=10000;if(Saved.ReconstructionMode==2){scale=6667;if(Saved.SRPreset==1)scale=5800;if(Saved.SRPreset==2)scale=5000;if(Saved.SRPreset==3)scale=3333;if(Saved.SRPreset==4)scale=Saved.CustomScaleBasisPoints;}Saved.RenderScaleBasisPoints=scale;}
- public void ChangePreset(int direction){if(ProviderOwned){if(SharedControls() && ProviderMenu!=null){int family=SelectedFamily(),quality=SelectedQuality()+direction;if(quality<0)quality=5;if(quality>5)quality=0;ProviderMenu.SelectQuality(family,quality);ProviderMenu.SelectMenuSr(family);RefreshRows();}return;}if(Saved==null || Saved.SchemaVersion!=4)return;int index=(Saved.SRPreset==5?0:Saved.SRPreset+1)+direction;if(index<0)index=5;if(index>5)index=0;int p=index==0?5:index-1;for(int attempt=0;attempt<6;attempt++){int candidate=p==4?ClampScale(Saved.LastCustomScaleBasisPoints):PresetSliderScale(p);if(ScaleSupported(candidate))break;index+=direction;if(index<0)index=5;if(index>5)index=0;p=index==0?5:index-1;}if(!ScaleSupported(10000))return;Saved.CustomScaleBasisPoints=p==4?ClampScale(Saved.LastCustomScaleBasisPoints):PresetSliderScale(p);p=PresetAtScale(Saved.CustomScaleBasisPoints);Saved.SRPreset=p;Saved.ReconstructionMode=p==5?1:2;UpdateScale();Saved.Revision++;Persist();RefreshRows();}
- public void ChangeScale(int scale){if(ProviderOwned){if(SharedControls() && ProviderMenu!=null){int family=SelectedFamily();ProviderMenu.SelectCustomScale(family,ClampScale(scale));ProviderMenu.SelectMenuSr(family);RefreshRows();}return;}if(Saved==null || Saved.SchemaVersion!=4)return;if(!ScaleSupported(10000))return;scale=ClampScale(scale);int p=PresetAtScale(scale);int mode=p==5?1:2;if(Saved.CustomScaleBasisPoints==scale && Saved.ReconstructionMode==mode && Saved.SRPreset==p)return;Saved.CustomScaleBasisPoints=scale;if(p==4)Saved.LastCustomScaleBasisPoints=scale;Saved.SRPreset=p;Saved.ReconstructionMode=mode;UpdateScale();Saved.Revision++;Persist();RefreshRows();}
+ public void ChangePreset(int direction){if(ProviderOwned){if(SharedControls() && ProviderMenu!=null){int family=SelectedFamily(),quality=SelectedQuality()+direction;if(quality<0)quality=5;if(quality>5)quality=0;ProviderMenu.SelectMenuQuality(family,quality);RefreshRows();}return;}if(Saved==null || Saved.SchemaVersion!=4)return;int index=(Saved.SRPreset==5?0:Saved.SRPreset+1)+direction;if(index<0)index=5;if(index>5)index=0;int p=index==0?5:index-1;for(int attempt=0;attempt<6;attempt++){int candidate=p==4?ClampScale(Saved.LastCustomScaleBasisPoints):PresetSliderScale(p);if(ScaleSupported(candidate))break;index+=direction;if(index<0)index=5;if(index>5)index=0;p=index==0?5:index-1;}if(!ScaleSupported(10000))return;Saved.CustomScaleBasisPoints=p==4?ClampScale(Saved.LastCustomScaleBasisPoints):PresetSliderScale(p);p=PresetAtScale(Saved.CustomScaleBasisPoints);Saved.SRPreset=p;Saved.ReconstructionMode=p==5?1:2;UpdateScale();Saved.Revision++;Persist();RefreshRows();}
+ public void ChangeScale(int scale){if(ProviderOwned){if(SharedControls() && ProviderMenu!=null){int family=SelectedFamily();ProviderMenu.SelectMenuCustomScale(family,ClampScale(scale));RefreshRows();}return;}if(Saved==null || Saved.SchemaVersion!=4)return;if(!ScaleSupported(10000))return;scale=ClampScale(scale);int p=PresetAtScale(scale);int mode=p==5?1:2;if(Saved.CustomScaleBasisPoints==scale && Saved.ReconstructionMode==mode && Saved.SRPreset==p)return;Saved.CustomScaleBasisPoints=scale;if(p==4)Saved.LastCustomScaleBasisPoints=scale;Saved.SRPreset=p;Saved.ReconstructionMode=mode;UpdateScale();Saved.Revision++;Persist();RefreshRows();}
  public void ResetOwned(){Sharpness=0;sharpnessBlocked=false;ModSettings.SetInt(this,"upscaling_sharpness",0);RefreshSharpnessRows();if(ProviderOwned){if(SharedControls() && ProviderMenu!=null){ProviderMenu.ResetDefaults();RefreshRows();}return;}if(FGSaved!=null){FGSaved.Mode=0;FGSaved.Revision++;PersistFG();}if(Saved==null || Saved.SchemaVersion!=4)return;Saved.ReconstructionMode=0;Saved.SRPreset=0;Saved.CustomScaleBasisPoints=6700;Saved.LastCustomScaleBasisPoints=7700;Saved.RenderScaleBasisPoints=10000;Saved.NativeFallback=true;Saved.Revision++;Persist();if(DisplaySaved!=null){DisplaySaved.HDROutput=0;DisplaySaved.PeakNits=1000;DisplaySaved.PaperWhiteNits=203;DisplaySaved.UINits=203;DisplaySaved.ReflexMode=1;DisplaySaved.Revision++;PersistDisplay();}RefreshRows();Log.Write("OWNED RESET");}
  public void Persist(){if(Saved!=null)Log.Write("SAVE="+UGameplayStatics.SaveGameToSlot(Saved,"MCD2GraphicsSettings",0)+" revision="+Saved.Revision+" mode="+Saved.ReconstructionMode);}
  public void RefreshRows(){RefreshSharpnessRows();RefreshDisplayRows();UWidgetBlueprintLibrary.GetAllWidgetsOfClass(this,out List<UUserWidget> rows,Unreal.ClassOf<ReconstructionRow>(),false);foreach(var w in rows){var row=w as ReconstructionRow;if(row!=null)row.Refresh();}UWidgetBlueprintLibrary.GetAllWidgetsOfClass(this,out List<UUserWidget> presets,Unreal.ClassOf<PresetRow>(),false);foreach(var w in presets){var row=w as PresetRow;if(row!=null)row.Refresh();}UWidgetBlueprintLibrary.GetAllWidgetsOfClass(this,out List<UUserWidget> scales,Unreal.ClassOf<ScaleRow>(),false);foreach(var w in scales){var row=w as ScaleRow;if(row!=null)row.Refresh();}}
@@ -750,9 +766,9 @@ public class ModActor : AActor, IModSettings {
  public void PollDisplay(){
   if(DisplaySaved==null || DisplaySaved.SchemaVersion!=1)return;
   var state=UGameplayStatics.LoadGameFromSlot("MCD2GraphicsDisplayRuntime",0) as DisplayRuntimeSave;
-  bool supportChanged=state!=null && (DisplayRuntime==null || state.ReflexAvailable!=DisplayRuntime.ReflexAvailable || state.SessionId!=DisplayRuntime.SessionId || state.ReflexFault!=DisplayRuntime.ReflexFault);
+  bool supportChanged=state!=null && (DisplayRuntime==null || state.ReflexAvailable!=DisplayRuntime.ReflexAvailable || state.SessionId!=DisplayRuntime.SessionId || state.ReflexFault!=DisplayRuntime.ReflexFault || state.RenderingVendorId!=DisplayRuntime.RenderingVendorId);
   if(state!=null && state.SchemaVersion==1)DisplayRuntime=state;
-  bool amdVisible=AmdLatencyAvailable();if(supportChanged || amdVisible!=amdMenuVisible){amdMenuVisible=amdVisible;SyncLists();}
+  bool amdVisible=AmdLatencyAvailable();if(supportChanged || amdVisible!=amdMenuVisible){amdMenuVisible=amdVisible;ProjectCommittedNvidia();SyncLists();RefreshRows();}
   if(displayAppliedRevision!=DisplaySaved.Revision && DisplayRuntime!=null && DisplayRuntime.HDRRevision==DisplaySaved.Revision && DisplayRuntime.HDRRestartRequired==0){var settings=UGameUserSettings.GetGameUserSettings();if(settings!=null){displayHDRSupported=settings.SupportsHDRDisplayOutput();if(displayHDRSupported || DisplaySaved.HDROutput==0){
     if(DisplaySaved.HDROutput==1){UKismetSystemLibrary.ExecuteConsoleCommand(this,"r.AllowHDR 1",UGameplayStatics.GetPlayerController(this,0));UKismetSystemLibrary.ExecuteConsoleCommand(this,"r.HDR.Display.OutputDevice 3",UGameplayStatics.GetPlayerController(this,0));UKismetSystemLibrary.ExecuteConsoleCommand(this,"r.HDR.Display.ColorGamut 2",UGameplayStatics.GetPlayerController(this,0));UKismetSystemLibrary.ExecuteConsoleCommand(this,"r.HDR.UI.CompositeMode 1",UGameplayStatics.GetPlayerController(this,0));}
     // Reflex/paper-white revisions do not change the native output mode.
