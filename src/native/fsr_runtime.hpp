@@ -103,11 +103,21 @@ static bool bind_device(Generation& c,a::command_list *cmd){
 }
 static bool copy_output(Generation& c,ID3D12GraphicsCommandList *native,ID3D12Resource *target){
  auto source=c.output->GetDesc(),out=target->GetDesc();
- if(source.Width!=out.Width||source.Height!=out.Height||source.Format!=out.Format||source.DepthOrArraySize!=out.DepthOrArraySize||
+ if(source.Format!=out.Format||source.DepthOrArraySize!=out.DepthOrArraySize||
   source.MipLevels!=out.MipLevels||source.SampleDesc.Count!=out.SampleDesc.Count||source.SampleDesc.Quality!=out.SampleDesc.Quality||
   source.Dimension!=out.Dimension||target==c.output)return false;
+ const bool exact=source.Width==out.Width&&source.Height==out.Height;
+ if(!exact&&(source.Dimension!=D3D12_RESOURCE_DIMENSION_TEXTURE2D||source.Format!=DXGI_FORMAT_R16G16B16A16_FLOAT||source.DepthOrArraySize!=1||source.MipLevels!=1||
+  source.SampleDesc.Count!=1||source.SampleDesc.Quality!=0||!c.outputWidth||!c.outputHeight||
+  source.Width!=c.outputWidth||source.Height!=c.outputHeight||out.Width<source.Width||out.Height<source.Height))return false;
  eval_transition(native,c.output,D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,D3D12_RESOURCE_STATE_COPY_SOURCE);
- eval_transition(native,target,D3D12_RESOURCE_STATE_UNORDERED_ACCESS,D3D12_RESOURCE_STATE_COPY_DEST);native->CopyResource(target,c.output);
+ eval_transition(native,target,D3D12_RESOURCE_STATE_UNORDERED_ACCESS,D3D12_RESOURCE_STATE_COPY_DEST);
+ if(exact)native->CopyResource(target,c.output);
+ else{
+  D3D12_TEXTURE_COPY_LOCATION from{},to{};from.pResource=c.output;to.pResource=target;
+  from.Type=to.Type=D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+  D3D12_BOX region{0,0,0,c.outputWidth,c.outputHeight,1};native->CopyTextureRegion(&to,0,0,0,&from,&region);
+ }
  eval_transition(native,target,D3D12_RESOURCE_STATE_COPY_DEST,D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
  eval_transition(native,c.output,D3D12_RESOURCE_STATE_COPY_SOURCE,D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);c.history_dirty=true;return true;
 }

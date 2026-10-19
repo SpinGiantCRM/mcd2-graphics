@@ -1,4 +1,8 @@
 from pathlib import Path
+import os
+import shutil
+import subprocess
+import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -11,6 +15,23 @@ class FsrRuntimeSourceTests(unittest.TestCase):
         self.source = (ROOT / "src/native/fsr_runtime.hpp").read_text()
         self.record = self.source.split("static bool record(", 1)[1].split("static int load(", 1)[0]
         self.present = self.source.split("static void present(", 1)[1]
+
+    def test_actual_output_copy_accepts_only_bounded_padding(self):
+        start = self.source.index('static bool copy_output(')
+        body = self.source[start:self.source.index('static bool record(', start)]
+        fixture = (ROOT / 'tests/fsr_output_copy_fixture.cpp').read_text()
+        compiler = shutil.which('g++') or shutil.which('clang++')
+        self.assertIsNotNone(compiler, 'Portable C++ compiler required')
+        with tempfile.TemporaryDirectory() as temporary:
+            cpp = Path(temporary) / 'copy.cpp'
+            exe = Path(temporary) / ('copy.exe' if os.name == 'nt' else 'copy')
+            cpp.write_text(fixture.replace('// ACTUAL_COPY_OUTPUT', body))
+            command = [compiler, '-std=c++20', '-Wall', '-Wextra', '-Werror', str(cpp), '-o', str(exe)]
+            if os.name == 'nt':command.insert(1, '-static')
+            built = subprocess.run(command, capture_output=True, text=True)
+            self.assertEqual(built.returncode, 0, built.stdout + built.stderr)
+            ran = subprocess.run([str(exe)], capture_output=True, text=True)
+            self.assertEqual(ran.returncode, 0, ran.stdout + ran.stderr)
 
     def test_default_is_inactive_and_dependencies_are_verified_before_load(self):
         self.assertIn('#define MCD2_FSR_BRIDGE_SHA256 ""', self.source)

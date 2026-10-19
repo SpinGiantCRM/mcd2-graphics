@@ -1,3 +1,15 @@
+FSR output allocation may be padded beyond the logical viewport after a Windows
+resize. A captured 1680x1050 SDK output targeted a 1680x1052 game texture; rejecting
+that pair produced error 17. Preserve the exact-size `CopyResource` fast path.
+For a larger target, permit only the known single-mip/array/sample 2D RGBA16F
+output whose source dimensions equal the logical output, and copy subresource 0
+through a bounded logical `CopyTextureRegion` box. Leave padding untouched;
+reject smaller targets, aliasing and other descriptor mismatches before recording
+transitions. The actual-function portable fixture and owned AMD texture readback
+cover copied pixels, preserved padding and rejection. A fresh game resize run is
+still required; this correction does not establish a fix for the separate
+presenter resize failure.
+
 The [diagnostics attribution correction](RUNTIME_DIAGNOSTICS_ATTRIBUTION.md)
 separates current ready game context from SR activity. Native keeps zero SR
 activity while independent provider diagnostics require the current full
