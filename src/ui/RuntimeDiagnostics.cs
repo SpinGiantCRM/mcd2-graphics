@@ -11,9 +11,9 @@ public class DiagnosticsStateSave : USaveGame {
 public class RuntimeDiagnosticsClient : USaveGame {
  public DiagnosticsStateSave? State;
  public bool Fresh,SrAdvancing,FgAdvancing,ReflexAdvancing,AmdAdvancing;
- int sample,age,lastSr,lastFg,lastReflex,lastAmd,lastSession,lastRevision,lastWorld;
+ int sample,age,lastSr,lastSrProvider,lastFg,lastFgProvider,lastReflex,lastReflexMode,lastAmd,lastAmdMode,lastSession,lastRevision,lastWorld;
  int producerSession,producerRevision,producerWorld,producerSample;bool requireNewSample;
- void Invalidate(){State=null;sample=0;age=0;lastSr=lastFg=lastReflex=lastAmd=0;lastSession=lastRevision=lastWorld=0;requireNewSample=true;}
+ void Invalidate(){State=null;sample=0;age=0;lastSr=lastSrProvider=lastFg=lastFgProvider=lastReflex=lastReflexMode=lastAmd=lastAmdMode=0;lastSession=lastRevision=lastWorld=0;requireNewSample=true;}
  public void Start(){
   var state=UGameplayStatics.CreateSaveGameObject(Unreal.ClassOf<DiagnosticsStateSave>()) as DiagnosticsStateSave;
   if(state!=null){state.SchemaVersion=1;UGameplayStatics.SaveGameToSlot(state,"MCD2GraphicsDiagnosticsState",0);}
@@ -33,19 +33,27 @@ public class RuntimeDiagnosticsClient : USaveGame {
   bool sameProducer=producerSession==session&&producerRevision==next.Revision&&producerWorld==world;
   if(sameProducer&&(next.Sample<producerSample||(requireNewSample&&next.Sample<=producerSample))){Invalidate();return;}
   producerSession=session;producerRevision=next.Revision;producerWorld=world;producerSample=next.Sample;requireNewSample=false;
+  bool srEligible=next.SrProvider>0&&next.SrProvider==manager.SelectedProvider();
+  bool fgEligible=next.FgActive==1&&next.FgFault==0&&next.FgProvider==(manager.SelectedFgProvider()==1?2:1)&&manager.DisplayValue(5)==1;
+  bool reflexEligible=next.ReflexMode>0,amdEligible=next.AmdMode==1;
+  if(!srEligible)lastSrProvider=0;if(!fgEligible)lastFgProvider=0;if(!reflexEligible)lastReflexMode=0;if(!amdEligible)lastAmdMode=0;
   bool same=lastSession==session&&lastRevision==next.Revision&&lastWorld==world;
   if(!same){sample=0;age=0;}
   if(same&&next.Sample<sample){Invalidate();return;}
   if(next.Sample==sample){age++;if(age>3){Invalidate();return;}}
   else{
-   SrAdvancing=same&&next.SrFrames>lastSr&&next.SrProvider>0&&next.SrProvider==manager.SelectedProvider();
-   FgAdvancing=same&&next.FgGenerated>lastFg&&next.FgActive==1&&next.FgFault==0&&next.FgProvider==(manager.SelectedFgProvider()==1?2:1)&&manager.DisplayValue(5)==1;
-   ReflexAdvancing=same&&next.ReflexFrames>lastReflex&&next.ReflexMode>0;
-   AmdAdvancing=same&&next.AmdFrames>lastAmd&&next.AmdMode==1;
+   SrAdvancing=same&&next.SrFrames>lastSr&&srEligible&&next.SrProvider==lastSrProvider;
+   lastSrProvider=srEligible?next.SrProvider:0;
+   FgAdvancing=same&&fgEligible&&next.FgProvider==lastFgProvider&&next.FgGenerated>lastFg;
+   lastFgProvider=fgEligible?next.FgProvider:0;
+   ReflexAdvancing=same&&reflexEligible&&next.ReflexMode==lastReflexMode&&next.ReflexFrames>lastReflex;
+   lastReflexMode=reflexEligible?next.ReflexMode:0;
+   AmdAdvancing=same&&amdEligible&&lastAmdMode==1&&next.AmdFrames>lastAmd;
+   lastAmdMode=amdEligible?1:0;
    sample=next.Sample;age=0;lastSr=next.SrFrames;lastFg=next.FgGenerated;lastReflex=next.ReflexFrames;lastAmd=next.AmdFrames;
   }
   // Retain the last observation between native samples, with bounded expiry.
-  if(State!=null&&same&&age>0){SrAdvancing=manager.DiagnosticSrActive;FgAdvancing=manager.DiagnosticFgActive;ReflexAdvancing=manager.DiagnosticReflexActive;AmdAdvancing=manager.DiagnosticAmdActive;}
+  if(State!=null&&same&&age>0){SrAdvancing=srEligible&&lastSrProvider==next.SrProvider&&manager.DiagnosticSrActive;FgAdvancing=fgEligible&&lastFgProvider==next.FgProvider&&manager.DiagnosticFgActive;ReflexAdvancing=reflexEligible&&lastReflexMode==next.ReflexMode&&manager.DiagnosticReflexActive;AmdAdvancing=amdEligible&&lastAmdMode==1&&manager.DiagnosticAmdActive;}
   lastSession=session;lastRevision=next.Revision;lastWorld=world;State=next;Fresh=true;
  }
  public static string Implementation(int version){return version<=0?"Not used this session":(version/10000)+"."+((version/100)%100)+"."+(version%100);}

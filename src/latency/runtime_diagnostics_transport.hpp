@@ -4,7 +4,7 @@
 #include "../providers/runtime_diagnostics_projection.hpp"
 namespace mcd2::diagnostics {
 inline unsigned counter(std::uint64_t value){return unsigned(value&0x7fffffff);}
-inline void publish(const std::filesystem::path& saves,unsigned session,unsigned revision,MCD2DiagnosticIdentityV1 identity,unsigned reflexMode,std::uint64_t reflexFrames,unsigned amdRevision,unsigned amdChecksum,unsigned amdMode,std::uint64_t amdFrames,const std::filesystem::path& ini){
+inline void publish(const std::filesystem::path& saves,unsigned session,unsigned revision,MCD2DiagnosticIdentityV1 identity,const SrWorkerSample& srWorker,unsigned reflexMode,std::uint64_t reflexFrames,unsigned amdRevision,unsigned amdChecksum,unsigned amdMode,std::uint64_t amdFrames,const std::filesystem::path& ini){
  static ULONGLONG next=0;static unsigned sample=0;
  const auto now=GetTickCount64();if(now<next)return;next=now+500;
  auto read=[](const std::filesystem::path& path){std::error_code error;const auto size=std::filesystem::file_size(path,error);if(error||size>8192)return std::vector<std::uint8_t>{};std::ifstream file(path,std::ios::binary);return std::vector<std::uint8_t>(std::istreambuf_iterator<char>(file),{});};
@@ -23,7 +23,9 @@ inline void publish(const std::filesystem::path& saves,unsigned session,unsigned
  MCD2FgDiagnosticsV2 attributed{};attributed.size=sizeof(attributed);
  auto getAttributed=module?reinterpret_cast<int(*)(MCD2FgDiagnosticsV2*)>(GetProcAddress(module,"mcd2_fg_diagnostics_v2")):nullptr;
  if(!getAttributed||getAttributed(&attributed))attributed={};
- const auto projected=project(identity,sr,attributed,amdRevision,amdChecksum,amdMode,amdFrames,now);
+ // The V1 getter supplies separately verified metadata/DLSS activity. FSR
+ // activity comes only from the already decoded runtime sample in this worker.
+ const auto projected=project(identity,sr,attributed,amdRevision,amdChecksum,amdMode,amdFrames,GetTickCount64(),&srWorker);
  std::map<std::string,unsigned> fields={{"SchemaVersion",1},{"SessionId",session},{"Revision",revision},{"Sample",++sample},
   {"WorldGeneration",projected.world},{"SrProvider",projected.sr.provider},{"SrFrames",counter(projected.sr.evaluations)},{"FsrSrVersion",sr.implementation},{"FsrHardware",sr.capabilities},
   {"FgProvider",projected.fg.provider},{"FgActive",projected.fg.active},{"FgFault",projected.fg.fault},{"FgRendered",counter(projected.fg.rendered)},{"FgGenerated",counter(projected.fg.generated)},

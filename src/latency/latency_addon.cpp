@@ -185,8 +185,11 @@ void settings_loop(){std::map<std::string,unsigned> last;auto nextStatus=std::ch
  if(menuTransport)advancedFsrTransport=std::make_unique<mcd2::advanced::SaveTransport>(savesPath,authorityPath,advancedRoot,sessionId,2);
  if(menuTransport)advancedTransport=std::make_unique<mcd2::advanced::SaveTransport>(savesPath,authorityPath,advancedRoot,sessionId);
  std::uint32_t contextSequence=0;
+ mcd2::diagnostics::SrWorkerCache diagnosticSrCache;
  while(!workerStop){
   MCD2DiagnosticIdentityV1 diagnosticIdentity{};
+  mcd2::providers::SrRuntimeState diagnosticRuntime;int diagnosticRuntimeResult=-3;std::uint64_t diagnosticRuntimeAt=0;
+  mcd2::providers::SrContext diagnosticContext;std::uint64_t diagnosticContextAt=0;
   mcd2::providers::MenuAuthority shared;
   if(menuTransport){try{shared=menuTransport->poll();}catch(...){/* A transport failure cannot activate a feature. */}}
   if(advancedFsrFgTransport){try{advancedFsrFgTransport->poll(shared);}catch(...){/* Restart-only FSR FG selection. */}}
@@ -211,23 +214,28 @@ void settings_loop(){std::map<std::string,unsigned> last;auto nextStatus=std::ch
      srContextSnapshot.authority=snapshot;std::copy(contextBytes.begin(),contextBytes.end(),srContextSnapshot.context);
     }
    }
-   {std::lock_guard lock(providerSnapshotMutex);mcd2::providers::SrContext diagnosticContext;
+   {std::lock_guard lock(providerSnapshotMutex);
     if(shared.load==mcd2::providers::StoreStatus::Ok&&srContextSnapshot.size==sizeof(srContextSnapshot)&&
        mcd2::providers::decodeSrContext(srContextSnapshot.context,diagnosticContext))
-     diagnosticIdentity=mcd2::diagnostics::contextIdentity(sessionId,shared.current,diagnosticContext,srContextSnapshot.observedAtMs,GetTickCount64());
+     {diagnosticContextAt=srContextSnapshot.observedAtMs;diagnosticIdentity=mcd2::diagnostics::contextIdentity(sessionId,shared.current,diagnosticContext,diagnosticContextAt,GetTickCount64());}
    }
    // The worker alone serializes the renderer's volatile response. No save or
    // SDK call runs on a render callback, and this is not a commit receipt.
    auto renderer=GetModuleHandleW(L"mcd2-graphics.addon64");
    auto runtime=renderer?reinterpret_cast<decltype(&mcd2_sr_runtime_v1)>(GetProcAddress(renderer,"mcd2_sr_runtime_v1")):nullptr;
    MCD2SrRuntimeSnapshotV1 response{};response.size=sizeof(response);
-   if(runtime&&runtime(&response)==0&&response.reserved==0){
+   diagnosticRuntimeResult=runtime?runtime(&response):-3;diagnosticRuntimeAt=GetTickCount64();
+   if(diagnosticRuntimeResult==0){
     mcd2::providers::SrRuntimeBytes words;std::copy(std::begin(response.state),std::end(response.state),words.begin());
-    mcd2::providers::SrRuntimeState state;
-    if(mcd2::providers::decodeSrRuntimeState(words,state)&&state.session==sessionId&&state.intent==shared.current.bootstrap.stamp)
+    if(response.reserved||!mcd2::providers::decodeSrRuntimeState(words,diagnosticRuntime))diagnosticRuntimeResult=-1;
+    else if(diagnosticRuntime.session==sessionId&&diagnosticRuntime.intent==shared.current.bootstrap.stamp)
      mcd2::providers::publishSrRuntimeSave(savesPath,words);
    }
   }
+  const auto diagnosticRequested=shared.load==mcd2::providers::StoreStatus::Ok?shared.current.intent.sr:mcd2::providers::SrProvider::Native;
+  diagnosticSrCache.observe(diagnosticIdentity,diagnosticRequested,diagnosticRuntimeResult,
+   diagnosticRuntimeResult==0?&diagnosticRuntime:nullptr,diagnosticRuntimeAt,GetTickCount64());
+  const auto diagnosticSrSample=diagnosticSrCache.snapshot();
   if(amdLatencyOptIn){mcd2::amd_latency::Request request;
    try{mcd2::providers::DecodedGraphicsRecord record;mcd2::providers::GraphicsStore authority(authorityPath);
     if(consolidatedMenuTransport){if(shared.load==mcd2::providers::StoreStatus::Ok)request=mcd2::amd_latency::resolve(shared.current);}
@@ -264,7 +272,9 @@ void settings_loop(){std::map<std::string,unsigned> last;auto nextStatus=std::ch
    state["AmdAntiLagFault"]=amdState.fault?1u:0u;
    state["AmdAntiLagRevision"]=amdState.revision;
    state["AmdAntiLagFgCompatible"]=amdState.fgCompatible&&!amdState.fault?1u:0u;
-   if(consolidatedMenuTransport)mcd2::diagnostics::publish(savesPath,sessionId,intent.revision,diagnosticIdentity,applied,c?c->completed():0,amdState.revision,amdState.checksum,amdState.enabled?1u:0u,amdState.inputFrames,advancedRoot/L"DependencyOverrides.ini");
+   if(consolidatedMenuTransport){
+    const auto publishIdentity=shared.load==mcd2::providers::StoreStatus::Ok?mcd2::diagnostics::contextIdentity(sessionId,shared.current,diagnosticContext,diagnosticContextAt,GetTickCount64()):MCD2DiagnosticIdentityV1{};
+    mcd2::diagnostics::publish(savesPath,sessionId,intent.revision,publishIdentity,diagnosticSrSample,applied,c?c->completed():0,amdState.revision,amdState.checksum,amdState.enabled?1u:0u,amdState.inputFrames,advancedRoot/L"DependencyOverrides.ini");}
    auto file=savesPath/L"MCD2GraphicsDisplayRuntime.sav";auto seed=read_slot(file);std::map<std::string,unsigned> existing;size_t h=0;
    if(state!=last||!mcd2::display::parse(seed,"DisplayRuntimeSave",existing,h)||existing["SessionId"]!=sessionId){auto data=mcd2::display::encode_runtime(seed,state);if(!data.empty()){
      auto temp=savesPath/L"MCD2GraphicsDisplayRuntime.pending";{std::ofstream f(temp,std::ios::binary|std::ios::trunc);f.write(reinterpret_cast<const char*>(data.data()),data.size());f.flush();if(!f)throw std::runtime_error("Runtime state write failed");}

@@ -30,6 +30,10 @@ class SharedLatencyRecipe(unittest.TestCase):
             self.assertIn('ready&&ready()?0:-100', source)
             self.assertIn('mcd2_fg_visit_frame', source)
             self.assertIn('runtime_diagnostics_transport.hpp', source)
+            self.assertIn('diagnosticRuntimeResult=runtime?runtime(&response):-3', source)
+            self.assertIn('diagnosticSrCache.observe(diagnosticIdentity,diagnosticRequested', source)
+            self.assertIn('publishIdentity,diagnosticSrSample,applied', source)
+            self.assertEqual(source.count('runtime(&response)'), 1)
             self.assertNotIn('folder/L"mcd2-streamline-bridge.dll"', source)
             self.assertNotIn('register_event<reshade::addon_event::init_device>(init)', source)
 

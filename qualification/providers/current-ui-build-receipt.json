@@ -12,7 +12,7 @@
     "src/ui/AdvancedInfoWidget.cs": "0de0d9e909cb0cf55c19d6cdbf0f08e3cebd62c69e0f6bf572dff9862b9d4295",
     "src/ui/AdvancedSettingsPanel.cs": "9f1fee8fb7d9cad2667d7896977de155868a46407e2b3bb385400f4b7f9505a3",
     "src/ui/NativeSettingsWidgets.cs": "3110705bf8733224e2926b8553e18ff0cefcaac3df579d7dfe6405ec1f679c4d",
-    "src/ui/RuntimeDiagnostics.cs": "b19ba312fb6872386b687f33101fe0819c24158fe77d1352839e8a6724e6b7ad",
+    "src/ui/RuntimeDiagnostics.cs": "dae568163f0a023c6d542444c9771553997c672596dc7dac3c872d5cbc0cc334",
     "src/ui/RuntimeDiagnosticsOverlay.cs": "cde3b72de1a23c161f83ad00cf6900599057d6fcefb026dd8839b494b962a540",
     "src/ui/UpscalingSharpness.cs": "070afd9cfdcf99a1ddc11d8d9cb321235e7daea7933b7e7c31dd824111e60cc8",
     "src/ui/mod-info.json": "c6a2be6c7020c75eb71cd87df7f6f19d84615be6b7d78aded5da65736c68c0de",
@@ -21,8 +21,8 @@
   },
   "payloadSHA256": {
     "MCD2Graphics_P.pak": "415d12911107bd7d66f205ba576995a61dfb6c870893a6f782ac0af94376d594",
-    "MCD2Graphics_P.ucas": "9f71608eddbb10ef57412b3b09896792354fbee635b0b64919b12a75c7f2bad7",
-    "MCD2Graphics_P.utoc": "6f7cbe8e8a0bc324bf06197d471ef8fdee4ecc8a6311d66b48ad49a3f86789b7"
+    "MCD2Graphics_P.ucas": "8e50e35fe717224636b360c9143800b203e4621831388d07e705698a6cc10739",
+    "MCD2Graphics_P.utoc": "57f2c31e9f364a369321752a4fb7d2643b70b3e000be0cd7519c4080191936ec"
   },
   "metadataAPI": "Blueprint Loader 2.0 BP_ModInfo; SDK-generated versioned metadata; no popup API",
   "compiler": "NeoRune 1.0.0 / .NET reference pack 10.0.13",
@@ -82,5 +82,5 @@
   "WindowsQualified": false,
   "LinuxRuntimeQualified": false,
   "publishedPayloadChanged": false,
-  "archiveSHA256": "4f6aec8aaad9487cfb1f5f817047b4f1b0561955bdccb28d8afdddc3765a9b64"
+  "archiveSHA256": "4bb93005ac837c0ae882724efbeddaccf5a54c17a6d75623cf6b04186d8dbcb8"
 }

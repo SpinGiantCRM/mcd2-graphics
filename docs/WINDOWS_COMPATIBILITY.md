@@ -4,7 +4,12 @@ activity while independent provider diagnostics require the current full
 authority stamp and world. FG V2 attributes asynchronous SDK outcomes to their
 admitted frame epochs; V1 remains unchanged. AMD timing requires its applied
 revision and checksum. Preserve the all-channel UI identity/expiry checks,
-bounded callback retention and anti-replay tests on both CI platforms. Offline
+bounded callback retention and anti-replay tests on both CI platforms. FSR
+activity reuses the worker's decoded native runtime snapshot; Busy is unknown,
+not a fresh zero/reset. Preserve the 1500 ms original-observation bound, exact
+identity/Active/error gates, immediate successful inactive/error invalidation
+and independent per-channel UI recovery baselines. No extra render lock or SDK work is
+permitted for sampling. Offline
 checks and code review do not qualify a new artifact or repair the exit fault;
 the changed complete package still requires fresh Windows runtime testing.
 

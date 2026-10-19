@@ -46,6 +46,33 @@ static class DiagnosticsTest {
   s.Sample++;s.FgGenerated++;s.ReflexFrames++;s.AmdFrames++;Poll(c,m);Need(c.FgAdvancing&&c.ReflexAdvancing&&c.AmdAdvancing);
   for(int i=0;i<4;i++)Poll(c,m);Need(!c.Fresh);
   s.Sample++;s.FgGenerated+=10;s.ReflexFrames+=10;s.AmdFrames+=10;Poll(c,m);Need(!c.FgAdvancing&&!c.ReflexAdvancing&&!c.AmdAdvancing);
+  // An unavailable SR read is not a counter reset; other channels stay independent.
+  var isolated=new RuntimeDiagnosticsClient();m.Provider=2;m.FgProvider=0;m.FgMode=1;
+  s.SrProvider=2;s.SrFrames=100;s.FgProvider=1;s.FgActive=1;s.FgFault=0;s.AmdMode=1;
+  s.Sample++;Poll(isolated,m);Need(!isolated.SrAdvancing);
+  s.Sample++;s.SrProvider=0;s.SrFrames=0;s.FgGenerated++;s.AmdFrames++;Poll(isolated,m);
+  Need(!isolated.SrAdvancing&&isolated.FgAdvancing&&isolated.AmdAdvancing);
+  s.Sample++;s.SrProvider=2;s.SrFrames=100;s.FgGenerated++;s.AmdFrames++;Poll(isolated,m);
+  Need(!isolated.SrAdvancing&&isolated.FgAdvancing&&isolated.AmdAdvancing); // 100 -> Busy -> unchanged 100
+  s.Sample++;s.SrFrames=101;Poll(isolated,m);Need(isolated.SrAdvancing);
+  s.Sample++;s.SrFrames=3;Poll(isolated,m);Need(!isolated.SrAdvancing); // A real reset never advances.
+  s.Sample++;s.SrFrames=4;Poll(isolated,m);Need(isolated.SrAdvancing);
+  // Each independent provider must establish a new baseline after its own unavailable/Off sample.
+  for(int channel=0;channel<3;channel++){
+   var independent=new RuntimeDiagnosticsClient();m.Provider=2;m.FgProvider=0;m.FgMode=1;
+   s.SrProvider=2;s.SrFrames=100;s.FgProvider=1;s.FgActive=1;s.FgGenerated=100;s.ReflexMode=1;s.ReflexFrames=100;s.AmdMode=1;s.AmdFrames=100;
+   s.Sample++;Poll(independent,m);s.Sample++;s.SrFrames++;s.FgGenerated++;s.ReflexFrames++;s.AmdFrames++;Poll(independent,m);
+   Need(independent.SrAdvancing&&independent.FgAdvancing&&independent.ReflexAdvancing&&independent.AmdAdvancing);
+   s.Sample++;s.SrFrames++;s.FgGenerated++;s.ReflexFrames++;s.AmdFrames++;
+   if(channel==0){s.FgProvider=0;s.FgActive=0;s.FgGenerated=0;}if(channel==1){s.ReflexMode=0;s.ReflexFrames=0;}if(channel==2){s.AmdMode=0;s.AmdFrames=0;}
+   Poll(independent,m);Need(independent.SrAdvancing&&independent.FgAdvancing==(channel!=0)&&independent.ReflexAdvancing==(channel!=1)&&independent.AmdAdvancing==(channel!=2));
+   s.Sample++;s.SrFrames++;s.FgGenerated++;s.ReflexFrames++;s.AmdFrames++;
+   if(channel==0){s.FgProvider=1;s.FgActive=1;s.FgGenerated=101;}if(channel==1){s.ReflexMode=1;s.ReflexFrames=101;}if(channel==2){s.AmdMode=1;s.AmdFrames=101;}
+   Poll(independent,m);Need(independent.SrAdvancing&&independent.FgAdvancing==(channel!=0)&&independent.ReflexAdvancing==(channel!=1)&&independent.AmdAdvancing==(channel!=2)); // Unchanged recovery total is no progress.
+   s.Sample++;s.SrFrames++;s.FgGenerated++;s.ReflexFrames++;s.AmdFrames++;Poll(independent,m);Need(independent.SrAdvancing&&independent.FgAdvancing&&independent.ReflexAdvancing&&independent.AmdAdvancing);
+   if(channel==0)m.FgMode=0;if(channel==1)s.ReflexMode=0;if(channel==2)s.AmdMode=0;
+   Poll(independent,m);Need(independent.SrAdvancing&&independent.FgAdvancing==(channel!=0)&&independent.ReflexAdvancing==(channel!=1)&&independent.AmdAdvancing==(channel!=2)); // Off is immediate between producer samples.
+  }
   Console.WriteLine("Live diagnostics: advancing counters, Native independence, all-channel world validation and invalid/stale/opt-out baseline recovery pass");
  }
 }
