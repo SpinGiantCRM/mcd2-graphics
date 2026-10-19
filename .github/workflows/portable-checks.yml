@@ -27,6 +27,7 @@ jobs:
           python3 -m unittest discover -s tests -p "test_build_toolchain.py" -v
           python3 -m unittest discover -s tests -p "test_amd_latency_build.py" -v
           python3 -m unittest discover -s tests -p "test_ui_build.py" -v
+          python3 -m unittest discover -s tests -p "test_sr_menu_controls.py" -v
           python3 -m unittest discover -s tests -p "test_process_exit.py" -v
           python3 -m unittest discover -s tests -p "test_shared_sdk_shutdown.py" -v
           python3 -m unittest discover -s tests -p "test_bootstrap_lookup.py" -v
@@ -137,6 +138,7 @@ jobs:
           python -m unittest discover -s tests -p "test_build_toolchain.py" -v
           python -m unittest discover -s tests -p "test_amd_latency_build.py" -v
           python -m unittest discover -s tests -p "test_ui_build.py" -v
+          python -m unittest discover -s tests -p "test_sr_menu_controls.py" -v
           python -m unittest discover -s tests -p "test_process_exit.py" -v
           python -m unittest discover -s tests -p "test_shared_sdk_shutdown.py" -v
           python -m unittest discover -s tests -p "test_bootstrap_lookup.py" -v
