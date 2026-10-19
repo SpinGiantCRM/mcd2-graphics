@@ -6,8 +6,13 @@ retry the bridge's not-initialized response and forget on device init/destructio
 The cache owns no COM references and does not replace the SDK activation,
 current intent/session/world, input, presenter or retirement gates. Preserve the
 portable cache fixture in both CI jobs and the complete guide/header build receipt.
-The polling-disabled control removed the observed stutter; the rebuilt addon
-requires its own Windows runtime check and does not repair FSR timeout 22.
+The polling-disabled control removed the observed stutter. The private rebuilt
+guide with full controls restored then removed the periodic timing gaps, and
+the maintainer confirmed smooth Native and FSR selections in menus/gameplay.
+Keep the [bounded Windows record](../qualification/providers/windows-amd-stutter-fix-2026-10-19.json):
+FSR still recorded timeout 22 with zero evaluations, and that run exited with
+an access violation. Smooth output does not prove provider activation or a
+shutdown repair. A complete rebuilt installer still needs qualification.
 
 The render-scale slider always displays a numeric selected percentage, including
 FSR named presets before gameplay and during menu suspension/fallback. The display
@@ -15,8 +20,9 @@ uses FSR preset ratios, or the matching error-free SDK plan while applying or
 evaluating; it never authorizes source scaling. Preserve the native preflight,
 source acknowledgement and current-session/world checks. Keep keyboard/controller
 edits relative to the displayed value and rebuild the real UI/ModInfo after edits.
-The 19 October source/build checks do not qualify the rebuilt UI in game or fix
-the separately observed Windows FSR timeout, stutter or access violation.
+The 19 October private rebuilt UI loaded during the bounded stutter controls;
+the numeric-slider source/build checks do not establish all control/input paths
+or repair the separately observed Windows FSR timeout or access violation.
 
 The bootstrap trace uses one mutex for opening, event/AMD-description writes,
 flushing and closing. Factory creation and route teardown can run on different

@@ -1,0 +1,80 @@
+{
+  "date": "2026-10-19",
+  "decision": "Periodic-stutter fix confirmed; full Windows qualification remains FAIL",
+  "sourceCommit": "9505f1c503e8046e2e261fbfb5f9668bb6eed8e6",
+  "branch": "development/amd-colour-resize",
+  "originalCandidate": "0.4.0-amd.dev.16",
+  "machine": {
+    "gpu": "AMD Radeon(TM) 860M Graphics",
+    "driver": "32.0.31041.1004",
+    "steamBuild": 25754144,
+    "shippingSHA256": "3a8703406fd50520f83c4f70a0212c000cb3b584ef28eb38032902230c01ebdd"
+  },
+  "rootCause": "AMD FG capability enumeration on the render thread every second, even with FG Off. Cache by framework device and loaded bridge; invalidate on device initialization/destruction.",
+  "independentSdkSupportQueryMs": [
+    278.2486,
+    135.3305,
+    160.1859,
+    144.4329,
+    127.044,
+    135.9868,
+    139.349,
+    141.4647
+  ],
+  "controls": {
+    "nativeWithOriginalPolling": "User observed stutter in starting menu and after restarting with Native selected.",
+    "uiDisabledOnly": "Repeated long QPC intervals remained. A later invasive thread snapshot suspended/ended this run; its exit is excluded from normal-exit qualification.",
+    "uiRestoredPollingDisabled": "User confirmed no stutter; zero captured intervals over 100 ms.",
+    "cacheFixFullControlsRestored": "User confirmed smooth Native and FSR selections, including gameplay. Regular pauses disappeared; six isolated long intervals remained, with loading/focus causality unproven."
+  },
+  "timing": {
+    "ui-off": {
+      "method": "bounded QPC callback intervals; not physical display FPS",
+      "durationSeconds": 39.929,
+      "intervals": 4673,
+      "medianMs": 1.557,
+      "maxMs": 381.3027,
+      "gapsOver100Ms": 40
+    },
+    "fg-poll-off": {
+      "method": "bounded QPC callback intervals; not physical display FPS",
+      "durationSeconds": 39.994,
+      "intervals": 1405,
+      "medianMs": 27.8638,
+      "maxMs": 50.3216,
+      "gapsOver100Ms": 0
+    },
+    "cache-fixed": {
+      "method": "bounded QPC callback intervals; not physical display FPS",
+      "durationSeconds": 39.975,
+      "intervals": 4759,
+      "medianMs": 1.7194,
+      "maxMs": 888.5171,
+      "gapsOver100Ms": 6
+    }
+  },
+  "privateTestPayload": {
+    "guideAddonSHA256": "e3ad05596e271c02284b93c07de3fc94b90340fd0d39f29a39d2d5849ee1dbc0",
+    "timingAddonSHA256": "65b9ad868db2854560ebbe66b8a6bfde5b431d91306fefbf717f230d9e7746a3",
+    "uiSourceCommit": "87996d621c0f1472ca55e8381e1f6328c362f696",
+    "fullFgControlsRestored": true,
+    "completeInstallerQualified": false
+  },
+  "remainingFailures": {
+    "fsr": "Latest current-session FSR record still Fallback phase 8/error 22, zero evaluations, source restored to 100%. Smooth output does not establish active FSR.",
+    "exit": "Run 7 held shipping process exited 0xC0000005. Windows Application Error corroborates an unknown-module fault. No dump was captured for this run; cause remains unresolved."
+  },
+  "verification": {
+    "nativeCacheAndProtocolFixture": "PASS",
+    "fgStreamlineTests": 29,
+    "nativeFgTests": "5 passed, 1 CI-only fixture skipped locally",
+    "fsrFgBridgeTests": 6,
+    "portableCI": 39174516073,
+    "nativeWindowsCI": 39174516084,
+    "installerCI": 39174516138,
+    "update2InstallerCI": 39174516086,
+    "allFourCIWorkflows": "success"
+  },
+  "privateLogsDumpsAndPlayerDataCommitted": false,
+  "nextControl": "Timing collector removed; exact dev16 SR addon, cache-fixed guide and a private one-shot read-only AA CVar UI; unhandled-exception capture enabled."
+}
