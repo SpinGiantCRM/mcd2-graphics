@@ -10,6 +10,15 @@ alone exited 0 after 86.70 seconds. These bounded controls do not identify the
 precise cause or qualify Windows shutdown. Preserve the failed qualification,
 exact loaded hashes, private recovery data and remaining runtime gates.
 
+The same report's follow-up adds nine passing native owned-host probes and two
+bounded active FSR Quality hub observations with fresh matching state. Three
+ordinary hub closes returned 0, but the FSR closes took 87.465 and 24.480 seconds.
+A delayed-exit snapshot identifies a real swapchain Present waiting in the AMD
+driver through the framework/Steam-overlay/DXGI call chain, before the CRT stage
+of the earlier AV. This is not a root-cause attribution or shutdown repair. Keep
+the failed game-exit evidence and incomplete runtime gates; the renewed user
+launch hold leaves the game closed with Native/FG Off preferences restored.
+
 The Windows candidate framework also applies upstream ReShade
 [`64017f98`](https://github.com/crosire/reshade/commit/64017f98cc1393db51d9f5b1307c64350680f41c)
 for descriptor heaps that outlive their device. Registration follows proxy

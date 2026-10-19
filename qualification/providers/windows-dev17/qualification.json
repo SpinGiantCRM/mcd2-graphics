@@ -39,11 +39,11 @@
     "Physical controller not identified"
   ],
   "remaining": [
-    "SR presets and actual evaluations",
+    "Complete SR preset/custom/Native recovery matrix; bounded FSR Quality advancing evaluations observed in follow-up",
     "AMD FG and Anti-Lag activity/Off recovery",
     "Advanced keyboard/reset/persistence",
     "Actual output lifecycle SDR/HDR",
-    "Three ordinary exit codes and retirement/timing"
+    "Resolve prior AV and unexplained Present delays; obtain three ordinary clean exits with retirement/timing evidence"
   ],
   "normalExits": [
     {
@@ -233,7 +233,7 @@
     },
     "U4": {
       "status": "NOT RUN",
-      "observation": "Saved state observed across controls; full current-session runtime/persistence matrix pending"
+      "observation": "Saved state observed across controls; full current-session runtime/persistence matrix pending; FSR Quality selection persisted across F2/F3 restart, with fresh matching runtime activity, but full matrix remains pending"
     },
     "U5": {
       "status": "NOT RUN",
@@ -334,5 +334,23 @@
     "productionSourceChanged": false,
     "exitCrashFixed": false,
     "windowsRuntimeQualified": false
+  },
+  "runtimeFollowUp": {
+    "record": "runtime-followup.json",
+    "ordinaryHubExitCodes": [
+      "00000000",
+      "00000000",
+      "00000000"
+    ],
+    "closeToObserverSeconds": [
+      7.147,
+      87.465,
+      24.48
+    ],
+    "boundedFsrQualityActivity": true,
+    "unexplainedExitDelays": true,
+    "exitCrashFixed": false,
+    "windowsRuntimeQualified": false,
+    "launchesOnHold": true
   }
 }

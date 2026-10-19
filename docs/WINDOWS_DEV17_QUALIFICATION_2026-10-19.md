@@ -194,3 +194,70 @@ justified by this evidence. The prior failed game-exit gate remains unchanged.
 These probes establish synthetic SDK/component behavior, not active game SR/FG,
 Anti-Lag cadence, physical HDR output, visual correctness, performance or clean
 game shutdown. Runtime qualification remains failed/incomplete.
+
+## Authorized gameplay follow-up, then renewed launch hold
+
+After the offline pass, the user explicitly allowed game launches again. Three
+unchanged full-candidate runs used normal Steam launch, screenshots without
+accessibility-text requests, and ordinary Alt+F4 from hub gameplay. Their
+[separate follow-up record](../qualification/providers/windows-dev17/runtime-followup.json)
+uses F1–F3 labels to avoid confusion with the original controls above.
+
+| Run | Selection at ordinary hub close | Held-process exit | Seconds to observer |
+| --- | --- | --- | --- |
+| F1 | Native, FG Off, Anti-Lag Off | 0 | 7.147 |
+| F2 | FSR Quality, FG Off, Anti-Lag Off | 0 | 87.465 |
+| F3 | FSR Quality retained across restart, FG Off, Anti-Lag Off | 0 | 24.480 |
+
+Intervals start at the recorded request immediately before injected close and
+include input-dispatch latency and nominal two-second process polling. F3 also
+includes the snapshot intervention described below.
+
+F2 and F3 both established actual FSR Quality activity at 1280×800 into
+1920×1200, with advancing evaluation counters, error 0, and matching current
+session/world/authority. F2 advanced from 164 to 3984 evaluations over 89.26
+seconds. F3 advanced from 722 to 2020 over 30.06 seconds. Final runtime/context
+samples were younger than 1.5 seconds; the observed source percentage matched
+the requested SDK ratio within the protocol's tolerance. The source ack belongs
+to the accepted ApplySource request; subsequent phase transitions change the
+runtime sequence, so equality with the final Active sequence is not required.
+This establishes bounded Quality activity and restart persistence, not the
+remaining preset/custom/Native recovery matrix or image/performance qualification.
+
+All captured native hashes matched the frozen inputs: 14 startup components in
+F1/F3 and 15 in F2, which additionally captured the SR game bridge. The upscaler
+DLL was verified on disk and appears in F3's dump metadata; a full loaded-image
+hash is not claimed. `UIAutomationCore` was already observed at startup despite
+not requesting accessibility text, so these runs do not establish its absence
+or a causal relationship with the exit fault.
+
+F2's zero exit code does not pass shutdown timing: its framework log independently
+confirms the long delay. Its process observer has an unexplained sampling gap;
+the exact blocking observer call is unknown. F3 bounded initial module enumeration
+to startup components and retained two-second samples through exit. That observer
+change is not a demonstrated cause or correction for F2's sampling gap.
+
+F3 triggered an external read-only minidump 15 seconds after the close request,
+with thread and handle data. Capture took 0.75 seconds; no debugger attached.
+At that instant GameThread waited on an unnamed auto-reset engine event and
+RenderThread waited in game task/event code. RHIThread was in the AMD driver's
+SleepEx path during a real swapchain Present. Decoding a private executable hook
+trampoline and explicitly unwinding from its DXGI continuation recovered the
+game → candidate framework → Steam overlay → system DXGI → AMD driver path.
+The exact framework binary's COM vtable slot 8, function bounds and call through
+the original Present slot independently confirm the method identity. Misleading
+nearest-export names are not used as function identities.
+
+This sampled Present wait occurs before the CRT-exit stage seen in earlier AV
+dumps. It does not establish a common cause, event producer, or defect in any
+component on the stack. F3's dump may affect timing, and both delayed exits
+remain material failures rather than three clean shutdown passes. No production
+shutdown patch or Windows qualification is claimed.
+
+The user then placed launches on hold again. The game is closed, observers have
+finished, and nothing is scheduled to launch it. Native/FG Off was restored using
+the normal locked provider-store publication with a monotonic revision; Quality
+and all other preferences were preserved. All 18 installed owned files and 15
+dependencies were reverified, with overrides empty. Player/account saves were
+not read or restored. A future matched per-game Steam-overlay comparison is
+recorded as an unperformed diagnostic, not a workaround or release gate pass.
