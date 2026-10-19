@@ -1,5 +1,11 @@
 # Windows/Radeon development qualification
 
+The [dev.22 Windows checkpoint](WINDOWS_DEV22_QUALIFICATION_2026-10-20.md)
+records the newer exact inputs, current publisher dependencies and bounded
+runtime/installer follow-up. Windows qualification remains **FAIL** because the
+ordinary-exit access violation is unresolved. The dev.16 input selection below
+is historical; it does not identify the separately pinned dev.22 test package.
+
 ## Provider test candidate: 0.4.0-amd.dev.16
 
 Dev.16 is ready for Windows qualification. It includes the confirmed bootstrap
