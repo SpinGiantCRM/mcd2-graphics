@@ -94,7 +94,8 @@ Acquire quality 2 only for matching current-world FSR preflight; retain it until
 native retirement/source rollback and across actor level transitions, then
 restore only the still-owned value. The volatile receipt must reject a previous
 renderer session, yield to external edits and bound restoration retries. Native
-selection never acquires the lease. Preserve all shader/resource/SDK/source-ACK
+with FG Off never acquires the lease. Native + AMD FG may acquire only through
+the separate current-world/100%-source/FG-owner acknowledgement below. Preserve all shader/resource/SDK/source-ACK
 gates, managed ownership checks, both CI platforms and a real UI/ModInfo rebuild.
 The source-built lease passed a bounded Windows Native → FSR Quality → Native
 check: matching SDK counts advanced, full source scale returned, and the original
@@ -1062,3 +1063,45 @@ view/constant-buffer bindings after destruction, unknown/null bindings and live
 recovery in both portable CI jobs. This source correction requires a fresh full
 Windows candidate and runtime retest; handled Unreal crashes can exit with code
 zero and must never count as successful gameplay or normal shutdown.
+
+### HDR addon activation ownership
+
+RenoDX UE Extended's SDR tone mapper does not disable its separate SDR-to-HDR
+swapchain upgrade. HDR Off therefore owns only the exact ReShade
+`[ADDON] DisabledAddons` token `RenoDX@renodx-ue-extended.addon64`, with a bounded
+write-ahead `MCD2Graphics/HdrAddonActivation.bin` receipt beside the addon. A
+resident RenoDX keeps HDR output acknowledgement blocked until restart. A fresh
+Off startup without it can acknowledge native SDR; On restores only a token
+inserted by this lease and needs restart before calibration acknowledgement.
+Preexisting user disables are never removed. No live unloading or `Set_Path`
+override is used. Other disabled addons and calibration values are preserved.
+
+The lease retains original/last key values and missing-versus-empty state,
+survives ReShade's delayed config save, and permanently yields on observed
+external edits. Corrupt ownership or ambiguous/redirected configuration fails closed.
+Management supports the normal game-bin ReShade.ini only; BasePath/environment
+redirection is declined. Guided uninstall validates and restores the exact
+owned key before deleting any mod payload; conflicts stop removal with an
+actionable message. Preserve native/managed receipt compatibility, crash-window
+and actual backend tests on both platforms. Public config APIs provide verified
+readback, not atomic CAS against arbitrary concurrent external writers.
+This correction does not qualify HDR on an unsupported/SDR Windows display or
+repair the independently unresolved game shutdown defect.
+
+### Native AA frame-generation temporal preflight
+
+Native + AMD FG Single/2x needs the same validated single-output TAA producer.
+Its separate lease admission requires current matching authority, settled Native
+(or completed Native fallback), observed and requested 100% source, the implemented
+world scale, and a current matching FG controller acknowledgement of the actual
+AMD owner and availability. Prior generated frames are not required for producer
+preflight. Native source resolution and SR SDK evaluation remain unchanged.
+
+Retain a Native-guide lease across pause, missing context and actor travel. Off
+restoration requires a current matching FG acknowledgement and the optional
+NativeGuidesRetired readback equal to one. Unknown/BUSY and old runtimes retain.
+The native export takes a try-lock and reports retired only after the generation
+and its outside-lock COM release have both finished. It makes no SDK/GPU calls.
+External console edits, original-value receipts and bounded restore retries still
+apply. Actual-source client/native release-window fixtures cover this contract;
+a fresh complete UI/ModInfo/native artifact and Windows runtime checks are required.

@@ -5,6 +5,8 @@
 #define NOMINMAX
 #include <windows.h>
 #include "../providers/bootstrap_module.hpp"
+#include "../providers/hdr_addon_activation.hpp"
+#include "../providers/graphics_store.hpp"
 #include <d3d12.h>
 #include <dxgi1_4.h>
 #include <reshade.hpp>
@@ -291,19 +293,93 @@ void settings_loop(){std::map<std::string,unsigned> last;auto nextStatus=std::ch
   std::unique_lock lock(workerMutex);workerWake.wait_for(lock,std::chrono::milliseconds(500),[]{return workerStop.load();});
  }
 }
+struct HdrAddonBackend {
+ using Key=mcd2::hdr_activation::Key;using Receipt=mcd2::hdr_activation::Receipt;
+ std::optional<bool> emptyPresence;
+ std::filesystem::path path()const{return advancedRoot/mcd2::hdr_activation::receiptName;}
+ bool load(std::optional<Receipt>&out){
+  out.reset();std::error_code ec;if(!std::filesystem::exists(path(),ec))return !ec;
+  std::ifstream f(path(),std::ios::binary|std::ios::ate);if(!f)return false;auto n=f.tellg();if(n<0||n>32768)return false;
+  std::vector<uint8_t>b(static_cast<size_t>(n));f.seekg(0);if(!f.read(reinterpret_cast<char*>(b.data()),b.size()))return false;
+  Receipt r;if(!mcd2::hdr_activation::decode(b,r))return false;out=std::move(r);return true;
+ }
+ bool save(std::optional<Receipt>r){
+  if(!r){std::optional<Receipt>old;Key onDisk;if(!load(old)||!disk(onDisk))return false;
+   // ReShade saves its config cache later. Keep the restore WAL until the
+   // original value is actually on disk, including after a process crash.
+   if(old&&onDisk!=old->original)return true;
+   return DeleteFileW(path().c_str())||GetLastError()==ERROR_FILE_NOT_FOUND;}
+  bool conflict=false;
+  if(r->phase==mcd2::hdr_activation::Phase::Owned){Key flushed;if(!disk(flushed))return false;
+   if(flushed==r->original)r->phase=mcd2::hdr_activation::Phase::Prepared;
+   else if(flushed!=r->last){r->phase=mcd2::hdr_activation::Phase::Yielded;conflict=true;}}
+  auto bytes=mcd2::hdr_activation::encode(*r);if(bytes.empty())return false;auto pending=path();pending+=L".pending";
+  namespace io=mcd2::providers::store_detail;
+  return io::discardPending(pending)&&io::writeFlushed(pending,bytes)&&io::replace(pending,path())&&!conflict;
+ }
+ bool disk(Key&out){
+  // The public API does not expose redirected global-config paths. Never
+  // create a lease that the closed-game uninstaller cannot locate safely.
+  if(advancedRoot.empty()||GetEnvironmentVariableW(L"RESHADE_BASE_PATH_OVERRIDE",nullptr,0))return false;
+  auto module=std::make_unique<wchar_t[]>(32768);auto n=GetModuleFileNameW(reshade::internal::get_reshade_module_handle(),module.get(),32768);
+  std::error_code ec;if(!n||n>=32768||!std::filesystem::equivalent(std::filesystem::path(module.get()).parent_path(),advancedRoot.parent_path(),ec)||ec)return false;
+  auto file=advancedRoot.parent_path()/L"ReShade.ini";out={};if(!std::filesystem::exists(file,ec))return !ec;
+  if(GetFileAttributesW(file.c_str())&FILE_ATTRIBUTE_REPARSE_POINT)return false;
+  std::ifstream f(file,std::ios::binary|std::ios::ate);if(!f)return false;auto size=f.tellg();if(size<0||size>1024*1024)return false;f.seekg(0);
+  std::string line,section;bool seen=false;auto trim=[](std::string s){auto first=s.find_first_not_of(" \t\r\n");if(first==std::string::npos)return std::string();return s.substr(first,s.find_last_not_of(" \t\r\n")-first+1);};
+  while(std::getline(f,line)){if(line.starts_with("\xef\xbb\xbf"))line.erase(0,3);line=trim(line);if(line.empty()||line[0]==';'||line[0]=='#'||line[0]=='/')continue;
+   if(line[0]=='['){auto close=line.find(']');if(close==std::string::npos)return false;section=trim(line.substr(1,close-1));continue;}
+   auto eq=line.find('=');auto key=trim(line.substr(0,eq)),value=eq==std::string::npos?std::string():trim(line.substr(eq+1));
+   if(section=="INSTALL"&&key=="BasePath"&&!value.empty())return false;
+   if(section!="ADDON"||key!="DisabledAddons")continue;if(seen)return false;seen=true;out.present=true;if(value.empty())continue;
+   std::string entry;for(size_t i=0;i<value.size();++i){if(value[i]==','){if(i+1<value.size()&&value[i+1]==','){entry+=',';++i;}else{out.entries.push_back(entry);entry.clear();}}else entry+=value[i];}out.entries.push_back(entry);
+  }
+  return mcd2::hdr_activation::valid(out);
+ }
+ bool read(Key&out){
+  Key onDisk;if(!disk(onDisk))return false;size_t n=0;const bool present=reshade::get_config_value(nullptr,"ADDON","DisabledAddons",nullptr,&n);out={};
+  if(present){if(!n||n>32768)return false;std::vector<char>b(n);auto used=n;if(!reshade::get_config_value(nullptr,"ADDON","DisabledAddons",b.data(),&used)||used>=n)return false;
+   size_t at=0;while(at<used){auto end=std::find(b.begin()+at,b.begin()+used,'\0');if(end==b.begin()+used)return false;out.entries.emplace_back(b.begin()+at,end);at=size_t(end-b.begin())+1;}out.present=true;
+  }else out.present=emptyPresence.value_or(onDisk.present);
+  std::optional<Receipt>r;if(!load(r))return false;
+  // A known write may still be in ReShade's cache. Any third on-disk value
+  // is an external edit and is never overwritten by this activation lease.
+  if(r){if(onDisk!=r->original&&onDisk!=r->last){r->phase=mcd2::hdr_activation::Phase::Yielded;save(r);return false;}}
+  else{if(onDisk.entries!=out.entries)return false;if(out.entries.empty())out.present=onDisk.present;emptyPresence.reset();}
+  return mcd2::hdr_activation::valid(out);
+ }
+ bool write(const Key&expected,const Key&next){
+  Key current;if(!read(current)||current!=expected)return false;
+  if(!next.present)reshade::set_config_value(nullptr,"ADDON","DisabledAddons",static_cast<const char*>(nullptr));
+  else{std::string bytes;for(const auto&s:next.entries){bytes+=s;bytes+='\0';}reshade::set_config_value(nullptr,"ADDON","DisabledAddons",bytes.data(),bytes.size());}
+  emptyPresence=next.present;Key verified;return read(verified)&&verified==next;
+ }
+};
+mcd2::hdr_activation::Activation hdrAddonActivation;
+HdrAddonBackend hdrAddonBackend;
+mcd2::hdr_activation::Result update_hdr_addon_activation(bool hdr,bool resident){
+ try{
+  if(advancedRoot.empty()||(GetFileAttributesW(advancedRoot.c_str())&FILE_ATTRIBUTE_REPARSE_POINT))return {false,true};
+  mcd2::providers::store_detail::WriterLock lock(advancedRoot/L"HdrAddonActivation.lock");
+  if(lock.status!=mcd2::providers::StoreStatus::Ok)return {false,true};
+  return hdrAddonActivation.apply(hdr,resident,hdrAddonBackend);
+ }catch(...){return {false,true};}
+}
 void apply_hdr_config(){
  // Pinned RenoDX has no live settings API. Only its own config cache is updated;
  // calibration waits for restart. No private pointers, shader patching or fake live acknowledgement.
- static unsigned seen=0;static bool dirty=false;static unsigned profile=1;
+ static unsigned seen=0,lastBlocked=0;static bool dirty=false;static unsigned profile=1;
  mcd2::display::Intent intent;{std::lock_guard lock(intentMutex);intent=latestIntent;}
  if(!intent.revision||seen==intent.revision)return;
- if(!GetModuleHandleW(L"renodx-ue-extended.addon64")){
-  // Native HDR must be allowed to turn Off without an HDR calibration addon.
-  // Enabling HDR still requires the existing RenoDX calibration/restart gate.
-  hdrRestart=intent.hdr?1u:0u;hdrRevision=intent.hdr?0u:intent.revision;
-  if(!intent.hdr){seen=intent.revision;workerWake.notify_all();}
+ const bool resident=GetModuleHandleW(L"renodx-ue-extended.addon64")!=nullptr;
+ const auto activation=update_hdr_addon_activation(intent.hdr!=0,resident);
+ if(!activation.ready){
+  hdrRestart=1;hdrRevision=0;
+  seen=intent.revision; // Activation is a startup gate, never a per-Present IO retry.
+  if(lastBlocked!=intent.revision){lastBlocked=intent.revision;log<<"{\"kind\":\"hdr_addon_activation\",\"revision\":"<<intent.revision<<",\"restart\":1,\"conflict\":"<<activation.conflict<<"}\n";log.flush();}
   return;
  }
+ if(!intent.hdr){hdrRestart=0;hdrRevision=intent.revision;seen=intent.revision;workerWake.notify_all();return;}
  if(!seen){unsigned selected=1;reshade::get_config_value(nullptr,"renodx","SelectedProfile",selected);if(selected>=1&&selected<=3)profile=selected;}
  auto section=std::string("renodx-preset")+std::to_string(profile);
  const std::array<std::pair<const char*,unsigned>,4> wanted={{{"ToneMapType",intent.hdr?1u:0u},{"ToneMapPeakNits",intent.peak},{"ToneMapGameNits",intent.paper},{"ToneMapUINits",intent.ui}}};
