@@ -144,3 +144,53 @@ or FAIL. The [current procedure](AMD_WINDOWS_CANDIDATE_2026-10-12.md) says to st
 on a new unexplained crash, hang or image corruption. Component isolation and
 installer restoration do not turn those runtime gates into passes. No overall
 Windows pass or exit-crash repair is claimed.
+
+## Follow-up without launching the game
+
+The [offline record](../qualification/providers/windows-dev17/offline-checks.json)
+adds nine passing native Windows owned-host probes on the Radeon 860M. These use
+the exact candidate bridge, pinned current AMD runtimes and, where specified,
+the exact patched framework. Build receipts and checked source hashes connect
+the probes to the retained native artifact. Minecraft and Steam were not started
+during this pass, and no production source or installed payload was changed.
+
+| Isolated check | Result and scope |
+| --- | --- |
+| FSR SR, native D3D12 and framework-wrapped device | Both passed all five SDK quality modes with SDR and HDR synthetic inputs: 160 dispatches/readbacks each, correct region values, ten context retirements, no SDK errors/warnings |
+| AMD FG bridge, sRGB and PQ contracts | Both passed Off/On/Off, 60 generated frames for 60 enabled real frames, host-recording replay after SDK retirement, and idempotent retirement |
+| Presenter switching, sRGB and PQ contracts | Both passed five handoffs, stable COM identity, unsafe-switch refusals, concurrent observation and exact generated counts |
+| Resize, sRGB and PQ contracts | Both passed four handoffs, private data preservation, exact generated counts and retirement with FG still enabled; repeated with disposable `LOCALAPPDATA` |
+| Framework-wrapped resize diagnostic | Passed all four handoffs and FG-active retirement using unchanged production DLLs; a private probe variation explicitly loads the framework as `d3d12.asi` and verifies device wrapping |
+
+An initial framework resize comparison put ReShade at `dxgi.dll`, a path reserved
+for the mod bootstrap in the supported installation. The bridge then required a
+live worker settings snapshot that the isolated host did not supply, refused the
+handoff, and the probe returned 46. This was not an access violation. The corrected
+explicit-load diagnostic passed; the initial comparison is retained as a test
+layout limitation, not a production regression or a full-bootstrap pass.
+
+The original resize hosts also used the real mod-only provider-store directory.
+Their synthetic selections were restored to the sole record matching the prior
+recorded revision/checksum, preserving every field the host did not overwrite.
+Subsequent resize and framework diagnostics redirected `LOCALAPPDATA` to their
+own disposable directories and preserved the restored record's hash. Player and
+account saves were neither read nor restored. Future native runs of these hosts
+must redirect `LOCALAPPDATA` before execution.
+
+Fresh CPU checks passed 32 Python tests, 37 actual-source NGX shutdown ABI and
+ownership checks, 14 FSR ownership/destructor cases, all 128 shared SDK retirement
+combinations, real NT DLL-unload/process-termination detection, concurrent
+bootstrap trace teardown, process-lifetime/borrow fixtures, and the FG capability
+cache/protocol fixture. The disposable installer-core suite passed all 132 checks.
+Initial command/setup mistakes and their corrected successful invocations are
+disclosed in the offline record. All 18 installed owned files, 15 dependencies,
+242 installer entries and 17 payload hashes were reverified; overrides remain
+empty.
+
+Offline dump analysis recovered the game function ranges around the existing
+anchored return chain, but protected/dynamic code and unavailable private symbols
+still prevent a defensible worker identity. No additional shutdown patch is
+justified by this evidence. The prior failed game-exit gate remains unchanged.
+These probes establish synthetic SDK/component behavior, not active game SR/FG,
+Anti-Lag cadence, physical HDR output, visual correctness, performance or clean
+game shutdown. Runtime qualification remains failed/incomplete.

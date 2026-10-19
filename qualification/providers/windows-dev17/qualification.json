@@ -324,5 +324,15 @@
     "reason": "Sample-file replacement failed before quit and terminated the original observer; process was subsequently absent. No exit success/failure inferred.",
     "correction": "Sample publication errors retain the process handle; immutable final exit receipt avoids replacing a concurrently-read sample; locked/unlocked file fixture passed.",
     "repeatRun": 9
+  },
+  "offlineFollowUp": {
+    "record": "offline-checks.json",
+    "gameLaunched": false,
+    "ownedHostProbePasses": 9,
+    "pythonTests": 32,
+    "installerCoreChecks": 132,
+    "productionSourceChanged": false,
+    "exitCrashFixed": false,
+    "windowsRuntimeQualified": false
   }
 }
