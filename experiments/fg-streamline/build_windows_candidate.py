@@ -96,7 +96,8 @@ def copy_current_ui(repo, artifact):
         if hashlib.sha256(source).hexdigest() != expected:
             raise RuntimeError('UI source changed: rebuild UI/metadata instead of reusing the payload')
     manifest = json.loads((repo / 'manifest.json').read_text())
-    if ui['version'] != manifest['version']:
+    expected_version = manifest.get('uiCandidateVersion', manifest['version']) if is_candidate else manifest['version']
+    if ui['version'] != expected_version:
         raise RuntimeError('UI metadata version differs from the manifest')
     blobs = {}
     with zipfile.ZipFile(archive_path) as archive:

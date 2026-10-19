@@ -50,7 +50,10 @@ def build_ui(dotnet, sdk, pack_tools, output, *, actor=None, extra_sources=()):
     if not helpers or not all((sdk / 'ref' / name).is_file() for name in ('NeoRune.Abstractions.dll', 'NeoRune.Game.dll')):
         raise ValueError('Incomplete NeoRune SDK')
     metadata = json.loads((ROOT / 'src/ui/mod-info.json').read_text())
-    version = json.loads((ROOT / 'manifest.json').read_text())['version']
+    manifest = json.loads((ROOT / 'manifest.json').read_text())
+    # The root package still owns frozen preview files; candidate metadata has
+    # its own version, pinned by this same consumed manifest in the UI receipt.
+    version = manifest.get('uiCandidateVersion', manifest['version'])
     sources = [Path(actor).resolve() if actor else ROOT / 'src/ui/ModActor.cs']
     sources += [ROOT / 'src/ui' / name for name in UI_SOURCES[1:]]
     sources += [Path(path).resolve() for path in extra_sources]

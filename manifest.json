@@ -1,5 +1,6 @@
 {
-  "version": "0.4.0-amd.dev.21",
+  "version": "0.3.0-preview.1",
+  "uiCandidateVersion": "0.4.0-amd.dev.21",
   "files": {
     "Dungeons/Binaries/Win64/FGBootstrap.ini": "bd44ca93301b57e358688aaf4eb6df7076784e22cc9200d9a119c7158e776721",
     "Dungeons/Binaries/Win64/FGGuideCapture.ini": "5fb23ccf3916c8cb0d2c560395204590da098da0e8fcf9f74d8db8d40becc25a",

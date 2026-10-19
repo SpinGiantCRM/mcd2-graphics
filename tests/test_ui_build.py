@@ -1,5 +1,6 @@
 """Offline build-contract checks; fake compiler outputs never install a mod."""
 import json
+import shutil
 from pathlib import Path
 import subprocess
 import tempfile
@@ -107,7 +108,9 @@ class UIBuildTests(unittest.TestCase):
             for name in ui.PAYLOAD_NAMES:
                 if name != missing:
                     (self.output / 'Pak' / name).write_bytes(b'payload')
-            version = json.loads((ui.ROOT / 'manifest.json').read_text())['version']
+            manifest = json.loads((ui.ROOT / 'manifest.json').read_text())
+            version = manifest.get('uiCandidateVersion', manifest['version'])
+            self.assertIn('--version=' + version, args)
             (self.output / 'Pak/MCD2Graphics_P.neorune.json').write_text(json.dumps({'mod': 'MCD2Graphics', 'neoRune': '1.0.0', 'version': version}))
             return subprocess.CompletedProcess(command, returncode, diagnostic, '')
         with patch.object(ui.subprocess, 'check_output', return_value=self.version + '\n'), patch.object(ui.subprocess, 'run', side_effect=compiler) as run:
@@ -120,12 +123,27 @@ class UIBuildTests(unittest.TestCase):
         self.assertEqual(set(receipt['sourceFileSHA256']), set(ui.SOURCE_INPUTS))
         self.assertIn('manifest.json', receipt['sourceFileSHA256'])
         self.assertEqual(receipt['sourceFileSHA256']['manifest.json'], ui.source_sha(ui.ROOT / 'manifest.json'))
-        self.assertEqual(receipt['version'], json.loads((ui.ROOT / 'manifest.json').read_text())['version'])
+        manifest = json.loads((ui.ROOT / 'manifest.json').read_text())
+        self.assertEqual(receipt['version'], manifest.get('uiCandidateVersion', manifest['version']))
         self.assertFalse(receipt['WindowsQualified'])
         self.assertFalse(receipt['LinuxRuntimeQualified'])
         self.assertNotIn('trialOnly', receipt)
         self.assertNotIn('tools/ModInfoBuilder/Program.cs', receipt['sourceFileSHA256'])
         self.assertEqual(set(receipt['payloadSHA256']), set(ui.PAYLOAD_NAMES))
+
+    def test_candidate_ui_metadata_version_is_independent_of_frozen_package_version(self):
+        inputs = self.root / 'inputs'
+        for name in ui.SOURCE_INPUTS:
+            path = inputs / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(ui.ROOT / name, path)
+        manifest = json.loads((inputs / 'manifest.json').read_text())
+        manifest.update(version='0.3.0-preview.1', uiCandidateVersion='0.4.0-amd.dev.21')
+        (inputs / 'manifest.json').write_text(json.dumps(manifest))
+        with patch.object(ui, 'ROOT', inputs):
+            receipt = self.compile()
+        self.assertEqual(receipt['version'], '0.4.0-amd.dev.21')
+        self.assertEqual(receipt['sourceFileSHA256']['manifest.json'], ui.source_sha(inputs / 'manifest.json'))
 
     def test_probe_overlay_remains_explicitly_a_trial(self):
         actor = self.root / 'ModActor.cs'

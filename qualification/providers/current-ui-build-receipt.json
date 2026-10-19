@@ -16,14 +16,14 @@
     "src/ui/RuntimeDiagnosticsOverlay.cs": "cde3b72de1a23c161f83ad00cf6900599057d6fcefb026dd8839b494b962a540",
     "src/ui/UpscalingSharpness.cs": "070afd9cfdcf99a1ddc11d8d9cb321235e7daea7933b7e7c31dd824111e60cc8",
     "src/ui/mod-info.json": "c6a2be6c7020c75eb71cd87df7f6f19d84615be6b7d78aded5da65736c68c0de",
-    "build_ui.py": "5fbe1dd456c7177415746e78c1c169a80dc3161962722e124e639659dea8e179",
+    "build_ui.py": "639a193bbf2b74db22f1f6addad6e6b29cfa712c74a81ed29ae7735621f8fd09",
     "dependencies.lock.json": "816304d7cd61b9a9254980656c3b3f21495175f6cad94ef1f0520ed7c7b3b1e5",
-    "manifest.json": "0807f211fab1a3e9d82bc1dfcfb45851d696ef75acd64b04bbb613a16ee80d50"
+    "manifest.json": "f0debf7966d1cbbba889a4b6172b6a155c71b11d8629296be2a906631106006e"
   },
   "payloadSHA256": {
     "MCD2Graphics_P.pak": "9ebbd897bb48c5c25ef7531488134a5448c87a7c772fe8b8affbd2f40afbcfe8",
-    "MCD2Graphics_P.ucas": "6e6a2096fa235b2c0b6637356af221d513179e972c809409d0aa28b29a507776",
-    "MCD2Graphics_P.utoc": "59d741324d5f47a22da7d09c163f098a7bb131338bcd43379132de9b2b7cfedf"
+    "MCD2Graphics_P.ucas": "85dceec65bfbb3ee4132d53ba574f0e703adffb109ca5f1433f026495e321ac5",
+    "MCD2Graphics_P.utoc": "42e9afea0e2e5a7a59f5bee5dcb6ef013128b7b205aa51edf26a45d54a398497"
   },
   "metadataAPI": "Blueprint Loader 2.0 BP_ModInfo; SDK-generated versioned metadata; no popup API",
   "compiler": "NeoRune 1.0.0 / .NET reference pack 10.0.13",
@@ -83,5 +83,5 @@
   "WindowsQualified": false,
   "LinuxRuntimeQualified": false,
   "publishedPayloadChanged": false,
-  "archiveSHA256": "b175eb1513b5567be714cad01235b8d497b14fb813c05144beed8e887d175701"
+  "archiveSHA256": "f1a43e3db3ecad3e287b6bb3b88a6c4a30c7f8d61f1708bab5ea50938707c14f"
 }

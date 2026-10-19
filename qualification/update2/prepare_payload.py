@@ -4,7 +4,9 @@ from pathlib import Path
 root=Path(__file__).resolve().parents[2]
 manifest=json.loads((root/'manifest.json').read_text())
 expected=manifest['files'];output=root/'dist/qualified-own'
-archive = root/('qualification/fg-release/own-payload.zip' if manifest['version']=='0.3.0-preview.1' else 'qualification/update2/own-payload.zip')
+if manifest['version']!='0.3.0-preview.1':
+    raise ValueError('Unsupported legacy qualification version; use its explicit candidate packaging workflow')
+archive = root/'qualification/fg-release/own-payload.zip'
 with zipfile.ZipFile(archive) as z:
     if len(z.infolist())!=len(expected) or set(z.namelist())!=set(expected):
         raise ValueError('Qualification archive members differ from the manifest')

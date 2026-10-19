@@ -9,6 +9,7 @@ import subprocess
 import json
 import re
 import shutil
+import hashlib
 from unittest.mock import patch
 
 spec = importlib.util.spec_from_file_location('windows_candidate', Path(__file__).with_name('build_windows_candidate.py'))
@@ -171,6 +172,52 @@ class WindowsBuildChecks(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, 'Incomplete candidate UI source provenance'):
                 candidate.copy_current_ui(repo, artifact)
             self.assertFalse(artifact.exists())
+
+    def test_candidate_ui_version_binding_is_separate_and_fail_closed(self):
+        receipt = json.loads((candidate.REPO / 'qualification/providers/current-ui-build-receipt.json').read_text())
+        receipt['version'] = '0.4.0-amd.dev.21'
+        sources = {name: ('fixture source ' + name).encode() for name in receipt['sourceFileSHA256']}
+        with tempfile.TemporaryDirectory() as temporary:
+            repo = Path(temporary)
+            path = repo / 'qualification/providers/current-ui-build-receipt.json'
+            path.parent.mkdir(parents=True)
+            shutil.copyfile(candidate.REPO / 'qualification/providers/current-ui-payload.zip', path.with_name('current-ui-payload.zip'))
+            for number, version in enumerate(['0.4.0-amd.dev.21', '0.3.0-preview.1', '', None]):
+                manifest = {'version': '0.3.0-preview.1', 'files': {}}
+                if version is not None:
+                    manifest['uiCandidateVersion'] = version
+                sources['manifest.json'] = json.dumps(manifest).encode()
+                (repo / 'manifest.json').write_bytes(sources['manifest.json'])
+                receipt['sourceFileSHA256'] = {name: hashlib.sha256(data).hexdigest() for name, data in sources.items()}
+                path.write_text(json.dumps(receipt))
+                artifact = repo / ('artifact-' + str(number))
+                with patch.object(candidate.subprocess, 'check_output', side_effect=lambda args: sources[args[-1][5:]]):
+                    if number == 0:
+                        candidate.copy_current_ui(repo, artifact)
+                        self.assertEqual(json.loads((artifact / 'ui/build-receipt.json').read_text())['version'], '0.4.0-amd.dev.21')
+                    else:
+                        with self.assertRaisesRegex(RuntimeError, 'UI metadata version differs'):
+                            candidate.copy_current_ui(repo, artifact)
+                        self.assertFalse(artifact.exists())
+
+    def test_frozen_ui_fallback_keeps_package_version(self):
+        receipt = json.loads((candidate.REPO / 'qualification/fg-release/ui-build-receipt.json').read_text())
+        sources = {'src/ui/ModActor.cs': b'frozen actor', 'tools/ModInfoBuilder/Program.cs': b'frozen metadata builder'}
+        receipt['sourceSHA256'] = hashlib.sha256(sources['src/ui/ModActor.cs']).hexdigest()
+        receipt['modInfoBuilderSHA256'] = hashlib.sha256(sources['tools/ModInfoBuilder/Program.cs']).hexdigest()
+        with tempfile.TemporaryDirectory() as temporary:
+            repo = Path(temporary)
+            path = repo / 'qualification/fg-release/ui-build-receipt.json'
+            path.parent.mkdir(parents=True)
+            path.write_text(json.dumps(receipt))
+            shutil.copyfile(candidate.REPO / 'qualification/fg-release/own-payload.zip', path.with_name('own-payload.zip'))
+            manifest = json.loads((candidate.REPO / 'manifest.json').read_text())
+            manifest.update(version='0.3.0-preview.1', uiCandidateVersion='0.4.0-amd.dev.21')
+            (repo / 'manifest.json').write_text(json.dumps(manifest))
+            artifact = repo / 'artifact'
+            with patch.object(candidate.subprocess, 'check_output', side_effect=lambda args: sources[args[-1][5:]]):
+                candidate.copy_current_ui(repo, artifact)
+            self.assertEqual(json.loads((artifact / 'ui/build-receipt.json').read_text())['version'], '0.3.0-preview.1')
 
     def test_stale_metadata_source_is_refused_before_writing(self):
         with tempfile.TemporaryDirectory() as temporary:
