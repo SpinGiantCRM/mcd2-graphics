@@ -35,7 +35,7 @@ def build_ui(dotnet, sdk, pack_tools, output, *, actor=None, extra_sources=()):
     dotnet, sdk, pack_tools, output = (Path(p).resolve() for p in (dotnet, sdk, pack_tools, output))
     if output.exists() and any(output.iterdir()):
         raise ValueError('UI output directory must be empty')
-    pins = json.loads((ROOT / 'dependencies.lock.json').read_text())['buildDependencies']
+    pins = json.loads((ROOT / 'dependencies.lock.json').read_text(encoding='utf-8'))['buildDependencies']
     nuspec = ET.parse(sdk / 'NeoRune.Sdk.nuspec').getroot()
     version = next(node.text for node in nuspec.iter() if node.tag.rsplit('}', 1)[-1] == 'version')
     if version != pins['NeoRuneSDK'] or version != pins['NeoRuneTool']:
@@ -49,8 +49,8 @@ def build_ui(dotnet, sdk, pack_tools, output, *, actor=None, extra_sources=()):
     helpers = sorted((sdk / 'src').glob('*.cs'))
     if not helpers or not all((sdk / 'ref' / name).is_file() for name in ('NeoRune.Abstractions.dll', 'NeoRune.Game.dll')):
         raise ValueError('Incomplete NeoRune SDK')
-    metadata = json.loads((ROOT / 'src/ui/mod-info.json').read_text())
-    manifest = json.loads((ROOT / 'manifest.json').read_text())
+    metadata = json.loads((ROOT / 'src/ui/mod-info.json').read_text(encoding='utf-8'))
+    manifest = json.loads((ROOT / 'manifest.json').read_text(encoding='utf-8'))
     # The root package still owns frozen preview files; candidate metadata has
     # its own version, pinned by this same consumed manifest in the UI receipt.
     version = manifest.get('uiCandidateVersion', manifest['version'])
@@ -80,7 +80,7 @@ def build_ui(dotnet, sdk, pack_tools, output, *, actor=None, extra_sources=()):
     for name in PAYLOAD_NAMES:
         if not (output / 'Pak' / name).is_file() or not (output / 'Pak' / name).stat().st_size:
             raise RuntimeError('Compiler did not produce the complete UI package')
-    sdk_receipt = json.loads((output / 'Pak/MCD2Graphics_P.neorune.json').read_text())
+    sdk_receipt = json.loads((output / 'Pak/MCD2Graphics_P.neorune.json').read_text(encoding='utf-8'))
     if sdk_receipt.get('neoRune') != pins['NeoRuneTool'] or sdk_receipt.get('version') != version or sdk_receipt.get('mod') != 'MCD2Graphics':
         raise RuntimeError('Compiler metadata receipt differs from the requested build')
     receipt = {

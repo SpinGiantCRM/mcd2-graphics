@@ -96,7 +96,8 @@ class UIBuildTests(unittest.TestCase):
     def compile(self, *, diagnostic='', returncode=0, missing=None, **kwargs):
         def compiler(command, **options):
             self.assertEqual(command[:2], [str(self.dotnet.resolve()), str(self.sdk.resolve() / 'tools/neorune.dll')])
-            args = Path(command[-1][1:]).read_text().splitlines()
+            args = Path(command[-1][1:]).read_text(encoding='utf-8').splitlines()
+            self.compiler_arguments = args
             self.assertIn('--source=' + str(self.sdk.resolve() / 'src/ModSettings.cs'), args)
             self.assertIn('--source=' + str(self.sdk.resolve() / 'src/Trail.cs'), args)
             self.assertTrue(any(arg.startswith('--description=') for arg in args))
@@ -130,6 +131,23 @@ class UIBuildTests(unittest.TestCase):
         self.assertNotIn('trialOnly', receipt)
         self.assertNotIn('tools/ModInfoBuilder/Program.cs', receipt['sourceFileSHA256'])
         self.assertEqual(set(receipt['payloadSHA256']), set(ui.PAYLOAD_NAMES))
+
+    def test_utf8_metadata_reaches_compiler_under_cp1252_default(self):
+        # Reproduce Windows' legacy default even on UTF-8 CI hosts. Inspect the
+        # actual response consumed by the SDK, not a second metadata parser.
+        original_read = Path.read_text
+        def legacy_read(path, encoding=None, errors=None):
+            return original_read(path, encoding=encoding or 'cp1252', errors=errors)
+        expected = json.loads((ui.ROOT / 'src/ui/mod-info.json').read_bytes().decode('utf-8'))
+        self.assertIn('\u2192', expected['description'])
+        self.assertIn('\u2019', expected['description'])
+        with patch.object(Path, 'read_text', legacy_read):
+            self.compile()
+        for field, flag in [('title', 'title'), ('author', 'author'),
+                            ('authorURL', 'author-url'), ('description', 'description')]:
+            self.assertIn('--' + flag + '=' + expected[field], self.compiler_arguments)
+        corrupt = expected['description'].encode('utf-8').decode('cp1252')
+        self.assertNotIn('--description=' + corrupt, self.compiler_arguments)
 
     def test_candidate_ui_metadata_version_is_independent_of_frozen_package_version(self):
         inputs = self.root / 'inputs'
