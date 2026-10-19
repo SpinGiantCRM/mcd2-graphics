@@ -9,7 +9,12 @@ restore only the still-owned value. The volatile receipt must reject a previous
 renderer session, yield to external edits and bound restoration retries. Native
 selection never acquires the lease. Preserve all shader/resource/SDK/source-ACK
 gates, managed ownership checks, both CI platforms and a real UI/ModInfo rebuild.
-The control does not qualify the final lease, wider lifecycle or shutdown.
+The source-built lease passed a bounded Windows Native → FSR Quality → Native
+check: matching SDK counts advanced, full source scale returned, and the original
+quality was restored on the first attempt. Keep the
+[runtime record](../qualification/providers/windows-fsr-quality-fix-2026-10-19.json):
+the same process exited with an access violation, so wider lifecycle, all
+presets, the complete installer and shutdown remain unqualified.
 
 AMD FG provider enumeration must not run repeatedly on the render thread. On
 Windows/Radeon 860M the unchanged SDK support query took 127-278 ms per call,

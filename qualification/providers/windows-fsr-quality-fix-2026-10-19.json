@@ -1,0 +1,113 @@
+{
+  "date": "2026-10-19",
+  "sourceCommit": "1056af5ba98910c8143ada5849554c6c17da3a1b",
+  "branch": "development/amd-colour-resize",
+  "decision": "Bounded FSR Quality activation and Native restoration PASS; complete Windows qualification remains FAIL on exit access violation",
+  "machine": {
+    "gpu": "AMD Radeon(TM) 860M Graphics",
+    "driver": "32.0.31041.1004",
+    "steamBuild": 25754144,
+    "shippingSHA256": "3a8703406fd50520f83c4f70a0212c000cb3b584ef28eb38032902230c01ebdd"
+  },
+  "cause": {
+    "originalTemporalQuality": 1,
+    "workingTemporalQuality": 2,
+    "originalShader": "62de03a8",
+    "workingShader": "03645dc9",
+    "sharedRootParameterAndViewLayouts": true,
+    "originalHasAdditionalUavOutput": true,
+    "allowlistExpanded": false,
+    "shaderSHA256": {
+      "03645dc9": "8ea8a1ef46d6e26a26c447e40185d90254726a52ad2ea1b5fc213f325d6ccf0d",
+      "62de03a8": "1d119ce3ba26a06a109c78948fbb8171d029190f6448a387ccda8480a5078fc4"
+    },
+    "discardedHypothesis": "r.PostProcessAAQuality is absent in this game build. Its zero readback was not proof of disabled AA. Neither the startup override nor console command provided a valid AA control."
+  },
+  "fix": "Acquire the verified single-output temporal producer only for matching FSR preflight. Retain ownership through retirement/world transition, restore only a still-owned value after rollback, reject previous-session receipts and yield to external edits.",
+  "testPayload": {
+    "productionSourceUi": true,
+    "uiPayloadSHA256": {
+      "MCD2Graphics_P.pak": "2e24d47b7dc17c3bffc3d60903c4bab3b2e8999b8ddbf441bd4f773c919dce61",
+      "MCD2Graphics_P.ucas": "118cab28da95e32c02e95c1c32aa93f017574c88cdb42bedc3c7ad94cee43205",
+      "MCD2Graphics_P.utoc": "9a29e7b23e5322c82471331299cd819a46d649761a3f0dc7a92421942a221001"
+    },
+    "guideCacheAddonSHA256": "e3ad05596e271c02284b93c07de3fc94b90340fd0d39f29a39d2d5849ee1dbc0",
+    "renderingAddonSHA256": "0d16c5a41c80cea853c09d27bb0cb7024a37e32a951e333ab0da651a46b7d644",
+    "fullFgControlsRestored": true,
+    "privateTimingShaderAndOneShotProbesRemoved": true,
+    "completeInstallerQualified": false
+  },
+  "fsrQuality": {
+    "phase": 5,
+    "runtimeError": 0,
+    "evaluationsFirst": 107,
+    "evaluationsLast": 717,
+    "verifiedSamples": 20,
+    "sampleSpanSeconds": 19.085,
+    "renderSize": [
+      1280,
+      800
+    ],
+    "outputSize": [
+      1920,
+      1200
+    ],
+    "session": 89576021,
+    "world": 2,
+    "revision": 130,
+    "authorityChecksum": 794293189,
+    "allSamplesHaveMatchingCrcSessionRevisionWorld": true,
+    "originalQualityReceipt": 1
+  },
+  "nativeRestoration": {
+    "currentMatchingSamples": 16,
+    "sourceScaleMicro": 100000000,
+    "leaseOwned": false,
+    "externallyBlocked": false,
+    "originalQuality": 1,
+    "restoreAttempts": 1
+  },
+  "shippingExit": {
+    "heldProcessHandle": true,
+    "code": -1073741819,
+    "hex": "0xC0000005",
+    "userReportedClosed": true,
+    "windowsApplicationErrorCorroborates": true,
+    "faultModule": "unknown",
+    "causeEstablished": false
+  },
+  "separateShutdownObservation": {
+    "otherRunExitedZero": true,
+    "snapshotWithoutAttachedDebugger": true,
+    "steamAssertion": "Trying to close low level socket support, but we still have sockets open!",
+    "notEvidenceOfAccessViolationCause": true
+  },
+  "excludedControls": [
+    "Invasive thread snapshot suspended/ended the UI-off run.",
+    "Debugger attachment changed another startup to exit 1000.",
+    "Shader inspection wrote bounded files during loading; its loading stutter is not a clean performance measurement."
+  ],
+  "checks": {
+    "managedClientAndOwnershipFixture": "PASS",
+    "fsrSourceTests": 10,
+    "uiBuildTests": 11,
+    "windowsBuildTests": 13,
+    "realNeoRuneUiBuild": "PASS",
+    "portableCI": 39182219878,
+    "nativeWindowsCI": 39182219848,
+    "amdInstallerCI": 39182219854,
+    "update2InstallerCI": 39182219873,
+    "allFourCIWorkflows": "success"
+  },
+  "notQualified": [
+    "Complete rebuilt installer",
+    "All FSR presets",
+    "Pause/resume and world travel with final source",
+    "Resolution/device recreation",
+    "AMD FG On",
+    "NVIDIA hardware, HDR and physical controller",
+    "Linux runtime",
+    "Shutdown stability"
+  ],
+  "privateLogsDumpsShaderBytecodeAndPlayerDataCommitted": false
+}
