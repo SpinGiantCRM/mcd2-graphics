@@ -1,7 +1,8 @@
 # Windows dev.17 qualification with current dependencies
 
 **FAIL: the full candidate reproduced the intermittent normal-exit access
-violation. Qualification remains in progress; this is not release approval.**
+violation. Wider active-runtime qualification stopped under the checklist crash
+rule; this is not release approval.**
 The [machine-readable record](../qualification/providers/windows-dev17/qualification.json)
 contains the exact installer, manifest, dependency-lock hashes and completed
 component controls. Older successful component tests retain their original scope.
@@ -64,6 +65,14 @@ removed all 18 owned/private-DLSS files, restored the original framework proxy,
 and retained the 14 verified external files. The disposable Windows installer-core
 suite passed all 132 checks. Correct files were restored before every launch.
 
+The five checklist dependency override paths also passed their GUI checks:
+ReShade, RenoDX, Loader, DLSS and Streamline each required the explicit checkbox,
+accepted the recognized installed set, and changed only that dependency's status.
+Clearing each override restored normal recognition. Closing with the final
+temporary override selected and reopening reset all overrides to Off. These
+checks do not establish unknown future-runtime compatibility. No vendor binary
+was modified, and the final installation has an empty override receipt.
+
 The automation helper rejected the native dependency picker as a different
 target window. That picker path is **NOT RUN**. Official, hash-verified external
 files were prepared separately; normal GUI installation then recorded private
@@ -96,7 +105,13 @@ explicit-anchor return chain matched the full-package fault. The candidate
 
 These small, differently timed samples exclude our native/UI payload as a
 necessary condition for that reproduction. They do not prove a RenoDX,
-framework, game or computer-control defect. Component isolation is continuing.
+framework, game or computer-control defect. A further original-framework plus
+Loader control, with RenoDX removed, also reproduced the same read from `0x10`
+and explicit-anchor return chain. RenoDX is therefore not required for that
+reproduction. The exact patched candidate framework by itself, with Loader,
+RenoDX and all our payload absent, exited 0 after 86.70 seconds. That different
+framework/layout result does not explain the full candidate failure, and its
+unexplained delay remains material. Faulting workers had no recorded thread name.
 The separate descriptor-heap regression remains fixed; this recurring game AV
 must not be described as repaired by that change.
 
@@ -105,6 +120,27 @@ Physical Escape worked in an earlier run. Record this automation limitation
 separately from mod behavior; do not change gameplay code to accommodate it.
 Raw dumps, logs, account/party identifiers and recovery copies remain private.
 
+All diagnostic file moves were restored exactly. The full supported candidate
+was then reinstalled through its normal GUI and passed Repair/Verify. All 18
+owned files and 15 dependency files matched, with overrides empty. Its normal
+Steam launch reached the main menu with Loader 2.6 and all 14 expected loaded
+native component hashes. No player/account saves were read or rolled back.
+
+The first post-reinstall startup run's exit code is unavailable: a sample-file
+replacement error terminated its observer before the normal Quit request. The
+later absence of the process is not counted as exit-code evidence. The private
+collector was corrected to retain its held process handle when sample publication
+fails and to publish an immutable final exit receipt. A locked/unlocked-file
+fixture exercised the failure and recovery paths before an unchanged-candidate
+repeat. This collection correction changes no game, addon or vendor bytes.
+The repeat's immutable held-process receipt recorded exit code 0, 5.29 seconds
+from main-menu Quit confirmation to the two-second observer, without a clock
+gap. This was a startup/main-menu check with no gameplay; it does not replace
+the earlier failed full-package gameplay exit or establish a shutdown fix.
+
 The remaining active-FSR preset matrix, AMD FG/Anti-Lag advancing counters and
-Off recovery, output lifecycle, repeated full-package clean exits, and final
-normal reinstall/verification are pending. No overall Windows pass is claimed.
+Off recovery, output lifecycle and repeated full-package clean exits are NOT RUN
+or FAIL. The [current procedure](AMD_WINDOWS_CANDIDATE_2026-10-12.md) says to stop
+on a new unexplained crash, hang or image corruption. Component isolation and
+installer restoration do not turn those runtime gates into passes. No overall
+Windows pass or exit-crash repair is claimed.

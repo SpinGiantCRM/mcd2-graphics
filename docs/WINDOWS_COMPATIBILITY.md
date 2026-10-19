@@ -4,8 +4,10 @@ snapshot inputs separately from the frozen older packages. Its first full-packag
 ordinary quit reproduced the intermittent game-worker AV. A control also
 reproduced the matching return chain with the original framework and current
 RenoDX, while all our native/UI payload was absent. Two clean-game controls and
-one UI-only control exited 0. These bounded controls do not identify the precise
-cause or qualify Windows shutdown. Preserve the explicit failed qualification,
+one UI-only control exited 0. Removing RenoDX from the original-framework/Loader
+control still reproduced the same fault chain. The exact candidate framework
+alone exited 0 after 86.70 seconds. These bounded controls do not identify the
+precise cause or qualify Windows shutdown. Preserve the failed qualification,
 exact loaded hashes, private recovery data and remaining runtime gates.
 
 The Windows candidate framework also applies upstream ReShade

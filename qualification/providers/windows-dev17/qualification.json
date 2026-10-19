@@ -16,7 +16,7 @@
   "frameworkBundled": false,
   "vendorRuntimeBundled": false,
   "windowsRuntimeQualified": false,
-  "status": "FAIL: ordinary quit access violation; clean-game isolation in progress",
+  "status": "FAIL: unexplained full-candidate normal-exit AV; wider active-runtime qualification stopped under the checklist crash rule",
   "installerChecks": {
     "freshGuiInstall": "PASS",
     "duplicateInstallRefusal": "PASS",
@@ -30,7 +30,9 @@
     "coreDisposableFixtures": "PASS 132 checks",
     "nativeDownloadedFilePicker": "NOT RUN: automation helper refused the native owned picker as a different target window",
     "dependencyPreparation": "Official hash-verified external files preinstalled separately, including private DLSS; normal GUI installation adopted and recorded its ownership",
-    "intactUninstall": "PASS normal GUI: all18 owned/privateDLSS removed, originalproxy restored, all14 external dependencies retained and verified before private control hold"
+    "intactUninstall": "PASS normal GUI: all18 owned/privateDLSS removed, originalproxy restored, all14 external dependencies retained and verified before private control hold",
+    "dependencyOverrideGui": "PASS for the five checklist dependencies: explicit checkbox, Use installed version, isolated override status, clear/reopen to defaults Off; recognized real sets used and no vendor bytes changed",
+    "finalNormalReinstallAndVerify": "PASS: normal GUI Install then Repair/Verify; all18 own and15 dependency hashes verified, all diagnostic holds restored, overrides empty"
   },
   "hardwareUnavailable": [
     "Windows NVIDIA feature activation and DRS profile path",
@@ -41,8 +43,7 @@
     "AMD FG and Anti-Lag activity/Off recovery",
     "Advanced keyboard/reset/persistence",
     "Actual output lifecycle SDR/HDR",
-    "Three ordinary exit codes and retirement/timing",
-    "Final uninstall/reinstall"
+    "Three ordinary exit codes and retirement/timing"
   ],
   "normalExits": [
     {
@@ -53,6 +54,15 @@
       "observerIntervalSeconds": 2,
       "clockGapObserved": false,
       "dumpSHA256": "320445e04124b9406c9bc1dc04da9feaccd7d5e1f3a2420733a8e5cb02b40360"
+    },
+    {
+      "run": 9,
+      "route": "starting-menu Quit confirmation, repeated unchanged full candidate after collector correction",
+      "exitCodeHex": "00000000",
+      "elapsedToObserverSeconds": 5.286,
+      "observerIntervalSeconds": 2,
+      "clockGapObserved": false,
+      "gameplay": false
     }
   ],
   "diagnosticControls": [
@@ -61,6 +71,8 @@
       "variant": "Clean Steam, no mod, Loader, framework or vendor chain",
       "route": "Normal window close from hub",
       "exitCodeHex": "00000000",
+      "elapsedToObserverSeconds": 4.265,
+      "observerIntervalSeconds": 2,
       "clockGapObserved": false,
       "loadedGraphicsModules": {}
     },
@@ -69,6 +81,8 @@
       "variant": "Clean Steam, no mod, Loader, framework or vendor chain",
       "route": "Starting-menu Quit confirmation",
       "exitCodeHex": "00000000",
+      "elapsedToObserverSeconds": 6.127,
+      "observerIntervalSeconds": 2,
       "clockGapObserved": false,
       "loadedGraphicsModules": {}
     },
@@ -77,6 +91,8 @@
       "variant": "Loader 2.6 and exact production UI only; all native graphics components absent",
       "route": "Starting-menu Quit confirmation after opening mod page",
       "exitCodeHex": "00000000",
+      "elapsedToObserverSeconds": 5.263,
+      "observerIntervalSeconds": 2,
       "clockGapObserved": false,
       "loadedGraphicsModules": {}
     },
@@ -85,10 +101,36 @@
       "variant": "Original ReShade proxy and current RenoDX plus Loader 2.6; all own payload absent; candidate d3d12.asi not loaded",
       "route": "Normal window close from hub",
       "exitCodeHex": "C0000005",
+      "elapsedToObserverSeconds": 8.383,
+      "observerIntervalSeconds": 2,
       "clockGapObserved": false,
       "loadedGraphicsModules": {
         "dxgi.dll": "0cee63f9c9f13f3ac909c5b4903f4dbb4b719a7ab3b4f13b0deaf83c814b94f7",
         "renodx-ue-extended.addon64": "f828bb9ced6cba8843842c10c59c57460e8c3d8243a715c40ec752c6c4c2f568"
+      }
+    },
+    {
+      "run": 6,
+      "variant": "Original ReShade proxy and Loader 2.6; RenoDX held; all own payload absent; candidate d3d12.asi not loaded",
+      "route": "Normal window close from hub",
+      "exitCodeHex": "C0000005",
+      "elapsedToObserverSeconds": 9.311,
+      "observerIntervalSeconds": 2,
+      "clockGapObserved": false,
+      "loadedGraphicsModules": {
+        "dxgi.dll": "0cee63f9c9f13f3ac909c5b4903f4dbb4b719a7ab3b4f13b0deaf83c814b94f7"
+      }
+    },
+    {
+      "run": 7,
+      "variant": "Exact candidate47d ReShade standalone dxgi; all own native/UI, Loader and RenoDX absent; vendor bridges not loaded",
+      "route": "Normal window close from hub",
+      "exitCodeHex": "00000000",
+      "elapsedToObserverSeconds": 86.704,
+      "observerIntervalSeconds": 2,
+      "clockGapObserved": false,
+      "loadedGraphicsModules": {
+        "dxgi.dll": "47d415dd919854b143e942b203e2b595a932a00d543bdb25c971609f4e17427c"
       }
     }
   ],
@@ -111,7 +153,14 @@
     "offlineAnalysisOnly": true,
     "liveDebuggerAttached": false,
     "rootCauseProven": false,
-    "rawDumpPublished": false
+    "rawDumpPublished": false,
+    "withoutRenoDX": {
+      "run": 6,
+      "exception": "C0000005",
+      "readAddress": "0x10",
+      "sameExplicitAnchorReturnChain": true,
+      "dumpSHA256": "f94cf1aeef771676b077a079b0037ca3657cde9860c10270d1d91be19bdca1fa"
+    }
   },
   "checklist": {
     "B1": {
@@ -155,8 +204,8 @@
       "observation": "Changed shader refused by Repair and Uninstall without mutation; exact bytes restored before launch"
     },
     "I7": {
-      "status": "NOT RUN",
-      "observation": "All dependency override acknowledgement/default-reset GUI paths pending"
+      "status": "PASS",
+      "observation": "ReShade/RenoDX/Loader/DLSS/Streamline: explicit checkbox, Use installed version, isolated status, reset to pinned set; reopened installer defaults all Off. Uses recognized real files, not a future-version runtime compatibility test"
     },
     "I8": {
       "status": "PASS",
@@ -167,8 +216,8 @@
       "observation": "Intact normal GUI uninstall removed all18 owned/privateDLSS files, restored original proxy, retained14 verified external files"
     },
     "I10": {
-      "status": "NOT RUN",
-      "observation": "Final reinstall/Verify/launch pending after component isolation"
+      "status": "PASS",
+      "observation": "Final normal GUI reinstall, Verify and Steam launch reached main menu with Loader2.6; all14 loaded native component hashes matched, all18 owned files verified"
     },
     "U1": {
       "status": "NOT RUN",
@@ -243,12 +292,37 @@
       "observation": "Actual held process exited within120 seconds; no game force-kill, no clock gap"
     },
     "E3": {
-      "status": "NOT RUN",
-      "observation": "Diagnostic files guarded and partly restored; final supported candidate installation pending"
+      "status": "PASS",
+      "observation": "All exact diagnostic holds restored; normal GUI candidate reinstall/Verify and all18 own/15 dependency hashes passed; no player/account save rollback"
     },
     "E4": {
       "status": "PASS",
       "observation": "Sanitized partial report and aggregate retain exact inputs, failed gates and limitations; no release approval"
     }
+  },
+  "restoration": {
+    "candidateVersion": "0.4.0-amd.dev.17",
+    "ownedFilesVerified": 18,
+    "dependencyFilesVerified": 15,
+    "dependencyOverrides": {},
+    "normalGuiInstall": true,
+    "normalGuiVerify": true,
+    "allDiagnosticHoldsRestored": true,
+    "privateDlssSHA256": "d00b5b0ab29c3ca101b70c3a5ecb3a01b7ef33766a3383a28a18623083e6123e",
+    "playerAccountSavesRead": false,
+    "playerAccountSavesRestored": false,
+    "repeatStartupAndNormalExit": {
+      "run": 9,
+      "exitCodeHex": "00000000",
+      "elapsedToObserverSeconds": 5.286,
+      "loadedNativeFilesVerified": 14
+    }
+  },
+  "collectorLimitation": {
+    "run": 8,
+    "exitCodeRecorded": false,
+    "reason": "Sample-file replacement failed before quit and terminated the original observer; process was subsequently absent. No exit success/failure inferred.",
+    "correction": "Sample publication errors retain the process handle; immutable final exit receipt avoids replacing a concurrently-read sample; locked/unlocked file fixture passed.",
+    "repeatRun": 9
   }
 }
