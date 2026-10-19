@@ -118,6 +118,9 @@ class UIBuildTests(unittest.TestCase):
     def test_build_generates_metadata_and_complete_source_receipt(self):
         receipt = self.compile()
         self.assertEqual(set(receipt['sourceFileSHA256']), set(ui.SOURCE_INPUTS))
+        self.assertIn('manifest.json', receipt['sourceFileSHA256'])
+        self.assertEqual(receipt['sourceFileSHA256']['manifest.json'], ui.source_sha(ui.ROOT / 'manifest.json'))
+        self.assertEqual(receipt['version'], json.loads((ui.ROOT / 'manifest.json').read_text())['version'])
         self.assertFalse(receipt['WindowsQualified'])
         self.assertFalse(receipt['LinuxRuntimeQualified'])
         self.assertNotIn('trialOnly', receipt)

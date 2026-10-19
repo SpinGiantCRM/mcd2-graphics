@@ -20,8 +20,12 @@ std::vector<uint8_t> read(const std::filesystem::path&p){std::ifstream f(p,std::
 bool fresh(const std::filesystem::path&p){WIN32_FILE_ATTRIBUTE_DATA a{};if(!GetFileAttributesExW(p.c_str(),GetFileExInfoStandard,&a))return false;FILETIME now{};GetSystemTimeAsFileTime(&now);ULARGE_INTEGER n{},v{};n.LowPart=now.dwLowDateTime;n.HighPart=now.dwHighDateTime;v.LowPart=a.ftLastWriteTime.dwLowDateTime;v.HighPart=a.ftLastWriteTime.dwHighDateTime;return v.QuadPart<=n.QuadPart && n.QuadPart-v.QuadPart<15000000;}
 void init(const std::filesystem::path&folder){settingsPath=folder.parent_path()/L"SaveGames"/L"MCD2GraphicsFGSettings.sav";runtimePath=folder.parent_path()/L"SaveGames"/L"MCD2GraphicsFGRuntime.sav";session=(GetCurrentProcessId()^unsigned(GetTickCount64()))&0x7fffffff;if(!session)session=1;}
 void publish(unsigned active,bool ready){
- if(!enabled)return;const unsigned phase=fault?6:(!intent.mode?0:(!intent.ready?1:(active?3:2)));
- auto bytes=mcd2::fgui::encode(seed,{{"SchemaVersion",1},{"Revision",intent.revision},{"SessionId",session},{"Available",available},{"Active",active},{"Phase",phase},{"RestartRequired",restartRequired},{"AvailableProviders",availableProviders},{"StartupOwner",startupOwner},{"PresenterRoute",presenterRoute},{"PresenterCanSwitch",presenterCanSwitch},{"PresenterSettingsRevision",presenterSettingsRevision}});
+ if(!enabled)return;
+ auto nativeModule=GetModuleHandleW(L"mcd2-graphics.addon64");
+ auto nativeRetired=nativeModule?reinterpret_cast<int(*)()>(GetProcAddress(nativeModule,"mcd2_native_fg_retired_v1")):nullptr;
+ const unsigned nativeGuidesRetired=nativeRetired&&nativeRetired()==1?1u:0u;
+ const unsigned phase=fault?6:(!intent.mode?0:(!intent.ready?1:(active?3:2)));
+ auto bytes=mcd2::fgui::encode(seed,{{"SchemaVersion",1},{"Revision",intent.revision},{"SessionId",session},{"Available",available},{"Active",active},{"Phase",phase},{"RestartRequired",restartRequired},{"AvailableProviders",availableProviders},{"StartupOwner",startupOwner},{"PresenterRoute",presenterRoute},{"PresenterCanSwitch",presenterCanSwitch},{"PresenterSettingsRevision",presenterSettingsRevision},{"NativeGuidesRetired",nativeGuidesRetired}});
  if(bytes.empty()||bytes==lastPublished)return;auto tmp=runtimePath;tmp+=L".fg.tmp";std::ofstream f(tmp,std::ios::binary|std::ios::trunc);if(!f.write(reinterpret_cast<const char*>(bytes.data()),bytes.size()))return;f.close();if(MoveFileExW(tmp.c_str(),runtimePath.c_str(),MOVEFILE_REPLACE_EXISTING|MOVEFILE_WRITE_THROUGH))lastPublished=std::move(bytes);
 }
 void poll(a::device*device,const std::filesystem::path&policy,unsigned active){

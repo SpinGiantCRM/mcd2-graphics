@@ -4,12 +4,12 @@
 #include <iostream>
 
 // Synthetic mod-only GVAS envelope. No game/account/save data is included.
-std::vector<uint8_t> fixture(std::vector<std::pair<std::string,unsigned>> fields){
+std::vector<uint8_t> fixture(std::vector<std::pair<std::string,unsigned>> fields,bool runtime=false){
  std::vector<uint8_t> b;
  auto num=[&](unsigned v,unsigned n){for(unsigned i=0;i<n;++i)b.push_back(uint8_t(v>>(i*8)));};
  auto str=[&](const std::string&s){num(unsigned(s.size()+1),4);b.insert(b.end(),s.begin(),s.end());b.push_back(0);};
  num(0x53415647,4);num(3,4);num(522,4);num(1017,4);num(5,2);num(6,2);num(1,2);num(0,4);str("UE5");num(3,4);num(93,4);b.resize(b.size()+93*20);
- str("/Game/Mods/MCD2Graphics/FGSettingsSave.FGSettingsSave_C");num(0,1);
+ str(runtime?"/Game/Mods/MCD2Graphics/FGRuntimeSave.FGRuntimeSave_C":"/Game/Mods/MCD2Graphics/FGSettingsSave.FGSettingsSave_C");num(0,1);
  fields.insert(fields.begin(),{{"SchemaVersion",1},{"Revision",19},{"Mode",1},{"ContextReady",1},{"SessionId",123},{"SettingsRevision",42}});
  for(auto& [name,value]:fields){str(name);str("IntProperty");num(0,4);num(4,4);num(0,1);num(value,4);}str("None");num(0,4);return b;
 }
@@ -50,4 +50,9 @@ int main(){
   {{"FGProvider",1},{"fgProvider",1}},{{"fgProvider",2}},{{"fgProvider",1},{"PROVIDER",0}}})
   assert(!mcd2::fgui::decode(fixture(fields),i));
  std::cout<<"FG provider framing, legacy FName alias, current metadata and duplicate/truncation checks pass\n";
+ auto runtimeSeed=fixture({},true);auto encoded=mcd2::fgui::encode(runtimeSeed,{{"SchemaVersion",1},{"NativeGuidesRetired",1}});
+ std::map<std::string,unsigned> fields;size_t header=0;assert(!encoded.empty()&&mcd2::display::parse(encoded,"FGRuntimeSave",fields,header)&&fields["NativeGuidesRetired"]==1);
+ encoded=mcd2::fgui::encode(runtimeSeed,{{"SchemaVersion",1},{"NativeGuidesRetired",0}});fields.clear();assert(!encoded.empty()&&mcd2::display::parse(encoded,"FGRuntimeSave",fields,header)&&!fields.count("NativeGuidesRetired"));
+ assert(mcd2::fgui::encode(runtimeSeed,{{"UnprovenNativeRetirement",1}}).empty());
+
 }

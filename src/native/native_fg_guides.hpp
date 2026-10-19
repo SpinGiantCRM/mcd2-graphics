@@ -18,6 +18,7 @@ struct Generation : SrGuideGeneration {
 static mcd2::process_exit::Lifetime<std::unique_ptr<Generation>,retain_sr_generation> generationLifetime;
 static auto &generation=generationLifetime.get();
 static uint64_t conversions=0,skips=0,retirements=0;
+static bool retirementReleasing=false;
 using Notify=void(*)(void*,void*,void*,const MCD2FGCamera*);
 static Notify notify=nullptr;
 static bool eligible=false;
@@ -88,6 +89,7 @@ static void present(a::command_queue *q,std::unique_lock<std::recursive_mutex>& 
  auto wanted=observer?reinterpret_cast<int(*)()>(GetProcAddress(observer,"mcd2_fg_inputs_wanted")):nullptr;
  const bool request=selected();
  eligible=request&&notify&&wanted&&wanted()==1&&fsr_runtime::current&&GetTickCount64()-fsr_runtime::contextAt<=3000;
+ if(retirementReleasing)return;
  if(!generation){if(eligible){generation=std::make_unique<Generation>();generation->queue=q;}return;}
  auto &c=*generation;if(c.busy)return;if(!eligible)c.gap=true;
  if(!request)c.retiring=true;
@@ -103,10 +105,10 @@ static void present(a::command_queue *q,std::unique_lock<std::recursive_mutex>& 
  auto released=std::move(cache.ready_to_release);cache.ready_to_release.clear();c.busy=true;guard.unlock();
  for(auto &entry:released)LeanBorrowCache::release(entry);guard.lock();c.busy=false;
  if(c.retiring&&cache.recordings.empty()&&cache.entries.empty()&&!cache.blocked){
-  auto retired=std::move(generation);guard.unlock();retired->borrows.clear_after_idle();
+  retirementReleasing=true;auto retired=std::move(generation);guard.unlock();retired->borrows.clear_after_idle();
   for(auto it=retired->owned.resources.rbegin();it!=retired->owned.resources.rend();++it)if(*it)(*it)->Release();
   retired->owned.resources.clear(); // Manual reverse release must not run twice.
-  retired.reset();guard.lock();++retirements;
+  retired.reset();guard.lock();retirementReleasing=false;++retirements;
  }
 }
 }

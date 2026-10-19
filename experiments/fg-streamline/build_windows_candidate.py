@@ -78,7 +78,7 @@ def copy_current_ui(repo, artifact):
     if is_candidate:
         expected_sources = {'src/ui/' + name for name in ('ModActor.cs', 'ProviderSaveWords.cs',
                             'ProviderMenuClient.cs', 'ProviderRuntimeWords.cs', 'ProviderRuntimeClient.cs', 'AdvancedSettings.cs', 'AdvancedInfoWidget.cs', 'AdvancedSettingsPanel.cs', 'NativeSettingsWidgets.cs', 'RuntimeDiagnostics.cs', 'RuntimeDiagnosticsOverlay.cs', 'UpscalingSharpness.cs')}
-        expected_sources.update(('src/ui/mod-info.json', 'build_ui.py', 'dependencies.lock.json'))
+        expected_sources.update(('src/ui/mod-info.json', 'build_ui.py', 'dependencies.lock.json', 'manifest.json'))
         if ui.get('schemaVersion') != 3 or ui.get('trialOnly', False):
             raise RuntimeError('Expected production-source UI build receipt')
         if ui.get('candidateOnly') is not True or set(ui.get('sourceFileSHA256', {})) != expected_sources:

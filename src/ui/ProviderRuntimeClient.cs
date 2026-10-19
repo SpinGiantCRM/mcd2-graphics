@@ -1,6 +1,9 @@
 using NeoRune;
 using UE.Engine;
 
+public class FGSettingsSave : USaveGame {public int SchemaVersion;public int Revision;public int Mode;public int ContextReady;public int SessionId;public int FGProvider;public int SettingsRevision;}
+public class FGRuntimeSave : USaveGame {public int SchemaVersion;public int Revision;public int SessionId;public int Available;public int Active;public int Phase;public int RestartRequired;public int AvailableProviders;public int StartupOwner;public int PresenterRoute;public int PresenterCanSwitch;public int PresenterSettingsRevision;public int NativeGuidesRetired;}
+
 // Volatile game-thread source applier. The actor supplies current world and
 // measured console state; no persistent preference or GPU capability is inferred.
 public class ProviderRuntimeClient : USaveGame {
@@ -21,16 +24,46 @@ public class ProviderRuntimeClient : USaveGame {
   if(quality==0)return 10000;if(quality==5)return custom;
   return quality==1?6700:quality==2?(family==2?5900:5800):quality==3?5000:3300;
  }
- // Acquire the validated single-output TAA producer before source preflight.
+ // Acquire the validated single-output TAA producer for SR or Native FG preflight.
  // This does not acknowledge source scale or authorize SDK evaluation.
- public bool TemporalShaderPreflight(ProviderMenuClient menu){
+ public bool TemporalShaderPreflight(ProviderMenuClient menu,FGSettingsSave? fgSettings=null,FGRuntimeSave? fgRuntime=null){
   if(!menu.Ready || menu.Authority==null || !Enabled || Context==null || State==null ||
      !ContextValid(Context) || !StateValid(State))return false;
   var a=menu.Authority;var c=Context;var s=State;
-  return a.W20==2 && c.W10==1 && s.W18==2 && s.W10==1 && s.W11==0 &&
-   Session==a.W5 && c.W5==Session && s.W5==Session &&
+  bool matching=Session==a.W5 && c.W5==Session && s.W5==Session &&
    c.W9==WorldGeneration && s.W9==WorldGeneration &&
    c.W7==a.W19 && s.W7==a.W19 && c.W8==a.W16 && s.W8==a.W16;
+  if(!matching || c.W10!=1 || s.W11!=0)return false;
+  if(a.W20==2)return s.W18==2 && s.W10==1;
+  return NativeTemporalRequest(menu) && s.W18==0 && (s.W10==0 || s.W10==8) &&
+   s.W16==100000000 && c.W12==100000000 && c.W11==100000 &&
+   FgTemporalAck(a,fgSettings,fgRuntime) && fgSettings!.ContextReady==1 &&
+   fgRuntime!.Available==1 && (fgRuntime.AvailableProviders&2)!=0 && fgRuntime.AvailableProviders<=3 &&
+   fgRuntime.StartupOwner==2 && fgRuntime.PresenterRoute==2 && fgRuntime.RestartRequired==0 &&
+   (fgRuntime.Phase==2 || fgRuntime.Phase==3);
+ }
+ // This intent check retains an existing lease through pause and actor travel;
+ // acquisition still needs the independently validated current-world snapshots.
+ public bool NativeTemporalRequest(ProviderMenuClient menu){
+  var a=menu.Authority;
+  return menu.Ready && a!=null && a.W20==0 && a.W31==1 && a.W32==1 && a.W33==0 && a.W34==2;
+ }
+ static bool FgTemporalAck(ProviderAuthoritySave a,FGSettingsSave? settings,FGRuntimeSave? runtime){
+  return settings!=null && runtime!=null && settings.SchemaVersion==1 && runtime.SchemaVersion==1 &&
+   settings.Revision>0 && runtime.Revision==settings.Revision && runtime.SessionId>0 && runtime.SessionId==settings.SessionId &&
+   settings.SettingsRevision==a.W19 && runtime.PresenterSettingsRevision==a.W19 &&
+   settings.Mode==a.W31 && settings.FGProvider==a.W32 && runtime.Phase>=0 && runtime.Phase<=3 &&
+   runtime.Active>=0 && runtime.Active<=1 && runtime.NativeGuidesRetired>=0 && runtime.NativeGuidesRetired<=1;
+ }
+ public bool TemporalQualityRetain(ProviderMenuClient menu,FGSettingsSave? settings,FGRuntimeSave? runtime,bool nativeLease){
+  if(!menu.Ready || menu.Authority==null)return true;
+  if(nativeLease && (NativeTemporalRequest(menu) || !FgTemporalAck(menu.Authority,settings,runtime) ||
+     settings!.Mode!=0 || runtime!.Active!=0 || runtime.NativeGuidesRetired!=1))return true;
+  var state=State;var context=Context;var a=menu.Authority;
+  if(nativeLease && (!Enabled || context==null || state==null || !ContextValid(context) || !StateValid(state) ||
+     Session!=a.W5 || context.W5!=Session || state.W5!=Session || context.W9!=WorldGeneration || state.W9!=WorldGeneration ||
+     context.W7!=a.W19 || state.W7!=a.W19 || context.W8!=a.W16 || state.W8!=a.W16))return true;
+  return state==null || (state.W10>=1 && state.W10<=6) || state.W10==9;
  }
  public static bool GameplayWidgetAllowed(string name,bool layer){
   if(name.StartsWith("W_PlayerHUD_Activatable_C_") || name.StartsWith("W_HotbarContainer_Activatable_C_") || name.StartsWith("W_InGameNavigation_Activatable_C_"))return true;
@@ -143,10 +176,10 @@ public class ProviderRuntimeClient : USaveGame {
 // Volatile ownership receipt survives actor travel, but a new renderer session
 // cannot adopt the old process's lease. Only the observed owned value is restored.
 public class TemporalAaQualityLeaseSave : USaveGame {
- public int SchemaVersion,Session,Original,Owned,Blocked,Revision,Checksum,RestoreAttempts;
+ public int SchemaVersion,Session,Original,Owned,Blocked,Revision,Checksum,RestoreAttempts,NativeGuides;
  public int Command(int session,int revision,int checksum,bool exists,int observed,bool acquire,bool retain){
   if(session<=0 || revision<=0)return -1;
-  if(SchemaVersion!=1 || Session!=session){SchemaVersion=1;Session=session;Owned=0;Blocked=0;RestoreAttempts=0;}
+  if(SchemaVersion!=1 || Session!=session){SchemaVersion=1;Session=session;Owned=0;Blocked=0;RestoreAttempts=0;NativeGuides=0;}
   if(Revision!=revision || Checksum!=checksum){Revision=revision;Checksum=checksum;Blocked=0;}
   if(Owned==1){
    if(!exists || observed!=2){Owned=0;Blocked=1;return -1;}

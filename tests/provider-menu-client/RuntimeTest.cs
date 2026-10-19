@@ -28,6 +28,7 @@ static class RuntimeTest {
   ReadinessChecks();
   FoliageChecks();
   TemporalQualityChecks();
+  NativeTemporalQualityChecks();
   Check(ProviderRuntimeClient.CanRestoreNvidiaSource(7,2,123,1,7,123,3));
   Check(!ProviderRuntimeClient.CanRestoreNvidiaSource(7,2,123,1,7,124,3));
   Check(!ProviderRuntimeClient.CanRestoreNvidiaSource(7,2,123,1,8,123,3));
@@ -148,4 +149,40 @@ static class RuntimeTest {
   Check(retry.Command(123,7,99,true,2,false,false)==-1&&retry.Owned==1);
   Console.WriteLine("Temporal producer quality: preflight identity, travel, rollback, external edits and bounded restoration pass");
  }
+ static void NativeTemporalQualityChecks(){
+  UGameplayStatics.Slots.Clear();var menu=Menu();var a=menu.Authority!;a.W20=0;a.W31=1;a.W32=1;a.W33=0;a.W34=2;
+  var client=new ProviderRuntimeClient();client.Start();var s=Plan(1,0);s.W18=0;s.W16=100000000;s.W4=s.Checksum(0,32);UGameplayStatics.Slots["MCD2GraphicsProviderSrRuntime"]=s;
+  Check(client.Poll(menu,"Hub",true,100000,100000000));
+  var settings=new FGSettingsSave{SchemaVersion=1,Revision=11,SessionId=456,SettingsRevision=7,Mode=1,FGProvider=1,ContextReady=1};
+  var runtime=new FGRuntimeSave{SchemaVersion=1,Revision=11,SessionId=456,PresenterSettingsRevision=7,Available=1,AvailableProviders=2,StartupOwner=2,PresenterRoute=2,Phase=2};
+  Check(client.TemporalShaderPreflight(menu,settings,runtime));
+  s.W10=8;s.W4=s.Checksum(0,32);Check(client.TemporalShaderPreflight(menu,settings,runtime));s.W10=0;s.W4=s.Checksum(0,32);
+  Check(!client.NeedsSourceCommand()&&s.W16==100000000&&s.W17==0);
+  Check(!client.TemporalShaderPreflight(menu,null,runtime)&&!client.TemporalShaderPreflight(menu,settings,null));
+  foreach(int word in new[]{20,31,32,33,34}){int old=a.Word(word);typeof(ProviderAuthoritySave).GetField("W"+word)!.SetValue(a,old+1);Check(!client.TemporalShaderPreflight(menu,settings,runtime));typeof(ProviderAuthoritySave).GetField("W"+word)!.SetValue(a,old);}
+  foreach(int word in new[]{4,5,7,8,9,10,11,12}){var c=client.Context!;int old=c.Word(word);c.SetWord(word,old^1);if(word!=4)c.W4=c.Checksum(0,32);Check(!client.TemporalShaderPreflight(menu,settings,runtime));c.SetWord(word,old);c.W4=c.Checksum(0,32);}
+  foreach(int word in new[]{4,5,7,8,9,11,16,18}){int old=s.Word(word);s.SetWord(word,old^1);if(word!=4)s.W4=s.Checksum(0,32);Check(!client.TemporalShaderPreflight(menu,settings,runtime));s.SetWord(word,old);s.W4=s.Checksum(0,32);}
+  foreach(int phase in new[]{1,2,3,4,5,6,7,9}){s.W10=phase;s.W4=s.Checksum(0,32);Check(!client.TemporalShaderPreflight(menu,settings,runtime));}s.W10=0;s.W4=s.Checksum(0,32);
+  foreach(string name in new[]{"SchemaVersion","Revision","SessionId","SettingsRevision","Mode","FGProvider","ContextReady"}){var field=typeof(FGSettingsSave).GetField(name)!;int old=(int)field.GetValue(settings)!;field.SetValue(settings,old+1);Check(!client.TemporalShaderPreflight(menu,settings,runtime));field.SetValue(settings,old);}
+  foreach(string name in new[]{"SchemaVersion","Revision","SessionId","PresenterSettingsRevision","Available","AvailableProviders","StartupOwner","PresenterRoute","RestartRequired","NativeGuidesRetired","Active"}){var field=typeof(FGRuntimeSave).GetField(name)!;int old=(int)field.GetValue(runtime)!;field.SetValue(runtime,name=="AvailableProviders"?4:name=="NativeGuidesRetired"||name=="Active"?2:old+1);Check(!client.TemporalShaderPreflight(menu,settings,runtime));field.SetValue(runtime,old);}
+  foreach(int phase in new[]{0,1,4,5,6}){runtime.Phase=phase;Check(!client.TemporalShaderPreflight(menu,settings,runtime));}runtime.Phase=2;
+  runtime.Active=1;runtime.Phase=3;Check(client.TemporalShaderPreflight(menu,settings,runtime));runtime.Active=0;runtime.Phase=2;
+  Check(client.TemporalQualityRetain(menu,settings,runtime,true));
+  var context=client.Context;client.Context=null;var state=client.State;client.State=null;Check(client.TemporalQualityRetain(menu,settings,runtime,true));client.Context=context;client.State=state;
+  client.Context!.W10=0;client.Context.W4=client.Context.Checksum(0,32);Check(!client.TemporalShaderPreflight(menu,settings,runtime)&&client.TemporalQualityRetain(menu,settings,runtime,true));client.Context.W10=1;client.Context.W4=client.Context.Checksum(0,32);
+  // A fresh matching Off ACK alone still cannot release while the native readback is unknown/busy/live.
+  a.W31=0;settings.Mode=0;runtime.Phase=0;
+  Check(client.TemporalQualityRetain(menu,settings,runtime,true));runtime.NativeGuidesRetired=1;Check(!client.TemporalQualityRetain(menu,settings,runtime,true));
+  runtime.Active=1;Check(client.TemporalQualityRetain(menu,settings,runtime,true));runtime.Active=0;
+  runtime.Revision++;Check(client.TemporalQualityRetain(menu,settings,runtime,true));runtime.Revision--;
+  client.State=null;Check(client.TemporalQualityRetain(menu,settings,runtime,true));client.State=state;
+  client.Context.W9++;client.Context.W4=client.Context.Checksum(0,32);Check(client.TemporalQualityRetain(menu,settings,runtime,true));client.Context.W9--;client.Context.W4=client.Context.Checksum(0,32);
+  foreach(int original in new[]{0,1}){var lease=new TemporalAaQualityLeaseSave();a.W31=settings.Mode=1;runtime.Phase=2;runtime.NativeGuidesRetired=0;
+   int command=lease.Command(123,7,a.W16,true,original,client.TemporalShaderPreflight(menu,settings,runtime),client.TemporalQualityRetain(menu,settings,runtime,true));Check(command==2);lease.Observed(command,2);lease.NativeGuides=1;
+   Check(lease.Command(123,7,a.W16,true,2,false,true)==-1&&lease.Owned==1);
+   a.W31=settings.Mode=0;runtime.Phase=0;runtime.NativeGuidesRetired=1;command=lease.Command(123,7,a.W16,true,2,false,client.TemporalQualityRetain(menu,settings,runtime,true));Check(command==original);lease.Observed(command,original);Check(lease.Owned==0);
+  }
+  Console.WriteLine("Native FG temporal producer: full identity/ACK admission, source100%, pause/travel retention, actual retirement release and original restoration pass");
+ }
+
 }

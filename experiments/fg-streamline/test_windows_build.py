@@ -159,6 +159,19 @@ class WindowsBuildChecks(unittest.TestCase):
             for name, expected in receipt['payloadSHA256'].items():
                 self.assertEqual(candidate.sha(artifact / 'ui/Pak' / name), expected)
 
+    def test_candidate_without_consumed_manifest_pin_is_refused_before_archive_io(self):
+        receipt = json.loads((candidate.REPO / 'qualification/providers/current-ui-build-receipt.json').read_text())
+        receipt['sourceFileSHA256'].pop('manifest.json', None)
+        with tempfile.TemporaryDirectory() as temporary:
+            repo = Path(temporary)
+            path = repo / 'qualification/providers/current-ui-build-receipt.json'
+            path.parent.mkdir(parents=True)
+            path.write_text(json.dumps(receipt))
+            artifact = repo / 'artifact'
+            with self.assertRaisesRegex(RuntimeError, 'Incomplete candidate UI source provenance'):
+                candidate.copy_current_ui(repo, artifact)
+            self.assertFalse(artifact.exists())
+
     def test_stale_metadata_source_is_refused_before_writing(self):
         with tempfile.TemporaryDirectory() as temporary:
             artifact = Path(temporary) / 'artifact'

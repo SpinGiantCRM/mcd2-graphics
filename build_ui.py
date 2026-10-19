@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parent
 UI_SOURCES = ('ModActor.cs', 'ProviderSaveWords.cs', 'ProviderMenuClient.cs',
               'ProviderRuntimeWords.cs', 'ProviderRuntimeClient.cs', 'AdvancedSettings.cs', 'AdvancedInfoWidget.cs', 'AdvancedSettingsPanel.cs', 'NativeSettingsWidgets.cs', 'RuntimeDiagnostics.cs', 'RuntimeDiagnosticsOverlay.cs', 'UpscalingSharpness.cs')
 SOURCE_INPUTS = tuple('src/ui/' + name for name in UI_SOURCES) + (
-    'src/ui/mod-info.json', 'build_ui.py', 'dependencies.lock.json')
+    'src/ui/mod-info.json', 'build_ui.py', 'dependencies.lock.json', 'manifest.json')
 PAYLOAD_NAMES = tuple('MCD2Graphics_P.' + ext for ext in ('pak', 'ucas', 'utoc'))
 
 
