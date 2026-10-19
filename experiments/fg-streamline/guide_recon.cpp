@@ -102,19 +102,35 @@ void poll_policy(){static ULONGLONG next=0;auto now=GetTickCount64();if(now<next
  cachedRevision=GetPrivateProfileIntW(L"Capture",L"TrialRevision",0,capturePolicy.c_str());
 }
 bool tracking(){return captureEnabled || (fg_controls::enabled?fg_controls::wanted.load():guideTags.load()&&guideSamples<900);}
-MCD2DiagnosticIdentityV1 diagnostic_identity(){
+mcd2::diagnostics::IdentityRead diagnostic_identity(MCD2DiagnosticIdentityV1 previous={}){
+ using namespace mcd2;
  if(!fg_controls::enabled||!fg_controls::wanted)return {};
  auto latency=GetModuleHandleW(L"mcd2-display-latency.addon64");
  auto get=latency?reinterpret_cast<decltype(&mcd2_sr_context_v1)>(GetProcAddress(latency,"mcd2_sr_context_v1")):nullptr;
  auto menu=latency?reinterpret_cast<decltype(&mcd2_menu_snapshot_v1)>(GetProcAddress(latency,"mcd2_menu_snapshot_v1")):nullptr;
+ if(!get||!menu)return {};
  MCD2SrContextSnapshotV1 packet{};packet.size=sizeof(packet);MCD2MenuSnapshotV1 current{};current.size=sizeof(current);
- mcd2::providers::DecodedGraphicsRecord record;mcd2::providers::SrContext context;mcd2::providers::FgMenuProjection selection;
- if(!get||get(&packet)||!menu||menu(&current)||packet.reserved||current.reserved||current.load||packet.authority.load||
-    packet.authority.session!=current.session||memcmp(packet.authority.record,current.record,sizeof(current.record))||
-    !mcd2::providers::decodeGraphicsRecord(current.record,record)||!mcd2::providers::decodeSrContext(packet.context,context)||
-    !mcd2::providers::projectFgMenu(record,selection)||!selection.pairEligible||
-    !mcd2::providers::fgMenuMatches(selection,fg_controls::intent.settingsRevision,fg_controls::intent.provider,fg_controls::intent.mode))return {};
- return mcd2::diagnostics::contextIdentity(current.session,record,context,packet.observedAtMs,GetTickCount64());
+ const int contextResult=get(&packet),menuResult=menu(&current);const auto now=GetTickCount64();
+ if((contextResult&&contextResult!=-2)||(menuResult&&menuResult!=-2))return {};
+ providers::DecodedGraphicsRecord record,contextRecord;providers::SrContext context;providers::FgMenuProjection selection;
+ MCD2DiagnosticIdentityV1 contextId{};
+ if(!contextResult){
+  if(packet.reserved||packet.authority.load||!providers::decodeGraphicsRecord(packet.authority.record,contextRecord)||
+     !providers::decodeSrContext(packet.context,context))return {};
+  contextId=diagnostics::contextIdentity(packet.authority.session,contextRecord,context,packet.observedAtMs,now);
+  if(!diagnostics::valid(contextId))return {};
+  if(menuResult==-2&&diagnostics::valid(previous)&&!diagnostics::same(previous,contextId))return {};
+ }
+ if(!menuResult){
+  if(current.reserved||current.load||!current.session||!providers::decodeGraphicsRecord(current.record,record)||
+     !providers::projectFgMenu(record,selection)||!selection.pairEligible||
+     !providers::fgMenuMatches(selection,fg_controls::intent.settingsRevision,fg_controls::intent.provider,fg_controls::intent.mode))return {};
+  if(contextResult==-2&&diagnostics::valid(previous)&&(current.session!=previous.session||
+     record.bootstrap.stamp!=providers::RecordStamp{previous.revision,previous.checksum}))return {};
+ }
+ if(contextResult==-2||menuResult==-2)return {false,{}};
+ if(packet.authority.session!=current.session||memcmp(packet.authority.record,current.record,sizeof(current.record)))return {};
+ return {true,contextId};
 }
 
 void try_shared_sdk_quiesce(){
@@ -466,24 +482,25 @@ void present(a::command_queue*q,a::swapchain*swap,const a::rect*,const a::rect*,
  if(captureEnabled){static unsigned lastColour=UINT32_MAX;auto colour=unsigned(swap->get_color_space());if(colour!=lastColour){std::lock_guard lock(mutex);privateLog<<"{\"kind\":\"presentation_colour\",\"frame\":"<<frame<<",\"colourSpace\":"<<colour<<",\"width\":"<<outputWidth<<",\"height\":"<<outputHeight<<",\"format\":"<<outputFormat<<"}\n";privateLog.flush();lastColour=colour;}}
  struct SceneRelease{void operator()(ID3D12Resource*p)const{if(p&&!mcd2::process_exit::terminating())p->Release();}};
  std::unique_ptr<ID3D12Resource,SceneRelease> sceneBorrow;
- FrameData data{};bool ready=false,wanted=false;uint64_t id=UINT64_MAX;
+ FrameData data{};bool ready=false,wanted=false;uint64_t id=UINT64_MAX;MCD2DiagnosticIdentityV1 previousIdentity{};
  {
-  std::lock_guard lock(mutex);if(capturing()){identity_receipt("present");privateLog.flush();}id=presentFrame?presentFrame():UINT64_MAX;
+  std::lock_guard lock(mutex);previousIdentity=diagnosticPresent.identity;if(capturing()){identity_receipt("present");privateLog.flush();}id=presentFrame?presentFrame():UINT64_MAX;
   const unsigned revision=cachedRevision;
   if(revision&&revision!=trialRevision&&!activeFGMode){guideSamples=0;imageSamples=0;fgTrialFrames=0;gameFrames.clear();trialRevision=revision;privateLog<<"{\"kind\":\"trial_revision\",\"revision\":"<<revision<<"}\n";privateLog.flush();}
   if(id<UINT32_MAX&&!retiring&&!ownerClosing){auto f=gameFrames.find(uint32_t(id));if(f!=gameFrames.end()){data=f->second;ready=data.guides&&data.images;if(data.scene){data.scene->AddRef();sceneBorrow.reset(data.scene);}}}
   wanted=fg_controls::enabled?fg_controls::wanted.load()&&GetForegroundWindow()==outputWindow:legacyEnable.load()&&fgTrialFrames<600&&GetForegroundWindow()==outputWindow;
  }
  const unsigned mode=ready&&wanted&&fg_alpha::submission_queue(q)?1:0;
- const auto identity=wanted?diagnostic_identity():MCD2DiagnosticIdentityV1{};
- {std::lock_guard lock(mutex);diagnosticPresent={sizeof(diagnosticPresent),0,id,identity};}
+ const auto identityRead=wanted?diagnostic_identity(previousIdentity):mcd2::diagnostics::IdentityRead{};
+ const auto identity=identityRead.identity;
+ {std::lock_guard lock(mutex);diagnosticPresent={sizeof(diagnosticPresent),0,id,identityRead.known?identity:previousIdentity};}
  if(auto module=amd_bridge()){
   if(outputReady&&outputColour==1&&wanted&&matching_scene_view(data)){
    using Scene=int(*)(void*,void*,uint64_t);auto scene=reinterpret_cast<Scene>(GetProcAddress(module,"mcd2_afg_scene_v1"));ID3D12Device*device=nullptr;auto queue=reinterpret_cast<ID3D12CommandQueue*>(q->get_native());
    const auto owner=queue->GetDevice(IID_PPV_ARGS(&device));const auto staged=SUCCEEDED(owner)&&scene?scene(device,data.scene,id):-119;if(device)device->Release();ready=staged==0;
   }
   auto bind=reinterpret_cast<int(*)(const MCD2FgDiagnosticBindingV1*)>(GetProcAddress(module,"mcd2_afg_diagnostic_bind_v1"));
-  MCD2FgDiagnosticBindingV1 binding{sizeof(binding),0,id,identity};if(bind)bind(&binding);
+  MCD2FgDiagnosticBindingV1 binding{sizeof(binding),0,id,identity};if(identityRead.known&&bind)bind(&binding);
   using Present=int(*)(void*,uint64_t,uint32_t);auto configure=reinterpret_cast<Present>(GetProcAddress(module,"mcd2_afg_present_v2"));auto result=configure?configure(reinterpret_cast<void*>(q->get_native()),id,ready&&wanted?1:0):-1;
   activeFGMode=!result&&ready&&wanted?1:0;
   if(fg_controls::enabled&&result&&result!=MCD2_AFG_BUSY_V2&&result!=MCD2_AFG_OUTPUT_UNSUPPORTED_V3)fg_controls::fault=1;
@@ -512,8 +529,10 @@ void present(a::command_queue*q,a::swapchain*swap,const a::rect*,const a::rect*,
  }
  if(fg_controls::enabled && (fgTrialFrames%30==0 || mode!=activeFGMode))fg_controls::publish(activeFGMode,ready);
  if(activeFGMode){++fgTrialFrames;presentedFrame=uint32_t(id);}
+ if(identityRead.known){
  nvidiaDiagnosticFrames.select(identity);
  if(mode&&activeFGMode)nvidiaDiagnosticFrames.admit(id,identity);
+ }
 }
 }
 extern "C" __declspec(dllexport) int mcd2_fg_active(){if(mcd2::process_exit::terminating())return 0;return activeFGMode.load()?1:0;}

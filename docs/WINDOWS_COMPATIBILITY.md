@@ -1105,3 +1105,21 @@ and its outside-lock COM release have both finished. It makes no SDK/GPU calls.
 External console edits, original-value receipts and bounded restore retries still
 apply. Actual-source client/native release-window fixtures cover this contract;
 a fresh complete UI/ModInfo/native artifact and Windows runtime checks are required.
+
+### Nonblocking diagnostic observations
+
+A Busy (`-2`) identity getter is Unknown, not proof that the selected FG
+request/world ended. Skip epoch binding and new diagnostic frame admission on
+Unknown; retain original attributed outcome timestamps. Successful Off, changed
+session/stamp/world, not-ready/invalid context, hard errors and expiry still
+invalidate immediately, including when the other getter is Busy. SDK readiness
+and generation admission remain unchanged.
+
+Worker FG snapshots may survive Busy for at most 1500 ms from the original
+successful read, with exact full identity and the existing producer-outcome
+freshness bound. Explicit inactive/fault/malformed/error observations must not
+revive cached activity. The same bounded V1 metadata reuse preserves the FSR
+implementation label through Busy without supplying SR evaluation activity.
+Actual identity/producer/transport fixtures cover these cases on both portable
+CI platforms. Source and build checks pass; fresh Windows runtime qualification
+of this correction remains required.

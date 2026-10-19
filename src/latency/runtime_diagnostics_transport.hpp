@@ -15,14 +15,18 @@ inline void publish(const std::filesystem::path& saves,unsigned session,unsigned
  MCD2SrDiagnosticsV1 sr{sizeof(sr),0,0,0,0,0,0};
  auto module=GetModuleHandleW(L"mcd2-graphics.addon64");
  using Sr=int(*)(MCD2SrDiagnosticsV1*);auto get=module?reinterpret_cast<Sr>(GetProcAddress(module,"mcd2_sr_diagnostics_v1")):nullptr;
- if(!get||get(&sr))sr={sizeof(sr),0,0,0,0,0,0};
+ const int srResult=get?get(&sr):-3;
+ if(srResult)sr={sizeof(sr),0,0,0,0,0,0};
+ static SrMetadataCache srMetadata;srMetadata.observe(identity,srResult,sr,GetTickCount64());
  MCD2FgDiagnosticsV1 fg{sizeof(fg),0,0,0,0,0,0,0};
  module=GetModuleHandleW(L"mcd2-fg-guide-recon.addon64");using Fg=int(*)(MCD2FgDiagnosticsV1*);
  auto getFg=module?reinterpret_cast<Fg>(GetProcAddress(module,"mcd2_fg_diagnostics_v1")):nullptr;
  if(!getFg||getFg(&fg))fg={sizeof(fg),0,0,0,0,0,0,0};
  MCD2FgDiagnosticsV2 attributed{};attributed.size=sizeof(attributed);
  auto getAttributed=module?reinterpret_cast<int(*)(MCD2FgDiagnosticsV2*)>(GetProcAddress(module,"mcd2_fg_diagnostics_v2")):nullptr;
- if(!getAttributed||getAttributed(&attributed))attributed={};
+ const int fgResult=getAttributed?getAttributed(&attributed):-3;
+ static FgWorkerCache fgSamples;const auto fgReadAt=GetTickCount64();
+ fgSamples.observe(identity,fgResult,fgResult==0?&attributed:nullptr,fgReadAt,fgReadAt);attributed=fgSamples.snapshot();
  // The V1 getter supplies separately verified metadata/DLSS activity. FSR
  // activity comes only from the already decoded runtime sample in this worker.
  const auto projected=project(identity,sr,attributed,amdRevision,amdChecksum,amdMode,amdFrames,GetTickCount64(),&srWorker);

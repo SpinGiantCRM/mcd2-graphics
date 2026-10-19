@@ -16,15 +16,16 @@ class FgDiagnosticEpoch(unittest.TestCase):
         guide = (ROOT/'experiments/fg-streamline/guide_recon.cpp').read_text()
         bridge = (ROOT/'experiments/providers/fsr_fg_game_bridge.cpp').read_text()
         begin = guide.index('MCD2FgDiagnosticBindingV1 binding{')
-        binding = guide[begin:guide.index(';if(bind)', begin)+1]
-        identity = next(line.strip() for line in guide.splitlines() if 'const auto identity=wanted?diagnostic_identity()' in line)
+        binding = guide[begin:guide.index('\n', begin)]
+        begin = guide.index(' const auto identityRead=wanted?diagnostic_identity(')
+        identity = guide[begin:guide.index('\n {std::lock_guard', begin)]
         begin = bridge.index(' std::lock_guard lock(guard);if(!session||session->closing||wanted>1)')
         present = bridge[begin:bridge.index(' auto* supplied=', begin)]
         begin = bridge.index('extern "C" int mcd2_afg_diagnostic_bind_v1(')
         bind = bridge[begin:bridge.index('\nextern "C" int mcd2_afg_diagnostics_v2(', begin)]
         begin = bridge.index(' if(!configured&&s.diagnosticBinding.engineFrame==id)')
         admit = bridge[begin:bridge.index(' return configured;', begin)]
-        begin = guide.index(' nvidiaDiagnosticFrames.select(')
+        begin = guide.index(' if(identityRead.known){\n nvidiaDiagnosticFrames.select(')
         nvidia = guide[begin:guide.index('\n}', begin)]
         fixture = (ROOT/'experiments/fg-streamline/fg_diagnostic_epoch_fixture.cpp').read_text()
         for key, value in {'GUIDE_IDENTITY':identity,'BINDING':binding,'PRESENT_PREFIX':present,'BIND_EXPORT':bind,'FINAL_ADMISSION':admit,'NVIDIA':nvidia}.items():
