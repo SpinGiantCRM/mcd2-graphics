@@ -30,6 +30,15 @@ opt-in; never infer SR support from FG/Reflex or poll SDK capabilities each fram
 Unknown/stale metadata cannot authorize reduced DLSS source resolution or erase
 a saved choice. NVIDIA vendor identity alone is not active DLSS/RTX capability;
 the existing backend capability/source/resource gates remain mandatory.
+The bounded source-built menu run recorded Balanced with both Native and FSR,
+a preset edit that kept Native selected, synchronized SR preference records,
+advancing FSR evaluations (46-1150), and exit code 0. It used the retained CI
+renderers/framework with the changed latency addon and production UI rebuilt
+locally. The complete fresh CI artifact was hash-verified and staged afterward;
+its standalone WARP heap-lifetime probe passed, but that complete artifact has
+not yet had a game runtime test. Keep the
+[menu follow-up](../qualification/providers/windows-sr-menu-fix-2026-10-19.json)
+and distinguish source-equivalent component tests from full artifact qualification.
 
 FSR preflight requires the validated single-output TAA permutation. On Steam
 build 25754144, `r.TemporalAA.Quality=1` used shader `62de03a8`, whose otherwise
