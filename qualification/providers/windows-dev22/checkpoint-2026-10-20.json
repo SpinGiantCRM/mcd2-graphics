@@ -207,6 +207,49 @@
       "nullDerivedReadHex": "3dac",
       "actualWriterIdentified": false,
       "headNextZeroEstablished": false
+    },
+    {
+      "trial": 10,
+      "classification": "ordinary post-uninstall reinstall",
+      "context": "Normal GUI reinstall and Verify passed; title reached; startup sign-in error prevented gameplay",
+      "exitRoute": "Alt+F4",
+      "exitCodeHex": "00000000",
+      "latencySeconds": 6.026806,
+      "heldHandle": true,
+      "kernelExitTime": true,
+      "extraAddonUsed": false,
+      "debuggerUsed": false,
+      "ordinaryCleanExit": true,
+      "overallExitGatePassed": false,
+      "fullStartupGameplayQualification": false
+    },
+    {
+      "trial": 11,
+      "classification": "ordinary offline comparison",
+      "context": "Startup error prevented gameplay; Steam returned online afterward",
+      "exitRoute": "Alt+F4",
+      "exitCodeHex": "C0000005",
+      "latencySeconds": 6.183625,
+      "heldHandle": true,
+      "kernelExitTime": true,
+      "extraAddonUsed": false,
+      "debuggerUsed": false,
+      "ordinaryExitQualified": false,
+      "sameWorkerFunctionAndCallerChain": true,
+      "differentNullReadInstruction": true,
+      "actualWriterIdentified": false,
+      "exitCrashFixed": false
+    },
+    {
+      "trial": 12,
+      "classification": "interrupted diagnostic/excluded",
+      "manualWatchArmed": false,
+      "exitCodeHex": null,
+      "completeExitReceipt": false,
+      "ordinaryExitQualified": false,
+      "terminationCauseEstablished": false,
+      "temporaryAddonRemoved": true,
+      "original18Owned15DependencyHashesVerified": true
     }
   ],
   "run4Resize": {
@@ -510,7 +553,7 @@
     },
     "I10": {
       "status": "NOT RUN",
-      "observation": "Dev.22 post-I9 reinstall/Verify/launch cycle is not completed."
+      "observation": "Normal post-I9 GUI reinstall and Verify completed with exact hashes; launch reached title, but startup sign-in failure prevented full gameplay verification."
     },
     "U1": {
       "status": "NOT RUN",
@@ -624,7 +667,7 @@
     },
     "Diagnostics": {
       "status": "NOT RUN",
-      "observation": "Busy correction has bounded observations; strict SR validation is zero. Pause clearing, stale/disabled behavior and full recovery pending."
+      "observation": "Busy correction has bounded observations. The original strict SR collector remains zero; a separate read-only Active observer passed isolated synthetic checks, but has no fresh live validation. Pause clearing and stale/disabled behavior pending."
     },
     "Sharpness": {
       "status": "NOT RUN",
@@ -632,7 +675,7 @@
     },
     "Lifecycle/output": {
       "status": "NOT RUN",
-      "observation": "Native-owner game resize/SR recovery observed. Active AMD owner, pause/travel, original borderless restoration and actual colour-space/format checks pending."
+      "observation": "Native-owner game resize/SR recovery and original borderless restoration observed. Active AMD owner, pause/travel and actual colour-space/format checks pending."
     },
     "Shutdown": {
       "status": "FAIL",
@@ -640,11 +683,11 @@
     },
     "Installer": {
       "status": "NOT RUN",
-      "observation": "Exact current installation and negative refusal evidenced; current complete GUI lifecycle including I9/I10 pending."
+      "observation": "I2-I6, I8 and I9 complete; post-uninstall GUI reinstall and Verify passed, with title launch. I1/I7 full scope and I10 gameplay remain incomplete."
     }
   },
   "remainingGates": [
-    "I10 post-uninstall reinstall/Verify/launch",
+    "I10 full post-reinstall startup/gameplay verification after successful GUI reinstall, Verify and title launch",
     "Fresh complete current-candidate GUI and advanced-page input scope",
     "Explicit current official FSR SR/FG implementation selection",
     "Pause/stale/disabled diagnostics and strict SR validation",
@@ -700,7 +743,11 @@
     "ordinaryUninstallOwnedAbsent": 17,
     "ordinaryUninstallSharedDependenciesUnchanged": 14,
     "ordinaryUninstallOriginalProxyRestored": true,
-    "ordinaryUninstallExactConfigRestoration": true
+    "ordinaryUninstallExactConfigRestoration": true,
+    "postUninstallGuiReinstallPassed": true,
+    "postUninstallGuiVerifyPassed": true,
+    "postUninstallTitleLaunchObserved": true,
+    "postUninstallFullGameplayVerified": false
   },
   "additionalWorkflowMetadata": {
     "parentFreshReadOnlyApiVerification": true,
@@ -758,5 +805,15 @@
     "actualWriterIdentified": false,
     "corruptionProven": false,
     "limitation": "Polling snapshots are not atomic; transitions can be missed. The null value alone does not distinguish the earlier crash from normal cleanup."
+  },
+  "activeSrObserverPreparation": {
+    "privateToolOnly": true,
+    "productionChanged": false,
+    "originalCollectorChanged": false,
+    "syntheticChecksPassed": 32,
+    "freshLiveValidation": false,
+    "reportExitZeroAloneIsPass": false,
+    "directTransitionHistoryObserved": false,
+    "limitation": "The historical ApplySource ACK relation is checked separately from the exact transactional transition predicate; bounded local-file consistency is not authenticated transition history."
   }
 }

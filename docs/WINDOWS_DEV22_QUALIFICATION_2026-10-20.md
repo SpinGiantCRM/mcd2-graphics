@@ -100,7 +100,7 @@ Status applies to the **complete stated gate on current dev.22**. A bounded obse
 | I7 | NOT RUN | Fresh dev.22 FSR SR/FG acknowledgement, warning, Use installed, isolation and Off restoration passed; reopen showed all seven recognized/default Off. Other five toggle paths remain historical; full current seven-control gate incomplete. |
 | I8 | PASS | Pinned-source Windows installer Core suite passed 147 fixtures covering unknown/mixed/incomplete/unsafe/acknowledgement cases. Separate exact-shipped-Core constructor check verified seven defaults Off and byte-matching embedded inputs; 147 tests are not claimed against that shipped binary. |
 | I9 | PASS | Normal GUI uninstall removed all 17 removable owned paths, preserved 14 shared dependencies, restored original proxy and exact owned startup configuration. |
-| I10 | NOT RUN | Dev.22 post-I9 reinstall/Verify/launch cycle is not completed. |
+| I10 | NOT RUN | Normal post-I9 GUI reinstall and Verify completed with exact hashes; title launch succeeded, but sign-in failure prevented full startup/gameplay verification. |
 | U1 | NOT RUN | Fresh visible version dev.22, Loader 2.6, correct apostrophe/no mojibake. Full main/pause metadata gate incomplete; font arrow is visually blank. |
 | U2 | NOT RUN | Ordinary UI changes worked in bounded run 4; complete both-menu mouse/keyboard/layout gate pending. |
 | U3 | NOT RUN | Six FSR presets and dimensions observed; full preset/slider/fill/minimum interaction gate pending. |
@@ -137,7 +137,7 @@ Status applies to the **complete stated gate on current dev.22**. A bounded obse
 | Sharpness | NOT RUN | Complete 0–100%, reset/relaunch/provider/external-change gate pending. |
 | Lifecycle/output | NOT RUN | Native-owner game resize/SR recovery observed. Active AMD owner, pause/travel, original borderless restoration and actual colour-space/format checks pending. |
 | Shutdown | FAIL | Startup ordinary-exit access violation unresolved. Three ordinary code-zero quits with retirement and delay review are not completed. |
-| Installer | NOT RUN | Exact current installation and negative refusal evidenced; current complete GUI lifecycle including I9/I10 pending. |
+| Installer | NOT RUN | I2-I6, I8 and I9 complete. Reinstall, Verify and title launch passed; full I1/I7 scope and I10 gameplay remain incomplete. |
 
 Evidence preparation changes no runtime source or payload. The runtime observations and GUI maintenance above are attributed to the qualification agent; compiling this checkpoint used bounded offline receipt/report checks. Final settings/restoration, remaining fresh GUI scope, official FSR selection, pause diagnostics, travel and three ordinary clean quits remain outstanding. The extensive performance/image benchmark remains a separate post-release task; these observations do not grant release approval.
 
@@ -155,3 +155,14 @@ The advanced Upscaling tab displayed Auto, analytical 3.1 and experimental INT8 
 Run 9 reproduced an ordinary exit failure after startup sign-in errors 0020 and 0064. Held-handle kernel exit was `C0000005` after **5.810680 seconds** from Alt+F4. Independent offline analysis recovered the same worker function, caller chain and GameThread CRT-exit path as run 1, but a different null-derived byte read at `0x3dac`. The dump lacks the relevant heap; it does not establish a zero next link or identify its writer. No diagnostic addon or debugger was active. This fresh failure retains the shutdown blocker.
 
 Normal GUI uninstall then completed with the game closed. Independent before/after verification confirmed all 17 removable owned paths absent, including private DLSS; all 14 shared dependencies unchanged; the original proxy restored; both owned install/HDR receipts absent; and the exact ownership-safe startup configuration restored. Player saves were not read. This completes I9; the post-uninstall reinstall/Verify/launch gate is still being completed.
+
+
+## Further reinstall and ordinary shutdown observations
+
+After I9, normal GUI reinstall and Verify completed. All 18 owned and 15 dependency hashes and overrides `{}` matched the pinned candidate. Run 10 reached the title, but a startup sign-in error prevented gameplay. Its ordinary Alt+F4 completed with held-handle kernel exit 0 in **6.026806 seconds**. The full I10 gate remains incomplete.
+
+Run 11 used a temporary Steam offline comparison and again failed to reach gameplay. Its ordinary Alt+F4 ended `C0000005` in **6.183625 seconds**, without a debugger or extra diagnostic addon. Offline dump analysis and independent CDB unwind recovered the same worker function, caller chain and CRT-exit path, now at a different null-pointer read. The relevant heap is absent, so this does not identify a writer or justify a source patch. Steam was returned online.
+
+Run 12 was an interrupted diagnostic attempt with no arming or complete exit receipt. It is excluded. The temporary addon was removed and the exact 18-owned/15-dependency hashes reverified afterward.
+
+A separate private read-only Active SR observer now has 32 isolated synthetic checks. It preserves the production transition predicate and the original collector, and distinguishes historical ApplySource acknowledgement consistency from exact transition acknowledgement. No fresh live observer result is claimed. Report exit 0 alone does not qualify SR; advancing, current-context validation is required. This preparation changes no runtime source or payload. Windows remains **FAIL**.
