@@ -61,5 +61,103 @@
     "freeBeforeOriginalFaultProven": false,
     "captureCaveat": "Other threads could continue while the fault thread waited for the external dump.",
     "heapIntegrityPass": false
+  },
+  "etwFailingRun": {
+    "run": 16,
+    "diagnosticOnly": true,
+    "extraAddon": false,
+    "debuggerAttached": false,
+    "exactOriginalCandidateUsed": true,
+    "exitCodeHex": "C0000005",
+    "requestToKernelExitSeconds": 14.082399,
+    "faultMatchesRecurringWorker": true,
+    "faultInstruction": "cmp [r15],r12",
+    "faultReadAddress": "0x10",
+    "faultAnchorRVA": "0x8bf8ac6",
+    "workerFunctionBounds": [
+      "0x8bf8920",
+      "0x8bf8e8a"
+    ],
+    "heapFreeEventsForGame": 2797367,
+    "stackEventsForGame": 5515082,
+    "eventsLost": 0,
+    "targetFreeCounts": [
+      0,
+      1
+    ],
+    "twoTargetCollectionComplete": false,
+    "secondTargetFreeFromGameThread": true,
+    "secondTargetFrameCount": 12,
+    "gameFreeReturnRVAs": [
+      "0x8ca7b00",
+      "0x8e4caae"
+    ],
+    "gameCrtDestructorBounds": [
+      "0x8e4ca74",
+      "0x8e4cac0"
+    ],
+    "sameSecondTargetRetainedInFaultRdi": true,
+    "latencyAddonWaitOnDifferentThread": true,
+    "firstTargetInitiallySelfLinked": false,
+    "secondTargetInitiallySelfLinked": true,
+    "staticCleanupMatchesZeroNextObservation": true,
+    "runtimeCallbackBytesRetainedInDump": false,
+    "actualInstructionWriteCaptured": false,
+    "proprietaryOwnerClassIdentified": false,
+    "productionFixEstablished": false,
+    "recordingStopped": true,
+    "temporaryImageTracingConfigurationRestored": true,
+    "ownedFixtureValidatedExactFreeCallers": true,
+    "wrongTargetFixtureRejected": true,
+    "traceReaderVersion": "Microsoft.Diagnostics.Tracing.TraceEvent 4.0.0",
+    "traceSHA256": "1a733a88b4fb858db616169e7a817ae514a3a722ea9f4610387d35ebdb428ec7",
+    "dumpSHA256": "1e1b9763667e5dc450d2881e14d78b219574b34bd3978435ecc2f6d19904c79f",
+    "privateTimelineSHA256": "68dd8da31a04b2185089283ec0f0e556d6f88f9e3a3c55f63802ef86d34ffda0",
+    "windowsQualified": false
+  },
+  "etwCleanGameControl": {
+    "run": 17,
+    "diagnosticOnly": true,
+    "gameModEntryPointsAbsent": true,
+    "systemDxgiLoaded": true,
+    "heldKernelExitCodeHex": "00000000",
+    "recordedRequestToKernelExitSeconds": 99.283774,
+    "inputReturnToKernelExitSeconds": 90.669146,
+    "requestMarkerIncludesInputDispatchDelay": true,
+    "heapFreeEventsForGame": 277291,
+    "stackEventsForGame": 490431,
+    "eventsLost": 0,
+    "targetFreeCounts": [
+      1,
+      1
+    ],
+    "bothTargetStacksCaptured": true,
+    "knownCallerFixtureValidationClaimed": false,
+    "secondTargetGameReturnRVAs": [
+      "0x8ca7b00",
+      "0x8e4caae"
+    ],
+    "firstTargetGameReturnRVAs": [
+      "0x8ca7b00",
+      "0x8e4ca6d"
+    ],
+    "sameSecondTargetCleanupShapeWithoutCrash": true,
+    "matchedMenuDwellClaimed": false,
+    "matchingGenericWorkerEntryRVA": "0x8af026c",
+    "genericEntryIdentifiesOwningClass": false,
+    "workerStopEventAfterSecondFreeMilliseconds": 75.1562,
+    "threadStopCauseEstablished": false,
+    "ordinaryReleaseExitPass": false,
+    "productionFixEstablished": false,
+    "windowsQualified": false,
+    "recordingStopped": true,
+    "temporaryImageTracingConfigurationRestored": true,
+    "fifteenHeldFilesRestoredExactly": true,
+    "exactCandidateReinstalled": true,
+    "ownedFilesReverified": 18,
+    "dependencyFilesReverified": 15,
+    "dependencyOverrides": {},
+    "traceSHA256": "2b8cd383744af8db4dabd552ab6a4be9bb249c675d80a5f7d2d28227dbac121b",
+    "privateTimelineSHA256": "b4a63dc4e16daafcdb89b58e17341774d3a095199af7932c3b2247940dc44090"
   }
 }
