@@ -19,7 +19,10 @@ int main(){
  }
  for(auto dimension:{0u,UINT32_MAX}){auto p=sdr;p.width=dimension;assert(!validFgOutput(p));p=sdr;p.height=dimension;assert(!validFgOutput(p));}
  auto edge=sdr;edge.width=7680;edge.height=4320;assert(validFgOutput(edge));++edge.width;assert(!validFgOutput(edge));--edge.width;++edge.height;assert(!validFgOutput(edge));
- SdrSceneDraw d{123,0x088c6818,3,1,7,true,true,false,true,true,true,0,0,3840,2160,0,0,3840,2160};
+ // Captured tone-map variants with sharpening disabled/enabled. Every existing
+ // geometry/output rejection must apply equally to both exact shader hashes.
+ for(auto shader:{0x088c6818u,0xf7e35ae7u}){
+ SdrSceneDraw d{123,shader,3,1,7,true,true,false,true,true,true,0,0,3840,2160,0,0,3840,2160};
  assert(admitSdrSceneDraw(sdr,d));assert(!admitSdrSceneDraw(pq,d));
  for(unsigned mask=0;mask<16;++mask){auto bad=d;bad.writeMask=mask;assert(admitSdrSceneDraw(sdr,bad)==((mask&7)==7));}
  auto bad=d;bad.frame=UINT32_MAX;assert(!admitSdrSceneDraw(sdr,bad));bad=d;bad.shader^=1;assert(!admitSdrSceneDraw(sdr,bad));
@@ -28,4 +31,5 @@ int main(){
  for(auto member:{&SdrSceneDraw::x,&SdrSceneDraw::y,&SdrSceneDraw::width,&SdrSceneDraw::height}){bad=d;bad.*member+=1;assert(!admitSdrSceneDraw(sdr,bad));bad.*member=std::numeric_limits<float>::quiet_NaN();assert(!admitSdrSceneDraw(sdr,bad));}
  for(auto member:{&SdrSceneDraw::left,&SdrSceneDraw::top,&SdrSceneDraw::right,&SdrSceneDraw::bottom}){bad=d;bad.*member+=1;assert(!admitSdrSceneDraw(sdr,bad));}
  bad=d;bad.elements=6;assert(!admitSdrSceneDraw(sdr,bad));bad=d;bad.instances=2;assert(!admitSdrSceneDraw(sdr,bad));
+ }
 }

@@ -42,9 +42,16 @@ struct SdrSceneDraw {
     float x=0,y=0,width=0,height=0;
     std::int32_t left=0,top=0,right=0,bottom=0;
 };
+// Steam 25754144 SDR tone-map permutations, captured with game sharpening
+// disabled/enabled. Both retain the same View b1 layout and two game outputs.
+// The caller executes the original draw, including all outputs, before copying
+// the qualified primary backbuffer; this is not a shader replacement.
+constexpr bool qualifiedSdrSceneShader(std::uint32_t shader) {
+    return shader==0x088c6818u||shader==0xf7e35ae7u;
+}
 constexpr bool admitSdrSceneDraw(const FgOutputContract& output,const SdrSceneDraw& d) {
     return validFgOutput(output)&&output.colour==FgOutputColour::Srgb&&
-        d.frame<UINT32_MAX&&d.shader==0x088c6818&&d.indexed&&d.elements==3&&d.instances==1&&
+        d.frame<UINT32_MAX&&qualifiedSdrSceneShader(d.shader)&&d.indexed&&d.elements==3&&d.instances==1&&
         d.blendKnown&&!d.blendEnabled&&(d.writeMask&7u)==7u&&d.primaryBackbuffer&&
         d.viewportKnown&&d.scissorKnown&&d.x==0&&d.y==0&&
         d.width==float(output.width)&&d.height==float(output.height)&&

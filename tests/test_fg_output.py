@@ -26,6 +26,9 @@ class OutputTests(unittest.TestCase):
   self.assertLess(end.index('list->EndRenderPass()'),end.index('snapshot_scene(cmd,stamp)'))
   self.assertIn('if(c.passStores)stamp=c.pendingScene',end)
   self.assertIn('mcd2_fg::camera(view.data()',s)
+  self.assertIn('const bool sceneShader=mcd2::providers::qualifiedSdrSceneShader(state.ps);',draw)
+  self.assertIn('viewResult=sceneShader?scene_view_frame(cmd,state,id):-9;',draw)
+  self.assertNotIn('state.ps==0x088c6818',draw)
   identity=(ROOT/'experiments/fg-streamline/fg_scene_identity.h').read_text()
   for field in ('position','forward','up','right','viewToClip','clipToPrevious','jitter'):
    self.assertIn('memcmp(decoded.'+field+',expected.'+field,identity)

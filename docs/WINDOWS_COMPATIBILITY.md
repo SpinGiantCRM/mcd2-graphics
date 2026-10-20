@@ -1,3 +1,17 @@
+SDR FG scene admission recognizes the two captured Steam build 25754144 tone-map
+permutations: `088c6818` with game sharpening disabled and `f7e35ae7` with it
+enabled. Their captured resource bindings, View b1 allocation size, input and
+two-output signatures match. Execute the exact original draw, including its
+second output, before copying the primary backbuffer; never replace or skip
+either game output. Use the same exact shader allowlist before reading View b1
+and admitting the scene. Preserve CPU-upload bounds, frame/camera identity,
+full-output viewport/scissor, RGB write mask, no blending and all retirement
+checks. The portable fixture applies the complete rejection matrix to both
+variants on Windows and Linux. The original candidate reproduced active SR and
+Anti-Lag but zero FG at sharpening 100%, with FG recovering at 0% while the
+authority revision remained unchanged. A rebuilt complete candidate still needs
+fresh Windows testing; this change does not repair or qualify shutdown.
+
 FSR output allocation may be padded beyond the logical viewport after a Windows
 resize. A captured 1680x1050 SDK output targeted a 1680x1052 game texture; rejecting
 that pair produced error 17. Preserve the exact-size `CopyResource` fast path.

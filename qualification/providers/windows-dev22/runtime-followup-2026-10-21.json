@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-21",
+  "candidate": "0.4.0-amd.dev.22",
+  "runtimeSourceCommit": "fe8b2b49c528c3f0bbe8393cab3e69a257406cee",
+  "windowsQualified": false,
+  "status": "FAIL",
+  "runs19And20Ordinary": true,
+  "extraAddon": false,
+  "debugger": false,
+  "etw": false,
+  "run19Exit": {
+    "run": 19,
+    "codeHex": "00000000",
+    "markerToObservedExitSeconds": 90.565089,
+    "timingIncludesMonitorPolling": true,
+    "clockGapObserved": false,
+    "extraAddon": false,
+    "debugger": false,
+    "etw": false,
+    "notARepair": true
+  },
+  "run20Exit": {
+    "codeHex": "00000000",
+    "clockGapObserved": false,
+    "markerToObservedExitSeconds": 8.537548,
+    "timingIncludesMonitorPolling": true,
+    "notARepair": true
+  },
+  "sharpeningComparison": {
+    "sequencePercent": [
+      0,
+      100,
+      0
+    ],
+    "authorityRevisionUnchanged": true,
+    "sameSessionAndWorld": true,
+    "sr": "FSR Quality",
+    "fg": "AMD On analytical",
+    "antiLag": "On",
+    "reports": [
+      {
+        "srDelta": 38,
+        "fgRenderedDelta": 37,
+        "fgGeneratedDelta": 37,
+        "antiLagDelta": 38,
+        "srAdvancingValidated": 1,
+        "amdFgAdvancingValidated": 1,
+        "antiLagAdvancingValidated": 1
+      },
+      {
+        "srDelta": 62,
+        "fgRenderedDelta": 0,
+        "fgGeneratedDelta": 0,
+        "antiLagDelta": 46,
+        "srAdvancingValidated": 1,
+        "amdFgAdvancingValidated": 0,
+        "antiLagAdvancingValidated": 1
+      },
+      {
+        "srDelta": 41,
+        "fgRenderedDelta": 27,
+        "fgGeneratedDelta": 27,
+        "antiLagDelta": 41,
+        "srAdvancingValidated": 1,
+        "amdFgAdvancingValidated": 1,
+        "antiLagAdvancingValidated": 1
+      }
+    ],
+    "capturePolicyRestored": true
+  },
+  "nativeFg": {
+    "worldValidated": 1,
+    "amdFgAdvancingValidated": 1,
+    "renderedDelta": 51,
+    "generatedDelta": 51,
+    "sourceScaleMicro": 100000000,
+    "implementationVisible": 30106
+  },
+  "inGameSettingsAccess": "Temporary Loader mouse Open Mods shortcut; literal Pause input unverified",
+  "settingsSuspension": {
+    "contextReady": 0,
+    "diagnosticWorld": 0,
+    "fgActive": 0,
+    "fgGeneratedDelta": 0,
+    "srDelta": 0,
+    "antiLagDelta": 0
+  },
+  "originalGameplayBindingsRestored": true,
+  "loaderShortcutRestorationPending": true,
+  "displayRestored": "1920x1200 Windowed Full Screen",
+  "shaderInspection": {
+    "diagnosticRun": 21,
+    "ordinaryStabilityQualification": false,
+    "privateReadOnlyAddonRemoved": true,
+    "shaders": [
+      {
+        "crc32": "088c6818",
+        "sha256": "34bbc7a8b8fd64f4d604701e19198f9923313addd0c2ab2b52a98d09fc75c590",
+        "bytes": 6808,
+        "disassemblySucceeded": true
+      },
+      {
+        "crc32": "f7e35ae7",
+        "sha256": "9e097d73e45f13f788c8020c213ea60fddff0ba8b2deadab6616fc1d034e9c72",
+        "bytes": 7664,
+        "disassemblySucceeded": true
+      }
+    ],
+    "comparison": {
+      "inputSignatureEqual": true,
+      "outputSignatureEqual": true,
+      "bindingsEqual": true,
+      "bufferAllocationSizesEqual": true
+    },
+    "gameShaderBinariesPublished": false
+  },
+  "sourceCorrection": {
+    "newlyRecognizedCRC32": "f7e35ae7",
+    "originalDrawAndOutputsPreserved": true,
+    "allIdentityGeometryAndRetirementGatesPreserved": true,
+    "runtimeRetestPending": true,
+    "exitRepair": false
+  },
+  "afterDiagnosticRemoval": {
+    "ownedHashes": 18,
+    "dependencyHashes": 15,
+    "overrides": {}
+  },
+  "remaining": [
+    "exit cause-specific repair and ordinary repeat exits",
+    "rebuilt full candidate runtime test",
+    "travel and remaining UI/diagnostics gates",
+    "preference restoration"
+  ]
+}

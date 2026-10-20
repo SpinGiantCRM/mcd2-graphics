@@ -421,8 +421,9 @@ bool draw_common(a::command_list*cmd,const DrawCall&call){
   // end-of-pass image HUDless; defer generation for that unqualified frame.
   state.pendingScene=UINT32_MAX;
   if(snapshotTracking&&outputReady&&!retiring&&!ownerClosing&&!state.sceneReset.pending&&state.passKnown&&!state.graphics.dynamicOffsets&&!state.compute.dynamicOffsets){
-   uint32_t id=UINT32_MAX;auto pipe=pipelines.find(state.graphicsPipeline);const auto viewResult=state.ps==0x088c6818?scene_view_frame(cmd,state,id):-9;
-   if(state.ps==0x088c6818&&capturing())privateLog<<"{\"kind\":\"sdr_view_identity\",\"viewResult\":"<<viewResult<<",\"frameStamp\":"<<id<<"}\n";
+   const bool sceneShader=mcd2::providers::qualifiedSdrSceneShader(state.ps);
+   uint32_t id=UINT32_MAX;auto pipe=pipelines.find(state.graphicsPipeline);const auto viewResult=sceneShader?scene_view_frame(cmd,state,id):-9;
+   if(sceneShader&&capturing())privateLog<<"{\"kind\":\"sdr_view_identity\",\"viewResult\":"<<viewResult<<",\"frameStamp\":"<<id<<"}\n";
    if(pipe!=pipelines.end()&&!viewResult){
     const auto&v=state.diagnosticViewport;const auto&r=state.diagnosticScissor;
     mcd2::providers::SdrSceneDraw d{id,state.ps,call.elements,call.instances,pipe->second.writeMask,call.indexed,pipe->second.blendKnown,pipe->second.blendEnabled,state.primaryBackbuffer!=0,state.diagnosticViewportKnown,state.diagnosticScissorKnown,v.x,v.y,v.width,v.height,r.left,r.top,r.right,r.bottom};
