@@ -1,7 +1,7 @@
 {
   "schemaVersion": 3,
   "candidateOnly": true,
-  "version": "0.4.0-amd.dev.22",
+  "version": "0.4.0-amd.dev.23",
   "sourceFileSHA256": {
     "src/ui/ModActor.cs": "03b967f035cd43cf0ef659120d457b05a8401e0f64edf530e98668fa3e772dd6",
     "src/ui/ProviderSaveWords.cs": "ae796d9934e3b418e08e035d67eb1d0b3c256a30631cf37f6a710897812fdfee",
@@ -18,12 +18,12 @@
     "src/ui/mod-info.json": "c6a2be6c7020c75eb71cd87df7f6f19d84615be6b7d78aded5da65736c68c0de",
     "build_ui.py": "8ebdbabcff593c27f572a547c642703a74b5168776a7a7809537ae48d253bd14",
     "dependencies.lock.json": "816304d7cd61b9a9254980656c3b3f21495175f6cad94ef1f0520ed7c7b3b1e5",
-    "manifest.json": "e7268f0b402538fc6d3aad27473e494af8b7e67d5a383cf7346cfe1769a42341"
+    "manifest.json": "ea7edb528fbd33181e7ff50abc8208965d62d1eec151e1e4b52a24663a27808f"
   },
   "payloadSHA256": {
     "MCD2Graphics_P.pak": "f566a330d6a59d719e78787affcf934bf9cd44ea72774677102044c4ca312431",
-    "MCD2Graphics_P.ucas": "3abf69d0ae391dcdb6ea19041a692ebf0d111e0c3a4baa97aa7fe111c44408d3",
-    "MCD2Graphics_P.utoc": "fe3d36838bede3a36fce74f5b9a813b1b09335817bd8681c57780fa01eb2371a"
+    "MCD2Graphics_P.ucas": "64586c86888727ab706ecd3ceb41c49fc313b08c3eb5a6eeaba34d5d288589a1",
+    "MCD2Graphics_P.utoc": "157e7b8602a93c6f40148b3e849c1c151f4c7e9207eea4361173575ad3034e40"
   },
   "metadataAPI": "Blueprint Loader 2.0 BP_ModInfo; SDK-generated versioned metadata; no popup API",
   "compiler": "NeoRune 1.0.0 / .NET reference pack 10.0.13",
@@ -78,10 +78,10 @@
   "dotnetSDK": "10.0.402",
   "metadataSHA256": {
     "ModInfo.uasset": "8e7dfe0280b7f72a3bb51fa7a95cc78e83929a29a23aea4c7ab8f3541ebe7451",
-    "ModInfo.uexp": "f50007967aa9159013fce5ee055288571bb594347c60832670a7060b3d693062"
+    "ModInfo.uexp": "8b9c29268a2360ebab5b8d3209150de0e65769423956f8887c92147227fca19e"
   },
   "WindowsQualified": false,
   "LinuxRuntimeQualified": false,
   "publishedPayloadChanged": false,
-  "archiveSHA256": "bdcd05fb2a9074c6490fc93a63b2ef9a2f1066e8881b09e10d5196d4e002e63b"
+  "archiveSHA256": "3ee70e2ac0415840d6897340f989b8358c6be47913a13cb7854a42db8754ce53"
 }
