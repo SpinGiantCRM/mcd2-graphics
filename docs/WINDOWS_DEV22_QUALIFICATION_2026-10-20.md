@@ -93,13 +93,13 @@ Status applies to the **complete stated gate on current dev.22**. A bounded obse
 | B4 | NOT RUN | Candidate folder contains a space and runtime launched; full fresh installer prerequisites/protection-warning gate not established here. |
 | I1 | NOT RUN | Fresh unsupported-target Install refusal with unchanged files is retained; full supported identity/cards/wrong-folder gate needs completion. |
 | I2 | PASS | Parent directly observed normal dev.22 GUI install with current locked dependencies; final fresh-install receipt corroborates version, 18 owned/15 dependency hashes and overrides {}. Report author did not repeat the interaction. |
-| I3 | NOT RUN | Fresh dev.22 running-game GUI mutation checks not established. Dev.21 read-only Verify and Uninstall refusal remain historical. |
+| I3 | PASS | Fresh GUI Verify remained read-only during play; Install and confirmed Uninstall refused changes. All hashes and receipt retained. |
 | I4 | PASS | Parent directly observed normal intact GUI Verify; all 18 owned/15 dependency hashes, overrides {} and installed receipt unchanged. |
 | I5 | PASS | Only the backed-up owned shader was removed; normal GUI Repair restored its original hash. Exact 18+15 hashes and receipt unchanged. |
 | I6 | PASS | Modified owned shader caused Repair and confirmed Uninstall refusals before removal; other 17 owned/15 dependencies unchanged. Exact backup restored and final intact GUI Verify passed with original 18+15 hashes, overrides {} and receipt. |
 | I7 | NOT RUN | Fresh dev.22 FSR SR/FG acknowledgement, warning, Use installed, isolation and Off restoration passed; reopen showed all seven recognized/default Off. Other five toggle paths remain historical; full current seven-control gate incomplete. |
 | I8 | PASS | Pinned-source Windows installer Core suite passed 147 fixtures covering unknown/mixed/incomplete/unsafe/acknowledgement cases. Separate exact-shipped-Core constructor check verified seven defaults Off and byte-matching embedded inputs; 147 tests are not claimed against that shipped binary. |
-| I9 | NOT RUN | Dev.22 final ordinary GUI uninstall/restoration is not completed. |
+| I9 | PASS | Normal GUI uninstall removed all 17 removable owned paths, preserved 14 shared dependencies, restored original proxy and exact owned startup configuration. |
 | I10 | NOT RUN | Dev.22 post-I9 reinstall/Verify/launch cycle is not completed. |
 | U1 | NOT RUN | Fresh visible version dev.22, Loader 2.6, correct apostrophe/no mojibake. Full main/pause metadata gate incomplete; font arrow is visually blank. |
 | U2 | NOT RUN | Ordinary UI changes worked in bounded run 4; complete both-menu mouse/keyboard/layout gate pending. |
@@ -140,3 +140,18 @@ Status applies to the **complete stated gate on current dev.22**. A bounded obse
 | Installer | NOT RUN | Exact current installation and negative refusal evidenced; current complete GUI lifecycle including I9/I10 pending. |
 
 Evidence preparation changes no runtime source or payload. The runtime observations and GUI maintenance above are attributed to the qualification agent; compiling this checkpoint used bounded offline receipt/report checks. Final settings/restoration, remaining fresh GUI scope, official FSR selection, pause diagnostics, travel and three ordinary clean quits remain outstanding. The extensive performance/image benchmark remains a separate post-release task; these observations do not grant release approval.
+
+
+## Later ordinary exit and running-game installer follow-up
+
+Fresh exact dev.22 GUI Verify succeeded while the game was running. Install and confirmed Uninstall each refused with **Close Minecraft Dungeons II before changing files**. Independent post-action checks preserved all 18 owned and 15 dependency hashes, overrides `{}` and the unchanged installed receipt. This completes I3.
+
+Run 7 used ordinary mouse **Quit to Confirm** from the starting menu and completed with held-handle kernel exit code 0 in **5.813616 seconds**. The original Windowed Full Screen mode was restored through the ordinary Video UI at 1920x1200. An external read-only observer verified the exact game image and watched only two known pointer slots and their first two words; it used no debugger, injected code, register changes, memory writes or protection changes. A null next-link value persisted for about **3.30 seconds** during this successful exit. Consequently, that value alone does not establish corruption or identify the earlier failure's cause. Nominal polling was 2 ms, with a maximum observed gap of 24.12 ms; snapshots are not atomic.
+
+Diagnostic runs 6 and 8 used a separate temporary one-shot page observer and are excluded from ordinary-exit qualification. Each exited 0 after an ordinary close request and captured an unrelated write elsewhere on the same page, with the watched node still self-linked at capture. Both restored the original page protection. The temporary addon was removed and exact 18-owned/15-dependency hashes reverified. Neither identified the target writer or repaired the recurring crash. The observer itself creates a thread before protection is applied; its startup work is a possible source of the unrelated write, which the retained packet cannot resolve.
+
+The advanced Upscaling tab displayed Auto, analytical 3.1 and experimental INT8 choices on this GPU. A mouse round trip returned the selection to Auto. This establishes menu interaction only; it does not qualify optional INT8 activation, official ML support, keyboard navigation or controller input. Windows remains **FAIL** and further runtime/restoration checks remain pending.
+
+Run 9 reproduced an ordinary exit failure after startup sign-in errors 0020 and 0064. Held-handle kernel exit was `C0000005` after **5.810680 seconds** from Alt+F4. Independent offline analysis recovered the same worker function, caller chain and GameThread CRT-exit path as run 1, but a different null-derived byte read at `0x3dac`. The dump lacks the relevant heap; it does not establish a zero next link or identify its writer. No diagnostic addon or debugger was active. This fresh failure retains the shutdown blocker.
+
+Normal GUI uninstall then completed with the game closed. Independent before/after verification confirmed all 17 removable owned paths absent, including private DLSS; all 14 shared dependencies unchanged; the original proxy restored; both owned install/HDR receipts absent; and the exact ownership-safe startup configuration restored. Player saves were not read. This completes I9; the post-uninstall reinstall/Verify/launch gate is still being completed.

@@ -164,6 +164,49 @@
       "causalWriterIdentified": false,
       "temporaryAddonRemoved": true,
       "original18Owned15DependencyHashesVerified": true
+    },
+    {
+      "trial": 6,
+      "classification": "diagnostic/excluded",
+      "exitCodeHex": "00000000",
+      "latencySeconds": 5.9242463,
+      "ordinaryExitQualified": false,
+      "temporaryPageWatchRemoved": true,
+      "firstWriteWasTargetNode": false,
+      "originalPageProtectionRestored": true
+    },
+    {
+      "trial": 7,
+      "classification": "ordinary with external read-only observer",
+      "context": "Main menu; normal mouse Quit and Confirm; original borderless display restored; no injected diagnostic, debugger or register changes",
+      "exitCodeHex": "00000000",
+      "latencySeconds": 5.813616,
+      "ordinaryExitQualified": true,
+      "exitCrashFixed": false
+    },
+    {
+      "trial": 8,
+      "classification": "diagnostic/excluded",
+      "exitCodeHex": "00000000",
+      "latencySeconds": 6.554285,
+      "ordinaryExitQualified": false,
+      "temporaryPageWatchRemoved": true,
+      "firstWriteWasTargetNode": false,
+      "originalPageProtectionRestored": true
+    },
+    {
+      "trial": 9,
+      "classification": "ordinary",
+      "context": "Startup sign-in errors 0020 and 0064 after one retry; no gameplay, injected diagnostic or debugger; ordinary Alt+F4",
+      "exitCodeHex": "C0000005",
+      "latencySeconds": 5.81068,
+      "ordinaryExitQualified": false,
+      "faultUnresolved": true,
+      "sameWorkerAndCrtExitFamily": true,
+      "sameExactFaultAsRun1": false,
+      "nullDerivedReadHex": "3dac",
+      "actualWriterIdentified": false,
+      "headNextZeroEstablished": false
     }
   ],
   "run4Resize": {
@@ -395,7 +438,15 @@
     "reopenedSevenRecognizedDefaultOff": true,
     "otherFiveOverrideTogglePathsFreshlyRepeated": false,
     "installReceiptUnchangedAfterOverrideSubset": true,
-    "unknownFutureDependencyCompatibilityClaimed": false
+    "unknownFutureDependencyCompatibilityClaimed": false,
+    "originalBorderlessModeRestoredViaUi": true,
+    "originalDisplayOutput": [
+      1920,
+      1200
+    ],
+    "advancedFsrSrChoiceRoundTripObserved": true,
+    "advancedFsrSrRestoredAuto": true,
+    "keyboardControllerChecksAvailable": false
   },
   "historicalFailuresRetained": {
     "dev21ResizeFailure": "ResizeBuffers / DXGI_ERROR_INVALID_CALL",
@@ -430,8 +481,8 @@
       "observation": "Parent directly observed normal dev.22 GUI install with current locked dependencies; final fresh-install receipt corroborates version, 18 owned/15 dependency hashes and overrides {}. Report author did not repeat the interaction."
     },
     "I3": {
-      "status": "NOT RUN",
-      "observation": "Fresh dev.22 running-game GUI mutation checks not established. Dev.21 read-only Verify and Uninstall refusal remain historical."
+      "status": "PASS",
+      "observation": "Fresh exact dev.22 GUI Verify while the game was running completed read-only. Confirmed Uninstall and Install both refused with Close Minecraft Dungeons II before changing files. All 18 owned and 15 dependency hashes, overrides {} and the install receipt remained unchanged."
     },
     "I4": {
       "status": "PASS",
@@ -454,8 +505,8 @@
       "observation": "Pinned-source Windows installer Core suite passed 147 fixtures covering unknown/mixed/incomplete/unsafe/acknowledgement cases. Separate exact-shipped-Core constructor check verified seven defaults Off and byte-matching embedded inputs; 147 tests are not claimed against that shipped binary."
     },
     "I9": {
-      "status": "NOT RUN",
-      "observation": "Dev.22 final ordinary GUI uninstall/restoration is not completed."
+      "status": "PASS",
+      "observation": "Normal dev.22 GUI Uninstall completed with game closed. Independent checks confirmed all 17 removable owned paths absent including private DLSS, 14 shared dependencies unchanged, original proxy restored, install/HDR ownership receipts absent and exact ownership-safe config restoration. Player saves were not read."
     },
     "I10": {
       "status": "NOT RUN",
@@ -593,8 +644,7 @@
     }
   },
   "remainingGates": [
-    "I9/I10 ordinary GUI uninstall and post-uninstall reinstall/Verify/launch",
-    "Original borderless display-mode restoration",
+    "I10 post-uninstall reinstall/Verify/launch",
     "Fresh complete current-candidate GUI and advanced-page input scope",
     "Explicit current official FSR SR/FG implementation selection",
     "Pause/stale/disabled diagnostics and strict SR validation",
@@ -639,10 +689,18 @@
     "all18OwnedAnd15DependenciesVerified": true,
     "dependencyOverrides": {},
     "installedReceiptUnchanged": true,
-    "ordinaryUninstallI9Complete": false,
+    "ordinaryUninstallI9Complete": true,
     "postUninstallReinstallI10Complete": false,
     "gameClosedAtCheckpoint": true,
-    "temporaryDiagnosticAddonInstalledAtCheckpoint": false
+    "temporaryDiagnosticAddonInstalledAtCheckpoint": false,
+    "runningGameReadOnlyVerify": "PASS",
+    "runningGameInstallRefusal": "PASS",
+    "runningGameUninstallRefusal": "PASS",
+    "runningGameFilesAndReceiptUnchanged": true,
+    "ordinaryUninstallOwnedAbsent": 17,
+    "ordinaryUninstallSharedDependenciesUnchanged": 14,
+    "ordinaryUninstallOriginalProxyRestored": true,
+    "ordinaryUninstallExactConfigRestoration": true
   },
   "additionalWorkflowMetadata": {
     "parentFreshReadOnlyApiVerification": true,
@@ -687,5 +745,18 @@
     "embeddedInputsByteMatched": true,
     "unknownFutureDependencyCompatibilityClaimed": false,
     "gameRuntimeQualification": false
+  },
+  "run7ReadOnlyShutdownObservation": {
+    "pinnedImageVerified": true,
+    "debugger": false,
+    "processMemoryWrites": false,
+    "protectionChanges": false,
+    "pollMillisecondsNominal": 2,
+    "maximumPollGapMilliseconds": 24.1203,
+    "headNextBecameZeroDuringSuccessfulExit": true,
+    "nullStateObservedForApproximatelyMilliseconds": 3299.1,
+    "actualWriterIdentified": false,
+    "corruptionProven": false,
+    "limitation": "Polling snapshots are not atomic; transitions can be missed. The null value alone does not distinguish the earlier crash from normal cleanup."
   }
 }
