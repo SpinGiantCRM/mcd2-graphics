@@ -2,6 +2,8 @@
 
 The [sanitized aggregate](../qualification/providers/windows-dev22/checkpoint-2026-10-20.json) records the same checkpoint. The [earlier dev.17 record](WINDOWS_DEV17_QUALIFICATION_2026-10-19.md) retains the preceding failed history. This documentation update does not change the pinned runtime inputs.
 
+The later [exit investigation follow-up](WINDOWS_DEV22_EXIT_FOLLOWUP_2026-10-20.md) records additional offline heap evidence, working-source comparison and a bounded private settings-worker control. Its diagnostic results do not qualify the original payload.
+
 
 **Overall Windows status: FAIL. Windows and release qualification are not granted.** This sanitized incremental checkpoint is dated 20 October 2026 and records the evidence available at this checkpoint. The dev.22 ordinary startup exit access violation remains unresolved. Further checks and final restoration are pending.
 
