@@ -479,7 +479,7 @@
     "freshGuiInstallationIndependentlyRepeatedByReportAuthor": false,
     "freshFsrSrAndFgOverrideSubsetPassed": true,
     "reopenedSevenRecognizedDefaultOff": true,
-    "otherFiveOverrideTogglePathsFreshlyRepeated": false,
+    "otherFiveOverrideTogglePathsFreshlyRepeated": true,
     "installReceiptUnchangedAfterOverrideSubset": true,
     "unknownFutureDependencyCompatibilityClaimed": false,
     "originalBorderlessModeRestoredViaUi": true,
@@ -489,7 +489,8 @@
     ],
     "advancedFsrSrChoiceRoundTripObserved": true,
     "advancedFsrSrRestoredAuto": true,
-    "keyboardControllerChecksAvailable": false
+    "keyboardControllerChecksAvailable": false,
+    "wrongFolderRefusedAndSupportedSelectionRetained": true
   },
   "historicalFailuresRetained": {
     "dev21ResizeFailure": "ResizeBuffers / DXGI_ERROR_INVALID_CALL",
@@ -516,8 +517,8 @@
       "observation": "Candidate folder contains a space and runtime launched; full fresh installer prerequisites/protection-warning gate not established here."
     },
     "I1": {
-      "status": "NOT RUN",
-      "observation": "Fresh unsupported-target Install refusal with unchanged files is retained; full supported identity/cards/wrong-folder gate needs completion."
+      "status": "PASS",
+      "observation": "Supported Steam build 25754144 and all seven requirement cards accepted. Empty wrong folder refused with Select the Minecraft Dungeons II folder containing Dungeons; supported selection retained and fixture remained empty. Prior exact-candidate unsupported-target Install refusal retained. All 18 owned/15 dependency hashes, empty overrides and receipt unchanged."
     },
     "I2": {
       "status": "PASS",
@@ -540,8 +541,8 @@
       "observation": "Modified owned shader caused Repair and confirmed Uninstall refusals before removal; other 17 owned/15 dependencies unchanged. Exact backup restored and final intact GUI Verify passed with original 18+15 hashes, overrides {} and receipt."
     },
     "I7": {
-      "status": "NOT RUN",
-      "observation": "Fresh dev.22 FSR SR/FG acknowledgement, warning, Use installed, isolation and Off restoration passed; reopen showed all seven recognized/default Off. Other five toggle paths remain historical; full current seven-control gate incomplete."
+      "status": "PASS",
+      "observation": "Fresh exact dev.22 GUI framework, RenoDX, Loader, DLSS and Streamline warning/Use installed/isolation/Off paths completed; earlier exact-candidate FSR SR/FG paths retained. Reopened installer shows all seven recognized, no warnings or Use installed actions; 18 owned/15 dependency hashes, overrides {} and installation receipt unchanged."
     },
     "I8": {
       "status": "PASS",
@@ -552,8 +553,8 @@
       "observation": "Normal dev.22 GUI Uninstall completed with game closed. Independent checks confirmed all 17 removable owned paths absent including private DLSS, 14 shared dependencies unchanged, original proxy restored, install/HDR ownership receipts absent and exact ownership-safe config restoration. Player saves were not read."
     },
     "I10": {
-      "status": "NOT RUN",
-      "observation": "Normal post-I9 GUI reinstall and Verify completed with exact hashes; launch reached title, but startup sign-in failure prevented full gameplay verification."
+      "status": "PASS",
+      "observation": "Normal exact-candidate reinstall and verification followed by successful main menu and hub startup in run 18; later ordinary exit AV retained separately."
     },
     "U1": {
       "status": "NOT RUN",
@@ -573,7 +574,7 @@
     },
     "U5": {
       "status": "NOT RUN",
-      "observation": "Bounded hub gameplay/movement observed; required five minutes and dungeon/hub travel not completed."
+      "observation": "Over five minutes hub survival, active SR evaluations and mouse-drag movement observed. Required dungeon/hub return transition remains incomplete."
     },
     "U6": {
       "status": "NOT AVAILABLE",
@@ -621,7 +622,7 @@
     },
     "E1": {
       "status": "FAIL",
-      "observation": "Ordinary run 1 access violation; only one dev.22 ordinary clean exit. Diagnostic zero exit and interrupted session excluded."
+      "observation": "Recurring ordinary C0000005 exits include fresh no-debugger/no-extra-addon/no-ETW run 18; same worker failure family. Three final ordinary clean exits after a cause-specific repair remain incomplete."
     },
     "E2": {
       "status": "NOT RUN",
@@ -629,7 +630,7 @@
     },
     "E3": {
       "status": "NOT RUN",
-      "observation": "I9/I10 and original borderless-mode restoration remain pending."
+      "observation": "Normal I9 uninstall, I10 reinstall/startup and original borderless restoration passed; final full preference restoration remains pending."
     },
     "E4": {
       "status": "NOT RUN",
@@ -651,7 +652,7 @@
     },
     "FG Off recovery": {
       "status": "NOT RUN",
-      "observation": "Matched Off → On → Off counters/cadence retained; complete warmed repeated recovery regression pending."
+      "observation": "Matched Off \u00e2\u2020\u2019 On \u00e2\u2020\u2019 Off counters/cadence retained; complete warmed repeated recovery regression pending."
     },
     "Anti-Lag 2": {
       "status": "NOT RUN",
@@ -667,11 +668,11 @@
     },
     "Diagnostics": {
       "status": "NOT RUN",
-      "observation": "Busy correction has bounded observations. The original strict SR collector remains zero; a separate read-only Active observer passed isolated synthetic checks, but has no fresh live validation. Pause clearing and stale/disabled behavior pending."
+      "observation": "Separate read-only Active SR observer passed 32 synthetic checks and three fresh live advancing/current-context reports. Original transition-only collector unchanged. Full pause/stale/disabled recovery and intermittent version-label finding pending."
     },
     "Sharpness": {
       "status": "NOT RUN",
-      "observation": "Complete 0–100%, reset/relaunch/provider/external-change gate pending."
+      "observation": "Complete 0\u00e2\u20ac\u201c100%, reset/relaunch/provider/external-change gate pending."
     },
     "Lifecycle/output": {
       "status": "NOT RUN",
@@ -682,15 +683,14 @@
       "observation": "Startup ordinary-exit access violation unresolved. Three ordinary code-zero quits with retirement and delay review are not completed."
     },
     "Installer": {
-      "status": "NOT RUN",
-      "observation": "I2-I6, I8 and I9 complete; post-uninstall GUI reinstall and Verify passed, with title launch. I1/I7 full scope and I10 gameplay remain incomplete."
+      "status": "PASS",
+      "observation": "I1-I10 complete on exact dev.22 with current pinned publisher dependencies. Ordinary startup and hub gameplay after reinstall passed; subsequent exit failure retained separately."
     }
   },
   "remainingGates": [
-    "I10 full post-reinstall startup/gameplay verification after successful GUI reinstall, Verify and title launch",
     "Fresh complete current-candidate GUI and advanced-page input scope",
     "Explicit current official FSR SR/FG implementation selection",
-    "Pause/stale/disabled diagnostics and strict SR validation",
+    "Pause/stale/disabled diagnostics; fresh Active SR validation passed",
     "Travel and active AMD-owner resize/output lifecycle",
     "Three ordinary clean exits with completed retirement and delay review",
     "Root cause of ordinary-exit C0000005"
@@ -733,7 +733,7 @@
     "dependencyOverrides": {},
     "installedReceiptUnchanged": true,
     "ordinaryUninstallI9Complete": true,
-    "postUninstallReinstallI10Complete": false,
+    "postUninstallReinstallI10Complete": true,
     "gameClosedAtCheckpoint": true,
     "temporaryDiagnosticAddonInstalledAtCheckpoint": false,
     "runningGameReadOnlyVerify": "PASS",
@@ -747,7 +747,7 @@
     "postUninstallGuiReinstallPassed": true,
     "postUninstallGuiVerifyPassed": true,
     "postUninstallTitleLaunchObserved": true,
-    "postUninstallFullGameplayVerified": false
+    "postUninstallFullGameplayVerified": true
   },
   "additionalWorkflowMetadata": {
     "parentFreshReadOnlyApiVerification": true,
@@ -815,5 +815,6 @@
     "reportExitZeroAloneIsPass": false,
     "directTransitionHistoryObserved": false,
     "limitation": "The historical ApplySource ACK relation is checked separately from the exact transactional transition predicate; bounded local-file consistency is not authenticated transition history."
-  }
+  },
+  "runtimeFollowup": "runtime-followup-2026-10-20.json"
 }
