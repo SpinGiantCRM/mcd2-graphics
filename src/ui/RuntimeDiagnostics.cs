@@ -56,5 +56,5 @@ public class RuntimeDiagnosticsClient : USaveGame {
   if(State!=null&&same&&age>0){SrAdvancing=srEligible&&lastSrProvider==next.SrProvider&&manager.DiagnosticSrActive;FgAdvancing=fgEligible&&lastFgProvider==next.FgProvider&&manager.DiagnosticFgActive;ReflexAdvancing=reflexEligible&&lastReflexMode==next.ReflexMode&&manager.DiagnosticReflexActive;AmdAdvancing=amdEligible&&lastAmdMode==1&&manager.DiagnosticAmdActive;}
   lastSession=session;lastRevision=next.Revision;lastWorld=world;State=next;Fresh=true;
  }
- public static string Implementation(int version){return version<=0?"Not used this session":(version/10000)+"."+((version/100)%100)+"."+(version%100);}
+ public static string Implementation(int version){return version<=0?"Not verified in current context":(version/10000)+"."+((version/100)%100)+"."+(version%100);}
 }

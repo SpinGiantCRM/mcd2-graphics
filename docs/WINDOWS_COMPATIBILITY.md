@@ -38,6 +38,13 @@ and independent per-channel UI recovery baselines. No extra render lock or SDK w
 permitted for sampling. Offline
 checks and code review do not qualify a new artifact or repair the exit fault;
 the changed complete package still requires fresh Windows runtime testing.
+When pause, stale data or opt-out invalidates the current implementation sample,
+the UI says **Not verified in current context**. Do not describe this as never
+having used FSR in the session: a valid active observation may precede the
+invalidation. Preserve the null state and inactive channels rather than keeping
+old activity alive to populate a version label. The UI fixture covers successful
+FSR use followed by pause and expiry, with numeric implementation formatting
+unchanged. This wording correction does not repair shutdown.
 
 The [19 October dev.17 qualification](WINDOWS_DEV17_QUALIFICATION_2026-10-19.md)
 pins current publisher Loader 2.6, Streamline 2.14.16, DLSS 310.9.16 and RenoDX

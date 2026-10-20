@@ -33,6 +33,23 @@ static class DiagnosticsTest {
   s.Revision=7;s.Sample++;s.SrFrames++;Poll(c,m,false);Need(!c.Fresh&&c.State==null);
   var request=(DiagnosticsRequestSave)UGameplayStatics.Slots["MCD2GraphicsDiagnosticsRequest"];Need(request.Enabled==0&&request.SessionId==123);
   Need(RuntimeDiagnosticsClient.Implementation(30105)=="3.1.5"&&RuntimeDiagnosticsClient.Implementation(30106)=="3.1.6");
+  // Losing the current world/freshness after real FSR use must not claim that
+  // FSR has never been used during this session. Keep activity fail-closed.
+  var contextClient=new RuntimeDiagnosticsClient();
+  var contextManager=new ModActor{Provider=2,ProviderMenu=m.ProviderMenu,ProviderRuntime=new ProviderRuntimeClient{WorldGeneration=4}};
+  var contextState=new DiagnosticsStateSave{SchemaVersion=1,SessionId=123,Revision=7,Sample=200,WorldGeneration=4,SrProvider=2,SrFrames=20,FsrSrVersion=30105,FsrFgVersion=30106};
+  UGameplayStatics.Slots["MCD2GraphicsDiagnosticsState"]=contextState;Poll(contextClient,contextManager);
+  contextState.Sample++;contextState.SrFrames++;Poll(contextClient,contextManager);Need(contextClient.SrAdvancing);
+  Need(RuntimeDiagnosticsClient.Implementation(contextClient.State!.FsrSrVersion)=="3.1.5");
+  contextState.Sample++;contextState.WorldGeneration=0;Poll(contextClient,contextManager);
+  Need(contextClient.State==null&&!contextClient.SrAdvancing&&!contextClient.FgAdvancing);
+  if(RuntimeDiagnosticsClient.Implementation(contextClient.State==null?0:contextClient.State.FsrSrVersion)!="Not verified in current context")throw new Exception("Paused FSR diagnostics falsely deny prior use in this session");
+  contextState.WorldGeneration=4;contextState.Sample++;Poll(contextClient,contextManager);
+  for(int i=0;i<4;i++)Poll(contextClient,contextManager);
+  Need(contextClient.State==null&&!contextClient.SrAdvancing);
+  Need(RuntimeDiagnosticsClient.Implementation(0)=="Not verified in current context"&&RuntimeDiagnosticsClient.Implementation(-1)=="Not verified in current context");
+  Poll(contextClient,contextManager,false);Need(contextClient.State==null&&!contextClient.FgAdvancing);
+  UGameplayStatics.Slots["MCD2GraphicsDiagnosticsState"]=s;
   // Wrong/zero producer world must suppress every channel, including Native SR.
   m.Provider=0;m.FgMode=1;s.SrProvider=0;s.SrFrames=0;s.SessionId=123;s.Revision=7;s.WorldGeneration=4;s.AmdMode=1;s.AmdFrames=100;
   s.Sample++;Poll(c,m);s.Sample++;s.FgGenerated++;s.ReflexFrames++;s.AmdFrames++;Poll(c,m);
