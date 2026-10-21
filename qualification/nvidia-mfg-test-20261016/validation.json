@@ -69,5 +69,23 @@
     "ownedFiles": 17,
     "packageSHA256": "59679391f73b80f97df2668a6a61ae9a92c2c71190def7065113fc8496b2db99",
     "qualificationScope": "one bounded RTX 4080 / WinGDK 1.1.2.0 exit with external MFG Ada Unlock; no cross-hardware or long-run guarantee"
+  },
+  "extendedPlayerReport20261021": {
+    "sourceCommit": "312d028548712f4c43cae38bda680adc9370ffa6",
+    "installedOwnedHashes": "all 17 match",
+    "playerReport": "longer play works well; very slight occasional stutters, cause unknown",
+    "duration": "not specified",
+    "fgOutcomeSamples": 1435,
+    "fgNonzeroSdkResultOrStatusSamples": 0,
+    "last40ActualPresents": 3,
+    "latestCpuCoordinatorError": 0,
+    "latestSdkMarkerError": 0,
+    "latestReflexFault": 0,
+    "gdkStoppedReceipt": true,
+    "limits": [
+      "No frame-time capture or controlled FG On/Off comparison",
+      "Micro-stutters are not attributed to the mod or excluded as mod-related",
+      "This fixed-3x report does not qualify Dynamic adaptation"
+    ]
   }
 }

@@ -85,3 +85,13 @@ no retained shipping process after SR/3x FG gameplay. The player reports no
 noticeable performance loss with FG Off and accepts that cost as non-blocking;
 instrumented overhead remains unmeasured.
 A visible selector or passing synthetic capability test is not runtime proof.
+
+## Extended player report - 21 October 2026
+
+The player reports longer play works well, with very slight occasional stutters
+of unknown origin; duration was not specified. The installed 312d028 owned files
+still match all 17 hashes. Available logs contain 1,435 FG outcome samples with
+no nonzero SDK result/status; the last 40 report 3x. Latest coordinator, SDK marker
+and Reflex faults are zero, and the GDK worker logged stopped. These diagnostics
+do not measure frame pacing or identify the stutter cause. No controlled FG
+On/Off comparison was performed, and this report does not qualify Dynamic.
