@@ -2,6 +2,7 @@
 #include "../../src/providers/bootstrap_module.hpp"
 #include "fg_ui_protocol.hpp"
 #include "fg_configuration.hpp"
+#include "gdk_cache_clock.hpp"
 #include "../../src/providers/menu_snapshot.h"
 #include "../../src/providers/fg_menu_projection.hpp"
 // Experimental UI bridge: current-process heartbeat, supported rendering LUID,
@@ -11,13 +12,14 @@ std::filesystem::path settingsPath,runtimePath;
 mcd2::fgui::Intent intent{};std::vector<uint8_t> seed,lastPublished;
 std::atomic<bool> enabled{false},wanted{false};std::atomic<unsigned> fault{0};
 std::atomic<bool> retired{false};
+unsigned maximumGeneratedFrames=0,dynamicSupported=0,appliedFrameMode=0;
 unsigned session=0,available=0,availableProviders=0,startupOwner=0,previousMode=0,sessionMode=0,restartRequired=0;ULONGLONG nextPoll=0,nextSupport=0;
 std::vector<uint8_t> read(const std::filesystem::path&p){std::ifstream f(p,std::ios::binary|std::ios::ate);if(!f)return {};auto n=f.tellg();if(n<64||n>8192)return {};std::vector<uint8_t>b(static_cast<size_t>(n));f.seekg(0);if(!f.read(reinterpret_cast<char*>(b.data()),b.size()))return {};return b;}
-bool fresh(const std::filesystem::path&p){WIN32_FILE_ATTRIBUTE_DATA a{};if(!GetFileAttributesExW(p.c_str(),GetFileExInfoStandard,&a))return false;FILETIME now{};GetSystemTimeAsFileTime(&now);ULARGE_INTEGER n{},v{};n.LowPart=now.dwLowDateTime;n.HighPart=now.dwHighDateTime;v.LowPart=a.ftLastWriteTime.dwLowDateTime;v.HighPart=a.ftLastWriteTime.dwHighDateTime;return v.QuadPart<=n.QuadPart && n.QuadPart-v.QuadPart<15000000;}
+bool fresh(const std::filesystem::path&p){WIN32_FILE_ATTRIBUTE_DATA a{};if(!GetFileAttributesExW(p.c_str(),GetFileExInfoStandard,&a))return false;FILETIME now{};GetSystemTimeAsFileTime(&now);ULARGE_INTEGER n{},v{};n.LowPart=now.dwLowDateTime;n.HighPart=now.dwHighDateTime;v.LowPart=a.ftLastWriteTime.dwLowDateTime;v.HighPart=a.ftLastWriteTime.dwHighDateTime;return v.QuadPart<=n.QuadPart && n.QuadPart-v.QuadPart<fg_cache_fresh_budget();}
 void init(const std::filesystem::path&folder){settingsPath=folder.parent_path()/L"SaveGames"/L"MCD2GraphicsFGSettings.sav";runtimePath=folder.parent_path()/L"SaveGames"/L"MCD2GraphicsFGRuntime.sav";session=(GetCurrentProcessId()^unsigned(GetTickCount64()))&0x7fffffff;if(!session)session=1;}
 void publish(unsigned active,bool ready){
  if(!enabled)return;const unsigned phase=fault?6:(!intent.mode?0:(!intent.ready?1:(active?3:2)));
- auto bytes=mcd2::fgui::encode(seed,{{"SchemaVersion",1},{"Revision",intent.revision},{"SessionId",session},{"Available",available},{"Active",active},{"Phase",phase},{"RestartRequired",restartRequired},{"AvailableProviders",availableProviders},{"StartupOwner",startupOwner}});
+ auto bytes=mcd2::fgui::encode(seed,{{"SchemaVersion",1},{"Revision",intent.revision},{"SessionId",session},{"Available",available},{"Active",active},{"Phase",phase},{"RestartRequired",restartRequired},{"AvailableProviders",availableProviders},{"StartupOwner",startupOwner},{"MaximumGeneratedFrames",maximumGeneratedFrames},{"DynamicSupported",dynamicSupported},{"ActiveFrameMode",appliedFrameMode}});
  if(bytes.empty()||bytes==lastPublished)return;auto tmp=runtimePath;tmp+=L".fg.tmp";std::ofstream f(tmp,std::ios::binary|std::ios::trunc);if(!f.write(reinterpret_cast<const char*>(bytes.data()),bytes.size()))return;f.close();if(MoveFileExW(tmp.c_str(),runtimePath.c_str(),MOVEFILE_REPLACE_EXISTING|MOVEFILE_WRITE_THROUGH))lastPublished=std::move(bytes);
 }
 void poll(a::device*device,const std::filesystem::path&policy,unsigned active){
@@ -31,7 +33,13 @@ void poll(a::device*device,const std::filesystem::path&policy,unsigned active){
   if(native&&amdSupport&&amdSupport(native)==0)availableProviders|=2;
  }
  mcd2::fgui::Intent next{};if(!mcd2::fgui::decode(read(settingsPath),next)||!fresh(settingsPath)){intent.ready=0;wanted=false;publish(active,false);return;}
- intent=next;available=(availableProviders&(1u<<intent.provider))?1:0;
+ intent=next;maximumGeneratedFrames=0;dynamicSupported=0;
+ if(intent.provider==0){auto bridge=GetModuleHandleW(L"fg-sdk-bridge.dll");using Capabilities=int(*)(unsigned*,unsigned*);
+  auto capabilities=bridge?reinterpret_cast<Capabilities>(GetProcAddress(bridge,"mcd2_fg_capabilities_v1")):nullptr;
+  if(capabilities){unsigned maximum=0,dynamic=0;if(!capabilities(&maximum,&dynamic)){maximumGeneratedFrames=std::min(maximum,16u);dynamicSupported=dynamic==1?1:0;}}
+ }
+ const bool frameModeSupported=intent.provider==1?intent.frameMode==0:mcd2::fg::supportsFrameMode(intent.frameMode,maximumGeneratedFrames,dynamicSupported!=0);
+ available=(availableProviders&(1u<<intent.provider))?1:0;
  if(intent.mode!=previousMode){if(intent.mode)fault=0;previousMode=intent.mode;}
  if(seed.empty())seed=read(runtimePath);
  auto bootstrap=mcd2::providers::bootstrapModule();auto startup=bootstrap?reinterpret_cast<unsigned(*)()>(GetProcAddress(bootstrap,"mcd2_bootstrap_fg_session_mode")):nullptr;
@@ -42,13 +50,13 @@ void poll(a::device*device,const std::filesystem::path&policy,unsigned active){
   MCD2MenuSnapshotV1 current{};current.size=sizeof(current);mcd2::providers::DecodedGraphicsRecord record;mcd2::providers::FgMenuProjection selection;
   const bool currentRequest=snapshot&&snapshot(&current)==0&&!current.load&&!current.reserved&&current.session&&
    mcd2::providers::decodeGraphicsRecord(current.record,record)&&mcd2::providers::projectFgMenu(record,selection)&&
-   mcd2::providers::fgMenuMatches(selection,intent.settingsRevision,intent.provider,intent.mode);
-  restartRequired=available&&((intent.mode&&!mcd2::providers::fgOwnerMatches(startupOwner,intent.provider))||(!intent.mode&&startupOwner!=0))?1:0;
-  wanted=currentRequest&&selection.pairEligible&&available&&intent.mode&&intent.ready&&intent.session==session&&
+   mcd2::providers::fgMenuMatches(selection,intent.settingsRevision,intent.provider,intent.mode)&&selection.frameMode==intent.frameMode;
+  restartRequired=available&&(retired||(intent.mode&&!mcd2::providers::fgOwnerMatches(startupOwner,intent.provider))||(!intent.mode&&startupOwner==2))?1:0;
+  wanted=frameModeSupported&&currentRequest&&selection.pairEligible&&available&&intent.mode&&intent.ready&&intent.session==session&&
    mcd2::providers::fgOwnerMatches(startupOwner,intent.provider)&&!fault&&!retired;
   publish(active,false);return;
  }
- wanted=available&&sessionMode==1&&intent.mode&&intent.ready&&intent.session==session&&!fault&&!retired;
+ wanted=frameModeSupported&&available&&sessionMode==1&&intent.mode&&intent.ready&&intent.session==session&&!fault&&!retired;
  publish(active,false);
 }
 }

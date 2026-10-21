@@ -1,0 +1,2 @@
+f8acc924457d5b58629ab026b58468225ef3013ad0a3d8eff542a8181353bf35  MCD2-Graphics-GamePass-test-20261015-Windows-x64.zip
+9e9f45b7fe5d02c2af76f8533bca416e7bb2461fd11dba86749d1a96b11ebc69  MCD2-Graphics-GamePass-test-20261015-Sources.zip

@@ -72,7 +72,8 @@ static bool cleanup_detached_live(LiveFixture &c) {
   // NGX was initialized with this proxy device. Shutdown1 selects that device's
   // instance; the unwrapped resource device is not the initialization identity.
   // Never pass nullptr here: it would shut down every device's NGX instance.
-  else {using F=NVSDK_NGX_Result(*)(ID3D12Device*);auto fn=reinterpret_cast<F>(GetProcAddress(c.module,"NVSDK_NGX_D3D12_Shutdown1"));if(!fn||!c.proxy_device||!result("shutdown_device",fn(c.proxy_device)))return false;}
+  // The driver export writes a remaining-device count hidden by the SDK wrapper.
+  else {using F=NVSDK_NGX_Result(*)(ID3D12Device*,unsigned&);unsigned devicesLeft=0;auto fn=reinterpret_cast<F>(GetProcAddress(c.module,"NVSDK_NGX_D3D12_Shutdown1"));if(!fn||!c.proxy_device||!result("shutdown_device",fn(c.proxy_device,devicesLeft)))return false;}
   c.initialized=false;
  }
  // Device references were inserted first; reverse release drops them last.
@@ -100,7 +101,7 @@ static bool init_live_saved(a::command_queue *queue,std::unique_lock<std::recurs
   guard->lock();live_cleanup_busy=false;if(!cleaned){context->ready=false;live_fixture=std::move(context);}
   return false;
  };
- c.module=LoadLibraryW(L"nvngx.dll");if(!c.module)c.module=LoadLibraryExW(L"Z:\\run\\host\\usr\\lib\\nvidia\\wine\\nvngx.dll",nullptr,LOAD_WITH_ALTERED_SEARCH_PATH);
+ c.module=mcd2::ngx::load_driver();
  if(!c.module)return fail("driver_module");
  using Init=NVSDK_NGX_Result(*)(const char*,NVSDK_NGX_EngineType,const char*,const wchar_t*,ID3D12Device*,NVSDK_NGX_Version,const NVSDK_NGX_FeatureCommonInfo*);
  using Allocate=NVSDK_NGX_Result(*)(NVSDK_NGX_Parameter**);

@@ -1,6 +1,18 @@
 #pragma once
 #include "fg_bridge_contract.h"
 namespace mcd2::fg {
+// Saved/UI modes: 0..4 mean 2x..6x; 5 selects native Dynamic MFG.
+constexpr unsigned generatedFrames(unsigned frameMode) { return frameMode==5?0:frameMode+1; }
+constexpr bool supportsFrameMode(unsigned frameMode,unsigned maximum,bool dynamic) {
+ return frameMode<5 ? frameMode+1<=maximum : frameMode==5&&dynamic;
+}
+constexpr bool supportsGeneratedFrames(unsigned frames,unsigned maximum,bool dynamic) {
+ return frames ? frames<=5&&frames<=maximum : dynamic;
+}
+// Streamline intercepts final color; HUDless/UI images improve UI quality.
+inline bool nvidiaInputsReady(bool guides,bool composedImages,bool directFinalColor) {
+ return guides&&(composedImages||directFinalColor);
+}
 inline bool sameConfiguration(const MCD2FGConfig& a,const MCD2FGConfig& b) {
  return a.size==b.size && a.mode==b.mode && a.width==b.width && a.height==b.height &&
   a.motionWidth==b.motionWidth && a.motionHeight==b.motionHeight &&
@@ -20,11 +32,11 @@ inline MCD2FGConfig configurationForPresent(const MCD2FGConfig& requested,const 
  return requested;
 }
 inline bool restartRequired(bool available,unsigned requested,unsigned startup,bool retired) {
- return available && (retired || requested!=startup);
+ return available && (retired || (requested && !startup));
 }
-// Unbound/stale startup intent must not permanently retire an On swapchain.
-inline bool permanentOff(unsigned requested,bool currentSession,unsigned fault) {
- return fault!=0 || (currentSession && requested==0);
+// User Off retains the NVIDIA session; faults still retire it.
+inline bool permanentOff(unsigned fault) {
+ return fault!=0;
 }
 // Menu frames do not carry world guides. Suspending must not advertise their
 // absent guide dimensions as a new output-resolution allocation.

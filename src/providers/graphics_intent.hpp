@@ -12,7 +12,7 @@ namespace mcd2::providers {
 enum class SrProvider : std::uint32_t { Native, NvidiaDlss, AmdFsr, IntelXeSs };
 enum class Quality : std::uint32_t { NativeAA, Quality, Balanced, Performance, UltraPerformance, Custom };
 enum class FgProvider : std::uint32_t { Nvidia, Amd, Intel };
-enum class FgStrategy : std::uint32_t { Single, NativeMfg, Hybrid };
+enum class FgStrategy : std::uint32_t { Single, NativeMfg, Hybrid, Dynamic };
 enum class LatencyProvider : std::uint32_t { Automatic, NvidiaReflex, RadeonAntiLag2, IntelXeLL };
 enum class LatencyMode : std::uint32_t { Off, On, OnBoost };
 enum class PresentationOwner : std::uint32_t { Native, NvidiaStreamline, AmdFidelityFX, IntelXeSs };
@@ -65,7 +65,7 @@ constexpr bool validHdr(const HdrPreference& h) {
 // actual device, selected SDK, dimensions, frame inputs and pacing owner.
 constexpr bool validIntent(const GraphicsIntent& i) {
     if (i.schema != 5 || !validRevision(i.revision) || unsigned(i.sr) > 3 || unsigned(i.fg) > 2 ||
-        unsigned(i.fgStrategy) > 2 || unsigned(i.latency) > 3 || unsigned(i.latencyMode) > 2 ||
+        unsigned(i.fgStrategy) > 3 || unsigned(i.latency) > 3 || unsigned(i.latencyMode) > 2 ||
         !validHdr(i.hdr) || i.requestedMultiplier < 2 || i.requestedMultiplier > 16 ||
         (i.fgStrategy == FgStrategy::Single && i.requestedMultiplier != 2)) return false;
     for (const auto& p : i.srPreferences)
