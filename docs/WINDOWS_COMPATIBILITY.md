@@ -1188,3 +1188,26 @@ implementation label through Busy without supplying SR evaluation activity.
 Actual identity/producer/transport fixtures cover these cases on both portable
 CI platforms. Source and build checks pass; fresh Windows runtime qualification
 of this correction remains required.
+
+### Updated-game layout and AMD startup rollback
+
+Steam build 25910487 has a separate inspected layout, PE metadata, entry-point
+signatures and independent RIP-relative anchors for both frame counters. Keep
+the previous layouts and actual registry pointer/vtable checks. A version label
+or shared address delta must not authorize hooks on another image.
+
+AMD presenter creation explicitly enumerates the actual device's available
+providers and selects the verified 3.1.7 swapchain implementation through the
+documented override chain. The unchanged pinned runtime can otherwise default
+to 4.0.0; this was reproduced in an owned host outside the game and is not
+attributed solely to the Steam update. Failed unpublished creation must retire
+its presenter before native fallback reuses the HWND. Failed retirement retains
+ownership and refuses competing native creation; duplicate creation must not
+retire an already published presenter. Acquire the device successfully before
+publishing queue ownership. Preserve actual-source Windows WARP regressions and
+the explicit-provider hardware probe.
+
+The [dev.25 updated-game progress record](WINDOWS_DEV25_UPDATE_2026-10-22.md)
+separates these startup/layout results from the unresolved historical exit
+crash and from diagnostic-tool failures. Current Windows qualification remains
+incomplete; neither passing CI nor one ordinary clean exit grants approval.
