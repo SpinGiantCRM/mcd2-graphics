@@ -45,6 +45,7 @@ Loaded libraries do not establish ML-model or HDR activation.
 | Updated engine layout | PASS | Actual registry validation and marker registration accepted build 25910487. |
 | FSR / FG / Anti-Lag activity | PASS | Two ordinary pre-capture/current-process intervals validate same-session/revision/world advancing counters, with no provider errors. |
 | Ordinary full-candidate exits | PASS, three observations | Normal Alt+F4: active FSR/FG/Anti-Lag, Native after SR transitions, and missing-optional-runtime fallback. Held exit codes 0; about 7.49, 9.48 and 7.60 seconds, respectively. This is not the final exit series. |
+| Active SR/FG resize recovery | PASS, bounded | Windowed 1680x1050, maximized 1920x1177, then restored borderless 1920x1200; fresh current-context SR and generated-frame counters resumed with no provider error. |
 
 ## Functional follow-up — 23 October
 
@@ -112,10 +113,60 @@ FG correctly suspends while the game is not foreground.
 
 An image-specific Heaps run with verified verifier modules reached the hub and
 returned `C0000005` on normal close. ProcDump reported no access-violation event;
-this run does not identify a faulting instruction. Its exact IFEO absence was
-restored, and all installed hashes were rechecked. A later, non-verifier run
+that recorder log alone did not identify a faulting instruction. Its exact IFEO
+absence was restored, and all installed hashes were rechecked. A later, non-verifier run
 returned `1000` shortly after debugger attachment, before a close request.
 Neither diagnostic result is substituted for an ordinary-release exit result.
+
+Windows Error Reporting independently retained minidumps for both the Heaps run
+and the fifth ordinary run. Offline examination recovered their actual fault
+instructions and independently anchored the return chain using each captured
+instruction's direct jump and the updated executable's unwind metadata. Both
+reach the same worker functions; one reads through a null-derived address and
+the other through an unavailable heap address. Their main threads are in the
+same CRT-exit wait path. This establishes a shared worker family, not an owning
+component, allocation/free history or a source-level repair. No old live probe
+was retargeted and no game debugger was attached for this analysis.
+
+The sixth ordinary process used analytical SR/FG and exercised display changes.
+Windowed output was 1680x1050 with 1120x700 rendering; maximizing produced
+1920x1177 with 1280x785 rendering. Validated SR/FG deltas were 83/32 and 42/41.
+Restoring the original borderless mode produced 1280x800 to 1920x1200 and
+advancing SR/FG again. Anti-Lag remained Off and is not counted as active.
+An initial single click on the title-bar maximize button did not resize the
+window; only the subsequent normal title-bar double-click is counted.
+The normal hub Alt+F4 returned 0, with about 88.00 seconds from the immediate
+input marker to the held monitor's completed exit observation, without a clock
+gap. The slow clean exit does not repair the preceding ordinary crash.
+
+Afterward, normal GUI uninstall removed the owned payload and private DLSS
+copy, restored the previous framework proxy and retained the current shared
+dependencies. A hash-guarded private transaction temporarily held all remaining
+Loader containers and shared native runtime entry points outside game load
+paths. The first clean updated-game control reached the hub; its actual loaded
+modules contained system DXGI and no mod proxy, addon, Loader or SDK modules.
+The helper's Escape input was also ignored there. This supports a control-helper
+coverage limitation independent of the mod. Its normal close returned 0 after
+at least 90 seconds observed in the hub. A second clean control likewise used
+system DXGI without mod modules, remained in the hub for at least 90 seconds
+and exited 0. Close-to-observed-exit intervals were about 6.30 and 4.83 seconds.
+These controls do not establish that the base game can never crash. All 15
+temporarily held shared dependency/entrypoint files were restored to their exact
+hashes before reinstalling the candidate.
+The normal GUI reinstall and intact Verify succeeded; all 18 owned and 15
+dependency files, empty override map and original installed receipt matched.
+Final preference restoration and the end-of-qualification uninstall remain open.
+
+Microsoft's signed TTD 1.11.617.0 recorder passed owned clean and freed-read
+program controls, plus attach/stop followed by natural process completion.
+Offline CDB replay recovered the owned allocation, successful free and subsequent
+read of the same address in order, using the documented
+[memory](https://learn.microsoft.com/en-us/windows-hardware/drivers/debuggercmds/time-travel-debugging-memory-objects)
+and [heap](https://learn.microsoft.com/en-us/windows-hardware/drivers/debuggercmds/time-travel-debugging-heap-objects)
+queries. The exact bounded capture wrapper also passed owned clean and explicit
+failure-status controls with initialization confirmed, trace files retained,
+correct target exit codes and drained recorders. This qualifies that diagnostic
+method for a targeted experiment, not the game or candidate.
 
 The private capture wrapper could cancel its recorder immediately when the
 target signaled exit, racing a termination dump. It now allows bounded debugger
