@@ -29,6 +29,17 @@ def evidence():
     event('idempotent-retirement');event('complete')
     return rows
 class BridgeTests(unittest.TestCase):
+    def test_retained_startup_refuses_competing_native_fallback(self):
+        header=(ROOT/'experiments/providers/fsr_fg_game_bridge.h').read_text()
+        bootstrap=(ROOT/'experiments/fg-streamline/bootstrap_dxgi.cpp').read_text()
+        start=bootstrap.index('event("AMD-owned-swapchain",status)')
+        end=bootstrap.index('// The actual queue identifies',start)
+        failed=bootstrap[start:end]
+        self.assertIn('MCD2_AFG_SWAP_RETAINED = -190',header)
+        self.assertLess(failed.index('if(status==MCD2_AFG_SWAP_RETAINED)return E_ABORT;'),failed.index('return original('))
+        workflow=(ROOT/'.github/workflows/fg-windows-candidate.yml').read_text()
+        self.assertIn('python tests/run_fsr_startup_failure.py --sdk',workflow)
+
     def test_full_counter_and_retirement_gate(self):
         rows=evidence();self.assertTrue(runner.gate(rows,0,False))
         self.assertFalse(runner.gate(rows,5,False));self.assertFalse(runner.gate(rows,0,True))

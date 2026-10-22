@@ -1,3 +1,27 @@
+Failed AMD FG startup must retire an unpublished presenter and its queue/device
+references before allowing a native swapchain fallback on the same HWND. Acquire
+the device before publishing queue ownership, so failed GetDevice never enters
+device-dependent retirement. A
+provider-query error, rejected provider or partially failed SDK creation may
+already own that window. Preserve the provider verification gates. If retirement
+cannot complete, retain ownership and return `MCD2_AFG_SWAP_RETAINED`; bootstrap
+must return failure without attempting a competing native swapchain. Duplicate
+creation must not retire an existing presenter. The actual-source Windows WARP
+regression uses a controlled SDK with real DXGI HWND ownership to cover these
+failure paths, successful fallback, normal success and retained cleanup retry.
+This startup rollback correction does not repair or qualify the historical
+intermittent exit AV; fresh complete-candidate runtime tests remain required.
+
+The AMD runtime may enumerate a driver-supplied swapchain provider ahead of the
+verified SDK provider. Query versions for the actual device, require exact
+3.1.7 / 17752306900579389447 availability, and chain ffxOverrideVersion during
+presenter creation. An API version descriptor alone does not select that
+provider. Keep the post-create provider check; never accept a changed default
+by weakening it. The regression defaults to another provider unless explicitly
+selected, and rejects missing verified providers before SDK creation. AMD's API
+version-selection contract is documented at
+https://gpuopen.com/manuals/fsr_sdk/getting-started/ffx-api/.
+
 SDR FG scene admission recognizes the two captured Steam build 25754144 tone-map
 permutations: `088c6818` with game sharpening disabled and `f7e35ae7` with it
 enabled. Their captured resource bindings, View b1 allocation size, input and

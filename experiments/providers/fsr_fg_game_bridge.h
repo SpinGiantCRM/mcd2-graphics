@@ -3,6 +3,9 @@
 #include "../fg-streamline/fg_camera_contract.h"
 #include "../../src/providers/runtime_diagnostics.h"
 // Plain C boundary. The caller supplies native COM objects, never vendor structs.
+// A failed startup can retain resources when safe SDK retirement fails. The
+// caller must not create another swapchain for that HWND in this case.
+enum { MCD2_AFG_SWAP_RETAINED = -190 };
 struct MCD2AmdFgSwapV1 {
  uint32_t size,width,height,format,samples,sampleQuality,usage,buffers,scaling,effect,alpha,flags;
  uint32_t fullscreenProvided,windowed,refreshNumerator,refreshDenominator,scanline,modeScaling;

@@ -146,6 +146,7 @@ HRESULT STDMETHODCALLTYPE create_swap(IDXGIFactory2* factory,IUnknown* queue,HWN
   void* out=nullptr;const auto status=amdSwap(factory,nativeQueue,hwnd,&p,&out);nativeQueue->Release();nested=previous;
   event("AMD-owned-swapchain",status);
   if(!status&&out){*result=static_cast<IDXGISwapChain1*>(out);actualFgOwner=2;return S_OK;}
+  if(status==MCD2_AFG_SWAP_RETAINED)return E_ABORT;
   // A failed SDK construction never makes a later NVIDIA owner silently active.
   return original(factory,queue,hwnd,desc,fullscreen,output,result);
  }
