@@ -218,6 +218,29 @@ therefore does not establish equivalent coverage of this game. The recording
 does not identify the owner or demonstrate a crash repair, and its clean exit
 is excluded from ordinary qualification. No identical recapture is planned.
 
+The subsequent [full-memory heap diagnostic](../qualification/providers/windows-dev25/heap-exit-2026-10-23.json)
+reproduced `C0000005` on normal starting-menu window close, with Native, FG Off
+and Anti-Lag Off. Image-specific Application Verifier Heaps and Windows Error
+Reporting produced a complete 7,964,025,703-byte dump without an attached
+debugger. The actual invalid read targets a block independently classified as
+freed. Its retained freeing stack is a game-owned CRT exit callback; that
+callback's game static slot still contains the exact pointer consumed by the
+worker. This confirms a use-after-free for this diagnostic instance. Earlier
+ordinary faults grouped by worker family are consistent with this boundary,
+but their grouping alone does not prove an identical target in every case.
+
+The owned capture controls had recovered faults and freeing stacks, but failed
+their original requirement to retain both allocation and free history. Only
+that narrower demonstrated diagnostic capability was accepted for this one
+game run. The actual game dump likewise lacks the freed target's allocation
+history. Source ownership of the protected worker and complete stop/join and
+callback-registration ordering remain unresolved; distant export labels and
+display-enumeration allocation frames do not identify a class or component.
+This evidence does not justify a patch in our addon. No identical capture is
+planned. All temporary per-game diagnostic settings were restored, and exact
+18-owned / 15-dependency hashes and the receipt matched afterward. The run is
+excluded from ordinary qualification; Windows remains **UNQUALIFIED**.
+
 The private capture wrapper could cancel its recorder immediately when the
 target signaled exit, racing a termination dump. It now allows bounded debugger
 drain first. The exact corrected wrapper passes owned clean and explicit
