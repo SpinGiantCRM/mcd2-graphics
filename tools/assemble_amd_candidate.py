@@ -34,7 +34,7 @@ CONFIG = {
     BIN+'FGGuideCapture.ini': b'[Capture]\nEnabled=0\nGuideTags=1\nImageTags=1\nEnableFG=0\nTrialRevision=0\nNativeUIToggle=1\n',
 }
 FSR_COMMIT = '60f4ea81909200d8542eca14dccb2628b763a9a3'
-GAME = {'steamBuildID':'25754144', 'exeSHA256':'3a8703406fd50520f83c4f70a0212c000cb3b584ef28eb38032902230c01ebdd'}
+GAME = {'steamBuildID':'25910487', 'exeSHA256':'3842102bb05fc532b22e97992d61c2248d115be80ff752ff9b6843bf4acd7005'}
 FSR_RUNTIME = {
     'FSRUpscaler': (BIN+'MCD2Graphics/fsr/amd_fidelityfx_upscaler_dx12.dll', 'd0dcccc74a43c44ba435b7a369b456e0970d8a4464e4bd683119b374f2c9fb46'),
     'FSRFrameGeneration': (BIN+'amd_fidelityfx_framegeneration_dx12.dll', '02297beedd285e822d3a64f314cf00faf378dcec0edc47ff0c4dd71b3a8c2f18'),

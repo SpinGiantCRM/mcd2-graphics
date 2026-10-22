@@ -1,3 +1,11 @@
+Steam build 25910487 requires its separately inspected engine layout. Preserve
+the previous layouts and refuse unknown metadata/signatures. The new map checks
+the registry and name entry points, simulation/pacing dispatches and independent
+RIP-relative accesses to both frame counters. Runtime registry/vtable checks
+still apply before registration. These are explicit versioned locations, not
+an address-delta or fallback scan. The candidate baseline uses this game's exact
+executable hash; fresh FG, Anti-Lag and shutdown qualification remains required.
+
 Failed AMD FG startup must retire an unpublished presenter and its queue/device
 references before allowing a native swapchain fallback on the same HWND. Acquire
 the device before publishing queue ownership, so failed GetDevice never enters
