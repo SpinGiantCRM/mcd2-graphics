@@ -41,11 +41,12 @@ Loaded libraries do not establish ML-model or HDR activation.
 | Running-game writes | PASS | Install and confirmed uninstall refuse; intact Repair performs only its read-only scan. All files and receipt unchanged. |
 | Dependency override controls | PASS | All seven acknowledgement / Use installed paths tested individually; the other six cards stay recognized. Each returned Off; normal reopening defaults all seven Off. No override installation performed. |
 | Main-menu Loader metadata | PASS | Loader 2.6 and mod version dev.25, name, author and description observed. Loader-owned update-status text still clips. |
-| Main-menu Video layout | PASS | FSR Quality shows numeric 67% render scale; settings/help render. Full interaction matrix remains pending. |
+| Main-menu Video layout | PASS, mouse scope | Numeric render scale, preset/custom synchronization, shared preset and unavailable-DLSS skipping observed; keyboard coverage remains incomplete. |
 | Updated engine layout | PASS | Actual registry validation and marker registration accepted build 25910487. |
 | FSR / FG / Anti-Lag activity | PASS | Two ordinary pre-capture/current-process intervals validate same-session/revision/world advancing counters, with no provider errors. |
-| Ordinary full-candidate exits | PASS, three observations | Normal Alt+F4: active FSR/FG/Anti-Lag, Native after SR transitions, and missing-optional-runtime fallback. Held exit codes 0; about 7.49, 9.48 and 7.60 seconds, respectively. This is not the final exit series. |
+| Ordinary full-candidate exits | FAIL | The fifth ordinary process returned C0000005. Earlier clean exits took about 7.49, 9.48 and 7.60 seconds, and a later clean exit took about 88.00 seconds. Those observations do not establish a repair or pass the final exit series. |
 | Active SR/FG resize recovery | PASS, bounded | Windowed 1680x1050, maximized 1920x1177, then restored borderless 1920x1200; fresh current-context SR and generated-frame counters resumed with no provider error. |
+| Physical HDR | NOT AVAILABLE | Current Windows display diagnostic explicitly reports HDR not supported / HdrSupported 0 on the internal 1920x1200 60 Hz panel. Wide-color capability is separate and does not establish HDR support. |
 
 ## Functional follow-up — 23 October
 
@@ -157,6 +158,22 @@ The normal GUI reinstall and intact Verify succeeded; all 18 owned and 15
 dependency files, empty override map and original installed receipt matched.
 Final preference restoration and the end-of-qualification uninstall remain open.
 
+A smaller updated-game comparison then retained only publisher Loader 2.6 and
+the pre-existing ReShade 6.8.0.2155 proxy (SHA-256
+`0cee63f9c9f13f3ac909c5b4903f4dbb4b719a7ab3b4f13b0deaf83c814b94f7`).
+The normal GUI uninstall removed our owned payload, and all remaining native
+graphics dependencies, including the candidate framework, RenoDX and FSR /
+Streamline, were held outside load paths. Actual loaded modules confirmed that
+reduced state. Both ordinary runs reached the same hub for at least 90 seconds.
+The first normal window close returned 0; the second returned `C0000005`.
+Its WER dump independently anchors the same updated-image worker and CRT-exit
+wait path as the full candidate failure. Our UI, native code and graphics
+providers are therefore not necessary for this crash. This does not yet identify
+the responsible remaining component or exonerate the base game. No debugger or
+verifier was attached; a read-only Windows display report completed before the
+second close. The temporarily held files were restored before preparing the
+next, separately recorded Loader-only control.
+
 Microsoft's signed TTD 1.11.617.0 recorder passed owned clean and freed-read
 program controls, plus attach/stop followed by natural process completion.
 Offline CDB replay recovered the owned allocation, successful free and subsequent
@@ -167,6 +184,16 @@ queries. The exact bounded capture wrapper also passed owned clean and explicit
 failure-status controls with initialization confirmed, trace files retained,
 correct target exit codes and drained recorders. This qualifies that diagnostic
 method for a targeted experiment, not the game or candidate.
+
+The subsequent bounded game recording used Native with FG and Anti-Lag Off and
+returned 0 on normal window close. It initialized and drained successfully, and
+offline indexing succeeded. However, the recorder reported 705 unsupported
+instructions in game code. Saved exception contexts independently match the
+updated worker family, while the relevant memory-history and termination-call
+queries do not expose the required shutdown ordering. Successful fixture replay
+therefore does not establish equivalent coverage of this game. The recording
+does not identify the owner or demonstrate a crash repair, and its clean exit
+is excluded from ordinary qualification. No identical recapture is planned.
 
 The private capture wrapper could cancel its recorder immediately when the
 target signaled exit, racing a termination dump. It now allows bounded debugger
