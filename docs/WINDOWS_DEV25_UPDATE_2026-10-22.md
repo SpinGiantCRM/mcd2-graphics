@@ -47,6 +47,7 @@ Loaded libraries do not establish ML-model or HDR activation.
 | Ordinary full-candidate exits | FAIL | The fifth ordinary process returned C0000005. Earlier clean exits took about 7.49, 9.48 and 7.60 seconds, and a later clean exit took about 88.00 seconds. Those observations do not establish a repair or pass the final exit series. |
 | Active SR/FG resize recovery | PASS, bounded | Windowed 1680x1050, maximized 1920x1177, then restored borderless 1920x1200; fresh current-context SR and generated-frame counters resumed with no provider error. |
 | Physical HDR | NOT AVAILABLE | Current Windows display diagnostic explicitly reports HDR not supported / HdrSupported 0 on the internal 1920x1200 60 Hz panel. Wide-color capability is separate and does not establish HDR support. |
+| Physical controller | NOT AVAILABLE | No connected controller in any of four XInput slots; the Windows input report lists mouse, keyboard and two HIDI2C devices. |
 
 ## Functional follow-up — 23 October
 
@@ -173,6 +174,28 @@ the responsible remaining component or exonerate the base game. No debugger or
 verifier was attached; a read-only Windows display report completed before the
 second close. The temporarily held files were restored before preparing the
 next, separately recorded Loader-only control.
+
+The completed eight-run [component matrix](../qualification/providers/windows-dev25/component-controls-2026-10-23.json)
+keeps the current game, warm Steam, observed hub dwell of at least 90 seconds and
+normal window-close route. All runs used held process handles without a debugger
+or verifier. Timings below end at completed exit observation and include input
+dispatch and monitor polling; they are not intrinsic shutdown-duration samples.
+
+| Configuration | Held exit codes | Close to observed exit, seconds |
+|---|---|---|
+| Clean game | 0, 0 | 6.30, 4.83 |
+| Original framework plus Loader 2.6 | 0, C0000005 | 7.44, 9.28 |
+| Loader 2.6 only, system DXGI | 0, 0 | 5.80, 6.12 |
+| Original framework only, no Loader | 0, 0 | 8.64, 6.02 |
+
+The failure with the combination is a bounded observation, not proof of an
+interaction defect. Neither clean pair exonerates its components or the game.
+The useful conclusion is that the matching worker failure occurs without our
+graphics payload. All four file transactions were exactly restored. Normal GUI
+reinstall and Verify then succeeded, with the original receipt, all 18 owned /
+15 dependency hashes and empty overrides matching again. Provider preferences
+and remaining test bindings still await final restoration; shutdown remains
+FAIL. No further unchanged component repeats are planned for this matrix.
 
 Microsoft's signed TTD 1.11.617.0 recorder passed owned clean and freed-read
 program controls, plus attach/stop followed by natural process completion.
