@@ -1,6 +1,8 @@
 # Windows AMD qualification: updated-game dev.25 progress
 
 **Qualification is incomplete. No exit-crash repair or release approval is claimed.**
+The fifth ordinary process reproduced `C0000005` on normal close. Shutdown
+qualification therefore remains **FAIL**, despite three earlier clean exits.
 Steam build **25910487**, shipping SHA-256
 `3842102bb05fc532b22e97992d61c2248d115be80ff752ff9b6843bf4acd7005`,
 is a separate baseline from the previous 25754144 results. Old address-pinned
@@ -37,11 +39,67 @@ Loaded libraries do not establish ML-model or HDR activation.
 | Missing owned shader repair | PASS | Exact manifest bytes restored. |
 | Modified owned shader protection | PASS | Repair and confirmed uninstall refuse without mutation; exact original restored before launch. |
 | Running-game writes | PASS | Install and confirmed uninstall refuse; intact Repair performs only its read-only scan. All files and receipt unchanged. |
+| Dependency override controls | PASS | All seven acknowledgement / Use installed paths tested individually; the other six cards stay recognized. Each returned Off; normal reopening defaults all seven Off. No override installation performed. |
 | Main-menu Loader metadata | PASS | Loader 2.6 and mod version dev.25, name, author and description observed. Loader-owned update-status text still clips. |
 | Main-menu Video layout | PASS | FSR Quality shows numeric 67% render scale; settings/help render. Full interaction matrix remains pending. |
 | Updated engine layout | PASS | Actual registry validation and marker registration accepted build 25910487. |
 | FSR / FG / Anti-Lag activity | PASS | Two ordinary pre-capture/current-process intervals validate same-session/revision/world advancing counters, with no provider errors. |
-| Ordinary full-candidate exit | PASS, one observation | FSR Quality / FG On / Anti-Lag On, normal Alt+F4, held exit code 0, about 7.49 seconds, no clock gap or new Application crash event. |
+| Ordinary full-candidate exits | PASS, three observations | Normal Alt+F4: active FSR/FG/Anti-Lag, Native after SR transitions, and missing-optional-runtime fallback. Held exit codes 0; about 7.49, 9.48 and 7.60 seconds, respectively. This is not the final exit series. |
+
+## Functional follow-up — 23 October
+
+The Native-started third ordinary process reached the hub with FG and Anti-Lag
+Off. In Video, changing Quality to Balanced kept Native selected and displayed
+59%. The upscaler arrows cycled Native → FSR → Native, skipping DLSS on this
+Radeon and retaining Balanced. Mouse edits to Custom 77%, the displayed minimum
+33%, and Native AA 100% synchronized the preset, numeric value and fill without
+selecting an upscaler. Help explained the minimum. The first keyboard-arrow
+input moved focus to Display rather than editing the slider; keyboard slider
+coverage remains incomplete.
+
+The real UI selected Custom 77% and FSR, then the production configuration store
+requested the other named presets with full-record ownership checks. Strict
+current-session/revision/world observations validated advancing SR evaluations
+at Custom 77%, Native AA 100%, Quality, Balanced, Performance and Ultra
+Performance. Measured dimensions included 1479x924, 1280x800, 1130x706, 960x600
+and 640x400 for 1920x1200 output. Transient Applying or mismatched transition
+samples were excluded until validated Active. These are activity and resolution
+checks, not performance measurements.
+
+All three Advanced categories displayed exclusive selection and their side
+help. Changing FSR FG from analytical to explicit unsupported ML left the SR
+choice unchanged; changing SR to experimental INT8 left the FG choice unchanged.
+The separate choices survived menu changes. An ordinary restart confirmed the
+explicit INT8 SR preference persisted. Its separately acquired community DLL
+was absent, as permitted by the [external-runtime procedure](ADVANCED_SETTINGS.md#fsr-versions).
+The CRC-valid runtime record resolved to Fallback/error 23, zero evaluations and
+100% source scale, with a matching current-session context. It did not substitute
+analytical SR or reduce source resolution. INT8 activation is **NOT AVAILABLE**
+for this installed dependency set. Stable fallback records do not advance their
+file timestamp; the strict activity observer therefore refused them as stale,
+and was not weakened to claim activation.
+
+The third and fourth processes exited normally after about 9.48 and 7.60
+seconds. Their full installed-file hashes and receipt remained unchanged.
+No new Application crash event was found for the third process. Ordinary exit
+observations remain separate from the diagnostic failures below.
+
+The fifth ordinary process verified Auto selecting analytical SR 3.1.5, with
+61 advancing evaluations at Quality, while explicit unsupported ML FG produced
+zero generated frames. Its held process handle returned `C0000005` on normal
+Alt+F4, without a debugger, verifier or clock gap. The AMD presenter route had
+been created although FG was unavailable. This narrows a useful next control;
+it does not establish that the advanced choice caused the fault. All installed
+hashes still matched afterward. The close marker predates the input by a
+commentary interval, so it supplies only an upper timing bound for this run.
+
+The Loader Open Mods mouse shortcut opens responsive Settings. Gameplay Map
+inputs still failed through the control helper, including an admitted temporary
+mouse binding. Original Interact and Map bindings were restored and verified
+together. This does not qualify pause-menu entry, travel or Save and quit. No
+physical controller was detected. A briefly retained Video recommendation on
+the Loader list was observed during navigation; it disappeared on subsequent
+entry and is retained as a cosmetic observation.
 
 Machine: Windows 11 Pro build 26200, Radeon 860M, driver 32.0.32015.7029,
 1920x1200 SDR output. The first strict active interval advanced SR/FG-generated/
@@ -66,8 +124,8 @@ drain first. The exact corrected wrapper passes owned clean and explicit
 codes and completed debugger drain. This fixes capture tooling; it is not a
 game-crash repair. Dumps and proprietary runtime details remain private.
 
-Remaining checks include the complete menu/preset/advanced/diagnostics matrix,
-gameplay and travel, resize/ownership restoration, override acknowledgements,
+Remaining checks include keyboard and remaining advanced/diagnostics paths,
+gameplay and travel, resize/ownership restoration,
 final uninstall/reinstall, and ordinary shutdown regression. NVIDIA activation
 is unavailable on this Radeon-only machine. Physical controller/HDR coverage
 must be reported independently. Historical shutdown failures remain disclosed;
