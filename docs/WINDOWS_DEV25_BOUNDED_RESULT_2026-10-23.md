@@ -1,6 +1,6 @@
 # Windows Radeon qualification result — 23 October
 
-**Windows remains UNQUALIFIED.** One ordinary full-candidate run reproduced the intermittent shutdown access violation. Six isolation attempts did not identify its source owner; no crash repair or release approval is claimed. This closes the bounded investigation and recovery work while preserving the failed and untested gates below.
+**Windows remains UNQUALIFIED.** Ordinary full-candidate runs reproduced the intermittent shutdown access violation. Six isolation attempts did not identify its source owner; no crash repair or release approval is claimed. The autonomous follow-up on 24 October local time added keyboard editing and live sharpness-ownership evidence, restored the exact candidate, and retained the failed and untested gates below. Neither upstream response is a prerequisite for the remaining manual checks.
 
 ## Exact inputs
 
@@ -28,15 +28,18 @@ Host: Windows 11 build 26200, Radeon 860M, driver **32.0.32015.7029**, Steam bui
 | Advanced independence / persistence | PASS, bounded | Actual separate SR/FG selection and restart observations retained; all advanced choices restored to Auto. No NVIDIA model/DRS activation claim. |
 | Diagnostics and restart clearing | PASS | Independent details/overlay, both Off persisted, publication stopped at Settings close, opted-out data refused. Fresh menu session contains no prior-world activity. Constructed Advanced panel deliberately retains an observer. |
 | Active resize | PASS, reused SDR scope | Earlier dev.25 windowed/maximize/borderless measurements; unchanged native/framework rendering bytes. New RenoDX presence does not qualify active HDR resize. |
-| Sharpness | PASS, historical bounded endpoints only | dev.23 correction/counter sequence retained. Live external-value preservation/restoration is NOT RUN for this final candidate. |
-| Keyboard slider, physical pause/resume, five minutes active play and dungeon/hub travel | NOT RUN | One supported Escape attempt ignored. Mouse settings work; stationary hub activity is not active gameplay. No new input framework. |
+| Sharpness | PASS, bounded ownership contract; historical endpoints | A separate live-engine fixture called unchanged production methods: owned 0.23 → 0; Native restored 0.23; external 0.42 was preserved through the next poll and Native; fixture restored original -1.0. Exact production UI containers restored afterward. This diagnostic run is excluded from ordinary exit/performance qualification. dev.23 endpoint evidence retains its original scope. |
+| Keyboard slider | PASS, bounded synthesized path | After CommonUI keyboard focus and Down navigation, Right changed Quality 67% to Custom 68%; Left returned 67%. Native stayed selected. Physical-keyboard and endpoint coverage remain separate and untested in this follow-up. |
+| Physical pause/resume, five minutes active play and dungeon/hub travel | NOT RUN | One temporary World Map mouse binding, supported drag and HUD click did not activate the map in the hub. Both original bindings restored and visually verified. Stationary hub activity is not active gameplay. No new input framework. |
 | In-game Save and quit | NOT RUN | Current runs cover main-menu Quit and window close. dev.23 Save-and-quit evidence is not transferred to this candidate. |
-| Ordinary shutdown regression | FAIL | Full candidate C0000005 unresolved. Later clean exits do not repair it. Run 8 exited 0 with a clock gap, excluding comparable timing; recovery run 9 exited 0 without a gap. |
+| Ordinary shutdown regression | FAIL | Full candidate C0000005 unresolved and reproduced again in ordinary functional run 10 after normal Alt+F4 from the hub, without a clock gap. Later clean exits do not repair it. Run 8 exited 0 with a clock gap, excluding comparable timing; recovery run 9 exited 0 without a gap. Diagnostic sharpness run 11 is excluded from this gate. |
 | Normal GUI uninstall | PASS | 17 owned paths absent, private DLSS removed, original proxy restored, 14 shared files unchanged, receipt/HDR lease removed, exact ReShade configuration restored. |
-| Final preferences / installation | PASS, restoration scope | Original provider preferences restored by production CAS at revision 353; exact lease still owned after recovery startup. Loader shortcut blank/blank, display unchanged, Advanced Auto, diagnostics Off. 18/15 hashes match after final exit. |
+| Final preferences / installation | PASS, restoration scope | Follow-up restored all original provider preferences by production CAS at revision 360/checksum 2395825397; exact lease owned. Interact Left Mouse/blank and World Map M/blank visually restored. Loader shortcut blank/blank, display, Advanced Auto and diagnostics Off were not changed in the follow-up. All three production UI containers and 18/15 hashes match after final exit. |
 | Physical HDR / controller / Windows NVIDIA activation | NOT AVAILABLE | Matching hardware absent. No physical FPS, frame-time-tail, latency-benefit or image-quality qualification. |
 
 The [functional/recovery aggregate](../qualification/providers/windows-dev25/bounded-functional-2026-10-23.json) records measurements and limits. Its unchanged read-only SR observer and compiled dependencies still match the retained receipt. It validates a historical Apply-acknowledgement relationship, not a direct transition-history witness; the production transition predicate was not weakened.
+
+The [24 October local-time follow-up](../qualification/providers/windows-dev25/resumed-functional-2026-10-24.json) records the two additional functional checks, ordinary run 10 failure, diagnostic run 11 limits and final restoration. The [source-only sharpness fixture](../qualification/providers/windows-dev25/sharpness-ownership-probe.cs.txt) adds fixed engine values and readbacks after production `ApplySharpness`; removing only that addition and its call reconstructs every normalized production actor byte. It neither fabricates native responses nor changes production ownership methods. Its three containers are private test artifacts, not a release candidate.
 
 First startup after reinstall reported HDR restart required while creating its owned RenoDX-disable lease. The source deliberately fails closed while RenoDX is already resident. HDR was requested Off and physical output remained SDR; no HDR activation/calibration pass is claimed. Normal exit leaves the disable token for the next launch.
 
@@ -54,10 +57,10 @@ The next discriminating investigation is the worker's source owner and stop/join
 
 ## Handoff
 
-Candidate installed, game closed, test holds and image-specific diagnostic settings cleared, temporary power request released before handoff. The PC remains on because manual/qualification work is pending, as required by the accepted plan.
+Candidate installed, game closed, test holds and image-specific diagnostic settings cleared, temporary power request released before handoff. The maintainer subsequently requested shutdown once autonomous work is exhausted and manual attention is needed. Normal Windows shutdown is the final action after pushing this record; this document does not attest physical power-off. Do not wait for a ReShade reply to perform the remaining checks.
 
-1. Physical keyboard: edit render scale at 100%, Quality, Custom 77% and minimum; confirm number/preset/fill agree, preset-only changes keep Native selected, and unavailable DLSS is skipped.
+1. Physical keyboard: cover render scale at 100%, Quality, Custom 77% and minimum; confirm number/preset/fill agree. The synthesized 67% → 68% → 67% edit path now passes; it does not replace this endpoint coverage.
 2. Open pause, inspect Video/Mods, play actively for five minutes, travel to a dungeon and back, and validate recovered current-world SR/FG telemetry.
 3. With a held process monitor, use in-game Save and quit. Any AV retains FAIL; one clean manual exit does not repair an intermittent fault.
 
-Live external-sharpness ownership and a cause-directed exit regression remain required. Both dependency reports are now submitted; no reporting-account step remains pending. No administrator installation or broader permission is currently needed. Do not merge or label Windows qualified from this record.
+Live external-sharpness ownership is now covered within the diagnostic limits above. A cause-directed exit regression remains required: the worker's owner and stop/join order are still unknown, so another clean repetition alone cannot close it. Both dependency reports are submitted; no reporting-account step remains pending. No administrator installation or broader permission is currently needed. Do not merge or label Windows qualified from this record.

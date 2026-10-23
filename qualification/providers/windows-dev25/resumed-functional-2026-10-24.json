@@ -1,0 +1,146 @@
+{
+  "schema": "windows-amd-resumed-functional-v1",
+  "dateLocal": "2026-10-24",
+  "timezone": "Australia/Adelaide",
+  "recordedAtUTC": "2026-10-23T13:47:44.838003+00:00",
+  "decision": "UNQUALIFIED",
+  "version": "0.4.0-amd.dev.25",
+  "gameBuild": 25910487,
+  "gameImageSHA256": "3842102bb05fc532b22e97992d61c2248d115be80ff752ff9b6843bf4acd7005",
+  "nativeArtifactSource": "b5719f95820acb97dcd5fcdfa60bdde291b3379a",
+  "installerSource": "97c92569169ec5efdb5c4ac7bf54b0460f8db6fe",
+  "installerSHA256": "4b441e9d819ccdd1b132cb3edc396e8c9c05ff239665ebacefb7d14e67d331c2",
+  "dependencyLockSHA256": "0cebd7a90ef5338c1d0dcd32e71aece15456ee78199f08b20692d3601e202979",
+  "productionSourceChanged": false,
+  "sixAttemptIsolationMatrixReopened": false,
+  "keyboardSlider": {
+    "result": "PASS, bounded synthesized keyboard path",
+    "sequence": [
+      "Quality 67%, Native",
+      "Right: Custom 68%, Native",
+      "Left: Custom 67%, Native"
+    ],
+    "focus": "First keyboard input initializes CommonUI navigation at Display; Down reaches the scale row.",
+    "endKey": "Moves to last menu row, not slider maximum.",
+    "hardwareKeyboardAndEndpointCoverage": "NOT RUN in this follow-up; earlier mouse bounds retain their original scope."
+  },
+  "gameplay": {
+    "result": "NOT RUN",
+    "hubLoaded": true,
+    "supportedAttempt": "Temporary World Map Left Mouse binding, one Sky drag and one HUD click did not open map.",
+    "remaining": [
+      "Physical pause/resume",
+      "Five minutes active gameplay",
+      "Dungeon and hub travel with recovered current-world telemetry",
+      "In-game Save and quit"
+    ],
+    "stationaryHubCountedAsActivePlay": false,
+    "inputFrameworkAdded": false
+  },
+  "ordinaryExit": {
+    "run": 10,
+    "method": "Normal Alt+F4 from hub",
+    "result": "FAIL",
+    "exitCodeHex": "C0000005",
+    "clockGapObserved": false,
+    "heldProcessHandle": true,
+    "exitReceiptSHA256": "f298d91866234c05402ffd6c665f4ddb27e595f218f62166b8fe0c0a7a6ab50c",
+    "attribution": "Unresolved; no causal correction or failure-rate claim."
+  },
+  "sharpness": {
+    "result": "PASS, bounded live-engine ownership contract",
+    "diagnosticRun": 11,
+    "productionMethodsUnchanged": true,
+    "fixtureSource": "sharpness-ownership-probe.cs.txt",
+    "fixtureSourceSHA256": "f8f04583b9d16b6fd5d67cdc79742cea00359fa35e4c2beabf4e66bf5a6be34d",
+    "productionActorSHA256": "03b967f035cd43cf0ef659120d457b05a8401e0f64edf530e98668fa3e772dd6",
+    "trialActorSHA256": "a733615fbe53139607d273a37341a400dd9f9ffc9682f3fdea9bc2633dcacae8",
+    "trialPayloadSHA256": {
+      "MCD2Graphics_P.pak": "2923da28e503b09e7f22e62e852812df3cd79cab03a1837147d1935bfdf5d7a8",
+      "MCD2Graphics_P.ucas": "0fe57cbf33c04965c1d57e96c049559c1b07f4cf21f45cd6a76756cf46fb21a5",
+      "MCD2Graphics_P.utoc": "7adcaa654318ec6ae2d14f57f64ff8201aa6bf8d9d7ec38a1092597f04569f1e"
+    },
+    "session": 117217519,
+    "world": 2,
+    "providerSequence": [
+      "Native",
+      "FSR Quality",
+      "Native",
+      "FSR Quality",
+      "Native"
+    ],
+    "authorityRevisions": [
+      355,
+      356,
+      357,
+      358,
+      359
+    ],
+    "initialEngineValue": -1.0,
+    "externalBaseline": 0.23,
+    "ownedWrite": 0.0,
+    "normalNativeRestore": 0.23,
+    "externalConflict": 0.42,
+    "yieldPreserved": 0.42,
+    "nativeConflictPreserved": 0.42,
+    "fixtureFinalRestore": -1.0,
+    "fsrReadback": {
+      "phase": 5,
+      "error": 0,
+      "render": [
+        1280,
+        800
+      ],
+      "output": [
+        1920,
+        1200
+      ]
+    },
+    "limits": [
+      "A separate diagnostic UI container added a fixed-value engine writer and readback after unchanged production ApplySharpness.",
+      "No runtime or authority responses were fabricated. The ordinary configuration client selected providers.",
+      "Only the explicit mod-owned log slot was read; raw log stays private.",
+      "This is not an ordinary candidate exit, performance, physical image-quality or controller result."
+    ],
+    "diagnosticExitCodeHex": "00000000",
+    "ordinaryExitQualificationClaim": false,
+    "productionUIRestored": true
+  },
+  "restoration": {
+    "allOriginalProviderPreferences": true,
+    "revision": 360,
+    "checksum": 2395825397,
+    "originalPreferenceRecordSHA256": "4e805895af7f2047ba52915658dcdbd14ca3f3f3c981a5fcdc507248d9eadd2b",
+    "migrationMetadataPreserved": true,
+    "exactRestoredLeaseOwned": true,
+    "interactBinding": [
+      "LeftMouseButton",
+      "None"
+    ],
+    "worldMapBinding": [
+      "M",
+      "None"
+    ],
+    "inputBindingsVisuallyVerified": true,
+    "ownedFilesVerified": 18,
+    "dependenciesVerified": 15,
+    "overrides": {},
+    "gameClosed": true,
+    "temporaryPowerRequestReleasedAtUTC": "2026-10-23T13:46:26.1237157+00:00",
+    "persistentPowerSettingsChanged": false,
+    "perImageIFEO_WER_SilentProcessExitKeysPresent": false,
+    "debuggerOrCaptureProcessesPresent": false
+  },
+  "handoff": {
+    "userAway": true,
+    "waitForReShadeReply": false,
+    "shutdownAuthorizedAfterEvidencePush": true,
+    "physicalPowerOffVerifiedByThisRecord": false,
+    "remainingConsequentialBlocker": "Intermittent ordinary shutdown AV; source ownership unresolved.",
+    "hardwareUnavailable": [
+      "Physical HDR",
+      "Controller",
+      "Windows NVIDIA activation"
+    ]
+  }
+}
