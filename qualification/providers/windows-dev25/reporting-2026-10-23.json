@@ -1,0 +1,27 @@
+{
+  "schema": "windows-shutdown-reporting-v1",
+  "observedAt": "2026-10-23T13:12:14Z",
+  "blueprintLoader": {
+    "status": "submitted; saved body verified",
+    "issueId": 1156615,
+    "url": "https://www.nexusmods.com/minecraftdungeons2/mods/2?tab=bugs"
+  },
+  "reshade": {
+    "status": "submitted; success notification and saved body verified",
+    "topicId": 10366,
+    "postId": 48618,
+    "title": "MCD2: intermittent exit AV with ReShade 6.8.0 + Blueprint Loader 2.6",
+    "url": "https://reshade.me/forum/troubleshooting/10366-mcd2-intermittent-exit-av-with-reshade-6-8-0-blueprint-loader-2-6#48618",
+    "confirmation": "Your message has been successfully posted.",
+    "evidenceLinksPinnedToCommit": "0782d13b00cef82ee77da83bea3c591a432862c1"
+  },
+  "mojang": {
+    "status": "not submitted; attribution threshold not met",
+    "ordinaryUnmodifiedGameCrashEstablished": false,
+    "completeIndependentGameOwnershipProofEstablished": false
+  },
+  "ownershipResolved": false,
+  "crashRepairClaim": false,
+  "rawDumpsOrProprietaryDisassemblyUploaded": false,
+  "windowsQualified": false
+}

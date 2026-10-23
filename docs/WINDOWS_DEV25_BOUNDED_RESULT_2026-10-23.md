@@ -48,7 +48,7 @@ The [six-attempt ledger](../qualification/providers/windows-dev25/bounded-isolat
 
 The reduced failing proxy independently matches official ReShade 6.8.0. That reproduction contains neither our modified framework nor our payload. It is an unresolved Loader/ReShade compatibility finding. Already corrected descriptor corruption, long successful waits and tool/input failures remain separate.
 
-[Blueprint Loader issue 1156615](https://www.nexusmods.com/minecraftdungeons2/mods/2?tab=bugs) was submitted and its saved body verified. The [ReShade report](WINDOWS_DEPENDENCY_SHUTDOWN_REPORT_2026-10-23.md) is ready but requires forum sign-in; no submission is claimed. Mojang reporting remains on hold: no ordinary unmodified-game crash or complete independent game-ownership proof. Raw dumps and proprietary disassembly stay private.
+[Blueprint Loader issue 1156615](https://www.nexusmods.com/minecraftdungeons2/mods/2?tab=bugs) was submitted and its saved body verified. [ReShade topic 10366/post 48618](https://reshade.me/forum/troubleshooting/10366-mcd2-intermittent-exit-av-with-reshade-6-8-0-blueprint-loader-2-6#48618) was subsequently submitted and its saved body verified. Mojang reporting remains on hold: no ordinary unmodified-game crash or complete independent game-ownership proof. Raw dumps and proprietary disassembly stay private.
 
 The next discriminating investigation is the worker's source owner and stop/join order in the failing reduced stack. Further clean repetitions alone do not establish that boundary. No speculative source patch, proprietary-game edit, exception suppression or forced successful exit was added.
 
@@ -60,4 +60,4 @@ Candidate installed, game closed, test holds and image-specific diagnostic setti
 2. Open pause, inspect Video/Mods, play actively for five minutes, travel to a dungeon and back, and validate recovered current-world SR/FG telemetry.
 3. With a held process monitor, use in-game Save and quit. Any AV retains FAIL; one clean manual exit does not repair an intermittent fault.
 
-Live external-sharpness ownership and a cause-directed exit regression remain required. ReShade forum sign-in is the only pending reporting-account step. No administrator installation or broader permission is currently needed. Do not merge or label Windows qualified from this record.
+Live external-sharpness ownership and a cause-directed exit regression remain required. Both dependency reports are now submitted; no reporting-account step remains pending. No administrator installation or broader permission is currently needed. Do not merge or label Windows qualified from this record.

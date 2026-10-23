@@ -1,6 +1,6 @@
 # Intermittent Windows shutdown access violation — third-party modules present
 
-**Submission status:** DRAFT ON HOLD FOR ATTRIBUTION, not submitted. The official project portal denied access at preflight despite the maintainer having created a Mojira account. The finding was instead submitted as unresolved compatibility evidence in [Blueprint Loader issue 1156615](https://www.nexusmods.com/minecraftdungeons2/mods/2?tab=bugs); the [ReShade report](WINDOWS_DEPENDENCY_SHUTDOWN_REPORT_2026-10-23.md) awaits forum sign-in. No ordinary unmodified-game crash or complete independent game-ownership proof is established. Do not submit this draft to Mojang automatically.
+**Submission status:** DRAFT ON HOLD FOR ATTRIBUTION, not submitted. The official project portal denied access at preflight despite the maintainer having created a Mojira account. The finding was instead submitted as unresolved compatibility evidence in [Blueprint Loader issue 1156615](https://www.nexusmods.com/minecraftdungeons2/mods/2?tab=bugs); the same unresolved finding was submitted as [ReShade topic 10366/post 48618](https://reshade.me/forum/troubleshooting/10366-mcd2-intermittent-exit-av-with-reshade-6-8-0-blueprint-loader-2-6#48618). No ordinary unmodified-game crash or complete independent game-ownership proof is established. Do not submit this draft to Mojang automatically.
 
 ## Report text
 

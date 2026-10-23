@@ -1,8 +1,8 @@
 # Windows shutdown compatibility report
 
-Blueprint Loader report **1156615** was submitted on 23 October and its saved body was verified on the [Nexus bugs tab](https://www.nexusmods.com/minecraftdungeons2/mods/2?tab=bugs). The finding remains unresolved. The same report is ready for [ReShade Troubleshooting](https://reshade.me/forum/index), but submission requires forum sign-in. Neither ReShade's upstream repository nor the selected fork accepts GitHub issues. No ReShade submission is claimed.
+Both reports were submitted on 23 October: [Blueprint Loader issue **1156615**](https://www.nexusmods.com/minecraftdungeons2/mods/2?tab=bugs) and [ReShade topic **10366**, post **48618**](https://reshade.me/forum/troubleshooting/10366-mcd2-intermittent-exit-av-with-reshade-6-8-0-blueprint-loader-2-6#48618). Saved bodies were verified. ReShade displayed “Your message has been successfully posted.” The finding and source ownership remain unresolved; neither submission establishes a repair. The [reporting receipt](../qualification/providers/windows-dev25/reporting-2026-10-23.json) records actual delivery without publishing private screenshots or dumps.
 
-## Ready-to-send ReShade report
+## Evidence basis for the submitted ReShade report
 
 **Intermittent shutdown AV with official ReShade 6.8.0 and Blueprint Loader 2.6; ownership unresolved**
 
