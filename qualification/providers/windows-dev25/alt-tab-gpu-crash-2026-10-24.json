@@ -52,5 +52,127 @@
   "cpuStackProvesFailingGPUCommand": false,
   "rawArtifactsKeptPrivate": true,
   "accountIdentifierPublished": false,
-  "nextTest": "Matched Native / FG Off ordinary-play Alt-Tab control with a held process monitor. One clean control would not establish FSR causation. If needed, collect process-scoped GPU diagnostics on a subsequent FSR run."
+  "comparisons": [
+    {
+      "configuration": "Full candidate, Native / FG Off",
+      "result": "FAIL reported visual corruption; Alt-Tab survived",
+      "userReport": "Black horizontal lines started after returning to the game; some switches produced character forward jumps and some were normal",
+      "runtime": {
+        "currentWorldNativeConfirmed": true,
+        "requestedSourceScalePercent": 100,
+        "observedSourceScalePercent": 100,
+        "FSREvaluations": 0
+      },
+      "exit": {
+        "userReportedSaveAndQuitThenQuit": true,
+        "heldProcessHandle": true,
+        "exitCodeHex": "00000000",
+        "clockGapObserved": false
+      },
+      "visualEvidence": "User report; the captured image was occluded and is not visual proof",
+      "limit": "Native survival does not establish that FSR caused the earlier GPU crash"
+    },
+    {
+      "configuration": "No-injection game control, all 33 held candidate/dependency/receipt files absent",
+      "result": "PASS bounded user-reported Alt-Tab control",
+      "userReport": "done. no issues",
+      "requestedProcedure": "Three Alt-Tab out/back switches, approximately five minutes play, repeat, then quit normally",
+      "durationIndependentlyMeasured": false,
+      "moduleCensus": "No own addon, framework or vendor bridge loaded from game directory; ordinary Steam/AMD environment modules remained",
+      "exit": {
+        "heldProcessHandle": true,
+        "exitCodeHex": "00000000",
+        "clockGapObserved": false
+      },
+      "savesOrProviderPreferencesChangedByStaging": false,
+      "limit": "One clean control narrows the added-software boundary without proving a causal owner or universal game/driver stability"
+    },
+    {
+      "configuration": "Candidate ReShade direct dxgi + Blueprint Loader 2.6 only",
+      "frameworkSHA256": "9fdac099b390ff2d88d4cf6d51685f9991ea7484e6a70fe0b092019d7adddba2",
+      "result": "PASS bounded user-reported Alt-Tab control; FAIL ordinary shutdown",
+      "userReport": "closed - no issues",
+      "requestedProcedure": "Three Alt-Tab out/back switches, approximately one minute play, repeat, then quit normally",
+      "durationIndependentlyMeasured": false,
+      "ownBootstrap": false,
+      "ownAddon": false,
+      "ownUI": false,
+      "providerBridges": false,
+      "RenoDX": false,
+      "moduleCensus": "Only candidate dxgi framework matched injected game-directory module filter",
+      "exit": {
+        "heldProcessHandle": true,
+        "exitCodeHex": "C0000005",
+        "clockGapObserved": false,
+        "userVisibleProblemReported": false,
+        "windowsApplicationErrorMatchedPID": true,
+        "faultingModule": "unknown"
+      },
+      "limit": "Technical shutdown failure despite no visible complaint. Exit code alone does not establish the same faulting allocation or source owner as earlier shutdown captures."
+    },
+    {
+      "configuration": "Own bootstrap and mandatory bridges + candidate ReShade + Loader; own native addons/UI and RenoDX absent",
+      "result": "PASS bounded user-reported Alt-Tab control",
+      "userReport": "normal. i think the character jumps was a latency thing",
+      "exit": {
+        "heldProcessHandle": true,
+        "exitCodeHex": "00000000",
+        "clockGapObserved": false
+      },
+      "bootstrap": {
+        "FGSessionMode": 0,
+        "AMDPinnedRuntimeLoad": 0,
+        "earlySDKInit": 0,
+        "qualifiedReShadeLoad": 0
+      },
+      "limit": "No issue reported in this sample; clean exit does not repair intermittent shutdown failure"
+    },
+    {
+      "configuration": "Full graphics integration, RenoDX file held but already disabled/absent in earlier Native sample",
+      "result": "PASS bounded user-reported Native and FSR Alt-Tab retest",
+      "userReport": "normal",
+      "exit": {
+        "heldProcessHandle": true,
+        "exitCodeHex": "00000000",
+        "clockGapObserved": false
+      },
+      "processDurationSeconds": 244.357187,
+      "fiveMinutesActiveFSRPlayEstablished": false,
+      "FSRReading": {
+        "session": 107033713,
+        "revision": 378,
+        "checksum": 884376798,
+        "world": 2,
+        "phase": 5,
+        "provider": 2,
+        "quality": 1,
+        "error": 0,
+        "renderWidth": 1280,
+        "renderHeight": 800,
+        "outputWidth": 1920,
+        "outputHeight": 1200,
+        "evaluations": 2704
+      },
+      "limit": "A single FSR reading plus preceding Native samples establishes active re-entry within this session; no matched consecutive FSR delta was retained. Process lifetime is less than five minutes and does not satisfy the five-minute active-play gate. One clean retest does not repair the historical failure."
+    }
+  ],
+  "nextTest": "Exact full candidate, FSR Quality / FG Off, process-scoped -nogpucrashdebugging -dred request and private absolute log; hold five minutes of current-world FSR before repeating Alt-Tab. Diagnostic performance/exit results are excluded from ordinary qualification. Verify actual activation from engine metadata before relying on capture.",
+  "sharedComparisonEnvironment": {
+    "projectStartupConfigurationRetained": true,
+    "projectStartupConfigurationSHA256": "ce1ef90eafd1f4908203f477671562408019a95e392fa6e1224eb53ad397a304",
+    "antiAliasingMethod": 2,
+    "allowHDR": 1,
+    "physicalOutput": "SDR",
+    "limit": "No-injection control removes added runtime files, while retaining this common startup configuration and normal Steam/AMD modules; it is not a factory-settings baseline"
+  },
+  "characterJumpClarification": "Maintainer considers latency a possible explanation; not an established graphics-corruption symptom or proven cause",
+  "RenoDXScope": "Earlier full-candidate Native module record contains no loaded RenoDX addon and ReShade configuration disables it. Physically holding its file in the next full-integration run is not an effective active-module discriminator against that Native sample.",
+  "restorationAfterComparisons": {
+    "allTemporaryFileHoldsCleared": true,
+    "ownedFilesVerified": 18,
+    "dependenciesVerified": 15,
+    "dependencyOverrides": {},
+    "providerPreferences": "Current user-selected FSR Quality / FG Off retained; earlier historical preference capture was not forced over later user changes",
+    "projectStartupConfigurationUnchanged": true
+  }
 }
