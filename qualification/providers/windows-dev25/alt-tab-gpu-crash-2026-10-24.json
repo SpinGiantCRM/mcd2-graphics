@@ -1,0 +1,56 @@
+{
+  "schema": "windows-amd-alt-tab-gpu-crash-v1",
+  "dateLocal": "2026-10-24",
+  "decision": "UNQUALIFIED",
+  "gate": "Alt-Tab during gameplay",
+  "result": "FAIL",
+  "ordinaryRun": true,
+  "userReported": {
+    "provider": "FSR Quality",
+    "frameGeneration": "Off",
+    "location": "Ordinary play outside a dungeon",
+    "trigger": "Alt+Tab to desktop"
+  },
+  "gameBuild": 25910487,
+  "candidate": "0.4.0-amd.dev.25",
+  "nativeArtifactSource": "b5719f95820acb97dcd5fcdfa60bdde291b3379a",
+  "gameImageSHA256": "3842102bb05fc532b22e97992d61c2248d115be80ff752ff9b6843bf4acd7005",
+  "dependencyLockSHA256": "0cebd7a90ef5338c1d0dcd32e71aece15456ee78199f08b20692d3601e202979",
+  "postCrashOwnedFilesVerified": 18,
+  "postCrashDependenciesVerified": 15,
+  "providerIntent": {
+    "revision": 374,
+    "checksum": 597991553,
+    "provider": 2,
+    "quality": 1,
+    "fgEnabled": 0,
+    "activeEvaluationClaim": false
+  },
+  "engineReport": {
+    "type": "GPUCrash",
+    "message": "GPU Crash dump Triggered",
+    "secondsSinceStart": 291,
+    "crashedThread": "RHIInterruptThread",
+    "hasFocus": false,
+    "RHI": "D3D12",
+    "GPU": "AMD Radeon 860M",
+    "driver": "32.0.32015.7029",
+    "outOfMemoryFlag": false,
+    "DREDEnabled": false,
+    "DREDBreadcrumbsAvailable": false,
+    "DREDPageFaultDataAvailable": false
+  },
+  "dumpSHA256": "c453539c54034e450d06fa38df5bfb873c4b1dc521dfd9183ba2c51b90913574",
+  "crashContextSHA256": "72d73073fc3ea85a2888cf724e33edcf8a29be568de728ed5f0cf2bfc26ae96c",
+  "exception": {
+    "code": "00008000",
+    "interpretation": "Engine-generated GPU crash report; not the ordinary shutdown C0000005 access violation."
+  },
+  "causalOwner": "UNRESOLVED",
+  "sameCauseAsShutdownProven": false,
+  "physicalGPUFailureEstablished": false,
+  "cpuStackProvesFailingGPUCommand": false,
+  "rawArtifactsKeptPrivate": true,
+  "accountIdentifierPublished": false,
+  "nextTest": "Matched Native / FG Off ordinary-play Alt-Tab control with a held process monitor. One clean control would not establish FSR causation. If needed, collect process-scoped GPU diagnostics on a subsequent FSR run."
+}
