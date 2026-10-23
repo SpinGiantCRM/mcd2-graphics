@@ -1,0 +1,121 @@
+{
+  "schema": "windows-amd-bounded-isolation-v1",
+  "date": "2026-10-23",
+  "gameBuild": 25910487,
+  "gameImageSHA256": "3842102bb05fc532b22e97992d61c2248d115be80ff752ff9b6843bf4acd7005",
+  "nativeArtifactSource": "b5719f95820acb97dcd5fcdfa60bdde291b3379a",
+  "installerSource": "97c92569169ec5efdb5c4ac7bf54b0460f8db6fe",
+  "installerSHA256": "4b441e9d819ccdd1b132cb3edc396e8c9c05ff239665ebacefb7d14e67d331c2",
+  "dependencyLockSHA256": "0cebd7a90ef5338c1d0dcd32e71aece15456ee78199f08b20692d3601e202979",
+  "renoDX": {
+    "version": "0.2026.1023.0826",
+    "sha256": "572124413ff392c3741f730f45896f4fc99753de9805d04887c484d4085f7c3a",
+    "sameInAllMatchedArms": true
+  },
+  "attemptLimit": 6,
+  "attempts": [
+    {
+      "run": 1,
+      "configuration": "Excluded: direct executable returned Steam0042 before hub",
+      "matchedComparison": false,
+      "exitCodeHex": "00000000",
+      "heldHandle": true,
+      "clockGapObserved": false,
+      "debuggerAttached": false,
+      "verifierEnabled": false
+    },
+    {
+      "run": 2,
+      "configuration": "Candidate framework direct DXGI, current RenoDX, Loader2.6; no own code",
+      "matchedComparison": true,
+      "exitCodeHex": "00000000",
+      "heldHandle": true,
+      "clockGapObserved": false,
+      "debuggerAttached": false,
+      "verifierEnabled": false,
+      "minimumObservedHubDwellSeconds": 118.554893,
+      "closeMarkerToObservedExitSeconds": 110.882964
+    },
+    {
+      "run": 3,
+      "configuration": "Candidate framework via own bootstrap and mandatory bridges; no own addons/UI",
+      "matchedComparison": true,
+      "exitCodeHex": "00000000",
+      "heldHandle": true,
+      "clockGapObserved": false,
+      "debuggerAttached": false,
+      "verifierEnabled": false,
+      "minimumObservedHubDwellSeconds": 109.477207,
+      "closeMarkerToObservedExitSeconds": 7.734015
+    },
+    {
+      "run": 4,
+      "configuration": "Full candidate, Native/FGOff/AntiLagOff",
+      "matchedComparison": true,
+      "exitCodeHex": "C0000005",
+      "heldHandle": true,
+      "clockGapObserved": false,
+      "debuggerAttached": false,
+      "verifierEnabled": false,
+      "minimumObservedHubDwellSeconds": 139.953869,
+      "closeMarkerToObservedExitSeconds": 10.97442
+    },
+    {
+      "run": 5,
+      "configuration": "Same full native payload, only three UI containers removed",
+      "matchedComparison": true,
+      "exitCodeHex": "00000000",
+      "heldHandle": true,
+      "clockGapObserved": false,
+      "debuggerAttached": false,
+      "verifierEnabled": false,
+      "minimumObservedHubDwellSeconds": 99.338117,
+      "closeMarkerToObservedExitSeconds": 8.23769
+    },
+    {
+      "run": 6,
+      "configuration": "Full UI add-back",
+      "matchedComparison": true,
+      "exitCodeHex": "00000000",
+      "heldHandle": true,
+      "clockGapObserved": false,
+      "debuggerAttached": false,
+      "verifierEnabled": false,
+      "minimumObservedHubDwellSeconds": 107.3481285,
+      "closeMarkerToObservedExitSeconds": 6.870366
+    }
+  ],
+  "fullFault": {
+    "code": "C0000005",
+    "readTarget": "null",
+    "sameWorkerFunctionAndFirstTwoAnchoredCallersAsEarlierFamily": true,
+    "originalCodeAnchoredByCapturedStubJumpAndExactImageUnwind": true,
+    "mainThreadInCrtExitWait": true,
+    "sameFreedTargetProven": false,
+    "sourceOwnerEstablished": false,
+    "privateDumpSHA256": "a4401cfbc56b4113f5e73a5ab43f81306116e8b44accb90e8acd996cf6783727"
+  },
+  "originalProxyOfficialProvenance": {
+    "at": "2026-10-23T12:04:13.895608+00:00",
+    "source": "https://reshade.me/downloads/ReShade_Setup_6.8.0_Addon.exe",
+    "setupSHA256": "afe4c8f13048306307983b8b3d41d5bf00a86820440b0e57dea10950e1176445",
+    "entry": "ReShade64.dll",
+    "dllSHA256": "0cee63f9c9f13f3ac909c5b4903f4dbb4b719a7ab3b4f13b0deaf83c814b94f7",
+    "originalProxySHA256": "0cee63f9c9f13f3ac909c5b4903f4dbb4b719a7ab3b4f13b0deaf83c814b94f7",
+    "originalProxyMatchesOfficial": true,
+    "executed": false
+  },
+  "allHeldUiRestored": true,
+  "full18Owned15CurrentDependencyHashesVerifiedAfterRun6": true,
+  "windowsQualified": false,
+  "crashFixed": false,
+  "releaseApproved": false,
+  "conclusion": "Intermittent worker failure remains unattributed; clean route/UI comparisons do not exonerate any component or establish failure rates.",
+  "limitations": [
+    "At most one ordinary sample per reduced new arm; two full samples.",
+    "Close markers include input dispatch/commentary and monitor polling; run2 has a substantial dispatch delay. Not intrinsic shutdown benchmarks.",
+    "Chrome was reopened during run6 startup; CPU/environment activity is not strictly identical.",
+    "Generic monitor source field is not used to attribute reduced controls; actual loaded modules were checked.",
+    "Full diagnostic freed-target finding is separate from the fresh ordinary null-read instance."
+  ]
+}
