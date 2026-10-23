@@ -156,7 +156,7 @@
       "limit": "A single FSR reading plus preceding Native samples establishes active re-entry within this session; no matched consecutive FSR delta was retained. Process lifetime is less than five minutes and does not satisfy the five-minute active-play gate. One clean retest does not repair the historical failure."
     }
   ],
-  "nextTest": "Exact full candidate, FSR Quality / FG Off, process-scoped -nogpucrashdebugging -dred request and private absolute log; hold five minutes of current-world FSR before repeating Alt-Tab. Diagnostic performance/exit results are excluded from ordinary qualification. Verify actual activation from engine metadata before relying on capture.",
+  "nextTest": "Cause-directed investigation only: previous GPU fault lacks command breadcrumbs, while clean ordinary focus samples do not establish a repair. Do not repeat unchanged controls as proof of qualification.",
   "sharedComparisonEnvironment": {
     "projectStartupConfigurationRetained": true,
     "projectStartupConfigurationSHA256": "ce1ef90eafd1f4908203f477671562408019a95e392fa6e1224eb53ad397a304",
@@ -174,5 +174,7 @@
     "dependencyOverrides": {},
     "providerPreferences": "Current user-selected FSR Quality / FG Off retained; earlier historical preference capture was not forced over later user changes",
     "projectStartupConfigurationUnchanged": true
-  }
+  },
+  "diagnosticFollowUp": "timed-functional-2026-10-24.json",
+  "ordinaryFollowUp": "ordinary-timed-focus-2026-10-24.json"
 }

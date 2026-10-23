@@ -1,0 +1,123 @@
+{
+  "schema": "windows-amd-timed-functional-v1",
+  "dateLocal": "2026-10-24",
+  "candidate": "0.4.0-amd.dev.25",
+  "gameBuild": 25910487,
+  "nativeArtifactSource": "b5719f95820acb97dcd5fcdfa60bdde291b3379a",
+  "diagnosticOnly": true,
+  "ordinaryQualification": false,
+  "decision": "UNQUALIFIED",
+  "sourceFixClaim": false,
+  "requestedGPUTracing": {
+    "arguments": [
+      "-nogpucrashdebugging",
+      "-dred",
+      "-abslog=<private local file>"
+    ],
+    "actualShippingArgumentsVerified": true,
+    "actualTracingActivationEstablished": false,
+    "engineLogProduced": false,
+    "newUECrashReportProduced": false,
+    "debuggerAttached": false,
+    "persistentSystemChanges": false
+  },
+  "sustainedFSR": {
+    "continuousSeconds": 302.59400000000005,
+    "evaluationsDelta": 9852,
+    "restarts": 0,
+    "session": 37815367,
+    "revision": 378,
+    "world": 2,
+    "renderSize": [
+      1280,
+      800
+    ],
+    "outputSize": [
+      1920,
+      1200
+    ],
+    "providerErrors": 0,
+    "sourceAcknowledgementPredicateQualified": false,
+    "physicalActivePlayIndependentlyMeasured": false
+  },
+  "manualFollowUp": {
+    "userReport": "menu open - all normal",
+    "procedure": "Three Alt-Tab out/back switches, dungeon/hub travel, pause menu",
+    "result": "PASS bounded user-reported focus/travel behavior in diagnostic run",
+    "nativeActivityRecovery": {
+      "unreadyRetiringCreateActiveSequenceObserved": true,
+      "freshActiveEvaluationsFirst": 35,
+      "freshActiveEvaluationsLast": 332,
+      "reportedWorldGeneration": 2,
+      "newWorldEpochIndependentlyEstablished": false
+    }
+  },
+  "slider": {
+    "result": "PASS bounded mixed mouse and synthesized-key path",
+    "upscalerStayedNative": true,
+    "keyboardSequence": [
+      97,
+      98,
+      99,
+      100,
+      100
+    ],
+    "upperClamp": true,
+    "custom77": {
+      "numberPresetFillAgree": true,
+      "input": "mouse"
+    },
+    "minimum33": {
+      "numberPresetFillAgree": true,
+      "clamped": true,
+      "input": "mouse drag beyond lower endpoint"
+    },
+    "Quality": {
+      "numericPercent": 67,
+      "presetSharedAcrossNativeAndFSR": true
+    },
+    "physicalKeyboardUsed": false,
+    "keyboardLowerEndpointTested": false
+  },
+  "unexpectedMenuReturn": {
+    "result": "Observed return; suspected online timeout, not a separate graphics blocker",
+    "userSaysReturnedOnItsOwn": true,
+    "sameShippingProcessStayedRunning": true,
+    "newGPUCrashReport": false,
+    "newWindowsGameApplicationError": false,
+    "successfulSaveAndQuitClaim": false,
+    "networkOrIdleCauseEstablished": false,
+    "maintainerHypothesis": "Online-mode timeout",
+    "timeoutCauseIndependentlyEstablished": false,
+    "graphicsBlocker": false
+  },
+  "exit": {
+    "exitCodeHex": "00000000",
+    "clockGapObserved": false,
+    "heldProcessHandle": true,
+    "observedRoute": "Main-menu Quit and confirmation via supported UI API",
+    "ordinaryExitQualification": false
+  },
+  "restoration": {
+    "ownedFilesVerified": 18,
+    "dependenciesVerified": 15,
+    "allFileHoldsCleared": true,
+    "allSemanticPreferencesRestored": true,
+    "selectiveDifferencePreflight": true,
+    "freshCurrentAuthorityAndProductionCAS": true,
+    "historicalRevisionNotForced": true,
+    "revision": 393,
+    "checksum": 1544363444,
+    "recordSHA256": "a20472d3f23e4ff47e274ea158bdfb14262d962b27cfefa290af632ad4b8a934",
+    "savedCustomPercent": 69,
+    "selected": "FSR Quality / FG Off",
+    "unusedIntelPreferenceExactlyRestored": true,
+    "playerOrAccountSavesTouched": false
+  },
+  "limits": [
+    "Diagnostic timing/performance and exits do not establish ordinary release qualification.",
+    "No source repair or causal owner is established for the earlier GPU crash, visual corruption or shutdown fault.",
+    "Manual travel report is retained without claiming an independently observed world-epoch change.",
+    "The unexpected menu return interrupted FSR Save-and-quit coverage; it is not labelled a GPU crash."
+  ]
+}

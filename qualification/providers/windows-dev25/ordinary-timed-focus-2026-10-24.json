@@ -1,0 +1,71 @@
+{
+  "schema": "windows-amd-ordinary-timed-focus-v1",
+  "dateLocal": "2026-10-24",
+  "candidate": "0.4.0-amd.dev.25",
+  "gameBuild": 25910487,
+  "nativeArtifactSource": "b5719f95820acb97dcd5fcdfa60bdde291b3379a",
+  "decision": "UNQUALIFIED",
+  "sourceFixClaim": false,
+  "diagnosticTracingRequested": false,
+  "sustainedFSR": {
+    "continuousSeconds": 301.547,
+    "evaluationsDelta": 8386,
+    "timerResets": 0,
+    "providerErrors": 0,
+    "physicalActivePlayIndependentlyMeasured": false,
+    "observation": "Stationary character in ordinary outdoor gameplay; continuously sampled current-world FSR rendering",
+    "renderSize": [
+      1280,
+      800
+    ],
+    "outputSize": [
+      1920,
+      1200
+    ]
+  },
+  "focusSwitches": {
+    "actualAltTabOutBackPairs": 3,
+    "input": "Supported Windows UI API synthesized Alt-Tab between game and existing Chrome window",
+    "eachReturnFrameInspected": true,
+    "blackLinesObserved": false,
+    "crashObserved": false,
+    "result": "PASS bounded ordinary sample"
+  },
+  "postFocus": {
+    "session": 70347751,
+    "revision": 393,
+    "world": 2,
+    "phase": 5,
+    "provider": 2,
+    "quality": 1,
+    "error": 0,
+    "contextReady": 1,
+    "evaluations": 8322,
+    "sourceAcknowledgementPredicateQualified": false,
+    "monotonicEvaluationsAcrossFocusClaim": false
+  },
+  "exit": {
+    "route": "Normal Alt+F4 window close from gameplay; synthesized Escape did not open pause",
+    "heldProcessHandle": true,
+    "exitCodeHex": "00000000",
+    "clockGapObserved": false,
+    "FSRSaveAndQuitRouteQualified": false
+  },
+  "restoration": {
+    "ownedFilesVerified": 18,
+    "dependenciesVerified": 15,
+    "allFileHoldsCleared": true,
+    "preferencesUnchanged": true,
+    "revision": 393,
+    "recordSHA256": "a20472d3f23e4ff47e274ea158bdfb14262d962b27cfefa290af632ad4b8a934",
+    "savedCustomPercent": 69,
+    "selected": "FSR Quality / FG Off",
+    "playerOrAccountSavesTouched": false
+  },
+  "limits": [
+    "Clean sample does not establish repair or causal ownership of historical GPU crash, Native visual corruption or intermittent shutdown AV.",
+    "Five minutes of stationary rendered activity is not independently measured active play.",
+    "FSR Save-and-quit route remains unobserved; normal window-close exit is recorded separately.",
+    "No physical keyboard, controller, HDR, NVIDIA, latency or frame-time benefit claim."
+  ]
+}
