@@ -1,0 +1,54 @@
+{
+  "schema": "windows-amd-maintainer-acceptance-v1",
+  "dateLocal": "2026-10-24",
+  "candidate": "0.4.0-amd.dev.25",
+  "overall": "PENDING FSR in-game Save and quit observation",
+  "acceptanceRule": "Maintainer requested bounded checks without repeating clean tests; pass faults that cannot be reproduced and provide a reporting route for possible recurrence.",
+  "focusTransition": {
+    "result": "PASS bounded follow-up; historical incidents disclosed",
+    "repaired": false,
+    "historicalGPUCrashAndNativeLinesRetained": true,
+    "ordinaryEvidence": "ordinary-timed-focus-2026-10-24.json",
+    "diagnosticEvidence": "timed-functional-2026-10-24.json",
+    "furtherUnchangedRepeatsPlanned": false
+  },
+  "shutdown": {
+    "result": "KNOWN REPORTED ISSUE; not a demonstrated own-payload defect",
+    "historicalFailureErased": false,
+    "withoutOwnPayloadReproduction": "component-controls-2026-10-23.json",
+    "todayReducedReproduction": "alt-tab-gpu-crash-2026-10-24.json",
+    "ownerEstablished": false,
+    "upstreamReports": "reporting-2026-10-23.json",
+    "waitForUpstreamReply": false,
+    "furtherUnchangedMatrixPlanned": false,
+    "fixClaim": false
+  },
+  "FSRSaveAndQuit": {
+    "result": "PENDING",
+    "gameSession": 82910487,
+    "revision": 393,
+    "FSRActive": true,
+    "FG": "Off",
+    "heldExitMonitor": true,
+    "inputLimitation": "Supported synthetic Escape, menu-wheel key and HUD click did not open menus; physical pause requested without changing input mappings."
+  },
+  "reporting": {
+    "issuesEnabledVerified": true,
+    "publicBugFormExistsVerified": true,
+    "guide": "docs/REPORTING_GRAPHICS_PROBLEMS.md",
+    "expandedIssueForm": ".github/ISSUE_TEMPLATE/bug.yml",
+    "expandedFormNeedsBranchIntegration": true,
+    "existingPublicFormUsableWithGuide": true,
+    "rawDumpsPubliclyRequested": false
+  },
+  "hardwareUnavailable": [
+    "Physical HDR",
+    "Controller",
+    "Windows NVIDIA activation"
+  ],
+  "limits": [
+    "No universal crash repair, failure-rate estimate, physical performance, latency, hardware-safety or save-integrity claim.",
+    "The shutdown reproduction without own graphics payload establishes that payload is unnecessary; it does not identify the ultimate responsible component.",
+    "A clean bounded sample supports the maintainer acceptance decision and does not erase observed failures."
+  ]
+}

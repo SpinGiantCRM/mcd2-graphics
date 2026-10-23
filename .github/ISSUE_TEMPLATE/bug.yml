@@ -1,5 +1,5 @@
 name: Bug report
-description: Report a reproducible problem with MCD2 Graphics
+description: Report a problem with MCD2 Graphics, including intermittent crashes
 title: "[Bug] "
 labels: []
 body:
@@ -9,6 +9,8 @@ body:
         Thanks for reporting a problem. Please provide only information relevant to the graphics mod.
 
         **Remove account information, party codes, authentication data, private local paths and unrelated logs/screenshots before posting.**
+
+        Intermittent failures are welcome even if a retry works. For a crash or black screen, follow [the reporting guide](https://github.com/SpinGiantCRM/mcd2-graphics/blob/development/amd-colour-resize/docs/REPORTING_GRAPHICS_PROBLEMS.md). Do not upload raw crash dumps or entire log folders publicly.
 
   - type: input
     id: mod_version
@@ -78,15 +80,48 @@ body:
     attributes:
       label: ReShade and dependency versions
       description: Include the relevant pinned dependency versions if available.
-      placeholder: ReShade 6.8.0; Blueprint Loader 1.1; UE Extended nightly-20260928
+      placeholder: ReShade version or exact candidate; Blueprint Loader version; RenoDX snapshot; any overrides
     validations:
       required: true
+
+  - type: input
+    id: rendering_state
+    attributes:
+      label: Frame Generation, HDR and display mode
+      description: State what was selected when the problem occurred; include overlays or other graphics mods if known.
+      placeholder: FG Off; HDR Off; borderless 1920x1200; Steam overlay enabled
+
+  - type: dropdown
+    id: failure_kind
+    attributes:
+      label: What failed?
+      options:
+        - Not a crash
+        - Visible crash during play or focus switch
+        - Black lines / corruption, game stayed running
+        - Freeze or black screen
+        - Crash message or Windows fault only while quitting
+        - Unexpected return to main menu
+        - Other / unsure
+
+  - type: textarea
+    id: occurrence
+    attributes:
+      label: Timing and frequency
+      description: Approximate time in the session, location (menu / hub / dungeon), online or offline, and trigger (Alt-Tab out or back, resize, travel, Save and quit, or window close). Include failures/attempts if known; do not keep repeating a harmful test.
+      placeholder: After about five minutes outside a dungeon, returning from Alt-Tab; once in four attempts. FSR Quality, FG Off. A later attempt worked.
+
+  - type: textarea
+    id: crash_message
+    attributes:
+      label: Sanitized crash message or Windows error
+      description: Optional. Copy the error text/code and faulting module if available. Remove LoginId, account IDs and personal paths. Distinguish a visible gameplay crash from a fault recorded after the window closed.
 
   - type: textarea
     id: reproduction
     attributes:
       label: Reproduction steps
-      description: Give the shortest sequence that reproduces the problem.
+      description: Give the shortest sequence you observed. If intermittent, say so; a reliable reproduction is not required to submit a report.
       placeholder: |
         1. Launch the game.
         2. Load a level.

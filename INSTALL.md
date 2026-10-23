@@ -46,6 +46,8 @@ Close the game and choose **Uninstall**. Only unchanged recorded own files are r
 
 **Support → Create diagnostic report** exports allowlisted versions, platform/GPU and file checks/hashes. It excludes private paths, accounts, tokens, party codes, saves and raw logs. Review it before sharing.
 
+For crashes, black lines or shutdown faults, use the [bug report form](https://github.com/SpinGiantCRM/mcd2-graphics/issues/new?template=bug.yml) and [reporting guide](docs/REPORTING_GRAPHICS_PROBLEMS.md). Include FG/HDR state and the exact trigger. Intermittent failures are valid reports; keep raw dumps and full log folders private.
+
 Bounded [Linux/NVIDIA](docs/LINUX_FINAL_QUALIFICATION_2026-10-07.md) and [Windows/AMD installer/fallback](docs/WINDOWS_FULL_QUALIFICATION_2026-10-07.md) results apply to the exact [released hashes](qualification/fg-release/release-artifacts-2026-10-07.json). Windows NVIDIA active features/HDR, physical controllers, long sessions and device loss remain unqualified. Windows clean exits sometimes took 85–86 seconds. Historical failures remain documented.
 
 The mod does not force offline mode. Online/co-op permission and compatibility remain unverified; offline play is safer. [Online use](docs/ONLINE_USE.md). Packages are unsigned; transparent packaging does not guarantee Nexus clearance. Await Nexus staff clearance for quarantined files; do not use external links to bypass that review or disable security protection.

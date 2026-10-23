@@ -38,7 +38,7 @@ Steam is the verified edition. Xbox app / Microsoft Store PC compatibility remai
 
 Some foliage/interpolation artifacts remain possible. HDR uses the separately maintained UE Extended addon; calibrate peak brightness to your display. No official HDR master or physical panel-luminance measurement is claimed. Native graphics reset currently recognizes the English confirmation text.
 
-Report your store, game/mod version, GPU/driver, preset and reproduction steps. Remove personal details, party codes, private paths and authentication data; do not upload game executables or saves.
+Report your store, game/mod version, GPU/driver, preset and reproduction steps through the [bug report form](https://github.com/SpinGiantCRM/mcd2-graphics/issues/new?template=bug.yml). See [reporting graphics problems](docs/REPORTING_GRAPHICS_PROBLEMS.md) for intermittent crashes, Alt-Tab corruption and shutdown faults. Remove personal details, party codes, private paths and authentication data; keep raw dumps/log folders private and do not upload game executables or saves.
 
 ## Cross-platform maintenance
 
