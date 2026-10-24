@@ -1,6 +1,6 @@
 # MCD2 Graphics — DLSS, FSR, Frame Generation, HDR and low latency
 
-[Download 0.4.0-amd.dev.25](https://github.com/SpinGiantCRM/mcd2-graphics/releases/tag/v0.4.0-amd.dev.25) · [Nexus page](https://www.nexusmods.com/minecraftdungeons2/mods/87) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md) · [Validation](docs/VALIDATION.md)
+[Download 0.4.0-amd.dev.25](https://github.com/SpinGiantCRM/mcd2-graphics/releases/tag/v0.4.0-amd.dev.25) · [Nexus page](https://www.nexusmods.com/minecraftdungeons2/mods/87) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md) · [Validation](docs/VALIDATION.md) · [Documentation](docs/README.md)
 
 DLSS/DLAA, FSR upscaling, independent Frame Generation, HDR and supported low-latency controls in Minecraft Dungeons II's menus, with a guided Windows/Linux installer.
 

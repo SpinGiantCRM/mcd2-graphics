@@ -28,9 +28,17 @@ public class AdvancedInfoWidget : ModWidget {
   if(!Manager.ShowMenuDiagnostics){Label.SetText("");Label.SetVisibility(UE.UMG.ESlateVisibility.Collapsed);if(observing&&Manager.DiagnosticObservers>0)Manager.DiagnosticObservers--;observing=false;return;}
   Label.SetVisibility(UE.UMG.ESlateVisibility.Visible);if(!observing){Manager.DiagnosticObservers++;observing=true;}
   var d=Manager.Diagnostics==null?null:Manager.Diagnostics.State;var fg=Manager.AdvancedFG;
+  var mfg=Manager.FGRuntime;string mfgInfo="";
+  if(Manager.SelectedMfgStrategy()==2||Manager.SelectedMfgStrategy()==3){
+   mfgInfo="\n\nSoftware/Mixed FG backend: "+(mfg!=null&&mfg.SoftwareMultiplierMask>0?"DLSS Enabler 4.9.0 (capabilities available)":"Unavailable");
+   mfgInfo+="\nPresentation pacing: "+(mfg==null||mfg.MfgTimingStatus==0?"Waiting":mfg.MfgTimingStatus==1?"Following real-frame cadence":mfg.MfgTimingStatus==2?"Limited to fit display refresh":mfg.MfgTimingStatus==3?"Display refresh unavailable":"Presenter error");
+   if(mfg!=null&&mfg.MfgRefreshMilliHz>0)mfgInfo+="\nOutput refresh: "+(mfg.MfgRefreshMilliHz/1000)+" Hz";
+   if(mfg!=null&&mfg.MfgTimingStatus==2&&mfg.MfgTargetRealMilliFps>0)mfgInfo+="\nScheduled real-frame limit: ~"+(mfg.MfgTargetRealMilliFps/1000)+" FPS (not a measured FPS)";
+   if(d!=null)mfgInfo+="\nSuccessful software / native phase presents: "+d.FgSoftwareGenerated+" / "+d.FgNativeGenerated;
+  }
   Label.SetText(a.Status()+"\nDLSS SR version: "+a.Version(0)+"\n\nDLSS FG preset (requested): "+(fg==null?"Waiting":fg.Hint==1?"A - Standard":fg.Hint==2?"B - UI Recomposition":fg.Hint==3?"C - Performance":"Auto")+
    "\nDLSS FG driver request: "+(fg!=null&&fg.State!=null&&fg.Hint!=fg.State.W11?"Restart to apply":d==null?"Waiting":d.FgPresetStatus==1?"Accepted (model not reported)":d.FgPresetStatus==-20||d.FgPresetStatus==-21?"Requires a dedicated per-game NVIDIA profile":d.FgPresetStatus<0?"Not applied":"SDK default / unchanged")+"\nDLSS FG version: "+a.Version(4)+"\nActive DLSS models: not exposed by the runtime."+
    "\n\nFSR SR implementation (last verified): "+RuntimeDiagnosticsClient.Implementation(d==null?0:d.FsrSrVersion)+"\nFSR SR library: "+a.Version(2)+
-   "\nFSR FG implementation (last verified): "+RuntimeDiagnosticsClient.Implementation(d==null?0:d.FsrFgVersion)+"\nFSR FG library: "+a.Version(3)+"\nStreamline version: "+a.Version(1));
+   "\nFSR FG implementation (last verified): "+RuntimeDiagnosticsClient.Implementation(d==null?0:d.FsrFgVersion)+"\nFSR FG library: "+a.Version(3)+"\nStreamline version: "+a.Version(1)+mfgInfo);
  }
 }

@@ -1,5 +1,29 @@
 # Source build
 
+## Current release and integration inputs
+
+The public release is **0.4.0-amd.dev.25**. Use its
+[candidate selection receipt](../qualification/providers/windows-candidate-current.json)
+and platform locks linked in [the release guide](DEV25_RELEASE_CANDIDATE.md).
+The root manifest/dependency lock and preview archives remain frozen historical
+inputs. Default arguments using those files do not reproduce dev.25.
+
+`experiments/fg-streamline/build_windows_candidate.py` builds the complete native
+candidate and records its source and binary hashes. The production UI is built
+with `build_ui.py`; its current checked-in payload/receipt must match all consumed
+UI sources. Assemble the verified native archive with
+`tools/assemble_amd_candidate.py`, passing its SHA-256, source commit, version and
+artifact URL. Build the installer with explicit `--manifest`, `--dependency-lock`
+and `--payload` from that assembly. Preserve the distinct Windows/Linux locks.
+A rebuilt candidate requires new receipts and the affected runtime checks.
+
+PR60's **0.5.0-integration.dev.2** is separate unreleased Game Pass/MFG work.
+Its own bridge and external runtime requirements do not change the published
+0.4.0 installers or grant runtime acceptance. Native CI runs CPU ABI fixtures;
+GPU host checks and game qualification are separate.
+
+## Native and toolchain reference
+
 The native source is C++20. Its ReShade calls use a separate MSVC-ABI adapter; the main Windows addon uses MinGW. Both adapters are intentionally retained from the tested path. Do not replace them with PR435 or an upscaler-provider patch without the separate regression matrix.
 
 Pinned dependencies:
@@ -35,11 +59,11 @@ shim recursively includes itself on Windows. The NGX bridge defines the
 MSVC floating-point CRT marker required by LLVM MinGW.
 
 `--native-only` does not rebuild the UI or conversion shader. The Windows
-candidate reuses their hash-verified preview.1 payloads. The complete UI/shader
+historical native-only candidate reused its hash-verified preview.1 payloads. Current complete candidates use the source-matched UI receipt described above. The complete UI/shader
 source build remains unqualified on Windows. See the
 [Windows validation report](WINDOWS_VALIDATION_2026-10-05.md) for runtime scope.
 
-## Linux NVIDIA regression candidate (not published)
+## Historical preview.2 Linux NVIDIA regression candidate
 
 The Windows-produced PR5 addon failed Quality-to-DLAA teardown on the Linux
 NVIDIA host. The same native source built with MinGW GCC 16.2.0 and MSVC-target
@@ -61,7 +85,7 @@ packaged addon first; rebuilding with LLVM MinGW produces a different artifact
 and requires its own NVIDIA regression checks. See
 [regression handoff](LINUX_REGRESSION_HANDOFF_2026-10-05.md).
 
-## Update 2 display addon and guided installer
+## Historical Update 2 display addon and guided installer
 
 Build the UI using `build_ui.py` (also called by the full `build.py` recipe):
 

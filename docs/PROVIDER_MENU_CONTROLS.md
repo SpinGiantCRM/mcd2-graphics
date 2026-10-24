@@ -27,8 +27,27 @@ exact C# request also decoded and round-tripped through the native C++ decoder.
 The game Blueprint compiler and the native latency build succeeded locally.
 Both platform CI jobs retain their corresponding client and projection checks.
 
-**Not yet admitted:** the normal Video rows still use the existing NVIDIA path.
-The client now drives the opt-in [continuous FSR controller](FSR_CONTINUOUS_2026-10-09.md),
-including current-game source acknowledgement and automatic source rollback.
-The normal Video rows still need that connection. Compilation and transport checks do not qualify active
-AMD hardware or FSR frame generation. Published installer payloads are unchanged.
+In released **0.4.0-amd.dev.25**, the normal Video rows use the shared client for
+DLSS/FSR and independent FG/low-latency choices. The continuous SR controller
+requires current-game source acknowledgement and automatic source rollback;
+menu intent alone does not authorize reduced source resolution. Bounded
+[release acceptance](DEV25_RELEASE_CANDIDATE.md) records actual Windows/Radeon
+and Linux/NVIDIA checks with known issues. Earlier transport trials remain
+historical inputs, not this release's qualification.
+
+## Integration MFG controls
+
+The dev.2 advanced Frame Generation page adds **Mode** and **Multiplier** beside
+the existing DLSS preset and FSR version overrides. Basic FG On/Off and provider
+selection stay in Video settings. Standard is 2x. Native MFG uses the selected
+native provider's reported limit; Software MFG uses the external FSR-based
+headless backend; Mixed MFG combines a NVIDIA midpoint with software phases at
+4x or 6x. Software and mixed modes currently require DLSS or FSR upscaling.
+Unsupported counts are skipped rather than silently reduced. Restart or the
+existing confirmed presenter-switch protocol applies when ownership changes.
+
+Diagnostics remain in their own page and optional gameplay overlay. Separate
+DLSS/software component activity comes from advancing successful presentations
+with the current source identity. A saved choice, version or loaded DLL is not
+proof that the requested mode is running. Linux game qualification is pending;
+benchmarks remain separate.

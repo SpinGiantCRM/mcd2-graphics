@@ -209,3 +209,35 @@ public class AdvancedMenuClient : USaveGame {
   return Status()+"\n\nDLSS SR preset (active): Not reported\nDLSS FG preset (active): Not reported\n\nLoaded runtime versions\nNVIDIA DLSS Super Resolution: "+Version(0)+"\nNVIDIA DLSS Frame Generation: "+Version(4)+"\nAMD FSR Upscaling: "+Version(2)+"\nAMD FSR Frame Generation: "+Version(3)+"\nNVIDIA Streamline: "+Version(1);
  }
 }
+
+// Capability-filtered fixed-count choices. This never claims rendering activity.
+public static class MfgModes {
+ public static bool Any(int providers,int softwareMask,int mixedMask){
+  return providers>=0 && providers<=3 && (providers!=0 || (softwareMask>0 && (softwareMask&~124)==0) || (mixedMask>0 && (mixedMask&~80)==0));
+ }
+ // UI intent only: custom startup leaves Streamline's maximum unknown.
+ // Positive adapter support permits a baseline next-restart request, never activation.
+ public static bool NativeRestartNeeded(int strategy,int sr,int fg,int multiplier,int providers,int startupOwner,int nativeMaximumGenerated){
+  return (strategy==0 || strategy==1) && (sr==1 || sr==2) && fg==0 && multiplier==2 &&
+   providers>0 && providers<=3 && (providers&1)!=0 && startupOwner==4 && nativeMaximumGenerated==0;
+ }
+ public static bool Selected(int strategy,int sr,int fg,int multiplier,int providers,int softwareMask,int mixedMask,int nativeMaximumGenerated,int startupOwner=0){
+  if(strategy==2 || strategy==3)return Supported(strategy,sr,fg,multiplier,softwareMask,mixedMask,nativeMaximumGenerated);
+  if(providers<0 || providers>3)return false;
+  if(strategy==1)return (providers&1)!=0 && (Supported(strategy,sr,fg,multiplier,softwareMask,mixedMask,nativeMaximumGenerated) || NativeRestartNeeded(strategy,sr,fg,multiplier,providers,startupOwner,nativeMaximumGenerated));
+  return strategy==0 && multiplier==2 && (fg==0?(providers&1)!=0:fg==1 && (providers&2)!=0);
+ }
+ public static bool Supported(int strategy,int sr,int fg,int multiplier,int softwareMask,int mixedMask,int nativeMaximumGenerated){
+  if(multiplier<2 || multiplier>6 || (sr!=1 && sr!=2))return false;
+  if(strategy==0 || strategy==1)return fg==0 && nativeMaximumGenerated>=multiplier-1 && nativeMaximumGenerated<=5;
+  if(strategy==3)return fg==1 && softwareMask>=0 && (softwareMask&~124)==0 && (softwareMask&(1<<multiplier))!=0;
+  return strategy==2 && fg==0 && (multiplier==4 || multiplier==6) && mixedMask>=0 && (mixedMask&~80)==0 && (mixedMask&(1<<multiplier))!=0;
+ }
+ public static int NextCount(int strategy,int sr,int fg,int current,int direction,int softwareMask,int mixedMask,int nativeMaximumGenerated){
+  if(direction==0)return current;int count=current;
+  if(count<2 || count>6)count=direction>0?6:2;
+  for(int n=0;n<5;n++){count+=direction>0?1:-1;if(count<2)count=6;if(count>6)count=2;
+   if(Supported(strategy,sr,fg,count,softwareMask,mixedMask,nativeMaximumGenerated))return count;}
+  return current;
+ }
+}

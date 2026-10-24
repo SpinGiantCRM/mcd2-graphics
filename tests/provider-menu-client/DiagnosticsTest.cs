@@ -90,6 +90,21 @@ static class DiagnosticsTest {
    if(channel==0)m.FgMode=0;if(channel==1)s.ReflexMode=0;if(channel==2)s.AmdMode=0;
    Poll(independent,m);Need(independent.SrAdvancing&&independent.FgAdvancing==(channel!=0)&&independent.ReflexAdvancing==(channel!=1)&&independent.AmdAdvancing==(channel!=2)); // Off is immediate between producer samples.
   }
+  // Separate components require actual advancing presents under the current strategy.
+  var mixedClient=new RuntimeDiagnosticsClient();m.FgMode=1;m.FgProvider=0;m.ProviderMenu!.Authority!.W33=2;
+  s.FgProvider=1;s.FgActive=1;s.FgFault=0;s.FgStrategy=2;s.FgSoftwareGenerated=10;s.FgNativeGenerated=5;
+  s.Sample++;Poll(mixedClient,m);Need(!mixedClient.SoftwareFgAdvancing&&!mixedClient.NativeFgAdvancing);
+  s.Sample++;s.FgGenerated+=3;s.FgSoftwareGenerated+=2;s.FgNativeGenerated++;Poll(mixedClient,m);
+  Need(mixedClient.SoftwareFgAdvancing&&mixedClient.NativeFgAdvancing);
+  Poll(mixedClient,m);Need(mixedClient.SoftwareFgAdvancing&&mixedClient.NativeFgAdvancing);
+  s.Sample++;s.FgGenerated++;s.FgSoftwareGenerated++;Poll(mixedClient,m);
+  Need(mixedClient.SoftwareFgAdvancing&&!mixedClient.NativeFgAdvancing);
+  m.ProviderMenu.Authority.W33=3;Poll(mixedClient,m);Need(!mixedClient.SoftwareFgAdvancing&&!mixedClient.NativeFgAdvancing);
+  m.ProviderMenu.Authority.W33=2;s.Sample++;s.FgSoftwareGenerated++;s.FgNativeGenerated++;Poll(mixedClient,m);
+  Need(!mixedClient.SoftwareFgAdvancing&&!mixedClient.NativeFgAdvancing); // Fresh baseline after mismatch.
+  s.Sample++;s.FgGenerated+=3;s.FgSoftwareGenerated+=2;s.FgNativeGenerated++;Poll(mixedClient,m);
+  Need(mixedClient.SoftwareFgAdvancing&&mixedClient.NativeFgAdvancing);
+  m.FgMode=0;Poll(mixedClient,m);Need(!mixedClient.SoftwareFgAdvancing&&!mixedClient.NativeFgAdvancing);
   Console.WriteLine("Live diagnostics: advancing counters, Native independence, all-channel world validation and invalid/stale/opt-out baseline recovery pass");
  }
 }

@@ -49,11 +49,15 @@ addon build are not game or Xodus runtime qualification.
 
 ## Integration candidate gates
 
-The source candidate is `0.5.0-integration.dev.1`; the released dev.25 payload
+The source candidate is `0.5.0-integration.dev.2`; the released dev.25 payload
 and its qualification records remain unchanged. The guided installer requires
 an independently admitted Game Pass executable SHA-256 in `game.winGDK`.
-That pin has not yet been supplied, so Game Pass installation remains blocked
-instead of trusting the Steam executable identity or a version string.
+The candidate admits package version **1.1.3.0**, using the contributor-reported
+full on-disk executable SHA-256
+`22581b59ebf5675f706b5f27657d12b5de4c433908363800c7ac391ff586142e`
+and size 193,206,272 bytes. The [identity record](../qualification/providers/gamepass-1.1.3.0-executable.json)
+links the original report. Other executable hashes remain refused. An admitted
+hash allows installation; it does not prove the integrated game works.
 
 The edition-only runtime binding is acquired separately from the pinned
 Microsoft GDK package. Steam installation does not acquire this dependency.

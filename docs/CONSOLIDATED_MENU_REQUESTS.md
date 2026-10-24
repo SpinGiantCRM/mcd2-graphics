@@ -1,5 +1,12 @@
 # Consolidated menu transaction
 
+**Current status:** the shared request/authority client is used by released
+[0.4.0-amd.dev.25](DEV25_RELEASE_CANDIDATE.md). Its native Video controls and
+FSR cutover are implemented. The original trial/cutover statements below retain
+their historical context; use [current menu controls](PROVIDER_MENU_CONTROLS.md)
+for release behavior and unreleased PR60 extensions.
+
+
 `src/providers/menu_requests.hpp` implements the portable transaction processor
 for the next settings cutover. `menu_save_transport.hpp` now connects it to an
 opt-in native settings worker and a separately built NeoRune qualification

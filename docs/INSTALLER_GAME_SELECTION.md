@@ -22,8 +22,9 @@ so installation cannot accidentally continue against the previous location.
 
 Path recognition does not authorize installation. The edition's executable must
 still match the package's SHA-256 pin, dependencies must pass their own checks,
-and the game must be closed. Game Pass installation remains blocked until its
-exact executable pin is supplied. No changes to WindowsApps permissions, Gaming
+and the game must be closed. The dev.2 candidate admits the reported Game Pass
+1.1.3.0 executable through its separate hash pin; other builds remain refused.
+Native Game Pass and Xodus runtime checks are still pending. No changes to WindowsApps permissions, Gaming
 Services, save data or the managed Xodus runtime are made by selection.
 
 Core filesystem cases and GUI compilation are checked on Linux and Windows.

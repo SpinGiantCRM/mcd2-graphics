@@ -1,65 +1,58 @@
-# NVIDIA fixed Multi Frame Generation integration
+# Multi Frame Generation integration
 
-This candidate integrates the Xbox and MFG contributions from
+**Released 0.4.0-amd.dev.25 uses one FG provider at 2x.** MFG and Game Pass are
+unreleased PR60 work based on the FSR build, integrating contributions from
 [PR55](https://github.com/SpinGiantCRM/mcd2-graphics/pull/55) and
-[PR57](https://github.com/SpinGiantCRM/mcd2-graphics/pull/57) with the released FSR
-architecture. It is not a qualified release.
+[PR57](https://github.com/SpinGiantCRM/mcd2-graphics/pull/57).
 
-**Mods → MCD2 Graphics → Frame Generation → DLSS FG Multiplier** selects fixed
-2x–6x output. 2x requests one generated frame per rendered frame; 6x requests
-five. Selection and SDK configuration require the actual device's reported
-`numFramesToGenerateMax`, not a GPU-model whitelist. The initial default stays
-2x. Unsupported saved modes remain visible and can be changed to a supported
-mode or disabled. Multiplier selection is independent of DLSS FG preset A/B/C.
+## Candidate modes
 
-The same NVIDIA path can consume DLSS or FSR upscaling. The existing AMD FG path,
-its capability cache, temporal-guide ownership and native-Off presenter recovery
-remain separate. This is single-provider MFG. Combining two FG providers needs
-another presentation/timeline backend and remains unavailable.
+**Mods → MCD2 Graphics → Frame Generation → Mode / Multiplier** selects:
 
-The transport keeps the 48-byte plain-C configuration and schema-5 settings.
-Legacy FrameMode 0–4 maps to 2x–6x; omitted means 2x. Case-insensitive duplicate
-properties are refused. Dynamic mode is not enabled and strategy value 3 is
-rejected, preserving older schema-5 readers and rollback behavior.
+- **Standard:** one generated frame per real frame (2x), using the supported
+  NVIDIA or AMD provider selected in Video.
+- **Native MFG:** fixed NVIDIA output counts 2x–6x, bounded by the actual
+  Streamline device capability. GPU model names never grant a count.
+- **Software MFG:** external FSR-based headless generation at supported 2x–6x
+  counts, independently admitted on the actual device.
+- **Mixed MFG:** one caller-owned NVIDIA midpoint plus software intermediate
+  frames at 4x or 6x, from the same pair of real frames.
 
-Fresh startup with FG Off keeps the native presentation route. NVIDIA Off
-releases its feature and retains the existing restart requirement for re-enable.
-The contributor's retained-proxy live-toggle policy is not enabled by default.
-An active configuration is not a measured output multiplier: actual SDK
-presentation observations and diagnostics remain separate evidence.
+Software and mixed modes require DLSS or FSR SR guide producers in this
+candidate. Their capability masks do not authorize higher native counts. Preset
+A/B/C remains independent of multiplier. Dynamic adaptation is not enabled.
+One final presenter and one compatible latency owner coordinate each batch.
+Software/mixed presentation fits the multiplier to the output refresh through
+bounded backpressure. Higher counts can therefore lower the real rendering rate;
+Diagnostics shows this scheduled limit separately from measured FPS. Native Off
+removes this custom pacing. The game's saved FPS/VSync settings are preserved.
 
-## Existing evidence and remaining checks
+The schema-5 transport assigns strategy 3 to Software MFG, retaining values
+0 Standard, 1 Native MFG and 2 Mixed MFG. Old readers that do not understand the
+new strategy refuse it. Legacy FrameMode 0–4 still maps to 2x–6x. Checksums,
+session, authority revision, world, output and real-frame identities remain
+required. See [compute/presenter work and remaining gates](MFG_COMPUTE_TESTING.md).
 
-The contributor's fixed higher-mode evidence used RTX 4080 with a separately
-installed Ada unlocker. This does not establish ordinary RTX 40 support or
-native RTX 50 qualification. No unlocker is installed or bundled here. Historical
-contributor evidence is preserved in [NVIDIA_MFG_TESTING.md](NVIDIA_MFG_TESTING.md).
-It predates this FSR integration and does not qualify the combined candidate.
+## Qualification and external inputs
 
-Functional qualification must cover Steam and Game Pass on native Windows,
-Steam on Linux, and Game Pass through Xodus independently. Dynamic adaptation,
-combined-provider generation and performance claims remain deferred. Benchmarks
-are on hold.
+After custom startup, cached NVIDIA support permits a baseline 2x native
+request for the next restart. The native maximum remains unknown until
+Streamline reports it; software capabilities never authorize higher native
+counts. The menu shows this restart requirement separately from active support.
 
-## Required provider-neutral follow-on work
+The native path retains its restart requirement after releasing the NVIDIA
+feature. Custom Off recovery uses engine-confirmed presenter switching. An
+accepted setting or successful Present call is not a measured display multiplier.
 
-The complete MFG goal includes both Radeon and NVIDIA, single-provider software
-generation on compatible older hardware, supported native-provider paths, and
-two providers contributing frames to the same timeline. Native support must
-not remove supported software or mixed-provider choices on newer hardware.
+The contributor tested higher native counts on an RTX 4080 with an external Ada
+helper. Those [historical results](NVIDIA_MFG_TESTING.md) do not qualify this
+integrated binary, ordinary RTX 40 support or native RTX 50 hardware. Optional
+helpers stay external; production never forces counts or edits a global profile.
+The external software runtime is also acquired separately, hash-checked and
+credited, not bundled as an owned mod binary.
 
-[DLSS Enabler's author description](https://www.nexusmods.com/site/articles/237)
-is the mixed-provider behavior reference: it assigns suitable intermediate
-positions to separate generators and presents them on one timeline. This
-candidate has not implemented that backend or qualified those combinations.
-
-The next integration milestone must establish an arbitrary-phase software
-backend and its supported interface, qualify it on both hardware tracks, then
-coordinate compatible contributors through one presentation and latency owner.
-Current two-frame analytical FSR support is not proof of software MFG. Keep the
-existing refusal of unsupported combinations until their rendering backend is
-implemented. See the [roadmap](../ROADMAP.md).
-
-The [owned-input compute probe](MFG_COMPUTE_TESTING.md) now provides an isolated
-qualification gate for phase outputs and retirement. It is not connected to the
-game presenter and does not add a software/hybrid support claim.
+The qualification sequence is complete Linux/NVIDIA testing, then the available
+Windows/Radeon laptop startup check with MFG Off. That laptop cannot qualify MFG.
+Native Windows Game Pass and Linux/Xodus require separate tests. Display pacing,
+HDR, focus, travel, resize, Off recovery and normal exit must be checked against
+the same complete package before support claims. **Benchmarks remain on hold.**

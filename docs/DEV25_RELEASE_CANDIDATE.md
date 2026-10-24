@@ -1,6 +1,6 @@
 # FSR prerelease — 0.4.0-amd.dev.25
 
-This candidate has bounded **PASS WITH KNOWN ISSUES** results on [Windows/Radeon](WINDOWS_DEV25_ACCEPTANCE_2026-10-24.md) and [Linux/NVIDIA](LINUX_DEV25_ACCEPTANCE_2026-10-24.md). The [release downloads](https://github.com/SpinGiantCRM/mcd2-graphics/releases/tag/v0.4.0-amd.dev.25) retain the accepted Windows installer and exact verified Linux folder. Earlier downloads remain unchanged.
+This release has bounded **PASS WITH KNOWN ISSUES** results on [Windows/Radeon](WINDOWS_DEV25_ACCEPTANCE_2026-10-24.md) and [Linux/NVIDIA](LINUX_DEV25_ACCEPTANCE_2026-10-24.md). The [release downloads](https://github.com/SpinGiantCRM/mcd2-graphics/releases/tag/v0.4.0-amd.dev.25) retain the accepted Windows installer and exact verified Linux folder. Earlier downloads remain unchanged.
 
 ## Features and controls
 

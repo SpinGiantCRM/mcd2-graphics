@@ -1,8 +1,9 @@
 # Isolated MFG compute qualification
 
 This experiment evaluates an externally acquired headless compute interface with
-owned D3D12 images. It is separate from the installer and current fixed NVIDIA
-MFG integration. It does not enable software or mixed-provider MFG in game.
+owned D3D12 images. The original probe is separate from the installer and fixed NVIDIA MFG path.
+The dev.2 integration candidate adds a source-built game bridge and presenter;
+its status and remaining game checks are recorded below.
 
 The target remains software MFG on Radeon and NVIDIA, native provider MFG where
 available, and NVIDIA midpoint plus software intermediate frames at 4x/6x. A
@@ -35,8 +36,7 @@ It exposes `DLSSG_NVSDK_NGX_D3D12_*` entry points and phase index/count
 parameters. Exports do not qualify behavior, prove an algorithm or establish
 native NVIDIA output availability.
 
-Acquire it directly under the author's terms. Do not bundle, patch or install
-it in the game. The runner copies only this exact external input and our own
+Acquire it directly under the author's terms. Do not bundle or patch it. The isolated probe does not install it in the game. The runner copies only this exact external input and our own
 probe into a fresh directory, naming the module `dlss-enabler-headless.dll`.
 The probe verifies its hash again and holds a file handle against replacement.
 The external module stays loaded until process exit; live unload is not tested.
@@ -168,3 +168,53 @@ then check pause/resume, travel, output changes and normal shutdown. Unsupported
 counts must remain unavailable with an accurate status rather than silently
 claiming a smaller multiplier. Keep the native path separate from the required
 software/mixed presentation integration, which compute proof does not implement.
+
+## Complete game bridge candidate
+
+The dev.2 candidate adds `mcd2-mfg-game-bridge.dll`, built by
+`experiments/providers/build_mfg_game_bridge.py`. Its plain C ABI keeps the
+Microsoft C++ SDK calls inside the bridge. Native CI runs a dynamic CPU-only ABI
+fixture; it does not run the GPU host or acquire DLSS Enabler.
+
+The installer acquires the exact external 4.9.0 module separately, under the
+author's terms, into `MCD2Graphics/mfg/dlss-enabler-headless.dll`. It is loaded
+through its headless interface, rather than installed as a proxy. Its hash is
+checked before loading. The owned bridge and its receipt belong to the mod
+payload; the external runtime does not.
+
+The candidate offers Standard 2x, Native MFG, Software MFG and Mixed MFG controls.
+Software counts 2x–6x and mixed counts 4x/6x require the actual device's reported
+capability masks. Mixed uses a caller-owned NVIDIA midpoint and software phases
+from the same real pair. Native Streamline MFG retains its independent maximum;
+software capabilities never authorize a higher native count.
+
+The custom presenter owns one final swapchain timeline and a virtual application
+buffer ring. A single bounded worker schedules generated phases against measured
+real arrivals and the actual output refresh, with backpressure rather than an
+unpaced queue burst. Software/mixed multipliers can lower the real rendering
+rate to fit that output cadence; they do not rewrite the game's stored FPS cap.
+The Diagnostics page distinguishes this scheduled limit from measured FPS.
+Incoming VSync Off remains Off. Unknown refresh reports unavailable timing and
+presents real frames. Displayed cadence and VRR still require game qualification.
+ It publishes only complete ordered batches, keeps generated images
+out of real history, binds source/session/world/epoch, and retains resources until
+the actual queue fence completes. Off disables generation immediately; an
+engine-confirmed resize switches back to native buffers and presentation without
+its frame-copy work. Enabling the custom route again requires another confirmed
+resize or a restart. Failed resize retains the previous valid route.
+
+Software mode uses the existing hardware-supported low-latency path. Anti-Lag 2
+requires the actual AMD driver interface; it is not offered merely because FSR
+is selected. The custom presenter shares the persistent Anti-Lag context and
+marks each generated/real presentation. Diagnostics count actual successful
+component presentations, independently of saved mode or compute success.
+
+The owned host checks actual-source presentation and lifecycle outside MCD2.
+These checks cannot establish game image quality, pacing, menu operation or a
+clean game exit. Full Linux game qualification remains next; Windows/Radeon
+startup follows with MFG Off. Windows MFG, Game Pass and Xodus remain separate
+runtime gates. HDR format calculations alone do not prove HDR display output:
+the isolated desktop rejected PQ colour-space activation. Preserve this failed
+control and require the actual game's HDR check before claiming support.
+
+Performance benchmarks remain on hold.

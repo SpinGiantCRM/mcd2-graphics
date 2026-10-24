@@ -1,5 +1,11 @@
 # Provider architecture: baseline and migration boundaries
 
+The released baseline is [0.4.0-amd.dev.25](DEV25_RELEASE_CANDIDATE.md), with
+analytical FSR SR/FG and compatible Radeon Anti-Lag 2. The baseline/migration
+analysis below preserves its original October starting point; its pending-work
+statements are historical. Current Game Pass/MFG integration is tracked in
+[the MFG guide](NVIDIA_MULTI_FRAME_GENERATION.md) and [GDK transport](GDK_SAVE_TRANSPORT.md).
+
 The [official FSR owned-input gate](FSR_OWNED_INPUTS_2026-10-08.md) now passes
 all five analytical 3.1.5 presets in SDR/HDR through local CachyOS Proton:
 160 verified GPU readbacks and clean context retirement. This establishes SDK

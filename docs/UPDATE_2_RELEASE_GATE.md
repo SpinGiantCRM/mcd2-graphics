@@ -1,4 +1,7 @@
-# Update 2 qualification and release gate
+# Historical Update 2 qualification and release gate
+
+For released **0.4.0-amd.dev.25**, use [its acceptance and package scope](DEV25_RELEASE_CANDIDATE.md).
+This gate and publication decision apply only to the original 0.2.0-rc.1 inputs.
 
 Update 2 is the guided-installer / native HDR / Blueprint Loader 2.0 /
 Streamline Reflex release. It is distinct from published `v0.1.0-preview.2`.

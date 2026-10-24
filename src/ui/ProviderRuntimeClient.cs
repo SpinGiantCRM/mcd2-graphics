@@ -2,7 +2,7 @@ using NeoRune;
 using UE.Engine;
 
 public class FGSettingsSave : USaveGame {public int SchemaVersion;public int Revision;public int Mode;public int ContextReady;public int SessionId;public int FGProvider;public int SettingsRevision;public int FrameMode;}
-public class FGRuntimeSave : USaveGame {public int SchemaVersion;public int Revision;public int SessionId;public int Available;public int Active;public int Phase;public int RestartRequired;public int AvailableProviders;public int StartupOwner;public int PresenterRoute;public int PresenterCanSwitch;public int PresenterSettingsRevision;public int NativeGuidesRetired;public int MaximumGeneratedFrames;public int DynamicSupported;public int ActiveFrameMode;}
+public class FGRuntimeSave : USaveGame {public int SchemaVersion;public int Revision;public int SessionId;public int Available;public int Active;public int Phase;public int RestartRequired;public int AvailableProviders;public int StartupOwner;public int PresenterRoute;public int PresenterCanSwitch;public int PresenterSettingsRevision;public int NativeGuidesRetired;public int MaximumGeneratedFrames;public int DynamicSupported;public int ActiveFrameMode;public int SoftwareMultiplierMask;public int MixedMultiplierMask;public int MfgTimingStatus;public int MfgRefreshMilliHz;public int MfgTargetRealMilliFps;}
 
 // Volatile game-thread source applier. The actor supplies current world and
 // measured console state; no persistent preference or GPU capability is inferred.

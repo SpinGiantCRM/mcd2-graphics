@@ -1273,3 +1273,36 @@ capability gates. An optional external helper's synthetic Linux result is not
 Windows MFG qualification or permission to force higher production counts.
 See the [native helper trial](MFG_COMPUTE_TESTING.md#native-nvidia-mfg-helper-trial)
 for dependency identity, early loading, restoration and remaining game checks.
+
+
+### Complete software and mixed MFG candidate
+
+The dev.2 game bridge keeps SDK virtual calls inside a Microsoft-ABI DLL and
+reuses the existing plain guide/presentation boundary. Preserve current frame,
+world, authority checksum/session, actual queue identity and whole-batch fence
+proof. Actual component presentation counters are separate from successful
+compute outputs and from requested mode. Both portable CI platforms cover mode
+admission, transaction ordering and attribution. Native CI additionally runs the
+dynamic bridge ABI fixture without graphics runtimes or GPU work.
+
+Capability discovery may load both AMD and MFG bridges. Anti-Lag context routing
+must follow the application-local bootstrap's actual owner, never DLL presence.
+Retain generated/real markers and drain before releasing the persistent context.
+The CPU fixture covers both routes, a loaded inactive bridge and failed drain.
+
+Custom presentation uses virtual application buffers until a confirmed native
+Off resize. Native Off must expose the real buffers/index and bypass all custom
+copy/submission work. Refused/outstanding-reference resize must preserve the old
+route, with one presenter and no partially published batch. The owned hardware
+host is a bounded functional control; it does not qualify MCD2 or Windows MFG.
+
+Game Pass's named transports include the new capability masks, custom owner 4
+and independent software/native presentation counters. Reject unknown mask bits
+and owner 3. Only the diagnostic preset-status field may retain signed status
+bits; negative activity counters and signed settings remain refused. Preserve
+GDK 90/93-entry header round trips and the twenty-channel boundary.
+
+The reported Game Pass 1.1.3.0 on-disk executable is now separately hash-pinned.
+Contributor willingness to test is not integrated runtime acceptance. Keep issue
+#8 open until support works and is merged. Native Windows Game Pass and Linux
+Xodus checks remain pending; existing Steam qualification is not transferable.

@@ -1,4 +1,9 @@
-# Development after 0.1.0-preview.1
+# Historical development tracks — October 2026
+
+This document preserves early planning and observations. The current released
+baseline is [0.4.0-amd.dev.25](DEV25_RELEASE_CANDIDATE.md), including FSR and
+independent low latency. See [the roadmap](../ROADMAP.md) for current work; the
+not-yet-implemented statements below describe the original 4 October snapshot.
 
 ## Frozen reference
 
