@@ -278,6 +278,18 @@ def main():
     ngx = out / 'ngx'
     run('git', 'clone', '--no-checkout', 'https://github.com/NVIDIA/DLSS.git', ngx)
     run('git', '-C', ngx, 'checkout', lock['buildDependencies']['NVIDIASDKCommit'])
+    # Build only our owned-input compute probe. The headless provider stays
+    # external; CI runs the CPU-only public parameter ABI fixture, never GPU FG.
+    mfg_spec = importlib.util.spec_from_file_location('mfg_recipe', REPO / 'experiments/providers/build_mfg_compute_probe.py')
+    mfg_recipe = importlib.util.module_from_spec(mfg_spec)
+    mfg_spec.loader.exec_module(mfg_recipe)
+    mfg_probe = out / 'mfg-compute-probe'
+    mfg_recipe.build(ngx / 'include', mfg_probe, sysroot, llvm / 'clang-cl.exe', llvm / 'lld-link.exe')
+    run(mfg_probe / 'mfg-parameters-abi-test.exe')
+    mfg_artifact = artifact / 'isolated-mfg-compute-probe'
+    mfg_artifact.mkdir()
+    for name in ('mfg-compute-probe.exe', 'mfg-parameters-abi-test.exe', 'build-receipt.json', 'NVIDIA-SDK-LICENSE.txt'):
+        shutil.copyfile(mfg_probe / name, mfg_artifact / name)
     sr = out / 'sr'
     build_continuous_sr(REPO, sr, reshade / 'include', ngx / 'include',
                         llvm / 'clang++.exe', mingw, out / 'dxc/bin/x64/dxc.exe',

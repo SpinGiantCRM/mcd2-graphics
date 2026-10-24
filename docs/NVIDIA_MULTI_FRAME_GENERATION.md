@@ -59,3 +59,7 @@ coordinate compatible contributors through one presentation and latency owner.
 Current two-frame analytical FSR support is not proof of software MFG. Keep the
 existing refusal of unsupported combinations until their rendering backend is
 implemented. See the [roadmap](../ROADMAP.md).
+
+The [owned-input compute probe](MFG_COMPUTE_TESTING.md) now provides an isolated
+qualification gate for phase outputs and retirement. It is not connected to the
+game presenter and does not add a software/hybrid support claim.

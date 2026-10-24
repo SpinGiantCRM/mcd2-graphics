@@ -32,6 +32,15 @@ def samples(multiplier=4):
 
 
 class MfgProbeTests(unittest.TestCase):
+    def test_changed_sdk_headers_refused_before_compiler_or_output(self):
+        spec=importlib.util.spec_from_file_location('mfg_build',ROOT/'experiments/providers/build_mfg_compute_probe.py')
+        recipe=importlib.util.module_from_spec(spec); spec.loader.exec_module(recipe)
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp); sdk=root/'sdk'; sdk.mkdir()
+            for name in recipe.HEADERS: (sdk/name).write_bytes(b'changed declaration')
+            with self.assertRaises(ValueError): recipe.build(sdk,root/'output',compiler='must-not-launch')
+            self.assertFalse((root/'output').exists())
+
     def test_accepts_only_complete_ordered_distinct_images(self):
         for n in range(2,7): self.assertTrue(runner.image_gate(samples(n),0,False,n))
         good=samples()

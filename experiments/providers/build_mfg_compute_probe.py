@@ -2,6 +2,7 @@
 import argparse
 import hashlib
 import json
+import shutil
 from pathlib import Path
 import subprocess
 
@@ -51,7 +52,9 @@ def build(sdk,output,sysroot=None,compiler='clang-cl',linker='lld-link'):
              'binarySHA256':sha(output/'mfg-compute-probe.exe'),
              'abiTestSHA256':sha(output/'mfg-parameters-abi-test.exe'),
              'runtimeBundled':False,'gameIntegrationQualified':False,'runtimeQualified':False,
-             'compilerSHA256':sha(Path(compiler)) if Path(compiler).is_file() else None,
+             'compilerSHA256':sha(Path(shutil.which(str(compiler)) or compiler)),
+             'linkerSHA256':sha(Path(shutil.which(str(linker)) or linker)),
+             'headersLicenseSHA256':sha(ROOT/'third-party/NVIDIA-SDK-LICENSE.txt'),
              'abi':'Microsoft C++ x64','runtimeModuleLifetime':'process'}
     (output/'build-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
     (output/'NVIDIA-SDK-LICENSE.txt').write_bytes((ROOT/'third-party/NVIDIA-SDK-LICENSE.txt').read_bytes())

@@ -1225,3 +1225,16 @@ The native Windows presentation wrapper affects Steam as well as Game Pass.
 Offline tests do not qualify either runtime path. The current FSR retirement,
 presenter recovery, diagnostic attribution and advanced-settings guards remain
 required. Existing published payloads and qualification results are unchanged.
+
+### Provider-neutral MFG compute experiment
+
+The [owned-input MFG probe](MFG_COMPUTE_TESTING.md) is compiled with the Microsoft
+C++ ABI against pinned external NGX declarations. Its own typed parameter store
+retains scalar/resource distinctions and checked conversions. Both portable CI
+platforms exercise phase scheduling and parameter bounds; native Windows CI runs
+the CPU-only virtual ABI fixture. The external headless module remains separately
+acquired and hash-verified, never included in the game installer or CI artifact.
+Preserve completed-queue proof before context/resource release; a failed drain
+or SDK retirement retains ownership until isolated process exit. No live module
+unload, software MFG, mixed-provider generation, game presentation, output quality
+or other platform qualification follows from these build/fixture results.
