@@ -38,16 +38,25 @@ int main(){
     assert(presented(0)==S_OK&&count(5)==2&&presented(1)==S_OK&&count(7)==1);
     assert(mcd2_al2_frame_generation(1,0)==S_OK&&fgCount(2)==0);
     assert(mcd2_al2_frame_generation(0,0)==S_OK&&fgCount(1)==1&&presented(0)==E_NOINTERFACE);
+    assert(mcd2_al2_update(1)==S_OK); // Teardown starts with Anti-Lag enabled.
     assert(mcd2_al2_frame_generation(1,1)==S_OK);drainFail(1);
+    const auto shutdownDelayCalls=count(3),shutdownModeCalls=count(1)+count(2);
     mcd2_al2_shutdown();assert(count(6)==0&&mcd2_al2_can_unload()==0);
+    assert(count(3)==shutdownDelayCalls&&count(1)+count(2)==shutdownModeCalls);
     // A failed drain keeps the context valid even for an already queued frame.
     assert(presented(1)==S_OK&&count(7)==2);
     drainFail(0);mcd2_al2_shutdown();assert(count(6)==1&&mcd2_al2_can_unload()==1&&presented(0)==E_NOINTERFACE);
+    assert(count(3)==shutdownDelayCalls&&count(1)+count(2)==shutdownModeCalls);
     assert(mcd2_al2_init(reinterpret_cast<void*>(123))==S_OK);
     fail(1);assert(mcd2_al2_update(0)==E_FAIL);
+    const auto failedDelayCalls=count(3),failedModeCalls=count(1)+count(2);
     mcd2_al2_shutdown();assert(count(6)==2&&mcd2_al2_update(0)==E_NOINTERFACE);
     mcd2_al2_shutdown();assert(count(6)==2);
+    assert(count(3)==failedDelayCalls&&count(1)+count(2)==failedModeCalls);
     fail(0);assert(mcd2_al2_init(reinterpret_cast<void*>(123))==S_OK&&count(0)==3);
-    mcd2_al2_shutdown();assert(count(6)==3);FreeLibrary(presenter);FreeLibrary(fake);
+    const auto idleDelayCalls=count(3),idleModeCalls=count(1)+count(2);
+    mcd2_al2_shutdown();assert(count(6)==3);
+    assert(count(3)==idleDelayCalls&&count(1)+count(2)==idleModeCalls);
+    FreeLibrary(presenter);FreeLibrary(fake);
     std::cout<<"Official Anti-Lag SDK ABI fixture passed; synthetic driver, no hardware qualification\n";
 }

@@ -22,7 +22,7 @@ struct Session {
  PfnFfxCreateContext create=nullptr;PfnFfxDestroyContext destroy=nullptr;
  PfnFfxQuery query=nullptr;PfnFfxDispatch dispatch=nullptr;
  uint32_t rw=0,rh=0,ow=0,oh=0;uint64_t calls=0,provider=0,required=0,optional=0;
- bool recorded=false;uint32_t stage=0;
+ bool recorded=false;uint32_t stage=0,implementation=0;
 };
 bool dimensions(uint32_t w,uint32_t h){return w&&h&&w<=3840&&h<=2160;}
 bool texture(void *p,uint32_t w,uint32_t h,DXGI_FORMAT format=DXGI_FORMAT_UNKNOWN) {
@@ -33,6 +33,11 @@ bool texture(void *p,uint32_t w,uint32_t h,DXGI_FORMAT format=DXGI_FORMAT_UNKNOW
 }
 extern "C" int mcd2_fsr_create_v1(void *device,const wchar_t *runtime,
  uint32_t rw,uint32_t rh,uint32_t ow,uint32_t oh,void **out) {
+ return mcd2_fsr_create_v2(device,runtime,1,rw,rh,ow,oh,out);
+}
+extern "C" int mcd2_fsr_create_v2(void *device,const wchar_t *runtime,uint32_t implementation,
+ uint32_t rw,uint32_t rh,uint32_t ow,uint32_t oh,void **out) {
+ if(implementation!=1&&implementation!=2&&implementation!=3)return -1019;
  if(!out||*out||!device||!runtime||!dimensions(rw,rh)||!dimensions(ow,oh)||ow<rw||oh<rh)return -1001;
  // The experiment controller verifies pinned bytes and requires an absolute path.
  // Never fall back to a DLL basename or a current-directory search.
@@ -56,13 +61,17 @@ extern "C" int mcd2_fsr_create_v1(void *device,const wchar_t *runtime,
  std::vector<uint64_t> ids(count);std::vector<const char*> names(count);
  versions.versionIds=ids.data();versions.versionNames=names.data();code=s->query(nullptr,&versions.header);
  if(code)return int(code);if(count>ids.size())return -1006;
- for(size_t i=0;i<count;++i)if(names[i]&&std::strstr(names[i],"3.1.5"))s->provider=ids[i];
+ for(size_t i=0;i<count;++i)if(names[i]&&
+  ((implementation==1&&!std::strcmp(names[i],"3.1.5"))||
+   (implementation==2&&!std::strcmp(names[i],"4.1.1r11"))||
+   (implementation==3&&!std::strcmp(names[i],"4.1.1"))))s->provider=ids[i];
  if(!s->provider)return -1007;s->stage=2;
  ffxOverrideVersion selected{};selected.header.type=FFX_API_DESC_TYPE_OVERRIDE_VERSION;selected.versionId=s->provider;
  ffxCreateBackendDX12Desc backend{};backend.header.type=FFX_API_CREATE_CONTEXT_DESC_TYPE_BACKEND_DX12;
  backend.device=static_cast<ID3D12Device*>(device);backend.header.pNext=&selected.header;
  ffxCreateContextDescUpscale create{};create.header.type=FFX_API_CREATE_CONTEXT_DESC_TYPE_UPSCALE;
- create.header.pNext=&backend.header;create.maxRenderSize={rw,rh};create.maxUpscaleSize={ow,oh};
+ ffxCreateContextDescUpscaleVersion apiVersion{};apiVersion.header.type=FFX_API_CREATE_CONTEXT_DESC_TYPE_UPSCALE_VERSION;apiVersion.version=FFX_UPSCALER_VERSION;apiVersion.header.pNext=&backend.header;
+ create.header.pNext=implementation>=2?&apiVersion.header:&backend.header;create.maxRenderSize={rw,rh};create.maxUpscaleSize={ow,oh};
  create.flags=FFX_UPSCALE_ENABLE_HIGH_DYNAMIC_RANGE|FFX_UPSCALE_ENABLE_DEPTH_INVERTED
   |FFX_UPSCALE_ENABLE_DEPTH_INFINITE|FFX_UPSCALE_ENABLE_DEBUG_CHECKING;create.fpMessage=message;
  code=s->create(&s->context,&create.header,nullptr);if(code)return int(code);if(!s->context)return -1008;s->stage=3;
@@ -73,8 +82,11 @@ extern "C" int mcd2_fsr_create_v1(void *device,const wchar_t *runtime,
  s->required=inputs.required_resources;s->optional=inputs.optional_resources;
  constexpr uint64_t supplied=FFX_API_QUERY_RESOURCE_INPUT_COLOR|FFX_API_QUERY_RESOURCE_INPUT_DEPTH
   |FFX_API_QUERY_RESOURCE_INPUT_MV|FFX_API_QUERY_RESOURCE_INPUT_EXPOSURE;
- if(s->required&~supplied)return -1010;s->stage=5;
+ if(s->required&~supplied)return -1010;s->stage=5;s->implementation=implementation>=2?40101:30105;
  return 0;
+}
+extern "C" uint32_t mcd2_fsr_implementation_v1(void *opaque){
+ auto *s=static_cast<Session*>(opaque);return s&&s->stage==5&&s->context?s->implementation:0;
 }
 extern "C" int mcd2_fsr_dispatch_v1(void *opaque,void *cmd,void *colour,void *depth,
  void *motion,void *exposure,void *output,const MCD2FsrDispatchV1 *p) {

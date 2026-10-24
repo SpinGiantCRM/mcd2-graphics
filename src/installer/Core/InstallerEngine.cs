@@ -298,6 +298,9 @@ public sealed partial class InstallerEngine {
         byte[]? originalFramework=null;
         if(receipt.Framework is {HadFile:true} remembered) {ValidateFramework(remembered);originalFramework=File.ReadAllBytes(Target(root,FrameworkRecovery+remembered.PreviousHash+".bak"));}
         var config=RemoveHdr(receipt.Hdr); // Validate configuration before any mutation.
+        var activation=PrepareHdrActivationRemoval();
+        if(activation.Data!=null)AtomicWrite(activation.Config!,activation.Data);
+        if(activation.Lease!=null)File.Delete(activation.Lease);
         if(config.Data!=null)AtomicWrite(HdrPath(receipt.Hdr!.ProjectOverride),config.Data);else if(config.Delete)File.Delete(HdrPath(receipt.Hdr!.ProjectOverride));
         // All checks completed. Only our bootstrap key is restored; other configuration and saves remain.
         foreach(var f in receipt.Files)File.Delete(Target(root,f.Key));

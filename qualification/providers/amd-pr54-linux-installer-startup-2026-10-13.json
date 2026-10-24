@@ -1,0 +1,13 @@
+{
+  "candidate": "0.4.0-amd.dev.8",
+  "sourceInstallerRun": 38340596287,
+  "installerSHA256": "5ef688b4a7d93dd8b4265ae39ef6988fbc3c1db15ea5e38aa27a28981e4fdb7a",
+  "host": "Linux/KDE Wayland",
+  "selfContainedStartupPassed": true,
+  "supportedGameDetected": true,
+  "firstPageRendered": true,
+  "executablePermissionNeededAfterArtifactExtraction": true,
+  "guiInstallPerformed": false,
+  "windowsGuiQualified": false,
+  "closedAfterReadOnlyInspection": true
+}

@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-14",
+  "candidate": "0.4.0-amd.dev.8",
+  "implementationCommit": "c9f011a5bdc8dd6fd50885eeb8c2986764183755",
+  "productionNativeArchiveSHA256": "9574ec28b096f35e484af61e066835a1815178070d96e390c4c24ddd599c9e64",
+  "frameworkSHA256": "5ab60fb92385c774bb5f61d668676556c32fc91d989a18679129cdb32031bb84",
+  "host": "Linux/NVIDIA RTX 4080 SUPER",
+  "productionRuntimePayloadOnly": true,
+  "installedPayloadAndDependencyHashesVerified": true,
+  "privateTracingOrSamplerInstalled": false,
+  "minimumMatchedWorldSessionSeconds": 780,
+  "observedMatchedDurationSeconds": 780.0001662000004,
+  "sameShippingProcessAliveThroughoutDuration": true,
+  "fsrWithNvidiaFgPresets": [
+    {
+      "quality": "native-aa",
+      "renderResolution": [
+        3840,
+        2160
+      ],
+      "activeSamples": 2,
+      "sampledPresentsPerRenderedFrame": 2,
+      "sampledSdkErrors": 0
+    },
+    {
+      "quality": "quality",
+      "renderResolution": [
+        2560,
+        1440
+      ],
+      "activeSamples": 2,
+      "sampledPresentsPerRenderedFrame": 2,
+      "sampledSdkErrors": 0
+    },
+    {
+      "quality": "balanced",
+      "renderResolution": [
+        2259,
+        1271
+      ],
+      "activeSamples": 2,
+      "sampledPresentsPerRenderedFrame": 2,
+      "sampledSdkErrors": 0
+    },
+    {
+      "quality": "performance",
+      "renderResolution": [
+        1920,
+        1080
+      ],
+      "activeSamples": 2,
+      "sampledPresentsPerRenderedFrame": 2,
+      "sampledSdkErrors": 0
+    },
+    {
+      "quality": "ultra",
+      "renderResolution": [
+        1280,
+        720
+      ],
+      "activeSamples": 2,
+      "sampledPresentsPerRenderedFrame": 2,
+      "sampledSdkErrors": 0
+    },
+    {
+      "quality": "custom",
+      "renderResolution": [
+        2957,
+        1664
+      ],
+      "activeSamples": 2,
+      "sampledPresentsPerRenderedFrame": 2,
+      "sampledSdkErrors": 0
+    }
+  ],
+  "dlssQualityWithNvidiaFgSamplePassed": true,
+  "dlaaWithNvidiaFgSamplePassed": true,
+  "permanentNvidiaFgOffAndRefusedOnPassed": true,
+  "dlaaContinuedAfterFgRetired": true,
+  "nativeGenerationCleanupCompleted": true,
+  "nativeGenerationRetainedAfterQueueTeardown": false,
+  "nativeQueueTeardownRecordings": 0,
+  "sharedSdkResult": 0,
+  "shippingProcessExitCode": 0,
+  "normalQuitConfirmationToGoneSeconds": 3.8770225009993737,
+  "setupRestoredByteForByte": true,
+  "earlierProductionFailureReproduced": false,
+  "earlierProductionFailureCleared": false,
+  "rootCauseEstablished": false,
+  "nativeWindowsRadeonQualified": false,
+  "activeAntiLag2Qualified": false,
+  "productionQualificationPassed": false,
+  "rawLogsPublished": false,
+  "periodicLeanSnapshotIsNotTerminalCleanupProof": true
+}

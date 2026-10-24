@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-21",
+  "candidate": "0.4.0-amd.dev.22",
+  "runtimeSourceCommit": "fe8b2b49c528c3f0bbe8393cab3e69a257406cee",
+  "status": "FAIL",
+  "windowsQualified": false,
+  "method": "Private tested request client uses production GraphicsStore writer locking, CRC and CAS. Unsupported legacy preferences only; no runtime response, capability or acknowledgement writes. Normal installer Steam launch reached hub gameplay.",
+  "requestClientSHA256": "34f2508ad356c77b5878b1ea596d8344f5b3f0b3565613a8dab4796e34b26e93",
+  "legacyPublicationChecks": 8,
+  "originalClientRegressionChecks": 17,
+  "unsupportedDlss": [
+    {
+      "preset": "Quality67",
+      "resolved": "Native100",
+      "report": {
+        "worldValidated": 1,
+        "srPhase": 0,
+        "srError": 0,
+        "sourceScaleMicro": 100000000,
+        "srDelta": 0,
+        "fgRenderedDelta": 0,
+        "fgGeneratedDelta": 0,
+        "srAdvancingValidated": 0,
+        "amdFgAdvancingValidated": 0,
+        "reflexMode": 0,
+        "rawAntiLagMode": 0,
+        "sourceAcknowledged": 0
+      }
+    },
+    {
+      "preset": "NativeAA100",
+      "resolved": "Native100",
+      "freshStatusSamples": 6,
+      "report": {
+        "worldValidated": 1,
+        "srPhase": 0,
+        "srError": 0,
+        "sourceScaleMicro": 100000000,
+        "srDelta": 0,
+        "fgRenderedDelta": 0,
+        "fgGeneratedDelta": 0,
+        "srAdvancingValidated": 0,
+        "amdFgAdvancingValidated": 0,
+        "reflexMode": 0,
+        "rawAntiLagMode": 0,
+        "sourceAcknowledged": 0
+      }
+    },
+    {
+      "preset": "Custom77",
+      "resolved": "Native100",
+      "freshStatusSamples": 6,
+      "report": {
+        "worldValidated": 1,
+        "srPhase": 0,
+        "srError": 0,
+        "sourceScaleMicro": 100000000,
+        "srDelta": 0,
+        "fgRenderedDelta": 0,
+        "fgGeneratedDelta": 0,
+        "srAdvancingValidated": 0,
+        "amdFgAdvancingValidated": 0,
+        "reflexMode": 0,
+        "rawAntiLagMode": 0,
+        "sourceAcknowledged": 0
+      }
+    }
+  ],
+  "unsupportedNvidiaFgReflex": [
+    {
+      "requestedReflex": "On",
+      "requestedNvidiaFg": true,
+      "report": {
+        "worldValidated": 1,
+        "srPhase": 0,
+        "srError": 0,
+        "sourceScaleMicro": 100000000,
+        "srDelta": 0,
+        "fgRenderedDelta": 0,
+        "fgGeneratedDelta": 0,
+        "srAdvancingValidated": 0,
+        "amdFgAdvancingValidated": 0,
+        "reflexMode": 0,
+        "rawAntiLagMode": 0,
+        "sourceAcknowledged": 0
+      }
+    },
+    {
+      "requestedReflex": "Boost",
+      "requestedNvidiaFg": true,
+      "report": {
+        "worldValidated": 1,
+        "srPhase": 0,
+        "srError": 0,
+        "sourceScaleMicro": 100000000,
+        "srDelta": 0,
+        "fgRenderedDelta": 0,
+        "fgGeneratedDelta": 0,
+        "srAdvancingValidated": 0,
+        "amdFgAdvancingValidated": 0,
+        "reflexMode": 0,
+        "rawAntiLagMode": 0,
+        "sourceAcknowledged": 0
+      }
+    }
+  ],
+  "fgAdmissionSnapshots": [
+    {
+      "AvailableProviders": 2,
+      "NativeGuidesRetired": 1,
+      "Active": 0,
+      "Fault": 0,
+      "StartupOwner": 0,
+      "PresenterRoute": 0,
+      "NativeGuidesOwned": 0
+    },
+    {
+      "AvailableProviders": 2,
+      "NativeGuidesRetired": 1,
+      "Active": 0,
+      "Fault": 0,
+      "StartupOwner": 0,
+      "PresenterRoute": 0,
+      "NativeGuidesOwned": 0
+    }
+  ],
+  "ordinaryExits": [
+    {
+      "run": 23,
+      "code": "00000000",
+      "clockGapObserved": false,
+      "markerToObservedExitSeconds": 90.955068,
+      "timingIncludesPolling": true,
+      "notAShutdownPass": true
+    },
+    {
+      "run": 24,
+      "code": "00000000",
+      "clockGapObserved": false,
+      "markerToObservedExitSeconds": 7.934955,
+      "timingIncludesPolling": true,
+      "notAShutdownRepair": true
+    }
+  ],
+  "limits": [
+    "Bounded dev.22 observations; not fresh dev.23 activation checks.",
+    "UI normalized unavailable DLSS to Native before a source-reduction lease was observed; Native has no ApplySource acknowledgement. This is not an explicit backend Unsupported ACK or continuous submillisecond source monitoring.",
+    "Transient context/authority disagreements were refused until fresh consistent observations appeared.",
+    "Raw Anti-Lag frame counters can advance with mode0; this does not establish active Anti-Lag or Reflex.",
+    "An earlier direct executable launch failed Steam online startup and supplies no gameplay fallback pass.",
+    "Both ordinary code-zero exits leave the recurring exit AV unresolved."
+  ]
+}

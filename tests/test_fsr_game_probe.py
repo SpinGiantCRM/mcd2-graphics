@@ -33,7 +33,7 @@ class FsrGameProbeTests(unittest.TestCase):
         self.assertIn('if(s->required&~supplied)return -1010',text)
         self.assertIn('active.versionId!=s->provider',text)
         self.assertIn('LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR|LOAD_LIBRARY_SEARCH_SYSTEM32',text)
-        self.assertIn('std::strstr(names[i],"3.1.5")',text)
+        self.assertIn('!std::strcmp(names[i],"3.1.5")',text)
         self.assertIn('p->reset>1',text)
         self.assertNotIn('ffxConfigure',text)
 

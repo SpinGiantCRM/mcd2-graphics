@@ -31,8 +31,8 @@ changes = [
     ('  lastResult=init((folder/L"sl.interposer.dll").c_str(),folder.c_str(),logs.c_str());initialized=lastResult==0;if(!initialized)shutdown();return initialized;',
      '  auto ready=reinterpret_cast<int(*)()>(GetProcAddress(bridge,"mcd2_fg_initialized"));\n'
      '  lastResult=ready&&ready()?0:-100;initialized=lastResult==0;if(!initialized)shutdown();return initialized;'),
-    ('std::filesystem::path(filename.get()).parent_path()/L"MCD2Graphics"/L"streamline"',
-     'std::filesystem::path(filename.get()).parent_path()'),
+    ('auto folder=advancedRoot/L"streamline"',
+     'auto folder=advancedRoot.parent_path()'),
     ('void shutdown(){std::lock_guard lock(configMutex);if(bridge&&stopSdk)stopSdk();',
      'std::atomic<int> shutdownResult{0};\n'
      ' void shutdown(bool stop=false){std::lock_guard lock(configMutex);if(stop&&bridge&&stopSdk){shutdownResult=stopSdk();if(shutdownResult)return;}'),
@@ -85,7 +85,7 @@ command = [a.mingw_cxx, '-std=c++20', '-O2',
            *native_frame_guard(a.mingw_cxx), '-shared', '-static', '-s',
            '-I'+str(inc), '-I'+str(repo/'src/latency'), str(out/'latency_candidate.cpp'),
            '-o', str(out/'mcd2-display-latency.addon64'),
-           '-ld3d12', '-ldxgi', '-ld3dcompiler', '-lole32', '-luuid']
+           '-ld3d12', '-ldxgi', '-ld3dcompiler', '-lole32', '-luuid', '-lversion']
 with (out/'build-private.log').open('w') as log:
     subprocess.run(command, stdout=log, stderr=subprocess.STDOUT, check=True)
 (out/'build-receipt.json').write_text(json.dumps({

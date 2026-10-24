@@ -1,0 +1,181 @@
+{
+  "schemaVersion": 1,
+  "candidateBase": "0.4.0-amd.dev.8",
+  "host": "Linux/NVIDIA RTX 4080 SUPER",
+  "privateNativeAndGuideSubstitution": true,
+  "diagnosticBinaries": {
+    "nativeSHA256": "4a405da4b6141f90492658e4db96b535227b5809fe16cef0cd36cd2e92116a6e",
+    "guideSHA256": "d13438c6388cbf12109065f493856906165bcdfcb43c563f0e1a22920a31f288",
+    "fullProductionArtifactQualified": false
+  },
+  "frameworkSHA256": "5ab60fb92385c774bb5f61d668676556c32fc91d989a18679129cdb32031bb84",
+  "samplerInstalled": false,
+  "additionalGpuCommands": false,
+  "worldSessionElapsedSecondsBeforeQuit": 780.0012350260004,
+  "continuousFGActivationMeasured": false,
+  "fsrPresets": [
+    {
+      "quality": 2,
+      "source": [
+        2259,
+        1271
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "fgActive": true,
+      "guideResult": 0,
+      "sampledSdkPresents": 2
+    },
+    {
+      "quality": 3,
+      "source": [
+        1920,
+        1080
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "fgActive": true,
+      "guideResult": 0,
+      "sampledSdkPresents": 2
+    },
+    {
+      "quality": 4,
+      "source": [
+        1280,
+        720
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "fgActive": true,
+      "guideResult": 0,
+      "sampledSdkPresents": 2
+    },
+    {
+      "quality": 5,
+      "source": [
+        2996,
+        1685
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "fgActive": true,
+      "guideResult": 0,
+      "sampledSdkPresents": 2
+    },
+    {
+      "quality": 0,
+      "source": [
+        3840,
+        2160
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "fgActive": true,
+      "guideResult": 0,
+      "sampledSdkPresents": 2
+    },
+    {
+      "quality": 1,
+      "source": [
+        2560,
+        1440
+      ],
+      "output": [
+        3840,
+        2160
+      ],
+      "fgActive": true,
+      "guideResult": 0,
+      "sampledSdkPresents": 2
+    }
+  ],
+  "DLSSQualityAndDLAARuntimeAcknowledged": true,
+  "retiredNvidiaOnRefusedWithRestartStatus": true,
+  "normalShippingProcessExitCode": 0,
+  "confirmationToGoneSeconds": 4.7919117150013335,
+  "completedBoundaries": [
+    {
+      "boundary": "alpha_cleanup",
+      "durationMs": 0
+    },
+    {
+      "boundary": "alpha_cleanup",
+      "durationMs": 0
+    },
+    {
+      "boundary": "native_flush",
+      "durationMs": 0
+    },
+    {
+      "boundary": "native_wait_generation",
+      "durationMs": 5
+    },
+    {
+      "boundary": "native_cleanup_detached",
+      "durationMs": 3
+    },
+    {
+      "boundary": "native_flush",
+      "durationMs": 0
+    },
+    {
+      "boundary": "native_wait_generation",
+      "durationMs": 12
+    },
+    {
+      "boundary": "native_cleanup_detached",
+      "durationMs": 2
+    },
+    {
+      "boundary": "native_flush",
+      "durationMs": 0
+    },
+    {
+      "boundary": "native_wait_generation",
+      "durationMs": 12
+    },
+    {
+      "boundary": "native_cleanup_detached",
+      "durationMs": 2
+    },
+    {
+      "boundary": "alpha_cleanup",
+      "durationMs": 0
+    },
+    {
+      "boundary": "native_flush",
+      "durationMs": 0
+    },
+    {
+      "boundary": "native_wait_generation",
+      "durationMs": 1
+    },
+    {
+      "boundary": "native_cleanup_detached",
+      "durationMs": 2
+    },
+    {
+      "boundary": "nvidia_quiesce",
+      "durationMs": 14
+    },
+    {
+      "boundary": "alpha_cleanup",
+      "durationMs": 0
+    }
+  ],
+  "restoredByteForByte": true,
+  "productionHangReproduced": false,
+  "causeEstablished": false,
+  "fullProductionArtifactQualificationPassed": false,
+  "windowsRadeonQualified": false
+}

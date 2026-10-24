@@ -19,14 +19,14 @@ class ProcessExitTests(unittest.TestCase):
                 self.assertIsNotNone(body)
                 first = body.group(1)
                 if name == 'AddonUninit':
-                    first = source.split('void AddonUninit(HMODULE,HMODULE){', 1)[1].lstrip()
+                    first = source.split('void AddonUninit(HMODULE addon,HMODULE framework){', 1)[1].lstrip()
                 if name == 'init_device':
                     first = first.removeprefix('mcd2::process_exit::initialize();')
                 self.assertTrue(first.startswith('if(mcd2::process_exit::terminating())return'), first)
         self.assertIn('bool AddonInit(HMODULE,HMODULE){mcd2::process_exit::initialize();', source)
         self.assertIn('if(reserved)mcd2::process_exit::mark_terminating();else reshade::unregister_addon(module)', source)
         # Ordinary unload still requests real retirement; only terminal teardown skips it.
-        uninit = source.split('void AddonUninit(HMODULE,HMODULE){', 1)[1]
+        uninit = source.split('void AddonUninit(HMODULE addon,HMODULE framework){', 1)[1]
         self.assertIn('retiring=true;ownerClosing=true;', uninit)
         self.assertIn('try_retirement();', uninit)
         recipe = (ROOT / 'experiments/fg-streamline/build_probe.py').read_text()
@@ -37,7 +37,8 @@ class ProcessExitTests(unittest.TestCase):
         source = (ROOT / 'src/native/ngx_live_fixture.hpp').read_text()
         cleanup = source.split('static bool cleanup_detached_live(', 1)[1].split('static void cleanup_live_saved(', 1)[0]
         self.assertIn('cache_path.c_str(),c.proxy_device,NVSDK_NGX_Version_API', source)
-        self.assertIn('!c.proxy_device||!result("shutdown_device",fn(c.proxy_device))', cleanup)
+        self.assertIn('using F=NVSDK_NGX_Result(*)(ID3D12Device*,unsigned&)', cleanup)
+        self.assertIn('!c.proxy_device||!result("shutdown_device",fn(c.proxy_device,devicesLeft))', cleanup)
         self.assertNotIn('fn(c.resource_device)', cleanup)
         self.assertNotIn('fn(nullptr)', cleanup)
 
@@ -112,6 +113,13 @@ class ProcessExitTests(unittest.TestCase):
         self.assertLess(release.index('owned.resources.clear()'), release.index('retired.reset()'))
         recipe = (ROOT / 'experiments/fg-streamline/build_sr_candidate.py').read_text()
         self.assertIn('terminalGuardSourceSHA256', recipe)
+
+    def test_fsr_manual_release_clears_destructor_ownership(self):
+        source = (ROOT / 'src/native/fsr_runtime.hpp').read_text()
+        release = source.split('auto retired=std::move(generation)', 1)[1].split('state.sourceScaleMicro=100000000', 1)[0]
+        self.assertLess(release.index('(*it)->Release()'), release.index('owned.resources.clear()'))
+        self.assertLess(release.index('owned.resources.clear()'), release.index('FreeLibrary(retired->bridge)'))
+        self.assertLess(release.index('FreeLibrary(retired->bridge)'), release.index('retired.reset()'))
 
     def test_terminal_guards_precede_locks_and_sdk_cleanup(self):
         source = (ROOT / 'src/latency/latency_addon.cpp').read_text()

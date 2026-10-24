@@ -59,6 +59,68 @@ class CandidateAssemblyTests(unittest.TestCase):
         for ident,(n,pin) in assembler.FSR_RUNTIME.items():self.assertEqual(lock['dependencies'][ident]['sha256'],pin)
         self.assertFalse(any(p.name.startswith(('amd_fidelityfx_','nvngx_','sl.')) or p.name in ['ReShade64.dll','fg-chain-observer.addon64'] or p.suffix=='.exe' for p in (self.out/'payload').rglob('*')))
         for n,b in before.items():self.assertEqual((self.root/n).read_bytes(),b)
+    def test_workflow_uses_a_bounded_selectable_current_receipt(self):
+        workflow=(ROOT/'.github/workflows/amd-installer-candidate.yml').read_text()
+        self.assertIn('qualification_receipt:',workflow)
+        self.assertIn('qualification/providers/windows-candidate-current.json',workflow)
+        self.assertIn("qualification/providers/windows-candidate-*.json",workflow)
+        self.assertIn('re.fullmatch(',workflow)
+        self.assertNotIn('windows-candidate-pr52-2026-10-12.json',workflow)
+        self.assertIn("p.get('selectionNeedsRebuild',False)",workflow)
+        self.assertIn("p.get('sourceChangedAfterSelection',False)",workflow)
+        self.assertEqual(workflow.count("if: steps.candidate.outputs.ready == 'true'"),2)
+        pin=json.loads((ROOT/'qualification/providers/windows-candidate-current.json').read_text())
+        self.assertRegex(pin['archiveSHA256'],r'^[0-9a-f]{64}$')
+        self.assertRegex(pin['sourceCommit'],r'^[0-9a-f]{40}$')
+        self.assertGreater(pin['artifact'],0)
+        self.assertGreater(pin['run'],0)
+        self.assertIn('probe/FG_SCENE_COPY.cso',pin['receipt']['files'])
+        # Build receipts stay historical. Later runtime acceptance must point
+        # to evidence for the exact selected native artifact and candidate.
+        self.assertFalse(pin['receipt']['runtimeQualified'])
+        for flag,field in [('windowsRadeonRuntimeQualified','windowsAcceptance'),
+                           ('linuxFullArtifactRuntimeQualified','linuxAcceptance')]:
+            if pin.get(flag,False):
+                acceptance=json.loads((ROOT/pin[field]).read_text())
+                self.assertEqual(acceptance['candidate'],pin['candidateVersion'])
+                self.assertTrue(acceptance['overall'].startswith('PASS WITH KNOWN ISSUES'))
+                self.assertEqual(acceptance['remainingRequiredWorkForThisAcceptance'],[])
+        linux=json.loads((ROOT/pin['linuxAcceptance']).read_text())
+        self.assertEqual(linux['inputs']['artifact'],pin['artifact'])
+        self.assertEqual(linux['inputs']['nativeSourceCommit'],pin['sourceCommit'])
+
+    def test_workflow_uses_selected_platform_dependency_locks(self):
+        import copy,hashlib,textwrap
+        workflow=(ROOT/'.github/workflows/amd-installer-candidate.yml').read_text()
+        body=workflow.split("          locks=p.get('installerDependencyLocks')",1)[1]
+        body=body.split("          with open(os.environ['GITHUB_OUTPUT']",1)[0]
+        code="locks=p.get('installerDependencyLocks')\n"+textwrap.dedent(body)
+        stage=self.root/'workflow';(stage/'inputs').mkdir(parents=True)
+        (stage/'inputs/dependencies.lock.json').write_text('{}')
+        pin=json.loads((ROOT/'qualification/providers/windows-candidate-current.json').read_text())
+        def execute(selected):
+            original=Path.cwd()
+            try:
+                import os
+                os.chdir(ROOT)
+                exec(code,{'p':selected,'stage':stage,'pathlib':__import__('pathlib'),
+                           'hashlib':hashlib,'json':json,'re':__import__('re')})
+            finally:os.chdir(original)
+        execute(pin)
+        for rid,lock in pin['installerDependencyLocks'].items():
+            self.assertEqual((stage/f'{rid}-dependencies.lock.json').read_bytes(),(ROOT/lock['path']).read_bytes())
+            import subprocess
+            attribute=subprocess.check_output(['git','check-attr','text','--',lock['path']],cwd=ROOT,text=True)
+            self.assertTrue(attribute.strip().endswith(': unset'),'Pinned dependency bytes must survive Windows checkout')
+        for invalid in ('path','sha256','missing'):
+            selected=copy.deepcopy(pin)
+            if invalid=='missing':del selected['installerDependencyLocks']['linux-x64']
+            else:selected['installerDependencyLocks']['linux-x64'][invalid]='../untrusted.json' if invalid=='path' else '0'*64
+            with self.assertRaises((ValueError,KeyError)):execute(selected)
+        historical=copy.deepcopy(pin);del historical['installerDependencyLocks']
+        execute(historical)
+        self.assertEqual((stage/'linux-x64-dependencies.lock.json').read_text(),'{}')
+
     def test_archive_and_source_mismatch_before_output(self):
         pin=self.write()
         for kwargs in [{'pin':'0'*64},{'pin':pin,'source':'0'*40}]:

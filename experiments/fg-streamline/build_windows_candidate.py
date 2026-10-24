@@ -10,7 +10,7 @@ import subprocess
 import sys
 import urllib.request
 import zipfile
-from framework_provenance import RESHADE_COMMIT
+from framework_provenance import RESHADE_COMMIT, DESCRIPTOR_HEAP_PATCH, DESCRIPTOR_HEAP_FIX_COMMIT
 
 REPO = Path(__file__).resolve().parents[2]
 
@@ -22,6 +22,18 @@ def run(*args):
 def sha(path):
     with Path(path).open('rb') as stream:
         return hashlib.file_digest(stream, 'sha256').hexdigest()
+
+
+def apply_framework_patches(repo, checkout):
+    """Apply the complete candidate diff only to a clean pinned checkout."""
+    patch = repo / 'qualification/fg-release/reshade-reset-epoch.patch'
+    heap_patch = repo / DESCRIPTOR_HEAP_PATCH
+    if subprocess.check_output(['git', '-C', str(checkout), 'status', '--porcelain']).strip():
+        raise RuntimeError('Framework base checkout is not clean')
+    for approved in (patch, heap_patch):
+        run('git', '-C', checkout, 'apply', '--index', approved)
+    return (subprocess.check_output(['git', '-C', str(checkout), 'diff', '--cached', '--binary']),
+            subprocess.check_output(['git', '-C', str(checkout), 'status', '--porcelain']))
 
 
 def build_continuous_sr(repo, output, reshade, ngx, clang, mingw, dxc, bridge):
@@ -65,8 +77,10 @@ def copy_current_ui(repo, artifact):
     ui = json.loads(receipt_path.read_text())
     if is_candidate:
         expected_sources = {'src/ui/' + name for name in ('ModActor.cs', 'ProviderSaveWords.cs',
-                            'ProviderMenuClient.cs', 'ProviderRuntimeWords.cs', 'ProviderRuntimeClient.cs')}
-        expected_sources.add('tools/ModInfoBuilder/Program.cs')
+                            'ProviderMenuClient.cs', 'ProviderRuntimeWords.cs', 'ProviderRuntimeClient.cs', 'AdvancedSettings.cs', 'AdvancedInfoWidget.cs', 'AdvancedSettingsPanel.cs', 'NativeSettingsWidgets.cs', 'RuntimeDiagnostics.cs', 'RuntimeDiagnosticsOverlay.cs', 'UpscalingSharpness.cs')}
+        expected_sources.update(('src/ui/mod-info.json', 'build_ui.py', 'dependencies.lock.json', 'manifest.json'))
+        if ui.get('schemaVersion') != 3 or ui.get('trialOnly', False):
+            raise RuntimeError('Expected production-source UI build receipt')
         if ui.get('candidateOnly') is not True or set(ui.get('sourceFileSHA256', {})) != expected_sources:
             raise RuntimeError('Incomplete candidate UI source provenance')
         source_hashes = ui['sourceFileSHA256']
@@ -82,7 +96,8 @@ def copy_current_ui(repo, artifact):
         if hashlib.sha256(source).hexdigest() != expected:
             raise RuntimeError('UI source changed: rebuild UI/metadata instead of reusing the payload')
     manifest = json.loads((repo / 'manifest.json').read_text())
-    if ui['version'] != manifest['version']:
+    expected_version = manifest.get('uiCandidateVersion', manifest['version']) if is_candidate else manifest['version']
+    if ui['version'] != expected_version:
         raise RuntimeError('UI metadata version differs from the manifest')
     blobs = {}
     with zipfile.ZipFile(archive_path) as archive:
@@ -164,18 +179,14 @@ def main():
     run('git', '-C', reshade, 'checkout', RESHADE_COMMIT)
     run('git', '-C', reshade, 'submodule', 'update', '--init', '--recursive')
     patch = REPO / 'qualification/fg-release/reshade-reset-epoch.patch'
-    if subprocess.check_output(['git', '-C', str(reshade), 'status', '--porcelain']).strip():
-        raise RuntimeError('Framework base checkout is not clean')
-    run('git', '-C', reshade, 'apply', '--index', patch)
-    approved_diff = subprocess.check_output(['git', '-C', str(reshade), 'diff', '--cached', '--binary'])
-    approved_status = subprocess.check_output(['git', '-C', str(reshade), 'status', '--porcelain'])
+    approved_diff, approved_status = apply_framework_patches(REPO, reshade)
     # The upstream solution supplies SolutionDir used by dependency includes.
     # Building the vcxproj directly leaves those Windows include paths empty.
     run('msbuild', reshade / 'ReShade.sln', '/p:Configuration=Release', '/p:Platform=64-bit', '/m:2', '/verbosity:minimal')
     binary = reshade / 'bin/x64/Release/ReShade64.dll'
     clean = not subprocess.check_output(['git', '-C', str(reshade), 'status', '--porcelain']).strip()
     if subprocess.check_output(['git', '-C', str(reshade), 'status', '--porcelain']) != approved_status or subprocess.check_output(['git', '-C', str(reshade), 'diff', '--cached', '--binary']) != approved_diff:
-        raise RuntimeError('Framework source differs from the approved reset patch')
+        raise RuntimeError('Framework source differs from the approved candidate patches')
     run('git', '-C', reshade, 'diff', '--quiet')
     framework = artifact / 'experimental-reshade'
     framework.mkdir()
@@ -183,6 +194,8 @@ def main():
     (framework / 'build-receipt.json').write_text(json.dumps({
         'commit': RESHADE_COMMIT, 'sourceClean': clean, 'binarySHA256': sha(binary),
         'baseCleanBeforePatch': True, 'approvedPatchOnly': True, 'patchSHA256': sha(patch),
+        'additionalPatchSHA256': {DESCRIPTOR_HEAP_PATCH: sha(REPO / DESCRIPTOR_HEAP_PATCH)},
+        'descriptorHeapFixCommit': DESCRIPTOR_HEAP_FIX_COMMIT,
         'configuration': 'Release x64 full addon support', 'WindowsQualified': False,
     }, indent=2) + '\n')
     vswhere = Path(os.environ['ProgramFiles(x86)']) / 'Microsoft Visual Studio/Installer/vswhere.exe'
@@ -243,11 +256,11 @@ def main():
     amd_fg_bridge = out / 'fsr-fg-game-bridge'
     run(sys.executable, REPO / 'experiments/providers/build_fsr_fg_game_bridge.py',
         '--sdk', fsr_sdk, '--windows-sysroot', sysroot, '--output', amd_fg_bridge,
-        '--clang-cl', llvm / 'clang-cl.exe', '--linker', llvm / 'lld-link.exe')
+        '--clang-cl', llvm / 'clang-cl.exe', '--linker', llvm / 'lld-link.exe', '--presenter-switch-probe')
     destination = artifact / 'isolated-fsr-fg-game-bridge'
     destination.mkdir()
     for filename in ['mcd2-fsr-fg-game-bridge.dll', 'fsr-fg-game-bridge-probe.exe',
-                     'build-receipt.json', 'FSR-SDK-HEADERS-LICENSE.txt']:
+                     'presenter-switch-probe.exe', 'presenter-resize-probe.exe', 'build-receipt.json', 'FSR-SDK-HEADERS-LICENSE.txt']:
         shutil.copyfile(amd_fg_bridge / filename, destination / filename)
     probe = out / 'probe'
     run(sys.executable, scripts / 'build_probe.py', '--sdk', sdk, '--sysroot', sysroot,
@@ -281,7 +294,7 @@ def main():
     for folder in [probe, latency, sr]:
         destination = artifact / folder.name
         destination.mkdir()
-        for name in ['build-receipt.json', 'FGBootstrap.ini', 'FG_UI_ALPHA.cso']:
+        for name in ['build-receipt.json', 'FGBootstrap.ini', 'FG_UI_ALPHA.cso', 'FG_SCENE_COPY.cso']:
             if (folder / name).exists():
                 shutil.copyfile(folder / name, destination / name)
         if folder == sr:

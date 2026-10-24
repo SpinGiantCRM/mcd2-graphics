@@ -33,6 +33,30 @@ int main(int argc,char** argv){
   record.bootstrap.stamp.checksum^=1;assert(!projectFgMenu(record,projection));
  }
  intent.sr=SrProvider::AmdFsr;intent.fgStrategy=FgStrategy::NativeMfg;intent.requestedMultiplier=3;
+ // Preserve ownership changes and unsupported refusal while requiring restart
+ // after a permanent NVIDIA release, even when the startup owner still matches.
+ for(unsigned available=0;available<2;++available)for(unsigned enabled=0;enabled<2;++enabled)
+ for(unsigned owner=0;owner<4;++owner)for(unsigned provider=0;provider<3;++provider)
+ for(unsigned retired=0;retired<2;++retired){
+  const bool matching=provider<2&&owner==provider+1;
+  const bool expected=available&&(retired||(enabled?!matching:owner!=0));
+  assert(fgMenuRestartRequired(available,enabled,owner,provider,retired)==expected);
+ }
+ assert(fgMenuRestartRequired(true,true,1,0,true));
+ assert(!fgMenuRestartRequired(true,true,1,0,false));
+ assert(!fgMenuRestartRequired(true,true,2,1,false));
+ assert(fgMenuRestartRequired(true,false,2,1,false));
+ // Clear the status only after a current, fault-free AMD Off request has an
+ // actual native presenter and the bridge confirms live switching is available.
+ for(unsigned current=0;current<2;++current)for(unsigned available=0;available<2;++available)
+ for(unsigned enabled=0;enabled<2;++enabled)for(unsigned provider=0;provider<3;++provider)
+ for(unsigned route=0;route<4;++route)for(unsigned canSwitch=0;canSwitch<3;++canSwitch)
+ for(unsigned fault=0;fault<2;++fault)for(unsigned retired=0;retired<2;++retired){
+  const bool expected=current&&available&&!enabled&&provider==1&&route==1&&canSwitch==1&&!fault&&!retired;
+  assert(fgMenuNativeOffRecovered(current,available,enabled,provider,route,canSwitch,fault,retired)==expected);
+ }
+ assert(fgMenuRestartRequired(true,false,2,1,true) &&
+        !fgMenuNativeOffRecovered(true,true,false,1,1,1,0,true));
  assert(encodeGraphicsRecord(intent,bytes)&&decodeGraphicsRecord(bytes,record));
  FgMenuProjection unqualified;assert(projectFgMenu(record,unqualified)&&!unqualified.pairEligible);
  intent.fgStrategy=FgStrategy::Single;intent.requestedMultiplier=2;

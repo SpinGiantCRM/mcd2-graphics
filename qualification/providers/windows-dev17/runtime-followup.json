@@ -1,0 +1,202 @@
+{
+  "date": "2026-10-19",
+  "candidateVersion": "0.4.0-amd.dev.17",
+  "nativeSourceCommit": "cbc34b8d78ba77933ebc491da851acc615b8af55",
+  "installerSHA256": "db072fdba86b0be8710e2593db822e682842bc575ccb4a417a9f963666c3a056",
+  "manifestSHA256": "6b9c6c4fd48c6383c2d76ac7093402dffc8faaa5c9a83735354b170533479974",
+  "dependencyLockSHA256": "a1ae112c8b5c33054f4f754da9e60a93cbc1f9dcb9ea414c3be154e858fb4f87",
+  "status": "FAIL: prior ordinary-exit AV unresolved; new full-candidate FSR exits delayed",
+  "windowsRuntimeQualified": false,
+  "exitCrashFixed": false,
+  "productionPayloadChanged": false,
+  "gameLaunches": {
+    "count": 3,
+    "authorization": "User explicitly resumed game launches after the offline pass. User subsequently put launches on hold again.",
+    "currentState": "Game closed; no launch or capture scheduled; observers finished."
+  },
+  "exits": [
+    {
+      "run": "F1",
+      "route": "Ordinary Alt+F4 from hub gameplay",
+      "settings": "Native / FG Off / Anti-Lag Off",
+      "exitCodeHex": "00000000",
+      "closeToHeldObserverSeconds": 7.147,
+      "nominalObserverIntervalSeconds": 2,
+      "loadedNativeHashesVerified": 14,
+      "loadedHashScope": "Startup components; F2 additionally captured the SR game bridge. The SDK DLL was verified on disk and present in F3 dump metadata; no full loaded-image hash is claimed.",
+      "uiaCoreEverLoaded": true,
+      "clockGapObserved": false,
+      "accessibilityTextRequested": false,
+      "debuggerAttached": false,
+      "snapshotTriggered": false,
+      "timingGate": "Bounded ordinary exit observed",
+      "immutableExitReceiptSHA256": "00597ef21849e46f0d74777de8dfeb3250df5f690b3929d6e9e81daa508d42c0"
+    },
+    {
+      "run": "F2",
+      "route": "Ordinary Alt+F4 from hub gameplay",
+      "settings": "FSR Quality / FG Off / Anti-Lag Off",
+      "exitCodeHex": "00000000",
+      "closeToHeldObserverSeconds": 87.465,
+      "nominalObserverIntervalSeconds": 2,
+      "loadedNativeHashesVerified": 15,
+      "loadedHashScope": "Startup components; F2 additionally captured the SR game bridge. The SDK DLL was verified on disk and present in F3 dump metadata; no full loaded-image hash is claimed.",
+      "uiaCoreEverLoaded": true,
+      "clockGapObserved": false,
+      "accessibilityTextRequested": false,
+      "debuggerAttached": false,
+      "snapshotTriggered": false,
+      "timingGate": "FAIL unexplained delay; exit code zero is insufficient",
+      "immutableExitReceiptSHA256": "faf756cb8394df44b7e432788bebe883c81b9abbf2290ef928e5e62271dcedff"
+    },
+    {
+      "run": "F3",
+      "route": "Ordinary Alt+F4 from hub gameplay",
+      "settings": "FSR Quality / FG Off / Anti-Lag Off",
+      "exitCodeHex": "00000000",
+      "closeToHeldObserverSeconds": 24.48,
+      "nominalObserverIntervalSeconds": 2,
+      "loadedNativeHashesVerified": 14,
+      "loadedHashScope": "Startup components; F2 additionally captured the SR game bridge. The SDK DLL was verified on disk and present in F3 dump metadata; no full loaded-image hash is claimed.",
+      "uiaCoreEverLoaded": true,
+      "clockGapObserved": false,
+      "accessibilityTextRequested": false,
+      "debuggerAttached": false,
+      "snapshotTriggered": true,
+      "timingGate": "FAIL unexplained delay; exit code zero is insufficient",
+      "immutableExitReceiptSHA256": "de1e29e36a2f030a1563be8e76eb08d7fbd718f244d4582c13552a202deef55b"
+    }
+  ],
+  "boundedFsrActivity": [
+    {
+      "run": "F2",
+      "preset": "FSR Quality",
+      "phase": "Active",
+      "evaluations": [
+        164,
+        410,
+        568,
+        3984
+      ],
+      "observedSeconds": 89.262,
+      "render": [
+        1280,
+        800
+      ],
+      "output": [
+        1920,
+        1200
+      ],
+      "requestedSourceScaleMicro": 66666667,
+      "observedSourceScaleMicro": 66666664,
+      "runtimeError": 0,
+      "currentSessionWorldAndAuthorityMatched": true,
+      "finalRuntimeAgeSeconds": 0.134,
+      "finalContextAgeSeconds": 0.049,
+      "contextReady": true,
+      "sourceError": 0,
+      "sourceAckPresent": true,
+      "sourceAckScope": "The accepted ApplySource request. Later Create/Evaluate/Active phase transitions increment the runtime sequence; the old ApplySource ack is not expected to equal the final Active sequence.",
+      "reader": "Read-only helper using unchanged production GVAS framing, CRC and SR protocol decoders; only named mod-owned runtime/context slots and provider record read."
+    },
+    {
+      "run": "F3",
+      "preset": "FSR Quality",
+      "phase": "Active",
+      "evaluations": [
+        722,
+        1149,
+        1573,
+        2020
+      ],
+      "observedSeconds": 30.062,
+      "render": [
+        1280,
+        800
+      ],
+      "output": [
+        1920,
+        1200
+      ],
+      "requestedSourceScaleMicro": 66666667,
+      "observedSourceScaleMicro": 66666664,
+      "runtimeError": 0,
+      "currentSessionWorldAndAuthorityMatched": true,
+      "finalRuntimeAgeSeconds": 0.278,
+      "finalContextAgeSeconds": 0.159,
+      "contextReady": true,
+      "sourceError": 0,
+      "sourceAckPresent": true,
+      "sourceAckScope": "The accepted ApplySource request. Later Create/Evaluate/Active phase transitions increment the runtime sequence; the old ApplySource ack is not expected to equal the final Active sequence.",
+      "reader": "Read-only helper using unchanged production GVAS framing, CRC and SR protocol decoders; only named mod-owned runtime/context slots and provider record read."
+    }
+  ],
+  "delayedExitSnapshot": {
+    "run": "F3",
+    "triggerSecondsAfterClose": 15,
+    "captureSeconds": 0.75,
+    "dumpBytes": 6085100,
+    "dumpSHA256": "09020987adfa119b7f865891192f3021be003acb2c9ff03a9b484a191ba3fa18",
+    "flagsHex": "1964",
+    "debuggerAttached": false,
+    "gameThread": "Non-alertable wait on an unnamed auto-reset engine event, before the CRT-exit stage in earlier AV captures.",
+    "renderThread": "Waiting in game task/event code.",
+    "rhiThread": "Inside the AMD user-mode driver SleepEx path during swapchain Present.",
+    "validatedCallChain": [
+      "Game RHIThread",
+      "Candidate ReShade DXGISwapChain::Present",
+      "Steam overlay hook",
+      "System DXGI",
+      "AMD user-mode driver",
+      "SleepEx / NtDelayExecution"
+    ],
+    "chainRecovery": "The native stack stopped at a private executable hook trampoline. Its absolute call target and jump-back continuation were decoded; explicit-anchor unwind from the DXGI continuation recovered Steam overlay, framework and game callers.",
+    "presentMethodProof": {
+      "frameworkSHA256": "47d415dd919854b143e942b203e2b595a932a00d543bdb25c971609f4e17427c",
+      "vtableRVA": "429980",
+      "vtablePresentSlot": 8,
+      "presentFunctionRVA": [
+        "0x16df80",
+        "0x16e06a"
+      ],
+      "originalPresentCallRVA": "16e03f",
+      "callBytes": "ff5040",
+      "returnRVA": "16e042",
+      "binaryFunctionAndCOMSlotAgree": true
+    },
+    "gameThreadWaitHandleType": "Event, auto reset, waiting",
+    "waitedEventProducerIdentified": false,
+    "rootCauseEstablished": false,
+    "sameAsEarlierAvEstablished": false,
+    "limitations": "Single sampled delay; snapshot may affect timing. Presence in a call chain does not prove fault ownership. No attribution to an SDK, framework, overlay or driver defect."
+  },
+  "observerLimitation": {
+    "run": "F2",
+    "description": "F2 sample publication stops about4 seconds after close and has an unexplained gap until the immutable held-process exit receipt. The framework log independently spans about87 seconds from teardown to final unload. The exact blocking observer call is unknown.",
+    "correction": "F3 bounded enumeration to the initial14 startup components, and retained two-second samples through exit. Later SR DLL hashes require separate capture; the observer change is not a proven explanation for the F2 sampling gap.",
+    "powerGapInterpretation": "No observed clock gap is recorded; a stalled observer is not evidence of a system sleep."
+  },
+  "restoration": {
+    "sr": "Native",
+    "fg": "Off",
+    "antiLag": "Off",
+    "qualityAndOtherPreferencesPreserved": true,
+    "normalLockedStorePublication": true,
+    "revisionMonotonic": true,
+    "restoredRevision": 169,
+    "ownedFilesVerified": 18,
+    "dependencyFilesVerified": 15,
+    "dependencyOverrides": {},
+    "playerAccountSavesRead": false,
+    "playerAccountSavesRestored": false,
+    "gameClosed": true
+  },
+  "remaining": [
+    "Identify/fix or conclusively isolate prior game-worker AV",
+    "Resolve unexplained Present/shutdown delays, then three representative clean ordinary exits and retirement evidence",
+    "Complete game SR preset/custom/Native recovery matrix; only Quality activity is established here",
+    "AMD FG and Anti-Lag advancing activity/Off recovery",
+    "Advanced keyboard/reset/persistence and actual output lifecycle"
+  ],
+  "nextDiagnosticWhenLaunchesResume": "Compare the same hub close with Steam overlay disabled only for this game, with an original-setting receipt and exact restoration; repeat the matching baseline. This comparison has not been performed and is not a proposed production workaround."
+}

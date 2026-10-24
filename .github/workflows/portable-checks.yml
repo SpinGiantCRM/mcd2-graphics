@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Check Python syntax and public JSON
         run: |
-          python3 -m py_compile install.py build.py build_latency.py build_installer.py build_toolchain.py test_install.py tests/make_synthetic_saves.py
+          python3 -m py_compile install.py build.py build_ui.py build_latency.py build_installer.py build_toolchain.py test_install.py tests/make_synthetic_saves.py
           python3 -m json.tool manifest.json > /dev/null
           python3 -m json.tool dependencies.lock.json > /dev/null
       - name: Installer regressions
@@ -26,14 +26,20 @@ jobs:
         run: |
           python3 -m unittest discover -s tests -p "test_build_toolchain.py" -v
           python3 -m unittest discover -s tests -p "test_amd_latency_build.py" -v
+          python3 -m unittest discover -s tests -p "test_ui_build.py" -v
+          python3 -m unittest discover -s tests -p "test_sr_menu_controls.py" -v
           python3 -m unittest discover -s tests -p "test_process_exit.py" -v
           python3 -m unittest discover -s tests -p "test_shared_sdk_shutdown.py" -v
           python3 -m unittest discover -s tests -p "test_bootstrap_lookup.py" -v
+          python3 tests/test_bootstrap_shutdown_trace.py
           python3 -m unittest discover -s tests -p "test_fsr_probe.py" -v
           python3 -m unittest discover -s tests -p "test_fsr_fg_probe.py" -v
           python3 -m unittest discover -s tests -p "test_fsr_fg_game_bridge.py" -v
+          python3 -m unittest discover -s tests -p "test_fsr_presenter_switch.py" -v
+          python3 -m unittest discover -s tests -p "test_fsr_presenter_resize.py" -v
           python3 -m unittest discover -s tests -p "test_sr_guide_producer.py" -v
           python3 -m unittest discover -s tests -p "test_native_fg_guides.py" -v
+          python3 -m unittest discover -s tests -p "test_fg_output.py" -v
           python3 -m unittest discover -s tests -p "test_fsr_game_probe.py" -v
           python3 -m unittest discover -s tests -p "test_fsr_sustained_probe.py" -v
           python3 -m unittest discover -s tests -p "test_fsr_runtime.py" -v
@@ -62,6 +68,8 @@ jobs:
           /tmp/provider-legacy
           g++ -std=c++20 -Wall -Wextra -Werror tests/provider_observation_test.cpp -o /tmp/provider-observation
           /tmp/provider-observation
+          g++ -std=c++20 -Wall -Wextra -Werror tests/provider_advanced_settings_test.cpp -o /tmp/provider-advanced-settings
+          /tmp/provider-advanced-settings
           g++ -std=c++20 -Wall -Wextra -Werror tests/provider_menu_request_test.cpp -o /tmp/provider-menu-request
           /tmp/provider-menu-request
           g++ -std=c++20 -Wall -Wextra -Werror tests/provider_menu_transport_test.cpp -o /tmp/provider-menu-transport
@@ -70,6 +78,10 @@ jobs:
           /tmp/provider-display-projection
           g++ -std=c++20 -Wall -Wextra -Werror tests/native_fg_admission_test.cpp -o /tmp/native-fg-admission
           /tmp/native-fg-admission
+          g++ -std=c++20 -Wall -Wextra -Werror tests/fg_output_contract_test.cpp -o /tmp/fg-output-contract
+          /tmp/fg-output-contract
+          g++ -std=c++20 -Wall -Wextra -Werror tests/fg_scene_identity_test.cpp -o /tmp/fg-scene-identity
+          /tmp/fg-scene-identity
           g++ -std=c++20 -Wall -Wextra -Werror tests/shared_sdk_shutdown_test.cpp -o /tmp/shared-sdk-shutdown
           /tmp/shared-sdk-shutdown
           g++ -std=c++20 -Wall -Wextra -Werror -Wno-misleading-indentation tests/fg_provider_protocol_test.cpp -o /tmp/fg-provider-protocol
@@ -84,6 +96,7 @@ jobs:
           /tmp/settings-semantics /tmp/mcd2-fixtures/settings.sav /tmp/mcd2-fixtures/runtime.sav
       - name: Unsupported adapter and pending timeout checks
         run: |
+          python3 tests/test_sr_owned_retirement.py
           g++ -std=c++20 -Isrc/native tests/upscaler_support_test.cpp -o /tmp/upscaler-support
           /tmp/upscaler-support
           g++ -std=c++20 -Isrc/native tests/dlss_model_override_test.cpp -o /tmp/dlss-model-override
@@ -92,10 +105,14 @@ jobs:
           /tmp/lean-borrow-lifetime
       - name: Display protocol and Reflex frame identity
         run: |
+          python3 tests/test_hdr_config_gate.py
+          python3 tests/test_ngx_shutdown_abi.py
           g++ -std=c++20 -pthread -Wall -Wextra -Werror tests/process_exit_lifetime_test.cpp -o /tmp/process-exit-lifetime
           /tmp/process-exit-lifetime
           g++ -std=c++20 -pthread -Wall -Wextra -Werror tests/amd_latency_test.cpp -o /tmp/amd-latency
           /tmp/amd-latency
+          g++ -std=c++20 -pthread -Wall -Wextra -Werror tests/runtime_diagnostics_test.cpp -o /tmp/runtime-diagnostics
+          /tmp/runtime-diagnostics
           g++ -std=c++20 -Wall -Wextra -Werror tests/engine_layout_test.cpp -o /tmp/engine-layout
           /tmp/engine-layout
           g++ -std=c++20 -Wall -Wextra -Werror tests/wine_reflex_pacing_test.cpp -o /tmp/wine-reflex-pacing
@@ -110,6 +127,9 @@ jobs:
   windows-installer-checks:
     name: Windows installer checks
     runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
@@ -119,14 +139,20 @@ jobs:
         run: |
           python -m unittest discover -s tests -p "test_build_toolchain.py" -v
           python -m unittest discover -s tests -p "test_amd_latency_build.py" -v
+          python -m unittest discover -s tests -p "test_ui_build.py" -v
+          python -m unittest discover -s tests -p "test_sr_menu_controls.py" -v
           python -m unittest discover -s tests -p "test_process_exit.py" -v
           python -m unittest discover -s tests -p "test_shared_sdk_shutdown.py" -v
           python -m unittest discover -s tests -p "test_bootstrap_lookup.py" -v
+          python tests/test_bootstrap_shutdown_trace.py
           python -m unittest discover -s tests -p "test_fsr_probe.py" -v
           python -m unittest discover -s tests -p "test_fsr_fg_probe.py" -v
           python -m unittest discover -s tests -p "test_fsr_fg_game_bridge.py" -v
+          python -m unittest discover -s tests -p "test_fsr_presenter_switch.py" -v
+          python -m unittest discover -s tests -p "test_fsr_presenter_resize.py" -v
           python -m unittest discover -s tests -p "test_sr_guide_producer.py" -v
           python -m unittest discover -s tests -p "test_native_fg_guides.py" -v
+          python -m unittest discover -s tests -p "test_fg_output.py" -v
           python -m unittest discover -s tests -p "test_fsr_game_probe.py" -v
           python -m unittest discover -s tests -p "test_fsr_sustained_probe.py" -v
           python -m unittest discover -s tests -p "test_fsr_runtime.py" -v
@@ -140,24 +166,33 @@ jobs:
       - name: Provider intent contract
         shell: bash
         run: |
+          python tests/test_sr_owned_retirement.py
           g++ -std=c++20 -static -pthread -Wall -Wextra -Werror tests/process_exit_lifetime_test.cpp -o process-exit-lifetime.exe
           ./process-exit-lifetime.exe
           python tests/test_process_exit_windows.py
           g++ -std=c++20 -static -pthread -Wall -Wextra -Werror -Wno-unused-parameter -Wno-misleading-indentation tests/amd_swapchain_windows_test.cpp -ldxguid -o amd-swapchain.exe
           ./amd-swapchain.exe
           python tests/make_synthetic_saves.py display-fixtures
+          python tests/test_hdr_config_gate.py
+          python tests/test_ngx_shutdown_abi.py
           g++ -std=c++20 -static tests/display_protocol_test.cpp -o display-protocol.exe
           ./display-protocol.exe display-fixtures/display-settings.sav display-fixtures/display-runtime.sav
           g++ -std=c++20 -static -Isrc/native tests/lean_borrow_lifetime_test.cpp -o lean-borrow-lifetime.exe
           ./lean-borrow-lifetime.exe
           g++ -std=c++20 -static -pthread -Wall -Wextra -Werror tests/amd_latency_test.cpp -o amd-latency.exe
           ./amd-latency.exe
+          g++ -std=c++20 -static -pthread -Wall -Wextra -Werror tests/runtime_diagnostics_test.cpp -o runtime-diagnostics.exe
+          ./runtime-diagnostics.exe
           g++ -std=c++20 -Wall -Wextra -Werror tests/engine_layout_test.cpp -o engine-layout.exe
           ./engine-layout.exe
           g++ -std=c++20 -Wall -Wextra -Werror tests/provider_intent_test.cpp -o provider-intent.exe
           ./provider-intent.exe
           g++ -std=c++20 -static -Wall -Wextra -Werror tests/provider_legacy_test.cpp -o provider-legacy.exe
           ./provider-legacy.exe
+          g++ -std=c++20 -static -Wall -Wextra -Werror tests/provider_advanced_settings_test.cpp -o provider-advanced-settings.exe
+          ./provider-advanced-settings.exe
+          g++ -std=c++20 -static -Wall -Wextra -Werror tests/provider_advanced_windows_test.cpp -lversion -o provider-advanced-windows.exe
+          ./provider-advanced-windows.exe
           g++ -std=c++20 -static -Wall -Wextra -Werror tests/provider_menu_request_test.cpp -o provider-menu-request.exe
           ./provider-menu-request.exe
           g++ -std=c++20 -static -Wall -Wextra -Werror tests/provider_menu_transport_test.cpp -o provider-menu-transport.exe
@@ -166,6 +201,10 @@ jobs:
           ./provider-display-projection.exe
           g++ -std=c++20 -static -Wall -Wextra -Werror tests/native_fg_admission_test.cpp -o native-fg-admission.exe
           ./native-fg-admission.exe
+          g++ -std=c++20 -static -Wall -Wextra -Werror tests/fg_output_contract_test.cpp -o fg-output-contract.exe
+          ./fg-output-contract.exe
+          g++ -std=c++20 -static -Wall -Wextra -Werror tests/fg_scene_identity_test.cpp -o fg-scene-identity.exe
+          ./fg-scene-identity.exe
           g++ -std=c++20 -static -Wall -Wextra -Werror tests/shared_sdk_shutdown_test.cpp -o shared-sdk-shutdown.exe
           ./shared-sdk-shutdown.exe
           mkdir -p "bootstrap lookup/other"
@@ -203,9 +242,13 @@ jobs:
       - name: Install pinned .NET SDK
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9
         with:
-          dotnet-version: '10.0.401'
+          dotnet-version: '10.0.402'
       - name: Temporal SR foliage ownership checks
         run: python tests/test_fg_foliage_policy.py
+      - name: Presenter confirmation preservation
+        run: python tests/test_presenter_confirmation.py
+      - name: Native temporal end-play retirement
+        run: python tests/test_temporal_endplay.py
       - name: Consolidated provider menu controls
         run: dotnet run --project tests/provider-menu-client/ProviderMenuClient.Tests.csproj -c Release
       - name: Guided installer file-safety checks

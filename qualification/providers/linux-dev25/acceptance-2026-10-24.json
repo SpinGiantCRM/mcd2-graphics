@@ -1,0 +1,505 @@
+{
+  "schema": "linux-dev25-maintainer-acceptance-v1",
+  "dateLocal": "2026-10-24",
+  "candidate": "0.4.0-amd.dev.25",
+  "overall": "PASS WITH KNOWN ISSUES for the tested Linux/NVIDIA scope under the maintainer acceptance rule",
+  "acceptanceRule": "Complete bounded feature checks; disclose intermittent crashes without expanding qualification into a game repair. No demonstrated own-payload defect was identified in the captured shutdown failure. This is not proof that the Linux fault has the same owner as Windows.",
+  "inputs": {
+    "requestedSourceCommit": "e704a17c59e69ad4ec04191f43b0928ee0ad1097",
+    "nativeSourceCommit": "b5719f95820acb97dcd5fcdfa60bdde291b3379a",
+    "sourceTree": "775604d9599c7ae1862eaeeb878f31c611cdcc65",
+    "artifactRun": 39774607102,
+    "artifact": 12424387023,
+    "archiveSHA256": "49ae3e0eb63992eb8d161648623d24536ad1c2f52ca0cf72eded432450ee4476",
+    "artifactFilesVerified": 46,
+    "consumedSourcePinsVerified": 45,
+    "dependencyLock": "qualification/providers/linux-dev25/dependencies-2026-10-24.lock.json",
+    "dependencyLockSHA256": "8cc2d271748a5c4534f62b362f63edfa2d5ecf12c4df2a236ce169803ace4bbd",
+    "loaderVersion": "2.7",
+    "loaderFileId": 540,
+    "loaderArchiveSHA256": "100347ddf924686f12b0a042ba5cd47d487c30020bdd8b7eab05a7156022429d",
+    "frameworkSHA256": "9fdac099b390ff2d88d4cf6d51685f9991ea7484e6a70fe0b092019d7adddba2",
+    "frameworkBundled": false,
+    "vendorRuntimeBundled": false
+  },
+  "host": {
+    "os": "CachyOS, KDE Wayland",
+    "gpu": "NVIDIA RTX 4080 SUPER",
+    "driver": "615.78.08",
+    "proton": "CachyOS-11.0-100",
+    "steamBuild": "25910487",
+    "gameImageSHA256": "3842102bb05fc532b22e97992d61c2248d115be80ff752ff9b6843bf4acd7005",
+    "output": [
+      3840,
+      2160
+    ]
+  },
+  "installer": {
+    "linuxExecutableSHA256": "ab44970d6d8ab7a2e0fafbe26cb3cc0fc669d9c8dad68c8b9d57b61c6b8fdb22",
+    "manifestSHA256": "f4555cd7c79f5cbd97fd4ce9c05b8f1282952b1e3fd29c79cdb5bfeba3eac5b9",
+    "dependencyLockSHA256": "8cc2d271748a5c4534f62b362f63edfa2d5ecf12c4df2a236ce169803ace4bbd",
+    "deployment": "self-contained-folder",
+    "filesVerified": 241,
+    "packagePayloadFiles": 17,
+    "installedOwnedFilesVerified": 18,
+    "privateDLSSCopyIncludedInInstalledOwnedCount": true,
+    "dependencyFilesVerified": 15,
+    "overrides": {},
+    "coreChecksPassed": 148,
+    "exactCandidateFixtureChecksPassed": 15,
+    "liveInstallAndScan": "PASS through unchanged production installer core; no fresh native GUI interaction claim",
+    "repairRemovalReinstall": "PASS isolated exact-candidate filesystem fixture; live candidate retained installed"
+  },
+  "superResolution": {
+    "result": "PASS bounded current-context advancing evaluation checks",
+    "nativeBaseline": true,
+    "implementationFSR": 30105,
+    "modes": [
+      {
+        "mode": "dlss-q1",
+        "render": [
+          2560,
+          1440
+        ],
+        "output": [
+          3840,
+          2160
+        ],
+        "evaluationDelta": 38,
+        "error": 0
+      },
+      {
+        "mode": "dlss-q0",
+        "render": [
+          3840,
+          2160
+        ],
+        "output": [
+          3840,
+          2160
+        ],
+        "evaluationDelta": 53,
+        "error": 0
+      },
+      {
+        "mode": "dlss-q2",
+        "render": [
+          2228,
+          1256
+        ],
+        "output": [
+          3840,
+          2160
+        ],
+        "evaluationDelta": 106,
+        "error": 0
+      },
+      {
+        "mode": "dlss-q3",
+        "render": [
+          1920,
+          1080
+        ],
+        "output": [
+          3840,
+          2160
+        ],
+        "evaluationDelta": 1172,
+        "error": 0
+      },
+      {
+        "mode": "dlss-q4",
+        "render": [
+          1280,
+          720
+        ],
+        "output": [
+          3840,
+          2160
+        ],
+        "evaluationDelta": 1249,
+        "error": 0
+      },
+      {
+        "mode": "dlss-q5",
+        "render": [
+          2960,
+          1664
+        ],
+        "output": [
+          3840,
+          2160
+        ],
+        "evaluationDelta": 762,
+        "error": 0
+      },
+      {
+        "mode": "fsr-q1",
+        "render": [
+          2560,
+          1440
+        ],
+        "output": [
+          3840,
+          2160
+        ],
+        "evaluationDelta": 61,
+        "error": 0
+      },
+      {
+        "mode": "fsr-q0",
+        "render": [
+          3840,
+          2160
+        ],
+        "output": [
+          3840,
+          2160
+        ],
+        "evaluationDelta": 40,
+        "error": 0
+      },
+      {
+        "mode": "fsr-q2",
+        "render": [
+          2259,
+          1271
+        ],
+        "output": [
+          3840,
+          2160
+        ],
+        "evaluationDelta": 65,
+        "error": 0
+      },
+      {
+        "mode": "fsr-q3",
+        "render": [
+          1920,
+          1080
+        ],
+        "output": [
+          3840,
+          2160
+        ],
+        "evaluationDelta": 65,
+        "error": 0
+      },
+      {
+        "mode": "fsr-q4",
+        "render": [
+          1280,
+          720
+        ],
+        "output": [
+          3840,
+          2160
+        ],
+        "evaluationDelta": 57,
+        "error": 0
+      },
+      {
+        "mode": "fsr-q5",
+        "render": [
+          2957,
+          1664
+        ],
+        "output": [
+          3840,
+          2160
+        ],
+        "evaluationDelta": 107,
+        "error": 0
+      }
+    ]
+  },
+  "latency": {
+    "result": "PASS bounded independent controls and unsupported-device rejection",
+    "checks": [
+      {
+        "label": "fsr-reflex-on-fg-off",
+        "fgOff": true,
+        "reflexMode": 1,
+        "amdMode": 0,
+        "reflexDelta": 49,
+        "amdDelta": 0
+      },
+      {
+        "label": "fsr-reflex-boost-fg-off",
+        "fgOff": true,
+        "reflexMode": 2,
+        "amdMode": 0,
+        "reflexDelta": 37,
+        "amdDelta": 0
+      },
+      {
+        "label": "fsr-reflex-off-fg-off",
+        "fgOff": true,
+        "reflexMode": 0,
+        "amdMode": 0,
+        "reflexDelta": 41,
+        "amdDelta": 0
+      },
+      {
+        "label": "native-reflex-on-fg-off",
+        "fgOff": true,
+        "reflexMode": 1,
+        "amdMode": 0,
+        "reflexDelta": 74,
+        "amdDelta": 0
+      },
+      {
+        "label": "nvidia-unsupported-antilag2-refused",
+        "fgOff": true,
+        "reflexMode": 0,
+        "amdMode": 0,
+        "reflexDelta": 41,
+        "amdDelta": 0
+      },
+      {
+        "label": "native-latency-off-restored",
+        "fgOff": true,
+        "reflexMode": 0,
+        "amdMode": 0,
+        "reflexDelta": 82,
+        "amdDelta": 0
+      }
+    ],
+    "markersInOffProveActivation": false,
+    "antiLag2OnNvidiaSupported": false,
+    "physicalLatencyMeasured": false
+  },
+  "nvidiaFG": {
+    "result": "PASS bounded generation and API outcomes; shutdown known issue retained",
+    "checks": [
+      {
+        "label": "dlss-quality-nvidia-fg",
+        "renderedDelta": 639,
+        "generatedDelta": 639,
+        "successfulPresentationSamples": 11,
+        "sdkFault": 0,
+        "hdrEnabled": 1,
+        "elapsedSeconds": 12.02
+      },
+      {
+        "label": "dlaa-nvidia-fg",
+        "renderedDelta": 511,
+        "generatedDelta": 511,
+        "successfulPresentationSamples": 8,
+        "sdkFault": 0,
+        "hdrEnabled": 1,
+        "elapsedSeconds": 12.02
+      },
+      {
+        "label": "fsr-quality-nvidia-fg",
+        "renderedDelta": 789,
+        "generatedDelta": 789,
+        "successfulPresentationSamples": 13,
+        "sdkFault": 0,
+        "hdrEnabled": 1,
+        "elapsedSeconds": 12.02
+      }
+    ],
+    "sdkActualPresents": 2,
+    "sdkResult": 0,
+    "resizeRecovery": {
+      "output": [
+        3840,
+        2160
+      ],
+      "freshSuccessfulTwoPresentSamples": 15,
+      "userOperatedResolutionAndSharpnessControls": true,
+      "sharpnessEndpointsRequested": [
+        0,
+        100
+      ],
+      "independentSharpnessEngineReadback": false
+    }
+  },
+  "amdFG": {
+    "result": "PASS bounded analytical FG on NVIDIA with SDR",
+    "implementationObserved": 30106,
+    "checks": [
+      {
+        "label": "fsr-amd-fg-first-on",
+        "sr": 2,
+        "renderedDelta": 975,
+        "generatedDelta": 975,
+        "sdkSamples": 16,
+        "sdkGeneratedDelta": 900,
+        "fsrFgVersion": 30106,
+        "presenterRoute": 2,
+        "startupOwner": 2,
+        "fault": 0
+      },
+      {
+        "label": "amd-off-native-presenter-recovered",
+        "output": [
+          3840,
+          2160
+        ],
+        "presenterRoute": 1,
+        "restartRequired": 0
+      },
+      {
+        "label": "recovered-off-provider-rate",
+        "sample": 0,
+        "seconds": 20.76942777633667,
+        "evaluationDelta": 2448,
+        "renderEvaluationsPerSecond": 117.86554864978473,
+        "physicalDisplayFPSMeasured": false,
+        "presenterRoute": 1
+      },
+      {
+        "label": "recovered-off-provider-rate",
+        "sample": 1,
+        "seconds": 19.285181760787964,
+        "evaluationDelta": 2183,
+        "renderEvaluationsPerSecond": 113.19571819844782,
+        "physicalDisplayFPSMeasured": false,
+        "presenterRoute": 1
+      },
+      {
+        "label": "fsr-amd-fg-reenabled",
+        "sr": 2,
+        "renderedDelta": 1013,
+        "generatedDelta": 1013,
+        "sdkSamples": 16,
+        "sdkGeneratedDelta": 900,
+        "fsrFgVersion": 0,
+        "presenterRoute": 2,
+        "startupOwner": 2,
+        "fault": 0
+      },
+      {
+        "label": "dlss-quality-amd-fg",
+        "sr": 1,
+        "renderedDelta": 763,
+        "generatedDelta": 763,
+        "sdkSamples": 14,
+        "sdkGeneratedDelta": 780,
+        "fsrFgVersion": 30106,
+        "presenterRoute": 2,
+        "startupOwner": 2,
+        "fault": 0
+      },
+      {
+        "label": "native-amd-fg",
+        "sr": 0,
+        "renderedDelta": 714,
+        "generatedDelta": 714,
+        "sdkSamples": 12,
+        "sdkGeneratedDelta": 660,
+        "fsrFgVersion": 0,
+        "presenterRoute": 2,
+        "startupOwner": 2,
+        "fault": 0
+      }
+    ],
+    "freshNativeStartupToFG": "Restart required, correctly reported",
+    "onOffOn": "Returned to native presentation route without restart, then generated again",
+    "freshOffRenderEvaluationsPerSecond": [
+      112.8527,
+      109.5372
+    ],
+    "recoveredOffRenderEvaluationsPerSecond": [
+      117.8655,
+      113.1957
+    ],
+    "persistentOffLossDemonstratedInShortSamples": false,
+    "physicalDisplayFPSMeasured": false
+  },
+  "output": {
+    "hdr": "Active HDR colour-space identity verified with NVIDIA FG",
+    "sdr": "Active SDR colour-space identity verified with AMD FG; RenoDX absent",
+    "physicalPanelCalibrationMeasured": false
+  },
+  "menu": {
+    "loader27": "Mods page loaded; maintainer completed requested tabs, help and top-left diagnostics inspection and reported no visual problem",
+    "exhaustiveMenuOrControllerCoverage": false
+  },
+  "exits": {
+    "ordinary": [
+      {
+        "configuration": "Native/SR/independent latency checks",
+        "route": "Save and quit to desktop",
+        "exitCodeHex": "00000000"
+      },
+      {
+        "configuration": "NVIDIA FG, SR and resize checks",
+        "route": "Save and quit to desktop",
+        "exitCodeHex": "C0000409"
+      },
+      {
+        "configuration": "Fresh Off SDR and restart-required checks",
+        "route": "Save and quit to desktop",
+        "exitCodeHex": "00000000"
+      },
+      {
+        "configuration": "AMD FG SDR On-Off-On and provider changes",
+        "route": "Save and quit to desktop",
+        "exitCodeHex": "00000000"
+      }
+    ],
+    "diagnosticReplay": {
+      "configuration": "FSR Quality + NVIDIA FG + Reflex + HDR, unchanged settings",
+      "route": "Save and quit to desktop",
+      "exitCodeHex": "C0000409",
+      "terminalSignalRecorderActive": true,
+      "ordinaryCleanExitEvidence": false,
+      "observationSeconds": 180.2685,
+      "activeSnapshots": 164,
+      "totalSnapshots": 181,
+      "generatedDelta": 5196,
+      "successfulTwoPresentSamples": 224,
+      "failedPresentationSamples": 0,
+      "continuousActivityClaim": false
+    },
+    "sessionDurationIsShutdownLatency": false
+  },
+  "knownIssues": [
+    {
+      "issue": "Intermittent NVIDIA-session shutdown failure",
+      "terminalCode": "C0000409",
+      "underlyingException": "C0000005 read from address 0x10 during exception dispatch",
+      "ownPayloadDefectDemonstrated": false,
+      "sameFaultAsWindowsProven": false,
+      "windowsReducedReproduction": "../windows-dev25/component-controls-2026-10-23.json",
+      "existingReporting": "../windows-dev25/reporting-2026-10-23.json",
+      "duplicateReportSubmitted": false,
+      "waitForUpstreamReply": false,
+      "crashRepairClaim": false
+    },
+    {
+      "issue": "One main-menu startup lost mouse clicks while cursor moved",
+      "altTabRestoredClicks": true,
+      "occurredBeforeAutomatedPresenterSwitches": true,
+      "ownerEstablished": false
+    },
+    {
+      "issue": "Intermittent unavailable diagnostic activity/version sample despite independently advancing SDK outcomes",
+      "staleDataCountedAsActive": false,
+      "versionZeroCountedAsUnloaded": false
+    }
+  ],
+  "finalState": {
+    "gameClosed": true,
+    "ownedFilesVerified": 18,
+    "dependencyFilesVerified": 15,
+    "preferencesRestoredWithProductionCAS": true,
+    "userMenuChangesPreserved": true,
+    "temporaryProtonSettingsRemoved": true,
+    "noPlayerOrAccountSavesInspectedOrEdited": true,
+    "productionPayloadChangedForQualification": false
+  },
+  "unqualifiedOrDeferred": [
+    "Full FPS, frame-time, image-quality and physical latency benchmarks: deferred until after release by maintainer",
+    "Optional community portable FSR 4.1 INT8 activation",
+    "Official FSR 4.1 and ML FG activation on supported Radeon hardware",
+    "Native Windows NVIDIA model/profile overrides and active NVIDIA features",
+    "Physical controller, Linux Radeon, long sessions, device loss and comprehensive travel/respawn coverage",
+    "Xbox PC/Microsoft Store support, native multipliers and combined FG providers"
+  ],
+  "remainingRequiredWorkForThisAcceptance": [],
+  "releasePublishedOrMerged": false
+}

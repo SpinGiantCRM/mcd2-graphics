@@ -19,6 +19,7 @@ OWN = {
     'probe/fg-sdk-bridge.dll': BIN+'fg-sdk-bridge.dll',
     'probe/mcd2-fg-guide-recon.addon64': BIN+'mcd2-fg-guide-recon.addon64',
     'probe/FG_UI_ALPHA.cso': BIN+'FG_UI_ALPHA.cso',
+    'probe/FG_SCENE_COPY.cso': BIN+'FG_SCENE_COPY.cso',
     'latency/mcd2-display-latency.addon64': BIN+'mcd2-display-latency.addon64',
     'amd-latency/mcd2-antilag2-bridge.dll': BIN+'mcd2-antilag2-bridge.dll',
     'sr/mcd2-graphics.addon64': BIN+'mcd2-graphics.addon64',
@@ -29,11 +30,11 @@ OWN = {
     **{'ui/Pak/'+n: PAK+n for n in ('MCD2Graphics_P.pak','MCD2Graphics_P.ucas','MCD2Graphics_P.utoc')},
 }
 CONFIG = {
-    BIN+'FGBootstrap.ini': b'[Experiment]\nEnableSDK=1\nFactoryRouting=1\nTraceNvapi=0\n[Providers]\nConsolidatedMenuTransport=1\nObserveLegacySettings=0\nAmdAntiLag2=1\n',
+    BIN+'FGBootstrap.ini': b'[Experiment]\nEnableSDK=1\nFactoryRouting=1\nTraceNvapi=0\n[Providers]\nConsolidatedMenuTransport=1\nObserveLegacySettings=0\nAmdAntiLag2=1\nAmdPresenterSwitch=1\n',
     BIN+'FGGuideCapture.ini': b'[Capture]\nEnabled=0\nGuideTags=1\nImageTags=1\nEnableFG=0\nTrialRevision=0\nNativeUIToggle=1\n',
 }
 FSR_COMMIT = '60f4ea81909200d8542eca14dccb2628b763a9a3'
-GAME = {'steamBuildID':'25754144', 'exeSHA256':'3a8703406fd50520f83c4f70a0212c000cb3b584ef28eb38032902230c01ebdd'}
+GAME = {'steamBuildID':'25910487', 'exeSHA256':'3842102bb05fc532b22e97992d61c2248d115be80ff752ff9b6843bf4acd7005'}
 FSR_RUNTIME = {
     'FSRUpscaler': (BIN+'MCD2Graphics/fsr/amd_fidelityfx_upscaler_dx12.dll', 'd0dcccc74a43c44ba435b7a369b456e0970d8a4464e4bd683119b374f2c9fb46'),
     'FSRFrameGeneration': (BIN+'amd_fidelityfx_framegeneration_dx12.dll', '02297beedd285e822d3a64f314cf00faf378dcec0edc47ff0c4dd71b3a8c2f18'),
@@ -116,10 +117,10 @@ def assemble(archive, archive_sha, source_commit, output, version, artifact_url)
                          upgradeFromFiles={framework['file']:previous_framework_pin},
                          compatibilityNote='Select experimental-reshade/ReShade64.dll from the pinned CI artifact. Installed separately as d3d12.asi; active Windows qualification is pending.')
         for ident,(path,pin) in FSR_RUNTIME.items():
-            lock['dependencies'][ident] = {'version':'SDK 2.3 analytical', 'file':path, 'sha256':pin,
+            lock['dependencies'][ident] = {'version':('3.1.5 / official 4.1.1' if ident == 'FSRUpscaler' else '3.1.6 / ML 4.0.1'), 'file':path, 'sha256':pin,
                 'sdkCommit': FSR_COMMIT, 'bundled':False,
-                'url':'https://github.com/amd/FidelityFX-SDK/tree/'+FSR_COMMIT,
-                'compatibilityNote':'Official pinned analytical runtime. An installer override does not relax the native runtime hash/API or actual hardware checks.'}
+                'url':'https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK/tree/'+FSR_COMMIT,
+                'compatibilityNote':('Official pinned FSR upscaling runtime: analytical 3.1.5, plus official 4.1.1 on supported Radeon hardware. The optional community INT8 runtime is installed separately; see Advanced Settings.' if ident == 'FSRUpscaler' else 'Official pinned FSR Frame Generation runtime: analytical 3.1.6; ML 4.0.1 requires actual device approval. Portable upscaling does not enable ML frame generation.') + ' An installer override does not relax runtime hash/API or hardware checks.'}
         metadata = {'schemaVersion':1, 'candidateOnly':True, 'sourceCommit':source_commit,
             'artifactUrl':artifact_url, 'archiveSHA256':archive_sha,
             'verifiedArtifactFiles':len(pins), 'payload':manifest['files'],

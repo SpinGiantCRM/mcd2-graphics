@@ -7,9 +7,15 @@ third-party/AntiLag2/LICENSE.txt -text
 qualification/fg-release/*.patch text eol=lf
 # Preserve the exact upstream diff, including its context prefixes and indentation.
 qualification/fg-release/msvc-framework-source.patch -whitespace
+qualification/fg-release/reshade-descriptor-heap-lifetime.patch -whitespace
 # These files are byte inputs to separately hash-pinned dependency ZIPs.
 qualification/fg-release/ReShade-dependency-README.md text eol=lf
 qualification/fg-release/original-framework-README.md text eol=lf
 qualification/fg-release/msvc-framework-build-receipt.json text eol=lf
 qualification/fg-release/msvc-mitigation-installer-build.json text eol=lf
 qualification/fg-release/windows-msvc-mitigation-2026-10-07.json text eol=lf
+# Qualification records pin this exact installed lock, including CRLF bytes.
+qualification/providers/windows-dev25/dependencies-2026-10-23.lock.json -text whitespace=cr-at-eol
+qualification/providers/linux-dev25/dependencies-2026-10-24.lock.json -text
+# The follow-up receipt pins this source-only fixture byte for byte.
+qualification/providers/windows-dev25/sharpness-ownership-probe.cs.txt text eol=lf

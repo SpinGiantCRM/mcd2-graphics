@@ -1,5 +1,7 @@
 #pragma once
 #include <bcrypt.h>
+#include "../providers/runtime_diagnostics.h"
+#include "../providers/fsr_hardware_policy.hpp"
 #include "../../experiments/providers/fsr_game_bridge.h"
 #include "../providers/sr_runtime_protocol.hpp"
 #include "../providers/sr_runtime_snapshot.h"
@@ -11,6 +13,7 @@
 namespace fsr_runtime {
 namespace p=mcd2::providers;
 static p::SrRuntimeState state;
+static unsigned verifiedImplementation=0,officialHardware=0;static a::device* identifiedDevice=nullptr;
 static p::SrContext context;
 static std::uint32_t requestSequence=0;
 static bool requested=false,current=false,contextAvailable=false,restoring=false;
@@ -26,9 +29,10 @@ struct Generation : SrGuideGeneration {
  LeanBorrowCache borrows;a::command_queue *queue=nullptr;
  HMODULE bridge=nullptr;void *session=nullptr;ID3D12Resource *output=nullptr;
  ID3D12Resource *cropped_colour=nullptr;bool colour_readable=false;
- decltype(&mcd2_fsr_create_v1) create=nullptr;decltype(&mcd2_fsr_dispatch_v1) dispatch=nullptr;
+ decltype(&mcd2_fsr_create_v2) create=nullptr;decltype(&mcd2_fsr_dispatch_v1) dispatch=nullptr;
  decltype(&mcd2_fsr_quality_v1) quality=nullptr;decltype(&mcd2_fsr_destroy_v1) destroy=nullptr;
  decltype(&mcd2_fsr_info_v1) info=nullptr;
+ decltype(&mcd2_fsr_implementation_v1) implementation=nullptr;unsigned implementationChoice=1,implementationVersion=0;fs::path runtimePath;
  bool busy=false,history_dirty=false,readable=false,observed=false,force_reset=false;
  unsigned observedWidth=0,observedHeight=0,outputWidth=0,outputHeight=0;
  unsigned allocationWidth=0,allocationHeight=0;
@@ -99,11 +103,21 @@ static bool bind_device(Generation& c,a::command_list *cmd){
 }
 static bool copy_output(Generation& c,ID3D12GraphicsCommandList *native,ID3D12Resource *target){
  auto source=c.output->GetDesc(),out=target->GetDesc();
- if(source.Width!=out.Width||source.Height!=out.Height||source.Format!=out.Format||source.DepthOrArraySize!=out.DepthOrArraySize||
+ if(source.Format!=out.Format||source.DepthOrArraySize!=out.DepthOrArraySize||
   source.MipLevels!=out.MipLevels||source.SampleDesc.Count!=out.SampleDesc.Count||source.SampleDesc.Quality!=out.SampleDesc.Quality||
   source.Dimension!=out.Dimension||target==c.output)return false;
+ const bool exact=source.Width==out.Width&&source.Height==out.Height;
+ if(!exact&&(source.Dimension!=D3D12_RESOURCE_DIMENSION_TEXTURE2D||source.Format!=DXGI_FORMAT_R16G16B16A16_FLOAT||source.DepthOrArraySize!=1||source.MipLevels!=1||
+  source.SampleDesc.Count!=1||source.SampleDesc.Quality!=0||!c.outputWidth||!c.outputHeight||
+  source.Width!=c.outputWidth||source.Height!=c.outputHeight||out.Width<source.Width||out.Height<source.Height))return false;
  eval_transition(native,c.output,D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,D3D12_RESOURCE_STATE_COPY_SOURCE);
- eval_transition(native,target,D3D12_RESOURCE_STATE_UNORDERED_ACCESS,D3D12_RESOURCE_STATE_COPY_DEST);native->CopyResource(target,c.output);
+ eval_transition(native,target,D3D12_RESOURCE_STATE_UNORDERED_ACCESS,D3D12_RESOURCE_STATE_COPY_DEST);
+ if(exact)native->CopyResource(target,c.output);
+ else{
+  D3D12_TEXTURE_COPY_LOCATION from{},to{};from.pResource=c.output;to.pResource=target;
+  from.Type=to.Type=D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+  D3D12_BOX region{0,0,0,c.outputWidth,c.outputHeight,1};native->CopyTextureRegion(&to,0,0,0,&from,&region);
+ }
  eval_transition(native,target,D3D12_RESOURCE_STATE_COPY_DEST,D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
  eval_transition(native,c.output,D3D12_RESOURCE_STATE_COPY_SOURCE,D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);c.history_dirty=true;return true;
 }
@@ -198,23 +212,31 @@ static bool record(a::command_list *cmd,uint32_t x,uint32_t y,uint32_t z){
  if(result)return fail(16);
  MCD2FsrInfoV1 info{};info.size=sizeof(info);if(c.info(c.session,&info)||info.errors)return fail(28);
  if(!copy_output(c,native,go))return fail(17);
- c.force_reset=false;
+ c.force_reset=false;verifiedImplementation=c.implementationVersion;
  if(state.evaluations<0x7fffffffu)++state.evaluations;phase(p::SrPhase::Active);return true;
 }
 static int load(Generation& c){
  const auto folder=asset_root/L"fsr";
+ static const unsigned preference=GetPrivateProfileIntW(L"FSR",L"UpscalingVersion",0,(asset_root/L"DependencyOverrides.ini").c_str());
+ if(preference>2)return -4;
+ c.implementationChoice=preference==1?1:(officialHardware&1)?3:preference==2?2:1;
+ c.runtimePath=(c.implementationChoice==2?folder/L"portable":folder)/L"amd_fidelityfx_upscaler_dx12.dll";
  if(!hash_matches(folder/L"mcd2-fsr-game-bridge.dll",MCD2_FSR_BRIDGE_SHA256)||
-  !hash_matches(folder/L"amd_fidelityfx_upscaler_dx12.dll","d0dcccc74a43c44ba435b7a369b456e0970d8a4464e4bd683119b374f2c9fb46"))return -1;
+  !hash_matches(c.runtimePath,c.implementationChoice==2?"8192ea97620f8e6407bff346bf905f0d555ff73d89fe14616eb1fa5e41ab3175":"d0dcccc74a43c44ba435b7a369b456e0970d8a4464e4bd683119b374f2c9fb46"))return -1;
  c.bridge=LoadLibraryExW((folder/L"mcd2-fsr-game-bridge.dll").c_str(),nullptr,LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR|LOAD_LIBRARY_SEARCH_SYSTEM32);
  if(!c.bridge)return -2;
- c.create=reinterpret_cast<decltype(c.create)>(GetProcAddress(c.bridge,"mcd2_fsr_create_v1"));
+ c.create=reinterpret_cast<decltype(c.create)>(GetProcAddress(c.bridge,"mcd2_fsr_create_v2"));
  c.dispatch=reinterpret_cast<decltype(c.dispatch)>(GetProcAddress(c.bridge,"mcd2_fsr_dispatch_v1"));
  c.quality=reinterpret_cast<decltype(c.quality)>(GetProcAddress(c.bridge,"mcd2_fsr_quality_v1"));
  c.destroy=reinterpret_cast<decltype(c.destroy)>(GetProcAddress(c.bridge,"mcd2_fsr_destroy_v1"));
  c.info=reinterpret_cast<decltype(c.info)>(GetProcAddress(c.bridge,"mcd2_fsr_info_v1"));
- return c.create&&c.dispatch&&c.quality&&c.destroy&&c.info?0:-3;
+ c.implementation=reinterpret_cast<decltype(c.implementation)>(GetProcAddress(c.bridge,"mcd2_fsr_implementation_v1"));
+ return c.create&&c.dispatch&&c.quality&&c.destroy&&c.info&&c.implementation?0:-3;
 }
 static void present(a::command_queue *q,std::unique_lock<std::recursive_mutex>& guard){
+ auto device=q->get_device();if(device!=identifiedDevice){identifiedDevice=device;officialHardware=0;unsigned vendor=0,id=0;char name[256]{};
+  if(device&&device->get_property(a::device_properties::vendor_id,&vendor)&&device->get_property(a::device_properties::device_id,&id)&&device->get_property(a::device_properties::description,name)){name[255]=0;officialHardware=p::fsrOfficialHardware(vendor,id,name);}}
+
  auto module=GetModuleHandleW(L"mcd2-display-latency.addon64");
  auto enabled=module?reinterpret_cast<decltype(&mcd2_menu_enabled_v1)>(GetProcAddress(module,"mcd2_menu_enabled_v1")):nullptr;
  if(enabled&&enabled()==1)menuOwner=true; // Never revert to legacy preferences on a transport failure.
@@ -275,7 +297,9 @@ static void present(a::command_queue *q,std::unique_lock<std::recursive_mutex>& 
   if(result){cache.blocked=true;phase(p::SrPhase::Failed,21);return;}c.session=nullptr;
   auto retired=std::move(generation);guard.unlock();retired->borrows.clear_after_idle();
   for(auto it=retired->owned.resources.rbegin();it!=retired->owned.resources.rend();++it)if(*it)(*it)->Release();
-  if(retired->bridge)FreeLibrary(retired->bridge);retired.reset();guard.lock();
+  retired->owned.resources.clear(); // EvalOwned must not release these references again.
+  if(retired->bridge)FreeLibrary(retired->bridge);
+  retired.reset();guard.lock();
   state.sourceScaleMicro=100000000;if(contextAvailable)state.world=context.world;restoring=true;phase(p::SrPhase::RestoreSource,state.error);return;
  }
  if((state.phase==p::SrPhase::Preflight||state.phase==p::SrPhase::ApplySource||state.phase==p::SrPhase::Create||state.phase==p::SrPhase::Evaluate)&&
@@ -283,7 +307,7 @@ static void present(a::command_queue *q,std::unique_lock<std::recursive_mutex>& 
  if(state.phase==p::SrPhase::Preflight&&c.observed){
   MCD2FsrQualityV1 quality{sizeof(quality),unsigned(state.quality),c.outputWidth,c.outputHeight};
   c.busy=true;guard.unlock();int result=load(c);
-  if(!result){internal_evaluation=true;result=c.create(c.proxy_device,(asset_root/L"fsr"/L"amd_fidelityfx_upscaler_dx12.dll").c_str(),
+  if(!result){internal_evaluation=true;result=c.create(c.proxy_device,c.runtimePath.c_str(),c.implementationChoice,
     c.observedWidth,c.observedHeight,c.outputWidth,c.outputHeight,&c.session);internal_evaluation=false;}
   if(!result&&state.quality!=p::Quality::Custom)result=c.quality(c.session,&quality);
   if(!result){result=c.destroy(c.session,nullptr,0);if(!result)c.session=nullptr;}
@@ -300,8 +324,9 @@ static void present(a::command_queue *q,std::unique_lock<std::recursive_mutex>& 
  }
  if(state.phase==p::SrPhase::Create){
   c.busy=true;guard.unlock();internal_evaluation=true;
-  int result=c.create(c.proxy_device,(asset_root/L"fsr"/L"amd_fidelityfx_upscaler_dx12.dll").c_str(),c.width,c.height,c.outputWidth,c.outputHeight,&c.session);
+  int result=c.create(c.proxy_device,c.runtimePath.c_str(),c.implementationChoice,c.width,c.height,c.outputWidth,c.outputHeight,&c.session);
   internal_evaluation=false;
+  if(!result){c.implementationVersion=c.implementation(c.session);if(!c.implementationVersion)result=-1;}
   if(!result){c.motion=eval_texture(c.resource_device,c.owned,c.width,c.height,DXGI_FORMAT_R16G16_FLOAT,true);
    c.exposure=eval_texture(c.resource_device,c.owned,1,1,DXGI_FORMAT_R32_FLOAT,true);
    c.output=eval_texture(c.resource_device,c.owned,c.outputWidth,c.outputHeight,DXGI_FORMAT_R16G16B16A16_FLOAT,true);
@@ -345,10 +370,25 @@ static void fsr_runtime_reset(a::command_list *cmd){if(!fsr_runtime::generation)
 static void fsr_runtime_forget(a::command_list *cmd){if(fsr_runtime::generation){auto &cache=fsr_runtime::generation->borrows;
  cache.reset_pending.erase(cmd);cache.reset_epochs.erase(cmd);cache.forget(cmd);}}
 static void fsr_runtime_submit(a::command_queue *q,a::command_list *cmd){if(fsr_runtime::generation&&fsr_runtime::generation->borrows.recordings.contains(cmd)&&fsr_runtime::generation->queue!=q){fsr_runtime::generation->borrows.blocked=true;fsr_runtime::stop(18);}}
-static void fsr_runtime_destroy_queue(a::command_queue *q){if(fsr_runtime::generation&&fsr_runtime::generation->queue==q){
+static void fsr_runtime_destroy_queue(a::command_queue *q){if(q->get_device()==fsr_runtime::identifiedDevice){fsr_runtime::identifiedDevice=nullptr;fsr_runtime::officialHardware=0;}if(fsr_runtime::generation&&fsr_runtime::generation->queue==q){
  fsr_runtime::generation->borrows.blocked=true;fsr_runtime::generation->queue=nullptr;fsr_runtime::stop(27);}}
 extern "C" __declspec(dllexport) int mcd2_sr_runtime_v1(MCD2SrRuntimeSnapshotV1* out){
  if(!out||out->size!=sizeof(*out))return -1;std::unique_lock guard(lock,std::try_to_lock);if(!guard.owns_lock())return -2;
  mcd2::providers::SrRuntimeBytes bytes;if(!mcd2::providers::encodeSrRuntimeState(fsr_runtime::state,bytes))return -3;
  out->reserved=0;std::copy(bytes.begin(),bytes.end(),out->state);return 0;
+}
+
+extern "C" __declspec(dllexport) int mcd2_sr_diagnostics_v1(MCD2SrDiagnosticsV1* out){
+ if(!out||out->size!=sizeof(*out)||mcd2::process_exit::terminating())return -1;
+ std::unique_lock guard(lock,std::try_to_lock);if(!guard.owns_lock())return -2;
+ *out={sizeof(*out),0,0,fsr_runtime::menuWorld,fsr_runtime::verifiedImplementation,fsr_runtime::officialHardware,0};
+ if(fsr_runtime::generation&&fsr_runtime::state.phase==mcd2::providers::SrPhase::Active&&!fsr_runtime::state.error){
+  out->provider=2;out->revision=fsr_runtime::state.intent.revision;out->world=fsr_runtime::state.world;
+  // The active context's provider ID was queried and matched to this explicitly
+  // selected implementation by create_v2, before the first successful dispatch.
+  out->implementation=fsr_runtime::generation->implementationVersion;out->evaluations=fsr_runtime::state.evaluations;
+ }else if(ui_control.phase==2&&lean.wanted&&!lean.failed&&!lean.stop){
+  out->provider=1;out->revision=ui_control.applied_revision;out->evaluations=lean.evaluations;
+ }
+ return 0;
 }

@@ -22,6 +22,7 @@ static class ControlsTest {
   a.W6=r.W6;a.W7=status;a.W11=status==11?6:status==5?5:0;a.W9=a.W19;a.W10=a.W16;Seal(a);
  }
  public static void Run(){
+  SharedSrChecks();
   var a=Authority();var c=Client(a);
   Check(c.SelectSr(2)&&c.SelectQuality(2,2)&&c.SelectCustomScale(2,7100),"AMD choices accepted");
   Check(c.SelectLatency(2,1)&&c.SelectHdr(true,420,203,167),"AMD/HDR edits");
@@ -100,5 +101,21 @@ static class ControlsTest {
    r.W35==0&&r.W36==1000&&r.W37==203&&r.W38==203,"complete reset transaction");
   for(int word=19;word<=25;word+=3)Check(r.Word(word)==1&&r.Word(word+1)==6700&&r.Word(word+2)==7700,"reset every provider preference");
   Console.WriteLine("Provider controls: independent SR/FG/latency/HDR, coalescing, conflict rebase, travel, receipts, bounds and save-failure checks pass");
+ }
+ static void SharedSrChecks(){
+  var a=Authority();a.W21=2;a.W24=1;a.W26=7900;Seal(a);var c=Client(a);
+  Check(c.SelectMenuQuality(2,3),"shared preset edit");
+  Check(c.Value(8)==0 && c.Value(9)==3 && c.Value(12)==3,"preset edit keeps Native and synchronizes SR");
+  Check(c.SelectMenuCustomScale(2,7400),"shared custom percentage");
+  Check(c.Value(9)==5 && c.Value(12)==5 && c.Value(10)==7400 && c.Value(13)==7400 && c.Value(11)==7400 && c.Value(14)==7400,"shared custom and last custom");
+  c.Poll();var r=Sent();Check(c.RequestValid(r)&&r.W18==0&&r.W29==0,"valid Native transaction leaves FG alone");
+  Ack(a,r);c.Poll();Check(c.ShareSrPreferences(2)&&c.SelectMenuSr(2),"switch uses current shared preference");
+  c.Poll();r=Sent();Check(r.W19==5&&r.W22==5&&r.W20==7400&&r.W23==7400,"switch retains custom percentage");
+  Ack(a,r);c.Poll();c.SelectMenuQuality(1,1);c.Poll();r=Sent();
+  Check(r.W18==2&&r.W19==1&&r.W22==1,"edit from another family keeps FSR selected");
+  Ack(a,r);c.Poll();c.SelectMenuQuality(2,5);c.Poll();r=Sent();
+  Check(r.W20==7400&&r.W23==7400,"Custom restores shared last percentage");
+  Ack(a,r);c.Poll();int dirty=c.Dirty;
+  Check(!c.SelectMenuQuality(3,1)&&!c.SelectMenuQuality(1,6)&&!c.SelectMenuCustomScale(2,17)&&c.Dirty==dirty,"invalid shared edits do not mutate");
  }
 }

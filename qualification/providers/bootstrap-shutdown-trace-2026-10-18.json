@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "scope": "Offline bootstrap shutdown trace ownership regression",
+  "baseImplementationHead": "b23da00",
+  "sourceSHA256": "2ff6de4d8dfb3f36a98e7f6f012a834c338ccdbd4e927bbb741b7aaf1581dcb0",
+  "defect": "A factory caller can pass the trace handle to fprintf while concurrent route teardown closes it. The receipt pointer and lifetime previously had no shared lock.",
+  "correction": "One receipt mutex serializes creation, event and AMD-description writes, flushing, and final close. Late events and repeated detach do not reuse the handle.",
+  "actualSourceFixture": {
+    "controlledInterleaving": true,
+    "usesSchedulingDelayToInferRace": false,
+    "originalSourceFails": true,
+    "correctedSourcePasses": true,
+    "linuxNativePass": true,
+    "windowsExecutableUnderIsolatedProtonPass": true,
+    "nativeWindowsExecutionPerformed": false,
+    "bothPlatformCIRequired": true
+  },
+  "bootstrapMicrosoftABICompilePassed": true,
+  "exactDev15LatencyControl": {
+    "dllSHA256": "18810430c6b9e8273a1212227e7bf99f5e57aeea35565782773bdebf99c078d0",
+    "ordinaryUnloadCycles": 40,
+    "ordinaryExitCode": 0,
+    "terminalWithWorkerExitCode": 0,
+    "frameworkMocked": true,
+    "dxgiMocked": true,
+    "gpuDeviceCreated": false,
+    "providerSdkLoaded": false,
+    "qualifiesGameRuntime": false
+  },
+  "gameLaunched": false,
+  "liveInstallationChanged": false,
+  "originalGameExitCode": "0xC0000409",
+  "originalFailureCauseEstablished": false,
+  "linuxShutdownQualified": false,
+  "windowsRadeonQualified": false,
+  "newCompleteArtifactRequired": true
+}

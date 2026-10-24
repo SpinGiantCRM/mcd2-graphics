@@ -4,8 +4,8 @@ The native source is C++20. Its ReShade calls use a separate MSVC-ABI adapter; t
 
 Pinned dependencies:
 
-- NeoRune SDK and tool **0.1.2**, obtained from NuGet. The SDK provides the game bindings; these generated bindings are not copied into this repository.
-- .NET SDK **10.0.401** (reference runtime **10.0.12**) for the tested UI compiler.
+- NeoRune SDK and tool **1.0.0**, obtained from NuGet. The SDK provides the game bindings; these generated bindings are not copied into this repository.
+- .NET SDK **10.0.402** (reference pack **10.0.13**) for the tested UI compiler.
 - ReShade SDK **v6.8.0**, addon API **20**; obtain headers from `crosire/reshade`.
 - NVIDIA DLSS SDK commit **374959484e79a640feaba44c93ac8cfb0a03f5b5**, obtained from NVIDIA under its own license.
 - LLVM/Clang, MinGW-w64 C++20 and Microsoft's DirectX Shader Compiler for the native/conversion shader build.
@@ -63,11 +63,29 @@ and requires its own NVIDIA regression checks. See
 
 ## Update 2 display addon and guided installer
 
-Build the UI using `build.py` and the separately acquired NeoRune SDK/tool and package tools. The build includes `tools/ModInfoBuilder`, which packages the Blueprint Loader 2.0 ModInfo using the loader's public template class. No extracted game assets or vendor runtime files are included.
+Build the UI using `build_ui.py` (also called by the full `build.py` recipe):
+
+```text
+python build_ui.py --dotnet PATH --neorune-sdk PATH --pack-tools PATH --output EMPTY_DIRECTORY
+```
+
+The build uses the exact versions in `dependencies.lock.json`, compiles the SDK
+helpers and creates versioned Blueprint Loader ModInfo from `src/ui/mod-info.json`
+and `manifest.json`. NeoRune packages the ModInfo discovery header itself; do not
+run the legacy `tools/ModInfoBuilder` afterward, because it would discard generated
+Mods-tab settings. Use the CLI build command above rather than the SDK's automatic
+MSBuild install target. This recipe never installs into the game.
+
+The output includes the three UI payload files and a source/tool/payload receipt.
+Only those three payload files belong in the installer; keep compiler logs and
+SDK inputs out. Candidate UI changes require a matching rebuilt archive and
+receipt before native CI may reuse them. The NeoRune 1.0.0/.NET 10.0.402 compiler
+build has passed on Linux; gameplay and Windows runtime qualification of its
+output remain required. Existing release archives are unchanged.
 
 Build the independent display/latency addon with `build_latency.py --streamline-sdk PATH --windows-sysroot PATH --reshade-include PATH --output PATH`. Streamline SDK **2.14.1** and the Microsoft C++/Windows SDK sysroot are acquired separately under their own terms. It builds the MSVC ABI bridge and MinGW addon with the preserved frame-size guard; it does not rebuild or alter the released SR renderer. Compiler paths can be supplied explicitly. This Linux-hosted recipe is not a Windows source-build qualification.
 
-Stage the seven own payload files with exactly the hashes in manifest.json. Build each standalone installer using .NET SDK **10.0.401**, Avalonia **11.3.22** and its committed package lock:
+Stage the seven own payload files with exactly the hashes in manifest.json. Build each standalone installer using .NET SDK **10.0.402**, Avalonia **11.3.22** and its committed package lock:
 
 ```text
 python build_installer.py --dotnet PATH --payload PATH --rid linux-x64 --output PATH

@@ -2,6 +2,18 @@ from pathlib import Path
 import importlib.util,os,re,shutil,subprocess,tempfile,unittest
 ROOT=Path(__file__).resolve().parents[1]
 class NativeFgTests(unittest.TestCase):
+ def test_capability_cache_is_bound_to_device_lifetime_and_packaged(self):
+  controls=(ROOT/'experiments/fg-streamline/fg_controls.hpp').read_text()
+  guide=(ROOT/'experiments/fg-streamline/guide_recon.cpp').read_text()
+  recipe=(ROOT/'experiments/fg-streamline/build_probe.py').read_text()
+  self.assertIn('amdCapabilities.query(reinterpret_cast<std::uintptr_t>(device),reinterpret_cast<std::uintptr_t>(amd)',controls)
+  self.assertIn('return amdSupport(native)',controls)
+  self.assertIn('E(destroy_device,destroy_device)',guide)
+  for name in ('init_device','destroy_device'):
+   body=guide.split('void '+name+'(',1)[1].split('\n',1)[0]
+   self.assertIn('fg_controls::forget_device(device)',body)
+  self.assertIn("'src/providers/fg_capability_cache.hpp'",recipe)
+  self.assertIn('currentRequest&&selection.pairEligible&&available&&intent.mode&&intent.ready&&intent.session==session',controls)
  def test_admission_executable(self):
   if os.name=='nt':self.skipTest('Windows CI runs the native admission executable in its configured C++ toolchain step')
   compiler=shutil.which('g++') or shutil.which('clang++')

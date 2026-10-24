@@ -1,11 +1,13 @@
 # Guided installation — 0.3.0-preview.1
 
+For the upcoming FSR release, use the [dev.25 candidate guide](docs/DEV25_RELEASE_CANDIDATE.md). Its tested Windows/Radeon and Linux/NVIDIA dependency sets use Loader 2.6 and 2.7 respectively. It has not been published; the instructions below still identify the existing 0.3.0-preview.1 downloads.
+
 Download the compiled **Windows** or **Linux** installer from the [release Assets](https://github.com/SpinGiantCRM/mcd2-graphics/releases/tag/v0.3.0-preview.1). Extract the **entire folder** before running it. GitHub's automatic source archives are for developers. No separate Python or .NET installation is needed.
 
 ## Install
 
 1. Use a legally obtained Steam game that already launches and signs in normally. Launch once, then close it. Xbox app / Microsoft Store PC compatibility remains unverified.
-2. Run **MCD2-Graphics-Installer.exe** on Windows or **mcd2-graphics-installer** on Linux.
+2. Run **MCD2-Graphics-Installer.exe** on Windows or **mcd2-graphics-installer** on Linux. If Linux reports “Permission denied,” enable **Allow executing file as program** in the file properties, or run `chmod +x mcd2-graphics-installer` from the extracted folder.
 3. **Game:** choose the detected Steam installation or Browse. The supported executable and build are verified.
 4. **Requirements:** select official Blueprint Loader, RenoDX and NVIDIA dependency downloads. Select the separate **ReShade-PR435-4eb9056-reset-epoch-msvc-x64.zip** from the same release under ReShade. The installer verifies and places each dependency; downloads and license acceptance stay under your control.
 5. **Install:** install, then launch normally through Steam. Controls are in **Settings → Video**; the Mods page shows version and help.
@@ -45,6 +47,8 @@ Close the game and choose **Uninstall**. Only unchanged recorded own files are r
 ## Support and qualification
 
 **Support → Create diagnostic report** exports allowlisted versions, platform/GPU and file checks/hashes. It excludes private paths, accounts, tokens, party codes, saves and raw logs. Review it before sharing.
+
+For crashes, black lines or shutdown faults, use the [bug report form](https://github.com/SpinGiantCRM/mcd2-graphics/issues/new?template=bug.yml) and [reporting guide](docs/REPORTING_GRAPHICS_PROBLEMS.md). Include FG/HDR state and the exact trigger. Intermittent failures are valid reports; keep raw dumps and full log folders private.
 
 Bounded [Linux/NVIDIA](docs/LINUX_FINAL_QUALIFICATION_2026-10-07.md) and [Windows/AMD installer/fallback](docs/WINDOWS_FULL_QUALIFICATION_2026-10-07.md) results apply to the exact [released hashes](qualification/fg-release/release-artifacts-2026-10-07.json). Windows NVIDIA active features/HDR, physical controllers, long sessions and device loss remain unqualified. Windows clean exits sometimes took 85–86 seconds. Historical failures remain documented.
 

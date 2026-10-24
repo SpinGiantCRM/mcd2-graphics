@@ -3,6 +3,7 @@
 #include <chrono>
 #include <cassert>
 #include <iostream>
+#include <cstring>
 std::atomic<bool> entered{false},allow{false},live{true},terminal{false};
 std::atomic<unsigned> calls{0},destroyed{0};
 std::atomic<bool> finalReleaseEntered{false},allowFinalRelease{false};
@@ -54,11 +55,32 @@ public:
  HRESULT STDMETHODCALLTYPE ResizeBuffers1(UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT Format, UINT SwapChainFlags, const UINT *pCreationNodeMask, IUnknown *const *ppPresentQueue) override {return S_OK;}
  HRESULT STDMETHODCALLTYPE SetHDRMetaData(DXGI_HDR_METADATA_TYPE Type, UINT Size, void *pMetaData) override {assert(Type==DXGI_HDR_METADATA_TYPE_HDR10&&Size==9&&pMetaData==reinterpret_cast<void*>(42));return HRESULT(321);}
 };
+unsigned metadataPhase=0;
+const GUID dataKey={9,8,7,{6,5,4,3,2,1,0,9}};
+HRESULT inspectResize(IDXGISwapChain4*& raw,UINT count,UINT width,UINT height,DXGI_FORMAT format,UINT flags,const MCD2PresentationState& state){
+ assert(state.colourSet&&state.colour==DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020);
+ assert(state.latencySet&&state.latency==2&&state.handleIssued);
+ if(metadataPhase==0){unsigned value=0;assert(state.privateData.size()==1&&IsEqualGUID(state.privateData[0].id,dataKey)&&state.privateData[0].bytes.size()==sizeof(value));std::memcpy(&value,state.privateData[0].bytes.data(),sizeof(value));assert(value==12345&&state.privateComplete);}
+ else if(metadataPhase==1)assert(state.privateData.empty()&&state.privateComplete);
+ else assert(!state.privateComplete);
+ return raw->ResizeBuffers(count,width,height,format,flags);
+}
 int main(){
  std::mutex gate;auto raw=new Fake;auto outer=new MCD2SynchronizedSwapchain(raw,gate,isLive,isTerminal);
  for(const auto& iid:{IID_IUnknown,IID_IDXGIObject,IID_IDXGIDeviceSubObject,IID_IDXGISwapChain,IID_IDXGISwapChain1,IID_IDXGISwapChain2,IID_IDXGISwapChain3,IID_IDXGISwapChain4}){void* p=nullptr;assert(outer->QueryInterface(iid,&p)==S_OK&&p==outer);static_cast<IUnknown*>(p)->Release();}
  const GUID unknown={1,2,3,{4,5,6,7,8,9,10,11}};void* unknownOut=reinterpret_cast<void*>(1);assert(outer->QueryInterface(unknown,&unknownOut)==E_NOINTERFACE&&!unknownOut);assert(outer->QueryInterface(IID_IUnknown,nullptr)==E_POINTER);
  assert(outer->GetCurrentBackBufferIndex()==7);assert(outer->GetFrameLatencyWaitableObject()==reinterpret_cast<HANDLE>(123));assert(outer->SetHDRMetaData(DXGI_HDR_METADATA_TYPE_HDR10,9,reinterpret_cast<void*>(42))==HRESULT(321));
+ // Capture is optional for the legacy constructor. An enabled callback gets
+ // copied binary metadata and explicit unsafe-handle/budget observations.
+ auto inspected=new MCD2SynchronizedSwapchain(raw,gate,isLive,isTerminal,inspectResize);
+ unsigned metadata=12345;assert(inspected->SetPrivateData(dataKey,sizeof(metadata),&metadata)==S_OK);
+ assert(inspected->SetColorSpace1(DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020)==S_OK);
+ assert(inspected->SetMaximumFrameLatency(2)==S_OK);assert(inspected->GetFrameLatencyWaitableObject()==reinterpret_cast<HANDLE>(123));
+ assert(inspected->ResizeBuffers(3,64,64,DXGI_FORMAT_R10G10B10A2_UNORM,0)==S_OK);
+ assert(inspected->SetPrivateData(dataKey,0,nullptr)==S_OK);metadataPhase=1;
+ assert(inspected->ResizeBuffers(3,64,64,DXGI_FORMAT_R10G10B10A2_UNORM,0)==S_OK);
+ assert(inspected->SetPrivateData(dataKey,65537,reinterpret_cast<void*>(42))==S_OK);metadataPhase=2;
+ assert(inspected->ResizeBuffers(3,64,64,DXGI_FORMAT_R10G10B10A2_UNORM,0)==S_OK);assert(inspected->Release()==0);
  for(bool present1:{false,true}){
   entered=false;allow=false;std::atomic<bool> attempted{false},prepared{false};
   std::thread a([&]{auto r=present1?outer->Present1(0,0,nullptr):outer->Present(0,0);assert(r==S_FALSE);});until(entered);

@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "implementationCommit": "c9f011a5bdc8dd6fd50885eeb8c2986764183755",
+  "guideSHA256": "a46dd699a879ae1a41fca56b1fbb82ad69551ddb4d30da39a2585b0f41081284",
+  "frameworkSHA256": "379dc8d812304cae5d4cd85e65e2dac4899b14db856d57d3540e6fdf750e39b4",
+  "originalNativeArchiveSHA256": "d7826ce0b330595d0a66bfbee3e3275e129519ebdabc443a0fc6b02d1462661f",
+  "guideOnlySubstitution": true,
+  "diagnosticInstrumentation": false,
+  "host": "Linux/NVIDIA RTX 4080 SUPER",
+  "fullRebuiltArchiveQualified": false,
+  "nvidia": {
+    "startupAndTemporaryPauseResumePassed": true,
+    "retiredOnRefused": true,
+    "restartRequiredAfterPermanentRelease": true
+  },
+  "amd": {
+    "liveOffOnPassed": true,
+    "generatedCountStoppedWhileOff": true,
+    "realPresentsAdvancedWhileOff": true,
+    "onObservationRealDelta": 3600,
+    "onObservationGeneratedDelta": 3600,
+    "onRestartRequired": false,
+    "sdkFaultErrorsWarnings": 0
+  },
+  "processExits": {
+    "nvidia": {
+      "heldExitCode": 0,
+      "confirmationToGoneSeconds": 4.485133946998758,
+      "restoredByteForByte": true,
+      "sharedSDKRetirementResult": 0
+    },
+    "amd": {
+      "heldExitCode": 0,
+      "confirmationToGoneSeconds": 3.8705028730000777,
+      "restoredByteForByte": true,
+      "sharedSDKRetirementResult": 0
+    }
+  },
+  "windowsRadeonQualified": false,
+  "rawDiagnosticsPublished": false,
+  "physicalDisplayFPSMeasured": false,
+  "inputLatencyMeasured": false
+}

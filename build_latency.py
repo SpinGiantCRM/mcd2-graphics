@@ -18,7 +18,7 @@ for i in ['crt/include','sdk/include/ucrt','sdk/include/shared','sdk/include/um'
 exports=['verify','init','set_device','mode_limit','mode','begin','index','sleep','marker','state','report_range','pcl_message','shutdown']
 link=[a.linker,'/dll','/out:'+str(o/'mcd2-streamline-bridge.dll'),str(o/'streamline_bridge.obj')]+['/export:mcd2_sl_'+x for x in exports]+['kernel32.lib','user32.lib','wintrust.lib','crypt32.lib','advapi32.lib','shell32.lib']
 for l in ['crt/lib/x86_64','sdk/lib/ucrt/x86_64','sdk/lib/um/x86_64']:link+=['/libpath:'+str(a.windows_sysroot.resolve()/l)]
-commands=[cmd,link,[a.mingw_cxx,'-std=c++20','-O2',*native_frame_guard(a.mingw_cxx),'-shared','-static','-s','-I'+str(inc),str(src/'latency_addon.cpp'),'-o',str(o/'mcd2-display-latency.addon64'),'-ld3d12','-ldxgi','-ld3dcompiler','-lole32','-luuid']]
+commands=[cmd,link,[a.mingw_cxx,'-std=c++20','-O2',*native_frame_guard(a.mingw_cxx),'-shared','-static','-s','-I'+str(inc),str(src/'latency_addon.cpp'),'-o',str(o/'mcd2-display-latency.addon64'),'-ld3d12','-ldxgi','-ld3dcompiler','-lole32','-luuid','-lversion']]
 with(o/'build.log').open('w')as log:
  for command in commands:subprocess.run(command,stdout=log,stderr=subprocess.STDOUT,check=True)
 amd_bridge=build_amd_bridge(a.windows_sysroot.resolve(),o/'amd-latency',a.clang_cl,a.linker)

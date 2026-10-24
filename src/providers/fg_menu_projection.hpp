@@ -24,4 +24,18 @@ constexpr bool fgMenuMatches(const FgMenuProjection& current,std::uint32_t revis
 constexpr bool fgOwnerMatches(std::uint32_t owner,std::uint32_t provider){
     return provider<2&&owner==provider+1;
 }
+// A matching startup presenter cannot revive a permanently retired FG session.
+// Temporary menu suspension does not retire it; AMD live Off/On retains it.
+constexpr bool fgMenuRestartRequired(bool available,bool enabled,std::uint32_t owner,
+                                     std::uint32_t provider,bool retired){
+    return available&&(retired||(enabled?!fgOwnerMatches(owner,provider):owner!=0));
+}
+// A verified engine resize may already have restored AMD's native Off route.
+// This acknowledges that completed Off transition only; it never admits On,
+// revives a retired feature or changes NVIDIA's restart requirement.
+constexpr bool fgMenuNativeOffRecovered(bool currentRequest,bool available,bool enabled,
+                                        std::uint32_t provider,std::uint32_t route,
+                                        std::uint32_t canSwitch,std::uint32_t fault,bool retired){
+    return currentRequest&&available&&!enabled&&provider==1&&route==1&&canSwitch==1&&fault==0&&!retired;
+}
 } // namespace mcd2::providers

@@ -1,0 +1,1164 @@
+{
+  "date": "2026-10-19",
+  "candidateVersion": "0.4.0-amd.dev.17",
+  "reviewedBranchCommit": "7ecc1ebe63648c7594cd539de6d2af44f0b72ff2",
+  "nativeSourceCommit": "cbc34b8d78ba77933ebc491da851acc615b8af55",
+  "gameLaunchedDuringThisOfflinePass": false,
+  "gameIntegrationQualified": false,
+  "windowsRuntimeQualified": false,
+  "platform": {
+    "os": "Windows 11",
+    "gpu": "AMD Radeon 860M",
+    "driver": "32.0.31041.1004"
+  },
+  "buildReceiptSHA256": {
+    "FG": "9465c9508436da7e70bafc996629215745e39d71d6f6b261cf3ac7c8dd03594a",
+    "SR": "eca23de201a37b738543feb15c60bacb940c16784b33185cf85a124dc68ccab5"
+  },
+  "pythonTests": [
+    {
+      "name": "test_process_exit",
+      "tests": 11,
+      "exitCode": 0,
+      "logSHA256": "76c0379ecbc81237f78511318d61707867e319ee4596aaa23914f25bd6bb56e2"
+    },
+    {
+      "name": "test_shared_sdk_shutdown",
+      "tests": 7,
+      "exitCode": 0,
+      "logSHA256": "ed35b243d026d34139ac8e0f061ac69dce8e2b2ed1b7654d30df6d094ca45da9"
+    },
+    {
+      "name": "test_fsr_presenter_switch",
+      "tests": 3,
+      "exitCode": 0,
+      "logSHA256": "b57495966561e5f97af0bedd73aeeb7e917a23a72076c83631e5293e9900d128"
+    },
+    {
+      "name": "test_fsr_presenter_resize",
+      "tests": 4,
+      "exitCode": 0,
+      "logSHA256": "e0ec25eb841247a7c6a112cd448ab62f7a72e2484d7820b65e29e13e6d902721"
+    },
+    {
+      "name": "test_sr_menu_controls",
+      "tests": 2,
+      "exitCode": 0,
+      "logSHA256": "90ebe7b9156352b770aa5749d0191816c971f501f5ae773f5a8585c98c154ad1"
+    },
+    {
+      "name": "provider-store",
+      "tests": 5,
+      "exitCode": 0,
+      "logSHA256": "7d95d56537bd01d23e0705ef65af61819c010a10b2c49cf05a8b3066e2961d4f"
+    }
+  ],
+  "nativeAndInstallerChecks": [
+    {
+      "name": "ngx-shutdown-abi-corrected",
+      "exitCode": 0,
+      "logSHA256": "48092cd6fed21cd25ecdcb1cb9c1fbc941e4e796f1301faedb7d2a70318acc63",
+      "checks": 37
+    },
+    {
+      "name": "test_sr_owned_retirement",
+      "exitCode": 0,
+      "logSHA256": "155d4b55c70a48ddcf586bd8175fcfd91eecdef259a260e7919db641ef5a1538",
+      "checks": 14
+    },
+    {
+      "name": "shared_sdk_shutdown_test",
+      "exitCode": 0,
+      "logSHA256": "d4e209ca2aa7235e649222095eacefa8137b3f65f0abebc94bb3740c984500aa",
+      "checks": 128
+    },
+    {
+      "name": "test_bootstrap_shutdown_trace",
+      "exitCode": 0,
+      "logSHA256": "82665795d6ace53069e6272dc02efbe178e09fb2597304b19c16453c425ac105"
+    },
+    {
+      "name": "test_process_exit_windows",
+      "exitCode": 0,
+      "logSHA256": "b3b63d4f423249fa3ad8bcf3375dcdb84d743eac5a57f26142260337c39bf148"
+    },
+    {
+      "name": "process_exit_lifetime_test",
+      "exitCode": 0,
+      "logSHA256": "b5fe83d150e940d41895c89b43c3c7e2b8c080f26e3c7304aa13e3788bb03b9f"
+    },
+    {
+      "name": "installer-core",
+      "exitCode": 0,
+      "logSHA256": "6472e3cea4c3faa0bd69ad27aab067e2ef907fa7af47b4ce6d987ce4657eb176",
+      "checks": 132
+    },
+    {
+      "name": "lean_borrow_lifetime_test",
+      "exitCode": 0
+    },
+    {
+      "name": "fg_provider_protocol_test",
+      "exitCode": 0,
+      "coverage": "10,000 cached supported and 10,000 cached unsupported lookups, device/module identity, initialization retry and synthetic provider protocol"
+    }
+  ],
+  "ownedHostProbes": [
+    {
+      "case": "bridge-sdr",
+      "exitCode": 0,
+      "timeout": false,
+      "seconds": 4.953,
+      "passed": true,
+      "nativeWindows": true,
+      "gameLaunched": false,
+      "gameIntegrationQualified": false,
+      "performanceQualified": false,
+      "inputsSHA256": {
+        "fsr-fg-game-bridge-probe.exe": "e3e5c72711ef94b5bd104930a0b5a260f16c5942e979cafe947b127721bd0def",
+        "mcd2-fsr-fg-game-bridge.dll": "7e639097cd841b20bb96f43e99acbd38df98feaf6e296f9ca3c8759077a23ab9",
+        "amd_fidelityfx_framegeneration_dx12.dll": "02297beedd285e822d3a64f314cf00faf378dcec0edc47ff0c4dd71b3a8c2f18"
+      },
+      "eventCounts": {
+        "clear-antilag-after-presentation": 1,
+        "clear-antilag-before-presentation": 1,
+        "complete": 1,
+        "configure-bridge-present": 120,
+        "configure-output-contract": 1,
+        "copy-hudless-world": 60,
+        "create-bridge-swapchain": 1,
+        "host-recording-replay-after-SDK-retirement": 1,
+        "idempotent-retirement": 1,
+        "load-verified-runtime": 1,
+        "owned-presenter-antilag-ready": 1,
+        "owned-recording-contract": 1,
+        "phase": 3,
+        "prepare-game-bridge-inputs": 60,
+        "reject-unrelated-submission-queue": 1,
+        "retire-with-replayable-host-recording": 1,
+        "set-presentation-colour": 1
+      },
+      "phases": [
+        {
+          "stage": "phase",
+          "phase": 0,
+          "enabled": false,
+          "real": 30,
+          "generated": 0,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "phase",
+          "phase": 1,
+          "enabled": true,
+          "real": 60,
+          "generated": 60,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "phase",
+          "phase": 2,
+          "enabled": false,
+          "real": 30,
+          "generated": 0,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "complete",
+          "result": 0
+        }
+      ],
+      "phaseCount": 3,
+      "trialCount": 0,
+      "applicationJSONLSHA256": "ac3707410fabdaf088d8036b1b837f5bcf88cd32a4316fb59e260377f6290cc6",
+      "settingsIsolation": "No provider-store writes in this host"
+    },
+    {
+      "case": "bridge-pq",
+      "exitCode": 0,
+      "timeout": false,
+      "seconds": 4.281,
+      "passed": true,
+      "nativeWindows": true,
+      "gameLaunched": false,
+      "gameIntegrationQualified": false,
+      "performanceQualified": false,
+      "inputsSHA256": {
+        "fsr-fg-game-bridge-probe.exe": "e3e5c72711ef94b5bd104930a0b5a260f16c5942e979cafe947b127721bd0def",
+        "mcd2-fsr-fg-game-bridge.dll": "7e639097cd841b20bb96f43e99acbd38df98feaf6e296f9ca3c8759077a23ab9",
+        "amd_fidelityfx_framegeneration_dx12.dll": "02297beedd285e822d3a64f314cf00faf378dcec0edc47ff0c4dd71b3a8c2f18"
+      },
+      "eventCounts": {
+        "clear-antilag-after-presentation": 1,
+        "clear-antilag-before-presentation": 1,
+        "complete": 1,
+        "configure-bridge-present": 120,
+        "configure-output-contract": 1,
+        "copy-hudless-world": 60,
+        "create-bridge-swapchain": 1,
+        "host-recording-replay-after-SDK-retirement": 1,
+        "idempotent-retirement": 1,
+        "load-verified-runtime": 1,
+        "owned-presenter-antilag-ready": 1,
+        "owned-recording-contract": 1,
+        "phase": 3,
+        "prepare-game-bridge-inputs": 60,
+        "reject-unrelated-submission-queue": 1,
+        "retire-with-replayable-host-recording": 1,
+        "set-presentation-colour": 1
+      },
+      "phases": [
+        {
+          "stage": "phase",
+          "phase": 0,
+          "enabled": false,
+          "real": 30,
+          "generated": 0,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "phase",
+          "phase": 1,
+          "enabled": true,
+          "real": 60,
+          "generated": 60,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "phase",
+          "phase": 2,
+          "enabled": false,
+          "real": 30,
+          "generated": 0,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "complete",
+          "result": 0
+        }
+      ],
+      "phaseCount": 3,
+      "trialCount": 0,
+      "applicationJSONLSHA256": "ac3707410fabdaf088d8036b1b837f5bcf88cd32a4316fb59e260377f6290cc6",
+      "settingsIsolation": "No provider-store writes in this host"
+    },
+    {
+      "case": "switch-sdr",
+      "exitCode": 0,
+      "timeout": false,
+      "seconds": 15.812,
+      "passed": true,
+      "nativeWindows": true,
+      "gameLaunched": false,
+      "gameIntegrationQualified": false,
+      "performanceQualified": false,
+      "inputsSHA256": {
+        "presenter-switch-probe.exe": "db1f1bc3ee6956bfc8ce7248a2a8a4f7ff0a5a474937c2da31bfb8b8a4cb6011",
+        "mcd2-fsr-fg-game-bridge.dll": "7e639097cd841b20bb96f43e99acbd38df98feaf6e296f9ca3c8759077a23ab9",
+        "amd_fidelityfx_framegeneration_dx12.dll": "02297beedd285e822d3a64f314cf00faf378dcec0edc47ff0c4dd71b3a8c2f18"
+      },
+      "eventCounts": {
+        "clear-antilag-before-presentation": 1,
+        "complete": 1,
+        "concurrent-observer": 1,
+        "configure-bridge-present": 150,
+        "configure-output-contract": 1,
+        "copy-hudless-world": 120,
+        "create-bridge-swapchain": 1,
+        "load-verified-runtime": 1,
+        "owned-presenter-antilag-ready": 1,
+        "owned-recording-contract": 1,
+        "phase": 6,
+        "prepare-game-bridge-inputs": 120,
+        "reject-empty-target": 1,
+        "reject-unrelated-submission-queue": 1,
+        "reject-unsafe-switch": 5,
+        "set-presentation-colour": 1,
+        "switch": 5
+      },
+      "phases": [
+        {
+          "stage": "phase",
+          "phase": 0,
+          "enabled": false,
+          "sdkOwner": true,
+          "real": 30,
+          "generated": 0,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "phase",
+          "phase": 1,
+          "enabled": false,
+          "sdkOwner": false,
+          "real": 30,
+          "generated": 0,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "phase",
+          "phase": 2,
+          "enabled": true,
+          "sdkOwner": true,
+          "real": 60,
+          "generated": 60,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "phase",
+          "phase": 3,
+          "enabled": false,
+          "sdkOwner": false,
+          "real": 30,
+          "generated": 0,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "phase",
+          "phase": 4,
+          "enabled": true,
+          "sdkOwner": true,
+          "real": 60,
+          "generated": 60,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "phase",
+          "phase": 5,
+          "enabled": false,
+          "sdkOwner": false,
+          "real": 30,
+          "generated": 0,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "complete",
+          "result": 0
+        }
+      ],
+      "phaseCount": 6,
+      "trialCount": 0,
+      "applicationJSONLSHA256": "f1d3b724399e3056ef81a7eb596d60658c4d68b14d1e88a01aeb0d2c8fe4f368",
+      "settingsIsolation": "No provider-store writes in this host"
+    },
+    {
+      "case": "switch-pq",
+      "exitCode": 0,
+      "timeout": false,
+      "seconds": 15.016,
+      "passed": true,
+      "nativeWindows": true,
+      "gameLaunched": false,
+      "gameIntegrationQualified": false,
+      "performanceQualified": false,
+      "inputsSHA256": {
+        "presenter-switch-probe.exe": "db1f1bc3ee6956bfc8ce7248a2a8a4f7ff0a5a474937c2da31bfb8b8a4cb6011",
+        "mcd2-fsr-fg-game-bridge.dll": "7e639097cd841b20bb96f43e99acbd38df98feaf6e296f9ca3c8759077a23ab9",
+        "amd_fidelityfx_framegeneration_dx12.dll": "02297beedd285e822d3a64f314cf00faf378dcec0edc47ff0c4dd71b3a8c2f18"
+      },
+      "eventCounts": {
+        "clear-antilag-before-presentation": 1,
+        "complete": 1,
+        "concurrent-observer": 1,
+        "configure-bridge-present": 150,
+        "configure-output-contract": 1,
+        "copy-hudless-world": 120,
+        "create-bridge-swapchain": 1,
+        "load-verified-runtime": 1,
+        "owned-presenter-antilag-ready": 1,
+        "owned-recording-contract": 1,
+        "phase": 6,
+        "prepare-game-bridge-inputs": 120,
+        "reject-empty-target": 1,
+        "reject-unrelated-submission-queue": 1,
+        "reject-unsafe-switch": 5,
+        "set-presentation-colour": 1,
+        "switch": 5
+      },
+      "phases": [
+        {
+          "stage": "phase",
+          "phase": 0,
+          "enabled": false,
+          "sdkOwner": true,
+          "real": 30,
+          "generated": 0,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "phase",
+          "phase": 1,
+          "enabled": false,
+          "sdkOwner": false,
+          "real": 30,
+          "generated": 0,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "phase",
+          "phase": 2,
+          "enabled": true,
+          "sdkOwner": true,
+          "real": 60,
+          "generated": 60,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "phase",
+          "phase": 3,
+          "enabled": false,
+          "sdkOwner": false,
+          "real": 30,
+          "generated": 0,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "phase",
+          "phase": 4,
+          "enabled": true,
+          "sdkOwner": true,
+          "real": 60,
+          "generated": 60,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "phase",
+          "phase": 5,
+          "enabled": false,
+          "sdkOwner": false,
+          "real": 30,
+          "generated": 0,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "complete",
+          "result": 0
+        }
+      ],
+      "phaseCount": 6,
+      "trialCount": 0,
+      "applicationJSONLSHA256": "ecc8f031acce0f986550633fe73b704e4ee79bf2eeb70cc0192a9303c05d870e",
+      "settingsIsolation": "No provider-store writes in this host"
+    },
+    {
+      "case": "resize-sdr-on-exit-isolated",
+      "exitCode": 0,
+      "timeout": false,
+      "seconds": 18.672,
+      "passed": true,
+      "nativeWindows": true,
+      "gameLaunched": false,
+      "gameIntegrationQualified": false,
+      "performanceQualified": false,
+      "inputsSHA256": {
+        "presenter-resize-probe.exe": "81aaf9c50497ef6f40fef6390144297d4bf0ac493737c0d60d9543f07648b438",
+        "mcd2-fsr-fg-game-bridge.dll": "7e639097cd841b20bb96f43e99acbd38df98feaf6e296f9ca3c8759077a23ab9",
+        "amd_fidelityfx_framegeneration_dx12.dll": "02297beedd285e822d3a64f314cf00faf378dcec0edc47ff0c4dd71b3a8c2f18"
+      },
+      "eventCounts": {
+        "clear-antilag-before-presentation": 1,
+        "complete": 1,
+        "configure-bridge-present": 270,
+        "configure-output-contract": 1,
+        "copy-hudless-world": 180,
+        "create-bridge-swapchain": 1,
+        "load-verified-runtime": 1,
+        "owned-presenter-antilag-ready": 1,
+        "owned-recording-contract": 1,
+        "phase": 6,
+        "prepare-game-bridge-inputs": 180,
+        "presenter-handoff": 4,
+        "reject-unrelated-submission-queue": 1,
+        "retire-request-state": 1,
+        "set-presentation-colour": 1
+      },
+      "phases": [
+        {
+          "stage": "phase",
+          "phase": 0,
+          "enabled": false,
+          "real": 30,
+          "generated": 0,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "phase",
+          "phase": 1,
+          "enabled": true,
+          "real": 60,
+          "generated": 60,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "phase",
+          "phase": 2,
+          "enabled": false,
+          "real": 30,
+          "generated": 0,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "phase",
+          "phase": 3,
+          "enabled": true,
+          "real": 60,
+          "generated": 60,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "phase",
+          "phase": 4,
+          "enabled": false,
+          "real": 30,
+          "generated": 0,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "phase",
+          "phase": 5,
+          "enabled": true,
+          "real": 60,
+          "generated": 60,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "complete",
+          "result": 0
+        }
+      ],
+      "phaseCount": 6,
+      "trialCount": 0,
+      "applicationJSONLSHA256": "adabb7c3c3c6e3a1863a21f601c6236d5cea8d8285d18de9e03cbcf930079f00",
+      "settingsIsolation": "LOCALAPPDATA redirected to disposable per-probe folder"
+    },
+    {
+      "case": "resize-pq-on-exit-isolated",
+      "exitCode": 0,
+      "timeout": false,
+      "seconds": 17.578,
+      "passed": true,
+      "nativeWindows": true,
+      "gameLaunched": false,
+      "gameIntegrationQualified": false,
+      "performanceQualified": false,
+      "inputsSHA256": {
+        "presenter-resize-probe.exe": "81aaf9c50497ef6f40fef6390144297d4bf0ac493737c0d60d9543f07648b438",
+        "mcd2-fsr-fg-game-bridge.dll": "7e639097cd841b20bb96f43e99acbd38df98feaf6e296f9ca3c8759077a23ab9",
+        "amd_fidelityfx_framegeneration_dx12.dll": "02297beedd285e822d3a64f314cf00faf378dcec0edc47ff0c4dd71b3a8c2f18"
+      },
+      "eventCounts": {
+        "clear-antilag-before-presentation": 1,
+        "complete": 1,
+        "configure-bridge-present": 270,
+        "configure-output-contract": 1,
+        "copy-hudless-world": 180,
+        "create-bridge-swapchain": 1,
+        "load-verified-runtime": 1,
+        "owned-presenter-antilag-ready": 1,
+        "owned-recording-contract": 1,
+        "phase": 6,
+        "prepare-game-bridge-inputs": 180,
+        "presenter-handoff": 4,
+        "reject-unrelated-submission-queue": 1,
+        "retire-request-state": 1,
+        "set-presentation-colour": 1
+      },
+      "phases": [
+        {
+          "stage": "phase",
+          "phase": 0,
+          "enabled": false,
+          "real": 30,
+          "generated": 0,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "phase",
+          "phase": 1,
+          "enabled": true,
+          "real": 60,
+          "generated": 60,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "phase",
+          "phase": 2,
+          "enabled": false,
+          "real": 30,
+          "generated": 0,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "phase",
+          "phase": 3,
+          "enabled": true,
+          "real": 60,
+          "generated": 60,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "phase",
+          "phase": 4,
+          "enabled": false,
+          "real": 30,
+          "generated": 0,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "phase",
+          "phase": 5,
+          "enabled": true,
+          "real": 60,
+          "generated": 60,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "complete",
+          "result": 0
+        }
+      ],
+      "phaseCount": 6,
+      "trialCount": 0,
+      "applicationJSONLSHA256": "adabb7c3c3c6e3a1863a21f601c6236d5cea8d8285d18de9e03cbcf930079f00",
+      "settingsIsolation": "LOCALAPPDATA redirected to disposable per-probe folder"
+    },
+    {
+      "case": "sr-presets-native",
+      "exitCode": 0,
+      "timeout": false,
+      "seconds": 3.172,
+      "passed": true,
+      "nativeWindows": true,
+      "gameLaunched": false,
+      "gameIntegrationQualified": false,
+      "performanceQualified": false,
+      "inputsSHA256": {
+        "fsr-owned-inputs.exe": "b2bb47038505cab8fdb745b85f3f7c05bcb0cef0b5da28cde4c638ed3d7df314",
+        "amd_fidelityfx_upscaler_dx12.dll": "d0dcccc74a43c44ba435b7a369b456e0970d8a4464e4bd683119b374f2c9fb46"
+      },
+      "eventCounts": {
+        "complete": 1,
+        "confirm-active-provider": 10,
+        "create-context": 10,
+        "destroy-context-after-fence": 10,
+        "destroy-returned-context-nonnull": 10,
+        "device": 1,
+        "dispatch-owned-inputs": 160,
+        "factory": 1,
+        "framework": 1,
+        "load-pinned-upscaler": 1,
+        "provider": 2,
+        "query-provider-count": 1,
+        "query-provider-versions": 1,
+        "query-render-resolution": 10,
+        "readback": 160,
+        "release-RTV-heap": 10,
+        "release-owned-image": 70,
+        "release-readback": 10,
+        "rendering-adapter": 1,
+        "retired-owned-resources": 11,
+        "trial": 10
+      },
+      "phases": [
+        {
+          "stage": "framework",
+          "requested": false,
+          "exports": false,
+          "deviceWrapped": false
+        },
+        {
+          "stage": "trial",
+          "trial": 0,
+          "HDR": false,
+          "quality": 0,
+          "renderWidth": 1280,
+          "renderHeight": 720
+        },
+        {
+          "stage": "trial",
+          "trial": 1,
+          "HDR": false,
+          "quality": 1,
+          "renderWidth": 853,
+          "renderHeight": 480
+        },
+        {
+          "stage": "trial",
+          "trial": 2,
+          "HDR": false,
+          "quality": 2,
+          "renderWidth": 752,
+          "renderHeight": 423
+        },
+        {
+          "stage": "trial",
+          "trial": 3,
+          "HDR": false,
+          "quality": 3,
+          "renderWidth": 640,
+          "renderHeight": 360
+        },
+        {
+          "stage": "trial",
+          "trial": 4,
+          "HDR": false,
+          "quality": 4,
+          "renderWidth": 426,
+          "renderHeight": 240
+        },
+        {
+          "stage": "trial",
+          "trial": 5,
+          "HDR": true,
+          "quality": 0,
+          "renderWidth": 1280,
+          "renderHeight": 720
+        },
+        {
+          "stage": "trial",
+          "trial": 6,
+          "HDR": true,
+          "quality": 1,
+          "renderWidth": 853,
+          "renderHeight": 480
+        },
+        {
+          "stage": "trial",
+          "trial": 7,
+          "HDR": true,
+          "quality": 2,
+          "renderWidth": 752,
+          "renderHeight": 423
+        },
+        {
+          "stage": "trial",
+          "trial": 8,
+          "HDR": true,
+          "quality": 3,
+          "renderWidth": 640,
+          "renderHeight": 360
+        },
+        {
+          "stage": "trial",
+          "trial": 9,
+          "HDR": true,
+          "quality": 4,
+          "renderWidth": 426,
+          "renderHeight": 240
+        },
+        {
+          "stage": "complete",
+          "dispatches": 160,
+          "SDKerrors": 0,
+          "SDKwarnings": 0,
+          "gameFilesChanged": false
+        }
+      ],
+      "phaseCount": 0,
+      "trialCount": 10,
+      "applicationJSONLSHA256": "9831f359dd5f99f5d11a2dfead6967ee51fb9da3f858029d35dc9e1cfb80fadf",
+      "settingsIsolation": "No provider-store writes in this host"
+    },
+    {
+      "case": "sr-presets-framework",
+      "exitCode": 0,
+      "timeout": false,
+      "seconds": 4.266,
+      "passed": true,
+      "nativeWindows": true,
+      "gameLaunched": false,
+      "gameIntegrationQualified": false,
+      "performanceQualified": false,
+      "inputsSHA256": {
+        "fsr-owned-inputs.exe": "b2bb47038505cab8fdb745b85f3f7c05bcb0cef0b5da28cde4c638ed3d7df314",
+        "amd_fidelityfx_upscaler_dx12.dll": "d0dcccc74a43c44ba435b7a369b456e0970d8a4464e4bd683119b374f2c9fb46",
+        "dxgi.dll": "47d415dd919854b143e942b203e2b595a932a00d543bdb25c971609f4e17427c"
+      },
+      "eventCounts": {
+        "complete": 1,
+        "confirm-active-provider": 10,
+        "create-context": 10,
+        "destroy-context-after-fence": 10,
+        "destroy-returned-context-nonnull": 10,
+        "device": 1,
+        "dispatch-owned-inputs": 160,
+        "factory": 1,
+        "framework": 1,
+        "load-pinned-upscaler": 1,
+        "provider": 2,
+        "query-provider-count": 1,
+        "query-provider-versions": 1,
+        "query-render-resolution": 10,
+        "readback": 160,
+        "release-RTV-heap": 10,
+        "release-owned-image": 70,
+        "release-readback": 10,
+        "rendering-adapter": 1,
+        "retired-owned-resources": 11,
+        "trial": 10
+      },
+      "phases": [
+        {
+          "stage": "framework",
+          "requested": true,
+          "exports": true,
+          "deviceWrapped": true
+        },
+        {
+          "stage": "trial",
+          "trial": 0,
+          "HDR": false,
+          "quality": 0,
+          "renderWidth": 1280,
+          "renderHeight": 720
+        },
+        {
+          "stage": "trial",
+          "trial": 1,
+          "HDR": false,
+          "quality": 1,
+          "renderWidth": 853,
+          "renderHeight": 480
+        },
+        {
+          "stage": "trial",
+          "trial": 2,
+          "HDR": false,
+          "quality": 2,
+          "renderWidth": 752,
+          "renderHeight": 423
+        },
+        {
+          "stage": "trial",
+          "trial": 3,
+          "HDR": false,
+          "quality": 3,
+          "renderWidth": 640,
+          "renderHeight": 360
+        },
+        {
+          "stage": "trial",
+          "trial": 4,
+          "HDR": false,
+          "quality": 4,
+          "renderWidth": 426,
+          "renderHeight": 240
+        },
+        {
+          "stage": "trial",
+          "trial": 5,
+          "HDR": true,
+          "quality": 0,
+          "renderWidth": 1280,
+          "renderHeight": 720
+        },
+        {
+          "stage": "trial",
+          "trial": 6,
+          "HDR": true,
+          "quality": 1,
+          "renderWidth": 853,
+          "renderHeight": 480
+        },
+        {
+          "stage": "trial",
+          "trial": 7,
+          "HDR": true,
+          "quality": 2,
+          "renderWidth": 752,
+          "renderHeight": 423
+        },
+        {
+          "stage": "trial",
+          "trial": 8,
+          "HDR": true,
+          "quality": 3,
+          "renderWidth": 640,
+          "renderHeight": 360
+        },
+        {
+          "stage": "trial",
+          "trial": 9,
+          "HDR": true,
+          "quality": 4,
+          "renderWidth": 426,
+          "renderHeight": 240
+        },
+        {
+          "stage": "complete",
+          "dispatches": 160,
+          "SDKerrors": 0,
+          "SDKwarnings": 0,
+          "gameFilesChanged": false
+        }
+      ],
+      "phaseCount": 0,
+      "trialCount": 10,
+      "applicationJSONLSHA256": "7b1cf500292c1250b68b2f1349221d7ea79275b667b44188c33eb2aadca9c8f7",
+      "settingsIsolation": "No provider-store writes in this host"
+    },
+    {
+      "case": "resize-framework-explicit-load",
+      "exitCode": 0,
+      "timeout": false,
+      "seconds": 21.407,
+      "passed": true,
+      "nativeWindows": true,
+      "gameLaunched": false,
+      "gameIntegrationQualified": false,
+      "diagnosticOnly": true,
+      "productionBridgeUnchanged": true,
+      "modifiedProbeSourceSHA256": "183414f78996787ec1cfc5e1fc6875dc1052fe31cc0ba51bdb33ca776db44dad",
+      "probeSHA256": "d392ede1444b6a7995ce44a7cccf3d217fd2acb1c104c9ffa86949f83bf9ad1e",
+      "inputsSHA256": {
+        "d3d12.asi": "47d415dd919854b143e942b203e2b595a932a00d543bdb25c971609f4e17427c",
+        "mcd2-fsr-fg-game-bridge.dll": "7e639097cd841b20bb96f43e99acbd38df98feaf6e296f9ca3c8759077a23ab9",
+        "amd_fidelityfx_framegeneration_dx12.dll": "02297beedd285e822d3a64f314cf00faf378dcec0edc47ff0c4dd71b3a8c2f18"
+      },
+      "eventCounts": {
+        "clear-antilag-before-presentation": 1,
+        "complete": 1,
+        "configure-bridge-present": 270,
+        "configure-output-contract": 1,
+        "copy-hudless-world": 180,
+        "create-bridge-swapchain": 1,
+        "diagnostic-resize-result": 4,
+        "explicit-framework-device": 1,
+        "load-verified-runtime": 1,
+        "owned-presenter-antilag-ready": 1,
+        "owned-recording-contract": 1,
+        "phase": 6,
+        "prepare-game-bridge-inputs": 180,
+        "presenter-handoff": 4,
+        "reject-unrelated-submission-queue": 1,
+        "retire-request-state": 1,
+        "set-presentation-colour": 1
+      },
+      "phases": [
+        {
+          "stage": "explicit-framework-device",
+          "wrapped": true
+        },
+        {
+          "stage": "phase",
+          "phase": 0,
+          "enabled": false,
+          "real": 30,
+          "generated": 0,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "phase",
+          "phase": 1,
+          "enabled": true,
+          "real": 60,
+          "generated": 60,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "diagnostic-resize-result",
+          "result": 0,
+          "route": 1
+        },
+        {
+          "stage": "phase",
+          "phase": 2,
+          "enabled": false,
+          "real": 30,
+          "generated": 0,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "diagnostic-resize-result",
+          "result": 0,
+          "route": 2
+        },
+        {
+          "stage": "phase",
+          "phase": 3,
+          "enabled": true,
+          "real": 60,
+          "generated": 60,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "diagnostic-resize-result",
+          "result": 0,
+          "route": 1
+        },
+        {
+          "stage": "phase",
+          "phase": 4,
+          "enabled": false,
+          "real": 30,
+          "generated": 0,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "diagnostic-resize-result",
+          "result": 0,
+          "route": 2
+        },
+        {
+          "stage": "phase",
+          "phase": 5,
+          "enabled": true,
+          "real": 60,
+          "generated": 60,
+          "fault": 0,
+          "errors": 0,
+          "warnings": 0
+        },
+        {
+          "stage": "complete",
+          "result": 0
+        }
+      ],
+      "phaseCount": 6,
+      "trialCount": 0,
+      "applicationJSONLSHA256": "2911da1d156306505248bd037da3a35d8a3e516c7d13b6f50272ee7746a60fb6",
+      "settingsIsolation": "LOCALAPPDATA redirected to disposable per-probe folder"
+    }
+  ],
+  "diagnosticLayoutFailure": {
+    "exitCode": 46,
+    "accessViolation": false,
+    "layout": "ReShade copied as application-local dxgi.dll; no mod bootstrap or live settings worker",
+    "explanation": "bootstrapModule identifies an application-local dxgi.dll. desiredNative requires a live menu snapshot in that layout; absent worker refuses handoff. This is not the full installed layout.",
+    "frameworkExportsChecked": {
+      "ReShadeRegisterAddon": true,
+      "mcd2_menu_snapshot_v1": false,
+      "bootstrapFactoryScope": false
+    },
+    "correctedComparison": "Explicitly loaded unchanged framework as d3d12.asi in a modified diagnostic probe; device wrapping verified; all four handoffs and final FG-active retirement passed with unchanged production bridge/runtime."
+  },
+  "testIsolationCorrection": {
+    "initialResizeHostsUsedRealModProviderStore": true,
+    "originalRecordedRevision": 167,
+    "originalRecordedChecksum": 1481197950,
+    "restoredModRecordSHA256": "ab97a77a3aee7ddba5c709f02ec28957aec9f166c45efe70e8d8c36b0ee3db4e",
+    "restoration": "Restored the only candidate consistent with the recorded pre-probe revision/checksum, changing only fields overwritten by the host; subsequent resize/diagnostic tests redirected LOCALAPPDATA and preserved the restored hash.",
+    "playerAccountSavesRead": false,
+    "playerAccountSavesRestored": false
+  },
+  "harnessCorrections": [
+    "NGX ABI standalone script initially invoked through unittest discovery; rerun directly with compiler passed.",
+    "Lean borrow fixture required src/native include directory.",
+    "Provider store wmain build required -municode.",
+    "Installer suite required repository working directory; corrected run passed all132 checks."
+  ],
+  "crashAnalysis": {
+    "newGameWorkerIdentityEstablished": false,
+    "exactGameSHA256": "3a8703406fd50520f83c4f70a0212c000cb3b584ef28eb38032902230c01ebdd",
+    "anchoredReturnRVAs": [
+      "8bf8e9a",
+      "8b10e87",
+      "8aeda25",
+      "8af02cf"
+    ],
+    "gameFunctionBoundsRecovered": [
+      [
+        "8bf8e8c",
+        "8bf8ea1"
+      ],
+      [
+        "8b0e998",
+        "8b168f5"
+      ],
+      [
+        "8aec30c",
+        "8af026c"
+      ],
+      [
+        "8af026c",
+        "8af0eec"
+      ]
+    ],
+    "limitation": "Protected/dynamic game code and absent private symbols prevent a defensible worker identity. No causal evidence for another shutdown patch."
+  },
+  "installedCandidateReverified": {
+    "ownedFiles": 18,
+    "dependencyFiles": 15,
+    "installerFiles": 242,
+    "payloadFiles": 17,
+    "overrides": {}
+  },
+  "remainingGameGates": [
+    "Resolve intermittent ordinary-exit AV and obtain three representative clean full-package exits",
+    "Game SR presets with advancing evaluation/readback and Native restoration",
+    "AMD FG and Anti-Lag advancing counters and Off recovery",
+    "Advanced keyboard/reset/persistence",
+    "Actual game output lifecycle and visual correctness"
+  ],
+  "scope": "Owned synthetic inputs only. HDR-input/PQ-contract passes are not physical HDR display or game-output qualification; generated counts are not a performance claim. Anti-Lag readiness/clear stages do not establish active game Anti-Lag cadence."
+}

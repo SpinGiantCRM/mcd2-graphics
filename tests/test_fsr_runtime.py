@@ -1,4 +1,8 @@
 from pathlib import Path
+import os
+import shutil
+import subprocess
+import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -11,6 +15,23 @@ class FsrRuntimeSourceTests(unittest.TestCase):
         self.source = (ROOT / "src/native/fsr_runtime.hpp").read_text()
         self.record = self.source.split("static bool record(", 1)[1].split("static int load(", 1)[0]
         self.present = self.source.split("static void present(", 1)[1]
+
+    def test_actual_output_copy_accepts_only_bounded_padding(self):
+        start = self.source.index('static bool copy_output(')
+        body = self.source[start:self.source.index('static bool record(', start)]
+        fixture = (ROOT / 'tests/fsr_output_copy_fixture.cpp').read_text()
+        compiler = shutil.which('g++') or shutil.which('clang++')
+        self.assertIsNotNone(compiler, 'Portable C++ compiler required')
+        with tempfile.TemporaryDirectory() as temporary:
+            cpp = Path(temporary) / 'copy.cpp'
+            exe = Path(temporary) / ('copy.exe' if os.name == 'nt' else 'copy')
+            cpp.write_text(fixture.replace('// ACTUAL_COPY_OUTPUT', body))
+            command = [compiler, '-std=c++20', '-Wall', '-Wextra', '-Werror', str(cpp), '-o', str(exe)]
+            if os.name == 'nt':command.insert(1, '-static')
+            built = subprocess.run(command, capture_output=True, text=True)
+            self.assertEqual(built.returncode, 0, built.stdout + built.stderr)
+            ran = subprocess.run([str(exe)], capture_output=True, text=True)
+            self.assertEqual(ran.returncode, 0, ran.stdout + ran.stderr)
 
     def test_default_is_inactive_and_dependencies_are_verified_before_load(self):
         self.assertIn('#define MCD2_FSR_BRIDGE_SHA256 ""', self.source)
@@ -76,6 +97,37 @@ class FsrRuntimeSourceTests(unittest.TestCase):
         observer = (ROOT / 'src/native/observer.cpp').read_text()
         self.assertIn('if(fsr_runtime_record(cmd,x,y,z))return true', observer)
         self.assertIn('fsr_runtime_submit(q,cmd)', observer)
+
+    def test_sr_and_fg_share_actual_gameplay_widget_gate(self):
+        actor = (ROOT / 'src/ui/ModActor.cs').read_text()
+        sr = actor.split('public void PollProviders(){', 1)[1].split('// Keep our recommendation', 1)[0]
+        gate = actor.split('public bool GameplayRenderingAllowed(){', 1)[1].split('\n }', 1)[0]
+        fg = actor.split('public void PollFG(){', 1)[1].split('public void RestoreFoliageVelocity(){', 1)[0]
+        self.assertIn('World.Player(this)!=null && GameplayRenderingAllowed()', sr)
+        self.assertIn('Saved.RenderContextReady==1 && GameplayRenderingAllowed()?1:0', fg)
+        self.assertIn('if(UGameplayStatics.IsGamePaused(this))return false', gate)
+        self.assertIn('foreach(var layer in Layers)', gate)
+        self.assertIn('foreach(var active in LifecycleWidgets)', gate)
+        self.assertIn('GetObjectName(layer)=="Activity_Stack"', gate)
+        self.assertIn('!active.IsActivated()', gate)
+        self.assertIn('GetObjectName(active),true)', gate)
+        self.assertIn('GetObjectName(active),false)', gate)
+        self.assertNotIn('Saved.', gate)  # Avoid a circular ready latch.
+        self.assertNotIn('foreach(var layer', fg)
+        self.assertIn('GetTickCount64()-c.started>15000', self.present)
+
+    def test_temporal_quality_lease_does_not_change_native_shader_admission(self):
+        actor=(ROOT/'src/ui/ModActor.cs').read_text()
+        self.assertIn('ProviderRuntime.TemporalShaderPreflight(ProviderMenu,FGSaved,FGRuntime)', actor)
+        self.assertIn('"r.TemporalAA.Quality "+command', actor)
+        runtime=(ROOT/'src/ui/ProviderRuntimeClient.cs').read_text()
+        self.assertIn('state.W10>=1 && state.W10<=6', runtime)
+        self.assertIn('ProviderRuntime.TemporalQualityRetain(ProviderMenu,FGSaved,FGRuntime,', actor)
+        self.assertIn('reason!=EEndPlayReason.LevelTransition', actor)
+        self.assertIn('MCD2GraphicsTemporalQualityLease', actor)
+        observer=(ROOT/'src/native/observer.cpp').read_text()
+        self.assertIn('return shader==TAA || shader==TAA_SR;', observer)
+        self.assertIn('native_reset(c,cmd,saved,*pass,pc,x,y,z)', self.record)
 
 
 if __name__ == '__main__':

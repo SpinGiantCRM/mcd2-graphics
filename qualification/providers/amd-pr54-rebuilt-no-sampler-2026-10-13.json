@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "candidate": "0.4.0-amd.dev.8",
+  "nativeArchiveSHA256": "9574ec28b096f35e484af61e066835a1815178070d96e390c4c24ddd599c9e64",
+  "frameworkSHA256": "5ab60fb92385c774bb5f61d668676556c32fc91d989a18679129cdb32031bb84",
+  "host": "Linux/NVIDIA RTX 4080 SUPER",
+  "samplerInstalled": false,
+  "HDRAddonHeldOutsideGame": true,
+  "SDROutputColourSpace": 1,
+  "freshOffMinimumDwellSeconds": 300,
+  "freshOffObservedDwellSeconds": 300.29950446099974,
+  "phases": {
+    "off-a": {
+      "active": false,
+      "realDelta": 360,
+      "generatedDelta": 0,
+      "SDKResult": 0,
+      "faultsErrorsWarnings": 0
+    },
+    "on-b": {
+      "active": true,
+      "realDelta": 240,
+      "generatedDelta": 240,
+      "SDKResult": 0,
+      "faultsErrorsWarnings": 0
+    },
+    "off-b": {
+      "active": false,
+      "realDelta": 360,
+      "generatedDelta": 0,
+      "SDKResult": 0,
+      "faultsErrorsWarnings": 0
+    }
+  },
+  "processExits": {
+    "off": {
+      "actualHeldProcessExitCode": 0,
+      "confirmationToGoneSeconds": 3.250567207000131
+    },
+    "owner": {
+      "actualHeldProcessExitCode": 0,
+      "confirmationToGoneSeconds": 3.8699320160012576
+    }
+  },
+  "sceneGPUCompletionVerified": true,
+  "recordedSceneLeasesAtRetirement": 0,
+  "sharedSDKRetirementResult": 0,
+  "restoredByteForByte": true,
+  "samplerCausationEstablished": false,
+  "priorFailuresRetained": true,
+  "candidateQualificationPassed": false,
+  "windowsRadeonQualified": false,
+  "physicalDisplayFPSMeasured": false,
+  "inputLatencyMeasured": false,
+  "rawDiagnosticsPublished": false
+}

@@ -1,3 +1,11 @@
+# 0.4.0-amd.dev.25 qualification — 24 October 2026
+
+The FSR candidate has bounded **PASS WITH KNOWN ISSUES** acceptance on [Windows/Radeon](WINDOWS_DEV25_ACCEPTANCE_2026-10-24.md) and [Linux/NVIDIA](LINUX_DEV25_ACCEPTANCE_2026-10-24.md). These results cover the same dev.25 native/UI payload and Steam build 25910487. Windows used Loader 2.6; Linux used Loader 2.7. Exact dependency locks and build identities are in the [current candidate receipt](../qualification/providers/windows-candidate-current.json).
+
+Analytical FSR SR/FG, independent low latency and supported mixed SR/FG combinations passed the bounded checks. Intermittent shutdown crashes, diagnostic gaps and historical focus issues remain disclosed. Windows reproduced its shutdown fault without this mod's graphics payload; Linux has not proven identical ownership. No crash repair or general stability guarantee is claimed.
+
+Full FPS, image-quality and physical latency benchmarks are deferred until after release by the maintainer. Experimental FSR 4.1/ML paths, wider hardware, physical controllers, long sessions and Xbox PC remain outside this acceptance. See the [candidate guide](DEV25_RELEASE_CANDIDATE.md). These records prepare publication; they do not change existing release assets or qualify arbitrary rebuilt installers.
+
 # 0.3.0-preview.1 qualification — 7 October 2026
 
 The exact installer source `e421e57e7667f0e9ec71e1940c6daa352a39f0c7` and twelve owned files have bounded [Linux/NVIDIA qualification](LINUX_FINAL_QUALIFICATION_2026-10-07.md) and [Windows/AMD GUI/fallback qualification](WINDOWS_FULL_QUALIFICATION_2026-10-07.md). Publication changes documentation and archive containers only; native/UI/shader/installer bytes remain the tested inputs.

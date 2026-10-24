@@ -5,6 +5,8 @@
 #define NOMINMAX
 #include <windows.h>
 #include "../providers/bootstrap_module.hpp"
+#include "../providers/hdr_addon_activation.hpp"
+#include "../providers/graphics_store.hpp"
 #include <d3d12.h>
 #include <dxgi1_4.h>
 #include <reshade.hpp>
@@ -20,6 +22,8 @@
 #include "display_protocol.hpp"
 #include "../providers/observed_settings.hpp"
 #include "../providers/menu_save_transport.hpp"
+#include "advanced_settings_transport.hpp"
+#include "runtime_diagnostics_transport.hpp"
 #include "../providers/display_projection.hpp"
 #include "../providers/menu_snapshot.h"
 #include "../providers/sr_runtime_snapshot.h"
@@ -94,10 +98,12 @@ auto& amdCoordinator=amdCoordinatorLifetime.get();
 std::mutex amdRequestMutex;mcd2::amd_latency::Request amdRequest;
 bool amdLatencyOptIn=false;
 std::atomic<unsigned> amdCandidateRejected=0;
+std::atomic<unsigned> renderingVendorId=0;std::atomic<uint64_t> renderingVendorDevice=0;
 mcd2::process_exit::Lifetime<std::shared_ptr<sr::TokenCoordinator>,mcd2::process_exit::terminating> coordinatorLifetime;
 auto& coordinator=coordinatorLifetime.get();std::atomic<uint64_t> firstFrame=0;uint64_t boundNative=0;
 std::atomic<unsigned> currentMode=0,reflexAvailable=0,reflexFault=0,hdrRevision=0,hdrRestart=0;
 std::atomic<bool> faultLogged=false;bool capabilityChecked=false;
+std::filesystem::path advancedRoot;
 void settings_loop();void apply_hdr_config();
 std::filesystem::path savesPath;std::mutex intentMutex; mcd2::display::Intent latestIntent{};
 mcd2::process_exit::Lifetime<std::thread,mcd2::process_exit::terminating> settingsWorkerLifetime;
@@ -171,14 +177,27 @@ void settings_loop(){std::map<std::string,unsigned> last;auto nextStatus=std::ch
  if(observeProviderSettings){std::error_code error;std::filesystem::create_directory(mirrorPath,error);}
  const auto authorityPath=savesPath.parent_path()/L"MCD2Graphics"/L"ProviderSettings";
  std::unique_ptr<mcd2::providers::MenuSaveTransport> menuTransport;
+ std::unique_ptr<mcd2::advanced::SaveTransport> advancedTransport,advancedFgTransport,advancedFsrTransport,advancedFsrFgTransport;
  if(consolidatedMenuTransport){std::error_code error;std::filesystem::create_directory(authorityPath,error);
   if(!error&&mcd2::providers::store_detail::directoryReady(authorityPath))
    menuTransport=std::make_unique<mcd2::providers::MenuSaveTransport>(savesPath,authorityPath,sessionId);
  }
+ if(menuTransport)advancedFgTransport=std::make_unique<mcd2::advanced::SaveTransport>(savesPath,authorityPath,advancedRoot,sessionId,true);
+ if(menuTransport)advancedFsrFgTransport=std::make_unique<mcd2::advanced::SaveTransport>(savesPath,authorityPath,advancedRoot,sessionId,3);
+ if(menuTransport)advancedFsrTransport=std::make_unique<mcd2::advanced::SaveTransport>(savesPath,authorityPath,advancedRoot,sessionId,2);
+ if(menuTransport)advancedTransport=std::make_unique<mcd2::advanced::SaveTransport>(savesPath,authorityPath,advancedRoot,sessionId);
  std::uint32_t contextSequence=0;
+ mcd2::diagnostics::SrWorkerCache diagnosticSrCache;
  while(!workerStop){
+  MCD2DiagnosticIdentityV1 diagnosticIdentity{};
+  mcd2::providers::SrRuntimeState diagnosticRuntime;int diagnosticRuntimeResult=-3;std::uint64_t diagnosticRuntimeAt=0;
+  mcd2::providers::SrContext diagnosticContext;std::uint64_t diagnosticContextAt=0;
   mcd2::providers::MenuAuthority shared;
   if(menuTransport){try{shared=menuTransport->poll();}catch(...){/* A transport failure cannot activate a feature. */}}
+  if(advancedFsrFgTransport){try{advancedFsrFgTransport->poll(shared);}catch(...){/* Restart-only FSR FG selection. */}}
+  if(advancedFsrTransport){try{advancedFsrTransport->poll(shared);}catch(...){/* Restart-only FSR selection. */}}
+  if(advancedFgTransport){try{advancedFgTransport->poll(shared);}catch(...){/* No renderer admission. */}}
+  if(advancedTransport){try{advancedTransport->poll(shared);}catch(...){/* Restart-only preferences cannot activate a feature. */}}
   if(consolidatedMenuTransport){
    MCD2MenuSnapshotV1 snapshot{sizeof(MCD2MenuSnapshotV1),sessionId,unsigned(shared.load),0,{}};
    mcd2::providers::GraphicsRecord bytes;
@@ -197,18 +216,28 @@ void settings_loop(){std::map<std::string,unsigned> last;auto nextStatus=std::ch
      srContextSnapshot.authority=snapshot;std::copy(contextBytes.begin(),contextBytes.end(),srContextSnapshot.context);
     }
    }
+   {std::lock_guard lock(providerSnapshotMutex);
+    if(shared.load==mcd2::providers::StoreStatus::Ok&&srContextSnapshot.size==sizeof(srContextSnapshot)&&
+       mcd2::providers::decodeSrContext(srContextSnapshot.context,diagnosticContext))
+     {diagnosticContextAt=srContextSnapshot.observedAtMs;diagnosticIdentity=mcd2::diagnostics::contextIdentity(sessionId,shared.current,diagnosticContext,diagnosticContextAt,GetTickCount64());}
+   }
    // The worker alone serializes the renderer's volatile response. No save or
    // SDK call runs on a render callback, and this is not a commit receipt.
    auto renderer=GetModuleHandleW(L"mcd2-graphics.addon64");
    auto runtime=renderer?reinterpret_cast<decltype(&mcd2_sr_runtime_v1)>(GetProcAddress(renderer,"mcd2_sr_runtime_v1")):nullptr;
    MCD2SrRuntimeSnapshotV1 response{};response.size=sizeof(response);
-   if(runtime&&runtime(&response)==0&&response.reserved==0){
+   diagnosticRuntimeResult=runtime?runtime(&response):-3;diagnosticRuntimeAt=GetTickCount64();
+   if(diagnosticRuntimeResult==0){
     mcd2::providers::SrRuntimeBytes words;std::copy(std::begin(response.state),std::end(response.state),words.begin());
-    mcd2::providers::SrRuntimeState state;
-    if(mcd2::providers::decodeSrRuntimeState(words,state)&&state.session==sessionId&&state.intent==shared.current.bootstrap.stamp)
+    if(response.reserved||!mcd2::providers::decodeSrRuntimeState(words,diagnosticRuntime))diagnosticRuntimeResult=-1;
+    else if(diagnosticRuntime.session==sessionId&&diagnosticRuntime.intent==shared.current.bootstrap.stamp)
      mcd2::providers::publishSrRuntimeSave(savesPath,words);
    }
   }
+  const auto diagnosticRequested=shared.load==mcd2::providers::StoreStatus::Ok?shared.current.intent.sr:mcd2::providers::SrProvider::Native;
+  diagnosticSrCache.observe(diagnosticIdentity,diagnosticRequested,diagnosticRuntimeResult,
+   diagnosticRuntimeResult==0?&diagnosticRuntime:nullptr,diagnosticRuntimeAt,GetTickCount64());
+  const auto diagnosticSrSample=diagnosticSrCache.snapshot();
   if(amdLatencyOptIn){mcd2::amd_latency::Request request;
    try{mcd2::providers::DecodedGraphicsRecord record;mcd2::providers::GraphicsStore authority(authorityPath);
     if(consolidatedMenuTransport){if(shared.load==mcd2::providers::StoreStatus::Ok)request=mcd2::amd_latency::resolve(shared.current);}
@@ -239,11 +268,15 @@ void settings_loop(){std::map<std::string,unsigned> last;auto nextStatus=std::ch
    // Capability comes from the actual driver interface and installed timing
    // owner, never a requested preference or adapter name in a save.
    auto amd=amd_controller();if(amd)amd->refresh_capabilities();auto amdState=amd?amd->state():mcd2::amd_latency::State{};
+   state["RenderingVendorId"]=renderingVendorId.load();
    state["AmdAntiLagAvailable"]=amdLatencyOptIn&&installed&&amdState.available&&!amdState.fault;
    state["AmdAntiLagMode"]=amdState.enabled?1u:0u;
    state["AmdAntiLagFault"]=amdState.fault?1u:0u;
    state["AmdAntiLagRevision"]=amdState.revision;
    state["AmdAntiLagFgCompatible"]=amdState.fgCompatible&&!amdState.fault?1u:0u;
+   if(consolidatedMenuTransport){
+    const auto publishIdentity=shared.load==mcd2::providers::StoreStatus::Ok?mcd2::diagnostics::contextIdentity(sessionId,shared.current,diagnosticContext,diagnosticContextAt,GetTickCount64()):MCD2DiagnosticIdentityV1{};
+    mcd2::diagnostics::publish(savesPath,sessionId,intent.revision,publishIdentity,diagnosticSrSample,applied,c?c->completed():0,amdState.revision,amdState.checksum,amdState.enabled?1u:0u,amdState.inputFrames,advancedRoot/L"DependencyOverrides.ini");}
    auto file=savesPath/L"MCD2GraphicsDisplayRuntime.sav";auto seed=read_slot(file);std::map<std::string,unsigned> existing;size_t h=0;
    if(state!=last||!mcd2::display::parse(seed,"DisplayRuntimeSave",existing,h)||existing["SessionId"]!=sessionId){auto data=mcd2::display::encode_runtime(seed,state);if(!data.empty()){
      auto temp=savesPath/L"MCD2GraphicsDisplayRuntime.pending";{std::ofstream f(temp,std::ios::binary|std::ios::trunc);f.write(reinterpret_cast<const char*>(data.data()),data.size());f.flush();if(!f)throw std::runtime_error("Runtime state write failed");}
@@ -260,13 +293,93 @@ void settings_loop(){std::map<std::string,unsigned> last;auto nextStatus=std::ch
   std::unique_lock lock(workerMutex);workerWake.wait_for(lock,std::chrono::milliseconds(500),[]{return workerStop.load();});
  }
 }
+struct HdrAddonBackend {
+ using Key=mcd2::hdr_activation::Key;using Receipt=mcd2::hdr_activation::Receipt;
+ std::optional<bool> emptyPresence;
+ std::filesystem::path path()const{return advancedRoot/mcd2::hdr_activation::receiptName;}
+ bool load(std::optional<Receipt>&out){
+  out.reset();std::error_code ec;if(!std::filesystem::exists(path(),ec))return !ec;
+  std::ifstream f(path(),std::ios::binary|std::ios::ate);if(!f)return false;auto n=f.tellg();if(n<0||n>32768)return false;
+  std::vector<uint8_t>b(static_cast<size_t>(n));f.seekg(0);if(!f.read(reinterpret_cast<char*>(b.data()),b.size()))return false;
+  Receipt r;if(!mcd2::hdr_activation::decode(b,r))return false;out=std::move(r);return true;
+ }
+ bool save(std::optional<Receipt>r){
+  if(!r){std::optional<Receipt>old;Key onDisk;if(!load(old)||!disk(onDisk))return false;
+   // ReShade saves its config cache later. Keep the restore WAL until the
+   // original value is actually on disk, including after a process crash.
+   if(old&&onDisk!=old->original)return true;
+   return DeleteFileW(path().c_str())||GetLastError()==ERROR_FILE_NOT_FOUND;}
+  bool conflict=false;
+  if(r->phase==mcd2::hdr_activation::Phase::Owned){Key flushed;if(!disk(flushed))return false;
+   if(flushed==r->original)r->phase=mcd2::hdr_activation::Phase::Prepared;
+   else if(flushed!=r->last){r->phase=mcd2::hdr_activation::Phase::Yielded;conflict=true;}}
+  auto bytes=mcd2::hdr_activation::encode(*r);if(bytes.empty())return false;auto pending=path();pending+=L".pending";
+  namespace io=mcd2::providers::store_detail;
+  return io::discardPending(pending)&&io::writeFlushed(pending,bytes)&&io::replace(pending,path())&&!conflict;
+ }
+ bool disk(Key&out){
+  // The public API does not expose redirected global-config paths. Never
+  // create a lease that the closed-game uninstaller cannot locate safely.
+  if(advancedRoot.empty()||GetEnvironmentVariableW(L"RESHADE_BASE_PATH_OVERRIDE",nullptr,0))return false;
+  auto module=std::make_unique<wchar_t[]>(32768);auto n=GetModuleFileNameW(reshade::internal::get_reshade_module_handle(),module.get(),32768);
+  std::error_code ec;if(!n||n>=32768||!std::filesystem::equivalent(std::filesystem::path(module.get()).parent_path(),advancedRoot.parent_path(),ec)||ec)return false;
+  auto file=advancedRoot.parent_path()/L"ReShade.ini";out={};if(!std::filesystem::exists(file,ec))return !ec;
+  if(GetFileAttributesW(file.c_str())&FILE_ATTRIBUTE_REPARSE_POINT)return false;
+  std::ifstream f(file,std::ios::binary|std::ios::ate);if(!f)return false;auto size=f.tellg();if(size<0||size>1024*1024)return false;f.seekg(0);
+  std::string line,section;bool seen=false;auto trim=[](std::string s){auto first=s.find_first_not_of(" \t\r\n");if(first==std::string::npos)return std::string();return s.substr(first,s.find_last_not_of(" \t\r\n")-first+1);};
+  while(std::getline(f,line)){if(line.starts_with("\xef\xbb\xbf"))line.erase(0,3);line=trim(line);if(line.empty()||line[0]==';'||line[0]=='#'||line[0]=='/')continue;
+   if(line[0]=='['){auto close=line.find(']');if(close==std::string::npos)return false;section=trim(line.substr(1,close-1));continue;}
+   auto eq=line.find('=');auto key=trim(line.substr(0,eq)),value=eq==std::string::npos?std::string():trim(line.substr(eq+1));
+   if(section=="INSTALL"&&key=="BasePath"&&!value.empty())return false;
+   if(section!="ADDON"||key!="DisabledAddons")continue;if(seen)return false;seen=true;out.present=true;if(value.empty())continue;
+   std::string entry;for(size_t i=0;i<value.size();++i){if(value[i]==','){if(i+1<value.size()&&value[i+1]==','){entry+=',';++i;}else{out.entries.push_back(entry);entry.clear();}}else entry+=value[i];}out.entries.push_back(entry);
+  }
+  return mcd2::hdr_activation::valid(out);
+ }
+ bool read(Key&out){
+  Key onDisk;if(!disk(onDisk))return false;size_t n=0;const bool present=reshade::get_config_value(nullptr,"ADDON","DisabledAddons",nullptr,&n);out={};
+  if(present){if(!n||n>32768)return false;std::vector<char>b(n);auto used=n;if(!reshade::get_config_value(nullptr,"ADDON","DisabledAddons",b.data(),&used)||used>=n)return false;
+   size_t at=0;while(at<used){auto end=std::find(b.begin()+at,b.begin()+used,'\0');if(end==b.begin()+used)return false;out.entries.emplace_back(b.begin()+at,end);at=size_t(end-b.begin())+1;}out.present=true;
+  }else out.present=emptyPresence.value_or(onDisk.present);
+  std::optional<Receipt>r;if(!load(r))return false;
+  // A known write may still be in ReShade's cache. Any third on-disk value
+  // is an external edit and is never overwritten by this activation lease.
+  if(r){if(onDisk!=r->original&&onDisk!=r->last){r->phase=mcd2::hdr_activation::Phase::Yielded;save(r);return false;}}
+  else{if(onDisk.entries!=out.entries)return false;if(out.entries.empty())out.present=onDisk.present;emptyPresence.reset();}
+  return mcd2::hdr_activation::valid(out);
+ }
+ bool write(const Key&expected,const Key&next){
+  Key current;if(!read(current)||current!=expected)return false;
+  if(!next.present)reshade::set_config_value(nullptr,"ADDON","DisabledAddons",static_cast<const char*>(nullptr));
+  else{std::string bytes;for(const auto&s:next.entries){bytes+=s;bytes+='\0';}reshade::set_config_value(nullptr,"ADDON","DisabledAddons",bytes.data(),bytes.size());}
+  emptyPresence=next.present;Key verified;return read(verified)&&verified==next;
+ }
+};
+mcd2::hdr_activation::Activation hdrAddonActivation;
+HdrAddonBackend hdrAddonBackend;
+mcd2::hdr_activation::Result update_hdr_addon_activation(bool hdr,bool resident){
+ try{
+  if(advancedRoot.empty()||(GetFileAttributesW(advancedRoot.c_str())&FILE_ATTRIBUTE_REPARSE_POINT))return {false,true};
+  mcd2::providers::store_detail::WriterLock lock(advancedRoot/L"HdrAddonActivation.lock");
+  if(lock.status!=mcd2::providers::StoreStatus::Ok)return {false,true};
+  return hdrAddonActivation.apply(hdr,resident,hdrAddonBackend);
+ }catch(...){return {false,true};}
+}
 void apply_hdr_config(){
  // Pinned RenoDX has no live settings API. Only its own config cache is updated;
  // calibration waits for restart. No private pointers, shader patching or fake live acknowledgement.
- static unsigned seen=0;static bool dirty=false;static unsigned profile=1;
+ static unsigned seen=0,lastBlocked=0;static bool dirty=false;static unsigned profile=1;
  mcd2::display::Intent intent;{std::lock_guard lock(intentMutex);intent=latestIntent;}
  if(!intent.revision||seen==intent.revision)return;
- if(!GetModuleHandleW(L"renodx-ue-extended.addon64")){hdrRestart=1;hdrRevision=0;return;}
+ const bool resident=GetModuleHandleW(L"renodx-ue-extended.addon64")!=nullptr;
+ const auto activation=update_hdr_addon_activation(intent.hdr!=0,resident);
+ if(!activation.ready){
+  hdrRestart=1;hdrRevision=0;
+  seen=intent.revision; // Activation is a startup gate, never a per-Present IO retry.
+  if(lastBlocked!=intent.revision){lastBlocked=intent.revision;log<<"{\"kind\":\"hdr_addon_activation\",\"revision\":"<<intent.revision<<",\"restart\":1,\"conflict\":"<<activation.conflict<<"}\n";log.flush();}
+  return;
+ }
+ if(!intent.hdr){hdrRestart=0;hdrRevision=intent.revision;seen=intent.revision;workerWake.notify_all();return;}
  if(!seen){unsigned selected=1;reshade::get_config_value(nullptr,"renodx","SelectedProfile",selected);if(selected>=1&&selected<=3)profile=selected;}
  auto section=std::string("renodx-preset")+std::to_string(profile);
  const std::array<std::pair<const char*,unsigned>,4> wanted={{{"ToneMapType",intent.hdr?1u:0u},{"ToneMapPeakNits",intent.peak},{"ToneMapGameNits",intent.paper},{"ToneMapUINits",intent.ui}}};
@@ -285,20 +398,28 @@ void init_swapchain(a::swapchain*swapchain,bool){
  log<<"{\"kind\":\"pcl_message_hook\",\"installed\":"<<(messageHook?"true":"false")<<",\"thread\":"<<messageThread<<"}\n";log.flush();
 }
 void init(a::device*device){
+ if(mcd2::process_exit::terminating())return;
  auto bootstrap=mcd2::providers::bootstrapModule();auto amdFg=bootstrap?reinterpret_cast<unsigned(*)()>(GetProcAddress(bootstrap,"mcd2_bootstrap_amd_fg_session")):nullptr;
  const bool frameIdentityOnly=amdFg&&amdFg()==1;
- if(installed||registry||(!provider.initialized&&!amdLatencyOptIn&&!frameIdentityOnly)||device->get_api()!=a::device_api::d3d12)return;
- // The actual rendering device LUID determines the AMD route. Never use the
- // display/default adapter and never attempt to load an AMD driver on Wine.
- bool useAmd=false;
- if(amdLatencyOptIn){unsigned vendor=0;IDXGIFactory4* factory=nullptr;IDXGIAdapter1* adapter=nullptr;
-  auto native=reinterpret_cast<ID3D12Device*>(device->get_native());DXGI_ADAPTER_DESC1 desc{};
+ if(device->get_api()!=a::device_api::d3d12)return;
+ // Query once per actual rendering device, even when latency is disabled.
+ // The candidate calls init only for the Unreal HWND swapchain. No SDK support
+ // enumeration runs in periodic menu/render polling.
+ const auto nativeIdentity=device->get_native();
+ if(renderingVendorDevice!=nativeIdentity){unsigned vendor=0;IDXGIFactory4* factory=nullptr;IDXGIAdapter1* adapter=nullptr;
+  auto native=reinterpret_cast<ID3D12Device*>(nativeIdentity);DXGI_ADAPTER_DESC1 desc{};
   if(SUCCEEDED(CreateDXGIFactory1(IID_PPV_ARGS(&factory)))){
    if(SUCCEEDED(factory->EnumAdapterByLuid(native->GetAdapterLuid(),IID_PPV_ARGS(&adapter)))){
     if(SUCCEEDED(adapter->GetDesc1(&desc))&&!(desc.Flags&DXGI_ADAPTER_FLAG_SOFTWARE))vendor=desc.VendorId;
     adapter->Release();
    }factory->Release();
   }
+  renderingVendorId=vendor;renderingVendorDevice=nativeIdentity;workerWake.notify_all();
+ }
+ if(installed||registry||(!provider.initialized&&!amdLatencyOptIn&&!frameIdentityOnly))return;
+ // Never use a display/default adapter or load an AMD driver on Wine.
+ bool useAmd=false;
+ if(amdLatencyOptIn){const unsigned vendor=renderingVendorId.load();
   const auto ntdll=GetModuleHandleW(L"ntdll.dll");const bool wine=ntdll&&GetProcAddress(ntdll,"wine_get_version");
   useAmd=mcd2::amd_latency::Eligibility{true,!wine,GetModuleHandleW(L"amdxc64.dll")!=nullptr,vendor}.candidate();
   if(!useAmd)amdCandidateRejected=1;
@@ -363,7 +484,12 @@ void cleanup(){
  auto amd=std::atomic_exchange(&amdCoordinator,std::shared_ptr<mcd2::amd_latency::Controller>{});if(amd)amd->shutdown();
  auto c=std::atomic_exchange(&coordinator,std::shared_ptr<sr::TokenCoordinator>{});if(c){c->shutdown();c->drain();}provider.shutdown();reflexAvailable=0;boundNative=0;registry=nullptr;firstFrame=0;capabilityChecked=false;workerWake.notify_all();
 }
-void destroy(a::device*device){if(device->get_native()==boundNative)cleanup();}
+void destroy(a::device*device){
+ if(mcd2::process_exit::terminating())return;
+ const auto nativeIdentity=device->get_native();
+ if(nativeIdentity==renderingVendorDevice){renderingVendorId=0;renderingVendorDevice=0;workerWake.notify_all();}
+ if(nativeIdentity==boundNative)cleanup();
+}
 
 }
 extern "C" __declspec(dllexport) int mcd2_menu_snapshot_v1(MCD2MenuSnapshotV1* snapshot){
@@ -391,7 +517,8 @@ extern "C" __declspec(dllexport) bool AddonInit(HMODULE module,HMODULE){
  auto moduleLength=GetModuleFileNameW(module,filename.get(),32768),localLength=GetEnvironmentVariableW(L"LOCALAPPDATA",local.get(),32768);
  if(!moduleLength||moduleLength>=32768||!localLength||localLength>=32768)return true;
  auto logs=std::filesystem::path(local.get())/L"Dungeons2"/L"Saved"/L"MCD2Graphics"/L"StreamlineLogs";std::filesystem::create_directories(logs);
- auto folder=std::filesystem::path(filename.get()).parent_path()/L"MCD2Graphics"/L"streamline";if(provider.initialized)return true;auto success=provider.load(folder,logs);
+ advancedRoot=std::filesystem::path(filename.get()).parent_path()/L"MCD2Graphics";
+ auto folder=advancedRoot/L"streamline";if(provider.initialized)return true;auto success=provider.load(folder,logs);
  // Opt-in development handoff only; the released UI/renderer is unchanged.
  observeProviderSettings=GetPrivateProfileIntW(L"Providers",L"ObserveLegacySettings",0,mcd2::providers::observedPolicyPath(filename.get()).c_str())==1;
  consolidatedMenuTransport=GetPrivateProfileIntW(L"Providers",L"ConsolidatedMenuTransport",0,mcd2::providers::observedPolicyPath(filename.get()).c_str())==1;

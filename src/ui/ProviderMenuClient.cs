@@ -108,6 +108,26 @@ public class ProviderMenuClient : USaveGame {
    if(named!=5)return Edit(word,named);}
   return Edit(word+1,scale) && Edit(word+2,scale) && Edit(word,5);
  }
+ // The menu has one SR preset/percentage, regardless of the selected producer.
+ // Keep the transport's separate records, including last Custom, in sync.
+ // These edits never select a producer or change the independent FG settings.
+ public bool ShareSrPreferences(int family){
+  if((family!=1 && family!=2) || !Ready)return false;
+  int source=PreferenceWord(family),quality=Value(source),scale=Value(source+1),last=Value(source+2);
+  for(int provider=1;provider<=2;provider++){
+   int word=PreferenceWord(provider);
+   if(!Edit(word,quality) || !Edit(word+1,scale) || !Edit(word+2,last))return false;
+  }
+  return true;
+ }
+ public bool SelectMenuQuality(int family,int quality){
+  if((family!=1 && family!=2) || !Ready || quality<0 || quality>5)return false;
+  return SelectQuality(family,quality) && ShareSrPreferences(family);
+ }
+ public bool SelectMenuCustomScale(int family,int scale){
+  if((family!=1 && family!=2) || !Ready || !ScaleValid(scale))return false;
+  return SelectCustomScale(family,scale) && ShareSrPreferences(family);
+ }
  public bool SelectFg(int provider,int strategy,int multiplier,bool enabled){
   if(provider<0 || provider>2 || strategy<0 || strategy>2 || multiplier<2 || multiplier>16 ||
      (strategy==0 && multiplier!=2) || !Ready)return false;

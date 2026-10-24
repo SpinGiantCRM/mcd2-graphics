@@ -1,0 +1,85 @@
+{
+  "date": "2026-10-19",
+  "sourceCommit": "cbc34b8d78ba77933ebc491da851acc615b8af55",
+  "branch": "development/amd-colour-resize",
+  "decision": "Shared SR preset and current-device vendor guard implemented; bounded Windows menu/gameplay control passed. Full qualification remains incomplete.",
+  "behavior": [
+    "One quality/custom/last-Custom menu preference is copied across DLSS and FSR records; independent FG intent remains intact.",
+    "Preset and percentage edits do not change the selected SR provider, including Native.",
+    "DLSS is skipped on a known incompatible rendering vendor and its legacy source projection stays at Native.",
+    "Device metadata uses the actual D3D12 adapter LUID, is queried once per device, and is accepted only from the current runtime session.",
+    "A persisted incompatible DLSS selection is changed to Native only after fresh, known device metadata; unknown/stale data cannot erase a preference."
+  ],
+  "machine": {
+    "gpu": "AMD Radeon(TM) 860M Graphics",
+    "driver": "32.0.31041.1004",
+    "steamBuild": 25754144
+  },
+  "build": {
+    "productionNeoRuneUi": true,
+    "metadataRebuilt": true,
+    "uiPayloadSHA256": {
+      "MCD2Graphics_P.pak": "415d12911107bd7d66f205ba576995a61dfb6c870893a6f782ac0af94376d594",
+      "MCD2Graphics_P.ucas": "51f16518e69588156b094caa6629938db8fb1761e9653f924f4e2e9ef1cea53c",
+      "MCD2Graphics_P.utoc": "8d3ef6347ccd716467483888397fae1aab4c3dcc7d30443e5ac59720ae78983d"
+    },
+    "officialSharedRuntimeLatencyRecipe": true,
+    "native16KiBFrameGuard": true,
+    "localAndCiNativeSourceHeaderClosureMatchesAfterLineEndingNormalization": true,
+    "lineEndingOnlyHeaderHashDifferences": [
+      "fg_capability_cache.hpp"
+    ]
+  },
+  "runtime": {
+    "variant": "Retained exact-source CI renderers/framework plus locally rebuilt changed latency addon and production UI; not the complete fresh CI artifact.",
+    "currentRenderingVendorId": 4098,
+    "nativeAndFsrCommittedSelectionsObserved": true,
+    "dlssCommittedSelectionObserved": false,
+    "initialPerProviderPresetMismatch": true,
+    "qualityAndCustomRecordsSynchronizedAfterFirstMenuSelection": true,
+    "balancedObservedWithNativeAndFsr": true,
+    "nativePresetEditObservedWithoutProviderChange": true,
+    "sdkEvaluationRange": [
+      46,
+      1150
+    ],
+    "matchingActiveSamples": 37,
+    "exitCode": 0,
+    "heldProcessHandle": true,
+    "clockGapObserved": false,
+    "debuggerAttached": false,
+    "captureAddonInstalled": false,
+    "userReply": "closed",
+    "finalCommittedSelection": "FSR Quality",
+    "finalNativeRestorationObserved": false
+  },
+  "freshCompleteArtifact": {
+    "run": 39191593403,
+    "artifact": 12160128654,
+    "archiveSHA256": "1999d45fab0248b512517fbc8be6871d0f39bcf7669b3af9ae998643797cc483",
+    "sourceCommit": "cbc34b8d78ba77933ebc491da851acc615b8af55",
+    "verifiedMembers": 46,
+    "realUiMatchesLocalBuild": true,
+    "frameworkSHA256": "47d415dd919854b143e942b203e2b595a932a00d543bdb25c971609f4e17427c",
+    "nativeLatencyMatchesLocalBuild": false,
+    "stagedAfterCleanExit": true,
+    "frameworkWarpLifetimeExit": 0,
+    "gameRuntimeTestedAfterStaging": false,
+    "separateFrameworkDependency": true,
+    "vendorRuntimesBundled": false
+  },
+  "validation": [
+    "Managed shared-preset/custom/Native-preservation, invalid edit and authority/session tests passed.",
+    "Real NeoRune UI and generated ModInfo rebuilt.",
+    "31 FG candidate/build/provenance tests passed after committing source and UI receipt.",
+    "Targeted FSR runtime, process-exit, shared-SDK, installer-framework and UI integration checks passed.",
+    "Portable Windows/Linux and guided installer CI passed; exact-source Windows native candidate run 39191593403 passed."
+  ],
+  "limits": [
+    "NVIDIA vendor identity is an exclusion gate, not proof of RTX/DLSS SDK capability; existing native capability/source/resource gates remain required.",
+    "The user returned closed without a new issue report; no claim is made that every input path or custom percentage was visually verified.",
+    "The last committed state was FSR Quality; this run does not add a final Native-restoration result. Prior exact-source control records that separately.",
+    "Complete fresh-artifact game runtime, installer lifecycle, Linux runtime, NVIDIA hardware, all presets, FG/HDR and broader shutdown coverage remain pending.",
+    "Successful recent exits do not conclusively establish the intermittent game AV root cause."
+  ]
+}

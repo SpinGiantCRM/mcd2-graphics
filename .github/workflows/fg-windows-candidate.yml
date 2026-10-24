@@ -26,7 +26,7 @@ jobs:
         run: |
           python3 - <<'PYTHON'
           import fnmatch, os, subprocess
-          patterns = ['.github/workflows/fg-windows-candidate.yml', 'experiments/fg-streamline/**', 'experiments/providers/**', 'tests/test_fsr*.py', 'src/native/**', 'src/shaders/**', 'src/latency/**', 'src/providers/**', 'src/ui/**', 'tools/ModInfoBuilder/**', 'build.py', 'build_latency.py', 'build_amd_latency.py', 'third-party/AntiLag2/**', 'tests/amd_antilag*', 'build_toolchain.py', 'dependencies.lock.json', 'manifest.json', 'qualification/fg-release/own-payload.zip', 'qualification/fg-release/ui-build-receipt.json', 'qualification/fg-release/reshade-reset-epoch.patch', 'qualification/providers/**']
+          patterns = ['.github/workflows/fg-windows-candidate.yml', 'experiments/fg-streamline/**', 'experiments/providers/**', 'tests/test_fsr*.py', 'tests/*fsr_startup*', 'src/native/**', 'src/shaders/**', 'src/latency/**', 'src/providers/**', 'src/ui/**', 'tools/ModInfoBuilder/**', 'build.py', 'build_ui.py', 'build_latency.py', 'build_amd_latency.py', 'third-party/AntiLag2/**', 'tests/amd_antilag*', 'build_toolchain.py', 'dependencies.lock.json', 'manifest.json', 'qualification/fg-release/own-payload.zip', 'qualification/fg-release/ui-build-receipt.json', 'qualification/fg-release/*.patch', 'qualification/providers/**']
           native = os.environ['EVENT_NAME'] == 'workflow_dispatch'
           if not native:
               changed = subprocess.check_output(['git', 'diff', '--name-only', '-z', os.environ['BASE_SHA'], os.environ['HEAD_SHA']]).decode().split('\0')
@@ -45,6 +45,8 @@ jobs:
       - uses: microsoft/setup-msbuild@6fb02220983dee41ce7ae257b6f4d8f9bf5ed4ce
       - name: Build pinned experimental dependencies and current FG source
         run: python experiments/fg-streamline/build_windows_candidate.py --output "$env:RUNNER_TEMP/fg-windows"
+      - name: Verify failed FG startup releases native HWND ownership
+        run: python tests/run_fsr_startup_failure.py --sdk "$env:RUNNER_TEMP/fg-windows/fsr-sdk" --output "$env:RUNNER_TEMP/fg-startup-failure"
       - name: Upload test binaries and build receipts only
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:

@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-20",
+  "scope": "Incremental exact-candidate runtime follow-up",
+  "candidate": "0.4.0-amd.dev.22",
+  "sourceCommit": "fe8b2b49c528c3f0bbe8393cab3e69a257406cee",
+  "run": 18,
+  "overallWindowsStatus": "FAIL",
+  "windowsQualified": false,
+  "releaseQualified": false,
+  "extraDiagnosticAddon": false,
+  "debuggerAttached": false,
+  "etwTraceActive": false,
+  "normalGuiReinstallCompleted": true,
+  "successfulStartupAndHubReached": true,
+  "I10": "PASS",
+  "installerTargetGate": {
+    "status": "PASS",
+    "supportedSteamBuild": "25754144",
+    "sevenRequirementsRecognized": true,
+    "priorExactCandidateUnsupportedTargetInstallRefused": true,
+    "emptyWrongFolderRefused": true,
+    "supportedSelectionRetained": true,
+    "wrongFolderRemainedEmpty": true,
+    "installRequestedForWrongFolder": false,
+    "ownedFilesUnchanged": 18,
+    "dependencyFilesUnchanged": 15,
+    "overridesEmpty": true,
+    "receiptUnchanged": true
+  },
+  "installerSevenOverrideGate": {
+    "fiveRemainingPathsCompleted": [
+      "ReShade",
+      "RenoDX",
+      "BlueprintLoader",
+      "DLSSRuntime",
+      "Streamline"
+    ],
+    "priorExactDev22FsrSrAndFgPathsRetained": true,
+    "reopenedAllSevenRecognized": true,
+    "reopenedNoCompatibilityWarningsOrUseInstalledButtons": true,
+    "ownedFilesUnchanged": 18,
+    "dependenciesUnchanged": 15,
+    "installedOverridesEmpty": true,
+    "installedReceiptUnchanged": true,
+    "status": "PASS"
+  },
+  "fiveMinuteHubSurvivalObserved": true,
+  "hubDungeonReturnGateComplete": false,
+  "mainMenuMetadata": {
+    "loader": "2.6",
+    "name": "MCD2 Graphics",
+    "author": "SpinGiantCRM",
+    "version": "0.4.0-amd.dev.22",
+    "descriptionPresent": true,
+    "updateStatusTextClippedInListCard": true
+  },
+  "advancedTabs": {
+    "exclusiveHighlightObserved": true,
+    "helpAndRecommendationVisible": true,
+    "srAndFgPreferencesIndependentlyChanged": true,
+    "srAutoWhileFgAnalyticalVerifiedInIni": true,
+    "relaunchPersistenceVerified": false,
+    "resetVerified": false
+  },
+  "videoMouseControls": {
+    "sharedBalancedRetainedNativeToFsr": true,
+    "unsupportedDlssSkipped": true,
+    "presetChangesKeptNativeSelected": true,
+    "namedPresetScaleNumeric": true,
+    "custom97Observed": true,
+    "hundredSelectsNativeAa": true,
+    "minimum33ClampedAndExplained": true,
+    "quality67Restored": true,
+    "sharpness0And100Observed": true,
+    "sharpnessExternalOwnershipVerified": false
+  },
+  "runtimeActiveSr": {
+    "observerSHA256": "002f0915bbbf58e7487b5070bec2c12cacb8f6a7031e1bc60dfe49382ed85cd9",
+    "reportCount": 3,
+    "srAdvancingValidatedInAll": true,
+    "worldValidatedInAll": true,
+    "implementationVersion": 30105,
+    "evaluationDeltas": [
+      112,
+      54,
+      36
+    ],
+    "diagnosticDeltas": [
+      112,
+      54,
+      36
+    ],
+    "sourceScaleMicro": 66666667,
+    "error": 0,
+    "directTransitionHistoryObserved": false,
+    "exactTransitionAckMatchesActiveSequence": false,
+    "phaseAwareHistoricalAckRelationValidated": true,
+    "reportSHA256": [
+      "6884fa49cc37f448270517090868196b9e5ed8b566320732c10cd1e8f8ebd494",
+      "c360a44b6c28a6af97ba6455e46bb4c43bc88723cf9797d51ca11651d434cc51",
+      "a8c3d0f2bdd631386a5f77fa7136fbcdbd4e651ea52382e97c26e3e68b6d870e"
+    ]
+  },
+  "diagnostics": {
+    "detailsToggleIndependentOfOverlay": true,
+    "overlayHiddenInMainMenu": true,
+    "overlayVisibleInHub": true,
+    "intermittentNotUsedVersionLabelObservedDuringActiveSr": true,
+    "fullPauseStaleDisabledRecoveryGateComplete": false
+  },
+  "input": {
+    "mouseDragGameplayMovementObserved": true,
+    "quickEscapeDidNotOpenPause": true,
+    "keyboardInputDeliveryEstablished": false,
+    "onScreenKeyboardAttemptDidNotResolve": true,
+    "ownedTemporaryKeyboardClosedWithAdministrator": true,
+    "securitySettingsChanged": false
+  },
+  "ordinaryExit": {
+    "codeHex": "C0000005",
+    "requestToKernelSeconds": 24.559795,
+    "inputReturnToKernelSeconds": 13.767659,
+    "sameWorkerFailureFamily": true,
+    "anchoredGameRVA": "0x8bf8ac6",
+    "dumpSHA256": "65d2b581427b39e13f745f0cd6e3e7f56bdbe23fe57dcaf830031d348a689852",
+    "extraAddon": false,
+    "debugger": false,
+    "etw": false
+  },
+  "afterExitVerification": {
+    "ownedFiles": 18,
+    "dependencyFiles": 15,
+    "overrides": {},
+    "installReceiptSHA256": "fc9fe1530a7090d91b31376356dec394056b668a11f2b838855be691610d58f4"
+  },
+  "remaining": [
+    "exit repair",
+    "pause and travel",
+    "active AMD-owner game resize",
+    "advanced reset/relaunch",
+    "diagnostics recovery",
+    "unsupported legacy intents",
+    "original preference restoration",
+    "final ordinary exits"
+  ]
+}

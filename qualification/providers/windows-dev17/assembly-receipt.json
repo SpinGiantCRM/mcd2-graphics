@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "candidateOnly": true,
+  "sourceCommit": "cbc34b8d78ba77933ebc491da851acc615b8af55",
+  "artifactUrl": "https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/39191593403/artifacts/12160128654",
+  "archiveSHA256": "1999d45fab0248b512517fbc8be6871d0f39bcf7669b3af9ae998643797cc483",
+  "verifiedArtifactFiles": 46,
+  "payload": {
+    "Dungeons/Binaries/Win64/FGBootstrap.ini": "486d64f34c6b9e95be96bae8dc511d699aa96026cbdc2bfd1f8792c552ef6cba",
+    "Dungeons/Binaries/Win64/FGGuideCapture.ini": "492c4233a4803fe3bcf1b472727ec142ec1d242669030bb7d95b735c22398ca0",
+    "Dungeons/Binaries/Win64/FG_SCENE_COPY.cso": "57416d6e20dc6cfcd66f99f4a5c660ba654c9a94500f729e91e85586fa432373",
+    "Dungeons/Binaries/Win64/FG_UI_ALPHA.cso": "fce79e558c20bfafd859f37e397b8a04b5d820670f6aa0214522cef276cca8c1",
+    "Dungeons/Binaries/Win64/MCD2Graphics/fsr/mcd2-fsr-game-bridge.dll": "7b9546ac97e5067885613bf2ff64f3d4461e387c69b1a9ab52da5e68d534be84",
+    "Dungeons/Binaries/Win64/MCD2Graphics/fsr_dense.cso": "089cef22d81092bd9ed2bdf0ec7a9bb6fcfe10268c52e0a57273dc69df68da68",
+    "Dungeons/Binaries/Win64/MCD2Graphics/live_dense.cso": "4a65a33ba983124b7c47d5822507613231abef7ec1fca8fa7fc51437fd0c29d2",
+    "Dungeons/Binaries/Win64/dxgi.dll": "412ecc25db7c59e03a7314f78e8baca660c617d5d78e1abd7e036f30a7f4ff6a",
+    "Dungeons/Binaries/Win64/fg-sdk-bridge.dll": "4d3120cc5b6f2b0517626c0c40a91074ca375b73dff1518ed53255cd0408af10",
+    "Dungeons/Binaries/Win64/mcd2-antilag2-bridge.dll": "592d940ba39e109d56dc56496c72733f6628c81916f925bc75b84c3a3a56c335",
+    "Dungeons/Binaries/Win64/mcd2-display-latency.addon64": "ae9b29f4f7500218f3cef5e9f41d6b47dfe012bd90d013c72d098c105da02acd",
+    "Dungeons/Binaries/Win64/mcd2-fg-guide-recon.addon64": "4db91ba3be2cdcddb61798d53c73fa6767c6d654a3b4f61998708b3286dfc602",
+    "Dungeons/Binaries/Win64/mcd2-fsr-fg-game-bridge.dll": "7e639097cd841b20bb96f43e99acbd38df98feaf6e296f9ca3c8759077a23ab9",
+    "Dungeons/Binaries/Win64/mcd2-graphics.addon64": "d843e87eaff92bd45e2ea4fa9e111455561827402e8c1c997d34e22cd0237afd",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.pak": "415d12911107bd7d66f205ba576995a61dfb6c870893a6f782ac0af94376d594",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.ucas": "51f16518e69588156b094caa6629938db8fb1761e9653f924f4e2e9ef1cea53c",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.utoc": "8d3ef6347ccd716467483888397fae1aab4c3dcc7d30443e5ac59720ae78983d"
+  },
+  "uiMetadataVersion": "0.3.0-preview.1",
+  "vendorRuntimeBundled": false,
+  "frameworkBundled": false,
+  "windowsRuntimeQualified": false,
+  "excludedDiagnostics": [
+    "probe/fg-chain-observer.addon64",
+    "isolated probe executables/addons"
+  ],
+  "sourceBuildReceipts": {
+    "amd-latency/build-receipt.json": "baa6c78a1d85903cb147fe02936161cd3c3299c0126110cb96009501fce0f3e0",
+    "experimental-reshade/build-receipt.json": "4043c51a2fcda1b78c91924229b970f8163027af8078d08ab798641fcb25e6a2",
+    "isolated-fsr-fg-game-bridge/build-receipt.json": "9465c9508436da7e70bafc996629215745e39d71d6f6b261cf3ac7c8dd03594a",
+    "isolated-fsr-fg-owned-inputs/build-receipt.json": "5f1b6ded8bb6cb711e1bc1a5f6615fd8cb2e1c6c623d507223c96ebb83e929ee",
+    "isolated-fsr-fg-presentation/build-receipt.json": "0f12b563d9ad6e2842f32a7f294c1c1f02854ba435e67a9a3f2a2e56a41dd833",
+    "isolated-fsr-game-bridge/build-receipt.json": "f6d6531496bdcca6be16a58a1169fd4325ffadf2a1c4202916f9f7a676c6b6ca",
+    "isolated-fsr-probe/build-receipt.json": "eca23de201a37b738543feb15c60bacb940c16784b33185cf85a124dc68ccab5",
+    "isolated-fsr-sustained-probe/build-receipt.json": "6792c03542b6f737af18a67a9fc2e963c271abc63ee140bf600a88f7e838f30f",
+    "latency/build-receipt.json": "e8f029aaeb1ef8c7a3fddbf449cab95405a117488d18d2f65f6734c15d4cda82",
+    "probe/build-receipt.json": "4e7f8f9d44bcf8033958720a8da9505966601695461d1b670d93523f5e931e54",
+    "sr/build-receipt.json": "a1ebd5a515a61f077ad246da22c1d91ca3ad698b71584e5cf483137bd933e811",
+    "ui/build-receipt.json": "ce76a6e4b61b6843b9dc27165ad8190073c42513f6290bd5f9c7f5f043e9789f"
+  }
+}

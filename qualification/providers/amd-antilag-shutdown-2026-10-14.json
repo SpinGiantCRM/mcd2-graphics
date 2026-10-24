@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-14",
+  "sdkCommit": "390aa4a8c8655d0ae6e90079db2c85e103a96da3",
+  "officialSdkUnmodified": true,
+  "bridgeABI": 2,
+  "contract": "Shutdown clears and drains FSR presentation readers before DeInitialize; it performs no Update/pacing or mode update",
+  "oldBridgeFixtureExitCode": 9,
+  "oldBridgeFailedExpectedNoShutdownUpdateAssertion": true,
+  "newBridgeFixtureExitCode": 0,
+  "buildRecipeTestsPassed": 3,
+  "syntheticOnly": true,
+  "nativeWindowsRadeonQualified": false,
+  "activeAntiLag2Qualified": false,
+  "oldBridgeSHA256": "6dbeb0d412d94ba204b095eea683d6a33eb1f6dc5f8b2bc32835568e3b65e52e",
+  "bridgeSHA256": "1ae5e5de57374426c9e9c2f9c899351465eaf343a4345d7c3fe995227169e713",
+  "sourceSHA256": "1480175af411864db6f239b710e26b9731af0987d3e322c7448f8d1c39398f92",
+  "tests": {
+    "amd_antilag_fake_driver.cpp": "05f8a58a830b48edc2f1a26540e5e090b805a89a58687cb20b4780f8e86a1e22",
+    "amd_antilag_fake_presenter.cpp": "c136fe3a497c371fd27289e01c99f200147f2ba6c790bd2f3db20ab67fd0bc68",
+    "amd_antilag_bridge_test.cpp": "f9f1565875c609ad32c52b673f6ddb74daa6f7e574b81bb4af0cf0bc54b26d2a"
+  },
+  "vendorRuntimeBundled": false,
+  "newBridgeNotInstalledInGame": true,
+  "oldDev8LinuxEvidenceDoesNotQualifyNewBridge": true,
+  "nativeWindowsHardwareUnavailable": true,
+  "oldAndNewUseIdenticalRegressionFixture": true,
+  "teardownBeginsWithEnabledAntiLag": true,
+  "failedDrainRetainsValidCallbackContext": true,
+  "successfulDrainReleasesAndUnloads": true,
+  "apiErrorShutdownAndIdempotenceCovered": true,
+  "controllerOrderingAndThreadedTeardownFixturePassed": true
+}

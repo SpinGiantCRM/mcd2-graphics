@@ -1,0 +1,820 @@
+{
+  "schemaVersion": 2,
+  "date": "2026-10-20",
+  "scope": "Sanitized incremental checkpoint; no final qualification",
+  "overallWindowsStatus": "FAIL",
+  "windowsQualified": false,
+  "releaseQualified": false,
+  "midWork": true,
+  "candidate": {
+    "version": "0.4.0-amd.dev.22",
+    "requestedSourceCommit": "fe8b2b49c528c3f0bbe8393cab3e69a257406cee",
+    "actualNativeArtifactSourceCommit": "8444aadc28d7c3327a12caef4aa7c1aeed672499",
+    "completeSourceTree": "bfba19b2a41d762338842032c0619225061b4b32",
+    "nativeWorkflow": 39294350560,
+    "nativeWorkflowAttempt": 1,
+    "nativeArtifactAttempt": 1,
+    "artifactId": 12206479195,
+    "archiveSHA256": "af94e6be41bca8fe3dac55bfa5d01d56210711af97cbe4c844a3d24260d00e67",
+    "portableWorkflow": 39294350569,
+    "installerSHA256": "e591098e537e9ffdd37cd75a45b4e1d83f449bc259cc9855dccd337a42c274ec",
+    "managedGuiSHA256": "a6617e0c99adc8a8776746c1863fbf7745c769d9509ddba53528d67fec0aca15",
+    "coreSHA256": "22853b1bffde16234caa203224d28efb7ff30933a57e0add1b4a11c0b4551ca9",
+    "manifestSHA256": "3fba83676f17a4aef055f103f7af0e5ce67b83f540f4f1da7fa9769c2dc72e93",
+    "dependencyLockSHA256": "d0d2d41c98f446d18895ea47b251079566c48c02c03816af1b03a12585727140",
+    "installerReceiptSHA256": "2a5d04beb9f619819354fa8d66dbc13dd32f3492a5996748b154498b59a30c7b",
+    "frameworkSHA256": "6b94ab48306b23da702c386abf853147218f5b6d6708a1ac8621aea414b7d676",
+    "verifiedInstallerEntries": 242,
+    "verifiedArtifactEntries": 47,
+    "verifiedSourcePins": 143,
+    "independentCiNativeConclusion": "success",
+    "independentCiPortableConclusion": "success",
+    "independentCiDigest": "sha256:af94e6be41bca8fe3dac55bfa5d01d56210711af97cbe4c844a3d24260d00e67",
+    "independentCiAgreement": true
+  },
+  "installedCheckpoint": {
+    "ownedFilesVerified": 18,
+    "dependencyFilesVerified": 15,
+    "dependencyOverrides": {},
+    "sourceCommit": "fe8b2b49c528c3f0bbe8393cab3e69a257406cee",
+    "actualArtifactSourceCommit": "8444aadc28d7c3327a12caef4aa7c1aeed672499",
+    "uiSourcePinsVerifiedAgainstCommit": "fe8b2b49c528c3f0bbe8393cab3e69a257406cee",
+    "ownedSHA256": {
+      "Dungeons/Binaries/Win64/FGBootstrap.ini": "486d64f34c6b9e95be96bae8dc511d699aa96026cbdc2bfd1f8792c552ef6cba",
+      "Dungeons/Binaries/Win64/FGGuideCapture.ini": "492c4233a4803fe3bcf1b472727ec142ec1d242669030bb7d95b735c22398ca0",
+      "Dungeons/Binaries/Win64/FG_SCENE_COPY.cso": "57416d6e20dc6cfcd66f99f4a5c660ba654c9a94500f729e91e85586fa432373",
+      "Dungeons/Binaries/Win64/FG_UI_ALPHA.cso": "fce79e558c20bfafd859f37e397b8a04b5d820670f6aa0214522cef276cca8c1",
+      "Dungeons/Binaries/Win64/MCD2Graphics/fsr/mcd2-fsr-game-bridge.dll": "00623e0160a3c3673940695970fbe103f6d5f3969efd6f1165d74c8f64470ff9",
+      "Dungeons/Binaries/Win64/MCD2Graphics/fsr_dense.cso": "089cef22d81092bd9ed2bdf0ec7a9bb6fcfe10268c52e0a57273dc69df68da68",
+      "Dungeons/Binaries/Win64/MCD2Graphics/live_dense.cso": "4a65a33ba983124b7c47d5822507613231abef7ec1fca8fa7fc51437fd0c29d2",
+      "Dungeons/Binaries/Win64/dxgi.dll": "70714bd8e6e1e92dd9bb46f5225153574ab5cef5b72f6d0563629f4262f0bc69",
+      "Dungeons/Binaries/Win64/fg-sdk-bridge.dll": "e2b2ad03e46479f831d19ed0f43c16fe172637e71605c16b3aa344cdd46b69fd",
+      "Dungeons/Binaries/Win64/mcd2-antilag2-bridge.dll": "40ceef56fbd6b432a162131b2e011185c11bfac7da6496d5766ac6ffb927143f",
+      "Dungeons/Binaries/Win64/mcd2-display-latency.addon64": "d0aa98fc02af1691745897cf9829c2056a2217a11d12b24b4d3ab48b3d0159e3",
+      "Dungeons/Binaries/Win64/mcd2-fg-guide-recon.addon64": "7b0cb1b9cb2677cfa98582a23b62d01f75852b6a03e65b84f98e3153322a497a",
+      "Dungeons/Binaries/Win64/mcd2-fsr-fg-game-bridge.dll": "af88cf3d7d4f79aec2ed169b72edfcfc8e4222c589e481bcbaedcb9730418a68",
+      "Dungeons/Binaries/Win64/mcd2-graphics.addon64": "d643367718f9c1fdd4f31d14e76c1371053dc0fe6058615827a0b3678abe1481",
+      "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.pak": "f566a330d6a59d719e78787affcf934bf9cd44ea72774677102044c4ca312431",
+      "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.ucas": "3abf69d0ae391dcdb6ea19041a692ebf0d111e0c3a4baa97aa7fe111c44408d3",
+      "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.utoc": "fe3d36838bede3a36fce74f5b9a813b1b09335817bd8681c57780fa01eb2371a",
+      "Dungeons/Binaries/Win64/MCD2Graphics/ngx-runtime/nvngx_dlss.dll": "d00b5b0ab29c3ca101b70c3a5ecb3a01b7ef33766a3383a28a18623083e6123e"
+    },
+    "dependencySHA256": {
+      "Dungeons/Binaries/Win64/d3d12.asi": "6b94ab48306b23da702c386abf853147218f5b6d6708a1ac8621aea414b7d676",
+      "Dungeons/Binaries/Win64/renodx-ue-extended.addon64": "f828bb9ced6cba8843842c10c59c57460e8c3d8243a715c40ec752c6c4c2f568",
+      "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.pak": "75e7144577253917f6da7312ef5e585b12fb728226a22b0938323751a6b555cd",
+      "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.ucas": "53ce0001a8c4077323a9342b42bc9d1bb9645116963cdb78fcdf9055336a1235",
+      "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.utoc": "847206e561dddce54be8a3f3868558597728e2affa4b697b84dbd0dbb8f30e1b",
+      "Dungeons/Binaries/Win64/MCD2Graphics/ngx-runtime/nvngx_dlss.dll": "d00b5b0ab29c3ca101b70c3a5ecb3a01b7ef33766a3383a28a18623083e6123e",
+      "Dungeons/Binaries/Win64/sl.interposer.dll": "b1d7395aebd7b9722841d64dcf7433680020b6a8e421f851c16d5ba0c2182edf",
+      "Dungeons/Binaries/Win64/sl.common.dll": "38eea3b4209afc455636ea372b5933d65fcc13becec6c84d101dcfc4d8648f75",
+      "Dungeons/Binaries/Win64/sl.pcl.dll": "5698c38e722318681f215c9fe68e45b9bedd51378acc699d8eee26e961e57770",
+      "Dungeons/Binaries/Win64/sl.reflex.dll": "443577e869352436ff7ec8f4d9c90418d3e95368436ce219261e0f4f07a38122",
+      "Dungeons/Binaries/Win64/sl.dlss_g.dll": "3ed9538df724993bea8a050195a6a78b9c8c8a566d5b05ade477aab3c390e90f",
+      "Dungeons/Binaries/Win64/nvngx_dlssg.dll": "8d59d49b36410dd6b62fef2503a5871d347415bd85d943fa0848563a95dd50c7",
+      "Dungeons/Binaries/Win64/NvLowLatencyVk.dll": "2a77dc3e1c724b7eea5755be0ae7423752e79a2459fae72181a9f00e3507e5d6",
+      "Dungeons/Binaries/Win64/MCD2Graphics/fsr/amd_fidelityfx_upscaler_dx12.dll": "d0dcccc74a43c44ba435b7a369b456e0970d8a4464e4bd683119b374f2c9fb46",
+      "Dungeons/Binaries/Win64/amd_fidelityfx_framegeneration_dx12.dll": "02297beedd285e822d3a64f314cf00faf378dcec0edc47ff0c4dd71b3a8c2f18"
+    },
+    "runtimeQualified": false,
+    "freshGameDirectoryScanByReportAuthor": false,
+    "latestOverrideReopenExactVerificationCorroborated": true,
+    "latestMaintenanceAndFinalGuiVerifyExactVerificationCorroborated": true,
+    "installedReceiptUnchangedAcrossMaintenance": true
+  },
+  "dependencyVersions": {
+    "BlueprintLoader": "2.6",
+    "RenoDXUEExtended": "0.2026.1008.1941",
+    "DLSSRuntime": "310.9.16",
+    "Streamline": "2.14.16",
+    "FSRUpscaler": "3.1.5 / official 4.1.1",
+    "FSRFrameGeneration": "3.1.6 / ML 4.0.1",
+    "versionsEstablishActiveSelection": false
+  },
+  "platform": {
+    "os": "Windows 11",
+    "gpu": "AMD Radeon 860M",
+    "driver": "32.0.31041.1004",
+    "steamBuild": "25754144",
+    "shippingSHA256": "3a8703406fd50520f83c4f70a0212c000cb3b584ef28eb38032902230c01ebdd",
+    "baselineCarriedForward": true,
+    "newHardwareScan": false,
+    "physicalHdrQualification": "NOT AVAILABLE",
+    "nvidiaQualification": "NOT AVAILABLE",
+    "xboxPcQualified": false
+  },
+  "ordinaryAndDiagnosticTrials": [
+    {
+      "trial": 1,
+      "classification": "ordinary",
+      "context": "Main menu; Native SR; startup FG request On; no gameplay/evaluations/generated frames established",
+      "exitCodeHex": "C0000005",
+      "latencySeconds": 6.905158,
+      "ordinaryExitQualified": false,
+      "faultUnresolved": true
+    },
+    {
+      "trial": 2,
+      "classification": "interrupted/excluded",
+      "exitCodeHex": null,
+      "ordinaryExitQualified": false,
+      "completeExitReceipt": false
+    },
+    {
+      "trial": 3,
+      "classification": "ordinary runtime until failed diagnostic attachment; termination excluded",
+      "attachmentFailed": true,
+      "hardwareWatchArmed": false,
+      "debugRegistersWritten": false,
+      "normalCloseRequested": false,
+      "exitCodeHex": "00000000",
+      "ordinaryExitQualified": false,
+      "terminationCauseEstablished": false
+    },
+    {
+      "trial": 4,
+      "classification": "ordinary",
+      "context": "FSR Quality hub; Native owner 0; FG Off; Anti-Lag On",
+      "exitRoute": "Alt+F4",
+      "exitCodeHex": "00000000",
+      "heldHandle": true,
+      "latencySeconds": 6.8994144,
+      "timezoneAwareRequestToKernelExit": true,
+      "ordinaryCleanExit": true,
+      "overallExitGatePassed": false,
+      "captureUsed": false,
+      "debuggerUsed": false,
+      "extraAddonUsed": false
+    },
+    {
+      "trial": 5,
+      "classification": "temporary hardware-write-watch diagnostic; termination excluded",
+      "manualWatchArmed": true,
+      "headReadableAndInitiallySelfLinked": true,
+      "threadsArmedCount": 108,
+      "threadsCleanedCount": 108,
+      "captureStoppedForNewThread": true,
+      "writeWatchEvents": 0,
+      "exitCodeHex": "00000000",
+      "normalCloseRequested": false,
+      "approximateSecondsAfterArmingToExit": 7,
+      "ordinaryExitQualified": false,
+      "terminationCauseEstablished": false,
+      "instrumentationCompatibilitySuspectedUnproven": true,
+      "causalWriterIdentified": false,
+      "temporaryAddonRemoved": true,
+      "original18Owned15DependencyHashesVerified": true
+    },
+    {
+      "trial": 6,
+      "classification": "diagnostic/excluded",
+      "exitCodeHex": "00000000",
+      "latencySeconds": 5.9242463,
+      "ordinaryExitQualified": false,
+      "temporaryPageWatchRemoved": true,
+      "firstWriteWasTargetNode": false,
+      "originalPageProtectionRestored": true
+    },
+    {
+      "trial": 7,
+      "classification": "ordinary with external read-only observer",
+      "context": "Main menu; normal mouse Quit and Confirm; original borderless display restored; no injected diagnostic, debugger or register changes",
+      "exitCodeHex": "00000000",
+      "latencySeconds": 5.813616,
+      "ordinaryExitQualified": true,
+      "exitCrashFixed": false
+    },
+    {
+      "trial": 8,
+      "classification": "diagnostic/excluded",
+      "exitCodeHex": "00000000",
+      "latencySeconds": 6.554285,
+      "ordinaryExitQualified": false,
+      "temporaryPageWatchRemoved": true,
+      "firstWriteWasTargetNode": false,
+      "originalPageProtectionRestored": true
+    },
+    {
+      "trial": 9,
+      "classification": "ordinary",
+      "context": "Startup sign-in errors 0020 and 0064 after one retry; no gameplay, injected diagnostic or debugger; ordinary Alt+F4",
+      "exitCodeHex": "C0000005",
+      "latencySeconds": 5.81068,
+      "ordinaryExitQualified": false,
+      "faultUnresolved": true,
+      "sameWorkerAndCrtExitFamily": true,
+      "sameExactFaultAsRun1": false,
+      "nullDerivedReadHex": "3dac",
+      "actualWriterIdentified": false,
+      "headNextZeroEstablished": false
+    },
+    {
+      "trial": 10,
+      "classification": "ordinary post-uninstall reinstall",
+      "context": "Normal GUI reinstall and Verify passed; title reached; startup sign-in error prevented gameplay",
+      "exitRoute": "Alt+F4",
+      "exitCodeHex": "00000000",
+      "latencySeconds": 6.026806,
+      "heldHandle": true,
+      "kernelExitTime": true,
+      "extraAddonUsed": false,
+      "debuggerUsed": false,
+      "ordinaryCleanExit": true,
+      "overallExitGatePassed": false,
+      "fullStartupGameplayQualification": false
+    },
+    {
+      "trial": 11,
+      "classification": "ordinary offline comparison",
+      "context": "Startup error prevented gameplay; Steam returned online afterward",
+      "exitRoute": "Alt+F4",
+      "exitCodeHex": "C0000005",
+      "latencySeconds": 6.183625,
+      "heldHandle": true,
+      "kernelExitTime": true,
+      "extraAddonUsed": false,
+      "debuggerUsed": false,
+      "ordinaryExitQualified": false,
+      "sameWorkerFunctionAndCallerChain": true,
+      "differentNullReadInstruction": true,
+      "actualWriterIdentified": false,
+      "exitCrashFixed": false
+    },
+    {
+      "trial": 12,
+      "classification": "interrupted diagnostic/excluded",
+      "manualWatchArmed": false,
+      "exitCodeHex": null,
+      "completeExitReceipt": false,
+      "ordinaryExitQualified": false,
+      "terminationCauseEstablished": false,
+      "temporaryAddonRemoved": true,
+      "original18Owned15DependencyHashesVerified": true
+    }
+  ],
+  "run4Resize": {
+    "presenterOwner": "Native",
+    "presenterOwnerCode": 0,
+    "fgActive": false,
+    "windowedOutput": [
+      1680,
+      1050
+    ],
+    "qualityRender": [
+      1120,
+      700
+    ],
+    "qualityOutput": [
+      1680,
+      1050
+    ],
+    "qualityEvaluationDelta": 557,
+    "qualityIntervalSeconds": 10.135149,
+    "firstFullscreen1920OutputResumed": true,
+    "secondToggleOutput": [
+      1680,
+      1050
+    ],
+    "secondToggleEvaluationDelta": 432,
+    "secondToggleSeconds": 10.117893,
+    "movementEvaluationDelta": 485,
+    "movementSeconds": 10.114613,
+    "thirdToggle1920OutputRestored": true,
+    "originalBorderlessModeRestored": false,
+    "nextStartupFgRequested": "On",
+    "nextStartupRequestProvesCurrentFgActive": false,
+    "activeAmdOwnerLifecycleQualified": false
+  },
+  "providerObservations": {
+    "nativeSrActivity": 0,
+    "nativeFgOnRenderedDelta": 35,
+    "nativeFgOnGeneratedDelta": 35,
+    "nativeFgOnAntiLagDelta": 35,
+    "nativeFgOffAntiLagDelta": 31,
+    "fsrQualityFgOnRenderedDelta": 60,
+    "fsrQualityFgOnGeneratedDelta": 60,
+    "fsrQualityFgOnWarmedRenderedDelta": 57,
+    "fsrQualityFgOnWarmedGeneratedDelta": 57,
+    "returnedFgOffRenderedDelta": 0,
+    "returnedFgOffGeneratedDelta": 0,
+    "returnedFgOffAntiLagDelta": 62,
+    "strictSrAdvancingValidated": 0,
+    "strictSourceAcknowledgementValidated": false,
+    "applySourceAckIsPhaseSpecificTransaction": true,
+    "ackValidationWeakened": false,
+    "fullDiagnosticsQualified": false,
+    "officialFsrSelectionQualified": false,
+    "latencyReductionMeasured": false
+  },
+  "fsrPresetObservations": [
+    {
+      "preset": "balanced",
+      "renderSize": [
+        1130,
+        706
+      ],
+      "outputSize": [
+        1920,
+        1200
+      ],
+      "error": 0,
+      "sourceError": 0,
+      "contextReady": 1,
+      "evaluationDelta": 352,
+      "seconds": 10.126562,
+      "strictCollectorValidated": false,
+      "fullQualification": false
+    },
+    {
+      "preset": "performance",
+      "renderSize": [
+        960,
+        600
+      ],
+      "outputSize": [
+        1920,
+        1200
+      ],
+      "error": 0,
+      "sourceError": 0,
+      "contextReady": 1,
+      "evaluationDelta": 491,
+      "seconds": 10.144618,
+      "strictCollectorValidated": false,
+      "fullQualification": false
+    },
+    {
+      "preset": "ultra-performance",
+      "renderSize": [
+        640,
+        400
+      ],
+      "outputSize": [
+        1920,
+        1200
+      ],
+      "error": 0,
+      "sourceError": 0,
+      "contextReady": 1,
+      "evaluationDelta": 535,
+      "seconds": 10.100732,
+      "strictCollectorValidated": false,
+      "fullQualification": false
+    },
+    {
+      "preset": "native-aa",
+      "renderSize": [
+        1920,
+        1200
+      ],
+      "outputSize": [
+        1920,
+        1200
+      ],
+      "error": 0,
+      "sourceError": 0,
+      "contextReady": 1,
+      "evaluationDelta": 239,
+      "seconds": 10.140612,
+      "strictCollectorValidated": false,
+      "fullQualification": false
+    },
+    {
+      "preset": "custom",
+      "renderSize": [
+        1479,
+        924
+      ],
+      "outputSize": [
+        1920,
+        1200
+      ],
+      "error": 0,
+      "sourceError": 0,
+      "contextReady": 1,
+      "evaluationDelta": 334,
+      "seconds": 10.130806,
+      "strictCollectorValidated": false,
+      "fullQualification": false
+    },
+    {
+      "preset": "quality",
+      "renderSize": [
+        1120,
+        700
+      ],
+      "outputSize": [
+        1680,
+        1050
+      ],
+      "error": 0,
+      "sourceError": 0,
+      "contextReady": 1,
+      "evaluationDelta": 557,
+      "seconds": 10.135149,
+      "strictCollectorValidated": false,
+      "fullQualification": false
+    }
+  ],
+  "presentationTiming": {
+    "context": "Same hub; FSR Quality; Anti-Lag On; 1920-wide output; settled approximately 30-second samples",
+    "offObservedDisplayCadencePerSecond": 38.95299607219026,
+    "onObservedDisplayCadencePerSecond": 57.597655412413516,
+    "returnedOffObservedDisplayCadencePerSecond": 38.16944012460076,
+    "generatedCountersIndependent": true,
+    "physicalPanelFpsClaimed": false,
+    "baseGeneratedPresentClassificationClaimed": false,
+    "latencyClaimed": false,
+    "coldApplySourceCaptureExcluded": true,
+    "timestampColumn": "CPUStartQPCTime",
+    "timestampUnit": "milliseconds",
+    "qpcTimeMsExplicitlyAttested": true,
+    "parserChecksPassed": 6,
+    "priorInferredSchemaSuperseded": true,
+    "fullPerformanceSuiteComplete": false,
+    "fullOffRecoveryGateComplete": false
+  },
+  "ownedBridgeProbe": {
+    "passed": true,
+    "exitCode": 0,
+    "gameFilesChanged": false,
+    "onIntervals": [
+      {
+        "real": 60,
+        "generated": 60
+      },
+      {
+        "real": 60,
+        "generated": 60
+      }
+    ],
+    "resizeSizes": [
+      [
+        1904,
+        1161
+      ],
+      [
+        1920,
+        1200
+      ]
+    ],
+    "nativeHandoffsSucceeded": true,
+    "heldBufferNegativeHex": "887A0001",
+    "releasedBufferRecovery": 0,
+    "gameIntegrationQualified": false,
+    "activeGameAmdOwnerResizeQualified": false
+  },
+  "currentUi": {
+    "observedVersion": "0.4.0-amd.dev.22",
+    "loader": "2.6",
+    "publisherApostropheCorrect": true,
+    "mojibakeAbsent": true,
+    "metadataArrowExactInBuild": true,
+    "gameFontArrowVisuallyBlank": true,
+    "completeMetadataAndBothMenusGate": false,
+    "unsupportedTargetInstallRefused": true,
+    "negativeFixtureFilesUnchanged": true,
+    "freshGuiInstallationParentDirectlyObserved": true,
+    "freshGuiInstallationReceiptCorroborated": true,
+    "freshGuiInstallationIndependentlyRepeatedByReportAuthor": false,
+    "freshFsrSrAndFgOverrideSubsetPassed": true,
+    "reopenedSevenRecognizedDefaultOff": true,
+    "otherFiveOverrideTogglePathsFreshlyRepeated": true,
+    "installReceiptUnchangedAfterOverrideSubset": true,
+    "unknownFutureDependencyCompatibilityClaimed": false,
+    "originalBorderlessModeRestoredViaUi": true,
+    "originalDisplayOutput": [
+      1920,
+      1200
+    ],
+    "advancedFsrSrChoiceRoundTripObserved": true,
+    "advancedFsrSrRestoredAuto": true,
+    "keyboardControllerChecksAvailable": false,
+    "wrongFolderRefusedAndSupportedSelectionRetained": true
+  },
+  "historicalFailuresRetained": {
+    "dev21ResizeFailure": "ResizeBuffers / DXGI_ERROR_INVALID_CALL",
+    "dev21OrdinaryRun4ExitCode": "C0000005",
+    "dev21OrdinaryRun4LatencySeconds": 5.9536,
+    "currentNativeOwnerResizeErasesHistoricalFailure": false,
+    "dev21EvidenceSuperseded": false
+  },
+  "originalChecklist": {
+    "B1": {
+      "status": "NOT RUN",
+      "observation": "Established Windows/GPU/driver/game baseline retained; no fresh complete HDR/VSync/limit/output baseline."
+    },
+    "B2": {
+      "status": "NOT RUN",
+      "observation": "Run 4 ordinary exit has held-handle/kernel evidence; the full current backup/recovery baseline is not reverified in this report. Saves are outside this report."
+    },
+    "B3": {
+      "status": "NOT RUN",
+      "observation": "No complete dev.22 normal uninstall/fresh-baseline restoration gate. Earlier dev.21 normal uninstall remains historical."
+    },
+    "B4": {
+      "status": "NOT RUN",
+      "observation": "Candidate folder contains a space and runtime launched; full fresh installer prerequisites/protection-warning gate not established here."
+    },
+    "I1": {
+      "status": "PASS",
+      "observation": "Supported Steam build 25754144 and all seven requirement cards accepted. Empty wrong folder refused with Select the Minecraft Dungeons II folder containing Dungeons; supported selection retained and fixture remained empty. Prior exact-candidate unsupported-target Install refusal retained. All 18 owned/15 dependency hashes, empty overrides and receipt unchanged."
+    },
+    "I2": {
+      "status": "PASS",
+      "observation": "Parent directly observed normal dev.22 GUI install with current locked dependencies; final fresh-install receipt corroborates version, 18 owned/15 dependency hashes and overrides {}. Report author did not repeat the interaction."
+    },
+    "I3": {
+      "status": "PASS",
+      "observation": "Fresh exact dev.22 GUI Verify while the game was running completed read-only. Confirmed Uninstall and Install both refused with Close Minecraft Dungeons II before changing files. All 18 owned and 15 dependency hashes, overrides {} and the install receipt remained unchanged."
+    },
+    "I4": {
+      "status": "PASS",
+      "observation": "Parent directly observed normal intact GUI Verify; all 18 owned/15 dependency hashes, overrides {} and installed receipt unchanged."
+    },
+    "I5": {
+      "status": "PASS",
+      "observation": "Only the backed-up owned shader was removed; normal GUI Repair restored its original hash. Exact 18+15 hashes and receipt unchanged."
+    },
+    "I6": {
+      "status": "PASS",
+      "observation": "Modified owned shader caused Repair and confirmed Uninstall refusals before removal; other 17 owned/15 dependencies unchanged. Exact backup restored and final intact GUI Verify passed with original 18+15 hashes, overrides {} and receipt."
+    },
+    "I7": {
+      "status": "PASS",
+      "observation": "Fresh exact dev.22 GUI framework, RenoDX, Loader, DLSS and Streamline warning/Use installed/isolation/Off paths completed; earlier exact-candidate FSR SR/FG paths retained. Reopened installer shows all seven recognized, no warnings or Use installed actions; 18 owned/15 dependency hashes, overrides {} and installation receipt unchanged."
+    },
+    "I8": {
+      "status": "PASS",
+      "observation": "Pinned-source Windows installer Core suite passed 147 fixtures covering unknown/mixed/incomplete/unsafe/acknowledgement cases. Separate exact-shipped-Core constructor check verified seven defaults Off and byte-matching embedded inputs; 147 tests are not claimed against that shipped binary."
+    },
+    "I9": {
+      "status": "PASS",
+      "observation": "Normal dev.22 GUI Uninstall completed with game closed. Independent checks confirmed all 17 removable owned paths absent including private DLSS, 14 shared dependencies unchanged, original proxy restored, install/HDR ownership receipts absent and exact ownership-safe config restoration. Player saves were not read."
+    },
+    "I10": {
+      "status": "PASS",
+      "observation": "Normal exact-candidate reinstall and verification followed by successful main menu and hub startup in run 18; later ordinary exit AV retained separately."
+    },
+    "U1": {
+      "status": "NOT RUN",
+      "observation": "Fresh visible version dev.22, Loader 2.6, correct apostrophe/no mojibake. Full main/pause metadata gate incomplete; font arrow is visually blank."
+    },
+    "U2": {
+      "status": "NOT RUN",
+      "observation": "Ordinary UI changes worked in bounded run 4; complete both-menu mouse/keyboard/layout gate pending."
+    },
+    "U3": {
+      "status": "NOT RUN",
+      "observation": "Six FSR presets and dimensions observed; full preset/slider/fill/minimum interaction gate pending."
+    },
+    "U4": {
+      "status": "NOT RUN",
+      "observation": "Final FG On is a next-startup request; relaunch/activity/persistence agreement pending."
+    },
+    "U5": {
+      "status": "NOT RUN",
+      "observation": "Over five minutes hub survival, active SR evaluations and mouse-drag movement observed. Required dungeon/hub return transition remains incomplete."
+    },
+    "U6": {
+      "status": "NOT AVAILABLE",
+      "observation": "No physical-controller result available."
+    },
+    "A1": {
+      "status": "NOT RUN",
+      "observation": "Exact installed hashes and Native/FG-Off observations available; full current loaded-chain/control gate incomplete."
+    },
+    "A2": {
+      "status": "NOT RUN",
+      "observation": "Legacy unsupported-DLSS before-scale-reduction fallback requests not repeated on current dev.22. FSR success does not satisfy this gate."
+    },
+    "A3": {
+      "status": "NOT RUN",
+      "observation": "Legacy unsupported NVIDIA FG/Reflex seeded preference fallback not repeated. Current supported AMD FG activity is a separate scope."
+    },
+    "A4": {
+      "status": "NOT RUN",
+      "observation": "Native-Windows Wine-only Reflex guard check not freshly evidenced."
+    },
+    "A5": {
+      "status": "NOT RUN",
+      "observation": "Optional-model-hint fallback gate not freshly evidenced."
+    },
+    "N1": {
+      "status": "NOT AVAILABLE",
+      "observation": "Requires suitable Windows NVIDIA hardware."
+    },
+    "N2": {
+      "status": "NOT AVAILABLE",
+      "observation": "Requires suitable Windows NVIDIA hardware."
+    },
+    "N3": {
+      "status": "NOT AVAILABLE",
+      "observation": "Requires suitable Windows NVIDIA hardware; AMD Anti-Lag counters do not substitute."
+    },
+    "N4": {
+      "status": "NOT AVAILABLE",
+      "observation": "NVIDIA performance matrix unavailable; AMD ETW observations are separately bounded."
+    },
+    "N5": {
+      "status": "NOT AVAILABLE",
+      "observation": "Native HDR display unavailable; no swapchain colour-space/format HDR pass."
+    },
+    "E1": {
+      "status": "FAIL",
+      "observation": "Recurring ordinary C0000005 exits include fresh no-debugger/no-extra-addon/no-ETW run 18; same worker failure family. Three final ordinary clean exits after a cause-specific repair remain incomplete."
+    },
+    "E2": {
+      "status": "NOT RUN",
+      "observation": "Bounded exit timings retained; full prescribed delayed-exit observation sequence not complete."
+    },
+    "E3": {
+      "status": "NOT RUN",
+      "observation": "Normal I9 uninstall, I10 reinstall/startup and original borderless restoration passed; final full preference restoration remains pending."
+    },
+    "E4": {
+      "status": "NOT RUN",
+      "observation": "This sanitized mid-work report/aggregate exist; final report/restoration/release decision is not complete."
+    }
+  },
+  "currentAmdChecklist": {
+    "Native control": {
+      "status": "NOT RUN",
+      "observation": "Native SR inactive and FG-Off startup observed; full scale/low-latency-Off/limiter control pending."
+    },
+    "FSR SR": {
+      "status": "NOT RUN",
+      "observation": "Six presets, actual dimensions and advancing SDK evaluations observed; explicit analytical/official implementation selection and strict diagnostics remain pending."
+    },
+    "AMD FG": {
+      "status": "NOT RUN",
+      "observation": "Valid Native and FSR counter advances; pause/resume, travel, active AMD-owner output/window lifecycle and any supported ML selection pending."
+    },
+    "FG Off recovery": {
+      "status": "NOT RUN",
+      "observation": "Matched Off \u00e2\u2020\u2019 On \u00e2\u2020\u2019 Off counters/cadence retained; complete warmed repeated recovery regression pending."
+    },
+    "Anti-Lag 2": {
+      "status": "NOT RUN",
+      "observation": "Valid independent FG-Off and FG-On counter advances retained; full eligibility/unsupported refusal and timing scope pending."
+    },
+    "NVIDIA routes / preset C": {
+      "status": "NOT AVAILABLE",
+      "observation": "No suitable Windows NVIDIA hardware; no native DRS/profile-restoration claim."
+    },
+    "Advanced Mods page": {
+      "status": "NOT RUN",
+      "observation": "Full three-tab/exclusive-glow navigation, independent official FSR SR/FG selections, Auto/reset and relaunch not completed."
+    },
+    "Diagnostics": {
+      "status": "NOT RUN",
+      "observation": "Separate read-only Active SR observer passed 32 synthetic checks and three fresh live advancing/current-context reports. Original transition-only collector unchanged. Full pause/stale/disabled recovery and intermittent version-label finding pending."
+    },
+    "Sharpness": {
+      "status": "NOT RUN",
+      "observation": "Complete 0\u00e2\u20ac\u201c100%, reset/relaunch/provider/external-change gate pending."
+    },
+    "Lifecycle/output": {
+      "status": "NOT RUN",
+      "observation": "Native-owner game resize/SR recovery and original borderless restoration observed. Active AMD owner, pause/travel and actual colour-space/format checks pending."
+    },
+    "Shutdown": {
+      "status": "FAIL",
+      "observation": "Startup ordinary-exit access violation unresolved. Three ordinary code-zero quits with retirement and delay review are not completed."
+    },
+    "Installer": {
+      "status": "PASS",
+      "observation": "I1-I10 complete on exact dev.22 with current pinned publisher dependencies. Ordinary startup and hub gameplay after reinstall passed; subsequent exit failure retained separately."
+    }
+  },
+  "remainingGates": [
+    "Fresh complete current-candidate GUI and advanced-page input scope",
+    "Explicit current official FSR SR/FG implementation selection",
+    "Pause/stale/disabled diagnostics; fresh Active SR validation passed",
+    "Travel and active AMD-owner resize/output lifecycle",
+    "Three ordinary clean exits with completed retirement and delay review",
+    "Root cause of ordinary-exit C0000005"
+  ],
+  "privacy": {
+    "sanitizedOnly": true,
+    "privatePathsIncluded": false,
+    "usernamesIncluded": false,
+    "processIdentifiersIncluded": false,
+    "accountOrPartyIdentifiersIncluded": false,
+    "runtimeSessionWorldNumericIdentifiersIncluded": false,
+    "rawLogsIncluded": false,
+    "dumpsIncluded": false,
+    "vendorBinariesIncluded": false,
+    "playerDataRead": false
+  },
+  "reportPreparation": {
+    "uiActions": false,
+    "gameActions": false,
+    "debuggerActions": false,
+    "gpuActions": false,
+    "networkActions": false,
+    "freshReceiptAgreementChecked": true,
+    "runtimeSourceChanged": false,
+    "payloadChanged": false,
+    "qualificationActionsAttributedToParent": true
+  },
+  "guiMaintenance": {
+    "directParentGuiAttestation": true,
+    "reportAuthorRepeatedGui": false,
+    "intactVerify": "PASS",
+    "missingOwnedShaderRepair": "PASS",
+    "modifiedOwnedShaderRepairRefusal": "PASS",
+    "modifiedOwnedShaderUninstallRefusal": "PASS",
+    "uninstallStoppedBeforeRemoval": true,
+    "other17OwnedAnd15DependenciesUnchangedAfterEachRefusal": true,
+    "exactBackupRestored": true,
+    "finalIntactGuiVerify": "PASS",
+    "all18OwnedAnd15DependenciesVerified": true,
+    "dependencyOverrides": {},
+    "installedReceiptUnchanged": true,
+    "ordinaryUninstallI9Complete": true,
+    "postUninstallReinstallI10Complete": true,
+    "gameClosedAtCheckpoint": true,
+    "temporaryDiagnosticAddonInstalledAtCheckpoint": false,
+    "runningGameReadOnlyVerify": "PASS",
+    "runningGameInstallRefusal": "PASS",
+    "runningGameUninstallRefusal": "PASS",
+    "runningGameFilesAndReceiptUnchanged": true,
+    "ordinaryUninstallOwnedAbsent": 17,
+    "ordinaryUninstallSharedDependenciesUnchanged": 14,
+    "ordinaryUninstallOriginalProxyRestored": true,
+    "ordinaryUninstallExactConfigRestoration": true,
+    "postUninstallGuiReinstallPassed": true,
+    "postUninstallGuiVerifyPassed": true,
+    "postUninstallTitleLaunchObserved": true,
+    "postUninstallFullGameplayVerified": true
+  },
+  "additionalWorkflowMetadata": {
+    "parentFreshReadOnlyApiVerification": true,
+    "requestedHead": "fe8b2b49c528c3f0bbe8393cab3e69a257406cee",
+    "runs": [
+      {
+        "run": 39294350565,
+        "conclusion": "success",
+        "url": "https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/39294350565"
+      },
+      {
+        "run": 39294350619,
+        "conclusion": "success",
+        "url": "https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/39294350619"
+      }
+    ],
+    "metadataOnly": true,
+    "replacesNativeArtifactAttestation": false,
+    "runtimeQualification": false
+  },
+  "installerCoreFixtures": {
+    "status": "PASS",
+    "checksPassed": 147,
+    "sourceCommit": "fe8b2b49c528c3f0bbe8393cab3e69a257406cee",
+    "sourcePinsVerified": 143,
+    "isolatedPrivateMetadata": true,
+    "classes": [
+      "unknown complete set",
+      "mixed individually recognized releases",
+      "missing/incomplete archive members",
+      "ambiguous archive members",
+      "traversal/unsafe paths",
+      "symlink safety",
+      "unsupported targets",
+      "running-state refusal",
+      "explicit acknowledgement"
+    ],
+    "sourceBuiltCoreTestResult": true,
+    "tests147ExecutedAgainstExactShippedBinaryClaimed": false,
+    "separateExactShippedCoreConstructorMetadataVerified": true,
+    "allSevenShippedDefaultsOff": true,
+    "embeddedInputsByteMatched": true,
+    "unknownFutureDependencyCompatibilityClaimed": false,
+    "gameRuntimeQualification": false
+  },
+  "run7ReadOnlyShutdownObservation": {
+    "pinnedImageVerified": true,
+    "debugger": false,
+    "processMemoryWrites": false,
+    "protectionChanges": false,
+    "pollMillisecondsNominal": 2,
+    "maximumPollGapMilliseconds": 24.1203,
+    "headNextBecameZeroDuringSuccessfulExit": true,
+    "nullStateObservedForApproximatelyMilliseconds": 3299.1,
+    "actualWriterIdentified": false,
+    "corruptionProven": false,
+    "limitation": "Polling snapshots are not atomic; transitions can be missed. The null value alone does not distinguish the earlier crash from normal cleanup."
+  },
+  "activeSrObserverPreparation": {
+    "privateToolOnly": true,
+    "productionChanged": false,
+    "originalCollectorChanged": false,
+    "syntheticChecksPassed": 32,
+    "freshLiveValidation": false,
+    "reportExitZeroAloneIsPass": false,
+    "directTransitionHistoryObserved": false,
+    "limitation": "The historical ApplySource ACK relation is checked separately from the exact transactional transition predicate; bounded local-file consistency is not authenticated transition history."
+  },
+  "runtimeFollowup": "runtime-followup-2026-10-20.json"
+}

@@ -9,6 +9,7 @@ import subprocess
 import json
 import re
 import shutil
+import hashlib
 from unittest.mock import patch
 
 spec = importlib.util.spec_from_file_location('windows_candidate', Path(__file__).with_name('build_windows_candidate.py'))
@@ -159,6 +160,65 @@ class WindowsBuildChecks(unittest.TestCase):
             for name, expected in receipt['payloadSHA256'].items():
                 self.assertEqual(candidate.sha(artifact / 'ui/Pak' / name), expected)
 
+    def test_candidate_without_consumed_manifest_pin_is_refused_before_archive_io(self):
+        receipt = json.loads((candidate.REPO / 'qualification/providers/current-ui-build-receipt.json').read_text())
+        receipt['sourceFileSHA256'].pop('manifest.json', None)
+        with tempfile.TemporaryDirectory() as temporary:
+            repo = Path(temporary)
+            path = repo / 'qualification/providers/current-ui-build-receipt.json'
+            path.parent.mkdir(parents=True)
+            path.write_text(json.dumps(receipt))
+            artifact = repo / 'artifact'
+            with self.assertRaisesRegex(RuntimeError, 'Incomplete candidate UI source provenance'):
+                candidate.copy_current_ui(repo, artifact)
+            self.assertFalse(artifact.exists())
+
+    def test_candidate_ui_version_binding_is_separate_and_fail_closed(self):
+        receipt = json.loads((candidate.REPO / 'qualification/providers/current-ui-build-receipt.json').read_text())
+        receipt['version'] = '0.4.0-amd.dev.21'
+        sources = {name: ('fixture source ' + name).encode() for name in receipt['sourceFileSHA256']}
+        with tempfile.TemporaryDirectory() as temporary:
+            repo = Path(temporary)
+            path = repo / 'qualification/providers/current-ui-build-receipt.json'
+            path.parent.mkdir(parents=True)
+            shutil.copyfile(candidate.REPO / 'qualification/providers/current-ui-payload.zip', path.with_name('current-ui-payload.zip'))
+            for number, version in enumerate(['0.4.0-amd.dev.21', '0.3.0-preview.1', '', None]):
+                manifest = {'version': '0.3.0-preview.1', 'files': {}}
+                if version is not None:
+                    manifest['uiCandidateVersion'] = version
+                sources['manifest.json'] = json.dumps(manifest).encode()
+                (repo / 'manifest.json').write_bytes(sources['manifest.json'])
+                receipt['sourceFileSHA256'] = {name: hashlib.sha256(data).hexdigest() for name, data in sources.items()}
+                path.write_text(json.dumps(receipt))
+                artifact = repo / ('artifact-' + str(number))
+                with patch.object(candidate.subprocess, 'check_output', side_effect=lambda args: sources[args[-1][5:]]):
+                    if number == 0:
+                        candidate.copy_current_ui(repo, artifact)
+                        self.assertEqual(json.loads((artifact / 'ui/build-receipt.json').read_text())['version'], '0.4.0-amd.dev.21')
+                    else:
+                        with self.assertRaisesRegex(RuntimeError, 'UI metadata version differs'):
+                            candidate.copy_current_ui(repo, artifact)
+                        self.assertFalse(artifact.exists())
+
+    def test_frozen_ui_fallback_keeps_package_version(self):
+        receipt = json.loads((candidate.REPO / 'qualification/fg-release/ui-build-receipt.json').read_text())
+        sources = {'src/ui/ModActor.cs': b'frozen actor', 'tools/ModInfoBuilder/Program.cs': b'frozen metadata builder'}
+        receipt['sourceSHA256'] = hashlib.sha256(sources['src/ui/ModActor.cs']).hexdigest()
+        receipt['modInfoBuilderSHA256'] = hashlib.sha256(sources['tools/ModInfoBuilder/Program.cs']).hexdigest()
+        with tempfile.TemporaryDirectory() as temporary:
+            repo = Path(temporary)
+            path = repo / 'qualification/fg-release/ui-build-receipt.json'
+            path.parent.mkdir(parents=True)
+            path.write_text(json.dumps(receipt))
+            shutil.copyfile(candidate.REPO / 'qualification/fg-release/own-payload.zip', path.with_name('own-payload.zip'))
+            manifest = json.loads((candidate.REPO / 'manifest.json').read_text())
+            manifest.update(version='0.3.0-preview.1', uiCandidateVersion='0.4.0-amd.dev.21')
+            (repo / 'manifest.json').write_text(json.dumps(manifest))
+            artifact = repo / 'artifact'
+            with patch.object(candidate.subprocess, 'check_output', side_effect=lambda args: sources[args[-1][5:]]):
+                candidate.copy_current_ui(repo, artifact)
+            self.assertEqual(json.loads((artifact / 'ui/build-receipt.json').read_text())['version'], '0.3.0-preview.1')
+
     def test_stale_metadata_source_is_refused_before_writing(self):
         with tempfile.TemporaryDirectory() as temporary:
             artifact = Path(temporary) / 'artifact'
@@ -188,11 +248,44 @@ class WindowsBuildChecks(unittest.TestCase):
             self.assertFalse(artifact.exists())
 
     def test_framework_patch_has_canonical_checkout_and_hash_bytes(self):
-        relative = 'qualification/fg-release/reshade-reset-epoch.patch'
-        self.assertNotIn(b'\r', (candidate.REPO / relative).read_bytes())
-        attributes = subprocess.check_output(
-            ['git', '-C', str(candidate.REPO), 'check-attr', 'eol', relative], text=True)
-        self.assertEqual(attributes.strip(), relative + ': eol: lf')
+        for relative in ('qualification/fg-release/reshade-reset-epoch.patch', candidate.DESCRIPTOR_HEAP_PATCH):
+            self.assertNotIn(b'\r', (candidate.REPO / relative).read_bytes())
+            attributes = subprocess.check_output(
+                ['git', '-C', str(candidate.REPO), 'check-attr', 'eol', relative], text=True)
+            self.assertEqual(attributes.strip(), relative + ': eol: lf')
+        self.assertEqual(candidate.sha(candidate.REPO / candidate.DESCRIPTOR_HEAP_PATCH),
+                         'e3a5a1d142628dd6247320769e71dc356b22671f80f6a77e591cbb34242fa7f8')
+        workflow = (candidate.REPO / '.github/workflows/fg-windows-candidate.yml').read_text()
+        patterns = ast.literal_eval(re.search(r'^\s+patterns = (\[.*\])$', workflow, re.MULTILINE).group(1))
+        self.assertTrue(any(fnmatch.fnmatchcase(candidate.DESCRIPTOR_HEAP_PATCH, p) for p in patterns))
+
+    def test_framework_patch_transaction_applies_both_and_refuses_dirty_sources(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            checkout = root / 'checkout'
+            checkout.mkdir()
+            git = lambda *args: subprocess.run(['git', '-C', str(checkout), *args], check=True, capture_output=True)
+            git('init', '-q')
+            git('config', 'core.autocrlf', 'false')
+            (checkout / 'reset.txt').write_bytes(b'old reset\n')
+            (checkout / 'heap.txt').write_bytes(b'old heap\n')
+            git('add', '.')
+            git('-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '-qm', 'base')
+            for name, relative in [('reset', 'qualification/fg-release/reshade-reset-epoch.patch'),
+                                   ('heap', candidate.DESCRIPTOR_HEAP_PATCH)]:
+                destination = root / relative
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                destination.write_bytes(f'--- a/{name}.txt\n+++ b/{name}.txt\n@@ -1 +1 @@\n-old {name}\n+new {name}\n'.encode())
+            diff, status = candidate.apply_framework_patches(root, checkout)
+            self.assertIn(b'+new reset', diff)
+            self.assertIn(b'+new heap', diff)
+            self.assertIn(b'M  reset.txt', status)
+            self.assertIn(b'M  heap.txt', status)
+            git('reset', '--hard', '-q', 'HEAD')
+            (checkout / 'unreviewed.txt').write_text('unrelated source')
+            with self.assertRaisesRegex(RuntimeError, 'not clean'):
+                candidate.apply_framework_patches(root, checkout)
+            self.assertEqual((checkout / 'reset.txt').read_text(), 'old reset\n')
 
     def test_unversioned_components_and_incomplete_versions_are_ignored(self):
         with tempfile.TemporaryDirectory() as temporary:

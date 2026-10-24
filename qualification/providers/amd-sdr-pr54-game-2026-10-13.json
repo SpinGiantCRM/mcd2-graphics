@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Bounded complete PR54 artifact SDR gameplay and resize control",
+  "nativeArtifact": 11775477368,
+  "nativeRun": 38313187332,
+  "sourceCommit": "de03af164956512ec5d0d6b8a03d6eb21e6b40c6",
+  "frameworkSHA256": "379dc8d812304cae5d4cd85e65e2dac4899b14db856d57d3540e6fdf750e39b4",
+  "sr": "FSR analytical Quality",
+  "fg": "AMD analytical",
+  "hdrAddonTemporarilyHeld": true,
+  "sceneColourSpace": 1,
+  "sampledSteadyIntervals": [
+    {
+      "prepared": 60,
+      "images": 60,
+      "realPresents": 60,
+      "generatedPresents": 60
+    },
+    {
+      "prepared": 60,
+      "images": 60,
+      "realPresents": 60,
+      "generatedPresents": 60
+    }
+  ],
+  "sdkFaults": 0,
+  "sdkErrors": 0,
+  "sdkWarnings": 0,
+  "observedSwapchains": [
+    {
+      "kind": "swapchain",
+      "resize": false,
+      "width": 3840,
+      "height": 2160,
+      "format": 24,
+      "colourSpace": 1,
+      "buffers": 3
+    },
+    {
+      "kind": "swapchain",
+      "resize": true,
+      "width": 3840,
+      "height": 2160,
+      "format": 24,
+      "colourSpace": 1,
+      "buffers": 3
+    },
+    {
+      "kind": "swapchain",
+      "resize": true,
+      "width": 3200,
+      "height": 1800,
+      "format": 24,
+      "colourSpace": 1,
+      "buffers": 3
+    },
+    {
+      "kind": "swapchain",
+      "resize": true,
+      "width": 3840,
+      "height": 2160,
+      "format": 24,
+      "colourSpace": 1,
+      "buffers": 3
+    }
+  ],
+  "resizeResumed": true,
+  "currentGuideDimensionsObserved": [
+    [
+      2560,
+      1440
+    ],
+    [
+      2134,
+      1200
+    ],
+    [
+      2560,
+      1440
+    ]
+  ],
+  "normalQuit": {
+    "actualExitCode": 0,
+    "processHandleHeld": true,
+    "confirmationToGoneSeconds": 4.383342888000016
+  },
+  "originalFilesRestored": true,
+  "wholeConfigurationRestored": true,
+  "windowsRadeonQualified": false,
+  "performanceQualified": false,
+  "physicalFPSClaim": false,
+  "rawEvidencePublished": false,
+  "sceneRecordingRetirement": {
+    "SDKResult": 0,
+    "recordedSceneLeases": 0,
+    "sceneGPUComplete": 1
+  },
+  "sharedSdkRetirement": 0
+}

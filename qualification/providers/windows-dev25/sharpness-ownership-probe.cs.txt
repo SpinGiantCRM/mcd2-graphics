@@ -1,0 +1,56 @@
+// Qualification-only addition to ModActor.cs; never a release payload.
+// Invoke immediately after unchanged ApplySharpness() in PollAdvanced().
+
+ // PRIVATE QUALIFICATION ONLY: fixed-value engine writer and readback.
+ // No player saves, fabricated runtime state, general command API or provider writes.
+ int qualificationPhase,qualificationStable,qualificationSession;
+ float qualificationOriginal;
+ bool QualificationNear(float a,float b){return a-b<0.001f&&b-a<0.001f;}
+ void QualificationSharpnessProbe(){
+  if(qualificationPhase==99||ProviderRuntime==null||ProviderRuntime.Context==null||ProviderRuntime.Context.W10!=1)return;
+  var player=World.PlayerController(this);if(player==null)return;
+  int session=ProviderRuntime.Context.W5;
+  float value=UKismetSystemLibrary.GetConsoleVariableFloatValue("r.Tonemapper.Sharpen");
+  if(!(value>=-1f&&value<=10f)){Log.Write("QSHARP FAIL invalid engine value");qualificationPhase=99;return;}
+  if(qualificationPhase!=0&&session!=qualificationSession){Log.Write("QSHARP FAIL session changed");qualificationPhase=99;return;}
+  bool native=SelectedProvider()==0;
+  if(qualificationPhase==0){
+   if(!native)return;qualificationSession=session;qualificationOriginal=value;
+   UKismetSystemLibrary.ExecuteConsoleCommand(this,"r.Tonemapper.Sharpen 0.23",player);
+   float read=UKismetSystemLibrary.GetConsoleVariableFloatValue("r.Tonemapper.Sharpen");
+   Log.Write("QSHARP BASE original="+qualificationOriginal+" external="+read+" session="+session);
+   qualificationPhase=QualificationNear(read,0.23f)?1:99;return;
+  }
+  if(qualificationPhase==1){
+   if(native)return;if(++qualificationStable<3)return;
+   bool ok=Sharpness==0&&sharpnessOwned&&QualificationNear(originalSharpness,0.23f)&&QualificationNear(value,0f);
+   Log.Write("QSHARP OWNED "+(ok?"PASS":"FAIL")+" original="+originalSharpness+" written="+writtenSharpness+" observed="+value);
+   qualificationStable=0;qualificationPhase=ok?2:99;return;
+  }
+  if(qualificationPhase==2){
+   if(!native)return;bool ok=!sharpnessOwned&&QualificationNear(value,0.23f);
+   Log.Write("QSHARP NORMAL_RESTORE "+(ok?"PASS":"FAIL")+" observed="+value);
+   qualificationPhase=ok?3:99;return;
+  }
+  if(qualificationPhase==3){
+   if(native)return;if(++qualificationStable<3)return;
+   if(!sharpnessOwned||!QualificationNear(value,0f)){Log.Write("QSHARP FAIL second lease not owned");qualificationPhase=99;return;}
+   UKismetSystemLibrary.ExecuteConsoleCommand(this,"r.Tonemapper.Sharpen 0.42",player);
+   float read=UKismetSystemLibrary.GetConsoleVariableFloatValue("r.Tonemapper.Sharpen");
+   Log.Write("QSHARP EXTERNAL_SET observed="+read);qualificationStable=0;qualificationPhase=QualificationNear(read,0.42f)?4:99;return;
+  }
+  if(qualificationPhase==4){
+   if(native)return;if(++qualificationStable<3)return;
+   bool ok=!sharpnessOwned&&sharpnessBlocked&&QualificationNear(value,0.42f);
+   Log.Write("QSHARP YIELD "+(ok?"PASS":"FAIL")+" observed="+value);
+   qualificationPhase=ok?5:99;return;
+  }
+  if(qualificationPhase==5){
+   if(!native)return;bool ok=!sharpnessOwned&&QualificationNear(value,0.42f);
+   Log.Write("QSHARP EXTERNAL_NATIVE "+(ok?"PASS":"FAIL")+" observed="+value);
+   if(ok){UKismetSystemLibrary.ExecuteConsoleCommand(this,"r.Tonemapper.Sharpen "+qualificationOriginal,player);
+    float read=UKismetSystemLibrary.GetConsoleVariableFloatValue("r.Tonemapper.Sharpen");
+    Log.Write("QSHARP FINAL_RESTORE "+(QualificationNear(read,qualificationOriginal)?"PASS":"FAIL")+" observed="+read);}
+   qualificationPhase=99;
+  }
+ }

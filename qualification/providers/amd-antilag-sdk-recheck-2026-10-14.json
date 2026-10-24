@@ -1,0 +1,13 @@
+{
+  "officialDownload": "https://gpuopen.com/download-Unreal-Engine-AntiLag2-plugin/",
+  "package": "UE-AL2-2_0_5",
+  "archiveSHA256": "7ee43a61d8bf72742931ffe06e3054fafec62cfa02a21b39c71f5566e0b8b23e",
+  "apiHeaderNormalisedSHA256": "0554c804cfb02442974b90cf1887031bfd18d41fba2054a2cd23c8ee65e6265f",
+  "pinnedSdkHeaderMatchesLatestPluginPackage": true,
+  "vendorRuntimeOrPluginBundled": false,
+  "nativeRadeonQualified": false,
+  "runtimeChangesRequiredForHeaderUpgrade": false,
+  "matchingPluginVariants": 6,
+  "schemaVersion": 1,
+  "candidateOnly": true
+}

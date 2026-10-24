@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-19",
+  "decision": "unqualified - FSR still times out; stutter control pending",
+  "purpose": "Windows Radeon timeout and crash investigation after failed dev16 qualification",
+  "gpu": "AMD Radeon(TM) 860M Graphics",
+  "driver": "32.0.31041.1004",
+  "gameBuild": 25754144,
+  "privateObserverAddonSHA256": "0114d25fdf988e9f8159a649279d5898b301437c18f01f8fd2c8fb8e050becf5",
+  "privateObserverWritesEveryFrames": 120,
+  "shippingProcessExitCode": 0,
+  "userConfirmedNormalQuit": true,
+  "nativeControlTestedByUser": false,
+  "userReportedStutterIntervalSeconds": 3,
+  "stutterCauseEstablished": false,
+  "pauseKeyResultConfirmed": false,
+  "crashReproducedThisRun": false,
+  "srRuntime": {
+    "5": 93553665,
+    "6": 25,
+    "7": 115,
+    "8": 287802663,
+    "9": 2,
+    "10": 8,
+    "11": 22,
+    "16": 100000000,
+    "17": 0,
+    "18": 2,
+    "19": 1
+  },
+  "originalTemporalShaderHashesObserved": false,
+  "isolatedFsrSdkControl": {
+    "gameFilesChanged": false,
+    "frameworkLoaded": false,
+    "shippingProcessTest": false,
+    "exitCode": 0,
+    "complete": {
+      "stage": "complete",
+      "dispatches": 160,
+      "SDKerrors": 0,
+      "SDKwarnings": 0,
+      "gameFilesChanged": false
+    },
+    "runtimeSHA256": "d0dcccc74a43c44ba435b7a369b456e0970d8a4464e4bd683119b374f2c9fb46",
+    "probeSHA256": "1ff9627e500020564021524ae546682fd3d4891e65a9471cd557506958cb1791"
+  },
+  "nextControl": "Exact dev16 rendering addon without repeating private shader trace; numeric-slider UI from 87996d6; Native first, FSR second; not a complete candidate qualification",
+  "privateLogsDumpsAndPlayerDataCommitted": false
+}

@@ -672,6 +672,17 @@ extern "C" __declspec(dllexport) int mcd2_sr_ngx_retired_v1() {
  return live_fixture?0:1;
 }
 
+// Snapshot only: never wait for the renderer or release GPU/SDK objects here.
+extern "C" __declspec(dllexport) int mcd2_native_fg_retired_v1() {
+ if(mcd2::process_exit::terminating())return -1;
+ std::unique_lock guard(lock,std::try_to_lock);if(!guard.owns_lock())return -1;
+#if MCD2_NATIVE_FG_GUIDES
+ return !native_fg::generation&&!native_fg::retirementReleasing?1:0;
+#else
+ return 1;
+#endif
+}
+
 extern "C" __declspec(dllexport) const char *NAME="MCD2 Graphics Reconstruction Candidate";
 extern "C" __declspec(dllexport) const char *DESCRIPTION="Native graphics-menu reconstruction; version-pinned interop";
 #define EVENT(ev,fn) reshade::register_event<reshade::addon_event::ev>(fn)

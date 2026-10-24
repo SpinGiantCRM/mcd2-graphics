@@ -1,0 +1,43 @@
+{
+  "schema": "windows-amd-exit-diagnostic-v1",
+  "date": "2026-10-23",
+  "candidate": "0.4.0-amd.dev.25",
+  "actualArtifactSourceCommit": "b5719f95820acb97dcd5fcdfa60bdde291b3379a",
+  "requestedBranchSourceCommit": "e704a17c59e69ad4ec04191f43b0928ee0ad1097",
+  "gameBuild": "25910487",
+  "gameImageSHA256": "3842102bb05fc532b22e97992d61c2248d115be80ff752ff9b6843bf4acd7005",
+  "diagnosticOnly": true,
+  "ordinaryQualification": false,
+  "method": "Application Verifier Heaps with image-specific WER full dump; no attached debugger",
+  "route": "Starting menu, observed >=30 seconds, normal window close",
+  "configuration": {
+    "upscaler": "Native",
+    "frameGeneration": false,
+    "antiLag": false
+  },
+  "run": 16,
+  "exitCodeHex": "C0000005",
+  "heldHandle": true,
+  "clockGapObserved": false,
+  "fullMemory": true,
+  "dumpBytes": 7964025703,
+  "privateDumpSHA256": "01b91d9223f9f1c5f9c8a13fdd7eca7520cc4de1094aed963345aa77250ecccc",
+  "finding": "Original worker read targets a block classified as freed; retained freeing stack is a game-owned CRT exit callback, and the game static slot still holds that exact pointer.",
+  "allocationHistoryRecovered": false,
+  "workerSourceOwnerIdentified": false,
+  "completeStopOrderingRecovered": false,
+  "sourceFixDemonstrated": false,
+  "temporaryImageSettingsRestored": true,
+  "installedFilesUnchanged": {
+    "owned": 18,
+    "dependencies": 15,
+    "overrides": {}
+  },
+  "qualification": "UNQUALIFIED",
+  "limitations": [
+    "Diagnostic capture changes heap behavior and is excluded from ordinary release evidence.",
+    "Captured use-after-free is proven for this instance; grouping previous ordinary faults by worker family does not prove every instance has the same target.",
+    "No class attribution follows from distant export labels or display-enumeration frames.",
+    "No identical capture or unchanged component matrix repeat is planned."
+  ]
+}

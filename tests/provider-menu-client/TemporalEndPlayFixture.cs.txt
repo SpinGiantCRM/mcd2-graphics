@@ -1,0 +1,47 @@
+using System;
+enum EEndPlayReason {Destroyed,LevelTransition,EndPlayInEditor,RemovedFromWorld,Quit}
+class TemporalAaQualityLeaseSave {public int Owned=1,NativeGuides=1,Original=1;}
+class ProviderMenuClient {}
+class FGSettingsSave {}
+class FGRuntimeSave {}
+// Exact current ACK/retirement semantics are separately exercised against the
+// production ProviderRuntimeClient. This fake checks the Actor consults that gate.
+class ProviderRuntimeClient {
+ public bool Retain=true;public int Calls;
+ public bool TemporalQualityRetain(ProviderMenuClient m,FGSettingsSave? s,FGRuntimeSave? r,bool native){Calls++;if(!native)throw new Exception("Native lease tag not passed");return Retain;}
+}
+static class UGameplayStatics {public static int Saves;public static void SaveGameToSlot(object o,string name,int user){Saves++;}}
+static class World {public static bool PlayerExists=true;public static object? PlayerController(object a)=>PlayerExists?a:null;}
+static class UKismetSystemLibrary {
+ public static int Value=2,Commands;public static bool Exists=true,Fail;
+ public static string GetConsoleVariableStringValue(string name)=>Exists?"value":"";
+ public static int GetConsoleVariableIntValue(string name)=>Value;
+ public static void ExecuteConsoleCommand(object a,string command,object p){Commands++;if(!Fail)Value=int.Parse(command[(command.LastIndexOf(' ')+1)..]);}
+ public static void Reset(){Value=2;Commands=0;Exists=true;Fail=false;World.PlayerExists=true;UGameplayStatics.Saves=0;}
+}
+class ModActor {
+ public TemporalAaQualityLeaseSave? TemporalQuality=new();public ProviderMenuClient? ProviderMenu=new();public ProviderRuntimeClient? ProviderRuntime=new();
+ public FGSettingsSave? FGSaved=new();public FGRuntimeSave? FGRuntime=new();
+ // ACTUAL_RESTORE
+ public void End(EEndPlayReason reason){
+ // ACTUAL_END_BRANCH
+ }
+}
+class Program {
+ static int checks;static void Check(bool value,string label){checks++;if(!value)throw new Exception(label);}
+ static ModActor Actor(int native=1){UKismetSystemLibrary.Reset();var a=new ModActor();a.TemporalQuality!.NativeGuides=native;return a;}
+ static void Main(){
+  foreach(var reason in Enum.GetValues<EEndPlayReason>()){
+   var a=Actor();a.End(reason);Check(UKismetSystemLibrary.Commands==0&&a.TemporalQuality!.Owned==1&&a.TemporalQuality.NativeGuides==1,"Native On/missing ACK/BUSY retains on "+reason);
+   a=Actor();a.ProviderRuntime!.Retain=false;a.End(reason);
+   Check(reason==EEndPlayReason.LevelTransition?UKismetSystemLibrary.Commands==0&&a.TemporalQuality!.Owned==1:UKismetSystemLibrary.Commands==1&&a.TemporalQuality!.Owned==0&&a.TemporalQuality.NativeGuides==0,"Only confirmed retired Off releases on "+reason);
+   a=Actor(0);a.End(reason);Check(reason==EEndPlayReason.LevelTransition?UKismetSystemLibrary.Commands==0:UKismetSystemLibrary.Commands==1&&a.ProviderRuntime!.Calls==0,"FSR end-play semantics preserved on "+reason);
+  }
+  foreach(int missing in new[]{0,1}){var a=Actor();if(missing==0)a.ProviderMenu=null;else a.ProviderRuntime=null;a.RestoreTemporalQuality();Check(UKismetSystemLibrary.Commands==0&&a.TemporalQuality!.Owned==1,"Unknown identity retains");}
+  {var a=Actor();a.ProviderRuntime!.Retain=false;World.PlayerExists=false;a.RestoreTemporalQuality();Check(UKismetSystemLibrary.Commands==0&&a.TemporalQuality!.Owned==1,"Missing player retains");}
+  {var a=Actor();a.ProviderRuntime!.Retain=false;UKismetSystemLibrary.Fail=true;a.RestoreTemporalQuality();Check(UKismetSystemLibrary.Commands==1&&a.TemporalQuality!.Owned==1,"Failed restore retains ownership");}
+  {var a=Actor();a.ProviderRuntime!.Retain=false;UKismetSystemLibrary.Value=0;a.RestoreTemporalQuality();Check(UKismetSystemLibrary.Commands==0&&UKismetSystemLibrary.Value==0&&a.TemporalQuality!.Owned==0,"External edit wins after retirement");}
+  {var a=Actor();a.TemporalQuality!.Owned=0;a.RestoreTemporalQuality();Check(UKismetSystemLibrary.Commands==0&&a.ProviderRuntime!.Calls==0,"Unowned lease untouched");}
+  Console.WriteLine($"{checks} actual Actor temporal restore/end-play checks passed");
+ }
+}

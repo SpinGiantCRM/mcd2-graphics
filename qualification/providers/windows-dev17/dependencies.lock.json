@@ -1,0 +1,185 @@
+{
+  "game": {
+    "steamBuildID": "25754144",
+    "exeSHA256": "3a8703406fd50520f83c4f70a0212c000cb3b584ef28eb38032902230c01ebdd"
+  },
+  "dependencies": {
+    "ReShade": {
+      "version": "PR435 / exact Windows candidate build",
+      "file": "Dungeons/Binaries/Win64/d3d12.asi",
+      "sha256": "47d415dd919854b143e942b203e2b595a932a00d543bdb25c971609f4e17427c",
+      "url": "https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/39191593403/artifacts/12160128654",
+      "bootstrapPreviousSHA256": "0cee63f9c9f13f3ac909c5b4903f4dbb4b719a7ab3b4f13b0deaf83c814b94f7",
+      "source": "https://github.com/JoeyDelp/reshade/tree/4eb9056c76016aad6f98495d3bbda2d721106104",
+      "patchSHA256": "109e99a0b160e2d2b1baf260b51bff461333aaf328554838ce994dac9abcfbc7",
+      "compatibilityNote": "Select experimental-reshade/ReShade64.dll from the pinned CI artifact. Installed separately as d3d12.asi; active Windows qualification is pending.",
+      "upgradeFromFiles": {
+        "Dungeons/Binaries/Win64/d3d12.asi": "ce808bb1494415586cfb2ec5638a3ab0f0cea3879e45146a34976740b59fcf48"
+      },
+      "additionalPatchSHA256": {
+        "qualification/fg-release/reshade-descriptor-heap-lifetime.patch": "e3a5a1d142628dd6247320769e71dc356b22671f80f6a77e591cbb34242fa7f8"
+      },
+      "descriptorHeapFixCommit": "64017f98cc1393db51d9f5b1307c64350680f41c"
+    },
+    "RenoDXUEExtended": {
+      "file": "Dungeons/Binaries/Win64/renodx-ue-extended.addon64",
+      "sha256": "f828bb9ced6cba8843842c10c59c57460e8c3d8243a715c40ec752c6c4c2f568",
+      "url": "https://github.com/marat569/renodx/releases/download/snapshot/renodx-ue-extended.addon64",
+      "releaseTag": "snapshot",
+      "compatibilityNote": "Current publisher release pinned for this candidate; runtime qualification recorded separately. Unknown files require the override.",
+      "compatibleReleases": [
+        {
+          "version": "nightly-20260928",
+          "files": {
+            "Dungeons/Binaries/Win64/renodx-ue-extended.addon64": "7941e06607c90f187688382fd259d483cde78f54ccb72099b239e8d45f5f87ac"
+          }
+        }
+      ],
+      "version": "0.2026.1008.1941"
+    },
+    "BlueprintLoader": {
+      "version": "2.6",
+      "files": {
+        "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.pak": "75e7144577253917f6da7312ef5e585b12fb728226a22b0938323751a6b555cd",
+        "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.ucas": "53ce0001a8c4077323a9342b42bc9d1bb9645116963cdb78fcdf9055336a1235",
+        "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.utoc": "847206e561dddce54be8a3f3868558597728e2affa4b697b84dbd0dbb8f30e1b"
+      },
+      "url": "https://www.nexusmods.com/minecraftdungeons2/mods/2?tab=files&file_id=506",
+      "archiveSHA256": "803cbcd502a3a2e2a0219989ee8560192847a852f74650efc8996fdc96fb1dfa",
+      "upgradeFromFiles": {
+        "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.ucas": "ea54c0f1b7614d0bc19d672b42b771324638b04b7a1a987e8445307fe1549a4f",
+        "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.utoc": "d51cb0005bbfcc8e506f403b388f6b731c08e7df5b8bb0f51a1018e733462110",
+        "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.pak": "75e7144577253917f6da7312ef5e585b12fb728226a22b0938323751a6b555cd"
+      },
+      "upgradeFromFileSets": [
+        {
+          "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.ucas": "7eae0158199637ea3dfe25996f16328dbac8bb67ef44a08d9c08052a39a28f5c",
+          "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.utoc": "e4d888db70ea0138c033569fbc410907a29bf8a90508b9f854d61f3d4fbeaad3",
+          "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.pak": "75e7144577253917f6da7312ef5e585b12fb728226a22b0938323751a6b555cd"
+        },
+        {
+          "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.ucas": "ea54c0f1b7614d0bc19d672b42b771324638b04b7a1a987e8445307fe1549a4f",
+          "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.utoc": "d51cb0005bbfcc8e506f403b388f6b731c08e7df5b8bb0f51a1018e733462110",
+          "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.pak": "75e7144577253917f6da7312ef5e585b12fb728226a22b0938323751a6b555cd"
+        }
+      ],
+      "minimumVersion": "2.0",
+      "compatibilityNote": "ModInfo/settings API from 2.0; popup API is not used.",
+      "compatibleReleases": [
+        {
+          "version": "2.0",
+          "files": {
+            "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.pak": "75e7144577253917f6da7312ef5e585b12fb728226a22b0938323751a6b555cd",
+            "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.ucas": "7eae0158199637ea3dfe25996f16328dbac8bb67ef44a08d9c08052a39a28f5c",
+            "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.utoc": "e4d888db70ea0138c033569fbc410907a29bf8a90508b9f854d61f3d4fbeaad3"
+          },
+          "archiveSHA256": "4c734597a5bfc21c7ca7b9a4f19738601b2c71f94a7c6e36b496c305a83a2937"
+        },
+        {
+          "version": "2.3",
+          "files": {
+            "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.pak": "75e7144577253917f6da7312ef5e585b12fb728226a22b0938323751a6b555cd",
+            "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.ucas": "3283f1c77672fed0bc0b279088df94e6646009345c2cff8d69d7208cdbc69098",
+            "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.utoc": "81a7cf3fd8cf8276d57fe8c4afcead2ff5bd847875b871d12ae105bc9b12274e"
+          },
+          "archiveSHA256": "982ccc00b25a83da7fb3081739651b0e1a16d62ca990696ba64d89e8617c3374"
+        },
+        {
+          "version": "2.2",
+          "files": {
+            "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.pak": "75e7144577253917f6da7312ef5e585b12fb728226a22b0938323751a6b555cd",
+            "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.ucas": "3bc5cfd49d73030255234469d4529252d867111979ec47667dd357e9034df857",
+            "Dungeons/Content/Paks/~mods/BlueprintLoader/BlueprintLoader_P.utoc": "0a4d1ac264091690f7efa8030104218dbbe2d32c0f2d053d4752b1a686ecb2ed"
+          },
+          "archiveSHA256": "cfadee0563c17684c1a3055c41bab7d5ca12f772a856bca6cb6bbea44744dc28"
+        }
+      ]
+    },
+    "DLSSRuntime": {
+      "sdkCommit": "9981c6350dc58c0ce21f024fd65e31e851c31689",
+      "sha256": "d00b5b0ab29c3ca101b70c3a5ecb3a01b7ef33766a3383a28a18623083e6123e",
+      "url": "https://raw.githubusercontent.com/NVIDIA/DLSS/9981c6350dc58c0ce21f024fd65e31e851c31689/lib/Windows_x86_64/rel/nvngx_dlss.dll",
+      "bundled": false,
+      "file": "Dungeons/Binaries/Win64/MCD2Graphics/ngx-runtime/nvngx_dlss.dll",
+      "version": "310.9.16",
+      "minimumVersion": "310.9.1",
+      "compatibilityNote": "NGX SR runtime; newer models can be requested with ModelPreset. Untested files require the override.",
+      "compatibleReleases": [
+        {
+          "version": "310.9.1",
+          "files": {
+            "Dungeons/Binaries/Win64/MCD2Graphics/ngx-runtime/nvngx_dlss.dll": "3975567b8943c53acce397f2b72380092f84f162d00b0d2c7d08a1025c563983"
+          }
+        }
+      ]
+    },
+    "Streamline": {
+      "version": "2.14.16",
+      "url": "https://github.com/NVIDIA-RTX/Streamline/releases/download/v2.14.16/streamline-sdk-v2.14.16.zip",
+      "archiveSHA256": "32041e51db0cab709a271b72a352281b690c2abbd669a827809401a5dd23956b",
+      "archiveMembers": {
+        "Dungeons/Binaries/Win64/sl.interposer.dll": "bin/x64/sl.interposer.dll",
+        "Dungeons/Binaries/Win64/sl.common.dll": "bin/x64/sl.common.dll",
+        "Dungeons/Binaries/Win64/sl.pcl.dll": "bin/x64/sl.pcl.dll",
+        "Dungeons/Binaries/Win64/sl.reflex.dll": "bin/x64/sl.reflex.dll",
+        "Dungeons/Binaries/Win64/sl.dlss_g.dll": "bin/x64/sl.dlss_g.dll",
+        "Dungeons/Binaries/Win64/nvngx_dlssg.dll": "bin/x64/nvngx_dlssg.dll",
+        "Dungeons/Binaries/Win64/NvLowLatencyVk.dll": "bin/x64/NvLowLatencyVk.dll"
+      },
+      "files": {
+        "Dungeons/Binaries/Win64/sl.interposer.dll": "b1d7395aebd7b9722841d64dcf7433680020b6a8e421f851c16d5ba0c2182edf",
+        "Dungeons/Binaries/Win64/sl.common.dll": "38eea3b4209afc455636ea372b5933d65fcc13becec6c84d101dcfc4d8648f75",
+        "Dungeons/Binaries/Win64/sl.pcl.dll": "5698c38e722318681f215c9fe68e45b9bedd51378acc699d8eee26e961e57770",
+        "Dungeons/Binaries/Win64/sl.reflex.dll": "443577e869352436ff7ec8f4d9c90418d3e95368436ce219261e0f4f07a38122",
+        "Dungeons/Binaries/Win64/sl.dlss_g.dll": "3ed9538df724993bea8a050195a6a78b9c8c8a566d5b05ade477aab3c390e90f",
+        "Dungeons/Binaries/Win64/nvngx_dlssg.dll": "8d59d49b36410dd6b62fef2503a5871d347415bd85d943fa0848563a95dd50c7",
+        "Dungeons/Binaries/Win64/NvLowLatencyVk.dll": "2a77dc3e1c724b7eea5755be0ae7423752e79a2459fae72181a9f00e3507e5d6"
+      },
+      "bundled": false,
+      "minimumVersion": "2.14.1",
+      "compatibilityNote": "Current publisher release pinned for this candidate; runtime qualification recorded separately. Unknown files require the override.",
+      "compatibleReleases": [
+        {
+          "version": "2.14.1",
+          "files": {
+            "Dungeons/Binaries/Win64/sl.interposer.dll": "8c87c9499461da561edd529aa9bf7831d67d7b94ebb1c1a5ed54ef4934e1ea4c",
+            "Dungeons/Binaries/Win64/sl.common.dll": "82924a8954dd671e09351c5de0eb87ad0eb25b944cc9f9ab955ca1d9950de15d",
+            "Dungeons/Binaries/Win64/sl.pcl.dll": "f13d51cfa05f4cd514df2026049e2db8adf359221713170ad386fd499915b582",
+            "Dungeons/Binaries/Win64/sl.reflex.dll": "0ce9725e3e03ea9e7f81d008b57f33ee365973d2e349131c8b1c3e3378fe2db0",
+            "Dungeons/Binaries/Win64/sl.dlss_g.dll": "f4a6b2b14dcc0b1485989e430d3b4e3a44ac1800b92ba1ad74f476e64fb2b09c",
+            "Dungeons/Binaries/Win64/nvngx_dlssg.dll": "ff6e90eb78b827927dff5b4ecc6b1c870c2e9bca29ed9f48c7d348cc9e170b82",
+            "Dungeons/Binaries/Win64/NvLowLatencyVk.dll": "2a77dc3e1c724b7eea5755be0ae7423752e79a2459fae72181a9f00e3507e5d6"
+          }
+        }
+      ]
+    },
+    "FSRUpscaler": {
+      "version": "3.1.5 / official 4.1.1",
+      "file": "Dungeons/Binaries/Win64/MCD2Graphics/fsr/amd_fidelityfx_upscaler_dx12.dll",
+      "sha256": "d0dcccc74a43c44ba435b7a369b456e0970d8a4464e4bd683119b374f2c9fb46",
+      "sdkCommit": "60f4ea81909200d8542eca14dccb2628b763a9a3",
+      "bundled": false,
+      "url": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK/tree/60f4ea81909200d8542eca14dccb2628b763a9a3",
+      "compatibilityNote": "Official pinned FSR upscaling runtime: analytical 3.1.5, plus official 4.1.1 on supported Radeon hardware. The optional community INT8 runtime is installed separately; see Advanced Settings. An installer override does not relax runtime hash/API or hardware checks."
+    },
+    "FSRFrameGeneration": {
+      "version": "3.1.6 / ML 4.0.1",
+      "file": "Dungeons/Binaries/Win64/amd_fidelityfx_framegeneration_dx12.dll",
+      "sha256": "02297beedd285e822d3a64f314cf00faf378dcec0edc47ff0c4dd71b3a8c2f18",
+      "sdkCommit": "60f4ea81909200d8542eca14dccb2628b763a9a3",
+      "bundled": false,
+      "url": "https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK/tree/60f4ea81909200d8542eca14dccb2628b763a9a3",
+      "compatibilityNote": "Official pinned FSR Frame Generation runtime: analytical 3.1.6; ML 4.0.1 requires actual device approval. Portable upscaling does not enable ML frame generation. An installer override does not relax runtime hash/API or hardware checks."
+    }
+  },
+  "buildDependencies": {
+    "NeoRuneSDK": "1.0.0",
+    "NeoRuneTool": "1.0.0",
+    "dotnetSDK": "10.0.402",
+    "ReShadeSDK": "PR435 4eb9056c76016aad6f98495d3bbda2d721106104",
+    "NVIDIASDKCommit": "374959484e79a640feaba44c93ac8cfb0a03f5b5",
+    "StreamlineSDK": "2.14.1",
+    "Avalonia": "11.3.22",
+    "dotnetReferencePack": "10.0.13"
+  }
+}

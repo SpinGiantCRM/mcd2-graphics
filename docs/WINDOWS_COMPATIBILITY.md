@@ -1,3 +1,365 @@
+Steam build 25910487 requires its separately inspected engine layout. Preserve
+the previous layouts and refuse unknown metadata/signatures. The new map checks
+the registry and name entry points, simulation/pacing dispatches and independent
+RIP-relative accesses to both frame counters. Runtime registry/vtable checks
+still apply before registration. These are explicit versioned locations, not
+an address-delta or fallback scan. The candidate baseline uses this game's exact
+executable hash; fresh FG, Anti-Lag and shutdown qualification remains required.
+
+Failed AMD FG startup must retire an unpublished presenter and its queue/device
+references before allowing a native swapchain fallback on the same HWND. Acquire
+the device before publishing queue ownership, so failed GetDevice never enters
+device-dependent retirement. A
+provider-query error, rejected provider or partially failed SDK creation may
+already own that window. Preserve the provider verification gates. If retirement
+cannot complete, retain ownership and return `MCD2_AFG_SWAP_RETAINED`; bootstrap
+must return failure without attempting a competing native swapchain. Duplicate
+creation must not retire an existing presenter. The actual-source Windows WARP
+regression uses a controlled SDK with real DXGI HWND ownership to cover these
+failure paths, successful fallback, normal success and retained cleanup retry.
+This startup rollback correction does not repair or qualify the historical
+intermittent exit AV; fresh complete-candidate runtime tests remain required.
+
+The AMD runtime may enumerate a driver-supplied swapchain provider ahead of the
+verified SDK provider. Query versions for the actual device, require exact
+3.1.7 / 17752306900579389447 availability, and chain ffxOverrideVersion during
+presenter creation. An API version descriptor alone does not select that
+provider. Keep the post-create provider check; never accept a changed default
+by weakening it. The regression defaults to another provider unless explicitly
+selected, and rejects missing verified providers before SDK creation. AMD's API
+version-selection contract is documented at
+https://gpuopen.com/manuals/fsr_sdk/getting-started/ffx-api/.
+
+SDR FG scene admission recognizes the two captured Steam build 25754144 tone-map
+permutations: `088c6818` with game sharpening disabled and `f7e35ae7` with it
+enabled. Their captured resource bindings, View b1 allocation size, input and
+two-output signatures match. Execute the exact original draw, including its
+second output, before copying the primary backbuffer; never replace or skip
+either game output. Use the same exact shader allowlist before reading View b1
+and admitting the scene. Preserve CPU-upload bounds, frame/camera identity,
+full-output viewport/scissor, RGB write mask, no blending and all retirement
+checks. The portable fixture applies the complete rejection matrix to both
+variants on Windows and Linux. The original candidate reproduced active SR and
+Anti-Lag but zero FG at sharpening 100%, with FG recovering at 0% while the
+authority revision remained unchanged. A rebuilt complete candidate still needs
+fresh Windows testing; this change does not repair or qualify shutdown.
+
+FSR output allocation may be padded beyond the logical viewport after a Windows
+resize. A captured 1680x1050 SDK output targeted a 1680x1052 game texture; rejecting
+that pair produced error 17. Preserve the exact-size `CopyResource` fast path.
+For a larger target, permit only the known single-mip/array/sample 2D RGBA16F
+output whose source dimensions equal the logical output, and copy subresource 0
+through a bounded logical `CopyTextureRegion` box. Leave padding untouched;
+reject smaller targets, aliasing and other descriptor mismatches before recording
+transitions. The actual-function portable fixture and owned AMD texture readback
+cover copied pixels, preserved padding and rejection. A fresh game resize run is
+still required; this correction does not establish a fix for the separate
+presenter resize failure.
+
+The [diagnostics attribution correction](RUNTIME_DIAGNOSTICS_ATTRIBUTION.md)
+separates current ready game context from SR activity. Native keeps zero SR
+activity while independent provider diagnostics require the current full
+authority stamp and world. FG V2 attributes asynchronous SDK outcomes to their
+admitted frame epochs; V1 remains unchanged. AMD timing requires its applied
+revision and checksum. Preserve the all-channel UI identity/expiry checks,
+bounded callback retention and anti-replay tests on both CI platforms. FSR
+activity reuses the worker's decoded native runtime snapshot; Busy is unknown,
+not a fresh zero/reset. Preserve the 1500 ms original-observation bound, exact
+identity/Active/error gates, immediate successful inactive/error invalidation
+and independent per-channel UI recovery baselines. No extra render lock or SDK work is
+permitted for sampling. Offline
+checks and code review do not qualify a new artifact or repair the exit fault;
+the changed complete package still requires fresh Windows runtime testing.
+When pause, stale data or opt-out invalidates the current implementation sample,
+the UI says **Not verified in current context**. Do not describe this as never
+having used FSR in the session: a valid active observation may precede the
+invalidation. Preserve the null state and inactive channels rather than keeping
+old activity alive to populate a version label. The UI fixture covers successful
+FSR use followed by pause and expiry, with numeric implementation formatting
+unchanged. This wording correction does not repair shutdown.
+
+The [19 October dev.17 qualification](WINDOWS_DEV17_QUALIFICATION_2026-10-19.md)
+pins current publisher Loader 2.6, Streamline 2.14.16, DLSS 310.9.16 and RenoDX
+snapshot inputs separately from the frozen older packages. Its first full-package
+ordinary quit reproduced the intermittent game-worker AV. A control also
+reproduced the matching return chain with the original framework and current
+RenoDX, while all our native/UI payload was absent. Two clean-game controls and
+one UI-only control exited 0. Removing RenoDX from the original-framework/Loader
+control still reproduced the same fault chain. The exact candidate framework
+alone exited 0 after 86.70 seconds. These bounded controls do not identify the
+precise cause or qualify Windows shutdown. Preserve the failed qualification,
+exact loaded hashes, private recovery data and remaining runtime gates.
+
+The same report's follow-up adds nine passing native owned-host probes and two
+bounded active FSR Quality hub observations with fresh matching state. Three
+ordinary hub closes returned 0, but the FSR closes took 87.465 and 24.480 seconds.
+A delayed-exit snapshot identifies a real swapchain Present waiting in the AMD
+driver through the framework/Steam-overlay/DXGI call chain, before the CRT stage
+of the earlier AV. This is not a root-cause attribution or shutdown repair. Keep
+the failed game-exit evidence and incomplete runtime gates; the renewed user
+launch hold left the game closed with Native/FG Off preferences restored.
+
+After launches resumed, a per-game Steam-overlay comparison exited 0 with the
+setting Off after 185.572 seconds and with the original On setting after 6.332
+seconds. Both had active FSR Quality and verified loaded candidate backing files.
+The overlay DLL remained resident in both; hook absence is unproven. The delayed
+run sampled a GameThread event wait through Microsoft xgameruntime, distinct
+from the earlier sampled Present wait. No shared root cause or overlay workaround
+is established. The overlay and Native/FG Off settings were restored. Keep the
+failed qualification and unresolved AV; these observations are not a repair.
+
+The Windows candidate framework also applies upstream ReShade
+[`64017f98`](https://github.com/crosire/reshade/commit/64017f98cc1393db51d9f5b1307c64350680f41c)
+for descriptor heaps that outlive their device. Registration follows proxy
+construction/destruction rather than a deferred raw-heap destruction callback
+holding the device pointer. Preserve the existing successful-Reset patch, exact
+additional-patch hashes, clean-base/diff checks and both CI platforms. Candidate
+trials require both patches; the historical separately pinned release remains
+unchanged. This corrects a dependency lifetime defect, not a proven cause of the
+intermittent game exit failure. The 19 October original-context capture still
+showed an AV on an unidentified game worker with GameThread in CRT exit; its
+explicit-anchor return chain matches the old build after the build's RVA shift.
+An isolated Windows WARP reproduction released the proxy heap/device while a
+raw heap survived: the old framework failed with heap corruption, and the fresh
+patched framework exited 0. This proves the dependency defect, not the game AV's
+cause. One framework-only control, one retained-MSVC full-mod control and two
+fresh exact-source full-mod runs exited 0. The latter included advancing FSR
+evaluations and Native/source/AA-quality restoration, without a debugger or
+capture addon. A sleep/resume-interrupted run is excluded. Keep the
+[bounded follow-up](../qualification/providers/windows-exit-heap-fix-2026-10-19.json);
+the small sample and remaining exit delay do not establish complete shutdown or
+installer qualification.
+
+The SR menu shares its quality, custom percentage and last-Custom preference
+across DLSS/FSR and Native. Preset/percentage edits never implicitly select an
+upscaler. Keep the underlying SR/FG transport records independent and preserve
+FG pairing validation. Skip DLSS on a known incompatible rendering vendor, and
+gate its legacy source projection with current-session device metadata. Query
+the actual D3D12 device LUID once at initialization, independently of latency
+opt-in; never infer SR support from FG/Reflex or poll SDK capabilities each frame.
+Unknown/stale metadata cannot authorize reduced DLSS source resolution or erase
+a saved choice. NVIDIA vendor identity alone is not active DLSS/RTX capability;
+the existing backend capability/source/resource gates remain mandatory.
+The bounded source-built menu run recorded Balanced with both Native and FSR,
+a preset edit that kept Native selected, synchronized SR preference records,
+advancing FSR evaluations (46-1150), and exit code 0. It used the retained CI
+renderers/framework with the changed latency addon and production UI rebuilt
+locally. The complete fresh CI artifact was hash-verified and staged afterward;
+its standalone WARP heap-lifetime probe passed, but that complete artifact has
+not yet had a game runtime test. Keep the
+[menu follow-up](../qualification/providers/windows-sr-menu-fix-2026-10-19.json)
+and distinguish source-equivalent component tests from full artifact qualification.
+
+FSR preflight requires the validated single-output TAA permutation. On Steam
+build 25754144, `r.TemporalAA.Quality=1` used shader `62de03a8`, whose otherwise
+matching constant-buffer and input layout includes a second UAV output. Merely
+allowlisting it would skip an output the current replacement does not populate.
+The bounded quality-2 control reached Active with advancing SDK evaluations.
+Acquire quality 2 only for matching current-world FSR preflight; retain it until
+native retirement/source rollback and across actor level transitions, then
+restore only the still-owned value. The volatile receipt must reject a previous
+renderer session, yield to external edits and bound restoration retries. Native
+with FG Off never acquires the lease. Native + AMD FG may acquire only through
+the separate current-world/100%-source/FG-owner acknowledgement below. Preserve all shader/resource/SDK/source-ACK
+gates, managed ownership checks, both CI platforms and a real UI/ModInfo rebuild.
+The source-built lease passed a bounded Windows Native → FSR Quality → Native
+check: matching SDK counts advanced, full source scale returned, and the original
+quality was restored on the first attempt. Keep the
+[runtime record](../qualification/providers/windows-fsr-quality-fix-2026-10-19.json):
+the same process exited with an access violation, so wider lifecycle, all
+presets, the complete installer and shutdown remain unqualified.
+
+AMD FG provider enumeration must not run repeatedly on the render thread. On
+Windows/Radeon 860M the unchanged SDK support query took 127-278 ms per call,
+and its once-per-second polling stalled Native menus with FG Off. Cache the
+result by framework device and loaded bridge, including unsupported results;
+retry the bridge's not-initialized response and forget on device init/destruction.
+The cache owns no COM references and does not replace the SDK activation,
+current intent/session/world, input, presenter or retirement gates. Preserve the
+portable cache fixture in both CI jobs and the complete guide/header build receipt.
+The polling-disabled control removed the observed stutter. The private rebuilt
+guide with full controls restored then removed the periodic timing gaps, and
+the maintainer confirmed smooth Native and FSR selections in menus/gameplay.
+Keep the [bounded Windows record](../qualification/providers/windows-amd-stutter-fix-2026-10-19.json):
+FSR still recorded timeout 22 with zero evaluations, and that run exited with
+an access violation. Smooth output does not prove provider activation or a
+shutdown repair. A complete rebuilt installer still needs qualification.
+
+The render-scale slider always displays a numeric selected percentage, including
+FSR named presets before gameplay and during menu suspension/fallback. The display
+uses FSR preset ratios, or the matching error-free SDK plan while applying or
+evaluating; it never authorizes source scaling. Preserve the native preflight,
+source acknowledgement and current-session/world checks. Keep keyboard/controller
+edits relative to the displayed value and rebuild the real UI/ModInfo after edits.
+The 19 October private rebuilt UI loaded during the bounded stutter controls;
+the numeric-slider source/build checks do not establish all control/input paths
+or repair the separately observed Windows FSR timeout or access violation.
+
+The bootstrap trace uses one mutex for opening, event/AMD-description writes,
+flushing and closing. Factory creation and route teardown can run on different
+threads; stdio's internal locking does not own a handle passed by another caller.
+Preserve late-event refusal and idempotent close. The actual-source concurrency
+fixture runs on both CI platforms and reproduces a closed-handle write with the
+old source. Linux and an isolated Windows executable under Proton pass with the
+correction; the Microsoft-ABI bootstrap also compiles. This establishes a trace
+lifetime defect, not the cause of the game's intermittent `0xC0000409` quit.
+The [offline receipt](../qualification/providers/bootstrap-shutdown-trace-2026-10-18.json)
+keeps that distinction. Select a complete rebuilt artifact and repeat native
+Windows/Radeon and Linux shutdown qualification before release.
+
+The advanced page embeds a tabbed custom widget through Blueprint Loader 2.0,
+with native stepper shells, native category buttons and the native bordered detail
+card on hover/focus. Loader and SDK sources remain unmodified. Preserve Loader
+save keys, independent SR/FG choices, keyboard/controller navigation and reset.
+The advanced page leases only its own Loader page padding to include the header
+and master toggle in the left column. Restore padding only while owned, retire
+the sibling help pane on exit, and preserve the structure/active-page checks.
+Its category bar reuses native buttons for font, hover/focus feedback and amber
+glow, with its own exclusive button group and a simple mod-owned divider.
+Retire click handlers on teardown and clear selection on page exit. Do not
+instantiate the native strip controller or call visibility methods that assume
+optional child bindings; standalone creation left its background null and caused
+a GameThread access violation. No native strip lookup or controller is needed.
+Leave Q/E with the main game tabs. This UI path still requires native Windows
+menu qualification.
+FSR SR create_v2 explicitly distinguishes analytical 3.1.5 from the separately
+pinned portable INT8 4.1.1r11 DLL and official 4.1.1. Auto uses official 4.1.1
+only on recognized Radeon RX 7000/9000 desktop hardware; other devices retain
+analytical Auto. Explicit 4.1 chooses official or portable according to that
+hardware classification. Recognition is not driver/provider activation proof.
+create_v1 retains its analytical contract.
+Preserve exact provider-name matching, active-ID/resource checks, failed-create
+ownership and returned implementation metadata. FSR FG 4.0.1 is an independent
+experimental device-approved selection; portable SR is not proof of ML FG support.
+Keep the native SR bridge hash binding and all header/build source receipts.
+Preset C uses DRS rather than the Streamline A/B UI-recomposition flag. Proton
+sets process-local overrides before SDK initialization. Windows permits only an
+existing one-application game profile, saves original settings first, restores
+only values still owned, and refuses base/shared profiles or external edits.
+Record driver request acceptance separately from active model identification.
+These changed paths require new native Windows/Radeon and runtime qualification.
+
+The AMD presenter status clears a stale restart requirement only after a
+current, available, fault-free, non-retired AMD Off request has reached the native
+presenter and the bridge confirms switching remains available. Preserve the
+existing On admission and NVIDIA permanent-retirement rules. The shared
+projection fixture and source checks cover this distinction on both CI platforms;
+the status correction passed bounded Linux/NVIDIA runtime checks in a rebuilt
+native candidate; Windows/Radeon coverage remains required.
+
+The advanced Mods-tab page uses Blueprint Loader's existing 2.0 settings API.
+Keep the separate versioned advanced request/state slots, core session/stamp
+validation, replay refusal, loader-owned persistence, one-key native INI mirror
+and restart-only model-override semantics. The named Mods-page selector has its
+own Loader key; preserve the previous numeric key and unknown manual values
+without reinterpreting NGX preset numbers as choice indices. Auto leaves all
+NGX model-preset overrides unset and follows the selected DLSS quality mode.
+Preserve migration from the earlier, differently ordered choice-index key.
+Advanced state v2 keeps the 128-byte layout and original module bits, adding
+the fifth (DLSS FG) module in bits 8/9 and its packed version in words 30/31.
+The UI accepts v1 states without inventing that missing version. Signed packed
+words must retain all bits, with version metadata requiring a loaded identity.
+The visible Custom entry is removed; unsupported legacy values normalize to
+Auto. Popup tooltips are removed and details stay in Diagnostics. Diagnostics
+are opt-in and separate selected presets from unavailable active-model
+readbacks. Do not label a framework/DLL version as an SDK-selected model.
+Runtime versions come from held, exact-path
+loaded modules and their in-memory version resources; inspecting them must not
+load a provider or authorize a feature. Preserve both-platform protocol/client
+checks, version-library linking and source-matched UI rebuild receipts. Native
+Windows/Radeon and in-game page qualification remain separate from those checks.
+
+The FG preset request has separate AdvancedFG slots, preserving SR replay/CAS
+and migration behavior. It writes only the FrameGenerationPreset INI key;
+Auto retains the Streamline default, A/B request UI recomposition Off/On, and
+no active-model readback is inferred. The gameplay diagnostics transport is
+opt-in, uses bounded mod-owned files and read-only snapshots, and requires
+advancing counters with current session/revision/world checks. FSR implementation
+versions retained from validated contexts must be labelled as last verified.
+Use the shared FG latency recipe and keep its root-path rewrite and version
+library link intact. Substituting the standalone adapter drops access to the
+already-initialized shared Streamline owner and hides independent Reflex.
+Preserve independent latency with FG Off. The sharpness slider uses one existing
+post-upscale game filter and yields/restores only while it still owns that value.
+New UI/native artifacts require fresh runtime qualification on each platform.
+
+The UI build uses pinned NeoRune 1.0.0 and .NET SDK 10.0.402/reference pack
+10.0.13. Preserve SDK-generated versioned ModInfo and its discovery header;
+regenerating it with the older manual builder would erase Mods-tab settings.
+Keep the isolated CLI build, complete source/payload receipts, CRLF-normalized
+source hashes, explicit trial receipts and both-platform build-contract checks.
+The dev.12 UI passed bounded Linux/NVIDIA startup, Video-menu and gameplay checks
+with Blueprint Loader 2.3 and 2.5. All six FSR quality selections activated with
+AMD FG; live Off/On and pause suspension also worked. These checks do not qualify
+Windows/Radeon, physical controllers or long sessions. The complete dev.14
+candidate also passed bounded Loader 2.5 startup, all six FSR presets with AMD FG,
+pause/resume, display-confirmation preservation and normal exits with native and
+AMD presenters on Linux/NVIDIA. Its stationary Off-recovery comparison met the
+1% throughput and frame-time limits across five switching cycles. This does not
+complete FG-On collector calibration or the wider benchmark qualification.
+Historical release receipts and binaries remain unchanged; select a new complete
+native artifact before installer qualification after further native changes.
+
+The [native HDR Off correction](HDR_OFF_ACKNOWLEDGEMENT_2026-10-14.md) allows
+the UI to disable native HDR without a loaded RenoDX addon. Preserve missing-addon
+On refusal, loaded-addon calibration/restart admission and one wake per Off
+revision. Keep the actual-source fixture in both portable CI jobs. Require a new
+artifact and actual output-colour checks; saved HDR Off alone is insufficient.
+Candidate installer assembly must skip stale source/artifact selections. Linux
+source tests and HDR throughput measurements do not qualify Windows/Radeon.
+
+The [shared gameplay readiness gate](FSR_MENU_READINESS_2026-10-14.md) applies
+the existing pause/widget exclusions to SR as well as FG. Preserve HUD/activity/
+notification allowances, source rollback outside gameplay and the acyclic actor
+gate. Keep acquisition gameplay-only and retain existing matching foliage leases
+through error-free temporary-menu retirement. The native timeout is unchanged.
+Require source guards, managed cases and a real source-matched UI/ModInfo rebuild;
+the bounded Linux control does not qualify native Windows/Radeon.
+
+The [FSR retirement correction](FSR_OWNED_RETIREMENT_2026-10-14.md) clears the
+owned resource list after manual reverse releases, before bridge unloading and
+generation destruction. Otherwise `EvalOwned` releases those references twice.
+Preserve SDK destruction, GPU/recording admission and failed-drain retention.
+Keep the actual-source reference-count fixture and order guard on both platforms.
+Earlier dev.8/dev.9 artifacts do not include this correction and cannot qualify it.
+
+The [Anti-Lag shutdown correction](AMD_ANTILAG_SHUTDOWN_2026-10-14.md) removes
+`Update` from teardown: the official SDK inserts its pacing operation there.
+Preserve clear/drain before `DeInitialize`, failed-drain context/module retention,
+ordinary pre-input updates, the unchanged ABI and frame-type handoff. The real
+Microsoft-ABI fixture starts enabled and checks zero teardown mode/delay calls
+on failed drain, successful retry, API error, repeated and independent cleanup.
+Keep it in native Windows CI and preserve the controller's threaded teardown
+checks on both platforms. A Wine synthetic pass does not qualify Radeon hardware.
+Earlier dev.8 results do not qualify the changed bridge; select a new complete
+source-matched artifact before Windows testing or publishing.
+
+The shared FG restart status must include permanent session retirement, even
+when the startup presenter still matches the requested provider. Preserve the
+retired admission refusal, ownership changes, unsupported-provider behavior,
+temporary menu suspension and AMD live Off/On. The portable projection fixture
+checks all 96 availability/mode/owner/provider/retirement combinations on both
+platforms; the source check verifies the real controller uses that predicate.
+The original PR54 NVIDIA regression exposed the missing status after successful
+permanent release. Corrected binaries need their own runtime checks.
+
+The portable Windows checks use Bash with fail-fast step execution, so an earlier
+Python failure cannot be masked by a later successful command. Keep the SDR
+output checks on both platforms. UI source changes require a real NeoRune and
+ModInfo rebuild with matching archive, member and source receipts; updating
+hashes alone is not a rebuild. Candidate payloads do not replace release files.
+
+The [SDR scene implementation](AMD_SDR_IMPLEMENTATION_2026-10-12.md) adds an
+owned RGB-preserving, opaque-alpha snapshot of the primary backbuffer after the
+original tone-map draw. Preserve complete original draw arguments, full coverage,
+actual colour/format/device gates, submitted-frame and camera parity, independent
+host recording leases, successful-reset stamps and strong Present borrows.
+Keep output context recreation separate from presenter ownership and preserve
+existing NVIDIA/HDR behavior. Include the new owned shader and all source headers
+in build/package receipts, with both platform checks. Two private Linux controls
+exited 0 after an earlier active SDR run failed with `0xc0000409`; these do not
+establish causation or qualify a complete rebuilt artifact or Windows/Radeon.
+
 The [FSR SR / NVIDIA FG route](FSR_NVIDIA_FG_2026-10-12.md) admits FSR through the
 shared guide producer without equating SR vendor with FG vendor. Preserve exact
 record and startup-owner matching, actual-adapter SDK checks, input readiness,
@@ -75,6 +437,15 @@ Windows/AMD or the separately observed shutdown failure.
 
 # Windows fixes: reasons and preservation requirements
 
+The [SDR boundary diagnostic](AMD_SDR_FG_2026-10-12.md) records actual ReShade
+presentation colour space, indexed/non-indexed draw arguments and explicit
+viewport/scissor/blend/write-mask metadata. Preserve unknown coverage defaults,
+capture-disabled and terminal returns before locks, and the original rendering
+callbacks. A 10-bit format does not prove HDR, and an RGB-only tone-map draw does
+not establish alpha validity. Keep both-platform source checks. The private
+Microsoft-ABI diagnostic's Linux metadata/exit pass does not qualify SDR FG,
+output resize, production performance or native Windows/Radeon execution.
+
 The temporary [provider present sampler](AMD_PROVIDER_BENCHMARK_2026-10-12.md)
 uses the same NT process-termination guard before its callback mutex and skips
 unregister only during terminal DllMain detach. Resolve the query in AddonInit;
@@ -109,7 +480,9 @@ unload with any retained generation, pin the exact addon/framework modules
 outside DllMain, unregister callbacks and refuse reuse until process restart.
 This is retained ownership, not completed retirement or hot-reload support.
 It uses the exact held proxy device supplied to NGX initialization for unshared
-`Shutdown1`. Preserve the non-null guard, verified shared ownership, fresh GPU
+`Shutdown1`. The direct driver export takes an additional writable remaining-device
+count; preserve that two-argument ABI and its actual-source fixture in both
+portable jobs. Preserve the non-null guard, verified shared ownership, fresh GPU
 completion and feature/parameter release before owned device/resource release.
 Retain the source checks on both CI platforms; Linux exit controls do not
 qualify Windows/NVIDIA NGX lifecycle or identify the mixed-provider exit delay.
@@ -715,3 +1088,126 @@ their source, compiler and output hashes. `fsr_dense.hlsl` includes the shared
 compiler outputs fail the build. Keep these owned assets in the isolated SR
 candidate, with vendor runtimes external. Both CI platforms check the recipe;
 Windows native build success still requires separate Windows GPU qualification.
+
+
+### Experimental AMD presenter reset
+
+Development candidates can opt in with `AmdPresenterSwitch=1` under
+`[Providers]` in `FGBootstrap.ini`. The option is read at swapchain creation.
+The disabled path retains the existing forwarding behaviour.
+
+The Video menu waits for a committed, current-session FG selection. A bounded
+engine resolution change supplies the actual `ResizeBuffers` boundary, then
+restores the previous resolution and window mode. Preserve the exact prior
+last-confirmed resolution and fullscreen mode as well: the temporary mode must
+not become the saved confirmation. Restore only confirmation still owned by
+that handoff; subsequent user display changes take precedence. Finish deferred
+confirmation ownership before starting another handoff and on actor teardown.
+The actual-source confirmation fixture runs on both CI platforms. Bounded
+Linux/NVIDIA main-menu and gameplay checks do not qualify Windows/Radeon.
+No presenter is replaced inside `Present`. Keep the shared SDK gate, fresh queue
+completion, callback drainage, one public COM identity, colour/HDR/private-data restoration and
+recovery to the previous presenter on target-creation failure. Issued waitable
+handles, exclusive fullscreen and incomplete metadata decline the handoff.
+
+`presenter-resize-probe.exe` exercises the real bridge with owned resources;
+`on-exit` additionally retires an active SDK presenter. Neither an isolated
+probe nor Linux/NVIDIA execution qualifies Windows/Radeon behaviour. Candidate
+qualification must compare warmed fresh Off against On → Off in the same scene,
+verify HDR/SR, keyboard focus, display restoration, pause/resume, travel and
+repeated normal exits. SDK frame counts do not establish physical display FPS.
+
+### Bounded guide observer resource lifetime
+
+The optional guide capture must check the existing init/destroy resource registry
+before querying native metadata or mapping a cached binding. A nonzero view lookup
+can still resolve an expired resource; cached descriptors do not own its lifetime.
+The observer already holds its mutex for this check and inspection. Unknown or
+destroyed resources are skipped. The actual observer regression covers retained
+view/constant-buffer bindings after destruction, unknown/null bindings and live
+recovery in both portable CI jobs. This source correction requires a fresh full
+Windows candidate and runtime retest; handled Unreal crashes can exit with code
+zero and must never count as successful gameplay or normal shutdown.
+
+### HDR addon activation ownership
+
+RenoDX UE Extended's SDR tone mapper does not disable its separate SDR-to-HDR
+swapchain upgrade. HDR Off therefore owns only the exact ReShade
+`[ADDON] DisabledAddons` token `RenoDX@renodx-ue-extended.addon64`, with a bounded
+write-ahead `MCD2Graphics/HdrAddonActivation.bin` receipt beside the addon. A
+resident RenoDX keeps HDR output acknowledgement blocked until restart. A fresh
+Off startup without it can acknowledge native SDR; On restores only a token
+inserted by this lease and needs restart before calibration acknowledgement.
+Preexisting user disables are never removed. No live unloading or `Set_Path`
+override is used. Other disabled addons and calibration values are preserved.
+
+The lease retains original/last key values and missing-versus-empty state,
+survives ReShade's delayed config save, and permanently yields on observed
+external edits. Corrupt ownership or ambiguous/redirected configuration fails closed.
+Management supports the normal game-bin ReShade.ini only; BasePath/environment
+redirection is declined. Guided uninstall validates and restores the exact
+owned key before deleting any mod payload; conflicts stop removal with an
+actionable message. Preserve native/managed receipt compatibility, crash-window
+and actual backend tests on both platforms. Public config APIs provide verified
+readback, not atomic CAS against arbitrary concurrent external writers.
+This correction does not qualify HDR on an unsupported/SDR Windows display or
+repair the independently unresolved game shutdown defect.
+
+### Native AA frame-generation temporal preflight
+
+Native + AMD FG Single/2x needs the same validated single-output TAA producer.
+Its separate lease admission requires current matching authority, settled Native
+(or completed Native fallback), observed and requested 100% source, the implemented
+world scale, and a current matching FG controller acknowledgement of the actual
+AMD owner and availability. Prior generated frames are not required for producer
+preflight. Native source resolution and SR SDK evaluation remain unchanged.
+
+Retain a Native-guide lease across pause, missing context and actor travel. Off
+restoration requires a current matching FG acknowledgement and the optional
+NativeGuidesRetired readback equal to one. Unknown/BUSY and old runtimes retain.
+The native export takes a try-lock and reports retired only after the generation
+and its outside-lock COM release have both finished. It makes no SDK/GPU calls.
+External console edits, original-value receipts and bounded restore retries still
+apply. Actual-source client/native release-window fixtures cover this contract;
+a fresh complete UI/ModInfo/native artifact and Windows runtime checks are required.
+
+### Nonblocking diagnostic observations
+
+A Busy (`-2`) identity getter is Unknown, not proof that the selected FG
+request/world ended. Skip epoch binding and new diagnostic frame admission on
+Unknown; retain original attributed outcome timestamps. Successful Off, changed
+session/stamp/world, not-ready/invalid context, hard errors and expiry still
+invalidate immediately, including when the other getter is Busy. SDK readiness
+and generation admission remain unchanged.
+
+Worker FG snapshots may survive Busy for at most 1500 ms from the original
+successful read, with exact full identity and the existing producer-outcome
+freshness bound. Explicit inactive/fault/malformed/error observations must not
+revive cached activity. The same bounded V1 metadata reuse preserves the FSR
+implementation label through Busy without supplying SR evaluation activity.
+Actual identity/producer/transport fixtures cover these cases on both portable
+CI platforms. Source and build checks pass; fresh Windows runtime qualification
+of this correction remains required.
+
+### Updated-game layout and AMD startup rollback
+
+Steam build 25910487 has a separate inspected layout, PE metadata, entry-point
+signatures and independent RIP-relative anchors for both frame counters. Keep
+the previous layouts and actual registry pointer/vtable checks. A version label
+or shared address delta must not authorize hooks on another image.
+
+AMD presenter creation explicitly enumerates the actual device's available
+providers and selects the verified 3.1.7 swapchain implementation through the
+documented override chain. The unchanged pinned runtime can otherwise default
+to 4.0.0; this was reproduced in an owned host outside the game and is not
+attributed solely to the Steam update. Failed unpublished creation must retire
+its presenter before native fallback reuses the HWND. Failed retirement retains
+ownership and refuses competing native creation; duplicate creation must not
+retire an already published presenter. Acquire the device successfully before
+publishing queue ownership. Preserve actual-source Windows WARP regressions and
+the explicit-provider hardware probe.
+
+The [dev.25 updated-game progress record](WINDOWS_DEV25_UPDATE_2026-10-22.md)
+separates these startup/layout results from the unresolved historical exit
+crash and from diagnostic-tool failures. Current Windows qualification remains
+incomplete; neither passing CI nor one ordinary clean exit grants approval.

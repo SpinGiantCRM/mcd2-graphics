@@ -11,7 +11,24 @@ static class RuntimeTest {
   s.W16=66666667;s.W18=2;s.W19=1;s.W20=1;s.W4=s.Checksum(0,32);return s;
  }
  public static void Run(){
+  foreach(int vendor in new[]{0,4098,32902}){
+   Check(!ProviderRuntimeClient.SrChoiceAvailable(1,true,123,1,123,vendor));
+   Check(ProviderRuntimeClient.SrChoiceAvailable(0,true,123,1,123,vendor));
+   Check(ProviderRuntimeClient.SrChoiceAvailable(2,true,123,1,123,vendor));
+  }
+  Check(ProviderRuntimeClient.SrChoiceAvailable(1,true,123,1,123,4318));
+  Check(!ProviderRuntimeClient.SrChoiceAvailable(1,true,123,1,122,4318));
+  Check(!ProviderRuntimeClient.SrChoiceAvailable(1,false,123,1,123,4318));
+  Check(!ProviderRuntimeClient.SrChoiceAvailable(1,true,123,0,123,4318));
+  // The preset remains numeric in menus, before a runtime plan exists.
+  foreach(int family in new[]{1,2}){
+   int[] expected={10000,6700,family==2?5900:5800,5000,3300,7700};
+   for(int quality=0;quality<expected.Length;quality++)Check(ProviderRuntimeClient.PresetScale(family,quality,7700)==expected[quality]);
+  }
+  ReadinessChecks();
   FoliageChecks();
+  TemporalQualityChecks();
+  NativeTemporalQualityChecks();
   Check(ProviderRuntimeClient.CanRestoreNvidiaSource(7,2,123,1,7,123,3));
   Check(!ProviderRuntimeClient.CanRestoreNvidiaSource(7,2,123,1,7,124,3));
   Check(!ProviderRuntimeClient.CanRestoreNvidiaSource(7,2,123,1,8,123,3));
@@ -57,6 +74,18 @@ static class RuntimeTest {
   travel.Stop();Check(travel.Context.W10==0&&travel.Context.W13==0&&travel.Context.W4==travel.Context.Checksum(0,32));
   Console.WriteLine("SR game-thread client: exact scale, reapply, rollback, actor travel, stale plan and corruption checks pass");
  }
+ static void ReadinessChecks(){
+  foreach(string name in new[]{"W_PlayerHUD_Activatable_C_1","W_HotbarContainer_Activatable_C_4","W_InGameNavigation_Activatable_C_9"}){
+   Check(ProviderRuntimeClient.GameplayWidgetAllowed(name,true));Check(ProviderRuntimeClient.GameplayWidgetAllowed(name,false));
+  }
+  foreach(string name in new[]{"Hotbar","MiniInventory","W_ActivityLayer_Activatable_C_2","W_LootNotification_Activatable_C_3"}){
+   Check(!ProviderRuntimeClient.GameplayWidgetAllowed(name,true));Check(ProviderRuntimeClient.GameplayWidgetAllowed(name,false));
+  }
+  foreach(string name in new[]{"","Activity_Stack","W_Settings_Activatable_C_1","W_System_Activatable_C_2","W_Inventory_Activatable_C_3","W_Map_Activatable_C_4","W_UnknownMod_Activatable_C_5"}){
+   Check(!ProviderRuntimeClient.GameplayWidgetAllowed(name,true));Check(!ProviderRuntimeClient.GameplayWidgetAllowed(name,false));
+  }
+  Console.WriteLine("28 gameplay widget admission checks passed");
+ }
  static void FoliageChecks(){
   UGameplayStatics.Slots.Clear();var menu=Menu();menu.Authority!.W20=2;
   var client=new ProviderRuntimeClient();client.Start();var s=Plan(5,5);s.W17=1;s.W4=s.Checksum(0,32);
@@ -64,6 +93,10 @@ static class RuntimeTest {
   Check(client.Poll(menu,"Hub",true,100000,66666667));
   Check(client.FoliageMotionReady(menu,true)&&client.FoliageMotionReady(menu,false));
   var c=client.Context!;
+  c.W10=0;c.W4=c.Checksum(0,32);Check(!client.FoliageMotionReady(menu,true)&&client.FoliageMotionReady(menu,false));
+  s.W10=6;s.W4=s.Checksum(0,32);Check(!client.FoliageMotionReady(menu,true)&&client.FoliageMotionReady(menu,false));
+  s.W11=22;s.W4=s.Checksum(0,32);Check(!client.FoliageMotionReady(menu,false));
+  s.W11=0;s.W10=5;s.W4=s.Checksum(0,32);c.W10=1;c.W4=c.Checksum(0,32);
   foreach(int word in new[]{4,5,7,8,9,10,12}){
    int before=c.Word(word);c.SetWord(word,before^1);if(word!=4)c.W4=c.Checksum(0,32);
    // A one-unit source difference is tolerated; test outside that tolerance.
@@ -85,4 +118,71 @@ static class RuntimeTest {
   Check(client.FoliageMotionReady(menu,true));
   Console.WriteLine("FSR foliage admission: active output, current world/request, scale, corruption and retirement gates pass");
  }
+ static void TemporalQualityChecks(){
+  UGameplayStatics.Slots.Clear();var menu=Menu();menu.Authority!.W20=2;
+  var client=new ProviderRuntimeClient();client.Start();var s=Plan(1,1);
+  UGameplayStatics.Slots["MCD2GraphicsProviderSrRuntime"]=s;
+  Check(client.Poll(menu,"Hub",true,100000,100000000)&&client.TemporalShaderPreflight(menu));
+  foreach(int word in new[]{4,5,7,8,9,18}){int old=s.Word(word);s.SetWord(word,old^1);if(word!=4)s.W4=s.Checksum(0,32);
+   Check(!client.TemporalShaderPreflight(menu));s.SetWord(word,old);s.W4=s.Checksum(0,32);}
+  s.W11=22;s.W4=s.Checksum(0,32);Check(!client.TemporalShaderPreflight(menu));s.W11=0;
+  foreach(int phase in new[]{0,2,3,4,5,6,7,8,9}){s.W10=phase;s.W4=s.Checksum(0,32);Check(!client.TemporalShaderPreflight(menu));}
+  s.W10=1;s.W4=s.Checksum(0,32);client.Context!.W10=0;client.Context.W4=client.Context.Checksum(0,32);Check(!client.TemporalShaderPreflight(menu));
+  foreach(int original in new[]{0,1}){
+   var lease=new TemporalAaQualityLeaseSave();
+   Check(lease.Command(123,7,99,true,original,false,true)==-1&&lease.Owned==0); // Native never acquires.
+   Check(lease.Command(123,7,99,false,original,true,true)==-1);
+   Check(lease.Command(123,7,99,true,original,true,true)==2);lease.Observed(2,2);
+   Check(lease.Owned==1&&lease.Original==original);
+   Check(lease.Command(123,7,99,true,2,false,true)==-1&&lease.Owned==1); // World travel/retirement retain.
+   var traveled=new TemporalAaQualityLeaseSave{SchemaVersion=1,Session=lease.Session,Original=lease.Original,Owned=lease.Owned,Revision=lease.Revision,Checksum=lease.Checksum};
+   Check(traveled.Command(123,7,99,true,2,false,true)==-1&&traveled.Owned==1);
+   Check(traveled.Command(123,8,100,true,2,false,false)==original);traveled.Observed(original,original);Check(traveled.Owned==0);
+   Check(lease.Command(123,7,99,true,0,false,true)==-1&&lease.Owned==0&&lease.Blocked==1); // External edit wins.
+   Check(lease.Command(123,7,99,true,0,true,true)==-1);
+   Check(lease.Command(123,8,100,true,0,true,true)==2);lease.Observed(2,1);Check(lease.Owned==0&&lease.Blocked==1); // Failed command.
+   var stale=new TemporalAaQualityLeaseSave{SchemaVersion=1,Session=123,Owned=1,Original=original};
+   Check(stale.Command(124,7,99,true,2,false,false)==-1&&stale.Owned==0); // No cross-process restore.
+  }
+  var retry=new TemporalAaQualityLeaseSave{SchemaVersion=1,Session=123,Owned=1,Original=1};
+  for(int n=0;n<3;n++){Check(retry.Command(123,7,99,true,2,false,false)==1);retry.Observed(1,2);}
+  Check(retry.Command(123,7,99,true,2,false,false)==-1&&retry.Owned==1);
+  Console.WriteLine("Temporal producer quality: preflight identity, travel, rollback, external edits and bounded restoration pass");
+ }
+ static void NativeTemporalQualityChecks(){
+  UGameplayStatics.Slots.Clear();var menu=Menu();var a=menu.Authority!;a.W20=0;a.W31=1;a.W32=1;a.W33=0;a.W34=2;
+  var client=new ProviderRuntimeClient();client.Start();var s=Plan(1,0);s.W18=0;s.W16=100000000;s.W4=s.Checksum(0,32);UGameplayStatics.Slots["MCD2GraphicsProviderSrRuntime"]=s;
+  Check(client.Poll(menu,"Hub",true,100000,100000000));
+  var settings=new FGSettingsSave{SchemaVersion=1,Revision=11,SessionId=456,SettingsRevision=7,Mode=1,FGProvider=1,ContextReady=1};
+  var runtime=new FGRuntimeSave{SchemaVersion=1,Revision=11,SessionId=456,PresenterSettingsRevision=7,Available=1,AvailableProviders=2,StartupOwner=2,PresenterRoute=2,Phase=2};
+  Check(client.TemporalShaderPreflight(menu,settings,runtime));
+  s.W10=8;s.W4=s.Checksum(0,32);Check(client.TemporalShaderPreflight(menu,settings,runtime));s.W10=0;s.W4=s.Checksum(0,32);
+  Check(!client.NeedsSourceCommand()&&s.W16==100000000&&s.W17==0);
+  Check(!client.TemporalShaderPreflight(menu,null,runtime)&&!client.TemporalShaderPreflight(menu,settings,null));
+  foreach(int word in new[]{20,31,32,33,34}){int old=a.Word(word);typeof(ProviderAuthoritySave).GetField("W"+word)!.SetValue(a,old+1);Check(!client.TemporalShaderPreflight(menu,settings,runtime));typeof(ProviderAuthoritySave).GetField("W"+word)!.SetValue(a,old);}
+  foreach(int word in new[]{4,5,7,8,9,10,11,12}){var c=client.Context!;int old=c.Word(word);c.SetWord(word,old^1);if(word!=4)c.W4=c.Checksum(0,32);Check(!client.TemporalShaderPreflight(menu,settings,runtime));c.SetWord(word,old);c.W4=c.Checksum(0,32);}
+  foreach(int word in new[]{4,5,7,8,9,11,16,18}){int old=s.Word(word);s.SetWord(word,old^1);if(word!=4)s.W4=s.Checksum(0,32);Check(!client.TemporalShaderPreflight(menu,settings,runtime));s.SetWord(word,old);s.W4=s.Checksum(0,32);}
+  foreach(int phase in new[]{1,2,3,4,5,6,7,9}){s.W10=phase;s.W4=s.Checksum(0,32);Check(!client.TemporalShaderPreflight(menu,settings,runtime));}s.W10=0;s.W4=s.Checksum(0,32);
+  foreach(string name in new[]{"SchemaVersion","Revision","SessionId","SettingsRevision","Mode","FGProvider","ContextReady"}){var field=typeof(FGSettingsSave).GetField(name)!;int old=(int)field.GetValue(settings)!;field.SetValue(settings,old+1);Check(!client.TemporalShaderPreflight(menu,settings,runtime));field.SetValue(settings,old);}
+  foreach(string name in new[]{"SchemaVersion","Revision","SessionId","PresenterSettingsRevision","Available","AvailableProviders","StartupOwner","PresenterRoute","RestartRequired","NativeGuidesRetired","Active"}){var field=typeof(FGRuntimeSave).GetField(name)!;int old=(int)field.GetValue(runtime)!;field.SetValue(runtime,name=="AvailableProviders"?4:name=="NativeGuidesRetired"||name=="Active"?2:old+1);Check(!client.TemporalShaderPreflight(menu,settings,runtime));field.SetValue(runtime,old);}
+  foreach(int phase in new[]{0,1,4,5,6}){runtime.Phase=phase;Check(!client.TemporalShaderPreflight(menu,settings,runtime));}runtime.Phase=2;
+  runtime.Active=1;runtime.Phase=3;Check(client.TemporalShaderPreflight(menu,settings,runtime));runtime.Active=0;runtime.Phase=2;
+  Check(client.TemporalQualityRetain(menu,settings,runtime,true));
+  var context=client.Context;client.Context=null;var state=client.State;client.State=null;Check(client.TemporalQualityRetain(menu,settings,runtime,true));client.Context=context;client.State=state;
+  client.Context!.W10=0;client.Context.W4=client.Context.Checksum(0,32);Check(!client.TemporalShaderPreflight(menu,settings,runtime)&&client.TemporalQualityRetain(menu,settings,runtime,true));client.Context.W10=1;client.Context.W4=client.Context.Checksum(0,32);
+  // A fresh matching Off ACK alone still cannot release while the native readback is unknown/busy/live.
+  a.W31=0;settings.Mode=0;runtime.Phase=0;
+  Check(client.TemporalQualityRetain(menu,settings,runtime,true));runtime.NativeGuidesRetired=1;Check(!client.TemporalQualityRetain(menu,settings,runtime,true));
+  runtime.Active=1;Check(client.TemporalQualityRetain(menu,settings,runtime,true));runtime.Active=0;
+  runtime.Revision++;Check(client.TemporalQualityRetain(menu,settings,runtime,true));runtime.Revision--;
+  client.State=null;Check(client.TemporalQualityRetain(menu,settings,runtime,true));client.State=state;
+  client.Context.W9++;client.Context.W4=client.Context.Checksum(0,32);Check(client.TemporalQualityRetain(menu,settings,runtime,true));client.Context.W9--;client.Context.W4=client.Context.Checksum(0,32);
+  foreach(int original in new[]{0,1}){var lease=new TemporalAaQualityLeaseSave();a.W31=settings.Mode=1;runtime.Phase=2;runtime.NativeGuidesRetired=0;
+   int command=lease.Command(123,7,a.W16,true,original,client.TemporalShaderPreflight(menu,settings,runtime),client.TemporalQualityRetain(menu,settings,runtime,true));Check(command==2);lease.Observed(command,2);lease.NativeGuides=1;
+   Check(lease.Command(123,7,a.W16,true,2,false,true)==-1&&lease.Owned==1);
+   a.W31=settings.Mode=0;runtime.Phase=0;runtime.NativeGuidesRetired=1;command=lease.Command(123,7,a.W16,true,2,false,client.TemporalQualityRetain(menu,settings,runtime,true));Check(command==original);lease.Observed(command,original);Check(lease.Owned==0);
+  }
+  Console.WriteLine("Native FG temporal producer: full identity/ACK admission, source100%, pause/travel retention, actual retirement release and original restoration pass");
+ }
+
 }

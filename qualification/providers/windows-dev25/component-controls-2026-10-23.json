@@ -1,0 +1,138 @@
+{
+  "date": "2026-10-23",
+  "scope": "Windows Radeon 860M component isolation on Steam 25910487",
+  "windowsQualified": false,
+  "crashFixed": false,
+  "releaseApproved": false,
+  "gameImageSHA256": "3842102bb05fc532b22e97992d61c2248d115be80ff752ff9b6843bf4acd7005",
+  "originalFramework": {
+    "version": "6.8.0.2155",
+    "sha256": "0cee63f9c9f13f3ac909c5b4903f4dbb4b719a7ab3b4f13b0deaf83c814b94f7"
+  },
+  "publisherLoader": {
+    "version": "2.6",
+    "fileId": 506,
+    "filesPage": "https://www.nexusmods.com/minecraftdungeons2/mods/2?tab=files"
+  },
+  "candidateSourceFieldInGenericMonitorIgnoredForAllControls": true,
+  "trials": [
+    {
+      "run": 7,
+      "configuration": "Clean game",
+      "route": "Normal window close from hub",
+      "closeToCompletedExitObservationSeconds": 6.298221,
+      "exitCodeHex": "00000000",
+      "clockGapObserved": false,
+      "installedCandidate": false,
+      "debuggerAttached": false,
+      "verifierEnabled": false,
+      "windowsDisplayDiagnosticCollectedBeforeClose": false
+    },
+    {
+      "run": 8,
+      "configuration": "Clean game",
+      "route": "Normal window close from hub",
+      "closeToCompletedExitObservationSeconds": 4.833804,
+      "exitCodeHex": "00000000",
+      "clockGapObserved": false,
+      "installedCandidate": false,
+      "debuggerAttached": false,
+      "verifierEnabled": false,
+      "windowsDisplayDiagnosticCollectedBeforeClose": false
+    },
+    {
+      "run": 10,
+      "configuration": "Original framework and Loader 2.6",
+      "route": "Normal window close from hub",
+      "closeToCompletedExitObservationSeconds": 7.436428,
+      "exitCodeHex": "00000000",
+      "clockGapObserved": false,
+      "installedCandidate": false,
+      "debuggerAttached": false,
+      "verifierEnabled": false,
+      "windowsDisplayDiagnosticCollectedBeforeClose": false
+    },
+    {
+      "run": 11,
+      "configuration": "Original framework and Loader 2.6",
+      "route": "Normal window close from hub",
+      "closeToCompletedExitObservationSeconds": 9.276684,
+      "exitCodeHex": "C0000005",
+      "clockGapObserved": false,
+      "installedCandidate": false,
+      "debuggerAttached": false,
+      "verifierEnabled": false,
+      "windowsDisplayDiagnosticCollectedBeforeClose": true
+    },
+    {
+      "run": 12,
+      "configuration": "Loader 2.6 only",
+      "route": "Normal window close from hub",
+      "closeToCompletedExitObservationSeconds": 5.804012,
+      "exitCodeHex": "00000000",
+      "clockGapObserved": false,
+      "installedCandidate": false,
+      "debuggerAttached": false,
+      "verifierEnabled": false,
+      "windowsDisplayDiagnosticCollectedBeforeClose": false
+    },
+    {
+      "run": 13,
+      "configuration": "Loader 2.6 only",
+      "route": "Normal window close from hub",
+      "closeToCompletedExitObservationSeconds": 6.11794,
+      "exitCodeHex": "00000000",
+      "clockGapObserved": false,
+      "installedCandidate": false,
+      "debuggerAttached": false,
+      "verifierEnabled": false,
+      "windowsDisplayDiagnosticCollectedBeforeClose": false
+    },
+    {
+      "run": 14,
+      "configuration": "Original framework only",
+      "route": "Normal window close from hub",
+      "closeToCompletedExitObservationSeconds": 8.644894,
+      "exitCodeHex": "00000000",
+      "clockGapObserved": false,
+      "installedCandidate": false,
+      "debuggerAttached": false,
+      "verifierEnabled": false,
+      "windowsDisplayDiagnosticCollectedBeforeClose": false
+    },
+    {
+      "run": 15,
+      "configuration": "Original framework only",
+      "route": "Normal window close from hub",
+      "closeToCompletedExitObservationSeconds": 6.015977,
+      "exitCodeHex": "00000000",
+      "clockGapObserved": false,
+      "installedCandidate": false,
+      "debuggerAttached": false,
+      "verifierEnabled": false,
+      "windowsDisplayDiagnosticCollectedBeforeClose": false
+    }
+  ],
+  "matchingControlCrash": {
+    "run": 11,
+    "windowsErrorReportDumpRetainedPrivately": true,
+    "sameUpdatedWorkerFamilyAndCrtExitWaitAsFullCandidate": true,
+    "ownUiNativePayloadModifiedFrameworkAndGraphicsProvidersAbsent": true,
+    "componentOwnerEstablished": false
+  },
+  "interpretation": "The mod graphics payload is not necessary for the matching shutdown failure. Clean control exits do not exonerate the base game or establish a repair.",
+  "restored": {
+    "allFourComponentFileTransactions": true,
+    "ownedFilesVerified": 18,
+    "dependencyFilesVerified": 15,
+    "dependencyOverrides": {},
+    "installedReceiptSHA256": "7161b9b996d262f8d0e334029730a3ac3132485c1bf6fcc0727d404c99269c2a"
+  },
+  "originalPreferenceRestorationPending": true,
+  "hardwareCoverage": {
+    "physicalHdr": "NOT AVAILABLE",
+    "physicalController": "NOT AVAILABLE",
+    "nvidiaActivation": "NOT AVAILABLE"
+  },
+  "remaining": "Cause-directed shutdown repair, gameplay/travel, remaining keyboard/advanced paths and final preference/restoration gates."
+}

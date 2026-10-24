@@ -16,7 +16,7 @@ recipe=load('build_fsr_fg_game_bridge');runner=load('run_fsr_fg_game_bridge_prob
 def evidence():
     rows=[]
     def event(stage,count=1,result=0):rows.extend(dict(stage=stage,result=result) for _ in range(count))
-    for stage in ['owned-recording-contract','load-verified-runtime','create-bridge-swapchain','set-PQ-output']:event(stage)
+    for stage in ['owned-recording-contract','load-verified-runtime','create-bridge-swapchain','set-presentation-colour','configure-output-contract']:event(stage)
     for stage in ['reject-unrelated-submission-queue','owned-presenter-antilag-ready','clear-antilag-before-presentation']:event(stage)
     for phase in range(3):
         count=60 if phase==1 else 30
@@ -29,6 +29,17 @@ def evidence():
     event('idempotent-retirement');event('complete')
     return rows
 class BridgeTests(unittest.TestCase):
+    def test_retained_startup_refuses_competing_native_fallback(self):
+        header=(ROOT/'experiments/providers/fsr_fg_game_bridge.h').read_text()
+        bootstrap=(ROOT/'experiments/fg-streamline/bootstrap_dxgi.cpp').read_text()
+        start=bootstrap.index('event("AMD-owned-swapchain",status)')
+        end=bootstrap.index('// The actual queue identifies',start)
+        failed=bootstrap[start:end]
+        self.assertIn('MCD2_AFG_SWAP_RETAINED = -190',header)
+        self.assertLess(failed.index('if(status==MCD2_AFG_SWAP_RETAINED)return E_ABORT;'),failed.index('return original('))
+        workflow=(ROOT/'.github/workflows/fg-windows-candidate.yml').read_text()
+        self.assertIn('python tests/run_fsr_startup_failure.py --sdk',workflow)
+
     def test_full_counter_and_retirement_gate(self):
         rows=evidence();self.assertTrue(runner.gate(rows,0,False))
         self.assertFalse(runner.gate(rows,5,False));self.assertFalse(runner.gate(rows,0,True))
@@ -61,10 +72,12 @@ class BridgeTests(unittest.TestCase):
                 recipe.build(root,root,root/'output','compiler','linker')
             receipt=json.loads((root/'output/build-receipt.json').read_text())
             for name in ['fsr_fg_game_bridge.cpp','fsr_fg_game_bridge.h','fsr_fg_game_bridge_probe.cpp','build_fsr_fg_probe.py',
-                         '../fg-streamline/fg_camera_contract.h','../../src/native/reset_epoch_contract.hpp']:
+                         '../fg-streamline/fg_camera_contract.h','../../src/native/reset_epoch_contract.hpp',
+                         '../../src/providers/runtime_diagnostics.h','../../src/providers/fg_diagnostics_attribution.hpp']:
                 self.assertEqual(receipt['sourceSHA256'][name],recipe.digest(ROOT/'experiments/providers'/name))
             self.assertFalse(receipt['runtimeBundled']);self.assertFalse(receipt['gameIntegrationQualified'])
             for command in calls[::2]:self.assertIn('/MT',command);self.assertIn('/clang:-Werror=frame-larger-than',command)
+            self.assertIn('/export:mcd2_afg_diagnostic_bind_v1',calls[1]);self.assertIn('/export:mcd2_afg_diagnostics_v2',calls[1])
             self.assertEqual({p.name for p in (root/'output').glob('*.dll')},{'mcd2-fsr-fg-game-bridge.dll'})
     def test_sdk_recordings_are_private_and_retirement_is_independent(self):
         source=(ROOT/'experiments/providers/fsr_fg_game_bridge.cpp').read_text()
@@ -82,7 +95,9 @@ class BridgeTests(unittest.TestCase):
         work=source.split('int beginWork(',1)[1].split('bool absolute(',1)[0]
         self.assertLess(work.index('completed<w.fence'),work.index('w.allocator->Reset()'))
         self.assertLess(work.index('w.command->Reset('),work.index('clearBorrowed(w)'))
-        retirement=source.split('extern "C" int mcd2_afg_retire_v1',1)[1]
+        retirement=source.split('int retireUnlocked(void* fence,uint64_t value){',1)[1].split('extern "C" int mcd2_afg_retire_v1',1)[0]
+        exported=source.split('extern "C" int mcd2_afg_retire_v1',1)[1]
+        self.assertIn('std::lock_guard lock(guard);auto result=retireUnlocked(fence,value)', exported)
         self.assertLess(retirement.index('WaitForSingleObject'),retirement.index('release(work.command)'))
         self.assertLess(retirement.index('release(work.command)'),retirement.index('s.destroy(&s.fg'))
         self.assertNotIn('->Reset(',retirement)
@@ -93,9 +108,9 @@ class BridgeTests(unittest.TestCase):
     def test_present_uses_same_gate_as_sdk_and_never_exposes_raw_identity(self):
         source=(ROOT/'experiments/providers/fsr_fg_game_bridge.cpp').read_text()
         wrapper=(ROOT/'experiments/providers/synchronized_swapchain.hpp').read_text()
-        self.assertIn('MCD2SynchronizedSwapchain(s.swap,guard,swapLive,mcd2::process_exit::terminating)', source)
+        self.assertIn('MCD2SynchronizedSwapchain(session->swap,guard,swapLive,mcd2::process_exit::terminating,anchor.allow?resizeTarget:nullptr,anchor.allow?nativePresented:nullptr)', source)
         self.assertNotIn('s.swap->QueryInterface(IID_IDXGISwapChain1,result)', source)
-        self.assertIn('session->swap==raw&&session->presenter&&!session->closing', source)
+        self.assertIn('session->swap==raw&&(session->presenter||session->nativePresenter)&&!session->closing', source)
         self.assertIn('mcd2::process_exit::initialize();', source)
         methods=re.findall(r'(?:HRESULT|UINT|BOOL|HANDLE) STDMETHODCALLTYPE (\w+)\([^\n]*?override \{([^\n]*)',wrapper)
         forward=[(name,body) for name,body in methods if name!='QueryInterface']

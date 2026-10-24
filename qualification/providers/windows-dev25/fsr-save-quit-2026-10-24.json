@@ -1,0 +1,70 @@
+{
+  "schema": "windows-amd-fsr-save-quit-v1",
+  "dateLocal": "2026-10-24",
+  "candidate": "0.4.0-amd.dev.25",
+  "gameBuild": 25910487,
+  "nativeArtifactSource": "b5719f95820acb97dcd5fcdfa60bdde291b3379a",
+  "result": "PASS bounded FSR save-to-main-menu and Quit route",
+  "ordinaryPayload": true,
+  "diagnosticTracingRequested": false,
+  "route": [
+    "Temporarily assign Menu Wheel secondary left mouse through Controls; hold with supported drag",
+    "Menu Wheel gear opens normal System page",
+    "Restore Interact primary LeftMouseButton / secondary None and Menu Wheel S / secondary None through row-specific UI actions",
+    "Click Save and exit to main menu; main menu observed immediately afterward",
+    "Click Quit and Confirm; await held shipping-process exit"
+  ],
+  "FSR": {
+    "selected": "Quality",
+    "FG": "Off",
+    "session": 82910487,
+    "revision": 393,
+    "checksum": 1544363444,
+    "world": 4,
+    "activeSnapshot": {
+      "phase": 5,
+      "contextReady": 1,
+      "error": 0,
+      "evaluations": 4,
+      "render": [
+        1280,
+        800
+      ],
+      "output": [
+        1920,
+        1200
+      ]
+    },
+    "advancingDeltaClaimInFinalWorld": false,
+    "followingApplyingSampleExcluded": true,
+    "sourceAcknowledgementPredicateQualified": false,
+    "providerIntentChangedDuringRoute": false
+  },
+  "exit": {
+    "heldProcessHandle": true,
+    "exitCodeHex": "00000000",
+    "clockGapObserved": false,
+    "requestMarkerToExitObservationSeconds": 88.774,
+    "timingLimit": "Request marker precedes supported UI confirmation; this is an observation interval, not exact CPU teardown time.",
+    "longExitDisclosed": true,
+    "forcedTermination": false
+  },
+  "restoration": {
+    "controlsVisuallyMatchOriginal": true,
+    "wholeControlsReset": false,
+    "providerRecordUnchanged": true,
+    "providerRecordSHA256": "a20472d3f23e4ff47e274ea158bdfb14262d962b27cfefa290af632ad4b8a934",
+    "ownedFilesVerified": 18,
+    "dependenciesVerified": 15,
+    "allFileHoldsCleared": true,
+    "gameClosed": true,
+    "saveFilesInspectedOrEditedByTools": false
+  },
+  "limits": [
+    "Temporary ordinary input mappings were restored before Save and exit. No production UI/native binary was replaced.",
+    "Save-to-main-menu followed by Quit was observed; the separate direct Save and quit to desktop option was not exercised.",
+    "Positive current-world Active snapshot is retained without claiming an advancing pair or source-ack predicate in that final world.",
+    "Clean exit does not establish repair of historical intermittent shutdown faults; about 89 seconds is still a material delay.",
+    "No save-file integrity audit, physical controller/HDR, Windows NVIDIA or performance benefit claim."
+  ]
+}

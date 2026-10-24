@@ -16,9 +16,17 @@
 #include <new>
 #include <vector>
 #include "fsr_fg_game_bridge.h"
+#include "../../src/providers/graphics_store.hpp"
 #include "synchronized_swapchain.hpp"
+#include "../../src/providers/fg_menu_projection.hpp"
+#include "../../src/providers/bootstrap_module.hpp"
+#include <filesystem>
+#include <fstream>
+#include "../../src/providers/menu_snapshot.h"
 #include "../../src/latency/process_exit.hpp"
 #include "../../src/latency/amd_fg_private_data.hpp"
+#include "../../src/providers/fg_output_contract.hpp"
+#include "../../src/providers/fg_diagnostics_attribution.hpp"
 #include "api/include/dx12/ffx_api_dx12.h"
 #include "framegeneration/include/ffx_framegeneration.h"
 #include "framegeneration/include/dx12/ffx_api_framegeneration_dx12.h"
@@ -36,9 +44,14 @@ struct Session {
  PfnFfxQuery query=nullptr;PfnFfxDispatch dispatch=nullptr;PfnFfxConfigure configure=nullptr;
  ffxContext fg=nullptr,presenter=nullptr;IDXGISwapChain4* swap=nullptr;
  ID3D12Device* device=nullptr;ID3D12CommandQueue* queue=nullptr;ID3D12Resource* world=nullptr;
+ bool nativePresenter=false;
  bool worldInitialized=false,historyLost=true,preparedCurrent=false,imageCurrent=false;std::atomic<bool> closing{false};
+ mcd2::providers::FgOutputContract output{};bool outputValid=false,rebuilding=false;
+ ID3D12Fence* outputFence=nullptr;uint64_t outputFenceValue=0,pendingOutputFence=0;
  uint32_t width=0,height=0;uint64_t engine=UINT64_MAX,ordinal=0,prepared=0,images=0;
  std::atomic<uint64_t> real{0},generated{0};std::atomic<unsigned> fault{0},active{0};
+ mcd2::diagnostics::FgAttribution diagnosticFrames;
+ MCD2FgDiagnosticBindingV1 diagnosticBinding{};
  // SDK work never enters a game-owned command recording. Inputs are staged
  // with strong refs and consumed only after game submissions, at Present.
  struct Inputs {
@@ -54,7 +67,7 @@ struct Session {
  bool unconfirmedSubmission=false;
  ID3D12Fence* retirementFence=nullptr;HANDLE retirementEvent=nullptr;bool retirementSignalled=false;
 } *session=nullptr;
-bool swapLive(IDXGISwapChain4* raw){return session&&session->swap==raw&&session->presenter&&!session->closing;}
+bool swapLive(IDXGISwapChain4* raw){return session&&session->swap==raw&&(session->presenter||session->nativePresenter)&&!session->closing;}
 void clearInputs(Session::Inputs& p){release(p.depth);release(p.motion);release(p.colour);p={};}
 void clearBorrowed(Session::Work& p){for(auto* resource:p.borrowed)resource->Release();p.borrowed.clear();}
 // No frame-time waits: a busy ring slot declines this generated frame. Failed
@@ -105,6 +118,8 @@ bool sameDevice(ID3D12Device* owner){if(!owner)return false;auto* a=identity(own
 bool command(void* opaque){if(!opaque)return false;ID3D12Device* owner=nullptr;bool same=SUCCEEDED(static_cast<ID3D12GraphicsCommandList*>(opaque)->GetDevice(IID_PPV_ARGS(&owner)))&&sameDevice(owner);release(owner);return same;}
 ffxReturnCode_t generate(ffxDispatchDescFrameGeneration* p,void* user){
  auto& s=*static_cast<Session*>(user);if(!p)return FFX_API_RETURN_ERROR_PARAMETER;
+ const auto transfer=mcd2::providers::fgOutputHdr(s.output)?FFX_API_BACKBUFFER_TRANSFER_FUNCTION_PQ:FFX_API_BACKBUFFER_TRANSFER_FUNCTION_SRGB;
+ if(!s.outputValid||p->backbufferTransferFunction!=transfer){s.fault=115;return FFX_API_RETURN_ERROR_PARAMETER;}
  const auto r=s.dispatch(&s.fg,&p->header);if(r)s.fault=unsigned(r);return r;
 }
 D3D12_RESOURCE_STATES state(uint32_t value){
@@ -122,19 +137,50 @@ ffxReturnCode_t compose(ffxCallbackDescFrameGenerationPresent* p,void* user){
  auto* cmd=static_cast<ID3D12GraphicsCommandList*>(p->commandList);auto* src=static_cast<ID3D12Resource*>(p->currentBackBuffer.resource);auto* dst=static_cast<ID3D12Resource*>(p->outputSwapChainBuffer.resource);
  const auto a=state(p->currentBackBuffer.state),b=state(p->outputSwapChainBuffer.state);
  if(src!=dst){transition(cmd,src,a,D3D12_RESOURCE_STATE_COPY_SOURCE);transition(cmd,dst,b,D3D12_RESOURCE_STATE_COPY_DEST);cmd->CopyResource(dst,src);transition(cmd,dst,D3D12_RESOURCE_STATE_COPY_DEST,b);transition(cmd,src,D3D12_RESOURCE_STATE_COPY_SOURCE,a);}
- if(p->isGeneratedFrame)++s.generated;else ++s.real;return FFX_API_RETURN_OK;
+ if(p->isGeneratedFrame)++s.generated;else ++s.real;
+ s.diagnosticFrames.outcome(p->frameID,p->isGeneratedFrame,1,GetTickCount64());return FFX_API_RETURN_OK;
 }
 int configure(bool enabled,bool teardown=false){
- auto& s=*session;ffxConfigureDescFrameGeneration c{};c.header.type=FFX_API_CONFIGURE_DESC_TYPE_FRAMEGENERATION;
+ auto& s=*session;if(!s.fg){s.active=0;return 0;}ffxConfigureDescFrameGeneration c{};c.header.type=FFX_API_CONFIGURE_DESC_TYPE_FRAMEGENERATION;
  c.swapChain=s.swap;c.frameGenerationEnabled=enabled;c.frameID=s.ordinal;c.generationRect={0,0,int32_t(s.width),int32_t(s.height)};
  c.presentCallback=teardown?nullptr:compose;c.presentCallbackUserContext=teardown?nullptr:&s;c.frameGenerationCallback=teardown?nullptr:generate;c.frameGenerationCallbackUserContext=teardown?nullptr:&s;
  if(s.worldInitialized&&!teardown)c.HUDLessColor=ffxApiGetResourceDX12(s.world,FFX_API_RESOURCE_STATE_PIXEL_COMPUTE_READ);
  const auto r=s.configure(&s.fg,&c.header);s.active=!r&&enabled;if(r)s.fault=unsigned(r);return int(r);
 }
+unsigned requestedFgImplementation(){
+ static const unsigned choice=[](){
+  auto path=std::make_unique<wchar_t[]>(32768);const auto module=GetModuleHandleW(L"mcd2-fsr-fg-game-bridge.dll");
+  const auto n=module?GetModuleFileNameW(module,path.get(),32768):0;if(!n||n>=32768)return 0u;
+  return GetPrivateProfileIntW(L"FSR",L"FrameGenerationVersion",0,(std::filesystem::path(path.get()).parent_path()/L"MCD2Graphics"/L"DependencyOverrides.ini").c_str());
+ }();return choice;
 }
-extern "C" int mcd2_afg_load_v1(const wchar_t* path){
+const char* requestedFgName(){return requestedFgImplementation()==2?"4.0.1":"3.1.6";}
+int createGeneration(const mcd2::providers::FgOutputContract& output){
+ auto& s=*session;s.width=output.width;s.height=output.height;
+ ffxQueryDescGetVersions versions{};versions.header.type=FFX_API_QUERY_DESC_TYPE_GET_VERSIONS;versions.createDescType=FFX_API_CREATE_CONTEXT_DESC_TYPE_FRAMEGENERATION;versions.device=s.device;
+ uint64_t count=0;versions.outputCount=&count;auto code=s.query(nullptr,&versions.header);if(code||!count||count>32)return -12;
+ std::vector<uint64_t> ids(count);std::vector<const char*> names(count);versions.versionIds=ids.data();versions.versionNames=names.data();code=s.query(nullptr,&versions.header);if(code||count>ids.size())return -13;
+ uint64_t provider=0;for(size_t i=0;i<count;++i)if(names[i]&&!strcmp(names[i],requestedFgName()))provider=ids[i];if(!provider||requestedFgImplementation()>2)return -14;
+ ffxOverrideVersion selected{};selected.header.type=FFX_API_DESC_TYPE_OVERRIDE_VERSION;selected.versionId=provider;
+ ffxCreateBackendDX12Desc backend{};backend.header.type=FFX_API_CREATE_CONTEXT_DESC_TYPE_BACKEND_DX12;backend.device=s.device;backend.header.pNext=&selected.header;
+ ffxCreateContextDescFrameGenerationVersion version{};version.header.type=FFX_API_CREATE_CONTEXT_DESC_TYPE_FRAMEGENERATION_VERSION;version.version=FFX_FRAMEGENERATION_VERSION;version.header.pNext=&backend.header;
+ ffxCreateContextDescFrameGenerationHudless hud{};hud.header.type=FFX_API_CREATE_CONTEXT_DESC_TYPE_FRAMEGENERATION_HUDLESS;hud.hudlessBackBufferFormat=ffxApiGetSurfaceFormatDX12(DXGI_FORMAT(output.sceneFormat));hud.header.pNext=&version.header;
+ ffxCreateContextDescFrameGeneration create{};create.header.type=FFX_API_CREATE_CONTEXT_DESC_TYPE_FRAMEGENERATION;create.header.pNext=&hud.header;
+ create.displaySize={s.width,s.height};create.maxRenderSize=create.displaySize;create.backBufferFormat=ffxApiGetSurfaceFormatDX12(DXGI_FORMAT(output.backbufferFormat));
+ create.flags=(mcd2::providers::fgOutputHdr(output)?FFX_FRAMEGENERATION_ENABLE_HIGH_DYNAMIC_RANGE:0)|FFX_FRAMEGENERATION_ENABLE_DEPTH_INVERTED|FFX_FRAMEGENERATION_ENABLE_DEPTH_INFINITE|FFX_FRAMEGENERATION_ENABLE_DEBUG_CHECKING;
+ code=s.create(&s.fg,&create.header,nullptr);if(code||!s.fg)return code?int(code):-15;
+ ffxQueryGetProviderVersion active{};active.header.type=FFX_API_QUERY_DESC_TYPE_GET_PROVIDER_VERSION;code=s.query(&s.fg,&active.header);if(code||active.versionId!=selected.versionId)return -16;
+ ffxConfigureDescGlobalDebug1 diagnostic{};diagnostic.header.type=FFX_API_CONFIGURE_DESC_TYPE_GLOBALDEBUG1;diagnostic.fpMessage=debug;code=s.configure(&s.fg,&diagnostic.header);if(code)return int(code);
+ D3D12_HEAP_PROPERTIES hp{};hp.Type=D3D12_HEAP_TYPE_DEFAULT;D3D12_RESOURCE_DESC texture{};texture.Dimension=D3D12_RESOURCE_DIMENSION_TEXTURE2D;texture.Width=s.width;texture.Height=s.height;texture.DepthOrArraySize=texture.MipLevels=1;texture.SampleDesc.Count=1;texture.Format=DXGI_FORMAT(output.sceneFormat);
+ auto hr=s.device->CreateCommittedResource(&hp,D3D12_HEAP_FLAG_NONE,&texture,D3D12_RESOURCE_STATE_COPY_DEST,nullptr,IID_PPV_ARGS(&s.world));if(FAILED(hr))return int(hr);
+ auto code2=configure(false);if(code2)return int(code2);
+
+ s.output=output;s.outputValid=true;s.historyLost=true;return 0;
+}
+}
+int loadUnlocked(const wchar_t* path){
  mcd2::process_exit::initialize();
- std::lock_guard lock(guard);if(session)return -1;if(!absolute(path)||!hashRuntime(path))return -2;
+ if(session)return -1;if(!absolute(path)||!hashRuntime(path))return -2;
  auto* s=new(std::nothrow) Session;if(!s)return -3;s->module=retainedRuntime?retainedRuntime:LoadLibraryExW(path,nullptr,LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR|LOAD_LIBRARY_SEARCH_SYSTEM32);
  if(!s->module){delete s;return -4;}
  s->create=reinterpret_cast<PfnFfxCreateContext>(GetProcAddress(s->module,"ffxCreateContext"));s->destroy=reinterpret_cast<PfnFfxDestroyContext>(GetProcAddress(s->module,"ffxDestroyContext"));
@@ -142,6 +188,8 @@ extern "C" int mcd2_afg_load_v1(const wchar_t* path){
  if(!s->create||!s->destroy||!s->query||!s->dispatch||!s->configure){FreeLibrary(s->module);delete s;return -5;}
  retainedRuntime=s->module;errors=warnings=0;session=s;return 0;
 }
+extern "C" int mcd2_afg_load_v1(const wchar_t* path){std::lock_guard lock(guard);return loadUnlocked(path);}
+extern "C" unsigned mcd2_afg_implementation_v1(){std::lock_guard lock(guard);return session&&session->fg?(requestedFgImplementation()==2?40001u:30106u):0u;}
 extern "C" int mcd2_afg_support_v1(void* opaque){
  std::lock_guard lock(guard);if(!session||!opaque)return -1;
  auto* device=static_cast<ID3D12Device*>(opaque);
@@ -154,49 +202,96 @@ extern "C" int mcd2_afg_support_v1(void* opaque){
  std::vector<uint64_t> ids(count);std::vector<const char*> names(count);
  versions.versionIds=ids.data();versions.versionNames=names.data();
  if(session->query(nullptr,&versions.header)||count>ids.size())return -4;
- for(size_t i=0;i<count;++i)if(ids[i]==17726168133342859270ull&&names[i]&&!strcmp(names[i],"3.1.6"))return 0;
+ for(size_t i=0;i<count;++i)if(names[i]&&!strcmp(names[i],requestedFgName())&&requestedFgImplementation()<=2)return 0;
  return -5;
 }
-extern "C" int mcd2_afg_swap_v1(void* factory,void* queue,void* hwnd,const MCD2AmdFgSwapV1* p,void** result){
- std::lock_guard lock(guard);
+int swapRawUnlocked(void* factory,void* queue,void* hwnd,const MCD2AmdFgSwapV1* p,void** result){
  if(!session)return -101;if(session->swap||session->fg||session->presenter)return -102;
  if(!factory||!queue||!hwnd||!result||*result||!p)return -103;
  if(p->size!=sizeof(*p))return -104;
  if(!p->width||!p->height||p->width>7680||p->height>4320||p->samples!=1||p->buffers<2||p->buffers>8)return -105;
- auto& s=*session;s.width=p->width;s.height=p->height;s.queue=static_cast<ID3D12CommandQueue*>(queue);s.queue->AddRef();
- auto hr=s.queue->GetDevice(IID_PPV_ARGS(&s.device));if(FAILED(hr))return int(hr);
- const auto format=DXGI_FORMAT(p->format);if(format!=DXGI_FORMAT_R16G16B16A16_FLOAT&&format!=DXGI_FORMAT_R10G10B10A2_UNORM)return -11;
- ffxQueryDescGetVersions versions{};versions.header.type=FFX_API_QUERY_DESC_TYPE_GET_VERSIONS;versions.createDescType=FFX_API_CREATE_CONTEXT_DESC_TYPE_FRAMEGENERATION;versions.device=s.device;
- uint64_t count=0;versions.outputCount=&count;auto code=s.query(nullptr,&versions.header);if(code||!count||count>32)return -12;
- std::vector<uint64_t> ids(count);std::vector<const char*> names(count);versions.versionIds=ids.data();versions.versionNames=names.data();code=s.query(nullptr,&versions.header);if(code||count>ids.size())return -13;
- bool found=false;for(size_t i=0;i<count;++i)found|=ids[i]==17726168133342859270ull&&names[i]&&!strcmp(names[i],"3.1.6");if(!found)return -14;
- ffxOverrideVersion selected{};selected.header.type=FFX_API_DESC_TYPE_OVERRIDE_VERSION;selected.versionId=17726168133342859270ull;
- ffxCreateBackendDX12Desc backend{};backend.header.type=FFX_API_CREATE_CONTEXT_DESC_TYPE_BACKEND_DX12;backend.device=s.device;backend.header.pNext=&selected.header;
- ffxCreateContextDescFrameGenerationVersion version{};version.header.type=FFX_API_CREATE_CONTEXT_DESC_TYPE_FRAMEGENERATION_VERSION;version.version=FFX_FRAMEGENERATION_VERSION;version.header.pNext=&backend.header;
- ffxCreateContextDescFrameGenerationHudless hud{};hud.header.type=FFX_API_CREATE_CONTEXT_DESC_TYPE_FRAMEGENERATION_HUDLESS;hud.hudlessBackBufferFormat=FFX_API_SURFACE_FORMAT_R10G10B10A2_UNORM;hud.header.pNext=&version.header;
- ffxCreateContextDescFrameGeneration create{};create.header.type=FFX_API_CREATE_CONTEXT_DESC_TYPE_FRAMEGENERATION;create.header.pNext=&hud.header;
- create.displaySize={s.width,s.height};create.maxRenderSize=create.displaySize;create.backBufferFormat=ffxApiGetSurfaceFormatDX12(format);
- create.flags=FFX_FRAMEGENERATION_ENABLE_HIGH_DYNAMIC_RANGE|FFX_FRAMEGENERATION_ENABLE_DEPTH_INVERTED|FFX_FRAMEGENERATION_ENABLE_DEPTH_INFINITE|FFX_FRAMEGENERATION_ENABLE_DEBUG_CHECKING;
- code=s.create(&s.fg,&create.header,nullptr);if(code||!s.fg)return code?int(code):-15;
- ffxQueryGetProviderVersion active{};active.header.type=FFX_API_QUERY_DESC_TYPE_GET_PROVIDER_VERSION;code=s.query(&s.fg,&active.header);if(code||active.versionId!=selected.versionId)return -16;
- ffxConfigureDescGlobalDebug1 diagnostic{};diagnostic.header.type=FFX_API_CONFIGURE_DESC_TYPE_GLOBALDEBUG1;diagnostic.fpMessage=debug;code=s.configure(&s.fg,&diagnostic.header);if(code)return int(code);
+ auto& s=*session;s.width=p->width;s.height=p->height;
+ auto* candidateQueue=static_cast<ID3D12CommandQueue*>(queue);ID3D12Device* candidateDevice=nullptr;
+ auto hr=candidateQueue->GetDevice(IID_PPV_ARGS(&candidateDevice));if(FAILED(hr)){release(candidateDevice);return int(hr);}
+ s.device=candidateDevice;s.queue=candidateQueue;s.queue->AddRef();
+ const auto format=DXGI_FORMAT(p->format);if(format!=DXGI_FORMAT_R16G16B16A16_FLOAT&&format!=DXGI_FORMAT_R10G10B10A2_UNORM&&format!=DXGI_FORMAT_R8G8B8A8_UNORM&&format!=DXGI_FORMAT_B8G8R8A8_UNORM)return -11;
+ // Runtime/driver defaults may advance independently of the verified presenter.
+ constexpr uint64_t presenterVersion=17752306900579389447ull;
+ ffxQueryDescGetVersions versions{};versions.header.type=FFX_API_QUERY_DESC_TYPE_GET_VERSIONS;versions.createDescType=FFX_API_CREATE_CONTEXT_DESC_TYPE_FRAMEGENERATIONSWAPCHAIN_FOR_HWND_DX12;versions.device=s.device;
+ uint64_t count=0;versions.outputCount=&count;if(s.query(nullptr,&versions.header)||!count||count>32)return -18;
+ std::vector<uint64_t> ids(count);std::vector<const char*> names(count);versions.versionIds=ids.data();versions.versionNames=names.data();if(s.query(nullptr,&versions.header)||count>ids.size())return -18;
+ bool available=false;for(size_t i=0;i<count;++i)if(ids[i]==presenterVersion&&names[i]&&!strcmp(names[i],"3.1.7"))available=true;if(!available)return -18;
+ ffxOverrideVersion selected{};selected.header.type=FFX_API_DESC_TYPE_OVERRIDE_VERSION;selected.versionId=presenterVersion;
  DXGI_SWAP_CHAIN_DESC1 desc{};desc.Width=p->width;desc.Height=p->height;desc.Format=format;desc.SampleDesc={p->samples,p->sampleQuality};desc.BufferUsage=p->usage;desc.BufferCount=p->buffers;desc.Scaling=DXGI_SCALING(p->scaling);desc.SwapEffect=DXGI_SWAP_EFFECT(p->effect);desc.AlphaMode=DXGI_ALPHA_MODE(p->alpha);desc.Flags=p->flags;
  DXGI_SWAP_CHAIN_FULLSCREEN_DESC fullscreen{};fullscreen.Windowed=p->windowed;fullscreen.RefreshRate={p->refreshNumerator,p->refreshDenominator};fullscreen.ScanlineOrdering=DXGI_MODE_SCANLINE_ORDER(p->scanline);fullscreen.Scaling=DXGI_MODE_SCALING(p->modeScaling);
- ffxCreateContextDescFrameGenerationSwapChainVersionDX12 swapVersion{};swapVersion.header.type=FFX_API_CREATE_CONTEXT_DESC_TYPE_FRAMEGENERATIONSWAPCHAIN_VERSION_DX12;swapVersion.version=FFX_FRAMEGENERATION_SWAPCHAIN_DX12_VERSION;
+ ffxCreateContextDescFrameGenerationSwapChainVersionDX12 swapVersion{};swapVersion.header.type=FFX_API_CREATE_CONTEXT_DESC_TYPE_FRAMEGENERATIONSWAPCHAIN_VERSION_DX12;swapVersion.version=FFX_FRAMEGENERATION_SWAPCHAIN_DX12_VERSION;swapVersion.header.pNext=&selected.header;
  ffxCreateContextDescFrameGenerationSwapChainForHwndDX12 swap{};swap.header.type=FFX_API_CREATE_CONTEXT_DESC_TYPE_FRAMEGENERATIONSWAPCHAIN_FOR_HWND_DX12;swap.header.pNext=&swapVersion.header;swap.swapchain=&s.swap;swap.hwnd=static_cast<HWND>(hwnd);swap.desc=&desc;swap.fullscreenDesc=p->fullscreenProvided?&fullscreen:nullptr;swap.dxgiFactory=static_cast<IDXGIFactory*>(factory);swap.gameQueue=s.queue;
- code=s.create(&s.presenter,&swap.header,nullptr);if(code||!s.swap||!s.presenter)return code?int(code):-17;
- ffxQueryGetProviderVersion current{};current.header.type=FFX_API_QUERY_DESC_TYPE_GET_PROVIDER_VERSION;code=s.query(&s.presenter,&current.header);if(code||current.versionId!=17752306900579389447ull)return -18;
- D3D12_HEAP_PROPERTIES hp{};hp.Type=D3D12_HEAP_TYPE_DEFAULT;D3D12_RESOURCE_DESC texture{};texture.Dimension=D3D12_RESOURCE_DIMENSION_TEXTURE2D;texture.Width=s.width;texture.Height=s.height;texture.DepthOrArraySize=texture.MipLevels=1;texture.SampleDesc.Count=1;texture.Format=DXGI_FORMAT_R10G10B10A2_UNORM;
- hr=s.device->CreateCommittedResource(&hp,D3D12_HEAP_FLAG_NONE,&texture,D3D12_RESOURCE_STATE_COPY_DEST,nullptr,IID_PPV_ARGS(&s.world));if(FAILED(hr))return int(hr);
- code=configure(false);if(code)return int(code);
- // Keep the SDK's raw swapchain for its configuration API. The application
- // receives one outer identity that serializes Present with our SDK gate.
- auto* outer=new(std::nothrow) MCD2SynchronizedSwapchain(s.swap,guard,swapLive,mcd2::process_exit::terminating);
- if(!outer)return E_OUTOFMEMORY;*result=static_cast<IDXGISwapChain1*>(outer);return 0;
+ auto code=s.create(&s.presenter,&swap.header,nullptr);if(code||!s.swap||!s.presenter)return code?int(code):-17;
+ ffxQueryGetProviderVersion current{};current.header.type=FFX_API_QUERY_DESC_TYPE_GET_PROVIDER_VERSION;code=s.query(&s.presenter,&current.header);if(code||current.versionId!=presenterVersion)return -18;
+ return 0;
+}
+struct SwitchAnchor {
+ IDXGIFactory2* factory=nullptr;ID3D12CommandQueue* queue=nullptr;HWND window=nullptr;
+ bool allow=false,trace=false;MCD2AmdFgSwapV1 description{};std::wstring runtime;std::filesystem::path policy,log;
+ void clear(){release(factory);release(queue);window=nullptr;allow=trace=false;}
+} anchor;
+int retireUnlocked(void*,uint64_t);
+int rollbackStartup(int failure){return retireUnlocked(nullptr,0)?MCD2_AFG_SWAP_RETAINED:failure;}
+HRESULT resizeTarget(IDXGISwapChain4*&,UINT,UINT,UINT,DXGI_FORMAT,UINT,const MCD2PresentationState&);
+void nativePresented(IDXGISwapChain4* raw,HRESULT result){if(session&&session->nativePresenter&&session->swap==raw&&result==S_OK)++session->real;}
+extern "C" int mcd2_afg_swap_v1(void* factory,void* queue,void* hwnd,const MCD2AmdFgSwapV1* p,void** result){
+ std::lock_guard lock(guard);
+ // Never retire an existing presenter in response to a duplicate creation.
+ if(session&&(session->presenter||session->swap||session->queue))return MCD2_AFG_SWAP_RETAINED;
+ auto resultCode=swapRawUnlocked(factory,queue,hwnd,p,result);if(resultCode)return rollbackStartup(resultCode);
+ auto own=std::make_unique<wchar_t[]>(32768);auto n=GetModuleFileNameW(GetModuleHandleW(L"mcd2-fsr-fg-game-bridge.dll"),own.get(),32768);
+ if(n&&n<32768){auto folder=std::filesystem::path(own.get()).parent_path();anchor.policy=folder/L"FGBootstrap.ini";anchor.log=folder/L"MCD2PresenterSwitch.jsonl";anchor.allow=GetPrivateProfileIntW(L"Providers",L"AmdPresenterSwitch",0,anchor.policy.c_str())==1;anchor.trace=GetPrivateProfileIntW(L"Experiment",L"PresenterTrace",0,anchor.policy.c_str())==1;}
+ if(anchor.allow){
+  anchor.factory=static_cast<IDXGIFactory2*>(factory);anchor.factory->AddRef();anchor.queue=static_cast<ID3D12CommandQueue*>(queue);anchor.queue->AddRef();anchor.window=static_cast<HWND>(hwnd);anchor.description=*p;
+  auto runtime=std::make_unique<wchar_t[]>(32768);n=GetModuleFileNameW(retainedRuntime,runtime.get(),32768);if(n&&n<32768)anchor.runtime.assign(runtime.get(),n);
+ }
+ auto* outer=new(std::nothrow) MCD2SynchronizedSwapchain(session->swap,guard,swapLive,mcd2::process_exit::terminating,anchor.allow?resizeTarget:nullptr,anchor.allow?nativePresented:nullptr);
+ if(!outer){anchor.clear();return rollbackStartup(E_OUTOFMEMORY);}
+ *result=static_cast<IDXGISwapChain1*>(outer);return 0;
+}
+extern "C" int mcd2_afg_output_v1(const MCD2AmdFgOutputV1* p){
+ std::lock_guard lock(guard);if(!session||session->closing||(!session->presenter&&!session->nativePresenter)||!session->swap)return -110;
+ auto& s=*session;if(!p||p->size!=sizeof(*p)||p->reserved)return -111;if(s.fault)return int(s.fault.load());
+ using namespace mcd2::providers;
+ FgOutputContract next{p->width,p->height,p->backbufferFormat,p->sceneFormat,FgOutputColour(p->colourSpace),FgSceneStage(p->sceneStage)};
+ DXGI_SWAP_CHAIN_DESC1 actual{};
+ if(!validFgOutput(next)||FAILED(s.swap->GetDesc1(&actual))||actual.Width!=next.width||actual.Height!=next.height||unsigned(actual.Format)!=next.backbufferFormat){
+  clearInputs(s.inputs);s.preparedCurrent=s.imageCurrent=false;s.historyLost=true;s.outputValid=false;
+  if(s.fg){auto r=configure(false);if(r)return r;}return MCD2_AFG_OUTPUT_UNSUPPORTED_V3;
+ }
+ if(s.nativePresenter){s.output=next;s.outputValid=true;s.width=next.width;s.height=next.height;return 0;}
+ if(s.outputValid&&s.fg&&!s.rebuilding&&next==s.output)return 0;
+ if(s.fg||s.world||s.rebuilding){
+  if(!s.rebuilding){
+   if(s.fg){auto r=configure(false,true);if(r)return r;}
+   ffxDispatchDescFrameGenerationSwapChainWaitForPresentsDX12 drain{};drain.header.type=FFX_API_DISPATCH_DESC_TYPE_FRAMEGENERATIONSWAPCHAIN_WAIT_FOR_PRESENTS_DX12;
+   if(auto r=s.dispatch(&s.presenter,&drain.header))return int(r);
+   clearInputs(s.inputs);s.preparedCurrent=s.imageCurrent=false;s.historyLost=true;s.outputValid=false;
+   if(!s.outputFence&&FAILED(s.device->CreateFence(0,D3D12_FENCE_FLAG_NONE,IID_PPV_ARGS(&s.outputFence))))return -112;
+   const auto value=++s.outputFenceValue;if(FAILED(s.queue->Signal(s.outputFence,value)))return -113;
+   s.pendingOutputFence=value;s.rebuilding=true;
+  }
+  const auto completed=s.outputFence->GetCompletedValue();if(completed==UINT64_MAX)return -114;
+  if(completed<s.pendingOutputFence)return MCD2_AFG_BUSY_V2;
+  // Fresh queue completion and drained SDK callbacks precede release. These
+  // private lists have no other replay owner; no game list is reset here.
+  for(auto& w:s.work){release(w.command);release(w.allocator);clearBorrowed(w);w.fence=0;}
+  release(s.workFence);s.workSequence=0;s.nextWork=0;s.unconfirmedSubmission=false;
+  if(s.fg){auto r=s.destroy(&s.fg,nullptr);if(r)return int(r);s.fg=nullptr;}
+  release(s.world);s.worldInitialized=false;s.rebuilding=false;
+ }
+ const auto result=createGeneration(next);if(result){s.fault=unsigned(result<0?-result:result);return result;}
+ return 0;
 }
 extern "C" unsigned mcd2_afg_recording_contract_v2(){return 2;}
 extern "C" int mcd2_afg_guides_v2(void* cmd,void* depth,void* motion,const MCD2AmdFgGuidesV1* p){
- std::lock_guard lock(guard);if(!session||!session->fg||session->closing||session->fault||!p||p->size!=sizeof(*p)||p->reserved)return -20;
+ std::lock_guard lock(guard);if(!session||session->closing||session->fault||!p||p->size!=sizeof(*p)||p->reserved)return -20;
+ if(!session->fg||session->rebuilding||!session->outputValid)return MCD2_AFG_BUSY_V2;
  auto& s=*session;const auto& c=p->camera;
  if(c.size!=sizeof(c))return -201;
  if(!c.width||!c.height||c.width>s.width||c.height>s.height)return -202;
@@ -213,15 +308,26 @@ extern "C" int mcd2_afg_guides_v2(void* cmd,void* depth,void* motion,const MCD2A
  s.engine=c.frame;++s.ordinal;s.preparedCurrent=true;s.imageCurrent=false;return 0;
 }
 extern "C" int mcd2_afg_world_v2(void* cmd,void* world,uint64_t id){
- std::lock_guard lock(guard);if(!session||session->closing||!session->preparedCurrent||id!=session->engine||!command(cmd)||!texture(world,session->width,session->height,DXGI_FORMAT_R10G10B10A2_UNORM,true))return -30;
+ std::lock_guard lock(guard);if(!session||session->closing||!session->preparedCurrent||id!=session->engine||!command(cmd)||!texture(world,session->width,session->height,DXGI_FORMAT(session->output.sceneFormat),true))return -30;
+ auto& s=*session;release(s.inputs.colour);s.inputs.colour=static_cast<ID3D12Resource*>(world);s.inputs.colour->AddRef();s.imageCurrent=true;return 0;
+}
+// Stage an owned scene only after its host recording was submitted. This API
+// records no commands and does not retain or reset a game-owned command list.
+extern "C" int mcd2_afg_scene_v1(void* device,void* world,uint64_t id){
+ if(mcd2::process_exit::terminating())return -117;
+ std::lock_guard lock(guard);if(!session||session->closing||session->rebuilding||!session->outputValid||!session->preparedCurrent||id!=session->engine||!sameDevice(static_cast<ID3D12Device*>(device))||!texture(world,session->width,session->height,DXGI_FORMAT(session->output.sceneFormat),true))return -118;
  auto& s=*session;release(s.inputs.colour);s.inputs.colour=static_cast<ID3D12Resource*>(world);s.inputs.colour->AddRef();s.imageCurrent=true;return 0;
 }
 extern "C" int mcd2_afg_present_v2(void* queue,uint64_t id,uint32_t wanted){
- std::lock_guard lock(guard);if(!session||!session->fg||session->closing||wanted>1)return -40;
+ std::lock_guard lock(guard);if(!session||session->closing||wanted>1)return -40;
  auto& s=*session;
+ // An explicit owner invalidation ends the epoch; an unready frame does not.
+ if(!queue&&id==UINT64_MAX)s.diagnosticFrames.select({});
  auto* supplied=queue?identity(static_cast<ID3D12CommandQueue*>(queue)):nullptr;
  auto* expected=identity(s.queue);const bool matched=supplied&&supplied==expected;release(supplied);release(expected);
  if(wanted&&!matched){s.historyLost=true;clearInputs(s.inputs);s.preparedCurrent=s.imageCurrent=false;configure(false);return -41;}
+ if(s.nativePresenter){clearInputs(s.inputs);s.active=0;s.historyLost=true;s.preparedCurrent=s.imageCurrent=false;return wanted?MCD2_AFG_BUSY_V2:0;}
+ if(!s.fg||s.rebuilding||!s.outputValid)return MCD2_AFG_BUSY_V2;
  const bool enable=wanted&&!s.fault&&id==s.engine&&s.preparedCurrent&&s.imageCurrent&&s.inputs.depth&&s.inputs.motion&&s.inputs.colour;
  if(!enable){s.historyLost=true;clearInputs(s.inputs);s.preparedCurrent=s.imageCurrent=false;return configure(false);}
  Session::Work* work=nullptr;auto result=beginWork(work);
@@ -246,7 +352,20 @@ extern "C" int mcd2_afg_present_v2(void* queue,uint64_t id,uint32_t wanted){
  // Signal failure cannot be interpreted as an unsubmitted list or safe Reset.
  const auto value=++s.workSequence;if(FAILED(s.queue->Signal(s.workFence,value))){s.unconfirmedSubmission=true;return fail(-78);}
  work->fence=value;s.nextWork=(s.nextWork+1)%s.work.size();++s.prepared;++s.images;s.historyLost=false;s.preparedCurrent=s.imageCurrent=false;
- return configure(true);
+ const auto configured=configure(true);
+ if(!configured&&s.diagnosticBinding.engineFrame==id)s.diagnosticFrames.admit(s.ordinal,s.diagnosticBinding.identity);
+
+ return configured;
+}
+extern "C" int mcd2_afg_diagnostic_bind_v1(const MCD2FgDiagnosticBindingV1* binding){
+ if(!binding||binding->size!=sizeof(*binding)||binding->reserved)return -1;
+ std::lock_guard lock(guard);if(!session||session->closing)return -2;
+ session->diagnosticBinding=*binding;session->diagnosticFrames.select(binding->identity);return 0;
+}
+extern "C" int mcd2_afg_diagnostics_v2(MCD2FgDiagnosticsV2* out){
+ if(!out||out->size!=sizeof(*out))return -1;
+ std::lock_guard lock(guard);if(!session||session->closing)return -2;
+ *out=session->diagnosticFrames.snapshot();out->size=sizeof(*out);out->provider=2;out->active=session->active.load();out->fault=session->fault.load();return 0;
 }
 extern "C" int mcd2_afg_state_v1(MCD2AmdFgStateV1* out){
  std::lock_guard lock(guard);if(!session||!out||out->size!=sizeof(*out))return -50;auto& s=*session;
@@ -271,12 +390,11 @@ extern "C" int mcd2_afg_antilag_v1(void* device,void* context,uint32_t enabled,u
  }
  return 0;
 }
-extern "C" int mcd2_afg_retire_v1(void* fence,uint64_t value){
- std::lock_guard lock(guard);if(!session)return 0;auto& s=*session;
+int retireUnlocked(void* fence,uint64_t value){if(!session)return 0;auto& s=*session;
  // ReShade can retire temporary startup devices before the game creates its
  // world swapchain. No presenter/recording exists to retire in that case.
  if(!s.fg&&!s.presenter&&!s.queue)return 0;
- if(s.fg&&!s.closing){const auto r=configure(false,true);if(r)return r;s.closing=true;}
+ if(!s.closing){s.diagnosticFrames.select({});if(s.fg){const auto r=configure(false,true);if(r)return r;}s.closing=true;}
  clearInputs(s.inputs);
  // Always obtain fresh queue completion before invalidating our private lists.
  // An external fence is supplemental evidence only.
@@ -297,5 +415,74 @@ extern "C" int mcd2_afg_retire_v1(void* fence,uint64_t value){
  if(s.presenter){ffxDispatchDescFrameGenerationSwapChainWaitForPresentsDX12 wait{};wait.header.type=FFX_API_DISPATCH_DESC_TYPE_FRAMEGENERATIONSWAPCHAIN_WAIT_FOR_PRESENTS_DX12;auto r=s.dispatch(&s.presenter,&wait.header);if(r)return int(r);}
  if(s.fg){auto r=s.destroy(&s.fg,nullptr);if(r)return int(r);s.fg=nullptr;}
  if(s.presenter){auto r=s.destroy(&s.presenter,nullptr);if(r)return int(r);s.presenter=nullptr;}
- release(s.world);release(s.swap);release(s.retirementFence);if(s.retirementEvent)CloseHandle(s.retirementEvent);release(s.queue);release(s.device);delete session;session=nullptr;return 0;
+ release(s.world);release(s.outputFence);release(s.swap);release(s.retirementFence);if(s.retirementEvent)CloseHandle(s.retirementEvent);release(s.queue);release(s.device);delete session;session=nullptr;return 0;
+}
+
+extern "C" int mcd2_afg_retire_v1(void* fence,uint64_t value){std::lock_guard lock(guard);auto result=retireUnlocked(fence,value);if(!result)anchor.clear();return result;}
+void switchLog(const char* stage,long code,bool native){if(!anchor.trace||anchor.log.empty())return;std::ofstream f(anchor.log,std::ios::app);f<<"{\"stage\":\""<<stage<<"\",\"result\":"<<code<<",\"native\":"<<(native?"true":"false")<<"}\n";}
+int desiredNative(){
+ if(!anchor.allow)return -1;
+ auto p=std::make_unique<wchar_t[]>(32768);auto n=GetEnvironmentVariableW(L"LOCALAPPDATA",p.get(),32768);if(!n||n>=32768)return -1;
+ using namespace mcd2::providers;GraphicsStore store(std::filesystem::path(p.get())/L"Dungeons2"/L"Saved"/L"MCD2Graphics"/L"ProviderSettings");DecodedGraphicsRecord r;FgMenuProjection projection;
+ if(store.load(r).status!=StoreStatus::Ok||r.intent.fg!=FgProvider::Amd||!projectFgMenu(r,projection)||!projection.pairEligible)return -1;
+ if(mcd2::providers::bootstrapModule()){
+  auto worker=GetModuleHandleW(L"mcd2-display-latency.addon64");using Snapshot=int(*)(MCD2MenuSnapshotV1*);auto snapshot=worker?reinterpret_cast<Snapshot>(GetProcAddress(worker,"mcd2_menu_snapshot_v1")):nullptr;
+  MCD2MenuSnapshotV1 current{};current.size=sizeof(current);DecodedGraphicsRecord live;
+  if(!snapshot||snapshot(&current)||!current.session||current.load||current.reserved||!decodeGraphicsRecord(current.record,live)||live.intent!=r.intent)return -1;
+ }
+ return r.intent.fgEnabled?0:1;
+}
+HRESULT resizeTarget(IDXGISwapChain4*& raw,UINT buffers,UINT width,UINT height,DXGI_FORMAT format,UINT flags,const MCD2PresentationState& state){
+ const int desired=desiredNative();
+ if(desired<0||!session||bool(desired)==session->nativePresenter)return raw->ResizeBuffers(buffers,width,height,format,flags);
+ BOOL fullscreen=TRUE;DXGI_SWAP_CHAIN_DESC1 old{};
+ if(!state.privateComplete||state.handleIssued||(flags&DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT)||FAILED(raw->GetDesc1(&old))||FAILED(raw->GetFullscreenState(&fullscreen,nullptr))||fullscreen||!anchor.factory||!anchor.queue||anchor.runtime.empty()){
+  switchLog("handoff-declined",1,session->nativePresenter);return raw->ResizeBuffers(buffers,width,height,format,flags);
+ }
+ auto desc=anchor.description;desc.buffers=buffers?buffers:old.BufferCount;desc.width=width;desc.height=height;desc.format=format==DXGI_FORMAT_UNKNOWN?unsigned(old.Format):unsigned(format);desc.flags=flags;desc.windowed=1;
+ RECT client{};if((!desc.width||!desc.height)&&GetClientRect(anchor.window,&client)){if(!desc.width)desc.width=client.right;if(!desc.height)desc.height=client.bottom;}
+ if(!desc.width||!desc.height||desc.buffers<2||desc.buffers>8)return E_INVALIDARG;
+ using Begin=int(*)(void*,void**);using End=void(*)(void*);auto bootstrap=mcd2::providers::bootstrapModule();
+ auto begin=bootstrap?reinterpret_cast<Begin>(GetProcAddress(bootstrap,"mcd2_bootstrap_factory_scope_begin_v1")):nullptr;
+ auto end=bootstrap?reinterpret_cast<End>(GetProcAddress(bootstrap,"mcd2_bootstrap_factory_scope_end_v1")):nullptr;
+ void* previous=nullptr;if(bootstrap&&(!begin||!end||begin(anchor.factory,&previous))){switchLog("factory-scope-declined",1,session->nativePresenter);return raw->ResizeBuffers(buffers,width,height,format,flags);}
+ struct Scope{End end;void* previous;~Scope(){if(end)end(previous);}} scope{end,previous};
+ switchLog("metadata-interface-count",long(std::count_if(state.privateData.begin(),state.privateData.end(),[](const auto& v){return v.interfaceValue;})),bool(desired));
+ switchLog("handoff-begin",0,bool(desired));
+ // This callback runs only at the engine's real ResizeBuffers boundary. The
+ // engine owns cached-view release; the bridge owns SDK/private-list drainage.
+ auto result=retireUnlocked(nullptr,0);if(result){switchLog("retirement-refused",result,bool(desired));return E_FAIL;}
+ raw->Release();raw=nullptr;
+ auto createTarget=[&](bool native)->HRESULT {
+  auto code=loadUnlocked(anchor.runtime.c_str());if(code)return E_FAIL;
+  if(!native){void* ignored=nullptr;code=swapRawUnlocked(anchor.factory,anchor.queue,anchor.window,&desc,&ignored);return code?E_FAIL:S_OK;}
+  auto& s=*session;s.queue=anchor.queue;s.queue->AddRef();auto hr=s.queue->GetDevice(IID_PPV_ARGS(&s.device));if(FAILED(hr))return hr;
+  DXGI_SWAP_CHAIN_DESC1 d{};d.Width=desc.width;d.Height=desc.height;d.Format=DXGI_FORMAT(desc.format);d.SampleDesc={desc.samples,desc.sampleQuality};d.BufferUsage=desc.usage;d.BufferCount=desc.buffers;d.Scaling=DXGI_SCALING(desc.scaling);d.SwapEffect=DXGI_SWAP_EFFECT(desc.effect);d.AlphaMode=DXGI_ALPHA_MODE(desc.alpha);d.Flags=desc.flags;
+  IDXGISwapChain1* created=nullptr;hr=anchor.factory->CreateSwapChainForHwnd(s.queue,anchor.window,&d,nullptr,nullptr,&created);if(FAILED(hr))return hr;
+  hr=created->QueryInterface(IID_PPV_ARGS(&s.swap));created->Release();if(FAILED(hr))return hr;s.nativePresenter=true;s.width=desc.width;s.height=desc.height;return S_OK;
+ };
+ auto created=createTarget(bool(desired));
+ if(FAILED(created)){
+  switchLog("target-create-failed",created,bool(desired));
+  if(retireUnlocked(nullptr,0)){switchLog("failed-target-retirement-refused",1,bool(desired));return created;}
+  auto recovered=createTarget(!bool(desired));
+  if(FAILED(recovered)){switchLog("fallback-create-failed",recovered,!bool(desired));return recovered;}
+  switchLog("previous-mode-recovered",0,!bool(desired));
+ }
+ raw=session->swap;raw->AddRef();anchor.description=desc;
+ HRESULT hr=S_OK;
+ for(const auto& item:state.privateData){hr=item.interfaceValue?raw->SetPrivateDataInterface(item.id,item.object.get()):raw->SetPrivateData(item.id,UINT(item.bytes.size()),item.bytes.data());if(FAILED(hr))break;}
+ if(SUCCEEDED(hr)&&state.colourSet)hr=raw->SetColorSpace1(state.colour);
+ if(SUCCEEDED(hr)&&state.hdrType!=DXGI_HDR_METADATA_TYPE_NONE)hr=raw->SetHDRMetaData(state.hdrType,UINT(state.hdr.size()),state.hdr.empty()?nullptr:const_cast<unsigned char*>(state.hdr.data()));
+ if(SUCCEEDED(hr)&&state.latencySet)hr=raw->SetMaximumFrameLatency(state.latency);
+ switchLog("handoff-complete",hr,session->nativePresenter);return hr;
+}
+
+extern "C" int mcd2_afg_presenter_switch_state_v1(unsigned* route,unsigned* allowed){
+ if(!route||!allowed)return -1;*route=*allowed=0;std::lock_guard lock(guard);
+ if(!session||session->closing||!session->swap)return 0;
+ *route=session->nativePresenter?1:session->presenter?2:0;
+ BOOL fullscreen=TRUE;
+ *allowed=*route&&anchor.allow&&anchor.factory&&anchor.queue&&!(anchor.description.flags&DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT)&&SUCCEEDED(session->swap->GetFullscreenState(&fullscreen,nullptr))&&!fullscreen?1:0;
+ return 0;
 }

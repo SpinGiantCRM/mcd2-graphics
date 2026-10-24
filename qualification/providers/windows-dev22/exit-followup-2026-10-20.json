@@ -1,0 +1,163 @@
+{
+  "date": "2026-10-20",
+  "runtimeSourceCommit": "fe8b2b49c528c3f0bbe8393cab3e69a257406cee",
+  "windowsQualified": false,
+  "releaseQualified": false,
+  "crashFixed": false,
+  "privateDiagnosticOnly": true,
+  "interpretation": "Inconclusive: neither arm reproduced the intermittent AV. Delays differ, but startup conditions also differ.",
+  "startupDifference": "Steam started in A; already running in B.",
+  "trials": [
+    {
+      "trial": "baseline-1",
+      "mode": "baseline-worker-on",
+      "closeRoute": "ordinary Alt+F4 from starting menu",
+      "dwellSeconds": 69.14014,
+      "exitSeconds": 93.612112,
+      "exitCodeHex": "00000000",
+      "loadedLatencySHA256": "f7566cd9d98862c611ebbae7deead5ad02f0b935c9881dead8bdd6d49fa579b4",
+      "receiptSHA256": {
+        "close": "02f75ccd9655ebcabf6a7d1104cd1bf03318ebacea86f169fcb4bd920201aa11",
+        "kernel": "eea533b0bc197b0156e8db285000a4adaf51bb9d66504063aca8ad5b945a745b",
+        "dwell": "98ad5f2c98882a41905120bce5f9f9d0f709b5aca32d0bfdb3f9f097647776d3",
+        "loaded": "6530aaead43bae351260e50aa80c2376fed3c8293ec5e871117d1d8cdf0e2f1b"
+      }
+    },
+    {
+      "trial": "control-1",
+      "mode": "control-worker-off",
+      "closeRoute": "ordinary Alt+F4 from starting menu",
+      "dwellSeconds": 66.874787,
+      "exitSeconds": 11.59426,
+      "exitCodeHex": "00000000",
+      "loadedLatencySHA256": "3a4e8b53ec47d12eefab61893ad3975021c713ba66d109dc82c619ee66ec2f2c",
+      "receiptSHA256": {
+        "close": "290325f5f667019e89b37042b279e6cf064a733e5410f5d01950fee03923ecbb",
+        "kernel": "506fb93bc61921e2b960a91bfc811936b72c61fe7c975d010dc8e130391c6d35",
+        "dwell": "2463e751f3533bb56bab224898779038a261e612ead27fd0c5926fbc28ec4d01",
+        "loaded": "04c74d020d228e0e21c1cf9b8ba1f57399c642467899849f6876c5d38cc662ef"
+      }
+    }
+  ],
+  "exactOriginalRestored": {
+    "ownedFilesVerified": 18,
+    "dependencyFilesVerified": 15,
+    "dependencyOverrides": {},
+    "installedReceiptSHA256": "fc9fe1530a7090d91b31376356dec394056b668a11f2b838855be691610d58f4"
+  },
+  "finalPreferenceRestorationPending": true,
+  "offlineFullDumpFollowup": {
+    "targetFreeAllocations": 2,
+    "heapClassification": "LFH;free",
+    "independentlyDecodedBusyBits": [
+      0,
+      0
+    ],
+    "adjacentControlBusyBits": [
+      1,
+      1
+    ],
+    "freeingCallerIdentified": false,
+    "freeBeforeOriginalFaultProven": false,
+    "captureCaveat": "Other threads could continue while the fault thread waited for the external dump.",
+    "heapIntegrityPass": false
+  },
+  "etwFailingRun": {
+    "run": 16,
+    "diagnosticOnly": true,
+    "extraAddon": false,
+    "debuggerAttached": false,
+    "exactOriginalCandidateUsed": true,
+    "exitCodeHex": "C0000005",
+    "requestToKernelExitSeconds": 14.082399,
+    "faultMatchesRecurringWorker": true,
+    "faultInstruction": "cmp [r15],r12",
+    "faultReadAddress": "0x10",
+    "faultAnchorRVA": "0x8bf8ac6",
+    "workerFunctionBounds": [
+      "0x8bf8920",
+      "0x8bf8e8a"
+    ],
+    "heapFreeEventsForGame": 2797367,
+    "stackEventsForGame": 5515082,
+    "eventsLost": 0,
+    "targetFreeCounts": [
+      0,
+      1
+    ],
+    "twoTargetCollectionComplete": false,
+    "secondTargetFreeFromGameThread": true,
+    "secondTargetFrameCount": 12,
+    "gameFreeReturnRVAs": [
+      "0x8ca7b00",
+      "0x8e4caae"
+    ],
+    "gameCrtDestructorBounds": [
+      "0x8e4ca74",
+      "0x8e4cac0"
+    ],
+    "sameSecondTargetRetainedInFaultRdi": true,
+    "latencyAddonWaitOnDifferentThread": true,
+    "firstTargetInitiallySelfLinked": false,
+    "secondTargetInitiallySelfLinked": true,
+    "staticCleanupMatchesZeroNextObservation": true,
+    "runtimeCallbackBytesRetainedInDump": false,
+    "actualInstructionWriteCaptured": false,
+    "proprietaryOwnerClassIdentified": false,
+    "productionFixEstablished": false,
+    "recordingStopped": true,
+    "temporaryImageTracingConfigurationRestored": true,
+    "ownedFixtureValidatedExactFreeCallers": true,
+    "wrongTargetFixtureRejected": true,
+    "traceReaderVersion": "Microsoft.Diagnostics.Tracing.TraceEvent 4.0.0",
+    "traceSHA256": "1a733a88b4fb858db616169e7a817ae514a3a722ea9f4610387d35ebdb428ec7",
+    "dumpSHA256": "1e1b9763667e5dc450d2881e14d78b219574b34bd3978435ecc2f6d19904c79f",
+    "privateTimelineSHA256": "68dd8da31a04b2185089283ec0f0e556d6f88f9e3a3c55f63802ef86d34ffda0",
+    "windowsQualified": false
+  },
+  "etwCleanGameControl": {
+    "run": 17,
+    "diagnosticOnly": true,
+    "gameModEntryPointsAbsent": true,
+    "systemDxgiLoaded": true,
+    "heldKernelExitCodeHex": "00000000",
+    "recordedRequestToKernelExitSeconds": 99.283774,
+    "inputReturnToKernelExitSeconds": 90.669146,
+    "requestMarkerIncludesInputDispatchDelay": true,
+    "heapFreeEventsForGame": 277291,
+    "stackEventsForGame": 490431,
+    "eventsLost": 0,
+    "targetFreeCounts": [
+      1,
+      1
+    ],
+    "bothTargetStacksCaptured": true,
+    "knownCallerFixtureValidationClaimed": false,
+    "secondTargetGameReturnRVAs": [
+      "0x8ca7b00",
+      "0x8e4caae"
+    ],
+    "firstTargetGameReturnRVAs": [
+      "0x8ca7b00",
+      "0x8e4ca6d"
+    ],
+    "sameSecondTargetCleanupShapeWithoutCrash": true,
+    "matchedMenuDwellClaimed": false,
+    "matchingGenericWorkerEntryRVA": "0x8af026c",
+    "genericEntryIdentifiesOwningClass": false,
+    "workerStopEventAfterSecondFreeMilliseconds": 75.1562,
+    "threadStopCauseEstablished": false,
+    "ordinaryReleaseExitPass": false,
+    "productionFixEstablished": false,
+    "windowsQualified": false,
+    "recordingStopped": true,
+    "temporaryImageTracingConfigurationRestored": true,
+    "fifteenHeldFilesRestoredExactly": true,
+    "exactCandidateReinstalled": true,
+    "ownedFilesReverified": 18,
+    "dependencyFilesReverified": 15,
+    "dependencyOverrides": {},
+    "traceSHA256": "2b8cd383744af8db4dabd552ab6a4be9bb249c675d80a5f7d2d28227dbac121b",
+    "privateTimelineSHA256": "b4a63dc4e16daafcdb89b58e17341774d3a095199af7932c3b2247940dc44090"
+  }
+}

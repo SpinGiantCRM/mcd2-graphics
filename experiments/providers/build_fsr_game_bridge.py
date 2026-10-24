@@ -21,6 +21,7 @@ def build(sdk, sysroot, output, compiler='clang-cl', linker='lld-link'):
     link = [linker, '/dll', '/out:'+str(binary), str(obj), 'kernel32.lib', 'd3d12.lib', 'dxguid.lib']
     for name in ['create', 'dispatch', 'info', 'quality', 'destroy']:
         link.append('/export:mcd2_fsr_'+name+'_v1')
+    link += ['/export:mcd2_fsr_create_v2', '/export:mcd2_fsr_implementation_v1']
     for folder in ['crt/lib/x86_64', 'sdk/lib/ucrt/x86_64', 'sdk/lib/um/x86_64']:
         link.append('/libpath:'+str(sysroot/folder))
     with (output/'build-private.log').open('w') as log:

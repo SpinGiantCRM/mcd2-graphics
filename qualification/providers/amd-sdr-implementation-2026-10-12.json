@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "developmentOnly": true,
+  "nativeWindowsRadeonQualified": false,
+  "physicalDisplayFpsMeasured": false,
+  "gameBuild": "25754144",
+  "output": {
+    "width": 3840,
+    "height": 2160,
+    "format": 24,
+    "colourSpace": 1
+  },
+  "source": {
+    "family": "FSR",
+    "preset": "Quality",
+    "width": 2560,
+    "height": 1440
+  },
+  "frameworkSHA256": "382332f44744487bea10e2dc8c68755d440dcb8188f9ce8b2b043894e4939cb0",
+  "runs": [
+    {
+      "stage": "primary",
+      "guideSHA256": "1bf9956613d6ed705e651972f091da96aca6cba777d2a1d774b725466065c8d5",
+      "bridgeSHA256": "53453b10565ee549d56b23bf37b3940bdd9097ffc4ee3e557938b007666da3c7",
+      "shaderSHA256": "57416d6e20dc6cfcd66f99f4a5c660ba654c9a94500f729e91e85586fa432373",
+      "steadyInterval": {
+        "realPresents": 60,
+        "generatedPresents": 60,
+        "prepared": 60,
+        "images": 60
+      },
+      "fault": 0,
+      "errors": 0,
+      "warnings": 0,
+      "exitCode": 3221226505,
+      "gameRestored": true,
+      "sceneRetired": true,
+      "sharedSdkRetired": true
+    },
+    {
+      "stage": "epoch",
+      "guideSHA256": "45eafa065c502b3daaba9582fe4d4e28c41476a641a331a6d95d4aed1e91e9e7",
+      "bridgeSHA256": "53453b10565ee549d56b23bf37b3940bdd9097ffc4ee3e557938b007666da3c7",
+      "shaderSHA256": "57416d6e20dc6cfcd66f99f4a5c660ba654c9a94500f729e91e85586fa432373",
+      "steadyInterval": {
+        "realPresents": 60,
+        "generatedPresents": 60,
+        "prepared": 60,
+        "images": 60
+      },
+      "fault": 0,
+      "errors": 0,
+      "warnings": 0,
+      "exitCode": 0,
+      "gameRestored": true,
+      "sceneRetired": true,
+      "sharedSdkRetired": true
+    },
+    {
+      "stage": "final",
+      "guideSHA256": "3572bc84be6cf070cd3ecd168d3173f3394fadb3b40b557a032a0ae7f5b3b52d",
+      "bridgeSHA256": "53453b10565ee549d56b23bf37b3940bdd9097ffc4ee3e557938b007666da3c7",
+      "shaderSHA256": "57416d6e20dc6cfcd66f99f4a5c660ba654c9a94500f729e91e85586fa432373",
+      "steadyInterval": {
+        "realPresents": 60,
+        "generatedPresents": 60,
+        "prepared": 60,
+        "images": 60
+      },
+      "fault": 0,
+      "errors": 0,
+      "warnings": 0,
+      "exitCode": 0,
+      "gameRestored": true,
+      "sceneRetired": true,
+      "sharedSdkRetired": true
+    }
+  ],
+  "syntheticPixelCopy": [
+    {
+      "format": 24,
+      "pixels": 153,
+      "RGBCodeDifferences": 0,
+      "alphaErrors": 0,
+      "retired": true
+    },
+    {
+      "format": 28,
+      "pixels": 153,
+      "RGBCodeDifferences": 0,
+      "alphaErrors": 0,
+      "retired": true
+    },
+    {
+      "format": 87,
+      "pixels": 153,
+      "RGBCodeDifferences": 0,
+      "alphaErrors": 0,
+      "retired": true
+    }
+  ],
+  "pause": {
+    "generatedDelta": 0,
+    "realDelta": 5760
+  },
+  "outstanding": [
+    "exact rebuilt Windows artifact",
+    "HDR regression",
+    "live output size/colour transition",
+    "matched performance/quality comparison",
+    "native Windows/Radeon and Anti-Lag2"
+  ]
+}

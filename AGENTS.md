@@ -18,3 +18,24 @@ The maintainer authorized one exception on 6 October 2026: the exact tested,
 source-built PR435 ReShade framework may be offered as a separate dependency
 download, with its source, build provenance and license. Keep it outside the
 mod installer archives. NVIDIA runtimes remain external dependencies.
+
+In-game diagnostics must be based on advancing provider counters, with bounded
+freshness and current session/revision/world validation. Keep the opt-in request
+separate from advanced preset persistence. Versions and requested overrides are
+not active-model readbacks. The FG override uses the documented Streamline UI
+recomposition setting; preserve Auto and driver-override caveats. Its separate
+advanced slots use the same replay/source validation and may change only the FG
+INI key. Use the shared-runtime latency recipe for the FG candidate, including
+its version-library link; the standalone latency build is not a substitute.
+Upscaling Sharpness uses one post-upscale game filter for both providers. Restore
+its prior value only while still owned, yield to external changes, and retain
+mouse, keyboard and controller paths with a 0-100 percent bound.
+
+The advanced page has separate Upscaling, Frame Generation and Diagnostics tabs
+with persistent side help. Preserve Loader-owned keys and the independent FSR
+SR/FG slots. Explicit portable FSR 4.1 INT8 and ML FG selections must never be
+reported as analytical fallback, and ML FG still needs actual device approval.
+DLSS FG C uses driver DRS; never map it to A/B recomposition or edit a global/
+shared NVIDIA profile. Preserve original-setting receipts, ownership checks and
+Auto restoration, plus the distinction between an accepted request and a model
+readback. Native Windows qualification is required for the Windows DRS path.

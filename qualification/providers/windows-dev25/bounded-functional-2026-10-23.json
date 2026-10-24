@@ -1,0 +1,220 @@
+{
+  "schema": "windows-amd-bounded-functional-v1",
+  "date": "2026-10-23",
+  "decision": "UNQUALIFIED",
+  "shutdownGate": "FAIL: unresolved ordinary full-candidate C0000005",
+  "version": "0.4.0-amd.dev.25",
+  "gameBuild": 25910487,
+  "gameImageSHA256": "3842102bb05fc532b22e97992d61c2248d115be80ff752ff9b6843bf4acd7005",
+  "nativeArtifactSource": "b5719f95820acb97dcd5fcdfa60bdde291b3379a",
+  "installerSource": "97c92569169ec5efdb5c4ac7bf54b0460f8db6fe",
+  "installerSHA256": "4b441e9d819ccdd1b132cb3edc396e8c9c05ff239665ebacefb7d14e67d331c2",
+  "dependencyLockSHA256": "0cebd7a90ef5338c1d0dcd32e71aece15456ee78199f08b20692d3601e202979",
+  "renderingGPU": "AMD Radeon 860M",
+  "driver": "32.0.32015.7029",
+  "output": "1920x1200 SDR, Windowed Full Screen",
+  "functionalRunsExcludedFromSixAttemptIsolationMatrix": [
+    7,
+    8,
+    9
+  ],
+  "fsrQuality": {
+    "revision": 346,
+    "world": 2,
+    "worldValidated": 1,
+    "srPhase": 5,
+    "srError": 0,
+    "sourceScaleMicro": 66666667,
+    "srAdvancingValidated": 1,
+    "amdFgAdvancingValidated": 1,
+    "antiLagAdvancingValidated": 0,
+    "srDelta": 53,
+    "fgRenderedDelta": 26,
+    "fgGeneratedDelta": 26,
+    "antiLagDelta": 40,
+    "render": [
+      1280,
+      800
+    ],
+    "output": [
+      1920,
+      1200
+    ]
+  },
+  "nativeWithFg": {
+    "revision": 347,
+    "world": 2,
+    "worldValidated": 1,
+    "srPhase": 8,
+    "srError": 0,
+    "sourceScaleMicro": 100000000,
+    "srAdvancingValidated": 0,
+    "amdFgAdvancingValidated": 1,
+    "antiLagAdvancingValidated": 0,
+    "srDelta": 0,
+    "fgRenderedDelta": 32,
+    "fgGeneratedDelta": 32,
+    "antiLagDelta": 22
+  },
+  "fsrLiveReentry": {
+    "revision": 348,
+    "world": 2,
+    "worldValidated": 1,
+    "srPhase": 5,
+    "srError": 0,
+    "sourceScaleMicro": 66666667,
+    "srAdvancingValidated": 1,
+    "amdFgAdvancingValidated": 1,
+    "antiLagAdvancingValidated": 0,
+    "srDelta": 37,
+    "fgRenderedDelta": 51,
+    "fgGeneratedDelta": 51,
+    "antiLagDelta": 28
+  },
+  "fsrFgAntiLag": {
+    "revision": 349,
+    "world": 2,
+    "worldValidated": 1,
+    "srPhase": 5,
+    "srError": 0,
+    "sourceScaleMicro": 66666667,
+    "srAdvancingValidated": 1,
+    "amdFgAdvancingValidated": 1,
+    "antiLagAdvancingValidated": 1,
+    "srDelta": 13,
+    "fgRenderedDelta": 25,
+    "fgGeneratedDelta": 25,
+    "antiLagDelta": 25
+  },
+  "nativeFinal": {
+    "revision": 350,
+    "world": 2,
+    "provider": 0,
+    "phase": 8,
+    "error": 0,
+    "sourceScaleMicro": 100000000,
+    "observedSourceScaleMicro": 100000000,
+    "contextReady": 1,
+    "evaluations": 0
+  },
+  "analyticalVersions": {
+    "sr": "3.1.5",
+    "fg": "3.1.6"
+  },
+  "observer": {
+    "at": "2026-10-23T12:36:34.773419+00:00",
+    "binarySHA256": "486a799e4b7ffb2e8c91a1bb1b8e480213c8fcdd933951deca553947aca8fb54",
+    "buildReceiptSHA256": "50e994d5c0eb1af8cdefd3c6e536ed86cf7600318505aa3100253199a901f6be",
+    "allCompiledDependenciesAndPhaseContractSourcesStillMatch": true,
+    "observerChangedForThisQualification": false,
+    "transitionPredicateUnchanged": true,
+    "privateHistoricalAckRelationNotDirectTransitionWitness": true
+  },
+  "observerLimitations": [
+    "Historical Apply acknowledgement relationship validated against unchanged production contract; no direct transition-history witness claimed.",
+    "Native inactive source scale is a fresh-context status result, not active SR dimensions or evaluations.",
+    "Transient resets, wrong-world and stale intervals excluded.",
+    "SDK counters do not establish physical FPS, frame-time tails, latency benefit or image quality."
+  ],
+  "diagnostics": {
+    "independentDetailsAndOverlay": "PASS",
+    "bothOffPersistedAcrossRestart": true,
+    "publicationStopsWhenSettingsCloses": true,
+    "readerRefusedOptedOutCurrentSession": true,
+    "advancedPanelRetainsObserverWhileConstructed": true,
+    "menuRestartClearsPriorActiveState": true
+  },
+  "run8Exit": {
+    "codeHex": "00000000",
+    "method": "normal Alt+F4",
+    "clockGapObserved": true,
+    "comparableShutdownTimingClaim": false
+  },
+  "postReinstallRecovery": {
+    "startupReachedMainMenu": true,
+    "originalPreferenceLeaseStillOwned": true,
+    "diagnosticsOffOnRestart": true,
+    "codeHex": "00000000",
+    "method": "Main menu Quit then Confirm",
+    "clockGapObserved": false,
+    "closeMarkerToObservedExitSeconds": 8.211786,
+    "crashRepairClaim": false
+  },
+  "hdr": {
+    "status": "NOT AVAILABLE",
+    "renoDxOwnedDisabledTokenObserved": true,
+    "newRenoDxBinaryPinVerified": true,
+    "activeRenoDxHdrRenderingClaim": false
+  },
+  "manualChecks": [
+    "Keyboard render-scale editing",
+    "Physical pause-menu entry and travel",
+    "In-game Save and quit"
+  ],
+  "remainingLiveGates": [
+    "Five minutes of active gameplay and dungeon-to-hub travel",
+    "External sharpness value ownership and restore",
+    "Pause/resume rendering recovery",
+    "Cause-directed ordinary exit regression after an actual repair"
+  ],
+  "hardwareUnavailable": [
+    "Physical HDR",
+    "Physical controller",
+    "Windows NVIDIA activation"
+  ],
+  "normalGuiUninstall": {
+    "verified": true,
+    "ownedAbsent": 17,
+    "sharedDependenciesUnchanged": 14,
+    "originalProxySHA256": "0cee63f9c9f13f3ac909c5b4903f4dbb4b719a7ab3b4f13b0deaf83c814b94f7",
+    "installReceiptRemoved": true,
+    "ownedHdrLeaseRemoved": true,
+    "ownedRenoDXTokenRemoved": true,
+    "exactConfigRestorationSHA256": "f2cb5b84020d95984497b5b58a98d89b478bd0fd5f20ced53b25c214dd3785c8",
+    "playerSavesReadOrChanged": false,
+    "beforeReportSHA256": "219c21364292b0d4bc2a73e4b0c11cfc10faa33b54c83ee2637821fcb0c678f9",
+    "performedThroughNormalGui": true
+  },
+  "preferences": {
+    "at": "2026-10-23T12:49:22.981727+00:00",
+    "sourceRevision": 204,
+    "restoredRevision": 353,
+    "preferenceBytesExact": true,
+    "productionCasAndLeaseVerified": true,
+    "originalSHA256": "4e805895af7f2047ba52915658dcdbd14ca3f3f3c981a5fcdc507248d9eadd2b",
+    "originalProvenance": "Exclusive-create retained receipt, exact store path binding, revision/CRC and preserved timestamps; SHA pinned at restoration, not at historical capture.",
+    "runtimeActivationClaim": false,
+    "loaderShortcut": "original blank/blank visually restored",
+    "advanced": "All Auto",
+    "diagnostics": "Both Off; reader refused current-session opt-in after closing Settings",
+    "display": "Unchanged Windowed Full Screen 1920x1200 SDR",
+    "playerSavesTouched": false
+  },
+  "finalInstallation": {
+    "state": "candidate installed; game closed after recovery launch",
+    "ownedFilesMatched": 18,
+    "dependencyFilesMatched": 15,
+    "overrides": {},
+    "installedReceiptSHA256": "7161b9b996d262f8d0e334029730a3ac3132485c1bf6fcc0727d404c99269c2a"
+  },
+  "productionSourceChangedThisExecution": false,
+  "releaseApproval": false,
+  "cleanup": {
+    "powerRequest": {
+      "releasedAt": "2026-10-23T12:58:32.0603132+00:00",
+      "persistentSettingsChanged": false
+    },
+    "isolationFileHoldsRestored": true,
+    "uiHoldsRestored": true,
+    "newRenoDxIntentionallyRetained": true,
+    "perImageIfeoAndWerKeysAbsentVerified": true,
+    "debuggerRecorderAndGameProcessesAbsentVerified": true
+  },
+  "checksThisExecution": {
+    "installerCore": 147,
+    "sharedSdkShutdown": 7,
+    "processExit": 11,
+    "bootstrapLookup": 3,
+    "productionFixClaim": false
+  }
+}

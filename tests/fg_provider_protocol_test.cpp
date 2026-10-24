@@ -1,18 +1,34 @@
 #include "../experiments/fg-streamline/fg_ui_protocol.hpp"
+#include "../src/providers/fg_capability_cache.hpp"
 #include <cassert>
 #include <iostream>
 
 // Synthetic mod-only GVAS envelope. No game/account/save data is included.
-std::vector<uint8_t> fixture(std::vector<std::pair<std::string,unsigned>> fields){
+std::vector<uint8_t> fixture(std::vector<std::pair<std::string,unsigned>> fields,bool runtime=false){
  std::vector<uint8_t> b;
  auto num=[&](unsigned v,unsigned n){for(unsigned i=0;i<n;++i)b.push_back(uint8_t(v>>(i*8)));};
  auto str=[&](const std::string&s){num(unsigned(s.size()+1),4);b.insert(b.end(),s.begin(),s.end());b.push_back(0);};
  num(0x53415647,4);num(3,4);num(522,4);num(1017,4);num(5,2);num(6,2);num(1,2);num(0,4);str("UE5");num(3,4);num(93,4);b.resize(b.size()+93*20);
- str("/Game/Mods/MCD2Graphics/FGSettingsSave.FGSettingsSave_C");num(0,1);
+ str(runtime?"/Game/Mods/MCD2Graphics/FGRuntimeSave.FGRuntimeSave_C":"/Game/Mods/MCD2Graphics/FGSettingsSave.FGSettingsSave_C");num(0,1);
  fields.insert(fields.begin(),{{"SchemaVersion",1},{"Revision",19},{"Mode",1},{"ContextReady",1},{"SessionId",123},{"SettingsRevision",42}});
  for(auto& [name,value]:fields){str(name);str("IntProperty");num(0,4);num(4,4);num(0,1);num(value,4);}str("None");num(0,4);return b;
 }
 int main(){
+ mcd2::providers::FgCapabilityCache cache;unsigned probes=0;
+ auto supported=[&]{++probes;return 0;};auto unsupported=[&]{++probes;return -5;};
+ assert(cache.query(0,2,supported)==-1&&cache.query(1,0,supported)==-1&&probes==0);
+ for(unsigned frame=0;frame<10000;++frame)assert(cache.query(1,2,supported)==0);
+ assert(probes==1); // No repeated driver query while FG is Off or On.
+ assert(cache.query(3,2,unsupported)==-5&&probes==2);
+ for(unsigned frame=0;frame<10000;++frame)assert(cache.query(3,2,supported)==-5);
+ assert(probes==2); // Unsupported results cannot become claimed support.
+ cache.forget(1);assert(cache.query(3,2,supported)==-5&&probes==2);
+ cache.forget(3);assert(cache.query(3,2,supported)==0&&probes==3); // Reused device address.
+ assert(cache.query(3,4,unsupported)==-5&&probes==4); // Changed runtime module.
+ auto notReady=[&]{++probes;return -1;};
+ assert(cache.query(5,4,notReady)==-1&&cache.query(5,4,notReady)==-1&&probes==6);
+ assert(cache.query(5,4,supported)==0&&probes==7); // Delayed SDK initialization retries.
+ std::cout<<"FG capability cache: bounded queries, device/runtime identity, unsupported and not-ready checks pass\n";
  mcd2::fgui::Intent i;
  for(const char* field:{"FGProvider","fgProvider","Provider","provider"}){
   auto b=fixture({{field,1}});assert(mcd2::fgui::decode(b,i));
@@ -34,4 +50,9 @@ int main(){
   {{"FGProvider",1},{"fgProvider",1}},{{"fgProvider",2}},{{"fgProvider",1},{"PROVIDER",0}}})
   assert(!mcd2::fgui::decode(fixture(fields),i));
  std::cout<<"FG provider framing, legacy FName alias, current metadata and duplicate/truncation checks pass\n";
+ auto runtimeSeed=fixture({},true);auto encoded=mcd2::fgui::encode(runtimeSeed,{{"SchemaVersion",1},{"NativeGuidesRetired",1}});
+ std::map<std::string,unsigned> fields;size_t header=0;assert(!encoded.empty()&&mcd2::display::parse(encoded,"FGRuntimeSave",fields,header)&&fields["NativeGuidesRetired"]==1);
+ encoded=mcd2::fgui::encode(runtimeSeed,{{"SchemaVersion",1},{"NativeGuidesRetired",0}});fields.clear();assert(!encoded.empty()&&mcd2::display::parse(encoded,"FGRuntimeSave",fields,header)&&!fields.count("NativeGuidesRetired"));
+ assert(mcd2::fgui::encode(runtimeSeed,{{"UnprovenNativeRetirement",1}}).empty());
+
 }

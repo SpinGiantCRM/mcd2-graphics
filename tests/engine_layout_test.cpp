@@ -49,5 +49,23 @@ int main() {
     assert(released.nameConstructor==0x1461040 && released.simulationCounter==0xbe45f10 && released.renderCounter==0xbe45f18);
     assert(updated.renderCounter==updated.simulationCounter+8);
     for(const auto rva:addresses)assert(rva<updated.imageSize);
-    std::cout<<"Both explicit engine layouts passed; "<<rejects<<" missing/corrupt guards rejected; unknown and mixed layouts refused.\n";
+    Image hotfixImage;
+    const std::set<std::uint32_t> hotfixAddresses{hotfix.simStart,hotfix.simStartDispatch,hotfix.simEndDispatch,
+        hotfix.pacingDispatch,hotfix.registryGet,hotfix.count,hotfix.add,hotfix.remove,hotfix.nameConstructor,
+        0x2f189fa,0x24d4db1};
+    assert(select(hotfix.timestamp,hotfix.imageSize,[&](auto rva,auto bytes){
+        if(!hotfixAddresses.contains(rva))return false;
+        hotfixImage[rva]={bytes.begin(),bytes.end()};return true;
+    })==&hotfix);
+    assert(hotfixImage.size()==11 && hotfix.steamBuild==25910487);
+    assert(select(hotfix.timestamp,hotfix.imageSize,reader(hotfixImage))==&hotfix);
+    assert(!select(hotfix.timestamp^1,hotfix.imageSize,reader(hotfixImage)));
+    assert(!select(hotfix.timestamp,hotfix.imageSize-1,reader(hotfixImage)));
+    assert(!select(updated.timestamp,updated.imageSize,reader(hotfixImage)));
+    assert(hotfix.registry==0xba9a270 && hotfix.simulationCounter==0xbe68010 && hotfix.renderCounter==0xbe68018);
+    for(const auto& [rva,bytes]:hotfixImage){
+        auto missing=hotfixImage;missing.erase(rva);assert(!select(hotfix.timestamp,hotfix.imageSize,reader(missing)));++rejects;
+        for(std::size_t n=0;n<bytes.size();++n){auto corrupt=hotfixImage;corrupt[rva][n]^=1;assert(!select(hotfix.timestamp,hotfix.imageSize,reader(corrupt)));++rejects;}
+    }
+    std::cout<<"Three explicit engine layouts passed; "<<rejects<<" missing/corrupt guards rejected; unknown and mixed layouts refused.\n";
 }

@@ -13,13 +13,14 @@ constexpr auto Read=D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE|D3D12_RESOURCE_ST
 void transition(ID3D12GraphicsCommandList* cmd,ID3D12Resource* image,D3D12_RESOURCE_STATES from,D3D12_RESOURCE_STATES to){
  D3D12_RESOURCE_BARRIER b{};b.Type=D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;b.Transition={image,D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,from,to};cmd->ResourceBarrier(1,&b);
 }
-int main(){
+int main(int argc,char**argv){
+ const bool sdr=argc==2&&!strcmp(argv[1],"sdr");
  FILE* log=nullptr;fopen_s(&log,"fsr-fg-game-bridge-probe.jsonl","w");if(!log)return 1;
  auto result=[&](const char* stage,long code){fprintf(log,"{\"stage\":\"%s\",\"result\":%ld}\n",stage,code);fflush(log);return code;};
  auto path=std::make_unique<wchar_t[]>(32768);auto length=GetCurrentDirectoryW(32768,path.get());if(!length||length>32600)return 2;
  auto bridge=LoadLibraryW(L"mcd2-fsr-fg-game-bridge.dll");if(!bridge)return 3;
 #define FN(name) auto name=reinterpret_cast<decltype(&mcd2_afg_##name##_v1)>(GetProcAddress(bridge,"mcd2_afg_" #name "_v1"));if(!name)return 4;
- FN(load) FN(swap) FN(state) FN(retire) FN(antilag_ready) FN(antilag)
+ FN(load) FN(swap) FN(output) FN(state) FN(retire) FN(antilag_ready) FN(antilag)
 #undef FN
 #define FN(name) auto name=reinterpret_cast<decltype(&mcd2_afg_##name##_v2)>(GetProcAddress(bridge,"mcd2_afg_" #name "_v2"));if(!name)return 4;
  FN(recording_contract) FN(guides) FN(world) FN(present)
@@ -51,7 +52,9 @@ int main(){
  const auto refused=present(unrelated,100,1);unrelated->Release();
  if(result("reject-unrelated-submission-queue",refused==-41?0:refused?refused:-1))return 37;
  HANDLE waitable=chain->GetFrameLatencyWaitableObject();if(!waitable)return 11;
- result("set-PQ-output",chain->SetColorSpace1(DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020));
+ if(result("set-presentation-colour",chain->SetColorSpace1(sdr?DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709:DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020)))return 38;
+ MCD2AmdFgOutputV1 contract{sizeof(contract),W,H,24,24,sdr?1u:3u,sdr?2u:1u,0};
+ if(result("configure-output-contract",output(&contract)))return 39;
  ID3D12DescriptorHeap* views=nullptr;D3D12_DESCRIPTOR_HEAP_DESC vh{};vh.Type=D3D12_DESCRIPTOR_HEAP_TYPE_RTV;vh.NumDescriptors=3;
  if(FAILED(device->CreateDescriptorHeap(&vh,IID_PPV_ARGS(&views))))return 12;
  ID3D12Resource* images[3]{};DXGI_FORMAT formats[]={DXGI_FORMAT_R10G10B10A2_UNORM,DXGI_FORMAT_R32_FLOAT,DXGI_FORMAT_R16G16_FLOAT};

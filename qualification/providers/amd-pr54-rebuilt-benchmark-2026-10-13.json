@@ -1,0 +1,1681 @@
+{
+  "schemaVersion": 1,
+  "candidate": "0.4.0-amd.dev.8",
+  "implementationCommit": "c9f011a5bdc8dd6fd50885eeb8c2986764183755",
+  "nativeArchiveSHA256": "9574ec28b096f35e484af61e066835a1815178070d96e390c4c24ddd599c9e64",
+  "frameworkSHA256": "5ab60fb92385c774bb5f61d668676556c32fc91d989a18679129cdb32031bb84",
+  "planSHA256": "22548783a82421160029f74f472dd8f1b3b42732c4984ec92ecf675d4e597331",
+  "host": "CachyOS / Proton SLR / RTX 4080 SUPER",
+  "sampleCountPerCapture": 1200,
+  "physicalDisplayFPSMeasured": false,
+  "inputLatencyMeasured": false,
+  "gpuPassTimesMeasured": false,
+  "windowsRadeonQualified": false,
+  "candidateQualificationPassed": false,
+  "outputs": {
+    "hdr": {
+      "numericMedianGatesPassed": true,
+      "groups": {
+        "clean-off": {
+          "medians": {
+            "applicationPresentRate": 137.33652386275938,
+            "p95Ms": 8.2935,
+            "p99Ms": 8.7864,
+            "SDKCountEquivalentTotal": null,
+            "gpuTelemetry": {
+              "memoryMiB": 5724.0,
+              "powerW": 300.78,
+              "temperatureC": 45.0,
+              "graphicsClockMHz": 3000.0,
+              "utilizationPercent": 94.0
+            }
+          },
+          "captures": [
+            {
+              "label": "pr54r-hdr-clean-off-0",
+              "intervals": 1199,
+              "seconds": 8.7303797,
+              "applicationPresentRate": 137.33652386275938,
+              "p95Ms": 8.2935,
+              "p99Ms": 9.22,
+              "SDKRealPresentRate": null,
+              "SDKGeneratedPresentRate": 0,
+              "SDKCountEquivalentTotal": null,
+              "SDKGeneratedPerRealPresent": null,
+              "SDKPreparedPerRealPresent": null,
+              "SDKImagesPerRealPresent": null,
+              "FGModeObservedOnlyAtCaptureBoundaries": true,
+              "continuousFGActivationMeasured": false,
+              "privateCaptureSHA256": "d3522b38efcdccb6b4a28c60b4834fa7fc75aa5ef03cff0b3fa3d2f517d3a228",
+              "gpuTelemetry": {
+                "utilizationPercent": {
+                  "median": 94.0,
+                  "min": 94.0,
+                  "max": 95.0
+                },
+                "graphicsClockMHz": {
+                  "median": 3000.0,
+                  "min": 3000.0,
+                  "max": 3000.0
+                },
+                "powerW": {
+                  "median": 301.245,
+                  "min": 290.97,
+                  "max": 301.85
+                },
+                "memoryMiB": {
+                  "median": 5724.0,
+                  "min": 5724.0,
+                  "max": 5724.0
+                },
+                "temperatureC": {
+                  "median": 45.0,
+                  "min": 44.0,
+                  "max": 45.0
+                }
+              }
+            },
+            {
+              "label": "pr54r-hdr-clean-off-1",
+              "intervals": 1199,
+              "seconds": 8.7346973,
+              "applicationPresentRate": 137.26863780385384,
+              "p95Ms": 8.273,
+              "p99Ms": 8.784,
+              "SDKRealPresentRate": null,
+              "SDKGeneratedPresentRate": 0,
+              "SDKCountEquivalentTotal": null,
+              "SDKGeneratedPerRealPresent": null,
+              "SDKPreparedPerRealPresent": null,
+              "SDKImagesPerRealPresent": null,
+              "FGModeObservedOnlyAtCaptureBoundaries": true,
+              "continuousFGActivationMeasured": false,
+              "privateCaptureSHA256": "f0ad97a0756b65caf0d2fa43d0a8db19047896f2314a7a51af3fca270a38bbf7",
+              "gpuTelemetry": {
+                "utilizationPercent": {
+                  "median": 94.0,
+                  "min": 94.0,
+                  "max": 95.0
+                },
+                "graphicsClockMHz": {
+                  "median": 3000.0,
+                  "min": 3000.0,
+                  "max": 3000.0
+                },
+                "powerW": {
+                  "median": 300.61,
+                  "min": 292.49,
+                  "max": 301.2
+                },
+                "memoryMiB": {
+                  "median": 5724.0,
+                  "min": 5724.0,
+                  "max": 5724.0
+                },
+                "temperatureC": {
+                  "median": 45.0,
+                  "min": 44.0,
+                  "max": 46.0
+                }
+              }
+            },
+            {
+              "label": "pr54r-hdr-clean-off-2",
+              "intervals": 1199,
+              "seconds": 8.7051952,
+              "applicationPresentRate": 137.73384426807567,
+              "p95Ms": 8.3119,
+              "p99Ms": 8.7864,
+              "SDKRealPresentRate": null,
+              "SDKGeneratedPresentRate": 0,
+              "SDKCountEquivalentTotal": null,
+              "SDKGeneratedPerRealPresent": null,
+              "SDKPreparedPerRealPresent": null,
+              "SDKImagesPerRealPresent": null,
+              "FGModeObservedOnlyAtCaptureBoundaries": true,
+              "continuousFGActivationMeasured": false,
+              "privateCaptureSHA256": "8eedadf62017d5c151e75e63b6a0bb5a8229ade8c7753593c6a50f4b3df5995d",
+              "gpuTelemetry": {
+                "utilizationPercent": {
+                  "median": 94.0,
+                  "min": 94.0,
+                  "max": 95.0
+                },
+                "graphicsClockMHz": {
+                  "median": 3000.0,
+                  "min": 3000.0,
+                  "max": 3000.0
+                },
+                "powerW": {
+                  "median": 300.78,
+                  "min": 292.74,
+                  "max": 301.28
+                },
+                "memoryMiB": {
+                  "median": 5724.0,
+                  "min": 5724.0,
+                  "max": 5724.0
+                },
+                "temperatureC": {
+                  "median": 45.0,
+                  "min": 44.0,
+                  "max": 46.0
+                }
+              }
+            }
+          ]
+        },
+        "on-a": {
+          "medians": {
+            "applicationPresentRate": 92.03982694578086,
+            "p95Ms": 11.9664,
+            "p99Ms": 12.7195,
+            "SDKCountEquivalentTotal": 184.07965389156172,
+            "gpuTelemetry": {
+              "memoryMiB": 6406.0,
+              "powerW": 289.02,
+              "temperatureC": 45.0,
+              "graphicsClockMHz": 3000.0,
+              "utilizationPercent": 96.0
+            }
+          },
+          "captures": [
+            {
+              "label": "pr54r-hdr-on-a-0",
+              "intervals": 1199,
+              "seconds": 13.0380781,
+              "applicationPresentRate": 91.9614064898108,
+              "p95Ms": 12.0059,
+              "p99Ms": 12.7195,
+              "SDKRealPresentRate": 91.9614064898108,
+              "SDKGeneratedPresentRate": 91.9614064898108,
+              "SDKCountEquivalentTotal": 183.9228129796216,
+              "SDKGeneratedPerRealPresent": 1.0,
+              "SDKPreparedPerRealPresent": 1.0,
+              "SDKImagesPerRealPresent": 1.0,
+              "FGModeObservedOnlyAtCaptureBoundaries": true,
+              "continuousFGActivationMeasured": false,
+              "privateCaptureSHA256": "37634113f6c4d677acedac8132fc115cc9a04f591590204b1f83c5d9e60ca43c",
+              "gpuTelemetry": {
+                "utilizationPercent": {
+                  "median": 96.0,
+                  "min": 94.0,
+                  "max": 96.0
+                },
+                "graphicsClockMHz": {
+                  "median": 3000.0,
+                  "min": 3000.0,
+                  "max": 3000.0
+                },
+                "powerW": {
+                  "median": 289.91,
+                  "min": 282.95,
+                  "max": 290.49
+                },
+                "memoryMiB": {
+                  "median": 6406.0,
+                  "min": 6405.0,
+                  "max": 6406.0
+                },
+                "temperatureC": {
+                  "median": 45.0,
+                  "min": 44.0,
+                  "max": 45.0
+                }
+              }
+            },
+            {
+              "label": "pr54r-hdr-on-a-1",
+              "intervals": 1199,
+              "seconds": 13.0269693,
+              "applicationPresentRate": 92.03982694578086,
+              "p95Ms": 11.964,
+              "p99Ms": 12.8096,
+              "SDKRealPresentRate": 92.03982694578086,
+              "SDKGeneratedPresentRate": 92.03982694578086,
+              "SDKCountEquivalentTotal": 184.07965389156172,
+              "SDKGeneratedPerRealPresent": 1.0,
+              "SDKPreparedPerRealPresent": 1.0,
+              "SDKImagesPerRealPresent": 1.0,
+              "FGModeObservedOnlyAtCaptureBoundaries": true,
+              "continuousFGActivationMeasured": false,
+              "privateCaptureSHA256": "5ef2fef9b8f959d331f9e9f3f996c2f43a3b940b14ac47f9089c8a96490ddb5e",
+              "gpuTelemetry": {
+                "utilizationPercent": {
+                  "median": 96.0,
+                  "min": 91.0,
+                  "max": 96.0
+                },
+                "graphicsClockMHz": {
+                  "median": 3000.0,
+                  "min": 3000.0,
+                  "max": 3000.0
+                },
+                "powerW": {
+                  "median": 288.92,
+                  "min": 281.93,
+                  "max": 290.34
+                },
+                "memoryMiB": {
+                  "median": 6406.0,
+                  "min": 6405.0,
+                  "max": 6406.0
+                },
+                "temperatureC": {
+                  "median": 45.0,
+                  "min": 44.0,
+                  "max": 45.0
+                }
+              }
+            },
+            {
+              "label": "pr54r-hdr-on-a-2",
+              "intervals": 1199,
+              "seconds": 13.0071547,
+              "applicationPresentRate": 92.1800368838544,
+              "p95Ms": 11.9664,
+              "p99Ms": 12.7009,
+              "SDKRealPresentRate": 92.1800368838544,
+              "SDKGeneratedPresentRate": 92.1800368838544,
+              "SDKCountEquivalentTotal": 184.3600737677088,
+              "SDKGeneratedPerRealPresent": 1.0,
+              "SDKPreparedPerRealPresent": 1.0,
+              "SDKImagesPerRealPresent": 1.0,
+              "FGModeObservedOnlyAtCaptureBoundaries": true,
+              "continuousFGActivationMeasured": false,
+              "privateCaptureSHA256": "1029a570ba7ffdceb9d0c08278986d4c32a57576c940c87cfad7cd561e844486",
+              "gpuTelemetry": {
+                "utilizationPercent": {
+                  "median": 96.0,
+                  "min": 94.0,
+                  "max": 96.0
+                },
+                "graphicsClockMHz": {
+                  "median": 3000.0,
+                  "min": 3000.0,
+                  "max": 3000.0
+                },
+                "powerW": {
+                  "median": 289.02,
+                  "min": 282.41,
+                  "max": 289.98
+                },
+                "memoryMiB": {
+                  "median": 6406.0,
+                  "min": 6405.0,
+                  "max": 6406.0
+                },
+                "temperatureC": {
+                  "median": 45.0,
+                  "min": 44.0,
+                  "max": 45.0
+                }
+              }
+            }
+          ]
+        },
+        "retained-off-a": {
+          "medians": {
+            "applicationPresentRate": 131.10045172470245,
+            "p95Ms": 8.613,
+            "p99Ms": 9.1122,
+            "SDKCountEquivalentTotal": null,
+            "gpuTelemetry": {
+              "memoryMiB": 6534.0,
+              "powerW": 290.86,
+              "temperatureC": 45.0,
+              "graphicsClockMHz": 3000.0,
+              "utilizationPercent": 95.0
+            }
+          },
+          "captures": [
+            {
+              "label": "pr54r-hdr-retained-off-a-0",
+              "intervals": 1199,
+              "seconds": 9.1456588,
+              "applicationPresentRate": 131.10045172470245,
+              "p95Ms": 8.613,
+              "p99Ms": 9.1122,
+              "SDKRealPresentRate": 131.10045172470245,
+              "SDKGeneratedPresentRate": 0,
+              "SDKCountEquivalentTotal": null,
+              "SDKGeneratedPerRealPresent": null,
+              "SDKPreparedPerRealPresent": null,
+              "SDKImagesPerRealPresent": null,
+              "FGModeObservedOnlyAtCaptureBoundaries": true,
+              "continuousFGActivationMeasured": false,
+              "privateCaptureSHA256": "4e38b127a85094dbcd19b0f48b2f9126d31147f754dfc569b106ffd8f8f6caa1",
+              "gpuTelemetry": {
+                "utilizationPercent": {
+                  "median": 95.0,
+                  "min": 94.0,
+                  "max": 95.0
+                },
+                "graphicsClockMHz": {
+                  "median": 3000.0,
+                  "min": 3000.0,
+                  "max": 3000.0
+                },
+                "powerW": {
+                  "median": 290.84,
+                  "min": 284.37,
+                  "max": 293.2
+                },
+                "memoryMiB": {
+                  "median": 6535.0,
+                  "min": 6534.0,
+                  "max": 6535.0
+                },
+                "temperatureC": {
+                  "median": 45.0,
+                  "min": 44.0,
+                  "max": 46.0
+                }
+              }
+            },
+            {
+              "label": "pr54r-hdr-retained-off-a-1",
+              "intervals": 1199,
+              "seconds": 9.1428668,
+              "applicationPresentRate": 131.14048648286115,
+              "p95Ms": 8.5491,
+              "p99Ms": 9.0222,
+              "SDKRealPresentRate": 131.14048648286115,
+              "SDKGeneratedPresentRate": 0,
+              "SDKCountEquivalentTotal": null,
+              "SDKGeneratedPerRealPresent": null,
+              "SDKPreparedPerRealPresent": null,
+              "SDKImagesPerRealPresent": null,
+              "FGModeObservedOnlyAtCaptureBoundaries": true,
+              "continuousFGActivationMeasured": false,
+              "privateCaptureSHA256": "7bb965f783d5b1c7612db12e9378b3293410e758724e3f4045bc7a03ca93beaa",
+              "gpuTelemetry": {
+                "utilizationPercent": {
+                  "median": 95.0,
+                  "min": 94.0,
+                  "max": 95.0
+                },
+                "graphicsClockMHz": {
+                  "median": 3000.0,
+                  "min": 3000.0,
+                  "max": 3000.0
+                },
+                "powerW": {
+                  "median": 291.8,
+                  "min": 284.95,
+                  "max": 293.14
+                },
+                "memoryMiB": {
+                  "median": 6534.0,
+                  "min": 6534.0,
+                  "max": 6535.0
+                },
+                "temperatureC": {
+                  "median": 45.0,
+                  "min": 44.0,
+                  "max": 46.0
+                }
+              }
+            },
+            {
+              "label": "pr54r-hdr-retained-off-a-2",
+              "intervals": 1199,
+              "seconds": 9.1912143,
+              "applicationPresentRate": 130.45066308594284,
+              "p95Ms": 8.7326,
+              "p99Ms": 9.2205,
+              "SDKRealPresentRate": 130.45066308594284,
+              "SDKGeneratedPresentRate": 0,
+              "SDKCountEquivalentTotal": null,
+              "SDKGeneratedPerRealPresent": null,
+              "SDKPreparedPerRealPresent": null,
+              "SDKImagesPerRealPresent": null,
+              "FGModeObservedOnlyAtCaptureBoundaries": true,
+              "continuousFGActivationMeasured": false,
+              "privateCaptureSHA256": "9a4a4240811fab58ba5fe752376d5ce3815d056b99a8d5885a955919715b807b",
+              "gpuTelemetry": {
+                "utilizationPercent": {
+                  "median": 95.0,
+                  "min": 94.0,
+                  "max": 95.0
+                },
+                "graphicsClockMHz": {
+                  "median": 3000.0,
+                  "min": 3000.0,
+                  "max": 3000.0
+                },
+                "powerW": {
+                  "median": 290.86,
+                  "min": 284.65,
+                  "max": 292.84
+                },
+                "memoryMiB": {
+                  "median": 6534.0,
+                  "min": 6534.0,
+                  "max": 6598.0
+                },
+                "temperatureC": {
+                  "median": 45.0,
+                  "min": 45.0,
+                  "max": 46.0
+                }
+              }
+            }
+          ]
+        },
+        "on-b": {
+          "medians": {
+            "applicationPresentRate": 92.04149015433562,
+            "p95Ms": 11.8917,
+            "p99Ms": 12.7178,
+            "SDKCountEquivalentTotal": 184.08298030867124,
+            "gpuTelemetry": {
+              "memoryMiB": 6504.0,
+              "powerW": 289.54,
+              "temperatureC": 45.0,
+              "graphicsClockMHz": 2985.0,
+              "utilizationPercent": 96.0
+            }
+          },
+          "captures": [
+            {
+              "label": "pr54r-hdr-on-b-0",
+              "intervals": 1199,
+              "seconds": 12.9730649,
+              "applicationPresentRate": 92.42226175866891,
+              "p95Ms": 11.8852,
+              "p99Ms": 12.7178,
+              "SDKRealPresentRate": 92.42226175866891,
+              "SDKGeneratedPresentRate": 92.42226175866891,
+              "SDKCountEquivalentTotal": 184.84452351733782,
+              "SDKGeneratedPerRealPresent": 1.0,
+              "SDKPreparedPerRealPresent": 1.0,
+              "SDKImagesPerRealPresent": 1.0,
+              "FGModeObservedOnlyAtCaptureBoundaries": true,
+              "continuousFGActivationMeasured": false,
+              "privateCaptureSHA256": "515522d0f4977c01d4e923a7579fc880f433a2396de5ba96fc7c32727b45ad9e",
+              "gpuTelemetry": {
+                "utilizationPercent": {
+                  "median": 96.0,
+                  "min": 95.0,
+                  "max": 96.0
+                },
+                "graphicsClockMHz": {
+                  "median": 2985.0,
+                  "min": 2985.0,
+                  "max": 2985.0
+                },
+                "powerW": {
+                  "median": 289.66,
+                  "min": 283.23,
+                  "max": 290.72
+                },
+                "memoryMiB": {
+                  "median": 6504.0,
+                  "min": 6504.0,
+                  "max": 6505.0
+                },
+                "temperatureC": {
+                  "median": 45.0,
+                  "min": 44.0,
+                  "max": 46.0
+                }
+              }
+            },
+            {
+              "label": "pr54r-hdr-on-b-1",
+              "intervals": 1199,
+              "seconds": 13.0267339,
+              "applicationPresentRate": 92.04149015433562,
+              "p95Ms": 11.8917,
+              "p99Ms": 12.7106,
+              "SDKRealPresentRate": 92.04149015433562,
+              "SDKGeneratedPresentRate": 92.04149015433562,
+              "SDKCountEquivalentTotal": 184.08298030867124,
+              "SDKGeneratedPerRealPresent": 1.0,
+              "SDKPreparedPerRealPresent": 1.0,
+              "SDKImagesPerRealPresent": 1.0,
+              "FGModeObservedOnlyAtCaptureBoundaries": true,
+              "continuousFGActivationMeasured": false,
+              "privateCaptureSHA256": "27349a8111a2735ed23622741bf3efe6e788098abca8e7c3e18a3d4bd4cdb0c0",
+              "gpuTelemetry": {
+                "utilizationPercent": {
+                  "median": 96.0,
+                  "min": 96.0,
+                  "max": 96.0
+                },
+                "graphicsClockMHz": {
+                  "median": 2985.0,
+                  "min": 2985.0,
+                  "max": 2985.0
+                },
+                "powerW": {
+                  "median": 289.54,
+                  "min": 283.19,
+                  "max": 290.58
+                },
+                "memoryMiB": {
+                  "median": 6504.0,
+                  "min": 6504.0,
+                  "max": 6505.0
+                },
+                "temperatureC": {
+                  "median": 45.0,
+                  "min": 44.0,
+                  "max": 46.0
+                }
+              }
+            },
+            {
+              "label": "pr54r-hdr-on-b-2",
+              "intervals": 1199,
+              "seconds": 13.0299563,
+              "applicationPresentRate": 92.01872764531068,
+              "p95Ms": 11.8963,
+              "p99Ms": 12.7803,
+              "SDKRealPresentRate": 92.01872764531068,
+              "SDKGeneratedPresentRate": 92.01872764531068,
+              "SDKCountEquivalentTotal": 184.03745529062135,
+              "SDKGeneratedPerRealPresent": 1.0,
+              "SDKPreparedPerRealPresent": 1.0,
+              "SDKImagesPerRealPresent": 1.0,
+              "FGModeObservedOnlyAtCaptureBoundaries": true,
+              "continuousFGActivationMeasured": false,
+              "privateCaptureSHA256": "ceee41b18eecd2caa21267d5cfac8d48eff79ccaafca2a2cd9ff69183a8b5c8b",
+              "gpuTelemetry": {
+                "utilizationPercent": {
+                  "median": 96.0,
+                  "min": 76.0,
+                  "max": 96.0
+                },
+                "graphicsClockMHz": {
+                  "median": 2985.0,
+                  "min": 2985.0,
+                  "max": 2985.0
+                },
+                "powerW": {
+                  "median": 289.27,
+                  "min": 281.88,
+                  "max": 290.6
+                },
+                "memoryMiB": {
+                  "median": 6505.0,
+                  "min": 6504.0,
+                  "max": 6505.0
+                },
+                "temperatureC": {
+                  "median": 45.0,
+                  "min": 44.0,
+                  "max": 46.0
+                }
+              }
+            }
+          ]
+        },
+        "retained-off-b": {
+          "medians": {
+            "applicationPresentRate": 131.64309889216239,
+            "p95Ms": 8.5969,
+            "p99Ms": 9.1403,
+            "SDKCountEquivalentTotal": null,
+            "gpuTelemetry": {
+              "memoryMiB": 6528.0,
+              "powerW": 293.11,
+              "temperatureC": 46.0,
+              "graphicsClockMHz": 2985.0,
+              "utilizationPercent": 95.0
+            }
+          },
+          "captures": [
+            {
+              "label": "pr54r-hdr-retained-off-b-0",
+              "intervals": 1199,
+              "seconds": 9.1519603,
+              "applicationPresentRate": 131.01018368709487,
+              "p95Ms": 8.6958,
+              "p99Ms": 9.1438,
+              "SDKRealPresentRate": 131.01018368709487,
+              "SDKGeneratedPresentRate": 0,
+              "SDKCountEquivalentTotal": null,
+              "SDKGeneratedPerRealPresent": null,
+              "SDKPreparedPerRealPresent": null,
+              "SDKImagesPerRealPresent": null,
+              "FGModeObservedOnlyAtCaptureBoundaries": true,
+              "continuousFGActivationMeasured": false,
+              "privateCaptureSHA256": "e9d8afd81388092c358554e49e2f977818682f823bd2a82e1dfdf9acd80ea54f",
+              "gpuTelemetry": {
+                "utilizationPercent": {
+                  "median": 95.0,
+                  "min": 94.0,
+                  "max": 95.0
+                },
+                "graphicsClockMHz": {
+                  "median": 2985.0,
+                  "min": 2985.0,
+                  "max": 2985.0
+                },
+                "powerW": {
+                  "median": 293.11,
+                  "min": 284.86,
+                  "max": 294.23
+                },
+                "memoryMiB": {
+                  "median": 6528.0,
+                  "min": 6528.0,
+                  "max": 6529.0
+                },
+                "temperatureC": {
+                  "median": 46.0,
+                  "min": 45.0,
+                  "max": 46.0
+                }
+              }
+            },
+            {
+              "label": "pr54r-hdr-retained-off-b-1",
+              "intervals": 1199,
+              "seconds": 9.1079594,
+              "applicationPresentRate": 131.64309889216239,
+              "p95Ms": 8.5621,
+              "p99Ms": 9.0142,
+              "SDKRealPresentRate": 131.64309889216239,
+              "SDKGeneratedPresentRate": 0,
+              "SDKCountEquivalentTotal": null,
+              "SDKGeneratedPerRealPresent": null,
+              "SDKPreparedPerRealPresent": null,
+              "SDKImagesPerRealPresent": null,
+              "FGModeObservedOnlyAtCaptureBoundaries": true,
+              "continuousFGActivationMeasured": false,
+              "privateCaptureSHA256": "36538dc1e13cab77c9728976915dc60fa2ca26abc9fe1e1ba9e4393aeaf1ab75",
+              "gpuTelemetry": {
+                "utilizationPercent": {
+                  "median": 95.0,
+                  "min": 94.0,
+                  "max": 95.0
+                },
+                "graphicsClockMHz": {
+                  "median": 2985.0,
+                  "min": 2985.0,
+                  "max": 2985.0
+                },
+                "powerW": {
+                  "median": 291.68,
+                  "min": 284.79,
+                  "max": 293.88
+                },
+                "memoryMiB": {
+                  "median": 6528.0,
+                  "min": 6528.0,
+                  "max": 6529.0
+                },
+                "temperatureC": {
+                  "median": 45.0,
+                  "min": 45.0,
+                  "max": 46.0
+                }
+              }
+            },
+            {
+              "label": "pr54r-hdr-retained-off-b-2",
+              "intervals": 1199,
+              "seconds": 9.1014103,
+              "applicationPresentRate": 131.73782529065852,
+              "p95Ms": 8.5969,
+              "p99Ms": 9.1403,
+              "SDKRealPresentRate": 131.73782529065852,
+              "SDKGeneratedPresentRate": 0,
+              "SDKCountEquivalentTotal": null,
+              "SDKGeneratedPerRealPresent": null,
+              "SDKPreparedPerRealPresent": null,
+              "SDKImagesPerRealPresent": null,
+              "FGModeObservedOnlyAtCaptureBoundaries": true,
+              "continuousFGActivationMeasured": false,
+              "privateCaptureSHA256": "65b0d52e76d40746dbe372170f736acca7b9a4e7e7128104253c62e76a7baece",
+              "gpuTelemetry": {
+                "utilizationPercent": {
+                  "median": 95.0,
+                  "min": 94.0,
+                  "max": 95.0
+                },
+                "graphicsClockMHz": {
+                  "median": 2985.0,
+                  "min": 2985.0,
+                  "max": 2985.0
+                },
+                "powerW": {
+                  "median": 293.32,
+                  "min": 286.03,
+                  "max": 294.38
+                },
+                "memoryMiB": {
+                  "median": 6528.0,
+                  "min": 6528.0,
+                  "max": 6529.0
+                },
+                "temperatureC": {
+                  "median": 46.0,
+                  "min": 45.0,
+                  "max": 46.0
+                }
+              }
+            }
+          ]
+        }
+      },
+      "gates": [
+        {
+          "phase": "clean-off",
+          "rateRatio": 1.0,
+          "p99Ratio": 1.0,
+          "memoryIncreaseMiB": 0.0,
+          "powerIncreaseW": 0.0,
+          "temperatureIncreaseC": 0.0,
+          "throughputPassed": true,
+          "tailPassed": true,
+          "resourcePassed": true,
+          "passed": true
+        },
+        {
+          "phase": "on-a",
+          "rateRatio": 0.670177345086704,
+          "p99Ratio": 1.44763498133479,
+          "memoryIncreaseMiB": 682.0,
+          "powerIncreaseW": -11.759999999999991,
+          "temperatureIncreaseC": 0.0,
+          "sdkTotalRatio": 1.340354690173408,
+          "throughputPassed": true,
+          "tailPassed": true,
+          "resourcePassed": true,
+          "passed": true
+        },
+        {
+          "phase": "retained-off-a",
+          "rateRatio": 0.9545927626340052,
+          "p99Ratio": 1.0370800327779295,
+          "memoryIncreaseMiB": 810.0,
+          "powerIncreaseW": -9.919999999999959,
+          "temperatureIncreaseC": 0.0,
+          "throughputPassed": true,
+          "tailPassed": true,
+          "resourcePassed": true,
+          "passed": true
+        },
+        {
+          "phase": "on-b",
+          "rateRatio": 0.6701894555472573,
+          "p99Ratio": 1.447441500500774,
+          "memoryIncreaseMiB": 780.0,
+          "powerIncreaseW": -11.239999999999952,
+          "temperatureIncreaseC": 0.0,
+          "sdkTotalRatio": 1.3403789110945146,
+          "throughputPassed": true,
+          "tailPassed": true,
+          "resourcePassed": true,
+          "passed": true
+        },
+        {
+          "phase": "retained-off-b",
+          "rateRatio": 0.9585439851653269,
+          "p99Ratio": 1.0402781571519621,
+          "memoryIncreaseMiB": 804.0,
+          "powerIncreaseW": -7.669999999999959,
+          "temperatureIncreaseC": 1.0,
+          "throughputPassed": true,
+          "tailPassed": true,
+          "resourcePassed": true,
+          "passed": true
+        }
+      ],
+      "restoredByteForByte": true
+    },
+    "sdr": {
+      "numericMedianGatesPassed": true,
+      "groups": {
+        "clean-off": {
+          "medians": {
+            "applicationPresentRate": 141.2723924842569,
+            "p95Ms": 8.0908,
+            "p99Ms": 8.6719,
+            "SDKCountEquivalentTotal": null,
+            "gpuTelemetry": {
+              "memoryMiB": 5729.0,
+              "powerW": 299.28,
+              "temperatureC": 46.0,
+              "graphicsClockMHz": 2985.0,
+              "utilizationPercent": 94.0
+            }
+          },
+          "captures": [
+            {
+              "label": "pr54r-sdr-clean-off-0",
+              "intervals": 1199,
+              "seconds": 8.4871501,
+              "applicationPresentRate": 141.2723924842569,
+              "p95Ms": 8.0279,
+              "p99Ms": 8.5522,
+              "SDKRealPresentRate": null,
+              "SDKGeneratedPresentRate": 0,
+              "SDKCountEquivalentTotal": null,
+              "SDKGeneratedPerRealPresent": null,
+              "SDKPreparedPerRealPresent": null,
+              "SDKImagesPerRealPresent": null,
+              "FGModeObservedOnlyAtCaptureBoundaries": true,
+              "continuousFGActivationMeasured": false,
+              "privateCaptureSHA256": "b66bd3dceea30246c43a46e8c0f6dfe4e7aad6244bde735f7dba0389ee9a179f",
+              "gpuTelemetry": {
+                "utilizationPercent": {
+                  "median": 94.0,
+                  "min": 93.0,
+                  "max": 95.0
+                },
+                "graphicsClockMHz": {
+                  "median": 2985.0,
+                  "min": 2985.0,
+                  "max": 2985.0
+                },
+                "powerW": {
+                  "median": 299.56,
+                  "min": 291.65,
+                  "max": 301.04
+                },
+                "memoryMiB": {
+                  "median": 5729.0,
+                  "min": 5728.0,
+                  "max": 5729.0
+                },
+                "temperatureC": {
+                  "median": 46.0,
+                  "min": 45.0,
+                  "max": 47.0
+                }
+              }
+            },
+            {
+              "label": "pr54r-sdr-clean-off-1",
+              "intervals": 1199,
+              "seconds": 8.4805004,
+              "applicationPresentRate": 141.3831664933357,
+              "p95Ms": 8.0908,
+              "p99Ms": 8.6719,
+              "SDKRealPresentRate": null,
+              "SDKGeneratedPresentRate": 0,
+              "SDKCountEquivalentTotal": null,
+              "SDKGeneratedPerRealPresent": null,
+              "SDKPreparedPerRealPresent": null,
+              "SDKImagesPerRealPresent": null,
+              "FGModeObservedOnlyAtCaptureBoundaries": true,
+              "continuousFGActivationMeasured": false,
+              "privateCaptureSHA256": "7eea3d655c1640d2451e99bfd57c009b8ef3b7338b56a62155f0f45f20394a41",
+              "gpuTelemetry": {
+                "utilizationPercent": {
+                  "median": 94.0,
+                  "min": 94.0,
+                  "max": 95.0
+                },
+                "graphicsClockMHz": {
+                  "median": 2985.0,
+                  "min": 2985.0,
+                  "max": 2985.0
+                },
+                "powerW": {
+                  "median": 299.28,
+                  "min": 291.32,
+                  "max": 300.22
+                },
+                "memoryMiB": {
+                  "median": 5729.0,
+                  "min": 5728.0,
+                  "max": 5729.0
+                },
+                "temperatureC": {
+                  "median": 46.0,
+                  "min": 45.0,
+                  "max": 47.0
+                }
+              }
+            },
+            {
+              "label": "pr54r-sdr-clean-off-2",
+              "intervals": 1199,
+              "seconds": 8.5190148,
+              "applicationPresentRate": 140.74397429148732,
+              "p95Ms": 8.2141,
+              "p99Ms": 8.7063,
+              "SDKRealPresentRate": null,
+              "SDKGeneratedPresentRate": 0,
+              "SDKCountEquivalentTotal": null,
+              "SDKGeneratedPerRealPresent": null,
+              "SDKPreparedPerRealPresent": null,
+              "SDKImagesPerRealPresent": null,
+              "FGModeObservedOnlyAtCaptureBoundaries": true,
+              "continuousFGActivationMeasured": false,
+              "privateCaptureSHA256": "7bfdef27dfaa6267ed79785df5d8fdf6c36fc13013dbbcf31fcd591eeb70c53e",
+              "gpuTelemetry": {
+                "utilizationPercent": {
+                  "median": 94.0,
+                  "min": 93.0,
+                  "max": 95.0
+                },
+                "graphicsClockMHz": {
+                  "median": 2985.0,
+                  "min": 2985.0,
+                  "max": 2985.0
+                },
+                "powerW": {
+                  "median": 297.4,
+                  "min": 291.16,
+                  "max": 300.19
+                },
+                "memoryMiB": {
+                  "median": 5729.0,
+                  "min": 5728.0,
+                  "max": 5730.0
+                },
+                "temperatureC": {
+                  "median": 46.0,
+                  "min": 45.0,
+                  "max": 47.0
+                }
+              }
+            }
+          ]
+        },
+        "on-a": {
+          "medians": {
+            "applicationPresentRate": 94.42124478322623,
+            "p95Ms": 11.6319,
+            "p99Ms": 12.3498,
+            "SDKCountEquivalentTotal": 188.84248956645246,
+            "gpuTelemetry": {
+              "memoryMiB": 6602.0,
+              "powerW": 289.48,
+              "temperatureC": 45.0,
+              "graphicsClockMHz": 3000.0,
+              "utilizationPercent": 96.0
+            }
+          },
+          "captures": [
+            {
+              "label": "pr54r-sdr-on-a-0",
+              "intervals": 1199,
+              "seconds": 12.8121483,
+              "applicationPresentRate": 93.5830566369576,
+              "p95Ms": 11.7167,
+              "p99Ms": 12.7389,
+              "SDKRealPresentRate": 93.5830566369576,
+              "SDKGeneratedPresentRate": 93.5830566369576,
+              "SDKCountEquivalentTotal": 187.1661132739152,
+              "SDKGeneratedPerRealPresent": 1.0,
+              "SDKPreparedPerRealPresent": 1.0,
+              "SDKImagesPerRealPresent": 1.0,
+              "FGModeObservedOnlyAtCaptureBoundaries": true,
+              "continuousFGActivationMeasured": false,
+              "privateCaptureSHA256": "eaac95a186813b648aa4f5b185c821c7e8f168cb372c19342fa4c50da159cad1",
+              "gpuTelemetry": {
+                "utilizationPercent": {
+                  "median": 96.0,
+                  "min": 93.0,
+                  "max": 96.0
+                },
+                "graphicsClockMHz": {
+                  "median": 3000.0,
+                  "min": 3000.0,
+                  "max": 3000.0
+                },
+                "powerW": {
+                  "median": 289.48,
+                  "min": 279.12,
+                  "max": 290.73
+                },
+                "memoryMiB": {
+                  "median": 6602.0,
+                  "min": 6602.0,
+                  "max": 6602.0
+                },
+                "temperatureC": {
+                  "median": 45.0,
+                  "min": 45.0,
+                  "max": 46.0
+                }
+              }
+            },
+            {
+              "label": "pr54r-sdr-on-a-1",
+              "intervals": 1199,
+              "seconds": 12.6984134,
+              "applicationPresentRate": 94.42124478322623,
+              "p95Ms": 11.6319,
+              "p99Ms": 12.3498,
+              "SDKRealPresentRate": 94.42124478322623,
+              "SDKGeneratedPresentRate": 94.42124478322623,
+              "SDKCountEquivalentTotal": 188.84248956645246,
+              "SDKGeneratedPerRealPresent": 1.0,
+              "SDKPreparedPerRealPresent": 1.0,
+              "SDKImagesPerRealPresent": 1.0,
+              "FGModeObservedOnlyAtCaptureBoundaries": true,
+              "continuousFGActivationMeasured": false,
+              "privateCaptureSHA256": "8891149b6e704d6bb4ef3bdc76d0d37db006f51dd143869ab042b1b9f19cc2b4",
+              "gpuTelemetry": {
+                "utilizationPercent": {
+                  "median": 96.0,
+                  "min": 93.0,
+                  "max": 96.0
+                },
+                "graphicsClockMHz": {
+                  "median": 3000.0,
+                  "min": 3000.0,
+                  "max": 3000.0
+                },
+                "powerW": {
+                  "median": 289.18,
+                  "min": 282.46,
+                  "max": 290.7
+                },
+                "memoryMiB": {
+                  "median": 6602.0,
+                  "min": 6602.0,
+                  "max": 6602.0
+                },
+                "temperatureC": {
+                  "median": 45.0,
+                  "min": 44.0,
+                  "max": 46.0
+                }
+              }
+            },
+            {
+              "label": "pr54r-sdr-on-a-2",
+              "intervals": 1199,
+              "seconds": 12.6933703,
+              "applicationPresentRate": 94.45875852215546,
+              "p95Ms": 11.5651,
+              "p99Ms": 12.0278,
+              "SDKRealPresentRate": 94.45875852215546,
+              "SDKGeneratedPresentRate": 94.45875852215546,
+              "SDKCountEquivalentTotal": 188.91751704431093,
+              "SDKGeneratedPerRealPresent": 1.0,
+              "SDKPreparedPerRealPresent": 1.0,
+              "SDKImagesPerRealPresent": 1.0,
+              "FGModeObservedOnlyAtCaptureBoundaries": true,
+              "continuousFGActivationMeasured": false,
+              "privateCaptureSHA256": "dab4b4dfb5339a4d987451036cf29c60d839f0f65e539ebe85a066cf4aaf9c47",
+              "gpuTelemetry": {
+                "utilizationPercent": {
+                  "median": 96.0,
+                  "min": 93.0,
+                  "max": 96.0
+                },
+                "graphicsClockMHz": {
+                  "median": 3000.0,
+                  "min": 3000.0,
+                  "max": 3000.0
+                },
+                "powerW": {
+                  "median": 289.595,
+                  "min": 283.87,
+                  "max": 291.55
+                },
+                "memoryMiB": {
+                  "median": 6602.0,
+                  "min": 6602.0,
+                  "max": 6602.0
+                },
+                "temperatureC": {
+                  "median": 46.0,
+                  "min": 45.0,
+                  "max": 46.0
+                }
+              }
+            }
+          ]
+        },
+        "retained-off-a": {
+          "medians": {
+            "applicationPresentRate": 134.74616390651494,
+            "p95Ms": 8.4283,
+            "p99Ms": 8.9067,
+            "SDKCountEquivalentTotal": null,
+            "gpuTelemetry": {
+              "memoryMiB": 6730.0,
+              "powerW": 291.59,
+              "temperatureC": 46.0,
+              "graphicsClockMHz": 2985.0,
+              "utilizationPercent": 95.0
+            }
+          },
+          "captures": [
+            {
+              "label": "pr54r-sdr-retained-off-a-0",
+              "intervals": 1199,
+              "seconds": 8.8982125,
+              "applicationPresentRate": 134.74616390651494,
+              "p95Ms": 8.4289,
+              "p99Ms": 8.9067,
+              "SDKRealPresentRate": 134.74616390651494,
+              "SDKGeneratedPresentRate": 0,
+              "SDKCountEquivalentTotal": null,
+              "SDKGeneratedPerRealPresent": null,
+              "SDKPreparedPerRealPresent": null,
+              "SDKImagesPerRealPresent": null,
+              "FGModeObservedOnlyAtCaptureBoundaries": true,
+              "continuousFGActivationMeasured": false,
+              "privateCaptureSHA256": "12b730356ed0eb9bca66f5a2bdab4a6fb2ac741ccdc3044ad383c66cdb4bb3eb",
+              "gpuTelemetry": {
+                "utilizationPercent": {
+                  "median": 95.0,
+                  "min": 94.0,
+                  "max": 95.0
+                },
+                "graphicsClockMHz": {
+                  "median": 2985.0,
+                  "min": 2985.0,
+                  "max": 2985.0
+                },
+                "powerW": {
+                  "median": 291.02,
+                  "min": 284.24,
+                  "max": 292.69
+                },
+                "memoryMiB": {
+                  "median": 6730.0,
+                  "min": 6730.0,
+                  "max": 6730.0
+                },
+                "temperatureC": {
+                  "median": 45.0,
+                  "min": 45.0,
+                  "max": 47.0
+                }
+              }
+            },
+            {
+              "label": "pr54r-sdr-retained-off-a-1",
+              "intervals": 1199,
+              "seconds": 8.8900856,
+              "applicationPresentRate": 134.86934254041378,
+              "p95Ms": 8.3653,
+              "p99Ms": 8.8999,
+              "SDKRealPresentRate": 134.86934254041378,
+              "SDKGeneratedPresentRate": 0,
+              "SDKCountEquivalentTotal": null,
+              "SDKGeneratedPerRealPresent": null,
+              "SDKPreparedPerRealPresent": null,
+              "SDKImagesPerRealPresent": null,
+              "FGModeObservedOnlyAtCaptureBoundaries": true,
+              "continuousFGActivationMeasured": false,
+              "privateCaptureSHA256": "17255acd2fa8f70ad83aff6ed4c053bd9f2ac0156e38b3e224d8fb2ed9826492",
+              "gpuTelemetry": {
+                "utilizationPercent": {
+                  "median": 95.0,
+                  "min": 94.0,
+                  "max": 95.0
+                },
+                "graphicsClockMHz": {
+                  "median": 2985.0,
+                  "min": 2985.0,
+                  "max": 2985.0
+                },
+                "powerW": {
+                  "median": 291.59,
+                  "min": 284.35,
+                  "max": 292.49
+                },
+                "memoryMiB": {
+                  "median": 6730.0,
+                  "min": 6730.0,
+                  "max": 6730.0
+                },
+                "temperatureC": {
+                  "median": 46.0,
+                  "min": 45.0,
+                  "max": 46.0
+                }
+              }
+            },
+            {
+              "label": "pr54r-sdr-retained-off-a-2",
+              "intervals": 1199,
+              "seconds": 8.9425191,
+              "applicationPresentRate": 134.07855064016582,
+              "p95Ms": 8.4283,
+              "p99Ms": 8.9329,
+              "SDKRealPresentRate": 134.07855064016582,
+              "SDKGeneratedPresentRate": 0,
+              "SDKCountEquivalentTotal": null,
+              "SDKGeneratedPerRealPresent": null,
+              "SDKPreparedPerRealPresent": null,
+              "SDKImagesPerRealPresent": null,
+              "FGModeObservedOnlyAtCaptureBoundaries": true,
+              "continuousFGActivationMeasured": false,
+              "privateCaptureSHA256": "01f302ba7744f91df6cb22f57c19bb449ba41724f9c4a11593341be8e7271b05",
+              "gpuTelemetry": {
+                "utilizationPercent": {
+                  "median": 95.0,
+                  "min": 94.0,
+                  "max": 95.0
+                },
+                "graphicsClockMHz": {
+                  "median": 2985.0,
+                  "min": 2985.0,
+                  "max": 2985.0
+                },
+                "powerW": {
+                  "median": 291.61,
+                  "min": 284.14,
+                  "max": 292.51
+                },
+                "memoryMiB": {
+                  "median": 6730.0,
+                  "min": 6730.0,
+                  "max": 6794.0
+                },
+                "temperatureC": {
+                  "median": 46.0,
+                  "min": 45.0,
+                  "max": 46.0
+                }
+              }
+            }
+          ]
+        },
+        "on-b": {
+          "medians": {
+            "applicationPresentRate": 94.2626047518746,
+            "p95Ms": 11.573,
+            "p99Ms": 12.072,
+            "SDKCountEquivalentTotal": 188.5252095037492,
+            "gpuTelemetry": {
+              "memoryMiB": 6699.0,
+              "powerW": 288.845,
+              "temperatureC": 45.0,
+              "graphicsClockMHz": 2985.0,
+              "utilizationPercent": 96.0
+            }
+          },
+          "captures": [
+            {
+              "label": "pr54r-sdr-on-b-0",
+              "intervals": 1199,
+              "seconds": 12.7269322,
+              "applicationPresentRate": 94.20966350398253,
+              "p95Ms": 11.6067,
+              "p99Ms": 12.3754,
+              "SDKRealPresentRate": 94.20966350398253,
+              "SDKGeneratedPresentRate": 94.20966350398253,
+              "SDKCountEquivalentTotal": 188.41932700796505,
+              "SDKGeneratedPerRealPresent": 1.0,
+              "SDKPreparedPerRealPresent": 1.0,
+              "SDKImagesPerRealPresent": 1.0,
+              "FGModeObservedOnlyAtCaptureBoundaries": true,
+              "continuousFGActivationMeasured": false,
+              "privateCaptureSHA256": "1b615f242c451afeecdaeacab95e3ea86c8f5ebc7283bca850a14c98ecf092e1",
+              "gpuTelemetry": {
+                "utilizationPercent": {
+                  "median": 96.0,
+                  "min": 93.0,
+                  "max": 96.0
+                },
+                "graphicsClockMHz": {
+                  "median": 2985.0,
+                  "min": 2985.0,
+                  "max": 2985.0
+                },
+                "powerW": {
+                  "median": 288.64,
+                  "min": 281.49,
+                  "max": 290.1
+                },
+                "memoryMiB": {
+                  "median": 6699.0,
+                  "min": 6699.0,
+                  "max": 6699.0
+                },
+                "temperatureC": {
+                  "median": 45.0,
+                  "min": 44.0,
+                  "max": 46.0
+                }
+              }
+            },
+            {
+              "label": "pr54r-sdr-on-b-1",
+              "intervals": 1199,
+              "seconds": 12.6993822,
+              "applicationPresentRate": 94.41404165314435,
+              "p95Ms": 11.573,
+              "p99Ms": 12.072,
+              "SDKRealPresentRate": 94.41404165314435,
+              "SDKGeneratedPresentRate": 94.41404165314435,
+              "SDKCountEquivalentTotal": 188.8280833062887,
+              "SDKGeneratedPerRealPresent": 1.0,
+              "SDKPreparedPerRealPresent": 1.0,
+              "SDKImagesPerRealPresent": 1.0,
+              "FGModeObservedOnlyAtCaptureBoundaries": true,
+              "continuousFGActivationMeasured": false,
+              "privateCaptureSHA256": "4915b017996911587a43a3da7a25d68d056723e89c6552b81a6de437328d38f3",
+              "gpuTelemetry": {
+                "utilizationPercent": {
+                  "median": 96.0,
+                  "min": 91.0,
+                  "max": 96.0
+                },
+                "graphicsClockMHz": {
+                  "median": 2985.0,
+                  "min": 2985.0,
+                  "max": 2985.0
+                },
+                "powerW": {
+                  "median": 289.02,
+                  "min": 282.63,
+                  "max": 290.84
+                },
+                "memoryMiB": {
+                  "median": 6699.0,
+                  "min": 6699.0,
+                  "max": 6700.0
+                },
+                "temperatureC": {
+                  "median": 46.0,
+                  "min": 44.0,
+                  "max": 46.0
+                }
+              }
+            },
+            {
+              "label": "pr54r-sdr-on-b-2",
+              "intervals": 1199,
+              "seconds": 12.7197843,
+              "applicationPresentRate": 94.2626047518746,
+              "p95Ms": 11.5485,
+              "p99Ms": 11.9557,
+              "SDKRealPresentRate": 94.2626047518746,
+              "SDKGeneratedPresentRate": 94.2626047518746,
+              "SDKCountEquivalentTotal": 188.5252095037492,
+              "SDKGeneratedPerRealPresent": 1.0,
+              "SDKPreparedPerRealPresent": 1.0,
+              "SDKImagesPerRealPresent": 1.0,
+              "FGModeObservedOnlyAtCaptureBoundaries": true,
+              "continuousFGActivationMeasured": false,
+              "privateCaptureSHA256": "cd2c33549f24ab3d6f9eaaaa01eedbf4bf0c8b36eba5ab5bd23b8ce7a15fcb42",
+              "gpuTelemetry": {
+                "utilizationPercent": {
+                  "median": 96.0,
+                  "min": 94.0,
+                  "max": 96.0
+                },
+                "graphicsClockMHz": {
+                  "median": 2985.0,
+                  "min": 2985.0,
+                  "max": 2985.0
+                },
+                "powerW": {
+                  "median": 288.845,
+                  "min": 281.19,
+                  "max": 290.46
+                },
+                "memoryMiB": {
+                  "median": 6699.0,
+                  "min": 6699.0,
+                  "max": 6699.0
+                },
+                "temperatureC": {
+                  "median": 45.0,
+                  "min": 44.0,
+                  "max": 46.0
+                }
+              }
+            }
+          ]
+        },
+        "retained-off-b": {
+          "medians": {
+            "applicationPresentRate": 135.21159187584252,
+            "p95Ms": 8.3825,
+            "p99Ms": 8.9058,
+            "SDKCountEquivalentTotal": null,
+            "gpuTelemetry": {
+              "memoryMiB": 6731.0,
+              "powerW": 291.42,
+              "temperatureC": 46.0,
+              "graphicsClockMHz": 2985.0,
+              "utilizationPercent": 95.0
+            }
+          },
+          "captures": [
+            {
+              "label": "pr54r-sdr-retained-off-b-0",
+              "intervals": 1199,
+              "seconds": 8.8675829,
+              "applicationPresentRate": 135.21159187584252,
+              "p95Ms": 8.3825,
+              "p99Ms": 8.7924,
+              "SDKRealPresentRate": 135.21159187584252,
+              "SDKGeneratedPresentRate": 0,
+              "SDKCountEquivalentTotal": null,
+              "SDKGeneratedPerRealPresent": null,
+              "SDKPreparedPerRealPresent": null,
+              "SDKImagesPerRealPresent": null,
+              "FGModeObservedOnlyAtCaptureBoundaries": true,
+              "continuousFGActivationMeasured": false,
+              "privateCaptureSHA256": "bd7f75c26b7c61e9668e82e2b37fec0fb7330655f4f82ce5f4b3bff399e07a93",
+              "gpuTelemetry": {
+                "utilizationPercent": {
+                  "median": 95.0,
+                  "min": 94.0,
+                  "max": 95.0
+                },
+                "graphicsClockMHz": {
+                  "median": 2985.0,
+                  "min": 2985.0,
+                  "max": 2985.0
+                },
+                "powerW": {
+                  "median": 290.83,
+                  "min": 286.41,
+                  "max": 293.25
+                },
+                "memoryMiB": {
+                  "median": 6731.0,
+                  "min": 6731.0,
+                  "max": 6731.0
+                },
+                "temperatureC": {
+                  "median": 46.0,
+                  "min": 45.0,
+                  "max": 47.0
+                }
+              }
+            },
+            {
+              "label": "pr54r-sdr-retained-off-b-1",
+              "intervals": 1199,
+              "seconds": 8.8663419,
+              "applicationPresentRate": 135.2305171087526,
+              "p95Ms": 8.3747,
+              "p99Ms": 8.9058,
+              "SDKRealPresentRate": 135.2305171087526,
+              "SDKGeneratedPresentRate": 0,
+              "SDKCountEquivalentTotal": null,
+              "SDKGeneratedPerRealPresent": null,
+              "SDKPreparedPerRealPresent": null,
+              "SDKImagesPerRealPresent": null,
+              "FGModeObservedOnlyAtCaptureBoundaries": true,
+              "continuousFGActivationMeasured": false,
+              "privateCaptureSHA256": "ae29c4f05026e06835919b692d1ad046073cc727de66217687b47317ee67623e",
+              "gpuTelemetry": {
+                "utilizationPercent": {
+                  "median": 94.0,
+                  "min": 94.0,
+                  "max": 95.0
+                },
+                "graphicsClockMHz": {
+                  "median": 2985.0,
+                  "min": 2985.0,
+                  "max": 2985.0
+                },
+                "powerW": {
+                  "median": 292.32,
+                  "min": 287.31,
+                  "max": 293.97
+                },
+                "memoryMiB": {
+                  "median": 6731.0,
+                  "min": 6731.0,
+                  "max": 6731.0
+                },
+                "temperatureC": {
+                  "median": 45.5,
+                  "min": 45.0,
+                  "max": 47.0
+                }
+              }
+            },
+            {
+              "label": "pr54r-sdr-retained-off-b-2",
+              "intervals": 1199,
+              "seconds": 8.9058086,
+              "applicationPresentRate": 134.63123382193504,
+              "p95Ms": 8.4317,
+              "p99Ms": 8.914,
+              "SDKRealPresentRate": 134.63123382193504,
+              "SDKGeneratedPresentRate": 0,
+              "SDKCountEquivalentTotal": null,
+              "SDKGeneratedPerRealPresent": null,
+              "SDKPreparedPerRealPresent": null,
+              "SDKImagesPerRealPresent": null,
+              "FGModeObservedOnlyAtCaptureBoundaries": true,
+              "continuousFGActivationMeasured": false,
+              "privateCaptureSHA256": "f405afa8d2de4d544d14c28fb054da90267178b4b4308909bb41f41068bf6a23",
+              "gpuTelemetry": {
+                "utilizationPercent": {
+                  "median": 95.0,
+                  "min": 94.0,
+                  "max": 95.0
+                },
+                "graphicsClockMHz": {
+                  "median": 2985.0,
+                  "min": 2985.0,
+                  "max": 2985.0
+                },
+                "powerW": {
+                  "median": 291.42,
+                  "min": 287.26,
+                  "max": 293.76
+                },
+                "memoryMiB": {
+                  "median": 6731.0,
+                  "min": 6731.0,
+                  "max": 6731.0
+                },
+                "temperatureC": {
+                  "median": 46.0,
+                  "min": 44.0,
+                  "max": 47.0
+                }
+              }
+            }
+          ]
+        }
+      },
+      "gates": [
+        {
+          "phase": "clean-off",
+          "rateRatio": 1.0,
+          "p99Ratio": 1.0,
+          "memoryIncreaseMiB": 0.0,
+          "powerIncreaseW": 0.0,
+          "temperatureIncreaseC": 0.0,
+          "throughputPassed": true,
+          "tailPassed": true,
+          "resourcePassed": true,
+          "passed": true
+        },
+        {
+          "phase": "on-a",
+          "rateRatio": 0.6683630334479423,
+          "p99Ratio": 1.424116975518629,
+          "memoryIncreaseMiB": 873.0,
+          "powerIncreaseW": -9.799999999999955,
+          "temperatureIncreaseC": -1.0,
+          "sdkTotalRatio": 1.3367260668958847,
+          "throughputPassed": true,
+          "tailPassed": true,
+          "resourcePassed": true,
+          "passed": true
+        },
+        {
+          "phase": "retained-off-a",
+          "rateRatio": 0.9538039353409462,
+          "p99Ratio": 1.0270759579792201,
+          "memoryIncreaseMiB": 1001.0,
+          "powerIncreaseW": -7.689999999999998,
+          "temperatureIncreaseC": 0.0,
+          "throughputPassed": true,
+          "tailPassed": true,
+          "resourcePassed": true,
+          "passed": true
+        },
+        {
+          "phase": "on-b",
+          "rateRatio": 0.6672400962019457,
+          "p99Ratio": 1.3920824732757524,
+          "memoryIncreaseMiB": 970.0,
+          "powerIncreaseW": -10.434999999999945,
+          "temperatureIncreaseC": -1.0,
+          "sdkTotalRatio": 1.3344801924038914,
+          "throughputPassed": true,
+          "tailPassed": true,
+          "resourcePassed": true,
+          "passed": true
+        },
+        {
+          "phase": "retained-off-b",
+          "rateRatio": 0.957098478323783,
+          "p99Ratio": 1.0269721744946319,
+          "memoryIncreaseMiB": 1002.0,
+          "powerIncreaseW": -7.859999999999957,
+          "temperatureIncreaseC": 0.0,
+          "throughputPassed": true,
+          "tailPassed": true,
+          "resourcePassed": true,
+          "passed": true
+        }
+      ],
+      "restoredByteForByte": true
+    }
+  },
+  "normalExits": {
+    "hdr-cleanoff": {
+      "heldProcessExitCode": 0,
+      "passed": true,
+      "confirmationToGoneSeconds": 4.075159116000577
+    },
+    "hdr-final": {
+      "heldProcessExitCode": 0,
+      "passed": true,
+      "confirmationToGoneSeconds": 4.684618790997774
+    },
+    "sdr-cleanoff": {
+      "heldProcessExitCode": 3221226505,
+      "passed": false,
+      "confirmationToGoneSeconds": 3.3008679220001795
+    },
+    "sdr-final": {
+      "heldProcessExitCode": 0,
+      "passed": true,
+      "confirmationToGoneSeconds": 3.6613538570018136
+    }
+  },
+  "rawDiagnosticsPublished": false,
+  "allNormalExitsPassed": false,
+  "shutdownFailure": {
+    "hexCode": "0xc0000409",
+    "phase": "fresh SDR FG Off",
+    "samplerInstalled": true,
+    "startupOwner": 0,
+    "causeEstablished": false,
+    "noSamplerIsolationPending": false,
+    "priorFailuresRetained": true,
+    "noSamplerIsolationReceipt": "amd-pr54-rebuilt-no-sampler-2026-10-13.json"
+  }
+}
