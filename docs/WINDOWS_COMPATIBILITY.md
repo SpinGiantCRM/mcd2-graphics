@@ -1257,3 +1257,19 @@ failure or prefix cancellation. Selecting a path never bypasses the edition's
 executable hash, dependencies or process guard. Preserve the real-filesystem
 selection tests on both CI platforms; native picker interaction still needs
 qualification. See [selection behavior](INSTALLER_GAME_SELECTION.md).
+
+### MFG prelaunch guards and qualification scope
+
+A rejected `Batch::begin` poisons an active result, including a previously
+completed result; the owner must invalidate explicitly before starting again.
+Do not publish the old images or continue a partial batch after failed reentry.
+The portable behavior fixture covers both cases on Linux and Windows. This
+transaction correction does not implement or qualify a game MFG presenter.
+
+The current qualification order is Linux/NVIDIA first, then a Windows/Radeon
+laptop launch check with MFG disabled. That hardware cannot perform MFG testing;
+Windows MFG remains untested. Preserve both CI platforms and the actual runtime
+capability gates. An optional external helper's synthetic Linux result is not
+Windows MFG qualification or permission to force higher production counts.
+See the [native helper trial](MFG_COMPUTE_TESTING.md#native-nvidia-mfg-helper-trial)
+for dependency identity, early loading, restoration and remaining game checks.

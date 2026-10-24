@@ -101,9 +101,9 @@ five process exits succeeded. The 6x phase strip was visually inspected against
 the two owned real inputs. The external module was the exact pinned 4.9.0 DLL;
 automatic Proton FSR4 replacement was disabled for these controls.
 
-The final hosted candidate from [run40079305728](https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/40079305728)
+The final hosted candidate from [run 40079305728](https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/40079305728)
 was replayed after the per-call flush-response guard. All five counts passed;
-all150 image measurements and saved raw images matched the reviewed controls.
+all 150 image measurements and saved raw images matched the reviewed controls.
 The [bounded qualification record](../qualification/providers/linux-mfg-compute-2026-10-24.json)
 pins the exact probe, artifact, external module and environment.
 
@@ -113,15 +113,58 @@ algorithm/provider from a DLL filename. Native NVIDIA caller-owned output and
 true mixed-provider generation remain separate gates. Preserve the failed
 missing-recording-flag controls alongside the corrected runs.
 
-## Admission after this gate
+## Qualification order
 
-Run 2x/3x/4x/5x/6x on native Windows/Radeon and Linux/NVIDIA separately. Preserve
-failed runs; record OS, Proton, driver, module and binary identities. One
-platform cannot qualify another. The exact external interface and provider
-attribution still need confirmation before production admission.
+Complete Linux/NVIDIA game qualification first. The available Windows/Radeon
+laptop is scheduled for an installer/startup check with MFG disabled afterward;
+it cannot run the MFG matrix. Keep Windows MFG explicitly untested. A future
+capable Radeon tester may run the isolated 2x–6x matrix independently, but the
+current laptop launch check is not evidence for that path.
 
-After compute proof, connect phase outputs to one presentation owner and one
-latency owner, with per-phase completion and current game identity. Then qualify
-pause/resume, Off recovery, travel, resizing, HDR/SDR and shutdown. Native NVIDIA
-output acquisition and mixed-provider 4x/6x have their own acceptance gate.
-Performance benchmarks remain a separate later activity.
+The exact external headless interface and provider attribution still need
+confirmation before production admission. After compute proof, connect phase
+outputs to one presentation owner and one latency owner, with per-phase
+completion and current game identity. Qualify pause/resume, Off recovery,
+travel, resizing, HDR/SDR and shutdown. Native NVIDIA output acquisition and
+mixed-provider 4x/6x have their own acceptance gate. Performance benchmarks
+remain a separate later activity.
+
+## Native NVIDIA MFG helper trial
+
+The integration branch's existing fixed NVIDIA MFG path uses Streamline's actual
+reported maximum. An optional external compatibility helper can be investigated
+on older RTX hardware; it must not become a GPU-name whitelist or permission to
+force a production count above the reported limit.
+
+The separately acquired [MFG Unlocker 1.6.1](https://github.com/dashdogy/MFG-Unlocker/releases/tag/v1.6.1)
+archive has SHA-256
+`abe4d6ae7eab1ea4cacc4775b05521c459516ed72f434784e4420080571e87c5`.
+Its unmodified `MFGUnlocker.dll` has SHA-256
+`24e3e6a8c07639fd9cbd79274e4eb21cc65a13f0453e1157720620c3d6286b33`.
+It remains an external dependency, outside the installer and own-payload archive.
+Follow the author's installation instructions and preserve unrelated loaders.
+
+For a controlled game trial, use one documented proxy filename that the actual
+shipping executable imports and whose adjacent slot is empty. The inspected
+Steam executable imports `WINMM.dll`; a separately staged `winmm.dll` is the
+planned route. Confirm those facts again before installation. Never replace the
+existing graphics proxy or load a second helper copy. Preserve the original
+launch options and remove only the still-owned helper file during restoration.
+Do not alter global NVIDIA profiles.
+
+The isolated Linux trial needed process-local `PROTON_NVIDIA_NVCUDA=1` for the
+helper to verify the actual Ada device, plus early Streamline device setup.
+Loading succeeded before higher native counts were usable: the helper's
+asynchronous activation had to finish before feature creation. A status file or
+successful DLL load alone is not readiness evidence. Confirm the selected
+helper, provider and runtime in the actual game, then require current Streamline
+capability/state and advancing generated presentations for the requested count.
+No private experimental capability override belongs in the game path.
+
+The isolated helper trials used synthetic owned images and do not qualify this
+proxy route, a newer runtime pair, game output quality or presentation pacing.
+Exercise the exact complete candidate and each offered count, return to Off,
+then check pause/resume, travel, output changes and normal shutdown. Unsupported
+counts must remain unavailable with an accurate status rather than silently
+claiming a smaller multiplier. Keep the native path separate from the required
+software/mixed presentation integration, which compute proof does not implement.

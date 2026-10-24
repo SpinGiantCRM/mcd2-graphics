@@ -50,6 +50,8 @@ int main() {
     assert(batch.record(pair,3,Provider::Software,103,true));
     assert(batch.complete());
     assert(!batch.begin(*four,pair)); // no batch replacement before invalidation
+    assert(!batch.complete()); // Rejected replacement poisons the prior completed result.
+    assert(!batch.record(pair,1,Provider::Software,104,true));
     batch.invalidate(); assert(!batch.complete());
     assert(batch.begin(*four,pair));
     assert(!batch.record(RealPair{8,10,11},1,Provider::Software,101,true));
@@ -67,5 +69,11 @@ int main() {
     assert(!batch.record(pair,1,Provider::Software,0,true));
     batch.invalidate(); auto corrupt=*four; corrupt.phases[0].numerator=2;
     assert(!batch.begin(corrupt,pair));
+    batch.invalidate(); assert(batch.begin(*four,pair));
+    assert(batch.record(pair,1,Provider::Software,101,true));
+    assert(!batch.begin(*four,RealPair{9,20,21}));
+    assert(!batch.record(pair,2,Provider::Software,102,true)); // Failed reentry also poisons a partial batch.
+    assert(!batch.complete());
+    batch.invalidate(); assert(batch.begin(*four,RealPair{9,20,21}));
     // The host supplies monotonic real IDs and the actual origin of its inputs.
 }

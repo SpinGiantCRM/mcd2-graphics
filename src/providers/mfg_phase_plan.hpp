@@ -47,7 +47,10 @@ class Batch {
 public:
     void invalidate() { active_=valid_=false; recorded_=0; outputs_={}; }
     bool begin(const Plan& plan,RealPair pair) {
-        if(active_ || !pair.epoch || !pair.previous || pair.current<=pair.previous ||
+        // A caller that ignores a rejected replacement must not publish or
+        // continue the old transaction. Keep it occupied until invalidate().
+        if(active_) { valid_=false; return false; }
+        if(!pair.epoch || !pair.previous || pair.current<=pair.previous ||
            pair.previousOrigin!=Origin::Real || pair.currentOrigin!=Origin::Real) return false;
         const auto expected=make_plan(plan.mode,plan.multiplier,{6,6,true});
         if(!expected || plan.count!=expected->count) return false;
