@@ -2,7 +2,7 @@
   "schema": "windows-amd-maintainer-acceptance-v1",
   "dateLocal": "2026-10-24",
   "candidate": "0.4.0-amd.dev.25",
-  "overall": "PENDING FSR in-game Save and quit observation",
+  "overall": "PASS WITH KNOWN ISSUES for the tested Windows/Radeon scope under the maintainer acceptance rule",
   "acceptanceRule": "Maintainer requested bounded checks without repeating clean tests; pass faults that cannot be reproduced and provide a reporting route for possible recurrence.",
   "focusTransition": {
     "result": "PASS bounded follow-up; historical incidents disclosed",
@@ -21,16 +21,16 @@
     "upstreamReports": "reporting-2026-10-23.json",
     "waitForUpstreamReply": false,
     "furtherUnchangedMatrixPlanned": false,
-    "fixClaim": false
+    "fixClaim": false,
+    "longSuccessfulExitSeconds": 88.774,
+    "latestFSRRouteExitCodeHex": "00000000"
   },
   "FSRSaveAndQuit": {
-    "result": "PENDING",
-    "gameSession": 82910487,
-    "revision": 393,
-    "FSRActive": true,
-    "FG": "Off",
-    "heldExitMonitor": true,
-    "inputLimitation": "Supported synthetic Escape, menu-wheel key and HUD click did not open menus; physical pause requested without changing input mappings."
+    "result": "PASS bounded save-to-main-menu then Quit",
+    "evidence": "fsr-save-quit-2026-10-24.json",
+    "exitCodeHex": "00000000",
+    "requestMarkerToExitObservationSeconds": 88.774,
+    "inputLimitationResolved": "Temporary menu-wheel mouse binding and supported held drag; original bindings restored before exit"
   },
   "reporting": {
     "issuesEnabledVerified": true,
@@ -50,5 +50,29 @@
     "No universal crash repair, failure-rate estimate, physical performance, latency, hardware-safety or save-integrity claim.",
     "The shutdown reproduction without own graphics payload establishes that payload is unnecessary; it does not identify the ultimate responsible component.",
     "A clean bounded sample supports the maintainer acceptance decision and does not erase observed failures."
-  ]
+  ],
+  "qualifiedScope": "Exact dev.25 candidate, Steam 25910487, Windows 11 build26200, Radeon860M driver32.0.32015.7029, 1920x1200 SDR; bounded functionality/install/recovery, with disclosed crash history and long exits",
+  "remainingRequiredWorkForThisAcceptance": [],
+  "releasePublishedOrMerged": false,
+  "unmeasuredOrUnavailableScope": [
+    "Independent five-minute physical active-play timing",
+    "Physical controller",
+    "Physical HDR",
+    "Windows NVIDIA activation",
+    "Physical FPS, frame-time tails and latency benefit",
+    "Direct Save and quit to desktop option",
+    "Source attribution or universal repair of historical intermittent faults"
+  ],
+  "finalRestoration": {
+    "controlsVisuallyMatchOriginal": true,
+    "wholeControlsReset": false,
+    "providerRecordUnchanged": true,
+    "providerRecordSHA256": "a20472d3f23e4ff47e274ea158bdfb14262d962b27cfefa290af632ad4b8a934",
+    "ownedFilesVerified": 18,
+    "dependenciesVerified": 15,
+    "allFileHoldsCleared": true,
+    "gameClosed": true,
+    "saveFilesInspectedOrEditedByTools": false
+  },
+  "finalRecord": "docs/WINDOWS_DEV25_ACCEPTANCE_2026-10-24.md"
 }

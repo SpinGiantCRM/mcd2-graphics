@@ -1,6 +1,6 @@
 # Windows AMD qualification: updated-game dev.25 progress
 
-**Final bounded record:** [23 October results and remaining gates](WINDOWS_DEV25_BOUNDED_RESULT_2026-10-23.md) supersede the in-progress statements below. Historical observations retain their own input scope. Windows remains UNQUALIFIED.
+**Final acceptance:** [24 October Windows/Radeon acceptance](WINDOWS_DEV25_ACCEPTANCE_2026-10-24.md) supersedes the in-progress decisions below: **PASS WITH KNOWN ISSUES** for the exact tested scope under the maintainer’s bounded acceptance rule. FSR Save and exit to main menu then Quit completed with exit 0; its approximately 89-second delay remains disclosed. Controls, preferences and 18/15 files are restored. The [23 October bounded record](WINDOWS_DEV25_BOUNDED_RESULT_2026-10-23.md) preserves historical failures and test limits without claiming a universal repair.
 
 **24 October morning GPU incident:** FSR Quality / FG Off crashed after the maintainer Alt-Tabbed during ordinary play outside a dungeon. The engine reports a GPU crash with focus lost; GPU breadcrumbs/page-fault data are absent. This adds a failed Alt-Tab gate independently of the unresolved shutdown AV. No responsible component or physical hardware failure is established. Exact candidate/dependency files still verify. [Incident receipt and next comparison](../qualification/providers/windows-dev25/alt-tab-gpu-crash-2026-10-24.json).
 
