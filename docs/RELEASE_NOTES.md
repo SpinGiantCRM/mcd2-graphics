@@ -1,6 +1,6 @@
-# 0.4.0-amd.dev.25 — FSR release candidate (not published)
+# 0.4.0-amd.dev.25 — FSR, Frame Generation and advanced settings
 
-Bounded [Windows/Radeon](WINDOWS_DEV25_ACCEPTANCE_2026-10-24.md) and [Linux/NVIDIA](LINUX_DEV25_ACCEPTANCE_2026-10-24.md) qualification is complete with known issues. Existing published releases remain unchanged. [Candidate installation and scope](DEV25_RELEASE_CANDIDATE.md).
+Bounded [Windows/Radeon](WINDOWS_DEV25_ACCEPTANCE_2026-10-24.md) and [Linux/NVIDIA](LINUX_DEV25_ACCEPTANCE_2026-10-24.md) qualification is complete with known issues. Earlier published releases remain unchanged. [Release installation and scope](DEV25_RELEASE_CANDIDATE.md).
 
 ## FSR and provider choices
 

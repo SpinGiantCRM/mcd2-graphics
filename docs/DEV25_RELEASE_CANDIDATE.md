@@ -1,6 +1,6 @@
-# FSR release candidate — 0.4.0-amd.dev.25
+# FSR prerelease — 0.4.0-amd.dev.25
 
-This candidate has bounded **PASS WITH KNOWN ISSUES** results on [Windows/Radeon](WINDOWS_DEV25_ACCEPTANCE_2026-10-24.md) and [Linux/NVIDIA](LINUX_DEV25_ACCEPTANCE_2026-10-24.md). It is prepared for release packaging; it has not been published. The published 0.3.0-preview.1 downloads remain unchanged.
+This candidate has bounded **PASS WITH KNOWN ISSUES** results on [Windows/Radeon](WINDOWS_DEV25_ACCEPTANCE_2026-10-24.md) and [Linux/NVIDIA](LINUX_DEV25_ACCEPTANCE_2026-10-24.md). The [release downloads](https://github.com/SpinGiantCRM/mcd2-graphics/releases/tag/v0.4.0-amd.dev.25) retain the accepted Windows installer and exact verified Linux folder. Earlier downloads remain unchanged.
 
 ## Features and controls
 
@@ -37,6 +37,6 @@ Extract the complete self-contained installer folder. No separate .NET or Python
 
 Full performance, image-quality and latency benchmarks follow release. The old preview.1 benchmark numbers apply only to that release. Report problems through the [graphics reporting guide](REPORTING_GRAPHICS_PROBLEMS.md); keep raw crash folders, dumps, account data and game files private.
 
-## Publication checks
+## Package provenance and scan status
 
-Runtime qualification is complete within the linked scope. Before publication, retain the exact tested payload and platform dependency locks, verify final archive contents/hashes and record available scan/signing results under the [package-review checks](NEXUS_RELEASE_GATE.md). Packages are unsigned; no new antivirus clean result is claimed by these runtime reports. Rebuilding or renaming a version inside the UI/native payload creates a different candidate and requires the affected checks again. Keep existing published tags/assets frozen.
+Runtime qualification is complete within the linked scope. Final archives passed content/hash checks; see [published artifact hashes and provenance](../qualification/providers/dev25-release-artifacts-2026-10-24.json). The accepted Windows installer and verified Linux folder were retained without production rebuilds. The [package-review checks](NEXUS_RELEASE_GATE.md) still apply to future replacements. Packages are unsigned; no new antivirus clean result is claimed by these runtime reports. Rebuilding or renaming a version inside the UI/native payload creates a different candidate and requires the affected checks again. Keep existing published tags/assets frozen.

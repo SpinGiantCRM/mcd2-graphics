@@ -1,0 +1,56 @@
+{
+  "schema": "mcd2-dev25-release-artifacts-v1",
+  "dateLocal": "2026-10-24",
+  "version": "0.4.0-amd.dev.25",
+  "releaseTag": "v0.4.0-amd.dev.25",
+  "releaseTarget": "ab99ffd041e1718fb0f89234e0bda611808268f4",
+  "nativeArtifactSource": "b5719f95820acb97dcd5fcdfa60bdde291b3379a",
+  "requestedNativeSource": "e704a17c59e69ad4ec04191f43b0928ee0ad1097",
+  "identicalNativeSourceTree": "775604d9599c7ae1862eaeeb878f31c611cdcc65",
+  "nativeArtifact": 12424387023,
+  "assets": [
+    {
+      "name": "MCD2-Graphics-0.4.0-amd.dev.25-Windows.zip",
+      "sha256": "a497d1ec222d73a0436b22b57150957719a5c0bfb38e067c50831b1f3c7fe2a8",
+      "bytes": 47614914
+    },
+    {
+      "name": "MCD2-Graphics-0.4.0-amd.dev.25-Linux.zip",
+      "sha256": "5d921590df7b72374597365baeb7f25ef52df2eef06750da40bb7dd74b06bd26",
+      "bytes": 47331518
+    },
+    {
+      "name": "MCD2-Graphics-dev25-ReShade-dependency.zip",
+      "sha256": "dcab60827f370ce35153fffee3376c498b0f0e339ed36e4e8d2306081be77810",
+      "bytes": 2438444
+    }
+  ],
+  "qualification": {
+    "Windows": "Bounded PASS WITH KNOWN ISSUES; original accepted installer retained",
+    "Linux": "Bounded PASS WITH KNOWN ISSUES; exact verified installer folder retained",
+    "WindowsInstallerSHA256": "4b441e9d819ccdd1b132cb3edc396e8c9c05ff239665ebacefb7d14e67d331c2",
+    "LinuxInstallerSHA256": "ab44970d6d8ab7a2e0fafbe26cb3cc0fc669d9c8dad68c8b9d57b61c6b8fdb22",
+    "WindowsDependencyLockSHA256": "0cebd7a90ef5338c1d0dcd32e71aece15456ee78199f08b20692d3601e202979",
+    "LinuxDependencyLockSHA256": "8cc2d271748a5c4534f62b362f63edfa2d5ecf12c4df2a236ce169803ace4bbd",
+    "WindowsLoader": "2.6",
+    "LinuxLoader": "2.7",
+    "noProductionRebuildForPublication": true
+  },
+  "signing": {
+    "status": "UNSIGNED",
+    "authenticodeReleaseSigningConfigured": false
+  },
+  "antivirus": {
+    "status": "NOT RUN",
+    "scanner": null,
+    "reason": "No local antivirus scanner configured; no clean-scan claim"
+  },
+  "archiveChecks": {
+    "crcAndRecordedHashes": "PASS",
+    "visibleInstallerFolder": true,
+    "nestedArchives": false,
+    "vendorRuntimesBundled": false,
+    "ReShadeSeparateWithSourcePatchesBuildReceiptAndLicense": true
+  },
+  "benchmarks": "Deferred until after publication; no new performance benefit claim"
+}

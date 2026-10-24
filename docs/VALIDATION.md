@@ -4,7 +4,7 @@ The FSR candidate has bounded **PASS WITH KNOWN ISSUES** acceptance on [Windows/
 
 Analytical FSR SR/FG, independent low latency and supported mixed SR/FG combinations passed the bounded checks. Intermittent shutdown crashes, diagnostic gaps and historical focus issues remain disclosed. Windows reproduced its shutdown fault without this mod's graphics payload; Linux has not proven identical ownership. No crash repair or general stability guarantee is claimed.
 
-Full FPS, image-quality and physical latency benchmarks are deferred until after release by the maintainer. Experimental FSR 4.1/ML paths, wider hardware, physical controllers, long sessions and Xbox PC remain outside this acceptance. See the [candidate guide](DEV25_RELEASE_CANDIDATE.md). These records prepare publication; they do not change existing release assets or qualify arbitrary rebuilt installers.
+Full FPS, image-quality and physical latency benchmarks are deferred until after release by the maintainer. Experimental FSR 4.1/ML paths, wider hardware, physical controllers, long sessions and Xbox PC remain outside this acceptance. See the [candidate guide](DEV25_RELEASE_CANDIDATE.md). [Published artifact hashes](../qualification/providers/dev25-release-artifacts-2026-10-24.json) identify the retained packages. These records do not qualify arbitrary rebuilt installers or change earlier release assets.
 
 # 0.3.0-preview.1 qualification — 7 October 2026
 
