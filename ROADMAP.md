@@ -14,7 +14,11 @@ Prepare shared provider interfaces and frame inputs while preserving existing DL
 
 ### 2. Multi Frame Generation
 
-Add supported native multipliers, then investigate hybrid MFG that can mix and match frame-generation providers. Keep one final presentation owner and a compatible latency solution.
+Deliver MFG paths for both Radeon and NVIDIA GPUs. Include single-provider software MFG on compatible older hardware and native-provider MFG where the actual device/runtime supports it. On newer hardware, retain a choice between supported native, software and mixed-provider modes; use the same admission and qualification standards for both vendors.
+
+Add DLSS Enabler-style hybrid MFG in which two FG providers contribute different intermediate frames to one output timeline. Independent upscaler and FG choices alone do not satisfy this goal. Keep one final presentation owner and a compatible latency solution.
+
+The fixed NVIDIA multiplier integration is one foundation for this work. It does not complete Radeon/software MFG or mixed-provider generation, which remain required milestones.
 
 Expose only combinations with verified frame inputs, output access and stable pacing. Reserve the same interfaces for later XeSS SR, FG/MFG and XeLL support.
 

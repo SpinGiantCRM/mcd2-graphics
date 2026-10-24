@@ -40,3 +40,22 @@ Functional qualification must cover Steam and Game Pass on native Windows,
 Steam on Linux, and Game Pass through Xodus independently. Dynamic adaptation,
 combined-provider generation and performance claims remain deferred. Benchmarks
 are on hold.
+
+## Required provider-neutral follow-on work
+
+The complete MFG goal includes both Radeon and NVIDIA, single-provider software
+generation on compatible older hardware, supported native-provider paths, and
+two providers contributing frames to the same timeline. Native support must
+not remove supported software or mixed-provider choices on newer hardware.
+
+[DLSS Enabler's author description](https://www.nexusmods.com/site/articles/237)
+is the mixed-provider behavior reference: it assigns suitable intermediate
+positions to separate generators and presents them on one timeline. This
+candidate has not implemented that backend or qualified those combinations.
+
+The next integration milestone must establish an arbitrary-phase software
+backend and its supported interface, qualify it on both hardware tracks, then
+coordinate compatible contributors through one presentation and latency owner.
+Current two-frame analytical FSR support is not proof of software MFG. Keep the
+existing refusal of unsupported combinations until their rendering backend is
+implemented. See the [roadmap](../ROADMAP.md).
