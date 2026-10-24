@@ -220,9 +220,10 @@ extern "C" __declspec(dllexport) int mcd2_gdk_prepare_v1(HMODULE module){
     try{return int(prepareBinding(module));}catch(...){return int(E_FAIL);}
 }
 extern "C" __declspec(dllexport) bool AddonInit(HMODULE module,HMODULE){
-    mcd2::process_exit::initialize();std::lock_guard lock(lifecycleMutex);if(worker)return true;
-    if(!addonRegistered){if(!reshade::register_addon(module))return false;addonRegistered=true;}
+    mcd2::process_exit::initialize();std::lock_guard lock(lifecycleMutex);
     if(closing)return false;
+    if(worker)return addonRegistered&&!worker->stop.load();
+    if(!addonRegistered){if(!reshade::register_addon(module))return false;addonRegistered=true;}
     std::array<wchar_t,256> family{};UINT32 length=static_cast<UINT32>(family.size());
     if(GetCurrentPackageFamilyName(&length,family.data())!=ERROR_SUCCESS || std::wstring_view(family.data()).find(L"Microsoft.MinecraftDungeons2_")!=0)return true;
     try {

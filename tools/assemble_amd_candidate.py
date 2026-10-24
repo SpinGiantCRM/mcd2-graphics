@@ -48,11 +48,21 @@ def safe_name(name):
     if not name or ':' in name or '\\' in name or p.is_absolute() or any(x in ('', '.', '..') for x in name.split('/')):
         raise ValueError('Unsafe artifact member')
 
+def integration_dependency_lock(assembled, released):
+    """Retain released platform pins while admitting the new own framework/GDK."""
+    result=copy.deepcopy(released)
+    result['game']=copy.deepcopy(assembled['game'])
+    result['dependencies']['ReShade']=copy.deepcopy(assembled['dependencies']['ReShade'])
+    for key in ('editionDependencies','buildDependencies'):
+        if key in assembled:result[key]=copy.deepcopy(assembled[key])
+    return result
+
 def assemble(archive, archive_sha, source_commit, output, version, artifact_url):
     if not re.fullmatch('[a-f0-9]{64}', archive_sha) or not re.fullmatch('[a-f0-9]{40}', source_commit):
         raise ValueError('Supply exact archive and source pins')
-    if not re.fullmatch(r'\d+\.\d+\.\d+-amd\.dev\.\d+', version):
-        raise ValueError('Use a distinct AMD development version')
+    if not re.fullmatch(r'\d+\.\d+\.\d+-(?:amd|integration)\.dev\.\d+', version):
+        raise ValueError('Use a distinct development version')
+    integration='-integration.dev.' in version
     if not re.fullmatch(r'https://github\.com/SpinGiantCRM/mcd2-graphics/actions/runs/\d+/artifacts/\d+', artifact_url):
         raise ValueError('Supply the CI artifact page, not a signed download URL')
     data = archive.read_bytes()
@@ -90,6 +100,17 @@ def assemble(archive, archive_sha, source_commit, output, version, artifact_url)
             if pins.get('ui/Pak/'+name) != pin:
                 raise ValueError('UI payload receipt mismatch')
         payload = {dest: content[src] for src, dest in OWN.items()}
+        if integration:
+            addon='gdk-save-bridge/mcd2-gdk-save-bridge.addon64'
+            gdk_receipt='gdk-save-bridge/build-result.json'
+            if addon not in content or gdk_receipt not in content:
+                raise ValueError('GDK transport and build receipt are required')
+            gdk=json.loads(content[gdk_receipt])
+            if gdk.get('files',{}).get(Path(addon).name)!=pins[addon]:
+                raise ValueError('GDK transport receipt hash mismatch')
+            if ui['version']!=version:
+                raise ValueError('Integration UI metadata version mismatch')
+            payload[BIN+Path(addon).name]=content[addon]
         payload.update(CONFIG)
         manifest = json.loads((ROOT/'manifest.json').read_bytes())
         prior = copy.deepcopy(manifest['upgradeFrom'])
@@ -99,6 +120,14 @@ def assemble(archive, archive_sha, source_commit, output, version, artifact_url)
         runtime = baseline_lock['dependencies']['DLSSRuntime']
         old_files[runtime['file']] = runtime['sha256']
         prior[manifest['version']] = old_files
+        if integration:
+            released=json.loads((ROOT/'qualification/providers/dev25-upgrade-files.json').read_text())
+            if released['version']!='0.4.0-amd.dev.25' or not released['files']:
+                raise ValueError('Expected the released dev.25 ownership map')
+            for name,pin in released['files'].items():
+                safe_name(name)
+                if not re.fullmatch('[a-f0-9]{64}',pin):raise ValueError('Invalid released ownership hash')
+            prior[released['version']]=released['files']
         manifest = {'version': version, 'candidateOnly': True,
                     'description': 'Development candidate: FSR upscaling and AMD Frame Generation; Anti-Lag 2 requires a supported Windows Radeon driver. Windows GPU qualification is pending.',
                     'uiMetadataVersion': ui['version'],
@@ -107,6 +136,8 @@ def assemble(archive, archive_sha, source_commit, output, version, artifact_url)
         # This candidate implements the explicitly signature-gated updated map.
         # The old released installer lock remains untouched.
         lock['game'] = dict(GAME)
+        if 'winGDK' in baseline_lock['game']:
+            lock['game']['winGDK']=copy.deepcopy(baseline_lock['game']['winGDK'])
         framework = lock['dependencies']['ReShade']
         previous_framework_pin = framework['sha256']
         # The framework remains a separately selected dependency, never payload.
@@ -127,7 +158,7 @@ def assemble(archive, archive_sha, source_commit, output, version, artifact_url)
             'uiMetadataVersion':ui['version'], 'vendorRuntimeBundled':False,
             'frameworkBundled':False, 'windowsRuntimeQualified':False,
             'excludedDiagnostics': ['probe/fg-chain-observer.addon64', 'isolated probe executables/addons'],
-            'sourceBuildReceipts': {n: pins[n] for n in pins if n.endswith('build-receipt.json')}}
+            'sourceBuildReceipts': {n: pins[n] for n in pins if n.endswith(('build-receipt.json','build-result.json'))}}
     notices = 'AMD candidate bridge notices\n\nVendor runtimes and ReShade are acquired separately; none is bundled in the own payload.\n\n'
     for name in ('third-party/FSR-SDK-HEADERS-LICENSE.txt','third-party/AntiLag2/LICENSE.txt'):
         notices += '\n--- '+name+' ---\n\n'+(ROOT/name).read_text(encoding='utf-8')
@@ -142,7 +173,7 @@ def assemble(archive, archive_sha, source_commit, output, version, artifact_url)
     (output/'AMD_BRIDGE_NOTICES.txt').write_text(notices,encoding='utf-8')
     receipts = output/'provenance'; receipts.mkdir()
     for name,b in content.items():
-        if name.endswith('build-receipt.json'):
+        if name.endswith(('build-receipt.json','build-result.json')):
             p=receipts/name;p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(b)
     (receipts/'windows-build-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
     (output/'assembly-receipt.json').write_text(json.dumps(metadata,indent=2)+'\n',encoding='utf-8')

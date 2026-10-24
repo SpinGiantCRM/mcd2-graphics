@@ -1,0 +1,17 @@
+{
+  "candidateVersion": "0.5.0-integration.dev.1",
+  "selectionNeedsRebuild": true,
+  "sourceChangedAfterSelection": true,
+  "runtimeQualified": false,
+  "reason": "Await a source-matched integration native artifact; historical dev.25 selection remains unchanged.",
+  "installerDependencyLocks": {
+    "linux-x64": {
+      "path": "qualification/providers/linux-dev25/dependencies-2026-10-24.lock.json",
+      "sha256": "8cc2d271748a5c4534f62b362f63edfa2d5ecf12c4df2a236ce169803ace4bbd"
+    },
+    "win-x64": {
+      "path": "qualification/providers/windows-dev25/dependencies-2026-10-23.lock.json",
+      "sha256": "0cebd7a90ef5338c1d0dcd32e71aece15456ee78199f08b20692d3601e202979"
+    }
+  }
+}

@@ -81,8 +81,10 @@ elif a.guide_recon:
     cmd=[str(src/'guide_recon.cpp') if x==str(src/'chain_observer.cpp') else '/Fo'+str(obj) if x.startswith('/Fo') else x for x in cmd]
     commands.append(cmd)
     commands.append(['lld-link','/dll','/out:'+str(out/'mcd2-fg-guide-recon.addon64'),str(obj),'kernel32.lib','user32.lib','dxguid.lib','d3d12.lib','d3dcompiler.lib',*[item for item in link if item.startswith('/libpath:')]])
+if a.guide_recon:
     scene_obj=out/'fg_scene_copy_probe.obj'
-    commands.append([str(src/'fg_scene_copy_probe.cpp') if x==str(src/'guide_recon.cpp') else '/Fo'+str(scene_obj) if x.startswith('/Fo') else x for x in cmd])
+    observer_command=next(c for c in commands if str(src/'chain_observer.cpp') in c)
+    commands.append([str(src/'fg_scene_copy_probe.cpp') if x==str(src/'chain_observer.cpp') else '/Fo'+str(scene_obj) if x.startswith('/Fo') else x for x in observer_command])
     commands.append(['lld-link','/out:'+str(out/'fg-scene-copy-probe.exe'),str(scene_obj),'kernel32.lib','user32.lib','dxguid.lib','d3d12.lib','d3dcompiler.lib',*[item for item in link if item.startswith('/libpath:')]])
 with (out/'build-private.log').open('w') as log:
     for cmd in commands:

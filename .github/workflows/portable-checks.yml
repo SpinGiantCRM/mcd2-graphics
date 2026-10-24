@@ -26,6 +26,7 @@ jobs:
         run: |
           python3 -m unittest discover -s tests -p "test_ci_contracts.py" -v
           python3 -m unittest discover -s tests -p "test_gdk_build.py" -v
+          python3 -m unittest discover -s tests -p "test_gdk_reinitialize.py" -v
           python3 -m unittest discover -s tests -p "test_build_toolchain.py" -v
           python3 -m unittest discover -s tests -p "test_amd_latency_build.py" -v
           python3 -m unittest discover -s tests -p "test_ui_build.py" -v
@@ -159,6 +160,7 @@ jobs:
         run: |
           python -m unittest discover -s tests -p "test_ci_contracts.py" -v
           python -m unittest discover -s tests -p "test_gdk_build.py" -v
+          python -m unittest discover -s tests -p "test_gdk_reinitialize.py" -v
           python -m unittest discover -s tests -p "test_build_toolchain.py" -v
           python -m unittest discover -s tests -p "test_amd_latency_build.py" -v
           python -m unittest discover -s tests -p "test_ui_build.py" -v
