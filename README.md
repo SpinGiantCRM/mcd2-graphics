@@ -1,64 +1,55 @@
-# MCD2 Graphics — DLSS, DLAA, Frame Generation, HDR and Reflex
+# MCD2 Graphics — DLSS, FSR, Frame Generation, HDR and low latency
 
-[Download](https://github.com/SpinGiantCRM/mcd2-graphics/releases) · [Nexus page](https://www.nexusmods.com/minecraftdungeons2/mods/87) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md) · [Validation](docs/VALIDATION.md)
+[Download 0.4.0-amd.dev.25](https://github.com/SpinGiantCRM/mcd2-graphics/releases/tag/v0.4.0-amd.dev.25) · [Nexus page](https://www.nexusmods.com/minecraftdungeons2/mods/87) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md) · [Validation](docs/VALIDATION.md)
 
-DLAA, DLSS Super Resolution, Frame Generation, native HDR controls and supported NVIDIA Reflex in Minecraft Dungeons II's Video menu, with a guided installer.
+DLSS/DLAA, FSR upscaling, independent Frame Generation, HDR and supported low-latency controls in Minecraft Dungeons II's menus, with a guided Windows/Linux installer.
 
-**Experimental prerelease: [`0.3.0-preview.1`](https://github.com/SpinGiantCRM/mcd2-graphics/releases/tag/v0.3.0-preview.1). Adds Frame Generation, DLSS foliage improvements, Linux Reflex pacing fixes and dependency overrides. [Release notes](docs/RELEASE_NOTES.md). Earlier preview tags and assets remain frozen.**
-
-The mod does not force offline mode. Online/co-op compatibility is unverified; offline play is safer. Follow the publisher's terms. See [online use](docs/ONLINE_USE.md).
-
-**Next release candidate: 0.4.0-amd.dev.25.** FSR SR/FG, independent latency, mixed SR/FG choices, sharpness and the advanced Mods pages have bounded [Windows/Radeon](docs/WINDOWS_DEV25_ACCEPTANCE_2026-10-24.md) and [Linux/NVIDIA](docs/LINUX_DEV25_ACCEPTANCE_2026-10-24.md) acceptance with known issues. [Candidate controls, installation and limits](docs/DEV25_RELEASE_CANDIDATE.md). It is not published yet; the controls and benchmarks below describe the released 0.3.0-preview.1.
+**Experimental prerelease: 0.4.0-amd.dev.25.** Adds analytical FSR SR/FG, independent provider choices, sharpness, advanced model settings and top-left gameplay diagnostics. The exact tested payload is retained. [Changelog](docs/RELEASE_NOTES.md) · [Installation](INSTALL.md) · [Hashes and scan/signing status](qualification/providers/dev25-release-artifacts-2026-10-24.json). Earlier tags/assets remain frozen.
 
 **NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.**
 
-## Released 0.3.0-preview.1 controls
+## Controls
 
-**Settings → Video → Reconstruction** is available from the main menu and pause menu.
+Use **Settings → Video** for:
 
-- **Upscaler:** Native or NVIDIA DLSS.
-- **DLSS Preset:** DLAA, Quality, Balanced, Performance, Ultra Performance, Custom.
-- **Render Scale:** 1% steps up to 100%; the minimum follows output resolution. At 4K it is 17%. 100% selects DLAA.
+- **Upscaling:** Native, NVIDIA DLSS/DLAA or AMD FSR, with quality presets and custom render scale. Availability and the minimum scale follow the provider, output size and supported hardware.
+- **Upscaling Sharpness:** one post-upscale game filter for either provider. Native fallback restores the prior value while still owned; external changes take precedence.
+- **Frame Generation:** select the supported FG provider independently of the upscaler. Tested combinations include FSR SR + NVIDIA FG, DLSS SR + AMD FG and Native + AMD FG. This release uses one FG provider at a time.
+- **Low latency:** NVIDIA Reflex Off / On / On + Boost, or Anti-Lag 2 on compatible Windows/Radeon systems. It remains independently selectable with FG Off. Anti-Lag 2 is not supported on NVIDIA.
+- **HDR:** HDR Output, Peak Brightness, Paper White and UI Brightness through the separate RenoDX dependency.
 
-Presets and scale stay synchronized. Quality displays 67% and uses exactly two-thirds internally; Ultra Performance displays 33% and uses one-third. Other scales select Custom. Changes are saved immediately and applied after a safe rendering-history reset. The main menu remains Native; saved DLSS selections activate in gameplay. Resume gameplay if a change is pending. Unsupported presets are skipped. Native retains your selected DLSS preset for later.
+The main menu remains Native; saved reconstruction choices activate in gameplay. Follow Applying and restart notices. AMD FG can return to native presentation on Off and generate again in a session started with AMD FG; enabling FG from a completely native startup requires a restart.
 
-HDR Output and its three calibration controls appear directly after Brightness. Calibration stays visible but disabled while Off. Native HDR settings and RenoDX processing apply together after the restart requested by the help panel.
+Use **Mods → MCD2 Graphics** for **Upscaling**, **Frame Generation** and **Diagnostics** tabs with persistent framed side help. DLSS SR lists Auto, E, F, J, K, L and M; DLSS FG lists Auto, A, B and C. Auto preserves quality-dependent SR selection. Explicit presets are requests, not final model readbacks. FSR SR/FG implementation choices are independent. See [Advanced settings](docs/ADVANCED_SETTINGS.md).
 
-NVIDIA Reflex appears beside FPS Limit only when the integration reports low-latency support. It offers Off, On and On + Boost; measurement markers and pre-input pacing continue in Off. Frame Generation offers Off / On and inserts one generated frame per rendered frame. It currently requires active NVIDIA DLSS/DLAA, native HDR and the separate patched ReShade framework; restart when requested. Ray Reconstruction and alternative upscalers are not included.
+The optional top-left gameplay overlay reports fresh, matching provider activity. Menu details, loaded DLL versions, requested overrides and actual execution remain distinct; a temporarily unavailable sample is not proof that rendering stopped.
 
 ## Requirements and installation
 
-The supported Steam build, the separate patched ReShade framework, Blueprint Loader **2.0+**, RenoDX UE Extended and official NVIDIA runtimes. Complete Loader 2.0, 2.2 and 2.3 sets are recognized. Each dependency has an explicit, default-Off untested-version override; it cannot supply missing APIs or unsupported hardware. See [installation](INSTALL.md), [the ReShade download and explanation](docs/FG_CANDIDATE.md#why-this-reshade-build-is-required) and [dependency overrides](docs/DEPENDENCY_OVERRIDES.md).
+Use supported **Steam build 25910487**, the separate pinned candidate ReShade framework, Blueprint Loader, RenoDX and the required official graphics runtimes. Windows/Radeon used **Loader 2.6**; Linux/NVIDIA used **2.7**. The installer verifies the complete platform-specific dependency set. Overrides do not provide missing APIs or unsupported hardware.
 
-Extract the entire Windows/Linux installer ZIP and run the included application; no separate Python or .NET installation is needed. The twelve owned files are visible under `payload/`. There is no nested payload archive, self-extraction or background downloader. The credited ReShade dependency is a separate download; NVIDIA runtimes remain external. Game assets, authentication replacements and player data are excluded.
+Extract the entire Windows/Linux installer ZIP. No separate .NET or Python installation is needed. Its 17 owned payload files are visible under `payload/`; installation additionally owns its verified private DLSS copy. Framework/vendor runtimes remain external, and no player/account data or game assets are included. [Install, update, repair and uninstall](INSTALL.md).
 
-## Scope and limitations
+The separately downloaded ReShade build supplies required device/queue and reset interfaces. A stock DLL is not interchangeable with the pinned framework. Its archive includes source references, exact patches, build receipt and license.
 
-Bounded [Linux/NVIDIA qualification](docs/LINUX_FINAL_QUALIFICATION_2026-10-07.md) and [Windows/AMD installer and fallback qualification](docs/WINDOWS_FULL_QUALIFICATION_2026-10-07.md) use the exact released files. Native Windows NVIDIA active DLSS/FG/Reflex, Windows HDR output, physical controllers, long sessions and device loss remain unqualified. Windows clean exits sometimes took about 85–86 seconds; historical shutdown failures remain documented. This release does not claim a universal crash repair or measured Reflex latency benefit.
+## Tested scope and known issues
 
-Steam is the verified edition. Xbox app / Microsoft Store PC compatibility remains unverified. Output is limited to 640×360–3840×2160. Main-menu rendering stays Native; saved DLSS activates in gameplay. Resolution changes may fall back to Native; reselect DLSS after the new size settles. Split-screen and unusual aspect ratios remain unqualified.
+Bounded [Windows/Radeon](docs/WINDOWS_DEV25_ACCEPTANCE_2026-10-24.md) and [Linux/NVIDIA](docs/LINUX_DEV25_ACCEPTANCE_2026-10-24.md) qualification is **PASS WITH KNOWN ISSUES** for the exact inputs recorded there. Analytical FSR SR **3.1.5** and FG **3.1.6** have runtime coverage. Official FSR 4.1, optional community INT8 and ML FG activation remain outside these completed checks and require their own hardware/runtime approval. Portable upscaling does not unlock ML FG.
 
-Some foliage/interpolation artifacts remain possible. HDR uses the separately maintained UE Extended addon; calibrate peak brightness to your display. No official HDR master or physical panel-luminance measurement is claimed. Native graphics reset currently recognizes the English confirmation text.
+Intermittent shutdown failures remain disclosed. Windows reproduced its worker fault with official ReShade + Loader and no graphics payload from this mod; the Linux fault is not proven identical. Successful Windows exits can take about **89 seconds**. Historical focus-related GPU crashes/black lines, a Linux click-capture recovery and intermittent unavailable diagnostic samples remain visible. No universal crash repair is claimed.
 
-Report your store, game/mod version, GPU/driver, preset and reproduction steps through the [bug report form](https://github.com/SpinGiantCRM/mcd2-graphics/issues/new?template=bug.yml). See [reporting graphics problems](docs/REPORTING_GRAPHICS_PROBLEMS.md) for intermittent crashes, Alt-Tab corruption and shutdown faults. Remove personal details, party codes, private paths and authentication data; keep raw dumps/log folders private and do not upload game executables or saves.
+Native Windows NVIDIA activation/profile overrides, Windows HDR, physical controllers, Linux Radeon, long sessions, device loss and wider lifecycle/hardware coverage remain unqualified. Xbox app / Microsoft Store PC, native MFG, combined FG providers, XeSS and ray reconstruction are not supported by this release.
 
-## Cross-platform maintenance
+Online/co-op compatibility and permission remain unverified; offline play is safer. The mod does not force offline mode. Follow the publisher's terms. [Online use](docs/ONLINE_USE.md).
 
-Before changing the installer, native addon or build recipe, read the
-[Windows fix rationale and preservation requirements](docs/WINDOWS_COMPATIBILITY.md).
-It maps every change to its cause, relevant Windows behavior and protecting checks.
+## Benchmarks and support
 
-## Released 0.3.0-preview.1 benchmark
+Full FPS, frame-time, image-quality and physical latency benchmarks follow release. The [0.3.0-preview.1 benchmark](docs/BENCHMARK_2026-10-07.md) is historical and does not measure this release. Activity counters and generated frames are not physical display FPS or measured input-latency improvement.
 
-At 4K on an RTX 4080 SUPER, three 30-second stationary hub samples per mode gave:
+Use the [bug form](https://github.com/SpinGiantCRM/mcd2-graphics/issues/new?template=bug.yml) and [reporting guide](docs/REPORTING_GRAPHICS_PROBLEMS.md). Include store, game/mod version, platform, GPU/driver, settings and reproduction steps. Keep raw logs/dumps, accounts, private paths, game executables and saves out of public reports.
 
-| Mode | FG Off: rendered FPS | FG On: rendered FPS | FG On: SDK presentation FPS |
-| --- | ---: | ---: | ---: |
-| DLAA | 81.80 | 61.06 | 122.11 |
-| Quality | 122.74 | 83.76 | 167.52 |
+## Cross-platform maintenance and credits
 
-FG Off was about 2% below a fresh previous-release control in this bounded scene. Generated frames add presentation rate while reducing base FPS; they do not increase simulation rate. SDK counts are not physical display-pacing or latency measurements. [Method and all runs](docs/BENCHMARK_2026-10-07.md). Earlier benchmark tables remain historical.
+Read [Windows compatibility requirements](docs/WINDOWS_COMPATIBILITY.md) before changing the native addon, installer or build recipe. Source builders should use the explicit dev.25 selection and platform locks; the root preview.1 manifests remain historical baseline inputs.
 
-## Credits
-
-ReShade, RenoDX/UE Extended, NeoRune and Blueprint Loader contributors, NVIDIA and AMD/GPUOpen. See [third-party notices](THIRD_PARTY_NOTICES.md). Development used AI assistance with local build and runtime checks.
+Thanks to ReShade, RenoDX/UE Extended, NeoRune, Blueprint Loader, NVIDIA and AMD/GPUOpen contributors. [Third-party notices](THIRD_PARTY_NOTICES.md). Development used AI assistance with local build and runtime checks. Packages are unsigned; no current local antivirus clean-scan result is claimed.
