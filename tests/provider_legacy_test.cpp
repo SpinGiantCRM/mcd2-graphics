@@ -57,6 +57,18 @@ int main() {
     assert(migrated.srPreferences[0].lastCustomScaleBasisPoints == 7300);
     assert(migrated.nativeFallbackPreference && migrated.fgEnabled);
     assert(migrated.latencyMode == LatencyMode::OnBoost && migrated.hdr == (HdrPreference{true,410,167,203}));
+    for(unsigned mode=0;mode<=4;++mode){
+        auto mfg=f;mfg["FrameMode"]=mode;mfg["FGProvider"]=0;mfg["SettingsRevision"]=22;
+        GraphicsIntent converted;assert(decodeLegacyGraphics(sr,display,save("FGSettingsSave",mfg),converted));
+        assert(converted.fgStrategy==(mode?FgStrategy::NativeMfg:FgStrategy::Single));
+        assert(converted.requestedMultiplier==(mode+2));
+        mfg.erase("FrameMode");mfg["frameMode"]=mode;
+        assert(decodeLegacyGraphics(sr,display,save("FGSettingsSave",mfg),converted));
+        assert(converted.fgStrategy==(mode?FgStrategy::NativeMfg:FgStrategy::Single));
+        mfg["FrameMode"]=mode;assert(!decodeLegacyGraphics(sr,display,save("FGSettingsSave",mfg),converted));
+    }
+    auto invalidMfg=f;invalidMfg["FrameMode"]=6;
+    assert(!decodeLegacyGraphics(sr,display,save("FGSettingsSave",invalidMfg),migrated));
     GraphicsRecord record;
     assert(encodeGraphicsRecord(migrated, record));
     DecodedGraphicsRecord loaded;
@@ -84,7 +96,7 @@ int main() {
     const auto committed = store.publish(migrated, {});
     assert(committed.status == StoreStatus::Ok);
     assert(store.load(loaded).status == StoreStatus::Ok && loaded.intent == migrated);
-    auto badUpgrade = migrated; badUpgrade.schema = 6;
+    auto badUpgrade = migrated; badUpgrade.schema = 8;
     assert(store.publish(badUpgrade, committed.stamp).status == StoreStatus::Invalid);
     assert(store.load(loaded).status == StoreStatus::Ok && loaded.intent == migrated);
     for (const auto& [name, bytes] : std::array<std::pair<const char*,Bytes>,3>{{

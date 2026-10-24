@@ -23,7 +23,7 @@ for relative,expected in manifest['files'].items():
  paths.append((relative,path))
 def external_runtime(relative):
  name=Path(relative).name.lower()
- return name.startswith(('sl.','nvngx_','amd_fidelityfx_')) or name in ('nvlowlatencyvk.dll','reshade64.dll','d3d12.asi')
+ return name.startswith(('sl.','nvngx_','amd_fidelityfx_')) or name in ('nvlowlatencyvk.dll','reshade64.dll','d3d12.asi','dlss-enabler-headless.dll')
 assert all(not external_runtime(x) for x,_ in paths),'External framework/vendor runtime is not owned payload'
 output=a.output.resolve()
 if any(c in str(output) for c in (';',',')):raise ValueError('MSBuild resource paths cannot contain property separators')
@@ -39,7 +39,7 @@ for relative,path in paths:
  target=output/'payload'/relative;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(path,target)
  assert hashlib.sha256(target.read_bytes()).hexdigest()==manifest['files'][relative]
 shutil.copyfile(root/'third-party/INSTALLER_NOTICES.txt',output/'INSTALLER_NOTICES.txt')
-for name in ('FSR-SDK-HEADERS-LICENSE.txt','AntiLag2/LICENSE.txt'):
+for name in ('FSR-SDK-HEADERS-LICENSE.txt','AntiLag2/LICENSE.txt','NVIDIA-SDK-LICENSE.txt'):
  target=output/'licenses'/name;target.parent.mkdir(parents=True,exist_ok=True)
  shutil.copyfile(root/'third-party'/name,target)
 assert not any(p.suffix.lower() in ('.zip','.7z','.rar') for p in output.rglob('*') if p.is_file()),'Nested archive refused'

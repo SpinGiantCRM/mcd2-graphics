@@ -54,9 +54,9 @@ class StoreProcessTests(unittest.TestCase):
 
     def test_wire_matches_independent_implementation(self):
         self.assertEqual(self.call("publish", 7, 0, 0)[0], OK)
-        fields = [5, 7, 0] + [1, 6700, 7700] * 3
+        fields = [7, 7, 0] + [1, 6700, 7700] * 3
         fields += [1, 0, 0, 0, 2, 0, 1, 0, 1000, 203, 203, 0, 0, 0]
-        expected = bytearray(struct.pack("<8s30I", b"MCD2GI5\0", 1, 128, 0, 0, *fields))
+        expected = bytearray(struct.pack("<8s30I", b"MCD2GI7\0", 1, 128, 0, 0, *fields))
         struct.pack_into("<I", expected, 16, zlib.crc32(expected))
         self.assertEqual((self.root / "intent-v5.bin").read_bytes(), expected)
 

@@ -15,7 +15,7 @@ on:
     inputs:
       qualification_receipt:
         description: Repository receipt containing exact native archive and source pins
-        default: qualification/providers/windows-candidate-current.json
+        default: qualification/providers/windows-candidate-integration.json
         required: true
         type: string
 permissions:
@@ -38,7 +38,7 @@ jobs:
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
-          CANDIDATE_RECEIPT: ${{ inputs.qualification_receipt || 'qualification/providers/windows-candidate-current.json' }}
+          CANDIDATE_RECEIPT: ${{ inputs.qualification_receipt || 'qualification/providers/windows-candidate-integration.json' }}
         run: |
           @'
           import hashlib,json,os,pathlib,re,subprocess,sys
@@ -69,6 +69,11 @@ jobs:
                   if hashlib.sha256(data).hexdigest()!=lock['sha256']:
                       raise ValueError('Selected dependency lock hash mismatch')
                   json.loads(data)
+              if '-integration.dev.' in p['candidateVersion']:
+                  sys.path.insert(0,str(pathlib.Path.cwd()/'tools'))
+                  from assemble_amd_candidate import integration_dependency_lock
+                  assembled=json.loads((stage/'inputs/dependencies.lock.json').read_bytes())
+                  data=(json.dumps(integration_dependency_lock(assembled,json.loads(data)),indent=2)+'\n').encode()
               (stage/f'{rid}-dependencies.lock.json').write_bytes(data)
           with open(os.environ['GITHUB_OUTPUT'],'a') as out: out.write('ready=true\n')
           '@ | python

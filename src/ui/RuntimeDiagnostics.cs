@@ -5,29 +5,31 @@ using UE.Engine;
 
 public class DiagnosticsRequestSave : USaveGame {public int SchemaVersion,SessionId,Enabled;}
 public class DiagnosticsStateSave : USaveGame {
- public int SchemaVersion,SessionId,Revision,Sample,WorldGeneration,SrProvider,SrFrames,FsrSrVersion;
+ public int SchemaVersion,SessionId,Revision,Sample,WorldGeneration,SrProvider,SrFrames,SrRetained,FsrSrVersion;
+ public int FgStrategy,FgSoftwareGenerated,FgNativeGenerated;
  public int FgProvider,FgActive,FgFault,FgRendered,FgGenerated,FsrFgVersion,ReflexMode,ReflexFrames,AmdMode,AmdFrames,FgPresetStatus,FsrHardware;
 }
 public class RuntimeDiagnosticsClient : USaveGame {
  public DiagnosticsStateSave? State;
- public bool Fresh,SrAdvancing,FgAdvancing,ReflexAdvancing,AmdAdvancing;
+ public bool Fresh,SrAdvancing,FgAdvancing,ReflexAdvancing,AmdAdvancing,SoftwareFgAdvancing,NativeFgAdvancing;
+ int lastFgStrategy,lastSoftwareFg,lastNativeFg;bool componentBaseline,lastSoftwareFgActive,lastNativeFgActive;
  int sample,age,lastSr,lastSrProvider,lastFg,lastFgProvider,lastReflex,lastReflexMode,lastAmd,lastAmdMode,lastSession,lastRevision,lastWorld;
  int producerSession,producerRevision,producerWorld,producerSample;bool requireNewSample;
- void Invalidate(){State=null;sample=0;age=0;lastSr=lastSrProvider=lastFg=lastFgProvider=lastReflex=lastReflexMode=lastAmd=lastAmdMode=0;lastSession=lastRevision=lastWorld=0;requireNewSample=true;}
+ void Invalidate(){componentBaseline=false;SoftwareFgAdvancing=NativeFgAdvancing=false;State=null;sample=0;age=0;lastSr=lastSrProvider=lastFg=lastFgProvider=lastReflex=lastReflexMode=lastAmd=lastAmdMode=0;lastSession=lastRevision=lastWorld=0;requireNewSample=true;}
  public void Start(){
   var state=UGameplayStatics.CreateSaveGameObject(Unreal.ClassOf<DiagnosticsStateSave>()) as DiagnosticsStateSave;
   if(state!=null){state.SchemaVersion=1;UGameplayStatics.SaveGameToSlot(state,"MCD2GraphicsDiagnosticsState",0);}
  }
  public void Poll(ModActor manager,bool enabled){
-  Fresh=false;SrAdvancing=false;FgAdvancing=false;ReflexAdvancing=false;AmdAdvancing=false;
+  Fresh=false;SrAdvancing=false;FgAdvancing=false;ReflexAdvancing=false;AmdAdvancing=false;SoftwareFgAdvancing=NativeFgAdvancing=false;
   var menu=manager.ProviderMenu;int session=menu!=null&&menu.Ready&&menu.Authority!=null?menu.Authority.W5:0;
   var request=UGameplayStatics.LoadGameFromSlot("MCD2GraphicsDiagnosticsRequest",0) as DiagnosticsRequestSave;
   if(request==null)request=UGameplayStatics.CreateSaveGameObject(Unreal.ClassOf<DiagnosticsRequestSave>()) as DiagnosticsRequestSave;
   if(request!=null && (request.SchemaVersion!=1||request.SessionId!=session||request.Enabled!=(enabled?1:0))){request.SchemaVersion=1;request.SessionId=session;request.Enabled=enabled?1:0;UGameplayStatics.SaveGameToSlot(request,"MCD2GraphicsDiagnosticsRequest",0);}
   if(!enabled||session==0||menu==null||menu.Authority==null){Invalidate();return;}
   var next=UGameplayStatics.LoadGameFromSlot("MCD2GraphicsDiagnosticsState",0) as DiagnosticsStateSave;
-  if(next==null||next.SchemaVersion!=1||next.SessionId!=session||next.Revision!=menu.Authority.W19||next.Sample<1||next.WorldGeneration<0||next.SrFrames<0||next.FgRendered<0||next.FgGenerated<0||next.ReflexFrames<0||next.AmdFrames<0||next.FgActive<0||next.FgActive>1||
-     next.FsrHardware<0||next.FsrHardware>3||next.FsrHardware==2||next.SrProvider<0||next.SrProvider>2||next.FgProvider<0||next.FgProvider>2||next.FgFault<0||next.ReflexMode<0||next.ReflexMode>2||next.AmdMode<0||next.AmdMode>1){Invalidate();return;}
+  if(next==null||next.SchemaVersion!=1||next.SessionId!=session||next.Revision!=menu.Authority.W19||next.Sample<1||next.WorldGeneration<0||next.SrFrames<0||next.SrRetained<0||next.SrRetained>1||(next.SrRetained==1&&next.SrProvider!=1)||next.FgRendered<0||next.FgGenerated<0||next.ReflexFrames<0||next.AmdFrames<0||next.FgActive<0||next.FgActive>1||
+     next.FgStrategy<0||next.FgStrategy>3||next.FgSoftwareGenerated<0||next.FgNativeGenerated<0||next.FsrHardware<0||next.FsrHardware>3||next.FsrHardware==2||next.SrProvider<0||next.SrProvider>2||next.FgProvider<0||next.FgProvider>2||next.FgFault<0||next.ReflexMode<0||next.ReflexMode>2||next.AmdMode<0||next.AmdMode>1){Invalidate();return;}
   int world=manager.ProviderRuntime==null?0:manager.ProviderRuntime.WorldGeneration;
   if(world<1||next.WorldGeneration!=world){Invalidate();return;}
   bool sameProducer=producerSession==session&&producerRevision==next.Revision&&producerWorld==world;
@@ -35,6 +37,12 @@ public class RuntimeDiagnosticsClient : USaveGame {
   producerSession=session;producerRevision=next.Revision;producerWorld=world;producerSample=next.Sample;requireNewSample=false;
   bool srEligible=next.SrProvider>0&&next.SrProvider==manager.SelectedProvider();
   bool fgEligible=next.FgActive==1&&next.FgFault==0&&next.FgProvider==(manager.SelectedFgProvider()==1?2:1)&&manager.DisplayValue(5)==1;
+  bool components=fgEligible&&(next.FgStrategy==2||next.FgStrategy==3)&&next.FgStrategy==(menu.Authority.W33&255);
+  bool oldComponents=componentBaseline&&lastSession==session&&lastRevision==next.Revision&&lastWorld==world&&lastFgStrategy==next.FgStrategy;
+  if(components&&oldComponents&&next.Sample>sample){SoftwareFgAdvancing=next.FgSoftwareGenerated>lastSoftwareFg;NativeFgAdvancing=next.FgStrategy==2&&next.FgNativeGenerated>lastNativeFg;}
+  if(components&&oldComponents&&State!=null&&next.Sample==sample){SoftwareFgAdvancing=lastSoftwareFgActive;NativeFgAdvancing=lastNativeFgActive;}
+  lastSoftwareFgActive=SoftwareFgAdvancing;lastNativeFgActive=NativeFgAdvancing;componentBaseline=components;
+  if(!components){lastSoftwareFg=lastNativeFg=0;}else{lastSoftwareFg=next.FgSoftwareGenerated;lastNativeFg=next.FgNativeGenerated;lastFgStrategy=next.FgStrategy;}
   bool reflexEligible=next.ReflexMode>0,amdEligible=next.AmdMode==1;
   if(!srEligible)lastSrProvider=0;if(!fgEligible)lastFgProvider=0;if(!reflexEligible)lastReflexMode=0;if(!amdEligible)lastAmdMode=0;
   bool same=lastSession==session&&lastRevision==next.Revision&&lastWorld==world;
@@ -42,7 +50,10 @@ public class RuntimeDiagnosticsClient : USaveGame {
   if(same&&next.Sample<sample){Invalidate();return;}
   if(next.Sample==sample){age++;if(age>3){Invalidate();return;}}
   else{
-   SrAdvancing=same&&next.SrFrames>lastSr&&srEligible&&next.SrProvider==lastSrProvider;
+   // Busy reuse preserves a previous progression observation only. The native
+   // producer bounds it by the original successful getter read (1500 ms).
+   SrAdvancing=same&&srEligible&&next.SrProvider==lastSrProvider&&
+    (next.SrRetained==1?next.SrFrames==lastSr&&manager.DiagnosticSrActive:next.SrFrames>lastSr);
    lastSrProvider=srEligible?next.SrProvider:0;
    FgAdvancing=same&&fgEligible&&next.FgProvider==lastFgProvider&&next.FgGenerated>lastFg;
    lastFgProvider=fgEligible?next.FgProvider:0;

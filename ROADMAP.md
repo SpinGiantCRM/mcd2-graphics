@@ -8,13 +8,17 @@ Release history is in the [changelog](docs/RELEASE_NOTES.md). See [validation](d
 
 ### 1. FSR parity with DLSS
 
-Consolidate and publish the implemented FSR Super Resolution, Native AA, Frame Generation and compatible Radeon Anti-Lag 2 paths. Dev.25 has bounded [Windows/Radeon and Linux/NVIDIA acceptance](docs/VALIDATION.md), with known issues disclosed. SR and FG are independently selectable, including DLSS SR + FSR FG and FSR SR + DLSS FG where supported. Full benchmarks follow release.
+The FSR Super Resolution, Native AA, Frame Generation and compatible Radeon Anti-Lag 2 paths shipped in **0.4.0-amd.dev.25**. That release has bounded [Windows/Radeon and Linux/NVIDIA acceptance](docs/VALIDATION.md), with known issues disclosed. SR and FG are independently selectable, including DLSS SR + FSR FG and FSR SR + DLSS FG where supported. Full benchmarks remain on hold at the maintainer's request.
 
 Prepare shared provider interfaces and frame inputs while preserving existing DLSS, FG, Reflex, HDR, saved settings and Native fallback. Qualify analytical paths first; enable ML paths only when their runtime and hardware requirements are met.
 
 ### 2. Multi Frame Generation
 
-Add supported native multipliers, then investigate hybrid MFG that can mix and match frame-generation providers. Keep one final presentation owner and a compatible latency solution.
+Deliver MFG paths for both Radeon and NVIDIA GPUs. Include single-provider software MFG on compatible older hardware and native-provider MFG where the actual device/runtime supports it. On newer hardware, retain a choice between supported native, software and mixed-provider modes; use the same admission and qualification standards for both vendors.
+
+Add DLSS Enabler-style hybrid MFG in which two FG providers contribute different intermediate frames to one output timeline. Independent upscaler and FG choices alone do not satisfy this goal. Keep one final presentation owner and a compatible latency solution.
+
+The fixed NVIDIA multiplier integration is one foundation for this work. It does not complete Radeon/software MFG or mixed-provider generation, which remain required milestones.
 
 Expose only combinations with verified frame inputs, output access and stable pacing. Reserve the same interfaces for later XeSS SR, FG/MFG and XeLL support.
 

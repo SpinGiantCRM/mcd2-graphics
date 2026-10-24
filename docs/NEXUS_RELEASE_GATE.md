@@ -9,8 +9,8 @@ downloads; pinned hashes, ownership, process refusal and rollback remain in forc
 Original build receipts identify the deployed files and leave signing and
 Windows qualification false at build time. Later runtime qualification is recorded separately; build receipts are not rewritten. A cross-compiled Windows installer is a build
 artifact, not a qualified release. Test fresh install, repair and uninstall on
-Windows using the complete folder. The `0.3.0-preview.1` package contains
-12 owned FG/SR/UI files. The patched ReShade framework is a separate, credited
+Windows using the complete folder. The released `0.4.0-amd.dev.25` folder contains
+17 visible payload files; installation additionally owns its verified private DLSS copy. The patched ReShade framework is a separate, credited
 dependency archive; NVIDIA runtime libraries remain external downloads.
 
 Before a new public release:

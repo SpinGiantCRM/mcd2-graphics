@@ -55,16 +55,28 @@ public:
  }
  MCD2FgDiagnosticsV2 snapshot()const{return sample_;}
 };
+// Metadata and DLSS activity share the getter, but only a matching successful
+// active DLSS observation may bridge Busy. FSR activity remains worker-owned.
 class SrMetadataCache {
  MCD2DiagnosticIdentityV1 identity_{};unsigned implementation_=0,capabilities_=0;std::uint64_t observed_=0;
+ MCD2SrDiagnosticsV1 dlss_{};
+ void clear(){implementation_=capabilities_=0;observed_=0;dlss_={};}
 public:
  void observe(MCD2DiagnosticIdentityV1 identity,int result,MCD2SrDiagnosticsV1& sample,std::uint64_t now){
-  if(!same(identity,identity_)){identity_=identity;implementation_=capabilities_=0;observed_=0;}
-  if(result==0&&sample.size==sizeof(sample)){implementation_=sample.implementation;capabilities_=sample.capabilities;observed_=now;}
-  else if(result!=-2){implementation_=capabilities_=0;observed_=0;}
-  if(!valid(identity)||!observed_||observed_>now||now-observed_>1500){implementation_=capabilities_=0;observed_=0;}
+  if(!same(identity,identity_)){clear();identity_=identity;}
+  if(result==0){
+   clear();
+   if(valid(identity)&&sample.size==sizeof(sample)){
+    implementation_=sample.implementation;capabilities_=sample.capabilities;observed_=now;
+    if(sample.provider==1&&sample.revision==identity.revision&&sample.world==identity.world)dlss_=sample;
+   }
+  }else if(result!=-2)clear();
+  if(!valid(identity)||!observed_||observed_>now||now-observed_>1500)clear();
   if(!valid(identity))sample.implementation=sample.capabilities=0;
-  if(result==-2)sample={sizeof(sample),0,0,0,implementation_,capabilities_,0};
+  if(result){
+   sample={sizeof(sample),0,0,0,implementation_,capabilities_,0};
+   if(result==-2&&dlss_.provider==1)sample=dlss_;
+  }
  }
 };
 struct Projection {unsigned world=0;MCD2SrDiagnosticsV1 sr{};MCD2FgDiagnosticsV2 fg{};unsigned amdMode=0;std::uint64_t amdFrames=0;};

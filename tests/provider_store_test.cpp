@@ -64,7 +64,7 @@ static int run(const fs::path& root, int argc, char** argv) {
     GraphicsRecord bytes;
     for (unsigned sr = 0; sr <= 3; ++sr)
         for (unsigned fg = 0; fg <= 2; ++fg)
-            for (unsigned strategy = 0; strategy <= 2; ++strategy)
+            for (unsigned strategy = 0; strategy <= 3; ++strategy)
                 for (unsigned latency = 0; latency <= 3; ++latency) {
                     GraphicsIntent value;
                     value.sr = SrProvider(sr); value.fgEnabled = true; value.fg = FgProvider(fg);
@@ -103,7 +103,7 @@ static int run(const fs::path& root, int argc, char** argv) {
     // Valid checksums cannot authorize malformed enums, booleans, owner,
     // revisions, calibration or migration metadata.
     constexpr std::array<std::pair<unsigned,unsigned>, 13> mutations{{
-        {8,2}, {12,124}, {20,2}, {24,6}, {28,0}, {32,4}, {36,6},
+        {8,2}, {12,124}, {20,2}, {24,8}, {28,0}, {32,4}, {36,6},
         {72,2}, {76,2}, {100,2}, {104,411}, {116,0}, {124,10}
     }};
     for (auto [offset, word] : mutations) {

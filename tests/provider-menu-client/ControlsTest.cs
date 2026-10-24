@@ -23,6 +23,27 @@ static class ControlsTest {
  }
  public static void Run(){
   SharedSrChecks();
+  Check(MfgModes.Any(0,124,0)&&MfgModes.Any(1,124,80),"custom caps expose Video FG without official AMD runtime");
+  Check(MfgModes.Selected(3,1,1,6,0,124,0,0),"software toggle uses own cap rather than official AMD bit");
+  Check(MfgModes.Selected(2,2,0,4,0,124,80,0),"mixed toggle uses actual caller-owned masks");
+  Check(!MfgModes.Selected(0,1,1,2,1,124,80,5),"software caps do not authorize standard AMD FG");
+  Check(!MfgModes.Selected(1,1,0,6,1,124,80,1)&&!MfgModes.Selected(4,1,0,2,1,124,80,5),"native count and unknown strategy refused");
+  Check(!MfgModes.Any(0,125,0)&&!MfgModes.Selected(3,1,1,6,0,60,0,0),"invalid/unoffered software cap refused");
+  Check(MfgModes.Supported(3,2,1,6,124,80,1),"software6x capability mask");
+  Check(!MfgModes.Supported(3,2,1,6,60,80,5),"software never borrows NVIDIA cap");
+  Check(MfgModes.Supported(2,1,0,4,124,80,1)&&MfgModes.Supported(2,2,0,6,124,80,1),"mixed actual mask");
+  Check(!MfgModes.Supported(2,2,0,3,124,80,5)&&!MfgModes.Supported(2,2,1,4,124,80,5),"mixed wrong count/provider refused");
+  Check(!MfgModes.Supported(3,2,1,4,125,80,5)&&!MfgModes.Supported(2,2,0,6,124,72,5),"unknown capability mask bits refused");
+  Check(!MfgModes.Supported(3,0,1,4,124,80,5),"new MFG requires actual shared guides");
+  Check(MfgModes.NextCount(2,2,0,4,1,124,80,1)==6&&MfgModes.NextCount(2,2,0,6,1,124,80,1)==4,"mixed skips unsupported odd multipliers");
+  Check(MfgModes.NativeRestartNeeded(1,1,0,2,1,4,0),"native2 request allowed after custom startup");
+  Check(MfgModes.NativeRestartNeeded(0,2,0,2,1,4,0),"standard NVIDIA2 restart is also identified");
+  Check(!MfgModes.NativeRestartNeeded(1,1,0,3,1,4,0),"unknown native maximum never authorizes higher counts");
+  Check(!MfgModes.NativeRestartNeeded(1,1,0,2,0,4,0)&&!MfgModes.NativeRestartNeeded(1,1,0,2,4,4,0),"positive valid cached SL support required");
+  Check(!MfgModes.NativeRestartNeeded(1,0,0,2,1,4,0)&&!MfgModes.NativeRestartNeeded(1,1,1,2,1,4,0),"restart request still needs native NVIDIA shared-guide pairing");
+  Check(!MfgModes.NativeRestartNeeded(1,1,0,2,1,2,0)&&!MfgModes.NativeRestartNeeded(1,1,0,2,1,4,1),"restart exception is only custom owner with unknown maximum");
+  Check(MfgModes.Selected(1,1,0,2,1,124,80,0,4)&&!MfgModes.Selected(1,1,0,3,1,124,80,0,4),"menu intent exception restricted to native2");
+  Check(!MfgModes.Supported(1,1,0,2,124,80,0),"next-restart intent is never current activation support");
   var a=Authority();var c=Client(a);
   Check(c.SelectSr(2)&&c.SelectQuality(2,2)&&c.SelectCustomScale(2,7100),"AMD choices accepted");
   Check(c.SelectLatency(2,1)&&c.SelectHdr(true,420,203,167),"AMD/HDR edits");
@@ -44,8 +65,17 @@ static class ControlsTest {
   Check(r.W18==2&&r.W29==1&&r.W30==0,"FSR/NVIDIA FG pairing preserved atomically");
   for(int sr=0;sr<4;sr++)for(int fg=0;fg<3;fg++){
    Check(c.MenuFgPairEligible(sr,fg,0,2)==((fg==0&&(sr==1||sr==2))||(fg==1&&(sr==0||sr==1||sr==2))),"UI/native route matrix agrees");
-   Check(!c.MenuFgPairEligible(sr,fg,1,3)&&!c.MenuFgPairEligible(sr,fg,2,3)&&!c.MenuFgPairEligible(sr,fg,0,3),"unimplemented strategy/count refused");
+   Check(c.MenuFgPairEligible(sr,fg,1,3)==(fg==0&&(sr==1||sr==2)),"native NVIDIA MFG route");
+   Check(c.MenuFgPairEligible(sr,fg,3,2)==(fg==1&&(sr==1||sr==2)),"software MFG uses either shared SR producer");
+   Check(c.MenuFgPairEligible(sr,fg,2,4)==(fg==0&&(sr==1||sr==2)),"true mixed4x route");
+   Check(c.MenuFgPairEligible(sr,fg,2,6)==(fg==0&&(sr==1||sr==2)),"true mixed6x route");
+   Check(c.MenuFgPairEligible(sr,fg,2,3)==(fg==0&&(sr==1||sr==2)),"mixed3x allocation route");
+   Check(!c.MenuFgPairEligible(sr,fg,1,7)&&!c.MenuFgPairEligible(sr,fg,0,3),"unsupported strategy/count refused");
   }
+  a=Authority();c=Client(a);Check(c.SelectMenuSr(2)&&c.SelectFg(1,3,6,true),"software6x request");c.Poll();r=Sent();
+  Check(c.RequestValid(r)&&r.W15==4&&r.W30==1&&r.W31==3&&r.W32==6,"software owner and selection sealed together");
+  Ack(a,r);c.Poll();Check(c.Ready,"software authority round trip");
+  Check(c.SelectFg(0,2,4,true),"mixed4x request");c.Poll();r=Sent();Check(c.RequestValid(r)&&r.W15==4&&r.W30==0&&r.W31==2&&r.W32==4,"mixed selection retains one custom owner");
   for(int quality=0;quality<6;quality++){
    a=Authority();c=Client(a);Check(c.SelectFg(0,0,2,true)&&c.SelectQuality(2,quality)&&c.SelectMenuSr(2),"FSR preset edit with NVIDIA FG");c.Poll();r=Sent();
    Check(r.W18==2&&r.W22==quality&&r.W29==1&&r.W30==0&&r.W15==1,"FSR preset preserves independent FG and owner");

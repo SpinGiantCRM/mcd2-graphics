@@ -20,3 +20,12 @@ it is not included in mod archives or the probe artifact.
 The self-contained guided installer includes .NET Runtime 10.0.12, Avalonia 11.3.22, SkiaSharp 2.88.9 and HarfBuzzSharp 8.3.1.1 under their upstream licenses. Their complete pinned notices are in `third-party/INSTALLER_NOTICES.txt` and embedded in the installer under Support → Third-party notices. This is distinct from the external graphics runtime dependencies, which are never bundled.
 
 Installer IPC support includes Tmds.DBus.Protocol 0.21.3 and MicroCom.Runtime 0.11.0 (MIT); their notices are retained under third-party and in the installer’s Support page.
+
+
+The integration candidate optionally uses artur07305's DLSS Enabler 4.9.0 through
+its headless frame-generation interface. Users acquire the exact unmodified
+runtime separately from the author under its terms. It is not bundled in the
+mod payload or CI artifact and is not installed as a proxy DLL. NVIDIA native
+runtimes and optional MFG compatibility helpers remain separate external inputs.
+The source-built MFG bridge compiles against the pinned NVIDIA SDK declarations;
+the corresponding NVIDIA notice accompanies the build.

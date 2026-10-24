@@ -1,4 +1,8 @@
-# Windows qualification: held 0.3.0-preview.1 candidate
+# Historical Windows qualification: held 0.3.0-preview.1 candidate
+
+Current release acceptance is recorded for [0.4.0-amd.dev.25](WINDOWS_DEV25_ACCEPTANCE_2026-10-24.md).
+The exact inputs and results below belong to the historical preview.1 run; they
+are not the input table for dev.25 or the unreleased PR60 integration.
 
 This input table is the frozen original qualification, whose result remains
 FAIL. For the separately pinned MSVC mitigation candidate and repeated checks,

@@ -1,5 +1,6 @@
 #pragma once
 #include "upscaler_support.hpp"
+#include "../providers/settings_paths.hpp"
 static bool ui_dlss_adapter_candidate(a::command_queue *queue,unsigned &vendor){
  auto *device=reinterpret_cast<ID3D12Device*>(queue->get_device()->get_native());
  IDXGIFactory4 *factory=nullptr;IDXGIAdapter1 *adapter=nullptr;DXGI_ADAPTER_DESC1 desc{};
@@ -35,8 +36,8 @@ static bool ui_poll_intent(){
   // on every call to this present callback.
   std::vector<wchar_t> local(32768);auto n=GetEnvironmentVariableW(L"LOCALAPPDATA",local.data(),DWORD(local.size()));if(!n||n>=local.size())return false;
   ui_control.session=uint32_t((GetTickCount64() ^ (uint64_t(GetCurrentProcessId())<<12)) & 0x7fffffff);if(!ui_control.session)ui_control.session=1;
-  ui_control.saves=fs::path(local.data())/L"Dungeons2"/L"Saved"/L"SaveGames";
-  root=fs::path(local.data())/L"Dungeons2"/L"Saved"/L"MCD2Graphics";
+  auto paths=mcd2::providers::currentSettingsPaths(fs::path(local.data()));if(!paths)return false;
+  ui_control.saves=paths->saves;root=paths->authority;
   std::error_code directory_error;fs::create_directories(root,directory_error);if(directory_error){ui_control.saves.clear();return false;}
   ui_control.receipt.open(root/L"MCD2GraphicsNativeReceipt.jsonl",std::ios::app);
  }

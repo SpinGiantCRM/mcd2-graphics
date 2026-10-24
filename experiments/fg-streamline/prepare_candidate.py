@@ -65,7 +65,7 @@ def main():
         files['experiments/fg-streamline/' + name] = Path(__file__).parent / name
     manifest = {
         'purpose': 'FG and DLSS foliage Windows test candidate; not a release',
-        'FGDefault': 'Off', 'nativeUIToggle': True, 'restartAfterModeChange': True,
+        'FGDefault': 'Off', 'nativeUIToggle': True, 'restartAfterModeChange': True, 'restartAfterProviderChange': True,
         'legacyMaximumFGFrames': 600, 'nativeUIToggleHasExpiry': False,
         'WindowsQualified': False, 'releaseQualified': False,
         'framework': {'commit': framework['commit'], 'binarySHA256': framework['binarySHA256']},

@@ -1,4 +1,8 @@
-# 0.3.0-preview.1 — Frame Generation preview
+# Historical 0.3.0-preview.1 — Frame Generation preview
+
+For the current release, use [0.4.0-amd.dev.25](DEV25_RELEASE_CANDIDATE.md),
+[installation](../INSTALL.md) and its separate framework dependency. The
+versions, hashes and benchmark results below apply only to preview.1.
 
 [Download the release](https://github.com/SpinGiantCRM/mcd2-graphics/releases/tag/v0.3.0-preview.1) · [Installation](../INSTALL.md) · [Release notes](RELEASE_NOTES.md) · [Fresh benchmarks](BENCHMARK_2026-10-07.md)
 

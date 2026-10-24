@@ -8,7 +8,9 @@ namespace mcd2::providers {
 // The one committed record supplies both menu intent and the early startup
 // route; publishing two separate files would allow a torn provider selection.
 using GraphicsRecord = std::array<std::uint8_t, 128>;
-inline constexpr std::array<std::uint8_t, 8> recordMagic{'M','C','D','2','G','I','5',0};
+inline constexpr std::array<std::uint8_t, 8> recordMagic{'M','C','D','2','G','I','7',0};
+inline constexpr std::array<std::uint8_t, 8> allocationRecordMagic{'M','C','D','2','G','I','6',0};
+inline constexpr std::array<std::uint8_t, 8> legacyRecordMagic{'M','C','D','2','G','I','5',0};
 inline constexpr unsigned recordVersion = 1;
 inline constexpr std::size_t checksumOffset = 16;
 
@@ -57,7 +59,10 @@ inline bool validMigrationStamp(const GraphicsIntent& i) {
 inline bool encodeGraphicsRecord(const GraphicsIntent& i, GraphicsRecord& out) {
     if (!validIntent(i) || !validMigrationStamp(i)) return false;
     GraphicsRecord next{};
-    std::copy(recordMagic.begin(), recordMagic.end(), next.begin());
+    // Preserve schema-5/6 bytes and checksums during reads and replay.
+    // An explicit user edit upgrades the intent to schema 7.
+    const auto& magic=i.schema==5?legacyRecordMagic:i.schema==6?allocationRecordMagic:recordMagic;
+    std::copy(magic.begin(), magic.end(), next.begin());
     setRecordWord(next, 8, recordVersion);
     setRecordWord(next, 12, unsigned(next.size()));
     setRecordWord(next, 20, unsigned(requestedOwner(i)));
@@ -68,7 +73,9 @@ inline bool encodeGraphicsRecord(const GraphicsIntent& i, GraphicsRecord& out) {
         put(unsigned(p.quality)); put(p.customScaleBasisPoints); put(p.lastCustomScaleBasisPoints);
     }
     put(i.nativeFallbackPreference); put(i.fgEnabled); put(unsigned(i.fg));
-    put(unsigned(i.fgStrategy)); put(i.requestedMultiplier);
+    // Offset 84: strategy low byte, DLSS/FSR generated counts in bytes 1/2;
+    // order occupies bits 24..29; bits 30/31 remain reserved zero.
+    put(unsigned(i.fgStrategy) | (i.dlssGenerated<<8) | (i.fsrGenerated<<16) | (i.frameOrder<<24)); put(i.requestedMultiplier);
     put(unsigned(i.latency)); put(unsigned(i.latencyMode));
     put(i.hdr.enabled); put(i.hdr.peakNits); put(i.hdr.paperWhiteNits); put(i.hdr.uiNits);
     put(i.migratedFrom.sr); put(i.migratedFrom.display); put(i.migratedFrom.fg);
@@ -80,7 +87,9 @@ inline bool encodeGraphicsRecord(const GraphicsIntent& i, GraphicsRecord& out) {
 
 inline bool decodeGraphicsRecord(std::span<const std::uint8_t> bytes, DecodedGraphicsRecord& out) {
     if (bytes.size() != GraphicsRecord{}.size() ||
-        !std::equal(recordMagic.begin(), recordMagic.end(), bytes.begin()) ||
+        (!std::equal(recordMagic.begin(), recordMagic.end(), bytes.begin()) &&
+         !std::equal(allocationRecordMagic.begin(), allocationRecordMagic.end(), bytes.begin()) &&
+         !std::equal(legacyRecordMagic.begin(), legacyRecordMagic.end(), bytes.begin())) ||
         recordWord(bytes, 8) != recordVersion || recordWord(bytes, 12) != bytes.size() ||
         recordWord(bytes, checksumOffset) != recordChecksum(bytes)) return false;
     DecodedGraphicsRecord next;
@@ -94,7 +103,13 @@ inline bool decodeGraphicsRecord(std::span<const std::uint8_t> bytes, DecodedGra
         p.quality = Quality(get()); p.customScaleBasisPoints = get(); p.lastCustomScaleBasisPoints = get();
     }
     i.nativeFallbackPreference = boolean(); i.fgEnabled = boolean(); i.fg = FgProvider(get());
-    i.fgStrategy = FgStrategy(get()); i.requestedMultiplier = get();
+    const auto packed=get();
+    if ((i.schema==5 && (bytes[6]!='5' || packed>3)) ||
+        (i.schema==6 && (bytes[6]!='6' || (packed&0xff000000u))) ||
+        (i.schema==7 && (bytes[6]!='7' || (packed&0xc0000000u)))) return false;
+    i.fgStrategy = FgStrategy(packed&0xff);i.dlssGenerated=(packed>>8)&0xff;i.fsrGenerated=(packed>>16)&0xff;
+    i.frameOrder=(packed>>24)&0x3f;
+    i.requestedMultiplier = get();
     i.latency = LatencyProvider(get()); i.latencyMode = LatencyMode(get());
     i.hdr.enabled = boolean(); i.hdr.peakNits = get(); i.hdr.paperWhiteNits = get(); i.hdr.uiNits = get();
     i.migratedFrom.sr = get(); i.migratedFrom.display = get(); i.migratedFrom.fg = get();

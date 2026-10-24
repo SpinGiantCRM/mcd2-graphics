@@ -50,7 +50,8 @@ int main(){
   {{"FGProvider",1},{"fgProvider",1}},{{"fgProvider",2}},{{"fgProvider",1},{"PROVIDER",0}}})
   assert(!mcd2::fgui::decode(fixture(fields),i));
  std::cout<<"FG provider framing, legacy FName alias, current metadata and duplicate/truncation checks pass\n";
- auto runtimeSeed=fixture({},true);auto encoded=mcd2::fgui::encode(runtimeSeed,{{"SchemaVersion",1},{"NativeGuidesRetired",1}});
+ auto runtimeSeed=fixture({},true);
+ auto nativeCaps=mcd2::fgui::encode(runtimeSeed,{{"SchemaVersion",1},{"MfgNativeGeneratedMax",2}});assert(!nativeCaps.empty());auto encoded=mcd2::fgui::encode(runtimeSeed,{{"SchemaVersion",1},{"NativeGuidesRetired",1}});
  std::map<std::string,unsigned> fields;size_t header=0;assert(!encoded.empty()&&mcd2::display::parse(encoded,"FGRuntimeSave",fields,header)&&fields["NativeGuidesRetired"]==1);
  encoded=mcd2::fgui::encode(runtimeSeed,{{"SchemaVersion",1},{"NativeGuidesRetired",0}});fields.clear();assert(!encoded.empty()&&mcd2::display::parse(encoded,"FGRuntimeSave",fields,header)&&!fields.count("NativeGuidesRetired"));
  assert(mcd2::fgui::encode(runtimeSeed,{{"UnprovenNativeRetirement",1}}).empty());

@@ -26,7 +26,7 @@ jobs:
         run: |
           python3 - <<'PYTHON'
           import fnmatch, os, subprocess
-          patterns = ['.github/workflows/fg-windows-candidate.yml', 'experiments/fg-streamline/**', 'experiments/providers/**', 'tests/test_fsr*.py', 'tests/*fsr_startup*', 'src/native/**', 'src/shaders/**', 'src/latency/**', 'src/providers/**', 'src/ui/**', 'tools/ModInfoBuilder/**', 'build.py', 'build_ui.py', 'build_latency.py', 'build_amd_latency.py', 'third-party/AntiLag2/**', 'tests/amd_antilag*', 'build_toolchain.py', 'dependencies.lock.json', 'manifest.json', 'qualification/fg-release/own-payload.zip', 'qualification/fg-release/ui-build-receipt.json', 'qualification/fg-release/*.patch', 'qualification/providers/**']
+          patterns = ['.github/workflows/fg-windows-candidate.yml', 'experiments/fg-streamline/**', 'experiments/providers/**', 'tests/test_fsr*.py', 'tests/*fsr_startup*', 'tests/mfg*', 'tests/test_mfg*', 'src/native/**', 'src/gdk/**', 'build_gdk_save_bridge.py', 'src/shaders/**', 'src/latency/**', 'src/providers/**', 'src/ui/**', 'tools/ModInfoBuilder/**', 'build.py', 'build_ui.py', 'build_latency.py', 'build_amd_latency.py', 'third-party/AntiLag2/**', 'tests/amd_antilag*', 'build_toolchain.py', 'dependencies.lock.json', 'manifest.json', 'qualification/fg-release/own-payload.zip', 'qualification/fg-release/ui-build-receipt.json', 'qualification/fg-release/*.patch', 'qualification/providers/**']
           native = os.environ['EVENT_NAME'] == 'workflow_dispatch'
           if not native:
               changed = subprocess.check_output(['git', 'diff', '--name-only', '-z', os.environ['BASE_SHA'], os.environ['HEAD_SHA']]).decode().split('\0')
@@ -70,7 +70,10 @@ jobs:
           jobs = json.loads(os.environ['NEEDS_JSON'])
           if jobs['changes']['result'] != 'success':
               raise SystemExit('Native build scope selection failed.')
-          expected = 'success' if jobs['changes']['outputs'].get('native') == 'true' else 'skipped'
+          selection = jobs['changes']['outputs'].get('native')
+          if selection not in ('true', 'false'):
+              raise SystemExit('Native build scope selection is missing or invalid.')
+          expected = 'success' if selection == 'true' else 'skipped'
           if jobs['build']['result'] != expected:
               raise SystemExit(f"Native build result {jobs['build']['result']}; required {expected}.")
           print('Native candidate gate passed.')

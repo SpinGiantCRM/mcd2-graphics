@@ -223,6 +223,8 @@ public:
     // Names live in a dedicated provider-settings directory, not legacy .sav
     // slots. No discovery, directory creation, backup deletion or save migration
     // happens as a side effect of constructing/reading the store.
+    // The existing store/lock names are stable across record schemas, so a
+    // schema-5 running session and schema-6 menu edit share one CAS authority.
     std::filesystem::path committedPath() const { return root_ / "intent-v5.bin"; }
     std::filesystem::path pendingPath() const { return root_ / "intent-v5.pending"; }
     std::filesystem::path lockPath() const { return root_ / "intent-v5.lock"; }

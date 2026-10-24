@@ -1211,3 +1211,148 @@ The [dev.25 updated-game progress record](WINDOWS_DEV25_UPDATE_2026-10-22.md)
 separates these startup/layout results from the unresolved historical exit
 crash and from diagnostic-tool failures. Current Windows qualification remains
 incomplete; neither passing CI nor one ordinary clean exit grants approval.
+
+## Xbox integration and installation profiles
+
+The integration preserves the released Steam 25910487 layout and adds the
+separately guarded WinGDK layout. The guided installer resolves edition from
+its executable layout, maps all binary destinations and ownership receipts,
+and checks both shipping processes before mutation. Game Pass on Linux uses
+an explicitly selected existing Xodus prefix; it never inherits Steam launch
+or prefix handling. An edition requires its own package executable pin.
+
+The native Windows presentation wrapper affects Steam as well as Game Pass.
+Offline tests do not qualify either runtime path. The current FSR retirement,
+presenter recovery, diagnostic attribution and advanced-settings guards remain
+required. Existing published payloads and qualification results are unchanged.
+
+### Provider-neutral MFG compute experiment
+
+The [owned-input MFG probe](MFG_COMPUTE_TESTING.md) is compiled with the Microsoft
+C++ ABI against pinned external NGX declarations. Its own typed parameter store
+retains scalar/resource distinctions and checked conversions. Both portable CI
+platforms exercise phase scheduling and parameter bounds; native Windows CI runs
+the CPU-only virtual ABI fixture. The external headless module remains separately
+acquired and hash-verified, never included in the game installer or CI artifact.
+Preserve completed-queue proof before context/resource release; a failed drain
+or SDK retirement retains ownership until isolated process exit. No live module
+unload, software MFG, mixed-provider generation, game presentation, output quality
+or other platform qualification follows from these build/fixture results.
+
+The isolated MFG caller declares `DLSSG.IsRecording=1` for every already-open
+command-list evaluation and requires the inspected interface's no-extra-flush
+response. Preserve this ownership contract and its Microsoft ABI regression.
+The previous omitted-flag Linux control caused the backend to reset/close the
+caller's list and fail retirement. Corrected synthetic Linux/NVIDIA 2x-6x runs
+passed with normal exits; this does not qualify Windows/Radeon or game wiring.
+
+### Installer game-location selection
+
+The integration branch carries PR9's folder/executable selection behavior through
+the edition-aware profile. Resolve only known Dungeons/Binaries parents and one
+Content wrapper; preserve executable identity, linked-ancestor rejection, mixed-
+edition ambiguity and the existing Xodus-prefix requirement. A failed replacement
+selection clears the old root/profile/dependency state, and the GUI redraws after
+failure or prefix cancellation. Selecting a path never bypasses the edition's
+executable hash, dependencies or process guard. Preserve the real-filesystem
+selection tests on both CI platforms; native picker interaction still needs
+qualification. See [selection behavior](INSTALLER_GAME_SELECTION.md).
+
+### MFG prelaunch guards and qualification scope
+
+A rejected `Batch::begin` poisons an active result, including a previously
+completed result; the owner must invalidate explicitly before starting again.
+Do not publish the old images or continue a partial batch after failed reentry.
+The portable behavior fixture covers both cases on Linux and Windows. This
+transaction correction does not implement or qualify a game MFG presenter.
+
+The current qualification order is Linux/NVIDIA first, then a Windows/Radeon
+laptop launch check with MFG disabled. That hardware cannot perform MFG testing;
+Windows MFG remains untested. Preserve both CI platforms and the actual runtime
+capability gates. An optional external helper's synthetic Linux result is not
+Windows MFG qualification or permission to force higher production counts.
+See the [native helper trial](MFG_COMPUTE_TESTING.md#native-nvidia-mfg-helper-trial)
+for dependency identity, early loading, restoration and remaining game checks.
+
+
+### Complete software and mixed MFG candidate
+
+The dev.2 game bridge keeps SDK virtual calls inside a Microsoft-ABI DLL and
+reuses the existing plain guide/presentation boundary. Preserve current frame,
+world, authority checksum/session, actual queue identity and whole-batch fence
+proof. Actual component presentation counters are separate from successful
+compute outputs and from requested mode. Both portable CI platforms cover mode
+admission, transaction ordering and attribution. Native CI additionally runs the
+dynamic bridge ABI fixture without graphics runtimes or GPU work.
+
+Capability discovery may load both AMD and MFG bridges. Anti-Lag context routing
+must follow the application-local bootstrap's actual owner, never DLL presence.
+Retain generated/real markers and drain before releasing the persistent context.
+The CPU fixture covers both routes, a loaded inactive bridge and failed drain.
+
+Custom presentation uses virtual application buffers until a confirmed native
+Off resize. Native Off must expose the real buffers/index and bypass all custom
+copy/submission work. If the application has already received a virtual
+waitable handle, live native switching requires a restart: preserve that handle
+and permit ordinary resize on the real-only virtual route while Off. Preserve
+application frame-latency values across permitted route changes.
+
+The bounded worker must hold a stable session lease across open-gate waits and
+revalidate closing/epoch after reacquiring the gate. Last swapchain Release must
+drain the worker and active operations before destroying their session/resources.
+Re-query actual output refresh at admission; reject an overdue batch before
+publication and report the real-frame fallback. Refused/outstanding-reference
+resize must preserve the old
+route, with one presenter and no partially published batch. The owned hardware
+host is a bounded functional control; it does not qualify MCD2 or Windows MFG.
+
+Game Pass's named transports include the new capability masks, custom owner 4
+and independent software/native presentation counters. Reject unknown mask bits
+and owner 3. Only the diagnostic preset-status field may retain signed status
+bits; negative activity counters and signed settings remain refused. Preserve
+GDK 90/93-entry header round trips and the twenty-channel boundary.
+
+The reported Game Pass 1.1.3.0 on-disk executable is now separately hash-pinned.
+Contributor willingness to test is not integrated runtime acceptance. Keep issue
+#8 open until support works and is merged. Native Windows Game Pass and Linux
+Xodus checks remain pending; existing Steam qualification is not transferable.
+
+
+### Independent generated-frame allocations
+
+The dev.3 candidate replaces the extra mode/multiplier rows with separate DLSS
+and FSR generated-frame counts. One rendered frame plus both counts is bounded
+at 6x. Schema6 packs the counts into the existing 128-byte settings record;
+schema5 records retain their original checksums until a new user edit. Preserve
+CAS stamps, all unrelated preferences, exact source identity and both platforms.
+NVIDIA and FSR capabilities are checked independently. Mixed admission requires
+the native runtime's exact interpolation grid, which can exceed the displayed
+DLSS image count; software capability never raises Streamline's maximum.
+
+The legacy configure entry point must not hold a second recursive gate level
+while v2 retires an active worker. The CPU actual-function fixture verifies that
+the worker can acquire the released gate during both Off and changed-allocation
+retirement. Component diagnostics cover every mixed total from 3x through 6x,
+with identity, original-observation freshness and fault checks unchanged.
+Offline fixtures and Microsoft-ABI compilation do not qualify a new mixed split,
+Windows MFG or clean game exit. Use the complete new candidate for runtime work;
+retain the separate Linux-first and Windows/Radeon-startup-with-MFG-Off gates.
+
+
+### Configurable generated-frame order
+
+Schema7 adds an Automatic/custom provider-order code in the existing 128-byte
+record; schema5/6 records must retain their bytes and source stamps until edited.
+The upper two packed-word bits remain reserved. Custom masks must match the
+configured DLSS/FSR counts and actual native grid capability. Automatic selects
+among admitted masks only. Preserve the exact order in bootstrap, source checks
+and configure_v3. Missing v3 cannot fall back to an old order-ignoring entry point.
+
+Changing order retires the prior feature resources under the existing stable
+session/queue/epoch guards. Old v1/v2 callers request Automatic without adding a
+recursive gate level during retirement. Presentation fractions stay monotonic;
+providers generate at the selected fraction rather than shuffling images.
+Portable tests cover all patterns, caps and malformed codes; the managed/native
+comparison covers 7,680 combinations. These checks and Microsoft-ABI builds do
+not qualify game quality, Windows MFG or display cadence. Keep the Linux-first
+campaign, Windows/Radeon startup-with-MFG-Off gate and separate edition checks.

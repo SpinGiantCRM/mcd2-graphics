@@ -2,6 +2,7 @@
 #define NOMINMAX
 #include <windows.h>
 #include <d3d12.h>
+#include "../providers/bootstrap_module.hpp"
 #include "../../third-party/AntiLag2/ffx_antilag2_dx12.h"
 
 // Compile against the official, unmodified SDK with Microsoft's COM ABI.
@@ -13,7 +14,12 @@ using Ready=int(*)(void*);
 using Publish=int(*)(void*,void*,unsigned,unsigned);
 Ready ready=nullptr;Publish publish=nullptr;
 void findPresenter(){
- auto module=GetModuleHandleW(L"mcd2-fsr-fg-game-bridge.dll");
+ // Capability discovery loads both bridges. Route only by the actual owner;
+ // the presence of a DLL must never redirect the persistent SDK context.
+ using Owner=unsigned(*)();
+ const auto bootstrap=mcd2::providers::bootstrapModule();
+ const auto owner=bootstrap?reinterpret_cast<Owner>(GetProcAddress(bootstrap,"mcd2_bootstrap_fg_owner")):nullptr;
+ auto module=GetModuleHandleW(owner&&owner()==4?L"mcd2-mfg-game-bridge.dll":L"mcd2-fsr-fg-game-bridge.dll");
  ready=module?reinterpret_cast<Ready>(GetProcAddress(module,"mcd2_afg_antilag_ready_v1")):nullptr;
  publish=module?reinterpret_cast<Publish>(GetProcAddress(module,"mcd2_afg_antilag_v1")):nullptr;
 }

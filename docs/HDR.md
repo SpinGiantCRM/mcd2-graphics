@@ -1,4 +1,4 @@
-# Native HDR controls — 0.3.0-preview.1
+# Native HDR controls — 0.4.0-amd.dev.25
 
 HDR uses the separately acquired, pinned RenoDX UE Extended addon. This is game HDR output and HDR scene processing, not an SDR conversion filter. No official HDR mastering reference is claimed.
 
@@ -28,4 +28,4 @@ Peak calibration is display-specific. The local True Black display was tested at
 - Native and advanced values differ: apply the four values through Video and restart normally.
 - Installer refuses an edited HDR startup key: your edit is retained; resolve it deliberately before repair. Uninstall restores only unchanged owned keys.
 
-Windows AMD unavailable-HDR behavior passed; native HDR output/calibration on a Windows HDR display remains unqualified. The tested HDR path is Linux/NVIDIA. See [Linux qualification](LINUX_FINAL_QUALIFICATION_2026-10-07.md) and [Windows qualification](WINDOWS_FULL_QUALIFICATION_2026-10-07.md).
+Windows AMD unavailable-HDR behavior passed; native HDR output/calibration on a Windows HDR display remains unqualified. The tested HDR path is Linux/NVIDIA. See the current [Linux qualification](LINUX_DEV25_ACCEPTANCE_2026-10-24.md) and [Windows acceptance](WINDOWS_DEV25_ACCEPTANCE_2026-10-24.md). NVIDIA FG/HDR and AMD FG/SDR were checked separately; no AMD FG/HDR or Windows HDR pass is inferred.

@@ -15,6 +15,26 @@ snapshot is Active with error zero. Busy never refreshes that time. A successful
 inactive/error snapshot, hard read/decoding error or identity change invalidates
 it immediately. This adds no render lock, SDK operation or file access.
 
+The same nonblocking getter supplies DLSS activity. A Busy result retains the
+last successful DLSS snapshot only for 1500 ms from that original read, with the
+same current ready session/revision/checksum/world and matching snapshot
+revision/world. Busy does not refresh that observation. A successful inactive,
+other-provider, malformed or changed-identity snapshot, a hard error or expiry
+removes the retained activity. FSR activity continues to come exclusively from
+the worker runtime snapshot above.
+
+The optional schema-1 `SrRetained` Boolean is set only for that bounded DLSS
+Busy reuse. The UI may preserve an earlier advancement observation only when
+that flag is one and the current identity, eligible provider and evaluation
+count are unchanged. Retention cannot establish advancement or revive an
+inactive baseline. A successful read with an unchanged counter clears Active
+immediately, and a changed retained count cannot count as new evaluations.
+Native cache expiry still publishes zero SR activity and requires a new UI
+baseline on recovery. The existing 500 ms producer and UI polling cadence and
+frozen-producer expiry remain unchanged. The Xbox typed slot validates this
+Boolean and provider relationship; the bounded diagnostic parser accommodates
+all 24 fields plus its terminator. Older records without the field mean zero.
+
 Each unavailable or inactive channel invalidates only its own UI activity
 baseline. The first recovered eligible provider/mode sample establishes a
 baseline, so 100 -> Busy/Off -> unchanged 100 cannot be reported as advancement.
@@ -47,7 +67,8 @@ full authority stamps, queued previous-world callbacks, duplicate/reused/unknown
 IDs, bounded retention and concurrent callback/snapshot publication. Both
 portable CI platforms execute it. The exact C# client tests cover wrong/zero
 world across SR, FG and latency, plus recovery and opt-out baselines, per-channel Busy/recovery, actual counter
-resets, and continued FG/latency activity while SR is unavailable. These
+resets, bounded DLSS Busy reuse, successful frozen-counter suspension, and
+continued FG/latency activity while SR is unavailable. These
 fixtures and compilation are separate from fresh Windows/Linux game
 qualification of the rebuilt complete artifact.
 
