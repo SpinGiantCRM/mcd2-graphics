@@ -307,6 +307,15 @@ def main():
             names = {'mcd2-display-latency.addon64' if folder == latency else 'mcd2-graphics.addon64': ''}
         for name in names:
             shutil.copyfile(folder / name, destination / name)
+    gdk_pin=lock['editionDependencies']['WinGDK']['GDKRuntime']
+    gdk_zip=out/'gdk.nupkg'
+    download(gdk_pin['url'],gdk_zip,gdk_pin['archiveSHA256'])
+    gdk_sdk=out/'gdk-sdk'
+    with zipfile.ZipFile(gdk_zip) as archive:archive.extractall(gdk_sdk)
+    gdk_output=out/'gdk-save-bridge'
+    run(sys.executable,REPO/'build_gdk_save_bridge.py','--reshade-include',reshade/'include','--gdk-include',gdk_sdk,'--mingw-cxx',mingw,'--output',gdk_output)
+    gdk_destination=artifact/'gdk-save-bridge';gdk_destination.mkdir()
+    for name in ['mcd2-gdk-save-bridge.addon64','build-result.json']:shutil.copyfile(gdk_output/name,gdk_destination/name)
     copy_current_ui(REPO, artifact)
     amd_destination = artifact / 'amd-latency'
     amd_destination.mkdir()

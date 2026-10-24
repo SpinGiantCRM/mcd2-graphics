@@ -1,5 +1,9 @@
 # Contributing to MCD2 Graphics
 
+For bounded implementation, reproduction and verification records, see the
+[task templates](docs/agent-efficiency/v1/TASKS.md) and
+[context and validation map](docs/agent-efficiency/v1/CONTEXT.md).
+
 Thanks for helping improve MCD2 Graphics. This project is still experimental, so reproducible evidence and clear scope are more valuable than broad claims.
 
 ## Before contributing

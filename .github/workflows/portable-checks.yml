@@ -24,6 +24,8 @@ jobs:
         run: python3 -m unittest discover -s tests -p "test_installer_*.py" -v
       - name: Native build recipe regressions
         run: |
+          python3 -m unittest discover -s tests -p "test_ci_contracts.py" -v
+          python3 -m unittest discover -s tests -p "test_gdk_build.py" -v
           python3 -m unittest discover -s tests -p "test_build_toolchain.py" -v
           python3 -m unittest discover -s tests -p "test_amd_latency_build.py" -v
           python3 -m unittest discover -s tests -p "test_ui_build.py" -v
@@ -74,6 +76,10 @@ jobs:
           /tmp/gdk-save-lifecycle
           g++ -std=c++20 tests/settings_paths_test.cpp -o /tmp/settings-paths
           /tmp/settings-paths
+          g++ -std=c++20 tests/gdk_identity_binding_test.cpp -o /tmp/gdk-identity
+          /tmp/gdk-identity
+          g++ -std=c++20 tests/fixed_mfg_policy_test.cpp -o /tmp/fixed-mfg-policy
+          /tmp/fixed-mfg-policy
       - name: Settings framing and semantic checks
         run: |
           g++ -std=c++20 -Wall -Wextra -Werror tests/provider_intent_test.cpp -o /tmp/provider-intent
@@ -154,6 +160,8 @@ jobs:
         run: python -m unittest discover -s tests -p "test_installer_*.py" -v
       - name: Native build recipe regressions
         run: |
+          python -m unittest discover -s tests -p "test_ci_contracts.py" -v
+          python -m unittest discover -s tests -p "test_gdk_build.py" -v
           python -m unittest discover -s tests -p "test_build_toolchain.py" -v
           python -m unittest discover -s tests -p "test_amd_latency_build.py" -v
           python -m unittest discover -s tests -p "test_ui_build.py" -v
@@ -211,6 +219,10 @@ jobs:
           ./gdk-save-lifecycle.exe
           g++ -std=c++20 -static tests/settings_paths_test.cpp -o settings-paths.exe
           ./settings-paths.exe
+          g++ -std=c++20 -static tests/gdk_identity_binding_test.cpp -o gdk-identity.exe
+          ./gdk-identity.exe
+          g++ -std=c++20 -static tests/fixed_mfg_policy_test.cpp -o fixed-mfg-policy.exe
+          ./fixed-mfg-policy.exe
           g++ -std=c++20 -static -Isrc/native tests/lean_borrow_lifetime_test.cpp -o lean-borrow-lifetime.exe
           ./lean-borrow-lifetime.exe
           g++ -std=c++20 -static -pthread -Wall -Wextra -Werror tests/amd_latency_test.cpp -o amd-latency.exe

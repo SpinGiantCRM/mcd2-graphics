@@ -9,7 +9,7 @@ namespace MCD2.Installer;
 
 public record Check(string Name, string Version, string State, string Expected, string Found);
 public record DependencyRelease(string Version, Dictionary<string,string> Files, string? ArchiveHash = null);
-public record Dependency(string Id, string Name, string Version, string Url, Dictionary<string,string> Files, string? ArchiveHash = null, Dictionary<string,string>? ArchiveMembers = null, Dictionary<string,string>? UpgradeFromFiles = null, IReadOnlyList<Dictionary<string,string>>? UpgradeFromFileSets = null, string? MinimumVersion = null, string? CompatibilityNote = null, IReadOnlyList<DependencyRelease>? CompatibleReleases = null) {
+public record Dependency(string Id, string Name, string Version, string Url, Dictionary<string,string> Files, string? ArchiveHash = null, Dictionary<string,string>? ArchiveMembers = null, Dictionary<string,string>? UpgradeFromFiles = null, IReadOnlyList<Dictionary<string,string>>? UpgradeFromFileSets = null, string? MinimumVersion = null, string? CompatibilityNote = null, IReadOnlyList<DependencyRelease>? CompatibleReleases = null, bool GamePassOnly = false) {
     public string Requirement => MinimumVersion is {} minimum ? minimum+"+" : CompatibilityNote??Version;
     public IEnumerable<DependencyRelease> Releases => new[]{new DependencyRelease(Version,Files,ArchiveHash)}.Concat(CompatibleReleases??[]);
 }
@@ -62,7 +62,8 @@ public sealed partial class InstallerEngine {
     }
     public string Version { get; }
     public string Description { get; }
-    public IReadOnlyList<Dependency> Dependencies { get; }
+    readonly IReadOnlyList<Dependency> allDependencies;
+    public IReadOnlyList<Dependency> Dependencies => allDependencies.Where(x=>!x.GamePassOnly||Profile?.Edition==GameEdition.WinGDK).ToArray();
     public string? GameRoot { get; private set; }
     public GameInstallationProfile? Profile { get; private set; }
     string GameTarget(string root,string relative)=>Target(root,Profile?.MapDestination(relative)??relative);
@@ -84,18 +85,21 @@ public sealed partial class InstallerEngine {
         foreach(var p in own.Keys) ValidateRelative(p);
         if(m.RootElement.TryGetProperty("upgradeFrom",out var upgrades))foreach(var version in upgrades.EnumerateObject())previousInstalls.Add(version.Name,ReadHashes(version.Value));
         var deps=new List<Dependency>();
-        foreach(var item in l.RootElement.GetProperty("dependencies").EnumerateObject()) {
+        IEnumerable<JsonProperty> definitions=l.RootElement.GetProperty("dependencies").EnumerateObject().ToArray();
+        if(l.RootElement.TryGetProperty("editionDependencies",out var editions)&&editions.TryGetProperty("WinGDK",out var extra))definitions=definitions.Concat(extra.EnumerateObject().ToArray());
+        foreach(var item in definitions) {
             var d=item.Value;
             var files=d.TryGetProperty("files",out var f)?ReadHashes(f):new Dictionary<string,string> {{d.GetProperty("file").GetString()!,d.GetProperty("sha256").GetString()!}};
             foreach(var path in files.Keys) ValidateRelative(path);
             var url=d.TryGetProperty("download",out var u)?u.GetString():d.TryGetProperty("source",out u)?u.GetString():d.TryGetProperty("url",out u)?u.GetString():null;
-            deps.Add(new(item.Name,item.Name switch {"BlueprintLoader"=>"Blueprint Loader", "ReShade"=>"ReShade full addon support", "RenoDXUEExtended"=>"RenoDX HDR support", "DLSSRuntime"=>"NVIDIA DLSS runtime", "Streamline"=>"NVIDIA Reflex / Frame Generation runtime", "FSRUpscaler"=>"AMD FSR upscaling runtime", "FSRFrameGeneration"=>"AMD Frame Generation runtime", _=>item.Name},
+            deps.Add(new(item.Name,item.Name switch {"BlueprintLoader"=>"Blueprint Loader", "ReShade"=>"ReShade full addon support", "RenoDXUEExtended"=>"RenoDX HDR support", "DLSSRuntime"=>"NVIDIA DLSS runtime", "Streamline"=>"NVIDIA Reflex / Frame Generation runtime", "GDKRuntime"=>"Xbox Game Save runtime binding", "FSRUpscaler"=>"AMD FSR upscaling runtime", "FSRFrameGeneration"=>"AMD Frame Generation runtime", _=>item.Name},
                 d.TryGetProperty("version",out var v)?v.ToString():d.TryGetProperty("releaseTag",out v)?v.ToString():"Pinned", url??OfficialUrl(item.Name), files,
                 d.TryGetProperty("archiveSHA256",out var a)?a.GetString():null, d.TryGetProperty("archiveMembers",out var members)?ReadHashes(members):null, d.TryGetProperty("upgradeFromFiles",out var prior)?ReadHashes(prior):null,
                 d.TryGetProperty("upgradeFromFileSets",out var sets)?sets.EnumerateArray().Select(ReadHashes).ToList():null,
                 d.TryGetProperty("minimumVersion",out var minimum)?minimum.GetString():null,
                 d.TryGetProperty("compatibilityNote",out var note)?note.GetString():null,
-                d.TryGetProperty("compatibleReleases",out var releases)?releases.EnumerateArray().Select(r=>new DependencyRelease(r.GetProperty("version").GetString()!,ReadHashes(r.GetProperty("files")),r.TryGetProperty("archiveSHA256",out var rh)?rh.GetString():null)).ToList():null));
+                d.TryGetProperty("compatibleReleases",out var releases)?releases.EnumerateArray().Select(r=>new DependencyRelease(r.GetProperty("version").GetString()!,ReadHashes(r.GetProperty("files")),r.TryGetProperty("archiveSHA256",out var rh)?rh.GetString():null)).ToList():null,
+                d.TryGetProperty("gamePassOnly",out var gamePassOnly)&&gamePassOnly.GetBoolean()));
             var dep=deps[^1];
             if(dep.MinimumVersion!=null&&(!System.Version.TryParse(dep.MinimumVersion,out var min)||!System.Version.TryParse(dep.Version,out var tested)||tested<min))throw new InvalidDataException("Invalid dependency minimum version.");
             foreach(var release in dep.CompatibleReleases??[]) {
@@ -103,7 +107,7 @@ public sealed partial class InstallerEngine {
                 if(dep.MinimumVersion!=null&&(!System.Version.TryParse(release.Version,out var v2)||v2<System.Version.Parse(dep.MinimumVersion)))throw new InvalidDataException("Compatible dependency is below the API minimum.");
             }
         }
-        Dependencies=deps;
+        allDependencies=deps;
     }
     // Normal packages contain visible, hash-pinned files beside the executable.
     public InstallerEngine(string dependencyJson, string manifestJson, string payloadDirectory)

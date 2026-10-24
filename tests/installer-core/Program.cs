@@ -23,6 +23,10 @@ try {
  GdkPut("Dungeons/Binaries/WinGDK/Dungeons-WinGDK-Shipping.exe");
  GdkPut("Dungeons/Binaries/WinGDK/dxgi.dll");GdkPut("Dungeons/Binaries/WinGDK/renodx-ue-extended.addon64");
  var gdkLock=JsonSerializer.Serialize(new{game=new{steamBuildID="123",exeSHA256=hash,winGDK=new{version="1.1.2.0",exeSHA256=hash}},dependencies});
+ var editionDependencies=new Dictionary<string,object>(dependencies){["GDKRuntime"]=new{version="test",file="Dungeons/Binaries/Win64/MCD2Graphics/gdk/xgameruntime.thunks.dll",sha256=hash,url="https://github.com/microsoft/GDK",gamePassOnly=true}};
+ var editionLock=JsonSerializer.Serialize(new{game=new{steamBuildID="123",exeSHA256=hash},dependencies=editionDependencies});
+ var steamEdition=new InstallerEngine(editionLock,manifest,()=>new MemoryStream(Payload())){RequireClosed=()=>{}};steamEdition.SetGame(temp);
+ Check(!steamEdition.Dependencies.Any(x=>x.Id=="GDKRuntime"),"Steam does not require the Game Pass middleware binding");
  var gdkEngine=new InstallerEngine(gdkLock,manifest,()=>new MemoryStream(Payload())){RequireClosed=()=>{},ConfigRootOverride=Path.Combine(temp,"GdkConfig")};
  gdkEngine.SetGame(gdkRoot,GameEdition.WinGDK,managedPrefix);
  var gdkDownload=Path.Combine(temp,"gdk-runtime.dll");File.WriteAllBytes(gdkDownload,file);gdkEngine.SelectDependency("DLSSRuntime",gdkDownload);

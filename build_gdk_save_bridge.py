@@ -7,6 +7,16 @@ import subprocess
 
 from build_toolchain import native_frame_guard, normalize_windows_header
 
+def resolve_gdk_include(root):
+    root=Path(root).resolve()
+    candidates={root,root/'GRDK/GameKit/Include',root/'windows/include'}
+    for pattern in ('*/GRDK/GameKit/Include','*/windows/include','native/*/windows/include'):
+        candidates.update(root.glob(pattern))
+    matches=sorted(path for path in candidates if all((path/name).is_file() for name in ('XGameSave.h','XGameRuntimeInit.h')))
+    if len(matches)!=1:
+        raise ValueError('Select one complete GDK include directory or one SDK version; missing/ambiguous layouts refused')
+    return matches[0]
+
 
 def main():
     root = Path(__file__).resolve().parent
@@ -16,6 +26,7 @@ def main():
     parser.add_argument('--mingw-cxx', default='x86_64-w64-mingw32-g++')
     parser.add_argument('--output', type=Path, default=root / 'dist/gdk-save-bridge')
     args = parser.parse_args()
+    args.gdk_include=resolve_gdk_include(args.gdk_include)
     if '#define RESHADE_API_VERSION 20' not in (args.reshade_include / 'reshade.hpp').read_text():
         raise ValueError('Expected ReShade API20 headers')
     output = args.output.resolve()
