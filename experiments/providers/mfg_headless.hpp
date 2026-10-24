@@ -21,6 +21,8 @@ struct MfgHeadless {
         // This probe owns an already-open command list and its submission.
         // Omitting this flag lets the backend Reset/Close that same list.
         params->Set("DLSSG.IsRecording",1u);
+        // Require this evaluation's response rather than a prior call's zero.
+        params->Set("DLSSG.FlushRequired",~0u);
         return evaluate(cmd,feature,params,nullptr);
     }
     bool load(const wchar_t* path) {

@@ -9,7 +9,8 @@ NVSDK_NGX_Result NVSDK_CONV check_recording(ID3D12GraphicsCommandList* cmd,const
     unsigned recording=0;
     assert(cmd && feature && !cb);
     assert(p->Get("DLSSG.IsRecording",&recording)==NVSDK_NGX_Result_Success && recording==1);
-    p->Set("DLSSG.FlushRequired",0u); ++evaluations;
+    if(evaluations==0) p->Set("DLSSG.FlushRequired",0u);
+    ++evaluations;
     return NVSDK_NGX_Result_Success;
 }
 int main() {
@@ -21,6 +22,10 @@ int main() {
     for(unsigned i=0;i<2;++i) {
         p->Set("DLSSG.IsRecording",0u);
         assert(backend.evaluate_recording(cmd,p)==NVSDK_NGX_Result_Success);
+        unsigned flush=~0u;
+        assert(p->Get("DLSSG.FlushRequired",&flush)==NVSDK_NGX_Result_Success);
+        // The second successful SDK call omits its response: stale zero is unsafe.
+        assert(i==0 ? flush==0 : flush!=0);
     }
     assert(evaluations==2);
     unsigned u=0; int i=0; float f=0; double d=0; unsigned long long ull=0;
