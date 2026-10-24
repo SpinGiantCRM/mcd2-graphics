@@ -9,7 +9,8 @@ class SharedRestartChecks(unittest.TestCase):
         self.assertIn('fgMenuNativeOffRecovered(currentRequest&&intent.session==session,available,intent.mode!=0,', shared)
         self.assertIn('intent.provider,presenterRoute,presenterCanSwitch,fault.load(),retired.load()))restartRequired=0;', shared)
         self.assertLess(shared.index('fgMenuRestartRequired('), shared.index('fgMenuNativeOffRecovered('))
-        self.assertLess(shared.index('fgMenuNativeOffRecovered('), shared.index('wanted=currentRequest'))
+        self.assertIn('wanted=frameModeSupported&&currentRequest&&', shared)
+        self.assertLess(shared.index('fgMenuNativeOffRecovered('), shared.index('wanted='))
 
     def test_shared_status_keeps_permanent_retirement_restart_requirement(self):
         source = Path(__file__).with_name('fg_controls.hpp').read_text()

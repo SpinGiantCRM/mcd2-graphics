@@ -46,3 +46,22 @@ Build with `build_gdk_save_bridge.py`, API20 headers and the pinned official GDK
 headers. SDK/runtime files stay external to the repository. The build receipt
 records source and GDK-header hashes. Portable codec/lifecycle checks and an
 addon build are not game or Xodus runtime qualification.
+
+## Integration candidate gates
+
+The source candidate is `0.5.0-integration.dev.1`; the released dev.25 payload
+and its qualification records remain unchanged. The guided installer requires
+an independently admitted Game Pass executable SHA-256 in `game.winGDK`.
+That pin has not yet been supplied, so Game Pass installation remains blocked
+instead of trusting the Steam executable identity or a version string.
+
+The edition-only runtime binding is acquired separately from the pinned
+Microsoft GDK package. Steam installation does not acquire this dependency.
+The build artifact contains the source-built bridge and its receipt, not the
+Microsoft runtime binding, player saves or account data.
+
+Before support can be advertised, qualify the same candidate on native Windows
+Game Pass and separately through Xodus, including user binding, all channel
+round trips, provider activation, restart and exit. The presentation wrapper
+also needs native Windows Steam regression coverage. Existing contributor
+results are historical inputs, not acceptance of the integrated binary.

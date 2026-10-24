@@ -1,49 +1,49 @@
 {
   "schemaVersion": 3,
   "candidateOnly": true,
-  "version": "0.4.0-amd.dev.25",
+  "version": "0.5.0-integration.dev.1",
   "sourceFileSHA256": {
-    "src/ui/ModActor.cs": "03b967f035cd43cf0ef659120d457b05a8401e0f64edf530e98668fa3e772dd6",
+    "src/ui/ModActor.cs": "d11007c2da2d9ce6b47a9a8cf2d5b44db9c13d1be88a6d9f1d8541478f14e932",
     "src/ui/ProviderSaveWords.cs": "ae796d9934e3b418e08e035d67eb1d0b3c256a30631cf37f6a710897812fdfee",
-    "src/ui/ProviderMenuClient.cs": "f229bf11b22ef13f6bdae191fc08afdc867ff3d6c654559b0f67e090997f282b",
+    "src/ui/ProviderMenuClient.cs": "f2fcfccfa8f655f42b53db86fbfb9a3bc8e9ee71a0b0c0fb147c9b06d852a630",
     "src/ui/ProviderRuntimeWords.cs": "fa5f8626af17474a0f60557050b55fbc470ac549726b0e969a810910d0bb632b",
-    "src/ui/ProviderRuntimeClient.cs": "2be82fdcf02df71f8ddace168350c8afefcd0a1942b301f0f2bc15ea7567cd68",
+    "src/ui/ProviderRuntimeClient.cs": "be67eb5ceaacb918f79bfa55fe32a657637d5339c99703cf7dc43dd2875c95d2",
     "src/ui/AdvancedSettings.cs": "582e633d931b016d41c9ae2589376366c8f0cd00a9f055b453f2a6c061ba3ec3",
     "src/ui/AdvancedInfoWidget.cs": "0de0d9e909cb0cf55c19d6cdbf0f08e3cebd62c69e0f6bf572dff9862b9d4295",
-    "src/ui/AdvancedSettingsPanel.cs": "9f1fee8fb7d9cad2667d7896977de155868a46407e2b3bb385400f4b7f9505a3",
+    "src/ui/AdvancedSettingsPanel.cs": "d072110b1e207c959aa67f72e40ccb7ce5b7709cb456f0017f49f0cb7d73ecf2",
     "src/ui/NativeSettingsWidgets.cs": "3110705bf8733224e2926b8553e18ff0cefcaac3df579d7dfe6405ec1f679c4d",
     "src/ui/RuntimeDiagnostics.cs": "45b14ff2e293adf2c75bd8b76d7cec3cf5b6d5462f72f360321234c0f4294c8d",
     "src/ui/RuntimeDiagnosticsOverlay.cs": "cde3b72de1a23c161f83ad00cf6900599057d6fcefb026dd8839b494b962a540",
     "src/ui/UpscalingSharpness.cs": "070afd9cfdcf99a1ddc11d8d9cb321235e7daea7933b7e7c31dd824111e60cc8",
     "src/ui/mod-info.json": "c6a2be6c7020c75eb71cd87df7f6f19d84615be6b7d78aded5da65736c68c0de",
     "build_ui.py": "8ebdbabcff593c27f572a547c642703a74b5168776a7a7809537ae48d253bd14",
-    "dependencies.lock.json": "816304d7cd61b9a9254980656c3b3f21495175f6cad94ef1f0520ed7c7b3b1e5",
-    "manifest.json": "be6087e297f05033994d5c6e3959cb266e37e7a683738a26cea2b28b97b03924"
+    "dependencies.lock.json": "b10379f4528e2f02677c493f94f71743f78bb2468ff8f921152b059f70d5d205",
+    "manifest.json": "973476c1173591e191b3965999fcab02edeacfb132d940350ce599019fa92e48"
   },
   "payloadSHA256": {
-    "MCD2Graphics_P.pak": "3cb89a41f4b50b220001df737e63e87eb3576aff2c1250e68c6476f3e4700e11",
-    "MCD2Graphics_P.ucas": "33223f08027b8dbf0a1b5dd229c9f9d2c8fd6f740960063b9e7706550be63f70",
-    "MCD2Graphics_P.utoc": "21bd3a4c3f05ea9c06a7ccb506b8062db0796c84a5a246a6293b34dc9d170c16"
+    "MCD2Graphics_P.pak": "b4b4de264b626e24f9adcfae58d8a3c4f4732859c140c28fad448a28fcae5c7d",
+    "MCD2Graphics_P.ucas": "76d3f8050c549de6cec62e91b41b391556a806700778c4ac3b526f82db60688c",
+    "MCD2Graphics_P.utoc": "6a095c7d7282cf6ae4b0dda2fb8c48391bf6681ee0e06911b022ca8603d9e4aa"
   },
   "metadataAPI": "Blueprint Loader 2.0 BP_ModInfo; SDK-generated versioned metadata; no popup API",
   "compiler": "NeoRune 1.0.0 / .NET reference pack 10.0.13",
   "toolSHA256": {
-    "dotnet": "abce6623a6729059cf39bb0f728c4a7804f625895099c88c17e6e704661e09eb",
+    "dotnet": "8b3d902364f618e31e029d4eba077d52c141dd641e375f4555715604806e44b6",
     "Microsoft.CodeAnalysis.CSharp.dll": "fc571a6647ac45b0b0dc1866b795529bb2eeb93adf9be97fcd5903cf482f700a",
     "Microsoft.CodeAnalysis.dll": "55618d457128eec582017545b8929ebf195669003b6ec737110f9519e1711d28",
     "NeoRune.Assets.dll": "836e6739c5c4748474193928814ed2ed6ea2b15552a2dd2faa7a449550f0e712",
     "NeoRune.Bindings.dll": "a72c9119856ef1ff1223a04621d54bd839e6ce1d2fc5d6b4a83bbeff9dd37fee",
     "NeoRune.Compiler.dll": "451c4b43321fc05c08596cb01836d617818a0b10d8e7748c4bdd57fce3216255",
     "NeoRune.Discovery.dll": "2a13b45f8471e4876a2aab7914eb41f67afda4995c8121fa790e056389e11d94",
-    "neorune.dll": "9ffeb3dbc2db899aa9785d8fabdd113c456fbe3f2b52f11d077e5742b599ade5",
     "NeoRune.Packaging.dll": "ec24fb69caa5418f86506089345e50a8acabc48ce0cc927dcaf738a2eaa975b6",
     "Newtonsoft.Json.dll": "a28c251dfe36d881e9e2462e171441b8b0ec156fe3f452602c9149b1b9efe05b",
     "UAssetAPI.dll": "5a70229f28af788925908619f72f0bb4ae337c1c88faba7ed09b919133942d60",
-    "ZstdSharp.dll": "5d597fb07c93f99bcbbcf1265bfc60de1f1f8fc070a3acc36f0371a86c326b16"
+    "ZstdSharp.dll": "5d597fb07c93f99bcbbcf1265bfc60de1f1f8fc070a3acc36f0371a86c326b16",
+    "neorune.dll": "9ffeb3dbc2db899aa9785d8fabdd113c456fbe3f2b52f11d077e5742b599ade5"
   },
   "packToolSHA256": {
-    "repak.exe": "fcd538e5994b9bb833622d425ae346f4e0692f02d4b0025114a559f9b6286022",
-    "retoc.exe": "a145f3557ec60b163ed1b78b2f380232d2753fa30350c8013c98e171db3ae7e7"
+    "repak.exe": "f36ddee2ed70cc9564b20c3d4b30a9432a8c2b8f171beff7bf5ffcf5ace52364",
+    "retoc.exe": "f36ddee2ed70cc9564b20c3d4b30a9432a8c2b8f171beff7bf5ffcf5ace52364"
   },
   "sdkInputSHA256": {
     "src/Coroutine.cs": "dcdcd43fb32f22ebc3143ea24ee66e83f9f59efe3089e5cd259d0ee033ea2036",
@@ -77,11 +77,11 @@
   "referencePack": "10.0.13",
   "dotnetSDK": "10.0.402",
   "metadataSHA256": {
-    "ModInfo.uasset": "8e7dfe0280b7f72a3bb51fa7a95cc78e83929a29a23aea4c7ab8f3541ebe7451",
-    "ModInfo.uexp": "05479c1df2a4c324d154ecaa4f6b4e8682b12f0a74ed3e636580c11b0667c08f"
+    "ModInfo.uasset": "4205ac87ad301bbc80e9209f420c1b1a0ddf60583364755ca95dd08436b3238a",
+    "ModInfo.uexp": "08c5b22d599ec0b65a45788a42c3d741230f71431e2b014d1990b861e8e7cc05"
   },
   "WindowsQualified": false,
   "LinuxRuntimeQualified": false,
   "publishedPayloadChanged": false,
-  "archiveSHA256": "b63def810b571124be988885f515a96d46b71a3a083b11f5423b696603429e67"
+  "archiveSHA256": "cb95e47e10dd7033dbb73823db69c678546459f0b3513a7313d8d9bf420c1615"
 }

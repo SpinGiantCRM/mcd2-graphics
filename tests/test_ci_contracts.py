@@ -112,15 +112,22 @@ class WindowsFailFastTests(unittest.TestCase):
         windows = workflow.split('  windows-installer-checks:\n', 1)[1].split(
             '\n  guided-installer-checks:', 1)[0]
         self.assertRegex(windows, r'defaults:\s+run:\s+shell: bash')
+        self.assertEqual(windows.count('\n    defaults:'), 1,
+                         'Duplicate job keys invalidate the hosted workflow')
         body = step_body(windows, 'Native build recipe regressions')
         # The first disposable module fails; the second records execution if
         # that failure is masked. Use the workflow's real command sequence.
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             (root / 'tests').mkdir()
-            (root / 'tests/test_ci_contracts.py').write_text(
-                'import unittest\nclass Pass(unittest.TestCase):\n'
-                ' def test_pass(self): pass\n')
+            # Every earlier discovery command needs a real passing test:
+            # newer Python versions fail discovery when no tests are found.
+            # Derive the stand-ins from the real recipe so adding a check
+            # cannot make this fixture stop before its injected failure.
+            for pattern in re.findall(r'-p "(test_[^"*]+\.py)"', body):
+                (root / 'tests' / pattern).write_text(
+                    'import unittest\nclass Pass(unittest.TestCase):\n'
+                    ' def test_pass(self): pass\n')
             (root / 'tests/test_build_toolchain.py').write_text(
                 'import unittest\nclass Failure(unittest.TestCase):\n'
                 ' def test_failure(self): self.fail("injected regression")\n')
