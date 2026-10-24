@@ -15,6 +15,17 @@ class Parameters {
     std::map<std::string,Value> values_;
     template<class T,class U> static bool convert(U value,T& output) {
         if constexpr(std::is_arithmetic_v<T> && std::is_arithmetic_v<U>) {
+            if constexpr(std::is_integral_v<U> && std::is_floating_point_v<T>) {
+                // Microsoft long double is only 53 bits. Check discarded
+                // integer bits before any floating conversion can round them.
+                using Unsigned=std::make_unsigned_t<U>;
+                Unsigned magnitude=static_cast<Unsigned>(value);
+                if constexpr(std::is_signed_v<U>) if(value<0) magnitude=Unsigned(0)-magnitude;
+                auto remaining=magnitude; unsigned significant=0;
+                while(remaining) { ++significant; remaining>>=1; }
+                constexpr unsigned precision=std::numeric_limits<T>::digits;
+                if(significant>precision && (magnitude & ((Unsigned(1)<<(significant-precision))-1))!=0) return false;
+            }
             const long double number=static_cast<long double>(value);
             if constexpr(std::is_integral_v<T>) {
                 constexpr int bits=std::numeric_limits<T>::digits;

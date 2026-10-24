@@ -3,7 +3,7 @@ import copy
 import hashlib
 import importlib.util
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import tempfile
 import unittest
 
@@ -32,6 +32,11 @@ def samples(multiplier=4):
 
 
 class MfgProbeTests(unittest.TestCase):
+    def test_linux_command_leaves_dll_resolution_to_windows_executable(self):
+        command=runner.probe_command(PurePosixPath('/home/test/isolated'),4,PurePosixPath('/tools/proton'))
+        self.assertEqual(command,['/tools/proton','run','/home/test/isolated/mfg-compute-probe.exe','4'])
+        self.assertEqual(runner.probe_command(Path('/native'),6),[str(Path('/native')/runner.BINARY),'6'])
+
     def test_changed_sdk_headers_refused_before_compiler_or_output(self):
         spec=importlib.util.spec_from_file_location('mfg_build',ROOT/'experiments/providers/build_mfg_compute_probe.py')
         recipe=importlib.util.module_from_spec(spec); spec.loader.exec_module(recipe)

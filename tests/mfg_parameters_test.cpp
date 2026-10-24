@@ -19,6 +19,14 @@ int main() {
     unsigned long long ull=0;
     assert(p.get("large",ull) && ull==std::numeric_limits<unsigned long long>::max());
     assert(!p.get("large",u) && !p.get("large",i));
+    double d=77;
+    assert(p.set("precision",9007199254740993ull));
+    assert(!p.get("precision",d) && d==77);
+    assert(!p.get("large",d) && d==77);
+    assert(p.set("float-precision",16777217ull)); f=77;
+    assert(!p.get("float-precision",f) && f==77);
+    assert(p.set("exact-double",9007199254740992ull));
+    assert(p.get("exact-double",d) && d==9007199254740992.);
     assert(p.set("overflow",std::ldexp(1.,64)) && !p.get("overflow",ull));
     assert(!p.set("nan",std::nanf("")));
     assert(!p.set("inf",INFINITY));

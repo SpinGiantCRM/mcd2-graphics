@@ -63,6 +63,13 @@ def game_running():
     return False
 
 
+def probe_command(run_dir,multiplier,proton=None):
+    # The Windows executable derives its adjacent DLL path from its own module
+    # filename. Never pass a POSIX DLL path to Windows std::filesystem.
+    command=[str(run_dir/BINARY),str(multiplier)]
+    return [str(proton),'run',*command] if proton else command
+
+
 def image_gate(rows,exit_code,timed_out,multiplier):
     if timed_out or exit_code!=0 or multiplier not in range(2,7): return False
     for stage in ('adapter','capability','init','populate','scratch','create','release','shutdown','complete'):
@@ -118,8 +125,7 @@ def run(build,runtime,run_dir,multiplier,proton=None,prefix=None,steam=None):
     shutil.copyfile(runtime,run_dir/RUNTIME)
     # Copy only the own probe and one exact external DLL; no game's proxy,
     # settings, runtime tree or launcher configuration is copied.
-    command=[str(run_dir/BINARY),str(run_dir/RUNTIME),str(multiplier)]
-    if os.name!='nt': command=[str(Path(proton).resolve()),'run',*command]
+    command=probe_command(run_dir,multiplier,Path(proton).resolve() if proton else None)
     started=time.monotonic(); timed_out=False
     with (run_dir/'process-private.log').open('w') as output:
         process=subprocess.Popen(command,cwd=run_dir,env=environment,stdout=output,stderr=subprocess.STDOUT,start_new_session=os.name!='nt')

@@ -198,10 +198,13 @@ int wmain(int argc,wchar_t** argv) {
     // the containment boundary. No callbacks/resources may escape into a game.
     auto s=new Session;
     try {
-        require(argc==3,"arguments-runtime-and-multiplier");
-        const std::wstring count=argv[2]; require(count.size()==1 && count[0]>=L'2' && count[0]<=L'6',"multiplier");
+        require(argc==2,"argument-multiplier");
+        const std::wstring count=argv[1]; require(count.size()==1 && count[0]>=L'2' && count[0]<=L'6',"multiplier");
         const unsigned multiplier=unsigned(count[0]-L'0');
-        const auto runtime=fs::path(argv[1]);
+        std::vector<wchar_t> modulePath(32768);
+        const auto length=GetModuleFileNameW(nullptr,modulePath.data(),DWORD(modulePath.size()));
+        require(length>0 && length<modulePath.size(),"executable-module-path");
+        const auto runtime=fs::path(std::wstring(modulePath.data(),length)).parent_path()/L"dlss-enabler-headless.dll";
         require(runtime.is_absolute() && runtime.filename()==L"dlss-enabler-headless.dll","headless-path");
         s->runtimeFile=verify_runtime(runtime); require(s->runtimeFile!=nullptr,"runtime-hash");
         require(SUCCEEDED(CreateDXGIFactory2(0,IID_PPV_ARGS(&s->factory))),"create-factory");
