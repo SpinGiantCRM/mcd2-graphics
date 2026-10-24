@@ -53,6 +53,10 @@ def integration_dependency_lock(assembled, released):
     result=copy.deepcopy(released)
     result['game']=copy.deepcopy(assembled['game'])
     result['dependencies']['ReShade']=copy.deepcopy(assembled['dependencies']['ReShade'])
+    previous=released['dependencies']['ReShade']
+    known=copy.deepcopy(previous.get('files') or {previous['file']:previous['sha256']})
+    allowed=result['dependencies']['ReShade'].setdefault('upgradeFromFileSets',[])
+    if known not in allowed:allowed.append(known)
     for key in ('editionDependencies','buildDependencies'):
         if key in assembled:result[key]=copy.deepcopy(assembled[key])
     return result

@@ -96,10 +96,11 @@ class CandidateAssemblyTests(unittest.TestCase):
                    'dependencies':{'ReShade':{'sha256':'2'*64},'Streamline':{'version':'old'}},
                    'editionDependencies':{'WinGDK':{'GDKRuntime':{'sha256':'3'*64}}}}
         released={'game':{'steamBuildID':'old'},'dependencies':{
-            'ReShade':{'sha256':'4'*64},'Streamline':{'version':'2.14.16'},'BlueprintLoader':{'version':'2.7'}}}
+            'ReShade':{'file':assembler.BIN+'d3d12.asi','sha256':'4'*64},'Streamline':{'version':'2.14.16'},'BlueprintLoader':{'version':'2.7'}}}
         result=assembler.integration_dependency_lock(assembled,released)
         self.assertEqual(result['game'],assembled['game'])
-        self.assertEqual(result['dependencies']['ReShade'],assembled['dependencies']['ReShade'])
+        self.assertEqual(result['dependencies']['ReShade']['sha256'],assembled['dependencies']['ReShade']['sha256'])
+        self.assertIn({assembler.BIN+'d3d12.asi':'4'*64},result['dependencies']['ReShade']['upgradeFromFileSets'])
         self.assertEqual(result['dependencies']['Streamline'],released['dependencies']['Streamline'])
         self.assertEqual(result['dependencies']['BlueprintLoader'],released['dependencies']['BlueprintLoader'])
         self.assertEqual(result['editionDependencies'],assembled['editionDependencies'])
