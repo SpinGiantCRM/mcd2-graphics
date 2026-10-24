@@ -1,3 +1,34 @@
+# 0.4.0-amd.dev.25 — FSR release candidate (not published)
+
+Bounded [Windows/Radeon](WINDOWS_DEV25_ACCEPTANCE_2026-10-24.md) and [Linux/NVIDIA](LINUX_DEV25_ACCEPTANCE_2026-10-24.md) qualification is complete with known issues. Existing published releases remain unchanged. [Candidate installation and scope](DEV25_RELEASE_CANDIDATE.md).
+
+## FSR and provider choices
+
+- Adds analytical FSR Super Resolution **3.1.5**, Native AA and Frame Generation **3.1.6** alongside DLSS/DLAA and NVIDIA FG. Quality modes and custom resolution scale share the native Video controls.
+- Separates SR and FG provider selection. Tested combinations include **FSR SR + NVIDIA FG**, **DLSS SR + AMD FG**, and Native rendering with AMD FG. This candidate uses one FG provider at a time; combined FG providers and native MFG are future work.
+- Adds compatible Windows/Radeon **Anti-Lag 2**, while retaining independent **Reflex Off / On / On + Boost** on supported NVIDIA hardware. Low latency remains selectable with FG Off. Anti-Lag 2 is refused on NVIDIA.
+- Safely returns AMD FG to the native presentation route on Off, then permits generation again in a session started with AMD FG. A completely native startup still requests a restart to enable FG. Short Linux recovery samples did not demonstrate the previous persistent Off penalty; full performance comparisons follow release.
+
+## Settings and runtime information
+
+- Adds **Upscaling Sharpness** below render scale, using one post-upscale game filter for both providers. Native fallback restores the prior value while still owned, and external changes take precedence.
+- Adds **Upscaling**, **Frame Generation** and **Diagnostics** pages under Mods → MCD2 Graphics, with persistent framed side help, compact rows and a single selected amber tab glow. Ordinary graphics controls remain in Video. Blueprint Loader source and other mods' settings are unchanged.
+- Adds letter-first DLSS SR model choices **E/F (legacy CNN), J/K (Transformer), L/M (second-generation Transformer)**, plus Auto. Auto follows the DLSS quality mode rather than forcing one model everywhere. Nonfunctional Custom is removed.
+- Adds **DLSS FG Auto/A/B/C requests**, independent FSR SR/FG implementation selectors, loaded runtime versions and separate menu-details/gameplay-diagnostics toggles. The gameplay overlay is at the **top left**. Active status requires fresh, matching runtime evidence; a saved preset, loaded DLL or accepted override is not final model readback.
+- Official FSR 4.1 and ML FG require supported hardware and driver approval. The optional community 4.1 INT8 upscaler is external and experimental; it does not unlock ML FG. Explicit unsupported selections do not silently become analytical FSR. These paths are outside this candidate's completed activation coverage.
+
+## Compatibility and qualification
+
+- Adds support for the inspected **Steam build 25910487**, retaining explicit executable/layout checks and Native fallback.
+- Improves padded FSR output copies after resize, SDR FG admission with game sharpening enabled, failed AMD-presenter startup cleanup and shared SDK/resource retirement. The candidate framework also carries the descriptor-heap lifetime correction. These changes do not claim to fix every crash.
+- Corrects bootstrap receipt logging synchronization and current-context diagnostics attribution. Stale, opted-out or mismatched observations cannot be treated as active execution. Some live diagnostic samples can still be unavailable while independent SDK activity advances.
+- Verifies the exact candidate with **Blueprint Loader 2.6 on Windows/Radeon** and **2.7 on Linux/NVIDIA**, Streamline **2.14.16**, DLSS **310.9.16**, FSR SDK **2.3.0** and RenoDX **0.2026.1023.0826**. Platform dependency locks remain separate. Framework and vendor runtimes are acquired externally.
+- Retains ownership-based install, repair and uninstall guards. Linux checks include 148 installer-core checks, 15 exact-candidate filesystem checks and final verification of all 18 installed owned files and 15 dependencies, with no overrides.
+
+**Known issues:** intermittent shutdown failures remain recorded. Windows reproduced its shutdown fault with official ReShade + Loader and no graphics payload from this mod; Linux's fault is not proven identical. Successful Windows shutdown can take about 89 seconds. Historical focus-loss crashes/black lines and one Linux click-capture recovery remain disclosed. See the linked acceptance records and [reporting guide](REPORTING_GRAPHICS_PROBLEMS.md).
+
+Full FPS, frame-time, image-quality and physical latency benchmarks follow release at the maintainer's request. No new performance-benefit claim is made. Physical controllers, wider hardware/lifecycle coverage, Xbox PC, combined FG providers and native MFG remain outside this candidate's qualified scope.
+
 # 0.3.0-preview.1 — Frame Generation preview
 
 Experimental prerelease. Uses the exact Windows-qualified installer source and payload; Linux qualification and fresh benchmarks passed without runtime or installer code changes for publication.

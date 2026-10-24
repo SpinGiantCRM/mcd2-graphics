@@ -16,8 +16,10 @@ For a Windows fault, optional useful fields from **Event Viewer → Windows Logs
 
 Keep raw Unreal crash folders, memory dumps and full logs private. They may contain account information, personal paths, process memory or proprietary game data. Do not attach executables, runtime DLLs, saves, tokens or entire folders to a public issue. Start with the sanitized diagnostic report, a short sanitized error excerpt and a cropped image if useful. A maintainer can request a specific additional capture and private transfer route if needed.
 
-## Current Windows candidate observations
+## Current candidate observations
 
 The dev.25 Windows/Radeon testing recorded an intermittent FSR Quality / FG Off focus-loss GPU crash, a Native black-line report, and intermittent shutdown access violations. Later focus-switch runs were clean. Shutdown faults also occurred in a reduced ReShade + Blueprint Loader configuration without this mod’s graphics payload. These are observations, not established causal attribution or a claim that all crashes share one cause.
+
+Linux/NVIDIA dev.25 testing also recorded shutdown failures in NVIDIA FG sessions. One diagnostic replay captured an access violation before the terminal failure; identical ownership with Windows is unproven. A startup main-menu click issue recovered after Alt-Tab. See the [Linux qualification](LINUX_DEV25_ACCEPTANCE_2026-10-24.md) and [Windows acceptance](WINDOWS_DEV25_ACCEPTANCE_2026-10-24.md). Existing dependency reports are reused; users do not need to repeat the component-isolation matrix.
 
 If your report resembles one of these, submit it to this project first with the exact inputs and trigger. We can compare the evidence and route a demonstrated dependency defect upstream. You do not need to diagnose the owner or create accounts with several dependency projects before reporting here. Do not disable Windows protection, alter driver timeout settings or patch the game to gather a report.

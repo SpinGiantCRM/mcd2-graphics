@@ -9,6 +9,8 @@ on:
       - 'dependencies.lock.json'
       - 'tests/test_installer_amd_candidate.py'
       - 'qualification/providers/windows-candidate-*.json'
+      - 'qualification/providers/linux-dev25/dependencies-*.lock.json'
+      - 'qualification/providers/windows-dev25/dependencies-*.lock.json'
   workflow_dispatch:
     inputs:
       qualification_receipt:
@@ -39,7 +41,7 @@ jobs:
           CANDIDATE_RECEIPT: ${{ inputs.qualification_receipt || 'qualification/providers/windows-candidate-current.json' }}
         run: |
           @'
-          import json,os,pathlib,re,subprocess,sys
+          import hashlib,json,os,pathlib,re,subprocess,sys
           selected=os.environ['CANDIDATE_RECEIPT']
           if not re.fullmatch(r'qualification/providers/windows-candidate-[a-zA-Z0-9.-]+\.json',selected):
               raise ValueError('Select a repository qualification receipt; arbitrary paths are refused')
@@ -56,6 +58,18 @@ jobs:
               '--archive-sha256',p['archiveSHA256'],'--source-commit',p['sourceCommit'],
               '--artifact-url',f'https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/{p["run"]}/artifacts/{p["artifact"]}',
               '--version',p['candidateVersion'],'--output',str(stage/'inputs')],check=True)
+          locks=p.get('installerDependencyLocks')
+          for rid in ('linux-x64','win-x64'):
+              data=(stage/'inputs/dependencies.lock.json').read_bytes()
+              if locks is not None:
+                  lock=locks[rid]
+                  if not re.fullmatch(r'qualification/providers/[a-zA-Z0-9.-]+/[a-zA-Z0-9.-]+\.json',lock['path']):
+                      raise ValueError('Select a repository dependency lock; arbitrary paths are refused')
+                  data=pathlib.Path(lock['path']).read_bytes()
+                  if hashlib.sha256(data).hexdigest()!=lock['sha256']:
+                      raise ValueError('Selected dependency lock hash mismatch')
+                  json.loads(data)
+              (stage/f'{rid}-dependencies.lock.json').write_bytes(data)
           with open(os.environ['GITHUB_OUTPUT'],'a') as out: out.write('ready=true\n')
           '@ | python
       - name: Build visible installer folders
@@ -63,9 +77,9 @@ jobs:
         shell: pwsh
         run: |
           $sdk = (Get-Command dotnet).Source
-          python build_installer.py --dotnet $sdk --payload dist/amd/inputs/payload --rid linux-x64 --manifest dist/amd/inputs/manifest.json --dependency-lock dist/amd/inputs/dependencies.lock.json --output dist/amd/installers/linux
+          python build_installer.py --dotnet $sdk --payload dist/amd/inputs/payload --rid linux-x64 --manifest dist/amd/inputs/manifest.json --dependency-lock dist/amd/linux-x64-dependencies.lock.json --output dist/amd/installers/linux
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          python build_installer.py --dotnet $sdk --payload dist/amd/inputs/payload --rid win-x64 --manifest dist/amd/inputs/manifest.json --dependency-lock dist/amd/inputs/dependencies.lock.json --output dist/amd/installers/windows
+          python build_installer.py --dotnet $sdk --payload dist/amd/inputs/payload --rid win-x64 --manifest dist/amd/inputs/manifest.json --dependency-lock dist/amd/win-x64-dependencies.lock.json --output dist/amd/installers/windows
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Upload development installers and provenance (not a release)
         if: steps.candidate.outputs.ready == 'true'
@@ -79,3 +93,4 @@ jobs:
             dist/amd/inputs/assembly-receipt.json
             dist/amd/inputs/AMD_BRIDGE_NOTICES.txt
             dist/amd/inputs/provenance/**
+            dist/amd/*-dependencies.lock.json

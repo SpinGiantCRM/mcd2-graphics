@@ -1,5 +1,7 @@
 # Guided installation — 0.3.0-preview.1
 
+For the upcoming FSR release, use the [dev.25 candidate guide](docs/DEV25_RELEASE_CANDIDATE.md). Its tested Windows/Radeon and Linux/NVIDIA dependency sets use Loader 2.6 and 2.7 respectively. It has not been published; the instructions below still identify the existing 0.3.0-preview.1 downloads.
+
 Download the compiled **Windows** or **Linux** installer from the [release Assets](https://github.com/SpinGiantCRM/mcd2-graphics/releases/tag/v0.3.0-preview.1). Extract the **entire folder** before running it. GitHub's automatic source archives are for developers. No separate Python or .NET installation is needed.
 
 ## Install

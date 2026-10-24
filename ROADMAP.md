@@ -8,7 +8,7 @@ Release history is in the [changelog](docs/RELEASE_NOTES.md). See [validation](d
 
 ### 1. FSR parity with DLSS
 
-Add native FSR Super Resolution, Native AA, Frame Generation and compatible Radeon Anti-Lag 2 support. Keep SR and FG independently selectable, including DLSS SR + FSR FG and FSR SR + DLSS FG where supported.
+Consolidate and publish the implemented FSR Super Resolution, Native AA, Frame Generation and compatible Radeon Anti-Lag 2 paths. Dev.25 has bounded [Windows/Radeon and Linux/NVIDIA acceptance](docs/VALIDATION.md), with known issues disclosed. SR and FG are independently selectable, including DLSS SR + FSR FG and FSR SR + DLSS FG where supported. Full benchmarks follow release.
 
 Prepare shared provider interfaces and frame inputs while preserving existing DLSS, FG, Reflex, HDR, saved settings and Native fallback. Qualify analytical paths first; enable ML paths only when their runtime and hardware requirements are met.
 

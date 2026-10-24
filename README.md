@@ -8,9 +8,11 @@ DLAA, DLSS Super Resolution, Frame Generation, native HDR controls and supported
 
 The mod does not force offline mode. Online/co-op compatibility is unverified; offline play is safer. Follow the publisher's terms. See [online use](docs/ONLINE_USE.md).
 
+**Next release candidate: 0.4.0-amd.dev.25.** FSR SR/FG, independent latency, mixed SR/FG choices, sharpness and the advanced Mods pages have bounded [Windows/Radeon](docs/WINDOWS_DEV25_ACCEPTANCE_2026-10-24.md) and [Linux/NVIDIA](docs/LINUX_DEV25_ACCEPTANCE_2026-10-24.md) acceptance with known issues. [Candidate controls, installation and limits](docs/DEV25_RELEASE_CANDIDATE.md). It is not published yet; the controls and benchmarks below describe the released 0.3.0-preview.1.
+
 **NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT.**
 
-## Controls
+## Released 0.3.0-preview.1 controls
 
 **Settings → Video → Reconstruction** is available from the main menu and pause menu.
 
@@ -46,7 +48,7 @@ Before changing the installer, native addon or build recipe, read the
 [Windows fix rationale and preservation requirements](docs/WINDOWS_COMPATIBILITY.md).
 It maps every change to its cause, relevant Windows behavior and protecting checks.
 
-## Local benchmark
+## Released 0.3.0-preview.1 benchmark
 
 At 4K on an RTX 4080 SUPER, three 30-second stationary hub samples per mode gave:
 
@@ -59,4 +61,4 @@ FG Off was about 2% below a fresh previous-release control in this bounded scene
 
 ## Credits
 
-ReShade, RenoDX/UE Extended, NeoRune and Blueprint Loader contributors, and NVIDIA. See [third-party notices](THIRD_PARTY_NOTICES.md). Development used AI assistance with local build and runtime checks.
+ReShade, RenoDX/UE Extended, NeoRune and Blueprint Loader contributors, NVIDIA and AMD/GPUOpen. See [third-party notices](THIRD_PARTY_NOTICES.md). Development used AI assistance with local build and runtime checks.
