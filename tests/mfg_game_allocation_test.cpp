@@ -4,7 +4,10 @@
 #define REQUIRE(expr) do { if(!(expr)){std::fprintf(stderr,"FAIL line %d: %s\n",__LINE__,#expr);return 1;} } while(false)
 int main(){
  auto& r=runtime();r.softwareReady=true;r.softwareMax=5;r.nativeReady=true;r.nativeMax=2;
- REQUIRE(mcd2_mfg_configure_v2(2,6,2,3)==0);
+ REQUIRE(mcd2_mfg_configure_v3(2,6,2,3,35)!=0); // D D requires sixths
+ REQUIRE(mcd2_mfg_configure_v3(2,6,2,3,42)==0 && selectedOrder==42);
+ REQUIRE(mcd2_mfg_configure_v3(2,6,2,3,106)!=0 && selectedOrder==42);
+ REQUIRE(mcd2_mfg_configure_v2(2,6,2,3)==0 && selectedOrder==0);
  REQUIRE(selectedStrategy==2 && selectedMultiplier==6 && selectedDlss==2 && selectedFsr==3);
  REQUIRE(mcd2_mfg_configure_v2(2,6,3,2)!=0); // sixths require native SDK count5
  REQUIRE(selectedDlss==2 && selectedFsr==3); // failed request preserves prior selection
@@ -37,5 +40,17 @@ int main(){
  unsigned count{},index{};params.Get("DLSSG.MultiFrameCount",&count);params.Get("DLSSG.MultiFrameIndex",&index);
  REQUIRE(count==1 && index==1); // preserved legacy midpoint SDK contract
  REQUIRE(mcd2_mfg_configure_v2(0,1,0,0)==0 && selectedDlss==0 && selectedFsr==0);
+ r.nativeMax=5;
+ REQUIRE(mcd2_mfg_configure_v3(2,6,2,3,35)==0 && selectedOrder==35);
+ REQUIRE(mcd2_mfg_configure_v3(0,1,0,0,35)!=0);
+ REQUIRE(mcd2_mfg_configure_v3(1,3,2,0,35)==0 && selectedOrder==35);
+ REQUIRE(mcd2_mfg_configure_v3(1,3,2,0,33)!=0);
+ s.plan=*make_allocation_plan(2,3,{6,6,true},35);
+ for(unsigned slot=1;slot<=5;++slot){
+  const bool native=slot<=2;parameters(s,params,native,slot);
+  params.Get("DLSSG.MultiFrameCount",&count);params.Get("DLSSG.MultiFrameIndex",&index);
+  REQUIRE(count==5 && index==slot); // unchanged sixths, selected providers reevaluated
+ }
+ REQUIRE(mcd2_mfg_configure_v1(3,6)==0 && selectedOrder==0);
  std::puts("PASS CPU allocation configuration and SDK parameter grid");return 0;
 }

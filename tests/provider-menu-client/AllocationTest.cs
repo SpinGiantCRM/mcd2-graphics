@@ -15,8 +15,8 @@ static class AllocationTest {
   var c=new ProviderMenuClient();c.Poll();Need(c.Ready&&c.DlssGenerated()==1&&c.FsrGenerated()==0,"legacy default2x");
   Need(c.SelectFgAllocation(2,3),"explicit split request");Need(c.Value(19)==0,"extra settings never enable FG");Need(c.Value(21)==2&&c.DlssGenerated()==2&&c.FsrGenerated()==3&&c.Value(22)==6,"coherent additive selection");
   c.Poll();var r=(ProviderRequestSave)UGameplayStatics.Slots["MCD2GraphicsProviderRequest"];
-  Need(r.W16==6&&r.W11==0x00364947&&r.W31==(2|(2<<8)|(3<<16))&&c.RequestValid(r),"versioned atomic wire");
+  Need(r.W16==7&&r.W11==0x00374947&&r.W31==(2|(2<<8)|(3<<16))&&c.RequestValid(r),"versioned atomic wire");
   r.W31|=1<<24;r.W14=r.Checksum(10,32);r.W4=r.Checksum(0,42);Need(!c.RequestValid(r),"reserved allocation bits refused");
-  Console.WriteLine("FG allocation: additive totals, device gates, uniform native grids, schema5 preservation and schema6 atomic split pass");
+  Console.WriteLine("FG allocation: additive totals, device gates, uniform native grids, schema5 preservation and schema7 atomic split pass");
  }
 }

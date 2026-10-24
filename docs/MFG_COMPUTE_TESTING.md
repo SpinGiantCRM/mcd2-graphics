@@ -224,3 +224,18 @@ the isolated desktop rejected PQ colour-space activation. Preserve this failed
 control and require the actual game's HDR check before claiming support.
 
 Performance benchmarks remain on hold.
+
+
+### Provider-order candidate
+
+Dev.4 adds Automatic and custom frame-order requests. The pure order fixture
+exhausts the 62 nonempty provider patterns through 6x, all valid count splits and
+native grid limits. The managed/native policy comparison covers 7,680 split,
+order-code and capability combinations. Automatic minimizes the worst provider
+gap, then summed squared gaps, then native grid size; deterministic ties retain
+the established 2 DLSS + 3 FSR order. Time fractions remain slot/total. Batch validation
+uses the admitted native grid so a cap-constrained Automatic choice remains valid.
+
+These are source/fixture checks. Real game output, displayed cadence and image
+quality still require the new complete package; earlier dev.2/dev.3 results do
+not qualify custom orders. Benchmarks remain on hold.

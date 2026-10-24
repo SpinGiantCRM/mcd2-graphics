@@ -27,6 +27,8 @@ extern "C" {
  // Off=0 requires1,0,0; Native=1 requires DLSS only; Hybrid=2 requires
  // both; Software=3 requires FSR only. Actual device SDK caps admit each grid.
  int mcd2_mfg_configure_v2(unsigned strategy,unsigned multiplier,unsigned dlssGenerated,unsigned fsrGenerated);
+ // Automatic=0; manual=32|DLSS generated-slot mask, actual SDK grid required.
+ int mcd2_mfg_configure_v3(unsigned strategy,unsigned multiplier,unsigned dlssGenerated,unsigned fsrGenerated,unsigned order);
  int mcd2_mfg_state_v1(MCD2MfgStateV1*);
  int mcd2_mfg_timing_v1(MCD2MfgTimingV1*);
 }

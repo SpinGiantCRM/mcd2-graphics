@@ -101,7 +101,7 @@ int main() {
     for (unsigned field = 0; field < 9; ++field) {
         auto invalid = request;
         switch (field) {
-            case 0: invalid.schema = 7; break;
+            case 0: invalid.schema = 8; break;
             case 1: invalid.revision = 0; break;
             case 2: invalid.sr = static_cast<SrProvider>(4); break;
             case 3: invalid.fg = static_cast<FgProvider>(3); break;

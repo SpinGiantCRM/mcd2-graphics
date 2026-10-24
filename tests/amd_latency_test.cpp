@@ -50,7 +50,7 @@ int main() {
     }
     auto invalid=r;invalid.bootstrap.stamp.checksum^=1;assert(!resolve(invalid).valid);
     invalid=r;invalid.bootstrap.stamp.revision++;assert(!resolve(invalid).valid);
-    invalid=r;invalid.intent.schema=7;assert(!resolve(invalid).valid);
+    invalid=r;invalid.intent.schema=8;assert(!resolve(invalid).valid);
     i.sr=providers::SrProvider::AmdFsr;i.fg=providers::FgProvider::Amd;i.fgEnabled=true;
     i.latency=providers::LatencyProvider::RadeonAntiLag2;i.latencyMode=providers::LatencyMode::On;
     const auto fgRequest=resolve(decoded(i));assert(fgRequest.valid&&fgRequest.enabled&&fgRequest.fg);

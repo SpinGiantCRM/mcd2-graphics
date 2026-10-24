@@ -1,6 +1,6 @@
 # Shared provider settings client
 
-`src/ui/ProviderMenuClient.cs` sends complete schema-5 setting requests to the
+`src/ui/ProviderMenuClient.cs` reads schema-5/6/7 settings and sends complete schema-7 requests to the
 single native settings writer. It handles SR/provider preferences, independent
 FG choices, latency, HDR and reset defaults. It does not write the committed
 record or infer that a saved choice is active.
@@ -42,7 +42,10 @@ The advanced Frame Generation page has separate **DLSS Generated Frames** and
 Each count is added to one rendered frame: **2 DLSS + 3 FSR + 1 rendered = 6x**.
 The two providers share a maximum of five generated frames. Basic FG On/Off and
 provider selection remain in Video, where ordinary FG defaults to 2x without
-visiting the extra settings. There is no separate Standard mode selector.
+visiting the extra settings. There is no separate Standard mode selector. **Frame Order** defaults to
+**Automatic**; its other choices are the supported full DLSS/FSR sequences.
+The side pane shows the order between rendered frames. An order edit preserves
+the counts and FG switch; a count edit restores Automatic.
 
 DLSS counts require a supported NVIDIA device. FSR works on compatible AMD and
 NVIDIA devices. Choices require the actual provider capabilities, not just a GPU

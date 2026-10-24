@@ -96,7 +96,7 @@ int main() {
     const auto committed = store.publish(migrated, {});
     assert(committed.status == StoreStatus::Ok);
     assert(store.load(loaded).status == StoreStatus::Ok && loaded.intent == migrated);
-    auto badUpgrade = migrated; badUpgrade.schema = 7;
+    auto badUpgrade = migrated; badUpgrade.schema = 8;
     assert(store.publish(badUpgrade, committed.stamp).status == StoreStatus::Invalid);
     assert(store.load(loaded).status == StoreStatus::Ok && loaded.intent == migrated);
     for (const auto& [name, bytes] : std::array<std::pair<const char*,Bytes>,3>{{

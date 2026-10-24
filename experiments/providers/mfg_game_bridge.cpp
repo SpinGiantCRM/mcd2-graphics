@@ -83,7 +83,7 @@ struct Runtime {
 };
 Runtime& runtime(){static auto* r=new Runtime;return *r;}
 std::recursive_mutex& gate(){static auto* g=new std::recursive_mutex;return *g;}
-unsigned selectedStrategy{},selectedMultiplier=1,selectedDlss{},selectedFsr{};
+unsigned selectedStrategy{},selectedMultiplier=1,selectedDlss{},selectedFsr{},selectedOrder{};
 uint64_t nowNs(){LARGE_INTEGER counter{},frequency{};QueryPerformanceCounter(&counter);QueryPerformanceFrequency(&frequency);return uint64_t(double(counter.QuadPart)*1e9/double(frequency.QuadPart));}
 struct Session {
  ID3D12Device* device{};ID3D12CommandQueue* queue{};IDXGISwapChain4* swap{};HWND window{};
@@ -98,7 +98,7 @@ struct Session {
  ID3D12Resource* history{},*composed{};
  ID3D12Resource* nonblockTarget{};bool nonblockCopy{},nativeRoute{};
  bool recording{},uncertain{},pending{},historyLost=true,outputValid{},closing{},hasFeatures{};
- unsigned logicalIndex{},fault{},warmup{},strategy{},multiplier=1,dlssGenerated{},fsrGenerated{},operationLeases{};
+ unsigned logicalIndex{},fault{},warmup{},strategy{},multiplier=1,dlssGenerated{},fsrGenerated{},order{},operationLeases{};
  AMD::AntiLag2DX12::Context* antiLag{};bool antiLagEnabled{};
  DXGI_COLOR_SPACE_TYPE colour=DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709;
  std::vector<ID3D12Resource*> buffers;std::array<ID3D12Resource*,5> outputs{};ID3D12Resource* outputReal{},*scratch{};
@@ -415,19 +415,22 @@ extern "C" int mcd2_mfg_load_v1(const wchar_t* software,const wchar_t* native){
 }
 extern "C" int mcd2_mfg_capabilities_v1(void* device,MCD2MfgCapabilitiesV1* out){if(!out||out->size!=sizeof(*out))return -1;std::lock_guard lock(gate());auto* raw=nativeObject(static_cast<ID3D12Device*>(device));auto result=capabilities(raw,out);drop(raw);return result;}
 extern "C" int mcd2_afg_support_v1(void* device){MCD2MfgCapabilitiesV1 caps{sizeof(caps)};return mcd2_mfg_capabilities_v1(device,&caps);}
-extern "C" int mcd2_mfg_configure_v2(unsigned strategy,unsigned multiplier,unsigned dlss,unsigned fsr){std::lock_guard lock(gate());auto& r=runtime();
- if(strategy==0){if(multiplier!=1||dlss||fsr)return -1;}
+extern "C" int mcd2_mfg_configure_v3(unsigned strategy,unsigned multiplier,unsigned dlss,unsigned fsr,unsigned order){std::lock_guard lock(gate());auto& r=runtime();
+ if(strategy==0){if(multiplier!=1||dlss||fsr||order)return -1;}
  else{
   if(strategy>3 || (strategy==1 && (!dlss||fsr)) ||
      (strategy==2 && (!dlss||!fsr)) || (strategy==3 && (dlss||!fsr)))return -2;
-  auto plan=make_allocation_plan(dlss,fsr,{r.softwareReady?r.softwareMax+1:0,r.nativeReady?r.nativeMax+1:0,r.nativeReady});
+  auto plan=make_allocation_plan(dlss,fsr,{r.softwareReady?r.softwareMax+1:0,r.nativeReady?r.nativeMax+1:0,r.nativeReady},order);
   if(!plan||plan->multiplier!=multiplier)return -3;
  }
- if(auto* s=current()){if(s->closing)return MCD2_AFG_BUSY_V2;SessionLease lease(*s);if(s->strategy!=strategy||s->multiplier!=multiplier||s->dlssGenerated!=dlss||s->fsrGenerated!=fsr){
+ if(auto* s=current()){if(s->closing)return MCD2_AFG_BUSY_V2;SessionLease lease(*s);if(s->strategy!=strategy||s->multiplier!=multiplier||s->dlssGenerated!=dlss||s->fsrGenerated!=fsr||s->order!=order){
   // Off ends generation immediately, even if a bounded drain must be retried.
-  if(!strategy){s->strategy=0;s->multiplier=1;s->dlssGenerated=s->fsrGenerated=0;s->state.active=0;s->state.restartRequired=s->nativeRoute?0u:1u;}
-  if(!retireFeatures(*s))return MCD2_AFG_BUSY_V2;s->strategy=strategy;s->multiplier=multiplier;s->dlssGenerated=dlss;s->fsrGenerated=fsr;s->state.active=0;s->state.restartRequired=(s->nativeRoute!=(strategy==0))?1u:0u;}}
- selectedStrategy=strategy;selectedMultiplier=multiplier;selectedDlss=dlss;selectedFsr=fsr;return 0;
+  if(!strategy){s->strategy=0;s->multiplier=1;s->dlssGenerated=s->fsrGenerated=s->order=0;s->state.active=0;s->state.restartRequired=s->nativeRoute?0u:1u;}
+  if(!retireFeatures(*s))return MCD2_AFG_BUSY_V2;s->strategy=strategy;s->multiplier=multiplier;s->dlssGenerated=dlss;s->fsrGenerated=fsr;s->order=order;s->state.active=0;s->state.restartRequired=(s->nativeRoute!=(strategy==0))?1u:0u;}}
+ selectedStrategy=strategy;selectedMultiplier=multiplier;selectedDlss=dlss;selectedFsr=fsr;selectedOrder=order;return 0;
+}
+extern "C" int mcd2_mfg_configure_v2(unsigned strategy,unsigned multiplier,unsigned dlss,unsigned fsr){
+ return mcd2_mfg_configure_v3(strategy,multiplier,dlss,fsr,0);
 }
 extern "C" int mcd2_mfg_configure_v1(unsigned strategy,unsigned multiplier){
  if(strategy==0)return mcd2_mfg_configure_v2(0,multiplier,0,0);
@@ -444,7 +447,7 @@ extern "C" int mcd2_afg_swap_v1(void* factory,void* queue,void* hwnd,const MCD2A
  if(!out)return -1;*out=nullptr;std::lock_guard lock(gate());if(current()||!factory||!queue||!hwnd||!p||p->size!=sizeof(*p)||p->samples!=1||p->buffers<2||p->buffers>16)return -2;
  auto* q=nativeObject(static_cast<ID3D12CommandQueue*>(queue));if(!q)return -3;if(q->GetDesc().Type!=D3D12_COMMAND_LIST_TYPE_DIRECT){drop(q);return -3;}
  auto* s=new(std::nothrow) Session;if(!s){drop(q);return -4;}
- if(FAILED(q->GetDevice(IID_PPV_ARGS(&s->device)))){drop(q);delete s;return -5;}s->queue=q;s->window=static_cast<HWND>(hwnd);s->strategy=selectedStrategy;s->multiplier=selectedMultiplier;s->dlssGenerated=selectedDlss;s->fsrGenerated=selectedFsr;s->nativeRoute=selectedStrategy==0;s->applicationFlags=p->flags;s->applicationWaitable=(p->flags&DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT)!=0;
+ if(FAILED(q->GetDevice(IID_PPV_ARGS(&s->device)))){drop(q);delete s;return -5;}s->queue=q;s->window=static_cast<HWND>(hwnd);s->strategy=selectedStrategy;s->multiplier=selectedMultiplier;s->dlssGenerated=selectedDlss;s->fsrGenerated=selectedFsr;s->order=selectedOrder;s->nativeRoute=selectedStrategy==0;s->applicationFlags=p->flags;s->applicationWaitable=(p->flags&DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT)!=0;
  current()=s;DXGI_SWAP_CHAIN_DESC1 d{p->width,p->height,DXGI_FORMAT(p->format),FALSE,{1,p->sampleQuality},p->usage,p->buffers,DXGI_SCALING(p->scaling),DXGI_SWAP_EFFECT(p->effect),DXGI_ALPHA_MODE(p->alpha),p->flags|DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT};
  DXGI_SWAP_CHAIN_FULLSCREEN_DESC full{{p->refreshNumerator,p->refreshDenominator},DXGI_MODE_SCANLINE_ORDER(p->scanline),DXGI_MODE_SCALING(p->modeScaling),BOOL(p->windowed)};
  IDXGISwapChain1* raw{};auto hr=static_cast<IDXGIFactory2*>(factory)->CreateSwapChainForHwnd(q,s->window,&d,p->fullscreenProvided?&full:nullptr,nullptr,&raw);
@@ -489,7 +492,7 @@ extern "C" int mcd2_afg_present_v2(void* queue,uint64_t frame,uint32_t wanted){s
  if(GetForegroundWindow()!=s->window){s->invalidate();s->inputs();return MCD2_AFG_BUSY_V2;}
  s->arrival=arrival;
  stateIdentity(*s);if(!s->identity)return fail(*s,-42);
- auto& r=runtime();auto plan=make_allocation_plan(s->dlssGenerated,s->fsrGenerated,{r.softwareReady?r.softwareMax+1:0,r.nativeReady?r.nativeMax+1:0,r.nativeReady});if(!plan||plan->multiplier!=s->multiplier)return fail(*s,-43);s->plan=*plan;
+ auto& r=runtime();auto plan=make_allocation_plan(s->dlssGenerated,s->fsrGenerated,{r.softwareReady?r.softwareMax+1:0,r.nativeReady?r.nativeMax+1:0,r.nativeReady},s->order);if(!plan||plan->multiplier!=s->multiplier)return fail(*s,-43);s->plan=*plan;
  if(s->previous&&frame!=s->previous+1)s->invalidate();s->identity.epoch=s->epoch;
  if(s->guides.camera.reset){s->invalidate();s->identity.epoch=s->epoch;}
  s->cadence.observe(arrival,s->lastOwnedNs);s->pair={s->epoch,s->previous,frame};s->state.previousReal=s->previous;s->state.currentReal=frame;s->state.epoch=s->epoch;s->state.identity=s->binding.identity;s->state.observedAtMs=GetTickCount64();s->state.active=0;++s->ordinal;

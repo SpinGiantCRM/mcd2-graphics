@@ -20,11 +20,32 @@ upscaling guides. Both runtimes must approve a mixed split. GPU names, an FSR
 capability or an optional helper alone never authorize higher DLSS counts.
 Unsupported choices are skipped without silently reducing a saved request.
 
-Every generated image comes from the same two rendered frames. A uniform final
-timeline assigns DLSS positions across that interval and fills other positions
-with FSR. The native runtime must support the exact interpolation grid, which
-can exceed the number of DLSS images selected for display. For 2 DLSS + 3 FSR,
-DLSS supplies positions 2/6 and 4/6; FSR supplies 1/6, 3/6 and 5/6.
+## Frame Order
+
+**Automatic** is the default in the extra settings. The **Frame Order** row also
+lists every supported manual DLSS/FSR sequence for the selected counts. The side
+pane shows the sequence between two rendered frames. Counts and the FG On/Off
+switch stay unchanged when selecting an order. Changing a count restores Automatic.
+
+Automatic keeps equally spaced presentation slots and balances the gaps between
+both providers' frames, subject to actual SDK limits. Among equally balanced
+orders, it prefers the smaller native interpolation grid and a stable tie-break.
+For **2 DLSS + 3 FSR**, it chooses:
+
+**Real → FSR → DLSS → FSR → DLSS → FSR → Real**
+
+Custom order chooses which provider generates each temporal slot. It does not
+shuffle already generated images, which would show motion out of sequence.
+Every image uses the same two rendered frames and its own time fraction. Some
+orders require a larger native interpolation grid; unsupported orders are
+unavailable, without silently substituting a different requested order.
+
+This is a pacing-based default, not a measured image-quality winner. The equal
+presentation-spacing goal follows [AMD's frame-pacing guidance](https://gpuopen.com/manuals/fidelityfx_sdk/techniques/frame-interpolation-swap-chain/#frame-pacing-and-presentation).
+The requirement to respect reported native counts follows [NVIDIA's DLSS-G guide](https://github.com/NVIDIA-RTX/Streamline/blob/v2.14.1/docs/ProgrammingGuideDLSS_G.md).
+The balanced mixed-provider order is this mod's policy; neither source prescribes
+a universal mixed-provider sequence. Scene-dependent quality comparison remains
+part of later image analysis.
 
 Preset A/B/C remains independent of the counts. One final presenter and compatible
 latency owner coordinate the batch. Generated images never become rendered-frame
@@ -32,9 +53,9 @@ history. Output refresh and bounded backpressure can lower the real rendering
 rate at higher counts; Diagnostics distinguishes the scheduled limit from a
 measured FPS. The saved FPS/VSync settings are preserved. Turn FG Off in Video.
 
-Schema6 keeps the 128-byte record and encodes the internal strategy and separate
-DLSS/FSR counts atomically. Schema5 settings retain their identity until edited;
-new edits preserve unrelated settings and use schema6. Old readers refuse the
+Schema7 keeps the 128-byte record and encodes the internal strategy, separate
+DLSS/FSR counts and requested order atomically. Schema5/6 settings retain their
+identity until edited; new edits preserve unrelated settings and use schema7. Old readers refuse the
 new format. Checksums, session/revision/world, source pair and queue completion
 remain required. See [compute/presenter checks](MFG_COMPUTE_TESTING.md).
 

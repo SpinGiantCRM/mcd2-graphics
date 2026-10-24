@@ -7,7 +7,7 @@ struct FgMenuProjection {
     std::uint32_t revision=0,provider=0;
     bool enabled=false,pairEligible=false;
     std::uint32_t frameMode=0,strategy=0;
-    std::uint32_t dlssGenerated=0,fsrGenerated=0;
+    std::uint32_t dlssGenerated=0,fsrGenerated=0,frameOrder=0;
     RecordStamp stamp{};
 };
 // Structural routes using the existing shared SR guide producer. A valid
@@ -26,7 +26,7 @@ inline bool projectFgMenu(const DecodedGraphicsRecord& record,FgMenuProjection& 
     const bool pair=custom||(nvidia&&i.fg==FgProvider::Nvidia&&(i.sr==SrProvider::NvidiaDlss||i.sr==SrProvider::AmdFsr))||
         (single&&i.fg==FgProvider::Amd&&(i.sr==SrProvider::Native||i.sr==SrProvider::NvidiaDlss||i.sr==SrProvider::AmdFsr));
     out={i.revision,unsigned(i.fg),i.fgEnabled,pair,i.requestedMultiplier-2,unsigned(i.fgStrategy),
-        allocation.dlssGenerated,allocation.fsrGenerated,record.bootstrap.stamp};return true;
+        allocation.dlssGenerated,allocation.fsrGenerated,i.frameOrder,record.bootstrap.stamp};return true;
 }
 constexpr bool fgMenuMatches(const FgMenuProjection& current,std::uint32_t revision,
                             std::uint32_t provider,std::uint32_t mode){
@@ -34,13 +34,13 @@ constexpr bool fgMenuMatches(const FgMenuProjection& current,std::uint32_t revis
 }
 constexpr bool fgMenuSourceMatches(const FgMenuProjection& p,std::uint32_t revision,std::uint32_t provider,
                                   std::uint32_t mode,std::uint32_t frameMode,std::uint32_t strategy){
-    return fgMenuMatches(p,revision,provider,mode)&&p.frameMode==frameMode&&p.strategy==strategy;
+    return fgMenuMatches(p,revision,provider,mode)&&p.frameMode==frameMode&&p.strategy==strategy&&p.frameOrder==0;
 }
 constexpr bool fgMenuSourceMatches(const FgMenuProjection& p,std::uint32_t revision,std::uint32_t provider,
                                   std::uint32_t mode,std::uint32_t frameMode,std::uint32_t strategy,
-                                  std::uint32_t dlssGenerated,std::uint32_t fsrGenerated){
-    return fgMenuSourceMatches(p,revision,provider,mode,frameMode,strategy)&&
-        p.dlssGenerated==dlssGenerated&&p.fsrGenerated==fsrGenerated;
+                                  std::uint32_t dlssGenerated,std::uint32_t fsrGenerated,std::uint32_t frameOrder=0){
+    return fgMenuMatches(p,revision,provider,mode)&&p.frameMode==frameMode&&p.strategy==strategy&&
+        p.dlssGenerated==dlssGenerated&&p.fsrGenerated==fsrGenerated&&p.frameOrder==frameOrder;
 }
 // Total-grid software support and the exact native-grid SDK count must both
 // admit a custom allocation. Legacy mixed total masks cannot describe this.
@@ -51,7 +51,7 @@ inline bool fgMenuAllocationSupported(const FgMenuProjection& p,std::uint32_t so
        p.dlssGenerated+p.fsrGenerated+1!=total ||
        (p.fsrGenerated && !(softwareMask&(1u<<total)))) return false;
     return bool(mcd2::mfg::make_allocation_plan(p.dlssGenerated,p.fsrGenerated,
-        {p.fsrGenerated?total:0,nativeGeneratedMax?nativeGeneratedMax+1:0,nativeGeneratedMax!=0}));
+        {p.fsrGenerated?total:0,nativeGeneratedMax?nativeGeneratedMax+1:0,nativeGeneratedMax!=0},p.frameOrder));
 }
 // Keep fresh-Off startup native; a multiplier never reserves a presentation owner.
 constexpr std::uint32_t fgStartupOwner(const FgMenuProjection& selection){

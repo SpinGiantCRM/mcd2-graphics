@@ -85,6 +85,8 @@ jobs:
           /tmp/fixed-mfg-policy
           g++ -std=c++20 -Wall -Wextra -Werror tests/mfg_phase_plan_test.cpp -o /tmp/mfg-phase-plan
           /tmp/mfg-phase-plan
+          g++ -std=c++20 -Wall -Wextra -Werror tests/fg_frame_order_test.cpp -o /tmp/fg-frame-order
+          /tmp/fg-frame-order
           g++ -std=c++20 -Wall -Wextra -Werror tests/mfg_game_transaction_test.cpp -o /tmp/mfg-game-transaction
           /tmp/mfg-game-transaction
           g++ -std=c++20 -Wall -Wextra -Werror tests/mfg_game_selection_test.cpp -o /tmp/mfg-game-selection
@@ -244,6 +246,8 @@ jobs:
           ./fixed-mfg-policy.exe
           g++ -std=c++20 -static -Wall -Wextra -Werror tests/mfg_phase_plan_test.cpp -o mfg-phase-plan.exe
           ./mfg-phase-plan.exe
+          g++ -std=c++20 -static -Wall -Wextra -Werror tests/fg_frame_order_test.cpp -o fg-frame-order.exe
+          ./fg-frame-order.exe
           g++ -std=c++20 -static -Wall -Wextra -Werror tests/mfg_game_transaction_test.cpp -o mfg-game-transaction.exe
           ./mfg-game-transaction.exe
           g++ -std=c++20 -static -Wall -Wextra -Werror tests/mfg_game_selection_test.cpp -o mfg-game-selection.exe

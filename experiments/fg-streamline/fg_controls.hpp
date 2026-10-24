@@ -16,7 +16,7 @@ std::atomic<bool> enabled{false},wanted{false};std::atomic<unsigned> fault{0};
 std::atomic<bool> retired{false};
 unsigned maximumGeneratedFrames=0,dynamicSupported=0,appliedFrameMode=0;
 unsigned softwareMultiplierMask=0,mixedMultiplierMask=0,mfgNativeGeneratedMax=0,selectedStrategy=0,selectedChecksum=0,selectedSourceSession=0;
-unsigned selectedDlssGenerated=0,selectedFsrGenerated=0;
+unsigned selectedDlssGenerated=0,selectedFsrGenerated=0,selectedFrameOrder=0;
 unsigned mfgTimingStatus=0,mfgRefreshMilliHz=0,mfgTargetRealMilliFps=0;
 unsigned presenterRoute=0,presenterCanSwitch=0,presenterSettingsRevision=0;
 unsigned session=0,available=0,availableProviders=0,startupOwner=0,previousMode=0,sessionMode=0,restartRequired=0;ULONGLONG nextPoll=0,nextSupport=0;
@@ -88,7 +88,7 @@ void poll(a::device*device,const std::filesystem::path&policy,unsigned active){
    mcd2::providers::fgMenuMatches(selection,intent.settingsRevision,intent.provider,intent.mode)&&selection.frameMode==intent.frameMode;
   selectedStrategy=currentRequest?selection.strategy:0;selectedChecksum=currentRequest?record.bootstrap.stamp.checksum:0;selectedSourceSession=currentRequest?current.session:0;
   const bool custom=selectedStrategy==2||selectedStrategy==3;
-  selectedDlssGenerated=currentRequest?selection.dlssGenerated:0;selectedFsrGenerated=currentRequest?selection.fsrGenerated:0;
+  selectedDlssGenerated=currentRequest?selection.dlssGenerated:0;selectedFsrGenerated=currentRequest?selection.fsrGenerated:0;selectedFrameOrder=currentRequest?selection.frameOrder:0;
   const bool admittedFrameMode=custom?(currentRequest&&mcd2::providers::fgMenuAllocationSupported(selection,softwareMultiplierMask,mfgNativeGeneratedMax)):frameModeSupported;
   if(custom)available=admittedFrameMode?1:0;
   presenterSettingsRevision=currentRequest?record.intent.revision:0;
@@ -97,9 +97,9 @@ void poll(a::device*device,const std::filesystem::path&policy,unsigned active){
       intent.provider,presenterRoute,presenterCanSwitch,fault.load(),retired.load(),selectedStrategy))restartRequired=0;
   wanted=admittedFrameMode&&currentRequest&&selection.pairEligible&&available&&intent.mode&&intent.ready&&intent.session==session&&
    mcd2::providers::fgOwnerMatches(startupOwner,intent.provider,selectedStrategy)&&!fault&&!retired;
-  if(startupOwner==4){auto module=GetModuleHandleW(L"mcd2-mfg-game-bridge.dll");auto configure=module?reinterpret_cast<int(*)(unsigned,unsigned,unsigned,unsigned)>(GetProcAddress(module,"mcd2_mfg_configure_v2")):nullptr;
+  if(startupOwner==4){auto module=GetModuleHandleW(L"mcd2-mfg-game-bridge.dll");auto configure=module?reinterpret_cast<int(*)(unsigned,unsigned,unsigned,unsigned,unsigned)>(GetProcAddress(module,"mcd2_mfg_configure_v3")):nullptr;
    const bool selectedOn=currentRequest&&custom&&intent.mode&&admittedFrameMode;
-   const auto configured=currentRequest&&configure?configure(selectedOn?selectedStrategy:0,selectedOn?selection.frameMode+2:1,selectedOn?selection.dlssGenerated:0,selectedOn?selection.fsrGenerated:0):0;
+   const auto configured=!currentRequest?0:configure?configure(selectedOn?selectedStrategy:0,selectedOn?selection.frameMode+2:1,selectedOn?selection.dlssGenerated:0,selectedOn?selection.fsrGenerated:0,selectedOn?selection.frameOrder:0):-1;
    if(configured){wanted=false;fault=1;}if(wanted)appliedFrameMode=selection.frameMode;
   }
   publish(active,false);return;
@@ -113,6 +113,6 @@ bool current_selection(){
  MCD2MenuSnapshotV1 current{};current.size=sizeof(current);mcd2::providers::DecodedGraphicsRecord record;mcd2::providers::FgMenuProjection p;
  return snapshot&&!snapshot(&current)&&!current.load&&!current.reserved&&current.session==selectedSourceSession&&
   mcd2::providers::decodeGraphicsRecord(current.record,record)&&record.bootstrap.stamp.checksum==selectedChecksum&&
-  mcd2::providers::projectFgMenu(record,p)&&mcd2::providers::fgMenuSourceMatches(p,intent.settingsRevision,intent.provider,intent.mode,intent.frameMode,selectedStrategy,selectedDlssGenerated,selectedFsrGenerated);
+  mcd2::providers::projectFgMenu(record,p)&&mcd2::providers::fgMenuSourceMatches(p,intent.settingsRevision,intent.provider,intent.mode,intent.frameMode,selectedStrategy,selectedDlssGenerated,selectedFsrGenerated,selectedFrameOrder);
 }
 }

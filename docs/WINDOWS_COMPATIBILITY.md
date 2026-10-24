@@ -1337,3 +1337,22 @@ with identity, original-observation freshness and fault checks unchanged.
 Offline fixtures and Microsoft-ABI compilation do not qualify a new mixed split,
 Windows MFG or clean game exit. Use the complete new candidate for runtime work;
 retain the separate Linux-first and Windows/Radeon-startup-with-MFG-Off gates.
+
+
+### Configurable generated-frame order
+
+Schema7 adds an Automatic/custom provider-order code in the existing 128-byte
+record; schema5/6 records must retain their bytes and source stamps until edited.
+The upper two packed-word bits remain reserved. Custom masks must match the
+configured DLSS/FSR counts and actual native grid capability. Automatic selects
+among admitted masks only. Preserve the exact order in bootstrap, source checks
+and configure_v3. Missing v3 cannot fall back to an old order-ignoring entry point.
+
+Changing order retires the prior feature resources under the existing stable
+session/queue/epoch guards. Old v1/v2 callers request Automatic without adding a
+recursive gate level during retirement. Presentation fractions stay monotonic;
+providers generate at the selected fraction rather than shuffling images.
+Portable tests cover all patterns, caps and malformed codes; the managed/native
+comparison covers 7,680 combinations. These checks and Microsoft-ABI builds do
+not qualify game quality, Windows MFG or display cadence. Keep the Linux-first
+campaign, Windows/Radeon startup-with-MFG-Off gate and separate edition checks.

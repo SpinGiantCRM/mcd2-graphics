@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <optional>
 #include <numeric>
+#include "fg_frame_order.hpp"
 
 // Compute scheduling only. No vendor/model whitelist, presenter or runtime
 // qualification claim lives here. Capabilities are supplied by an admitted host.
@@ -16,7 +17,7 @@ struct Capabilities {
 struct Phase { unsigned numerator{},denominator{}; Provider provider{}; };
 struct Plan {
     Mode mode{}; unsigned multiplier{},count{}; std::array<Phase,5> phases{};
-    unsigned dlssGenerated{},fsrGenerated{};
+    unsigned dlssGenerated{},fsrGenerated{},order{};
 };
 // Native evaluations may occupy a coarser uniform grid than the total output
 // grid. Its SDK count/index describes that native grid, never the number of
@@ -39,19 +40,16 @@ inline unsigned native_phase_index(const Plan& plan,unsigned slot) {
     const auto divisor=native_grid_divisor(plan);
     return divisor?plan.phases[slot-1].numerator/divisor:0;
 }
-inline std::optional<Plan> make_allocation_plan(unsigned dlss,unsigned fsr,Capabilities caps) {
-    if(dlss>5 || fsr>5 || dlss+fsr<1 || dlss+fsr>5) return {};
+inline std::optional<Plan> make_allocation_plan(unsigned dlss,unsigned fsr,Capabilities caps,unsigned order=0) {
+    if(!valid_order(dlss,fsr,order)) return {};
     const unsigned total=1+dlss+fsr;
-    Plan plan{dlss?(fsr?Mode::Hybrid:Mode::Native):Mode::Software,total,total-1,{},dlss,fsr};
-    for(unsigned slot=1;slot<total;++slot) plan.phases[slot-1]={slot,total,Provider::Software};
-    for(unsigned j=1;j<=dlss;++j) {
-        // Positive-integer round-to-nearest, with a half rounded upward.
-        const unsigned slot=(2*j*total+dlss+1)/(2*(dlss+1));
-        plan.phases[slot-1].provider=Provider::NvidiaNative;
-    }
     if(fsr && caps.softwareMaxMultiplier<total) return {};
-    if(dlss && (!caps.nativeCallerOwnedOutput ||
-                caps.nativeMaxMultiplier<native_generated_count(plan)+1)) return {};
+    if(dlss && (!caps.nativeCallerOwnedOutput || !caps.nativeMaxMultiplier)) return {};
+    const auto mask=resolve_order_mask(dlss,fsr,order,caps.nativeMaxMultiplier?caps.nativeMaxMultiplier-1:0);
+    if(!mask) return {};
+    Plan plan{dlss?(fsr?Mode::Hybrid:Mode::Native):Mode::Software,total,total-1,{},dlss,fsr,order};
+    for(unsigned slot=1;slot<total;++slot)
+        plan.phases[slot-1]={slot,total,(*mask&(1u<<(slot-1)))?Provider::NvidiaNative:Provider::Software};
     return plan;
 }
 inline std::optional<Plan> make_plan(Mode mode,unsigned multiplier,Capabilities caps) {
@@ -82,7 +80,10 @@ public:
         if(active_) { valid_=false; return false; }
         if(!pair.epoch || !pair.previous || pair.current<=pair.previous ||
            pair.previousOrigin!=Origin::Real || pair.currentOrigin!=Origin::Real) return false;
-        const auto expected=make_allocation_plan(plan.dlssGenerated,plan.fsrGenerated,{6,6,true});
+        // An Automatic plan may have been chosen under a smaller device cap.
+        // It remains the same winner when the cap is reduced to its own grid.
+        const auto expected=make_allocation_plan(plan.dlssGenerated,plan.fsrGenerated,
+            {6,native_generated_count(plan)+1,true},plan.order);
         if(!expected || plan.mode!=expected->mode || plan.multiplier!=expected->multiplier ||
            plan.count!=expected->count) return false;
         for(unsigned i=0;i<plan.count;++i) {

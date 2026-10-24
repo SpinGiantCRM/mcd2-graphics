@@ -11,7 +11,7 @@ _spec=importlib.util.spec_from_file_location('_mfg_probe',Path(__file__).with_na
 _probe=importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_probe)
 EXPORTS=['mcd2_mfg_'+name+'_v1' for name in ('load','capabilities','configure','state','timing')]
-EXPORTS+=['mcd2_mfg_configure_v2']
+EXPORTS+=['mcd2_mfg_configure_v2','mcd2_mfg_configure_v3']
 EXPORTS+=['mcd2_afg_'+name+'_v1' for name in ('support','swap','output','scene','state','diagnostic_bind','retire','presenter_switch_state','antilag_ready','antilag')]
 EXPORTS+=['mcd2_afg_'+name+'_v2' for name in ('recording_contract','guides','world','present','diagnostics')]
 
@@ -46,7 +46,7 @@ def build(headers,output,sysroot=None,compiler='clang-cl',linker='lld-link'):
     sources+=['experiments/providers/mfg_game_bridge.h','experiments/providers/mfg_game_swapchain.hpp',
               'experiments/providers/mfg_headless.hpp','experiments/providers/mfg_ngx_parameters.hpp','experiments/providers/mfg_game_parameters.hpp','experiments/providers/mfg_game_guides.hpp','experiments/providers/mfg_game_timeline.hpp','tests/mfg_game_timeline_test.cpp',
               'experiments/providers/fsr_fg_game_bridge.h','experiments/providers/build_mfg_game_bridge.py',
-              'src/providers/mfg_game_transaction.hpp','src/providers/mfg_phase_plan.hpp','src/providers/fg_output_contract.hpp',
+              'src/providers/mfg_game_transaction.hpp','src/providers/fg_frame_order.hpp','src/providers/mfg_phase_plan.hpp','src/providers/fg_output_contract.hpp',
               'src/providers/runtime_diagnostics.h','src/native/mfg_parameters.hpp','experiments/fg-streamline/fg_camera_contract.h',
               'src/latency/process_exit.hpp','src/latency/process_lifetime.hpp','third-party/AntiLag2/ffx_antilag2_dx12.h','experiments/providers/build_mfg_compute_probe.py','experiments/providers/mfg_owned_pattern.hpp']
     receipt=dict(schemaVersion=1,kind='mfg-game-bridge',abi='Microsoft C++ x64',

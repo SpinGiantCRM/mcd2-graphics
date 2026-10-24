@@ -6,8 +6,8 @@
   "sourceCommit": "ac7058cbdf7a50ad712894f378616e123710bfb6",
   "requestedSourceCommit": "569e45d3421a5f03f289eaf3d2eb98cb00cf3402",
   "sourceTree": "7f35c063c9c8dba68114f87bcade3d0d81b58401",
-  "selectionNeedsRebuild": false,
-  "sourceChangedAfterSelection": false,
+  "selectionNeedsRebuild": true,
+  "sourceChangedAfterSelection": true,
   "runtimeQualified": false,
   "windowsRadeonRuntimeQualified": false,
   "linuxFullArtifactRuntimeQualified": false,
@@ -92,5 +92,6 @@
     "crtVersion": "14.44.35207",
     "windowsSDK": "10.0.26100.0"
   },
-  "selectionNote": "Verified dev.3 native archive and API digest; its CI merge tree matches reviewed source569e45d. All owned members and242 consumed source pins were checked. This selector update changes metadata only. Independent DLSS/FSR allocations and Busy-sample diagnostics still need complete-package game qualification. Game Pass and Windows MFG remain untested."
+  "selectionNote": "Verified dev.3 native archive and API digest; its CI merge tree matches reviewed source569e45d. All owned members and242 consumed source pins were checked. This selector update changes metadata only. Independent DLSS/FSR allocations and Busy-sample diagnostics still need complete-package game qualification. Game Pass and Windows MFG remain untested.",
+  "requestedCandidateVersion": "0.5.0-integration.dev.4"
 }
