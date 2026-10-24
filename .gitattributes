@@ -16,5 +16,6 @@ qualification/fg-release/msvc-mitigation-installer-build.json text eol=lf
 qualification/fg-release/windows-msvc-mitigation-2026-10-07.json text eol=lf
 # Qualification records pin this exact installed lock, including CRLF bytes.
 qualification/providers/windows-dev25/dependencies-2026-10-23.lock.json -text whitespace=cr-at-eol
+qualification/providers/linux-dev25/dependencies-2026-10-24.lock.json -text
 # The follow-up receipt pins this source-only fixture byte for byte.
 qualification/providers/windows-dev25/sharpness-ownership-probe.cs.txt text eol=lf

@@ -109,6 +109,9 @@ class CandidateAssemblyTests(unittest.TestCase):
         execute(pin)
         for rid,lock in pin['installerDependencyLocks'].items():
             self.assertEqual((stage/f'{rid}-dependencies.lock.json').read_bytes(),(ROOT/lock['path']).read_bytes())
+            import subprocess
+            attribute=subprocess.check_output(['git','check-attr','text','--',lock['path']],cwd=ROOT,text=True)
+            self.assertTrue(attribute.strip().endswith(': unset'),'Pinned dependency bytes must survive Windows checkout')
         for invalid in ('path','sha256','missing'):
             selected=copy.deepcopy(pin)
             if invalid=='missing':del selected['installerDependencyLocks']['linux-x64']
