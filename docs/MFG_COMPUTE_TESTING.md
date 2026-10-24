@@ -101,6 +101,12 @@ five process exits succeeded. The 6x phase strip was visually inspected against
 the two owned real inputs. The external module was the exact pinned 4.9.0 DLL;
 automatic Proton FSR4 replacement was disabled for these controls.
 
+The final hosted candidate from [run40079305728](https://github.com/SpinGiantCRM/mcd2-graphics/actions/runs/40079305728)
+was replayed after the per-call flush-response guard. All five counts passed;
+all150 image measurements and saved raw images matched the reviewed controls.
+The [bounded qualification record](../qualification/providers/linux-mfg-compute-2026-10-24.json)
+pins the exact probe, artifact, external module and environment.
+
 This is a short synthetic compute result, not a game, Radeon, image-quality,
 latency or presentation qualification. It does not establish the internal
 algorithm/provider from a DLL filename. Native NVIDIA caller-owned output and
