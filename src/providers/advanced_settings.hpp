@@ -63,6 +63,20 @@ inline bool encodeAdvancedState(const AdvancedState& a,AdvancedStateBytes& out){
     advancedWord(b,4,recordChecksum(b));out=b;return true;
 }
 
+inline bool decodeAdvancedState(std::span<const std::uint8_t> b,AdvancedState& out){
+    if(b.size()!=128 || recordWord(b,0)!=0x3244434d || recordWord(b,4)!=0x00315241 ||
+       recordWord(b,8)!=2 || recordWord(b,12)!=128 || recordWord(b,16)!=recordChecksum(b))return false;
+    AdvancedState a;
+    a.session=recordWord(b,20);a.sequence=recordWord(b,24);a.status=AdvancedStatus(recordWord(b,28));
+    a.expected={recordWord(b,32),recordWord(b,36)};a.hint=recordWord(b,40);a.startupHint=recordWord(b,44);
+    a.migrated=recordWord(b,48);a.modules=recordWord(b,52);
+    for(unsigned n=0;n<16;++n)a.versions[n]=recordWord(b,56+n*4);
+    a.versions[16]=recordWord(b,120)&65535;a.versions[17]=recordWord(b,120)>>16;
+    a.versions[18]=recordWord(b,124)&65535;a.versions[19]=recordWord(b,124)>>16;
+    AdvancedStateBytes canonical;if(!encodeAdvancedState(a,canonical)||!std::equal(b.begin(),b.end(),canonical.begin()))return false;
+    out=a;return true;
+}
+
 // One instance on the existing settings worker. Replays never repeat a write.
 class AdvancedRequests {
     std::uint32_t session_;

@@ -16,7 +16,7 @@ int main(int argc,char** argv){
         "1234567890ABCDEF/000000001234567890ABCDEF12345678",
         "1234567890ABCDEF_000000001234567890ABCDEF1234567Z"})assert(!identity(invalid,parsed));
     const char* fixtures[]={"settings.sav","display-settings.sav","fg-settings.sav","runtime.sav","display-runtime.sav","fg-runtime.sav"};
-    for(std::size_t index=0;index<slots.size();++index){
+    for(std::size_t index=0;index<std::size(fixtures);++index){
         assert(slots[index].nativeWrites==(index>=3));
         std::ifstream file(std::filesystem::path(argv[1])/fixtures[index],std::ios::binary);
         std::vector<std::uint8_t> bytes(std::istreambuf_iterator<char>(file),{});

@@ -52,6 +52,7 @@ struct Api {
 struct Store {
     Api api;XUserHandle user=nullptr;XGameSaveProviderHandle provider=nullptr;
     const char* readStage="none";unsigned blobCount=0;std::uint32_t dataSize=0;
+    std::string accountBinding;
     Store()=default;Store(const Store&)=delete;Store& operator=(const Store&)=delete;
     ~Store(){if(mcd2::process_exit::terminating())return;if(provider)api.closeProvider(provider);if(user)api.closeUser(user);}
     HRESULT open(const std::filesystem::path& wgs,const std::filesystem::path& binding) {
@@ -67,7 +68,9 @@ struct Store {
         }
         if(error)return HRESULT_FROM_WIN32(error.value());
         if(!user)return HRESULT_FROM_WIN32(ERROR_NO_SUCH_LOGON_SESSION);
-        return api.initialize(user,selected.scid.c_str(),false,&provider);
+        const auto opened=api.initialize(user,selected.scid.c_str(),false,&provider);
+        if(SUCCEEDED(opened))accountBinding=std::to_string(selected.user)+":"+selected.scid;
+        return opened;
     }
     HRESULT readSlot(const Slot& slot,std::vector<std::uint8_t>& bytes,std::int64_t& modified) {
         readStage="container";blobCount=0;dataSize=0;
@@ -108,7 +111,7 @@ struct Store {
         api.closeContainer(handle);return result;
     }
     HRESULT writeSlot(const Slot& slot,const std::vector<std::uint8_t>& bytes) {
-        if(!slot.nativeWrites || !valid(slot,bytes))return E_INVALIDARG;
+        if(!slot.nativeWrites || !valid(slot,bytes,false))return E_INVALIDARG;
         XGameSaveContainerHandle handle=nullptr;auto result=api.container(provider,slot.name,&handle);if(FAILED(result))return result;
         XGameSaveUpdateHandle change=nullptr;result=api.update(handle,slot.name,&change);
         if(SUCCEEDED(result))result=api.write(change,"Data",bytes.data(),bytes.size());

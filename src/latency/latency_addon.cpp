@@ -4,6 +4,7 @@
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
+#include "../providers/settings_paths.hpp"
 #include "../providers/bootstrap_module.hpp"
 #include "../providers/hdr_addon_activation.hpp"
 #include "../providers/graphics_store.hpp"
@@ -168,7 +169,14 @@ LRESULT CALLBACK pcl_messages(int code,WPARAM removed,LPARAM data){
 }
 
 std::vector<uint8_t> read_slot(const std::filesystem::path&p){std::ifstream f(p,std::ios::binary|std::ios::ate);if(!f)return {};auto n=f.tellg();if(n<64||n>8192)return {};std::vector<uint8_t>b(size_t(n),0);f.seekg(0);f.read(reinterpret_cast<char*>(b.data()),n);return f?b:std::vector<uint8_t>{};}
-void settings_loop(){std::map<std::string,unsigned> last;auto nextStatus=std::chrono::steady_clock::now();
+void settings_loop(){
+ while(!workerStop&&savesPath.empty()){
+  std::vector<wchar_t> local(32768);auto n=GetEnvironmentVariableW(L"LOCALAPPDATA",local.data(),DWORD(local.size()));
+  if(n&&n<local.size()){auto paths=mcd2::providers::currentSettingsPaths(std::filesystem::path(local.data()));if(paths){savesPath=paths->saves;std::error_code error;std::filesystem::create_directories(paths->authority,error);if(error)savesPath.clear();}}
+  if(savesPath.empty()){std::unique_lock lock(workerMutex);workerWake.wait_for(lock,std::chrono::milliseconds(100),[]{return workerStop.load();});}
+ }
+ if(workerStop)return;
+ std::map<std::string,unsigned> last;auto nextStatus=std::chrono::steady_clock::now();
  std::ofstream status(savesPath.parent_path()/L"MCD2Graphics"/L"display-latency-status.jsonl",std::ios::trunc);
  mcd2::providers::ObservedSettings observations;
  mcd2::providers::ObservationResult observation;
@@ -526,7 +534,7 @@ extern "C" __declspec(dllexport) bool AddonInit(HMODULE module,HMODULE){
  amdLatencyOptIn=GetPrivateProfileIntW(L"Providers",L"AmdAntiLag2",0,mcd2::providers::observedPolicyPath(filename.get()).c_str())==1;
  amdProvider.path=std::filesystem::path(filename.get()).parent_path()/L"mcd2-antilag2-bridge.dll";
  std::ofstream receipt(logs/L"bootstrap.json");receipt<<"{\"initialized\":"<<(success?"true":"false")<<",\"result\":"<<provider.lastResult<<",\"stage\":\"AddonInit before native D3D12 device; DXGI factory may already exist\",\"fgBootstrapQualified\":false}\n";
- savesPath=std::filesystem::path(local.get())/L"Dungeons2"/L"Saved"/L"SaveGames";
+ savesPath.clear(); // Worker waits for the edition-specific, bound transport root.
  sessionId=unsigned((GetTickCount64()^(uint64_t(GetCurrentProcessId())<<12))&0x7fffffff);if(!sessionId)sessionId=1;
  workerStop=false;settingsWorker=std::thread(settings_loop);
  }catch(...){reflexAvailable=0;reflexFault=1;}return true;

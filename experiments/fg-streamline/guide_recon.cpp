@@ -33,6 +33,7 @@ namespace a=reshade::api;
 #include "../../src/providers/sr_runtime_snapshot.h"
 #include "../../src/native/reset_epoch_contract.hpp"
 #include "fg_controls.hpp"
+#include "../../src/providers/settings_paths.hpp"
 namespace {
 std::recursive_mutex mutex;
 std::ofstream privateLog;
@@ -70,7 +71,7 @@ void game_queue_destroy(a::command_queue*q){if(mcd2::process_exit::terminating()
 using Frame=uint64_t(*)();
 using Visit=int(*)(uint64_t,int(*)(void*,unsigned,void*),void*);
 Frame renderFrame=nullptr,presentFrame=nullptr,renderMarker=nullptr,threadRenderMarker=nullptr;Visit visitFrame=nullptr;
-struct FrameData{MCD2FGCamera camera{};bool guides=false,images=false,sdrFinalColor=false;ID3D12Resource*scene=nullptr;MCD2FGCamera sceneView{};bool sceneSubmitted=false;};
+struct FrameData:mcd2::fg::FrameInputs{ID3D12Resource*scene=nullptr;MCD2FGCamera sceneView{};bool sceneSubmitted=false;};
 std::map<uint32_t,FrameData> gameFrames;
 void trim_frames(){while(gameFrames.size()>16)gameFrames.erase(gameFrames.begin());}
 unsigned imageSamples=0,fgTrialFrames=0;std::atomic<unsigned> activeFGMode{0};uint32_t presentedFrame=UINT32_MAX;
@@ -219,7 +220,7 @@ void open(){
  if(privateLog.is_open())return;
  auto local=std::make_unique<wchar_t[]>(32768);auto n=GetEnvironmentVariableW(L"LOCALAPPDATA",local.get(),32768);
  if(!n||n>=32768)return;
- auto folder=std::filesystem::path(local.get())/L"Dungeons2"/L"Saved"/L"MCD2Graphics";
+ auto paths=mcd2::providers::currentSettingsPaths(std::filesystem::path(local.get()));if(!paths)return;auto folder=paths->authority;
  auto exe=std::make_unique<wchar_t[]>(32768);auto length=GetModuleFileNameW(nullptr,exe.get(),32768);if(!length||length>=32768)return;
  capturePolicy=std::filesystem::path(exe.get()).parent_path()/L"FGGuideCapture.ini";
  fg_controls::init(folder);std::filesystem::create_directories(folder);privateLog.open(folder/L"FGGuideRecon-private.jsonl",std::ios::trunc);
@@ -491,9 +492,9 @@ void finish(a::command_queue*,a::swapchain*){if(mcd2::process_exit::terminating(
 }
 void present(a::command_queue*q,a::swapchain*swap,const a::rect*,const a::rect*,unsigned,const a::rect*){if(mcd2::process_exit::terminating())return;
  if(gamePresentationOwner&&!gamePresentationCallback)return;
- poll_policy();fg_controls::poll(swap->get_device(),capturePolicy,activeFGMode);
+ open();poll_policy();fg_controls::poll(swap->get_device(),capturePolicy,activeFGMode);
  if(auto module=amd_bridge()){
-  auto d=swap->get_device()->get_resource_desc(swap->get_current_back_buffer());
+  auto d=fg_resources::resource_desc(swap->get_device(),fg_resources::current_back_buffer(swap));
   mcd2::providers::FgOutputContract next{d.texture.width,d.texture.height,unsigned(d.texture.format),unsigned(d.texture.format)==87?28u:unsigned(d.texture.format),mcd2::providers::FgOutputColour(swap->get_color_space()),swap->get_color_space()==a::color_space::srgb?mcd2::providers::FgSceneStage::SdrOpaqueSnapshot:mcd2::providers::FgSceneStage::HdrCompositor};
   bool changed=false,closing=false;
   {std::lock_guard lock(mutex);changed=!(next==sceneOutput);closing=ownerClosing;if(changed){sceneOutput=next;outputWidth=next.width;outputHeight=next.height;outputFormat=next.backbufferFormat;outputColour=unsigned(next.colour);gameFrames.clear();outputReady=false;snapshotTracking=false;retiring=true;}}

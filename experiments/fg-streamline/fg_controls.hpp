@@ -30,6 +30,7 @@ void publish(unsigned active,bool ready){
  if(bytes.empty()||bytes==lastPublished)return;auto tmp=runtimePath;tmp+=L".fg.tmp";std::ofstream f(tmp,std::ios::binary|std::ios::trunc);if(!f.write(reinterpret_cast<const char*>(bytes.data()),bytes.size()))return;f.close();if(MoveFileExW(tmp.c_str(),runtimePath.c_str(),MOVEFILE_REPLACE_EXISTING|MOVEFILE_WRITE_THROUGH))lastPublished=std::move(bytes);
 }
 void poll(a::device*device,const std::filesystem::path&policy,unsigned active){
+ if(settingsPath.empty()){wanted=false;return;}
  const auto now=GetTickCount64();if(now<nextPoll)return;nextPoll=now+200;enabled=!policy.empty()&&GetPrivateProfileIntW(L"Capture",L"NativeUIToggle",0,policy.c_str())==1;if(!enabled){wanted=false;return;}
  auto latency=GetModuleHandleW(L"mcd2-display-latency.addon64");
  auto menuEnabled=latency?reinterpret_cast<int(*)()>(GetProcAddress(latency,"mcd2_menu_enabled_v1")):nullptr;

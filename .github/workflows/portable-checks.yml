@@ -60,12 +60,18 @@ jobs:
           /tmp/fg-configuration
       - name: Generate synthetic parser fixtures
         run: python3 tests/make_synthetic_saves.py /tmp/mcd2-fixtures
-      - name: GDK legacy slot validation
+      - name: GDK provider transport and lifecycle validation
         run: |
           g++ -std=c++20 tests/gdk_save_slots_test.cpp -o /tmp/gdk-save-slots
           /tmp/gdk-save-slots /tmp/mcd2-fixtures
           g++ -std=c++20 tests/gdk_cache_time_test.cpp -o /tmp/gdk-cache-time
           /tmp/gdk-cache-time
+          g++ -std=c++20 tests/gdk_provider_transport_test.cpp -o /tmp/gdk-provider-transport
+          /tmp/gdk-provider-transport
+          g++ -std=c++20 -pthread tests/gdk_save_lifecycle_test.cpp -o /tmp/gdk-save-lifecycle
+          /tmp/gdk-save-lifecycle
+          g++ -std=c++20 tests/settings_paths_test.cpp -o /tmp/settings-paths
+          /tmp/settings-paths
       - name: Settings framing and semantic checks
         run: |
           g++ -std=c++20 -Wall -Wextra -Werror tests/provider_intent_test.cpp -o /tmp/provider-intent
@@ -195,6 +201,12 @@ jobs:
           ./gdk-save-slots.exe display-fixtures
           g++ -std=c++20 -static tests/gdk_cache_time_test.cpp -o gdk-cache-time.exe
           ./gdk-cache-time.exe
+          g++ -std=c++20 -static tests/gdk_provider_transport_test.cpp -o gdk-provider-transport.exe
+          ./gdk-provider-transport.exe
+          g++ -std=c++20 -static -pthread tests/gdk_save_lifecycle_test.cpp -o gdk-save-lifecycle.exe
+          ./gdk-save-lifecycle.exe
+          g++ -std=c++20 -static tests/settings_paths_test.cpp -o settings-paths.exe
+          ./settings-paths.exe
           g++ -std=c++20 -static -Isrc/native tests/lean_borrow_lifetime_test.cpp -o lean-borrow-lifetime.exe
           ./lean-borrow-lifetime.exe
           g++ -std=c++20 -static -pthread -Wall -Wextra -Werror tests/amd_latency_test.cpp -o amd-latency.exe

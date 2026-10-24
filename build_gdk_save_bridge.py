@@ -1,4 +1,4 @@
-"""Build the opt-in GDK legacy save transport; no release assets are replaced."""
+"""Build the identity-bound GDK save transport; no release assets are replaced."""
 import argparse
 import hashlib
 import json
@@ -29,13 +29,14 @@ def main():
                str(root / 'src/gdk/save_bridge_addon.cpp'), '-o', str(binary)]
     with (output / 'build.log').open('w') as log:
         subprocess.run(command, stdout=log, stderr=subprocess.STDOUT, check=True)
-    sources = [*sorted((root / 'src/gdk').glob('*.*')),
+    sources = [*sorted((root / 'src/gdk').glob('*.*')), *sorted((root / 'src/providers').glob('*.hpp')), *sorted((root / 'src/providers').glob('*.h')),
                root / 'src/native/settings_bridge.hpp', root / 'src/latency/display_protocol.hpp',
                root / 'src/latency/process_exit.hpp', root / 'src/latency/process_lifetime.hpp',
                root / 'experiments/fg-streamline/fg_ui_protocol.hpp']
     receipt = {'runtimeQualified': False,
                'sourceSHA256': {path.relative_to(root).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
                                 for path in sources},
+               'gdkHeadersSHA256': {path.relative_to(args.gdk_include).as_posix():hashlib.sha256(path.read_bytes()).hexdigest() for path in sorted(args.gdk_include.glob('*.h'))},
                'files': {binary.name: hashlib.sha256(binary.read_bytes()).hexdigest()}}
     (output / 'build-result.json').write_text(json.dumps(receipt, indent=2) + '\n')
     print(binary)
