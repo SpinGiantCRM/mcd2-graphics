@@ -19,6 +19,12 @@ def run(*args):
     subprocess.run([str(arg) for arg in args], check=True)
 
 
+def checkout_ngx(checkout,commit):
+    # Hash the exact upstream declaration bytes on Windows too. Its default
+    # core.autocrlf=true would otherwise rewrite pinned LF files during checkout.
+    run('git','-C',checkout,'-c','core.autocrlf=false','checkout',commit)
+
+
 def sha(path):
     with Path(path).open('rb') as stream:
         return hashlib.file_digest(stream, 'sha256').hexdigest()
@@ -277,7 +283,7 @@ def main():
     run(amd_latency / 'amd-antilag-test.exe')
     ngx = out / 'ngx'
     run('git', 'clone', '--no-checkout', 'https://github.com/NVIDIA/DLSS.git', ngx)
-    run('git', '-C', ngx, 'checkout', lock['buildDependencies']['NVIDIASDKCommit'])
+    checkout_ngx(ngx,lock['buildDependencies']['NVIDIASDKCommit'])
     # Build only our owned-input compute probe. The headless provider stays
     # external; CI runs the CPU-only public parameter ABI fixture, never GPU FG.
     mfg_spec = importlib.util.spec_from_file_location('mfg_recipe', REPO / 'experiments/providers/build_mfg_compute_probe.py')

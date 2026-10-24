@@ -1,10 +1,12 @@
 """Behavioral contracts for the isolated probe runner, never a GPU test."""
 import copy
+import ast
 import hashlib
 import importlib.util
 import json
 from pathlib import Path, PurePosixPath
 import tempfile
+import subprocess
 import unittest
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -32,6 +34,25 @@ def samples(multiplier=4):
 
 
 class MfgProbeTests(unittest.TestCase):
+    def test_native_checkout_preserves_pinned_bytes_with_windows_git_settings(self):
+        source=ROOT/'experiments/fg-streamline/build_windows_candidate.py'
+        tree=ast.parse(source.read_text())
+        function=next(node for node in tree.body if isinstance(node,ast.FunctionDef) and node.name=='checkout_ngx')
+        def run(*args): return subprocess.run([str(arg) for arg in args],check=True,capture_output=True)
+        namespace={'run':run}
+        exec(compile(ast.Module(body=[function],type_ignores=[]),str(source),'exec'),namespace)
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp); origin=root/'origin'; checkout=root/'checkout'
+            run('git','init',origin)
+            blob=b'public SDK declaration\nsecond line\n'
+            (origin/'declaration.h').write_bytes(blob)
+            run('git','-C',origin,'-c','core.autocrlf=false','add','declaration.h')
+            run('git','-C',origin,'-c','user.name=Fixture','-c','user.email=fixture@example.invalid','commit','-m','fixture')
+            commit=subprocess.check_output(['git','-C',str(origin),'rev-parse','HEAD'],text=True).strip()
+            run('git','clone','--no-checkout','--config','core.autocrlf=true',origin,checkout)
+            namespace['checkout_ngx'](checkout,commit)
+            self.assertEqual((checkout/'declaration.h').read_bytes(),blob)
+
     def test_linux_command_leaves_dll_resolution_to_windows_executable(self):
         command=runner.probe_command(PurePosixPath('/home/test/isolated'),4,PurePosixPath('/tools/proton'))
         self.assertEqual(command,['/tools/proton','run','/home/test/isolated/mfg-compute-probe.exe','4'])
