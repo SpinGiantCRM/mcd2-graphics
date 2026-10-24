@@ -4,8 +4,17 @@ import hashlib
 import json
 from pathlib import Path
 import subprocess
+import sys
 
 from build_toolchain import native_frame_guard, normalize_windows_header
+
+def run_compiler(command,log_path):
+    try:
+        with log_path.open('w') as log:
+            subprocess.run(command,stdout=log,stderr=subprocess.STDOUT,check=True)
+    except subprocess.CalledProcessError:
+        print(log_path.read_text(errors='replace')[-16000:],file=sys.stderr)
+        raise
 
 def resolve_gdk_include(root):
     root=Path(root).resolve()
@@ -38,8 +47,7 @@ def main():
     command = [args.mingw_cxx, '-std=c++20', '-O2', *native_frame_guard(args.mingw_cxx),
                '-shared', '-static', '-s', '-isystem', str(include), '-isystem', str(args.gdk_include.resolve()),
                str(root / 'src/gdk/save_bridge_addon.cpp'), '-o', str(binary)]
-    with (output / 'build.log').open('w') as log:
-        subprocess.run(command, stdout=log, stderr=subprocess.STDOUT, check=True)
+    run_compiler(command,output / 'build.log')
     sources = [*sorted((root / 'src/gdk').glob('*.*')), *sorted((root / 'src/providers').glob('*.hpp')), *sorted((root / 'src/providers').glob('*.h')),
                root / 'src/native/settings_bridge.hpp', root / 'src/latency/display_protocol.hpp',
                root / 'src/latency/process_exit.hpp', root / 'src/latency/process_lifetime.hpp',

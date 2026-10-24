@@ -42,7 +42,10 @@ bool privateDirectory(const std::filesystem::path& path){
 std::string bindingHash(const std::string& binding){
     auto module=LoadLibraryExW(L"bcrypt.dll",nullptr,LOAD_LIBRARY_SEARCH_SYSTEM32);if(!module)return {};
     auto open=reinterpret_cast<decltype(&BCryptOpenAlgorithmProvider)>(GetProcAddress(module,"BCryptOpenAlgorithmProvider"));
-    auto hash=reinterpret_cast<decltype(&BCryptHash)>(GetProcAddress(module,"BCryptHash"));
+    // Some MinGW targets hide this Windows 10 declaration. Resolve its public
+    // ABI explicitly; availability is still checked on the running system.
+    using Hash=NTSTATUS(WINAPI*)(BCRYPT_ALG_HANDLE,PUCHAR,ULONG,PUCHAR,ULONG,PUCHAR,ULONG);
+    auto hash=reinterpret_cast<Hash>(GetProcAddress(module,"BCryptHash"));
     auto close=reinterpret_cast<decltype(&BCryptCloseAlgorithmProvider)>(GetProcAddress(module,"BCryptCloseAlgorithmProvider"));
     BCRYPT_ALG_HANDLE algorithm=nullptr;std::array<UCHAR,32> digest{};std::string result;
     if(open&&hash&&close&&open(&algorithm,BCRYPT_SHA256_ALGORITHM,nullptr,0)>=0){
