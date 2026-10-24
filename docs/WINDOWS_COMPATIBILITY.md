@@ -1245,3 +1245,15 @@ response. Preserve this ownership contract and its Microsoft ABI regression.
 The previous omitted-flag Linux control caused the backend to reset/close the
 caller's list and fail retirement. Corrected synthetic Linux/NVIDIA 2x-6x runs
 passed with normal exits; this does not qualify Windows/Radeon or game wiring.
+
+### Installer game-location selection
+
+The integration branch carries PR9's folder/executable selection behavior through
+the edition-aware profile. Resolve only known Dungeons/Binaries parents and one
+Content wrapper; preserve executable identity, linked-ancestor rejection, mixed-
+edition ambiguity and the existing Xodus-prefix requirement. A failed replacement
+selection clears the old root/profile/dependency state, and the GUI redraws after
+failure or prefix cancellation. Selecting a path never bypasses the edition's
+executable hash, dependencies or process guard. Preserve the real-filesystem
+selection tests on both CI platforms; native picker interaction still needs
+qualification. See [selection behavior](INSTALLER_GAME_SELECTION.md).

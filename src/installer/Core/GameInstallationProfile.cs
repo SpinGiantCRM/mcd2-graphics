@@ -23,15 +23,8 @@ public sealed record GameInstallationProfile {
     }
     public static GameInstallationProfile Select(string root,GameEnvironment environment,
         GameEdition? edition=null,string? managedPrefix=null) {
-        root=Path.GetFullPath(root);
-        bool Has(GameEdition candidate)=>File.Exists(InstallerEngine.Target(root,
-            candidate==GameEdition.Steam?InstallerEngine.Shipping:"Dungeons/Binaries/WinGDK/Dungeons-WinGDK-Shipping.exe"));
-        if(edition is null) {
-            var steam=Has(GameEdition.Steam);var gdk=Has(GameEdition.WinGDK);
-            if(steam==gdk)throw new InvalidDataException(steam?"Choose the game edition explicitly.":"No recognized game executable layout found.");
-            edition=steam?GameEdition.Steam:GameEdition.WinGDK;
-        }
-        if(!Has(edition.Value))throw new InvalidDataException("The selected edition's executable is missing.");
+        var location=GameLocation.Resolve(root,edition);
+        root=location.Root;edition=location.Edition;
         string prefix="";
         if(environment==GameEnvironment.Linux) {
             if(edition==GameEdition.WinGDK) {

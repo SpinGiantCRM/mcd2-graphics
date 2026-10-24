@@ -8,6 +8,7 @@ void Throws(Action a,string name){bool caught=false;try{a();}catch(Exception e)w
 var temp=Path.Combine(Path.GetTempPath(),"mcd2-installer-test-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(temp);
 try {
  ProfileTests.Run(Check,Throws,temp);
+ GameLocationTests.Run(Check,Throws,temp);
  byte[] file=Encoding.UTF8.GetBytes("qualified test payload");string hash=InstallerEngine.Digest(file);var own=new Dictionary<string,string>{{"Dungeons/Binaries/Win64/mcd2-graphics.addon64",hash}};
  var dependencies=new Dictionary<string,object>{["ReShade"]=new{version="test",file="Dungeons/Binaries/Win64/dxgi.dll",sha256=hash,url="https://reshade.me/"},["RenoDXUEExtended"]=new{version="test",file="Dungeons/Binaries/Win64/renodx-ue-extended.addon64",sha256=hash,url="https://github.com/marat569/renodx"},["DLSSRuntime"]=new{version="test",file=InstallerEngine.Runtime,sha256=hash,url="https://github.com/NVIDIA/DLSS"}};
  string lockJson=JsonSerializer.Serialize(new{game=new{steamBuildID="123",exeSHA256=hash},dependencies});
@@ -39,13 +40,20 @@ try {
  File.WriteAllBytes(gdkOwned,file);gdkEngine.Uninstall();
  Check(!File.Exists(gdkOwned)&&File.Exists(Path.Combine(gdkRoot,"Dungeons/Binaries/WinGDK/renodx-ue-extended.addon64")),"Game Pass uninstall retains shared dependencies");
  var runtime=Path.Combine(temp,"download.dll");File.WriteAllBytes(runtime,file);
+ var stale=Engine();stale.SelectDependency("DLSSRuntime",runtime);stale.SetDependencyOverride("DLSSRuntime",true);
+ var unrelatedSelection=Path.Combine(temp,"NotAGame");Directory.CreateDirectory(unrelatedSelection);
+ Throws(()=>stale.SetGame(unrelatedSelection),"Failed replacement game selection is reported");
+ Check(stale.GameRoot==null&&stale.Profile==null&&!stale.Ready,"Failed selection clears previous root, edition and readiness");
+ stale.SetGame(temp);Check(!stale.OverrideEnabled("DLSSRuntime")&&stale.Scan().Single(x=>x.Name=="NVIDIA DLSS runtime").State=="Missing","Failed selection clears dependency choices and overrides");
+ var badRoot=Path.Combine(temp,"WrongBuild");var badExe=Path.Combine(badRoot,InstallerEngine.Shipping);Directory.CreateDirectory(Path.GetDirectoryName(badExe)!);File.WriteAllText(badExe,"different executable");
+ stale.SetGame(badExe);Check(stale.Scan()[0].State=="Unsupported version"&&!stale.Ready,"Executable normalization preserves exact fingerprint gate");
  var e=Engine();Check(!e.Ready,"Missing runtime prevents installation");e.SelectDependency("DLSSRuntime",runtime);Check(e.Ready,"Selected hash verified runtime makes install ready");
  e.Install();Check(InstallerEngine.DigestFile(Path.Combine(temp,own.Keys.Single()))==hash,"Payload installed and hashed");
  Check(File.ReadAllText(Path.Combine(temp,InstallerEngine.Marker)).Contains("candidate.test"),"Candidate version recorded");
  Throws(()=>e.Install(),"Duplicate install refused");
  Put(own.Keys.Single(),Encoding.UTF8.GetBytes("modified"));Throws(()=>e.Uninstall(),"Modified file stops uninstall before mutation");Throws(()=>e.Install(true),"Modified file stops repair");Check(File.Exists(Path.Combine(temp,InstallerEngine.Runtime)),"Runtime retained after failed uninstall");
  Put(own.Keys.Single());File.Delete(Path.Combine(temp,own.Keys.Single()));e.Install(true);Check(File.Exists(Path.Combine(temp,own.Keys.Single())),"Missing owned file repaired");
- var report=e.DiagnosticReport();Check(!report.Contains(temp)&&!report.Contains(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)),"Report excludes private paths");
+ var report=e.DiagnosticReport();Check(report.Contains("Edition: Steam"),"Diagnostics identify the selected edition");Check(!report.Contains(temp)&&!report.Contains(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)),"Report excludes private paths");
  e.Uninstall();Check(!File.Exists(Path.Combine(temp,own.Keys.Single()))&&!File.Exists(Path.Combine(temp,InstallerEngine.Runtime)),"Own payload and runtime removed");Check(File.Exists(Path.Combine(temp,"Dungeons/Binaries/Win64/dxgi.dll")),"External dependency preserved");
  Throws(()=>InstallerEngine.Target(temp,"../outside"),"Traversal rejected");Throws(()=>InstallerEngine.Target(temp,"C:/absolute"),"Drive path rejected");Throws(()=>InstallerEngine.Target(temp,"a\\b"),"Backslash archive path rejected");
  var evil=Engine(()=>new MemoryStream(Encoding.UTF8.GetBytes("broken zip")));evil.SelectDependency("DLSSRuntime",runtime);Throws(()=>evil.Install(),"Broken package refused before writing");Check(!File.Exists(Path.Combine(temp,InstallerEngine.Marker)),"Failed install leaves no receipt");

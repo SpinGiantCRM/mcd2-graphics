@@ -51,3 +51,10 @@ For crashes, black lines or shutdown faults, use the [bug report form](https://g
 
 Bounded [Linux/NVIDIA](docs/LINUX_DEV25_ACCEPTANCE_2026-10-24.md) and [Windows/Radeon](docs/WINDOWS_DEV25_ACCEPTANCE_2026-10-24.md) acceptance applies to the exact [published inputs](qualification/providers/dev25-release-artifacts-2026-10-24.json), with known issues. Intermittent shutdown failures remain recorded; Windows reproduced its worker fault without this mod's graphics payload, and identical Linux ownership is unproven. Some successful Windows exits took about 89 seconds. Native Windows NVIDIA features/profile overrides, Windows HDR, physical controllers, wider hardware, long sessions and device loss remain outside this scope.
 The mod does not force offline mode. Online/co-op permission and compatibility remain unverified; offline play is safer. [Online use](docs/ONLINE_USE.md). Packages are unsigned; transparent packaging does not guarantee Nexus clearance. Await Nexus staff clearance for quarantined files; do not use external links to bypass that review or disable security protection.
+
+## Integration installer development
+
+The forthcoming combined candidate adds folder/executable selection for both
+editions. See [integration game selection](docs/INSTALLER_GAME_SELECTION.md) for
+its bounded path rules and remaining checks. This does not change the released
+dev.25 instructions above.

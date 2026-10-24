@@ -36,7 +36,9 @@ public sealed class InstallerWindow:Window {
         header.Children.Add(navigation);root.Children.Add(header);
         var scroll=new ScrollViewer{Content=content,Margin=new Thickness(0,24,0,16)};Grid.SetRow(scroll,1);root.Children.Add(scroll);
         var footer=new StackPanel{Spacing=8};footer.Children.Add(message);footer.Children.Add(new TextBlock{Text="Saved games, account data and other mods are never part of installation or diagnostics.",Opacity=.65,TextWrapping=TextWrapping.Wrap});Grid.SetRow(footer,2);root.Children.Add(footer);Content=root;
-        var detected=InstallerEngine.DetectGames().FirstOrDefault();if(detected!=null)engine.SetGame(detected);Draw();
+        var detected=InstallerEngine.DetectGames().FirstOrDefault();
+        if(detected!=null)try{engine.SetGame(detected);}catch(Exception e)when(e is InvalidDataException or IOException or UnauthorizedAccessException){engine.ClearGame();}
+        Draw();
     }
     static string ReadResource(string name){using var stream=Assembly.GetExecutingAssembly().GetManifestResourceStream(name)??throw new InvalidDataException("Installer resource missing.");using var reader=new StreamReader(stream);return reader.ReadToEnd();}
     Button Button(string label,Action action) {var b=new Button{Content=label};b.Click+=(_,_)=>{if(!busy)action();};return b;}
@@ -50,10 +52,18 @@ public sealed class InstallerWindow:Window {
     void Draw() {
         content.Children.Clear();message.Text="";
         if(page==0) {
-            Text("Locate your game",22);Text("Steam libraries are detected automatically. Browse to select a Steam or Xbox PC installation. Game Pass on Linux uses your existing Xodus-managed prefix.");
-            var games=InstallerEngine.DetectGames().ToList();if(games.Count>1){var choice=new ComboBox{ItemsSource=games,SelectedItem=engine.GameRoot,HorizontalAlignment=HorizontalAlignment.Stretch};choice.SelectionChanged+=(_,_)=>{if(choice.SelectedItem is string p){engine.SetGame(p);Draw();}};content.Children.Add(choice);}
+            Text("Locate your game",22);Text("Choose the installation folder or shipping executable. Steam libraries are detected automatically. Supported builds are checked before installation. Game Pass on Linux uses your existing Xodus-managed prefix.");
+            var games=InstallerEngine.DetectGames().ToList();if(games.Count>1){var choice=new ComboBox{ItemsSource=games,SelectedItem=engine.GameRoot,HorizontalAlignment=HorizontalAlignment.Stretch};choice.SelectionChanged+=async(_,_)=>{if(choice.SelectedItem is string p)await Run(()=>ChooseGame(p));};content.Children.Add(choice);}
             Text(engine.GameRoot??"Game not found");
-            content.Children.Add(AsyncButton("Browse…",async()=>{var folders=await StorageProvider.OpenFolderPickerAsync(new(){Title="Choose Minecraft Dungeons II",AllowMultiple=false});var p=folders.SingleOrDefault()?.TryGetLocalPath();if(p!=null){string? prefix=null;if(!OperatingSystem.IsWindows()&&File.Exists(Path.Combine(p,"Dungeons/Binaries/WinGDK/Dungeons-WinGDK-Shipping.exe"))){var prefixes=await StorageProvider.OpenFolderPickerAsync(new(){Title="Choose this game's existing Xodus Wine prefix (pfx)",AllowMultiple=false});prefix=prefixes.SingleOrDefault()?.TryGetLocalPath();if(prefix==null)return;}engine.SetGame(p,managedPrefix:prefix);Draw();}}));
+            content.Children.Add(AsyncButton("Browse folder…",async()=>{
+                var selected=await StorageProvider.OpenFolderPickerAsync(new(){Title="Choose Minecraft Dungeons II",AllowMultiple=false});
+                if(selected.SingleOrDefault()?.TryGetLocalPath() is string path)await ChooseGame(path);
+            }));
+            content.Children.Add(AsyncButton("Choose game executable…",async()=>{
+                var selected=await StorageProvider.OpenFilePickerAsync(new(){Title="Choose the game's shipping executable",AllowMultiple=false,
+                    FileTypeFilter=new[]{new FilePickerFileType("Windows executable"){Patterns=new[]{"*.exe"}}}});
+                if(selected.SingleOrDefault()?.TryGetLocalPath() is string path)await ChooseGame(path);
+            }));
             if(engine.GameRoot!=null){Text("Game build: "+engine.GameBuild());var check=engine.Scan()[0];Text("Status: "+(check.State=="OK"?"Supported":"Unsupported — installation is blocked"));}
             content.Children.Add(Button("Check requirements",()=>{page=1;Draw();}));
         }else if(page==1) {
@@ -98,6 +108,18 @@ public sealed class InstallerWindow:Window {
             content.Children.Add(Button("Report a problem",()=>OpenLink("https://github.com/SpinGiantCRM/mcd2-graphics/issues/new/choose")));
             Text("Online compatibility is unverified. Offline play is safer; follow the publisher’s terms. Advanced RenoDX settings remain in ReShade.");
         }
+    }
+    async Task ChooseGame(string selection) {
+        engine.ClearGame();
+        try {
+            var location=GameLocation.Resolve(selection);string? prefix=null;
+            if(!OperatingSystem.IsWindows()&&location.Edition==GameEdition.WinGDK) {
+                var selected=await StorageProvider.OpenFolderPickerAsync(new(){Title="Choose this game's existing Xodus Wine prefix (pfx)",AllowMultiple=false});
+                prefix=selected.SingleOrDefault()?.TryGetLocalPath();
+                if(prefix==null)return;
+            }
+            engine.SetGame(location.Root,location.Edition,prefix);
+        } finally {Draw();}
     }
     async Task<string?> SelectFile(string title) {var selected=await StorageProvider.OpenFilePickerAsync(new(){Title=title,AllowMultiple=false});return selected.SingleOrDefault()?.TryGetLocalPath();}
     static void OpenLink(string url)=>Process.Start(new ProcessStartInfo(url){UseShellExecute=true});

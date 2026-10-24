@@ -140,10 +140,14 @@ public sealed partial class InstallerEngine {
     static Dictionary<string,string> ReadHashes(JsonElement e)=>e.EnumerateObject().ToDictionary(x=>x.Name,x=>x.Value.GetString()!);
     static string OfficialUrl(string id)=>id switch {"BlueprintLoader"=>"https://www.nexusmods.com/minecraftdungeons2/mods/2?tab=files", "ReShade"=>"https://reshade.me/", "RenoDXUEExtended"=>"https://github.com/marat569/renodx/releases/tag/nightly-20260928", "DLSSRuntime"=>"https://github.com/NVIDIA/DLSS", _=>throw new InvalidDataException("Unknown requirement")};
     public void SetGame(string path,GameEdition? edition=null,string? managedPrefix=null) {
+        ClearGame();
         var profile=GameInstallationProfile.Select(path,OperatingSystem.IsWindows()?GameEnvironment.Windows:GameEnvironment.Linux,edition,managedPrefix);
         var root=profile.Root;
-        if(GameRoot!=root||Profile!=profile){selections.Clear();overrideEnabled.Clear();overrideHashes.Clear();overrideOriginals.Clear();}
         GameRoot=root;Profile=profile;
+    }
+    public void ClearGame() {
+        GameRoot=null;Profile=null;
+        selections.Clear();overrideEnabled.Clear();overrideHashes.Clear();overrideOriginals.Clear();
     }
     public string GameBuild() {
         if(GameRoot==null)return "Not selected";
@@ -347,7 +351,7 @@ public sealed partial class InstallerEngine {
     public string DiagnosticReport() {
         // Positive allowlist, never read logs, saves, tokens, configs or arbitrary error text.
         var report=new StringBuilder("MCD2 Graphics diagnostics\n");
-        report.AppendLine("Mod: "+Version);report.AppendLine("Game build: "+GameBuild());report.AppendLine("Platform: "+(OperatingSystem.IsWindows()?"Windows ":"Linux ")+Environment.OSVersion.Version);
+        report.AppendLine("Mod: "+Version);report.AppendLine("Edition: "+(Profile?.Edition.ToString()??"Not selected"));report.AppendLine("Game build: "+GameBuild());report.AppendLine("Platform: "+(OperatingSystem.IsWindows()?"Windows ":"Linux ")+Environment.OSVersion.Version);
         foreach(var s in HardwareFacts())report.AppendLine(s);
         foreach(var c in Scan()) {report.AppendLine($"{c.Name}: {c.State} ({c.Version})");report.AppendLine("Expected SHA-256: "+c.Expected);report.AppendLine("Found SHA-256: "+c.Found);}
         report.AppendLine("No account data, private paths, saves or raw logs collected.");return report.ToString();
