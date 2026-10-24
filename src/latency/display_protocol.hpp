@@ -9,7 +9,8 @@ inline bool parse(const std::vector<uint8_t>&bytes,const char*className,std::map
  if(r.u32()!=0x53415647||r.u32()!=3||r.u32()!=522||r.u32()!=1017||r.u16()!=5||r.u16()!=6||r.u16()!=1||r.u32()!=0||r.str()!="UE5"||r.u32()!=3||r.u32()!=93)return false;
  if(r.at+93*20>bytes.size())return false;r.at+=93*20;
  if(r.str()!=std::string("/Game/Mods/MCD2Graphics/")+className+"."+className+"_C"||r.u8()!=0)return false;header=r.at;
- for(unsigned n=0;n<24;++n){auto name=r.str();if(!r.ok)return false;if(name=="None")return r.u32()==0&&r.ok&&r.at==bytes.size()&&values["SchemaVersion"]==1;
+ const unsigned properties=std::string(className)=="DiagnosticsStateSave"?25u:24u; // 24 diagnostic fields plus None.
+ for(unsigned n=0;n<properties;++n){auto name=r.str();if(!r.ok)return false;if(name=="None")return r.u32()==0&&r.ok&&r.at==bytes.size()&&values["SchemaVersion"]==1;
   if(values.count(name))return false;auto type=r.str();auto array=r.u32(),size=r.u32();auto flags=r.u8();if(!r.ok||type!="IntProperty"||array||size!=4||flags)return false;
   auto value=r.u32();if(!r.ok||(value>0x7fffffff&&!(std::string(className)=="DiagnosticsStateSave"&&name=="FgPresetStatus")))return false;values[name]=value;
  }return false;

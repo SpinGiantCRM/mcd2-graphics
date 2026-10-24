@@ -79,6 +79,31 @@ int main(){
  samples.observe(identity,p::SrProvider::AmdFsr,0,&runtime,100,1601);assert(!samples.snapshot().observedAtMs); // Delayed worker work cannot freshen an old read.
  samples.observe(identity,p::SrProvider::AmdFsr,0,&runtime,2300,2300);runtime.evaluations=1;samples.observe(identity,p::SrProvider::AmdFsr,0,&runtime,2301,2301);assert(samples.snapshot().state.evaluations==1); // Preserve an actual counter reset.
  sampled=samples.snapshot();projected=d::project(identity,unavailable,fg,7,record.bootstrap.stamp.checksum,1,100,2300,&sampled);assert(!projected.sr.provider); // Future observation rejected.
+ // DLSS getter Busy must preserve only the original identity-validated observation.
+ d::SrMetadataCache dlssCache;
+ const MCD2SrDiagnosticsV1 dlss{sizeof(dlss),1,7,4,30105,1,100};
+ auto getter=dlss;dlssCache.observe(identity,0,getter,100);
+ getter={sizeof(getter),0,0,0,0,0,0};dlssCache.observe(identity,-2,getter,600);
+ assert(getter.provider==1&&getter.evaluations==100&&getter.revision==7&&getter.world==4);
+ d::SrWorkerSample dlssWorker;dlssWorker.requested=p::SrProvider::NvidiaDlss;
+ projected=d::project(identity,getter,fg,7,record.bootstrap.stamp.checksum,1,100,600,&dlssWorker);
+ assert(projected.sr.provider==1&&projected.sr.evaluations==100&&projected.world==4);
+ projected=d::project(next,getter,fg,7,record.bootstrap.stamp.checksum,1,100,600,&dlssWorker);assert(!projected.sr.provider);
+ dlssCache.observe(identity,-2,getter,1600);assert(getter.provider==1&&getter.evaluations==100); // Inclusive original-read bound.
+ dlssCache.observe(identity,-2,getter,1601);assert(!getter.provider&&!getter.evaluations&&!getter.implementation);
+ for(unsigned field=0;field<4;++field){auto changed=identity;if(field==0)changed.session++;if(field==1)changed.revision++;if(field==2)changed.checksum^=1;if(field==3)changed.world++;
+  getter=dlss;dlssCache.observe(identity,0,getter,2000);dlssCache.observe(changed,-2,getter,2001);assert(!getter.provider&&!getter.evaluations);
+ }
+ for(int result:{-1,-3}){getter=dlss;dlssCache.observe(identity,0,getter,2100);dlssCache.observe(identity,result,getter,2101);dlssCache.observe(identity,-2,getter,2102);assert(!getter.provider&&!getter.evaluations);}
+ for(unsigned invalid=0;invalid<4;++invalid){getter=dlss;dlssCache.observe(identity,0,getter,2200);getter=dlss;
+  if(invalid==0){getter.provider=0;}if(invalid==1){getter.revision++;}if(invalid==2){getter.world++;}if(invalid==3){getter.size--;}
+  dlssCache.observe(identity,0,getter,2201);dlssCache.observe(identity,-2,getter,2202);assert(!getter.provider&&!getter.evaluations);
+ }
+ getter=dlss;getter.provider=2;dlssCache.observe(identity,0,getter,2300);dlssCache.observe(identity,-2,getter,2301);
+ assert(!getter.provider&&!getter.evaluations&&getter.implementation==30105); // FSR getter metadata cannot supply activity.
+ getter=dlss;dlssCache.observe(identity,0,getter,2400);dlssCache.observe({},-2,getter,2401);assert(!getter.provider&&!getter.implementation);
+ getter=dlss;dlssCache.observe(identity,0,getter,2500);dlssCache.observe(identity,-2,getter,2499);assert(!getter.provider); // Future read refused.
+ getter=dlss;dlssCache.observe(identity,0,getter,2600);getter.evaluations=3;dlssCache.observe(identity,0,getter,2601);dlssCache.observe(identity,-2,getter,2602);assert(getter.evaluations==3); // Successful reset replaces old total.
  next.revision=8;next.checksum^=1;
  // Callback and epoch publication use the production tracker's synchronization.
  std::thread producer([&]{for(unsigned n=101;n<10000;++n){tracker.select(n%2?identity:next);tracker.admit(n,n%2?identity:next);tracker.outcome(n,true,1,n);}});

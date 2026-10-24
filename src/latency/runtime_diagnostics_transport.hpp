@@ -18,7 +18,6 @@ inline void publish(const std::filesystem::path& saves,unsigned session,unsigned
  auto module=GetModuleHandleW(L"mcd2-graphics.addon64");
  using Sr=int(*)(MCD2SrDiagnosticsV1*);auto get=module?reinterpret_cast<Sr>(GetProcAddress(module,"mcd2_sr_diagnostics_v1")):nullptr;
  const int srResult=get?get(&sr):-3;
- if(srResult)sr={sizeof(sr),0,0,0,0,0,0};
  static SrMetadataCache srMetadata;srMetadata.observe(identity,srResult,sr,GetTickCount64());
  MCD2FgDiagnosticsV1 fg{sizeof(fg),0,0,0,0,0,0,0};
  module=GetModuleHandleW(L"mcd2-fg-guide-recon.addon64");using Fg=int(*)(MCD2FgDiagnosticsV1*);
@@ -37,7 +36,7 @@ inline void publish(const std::filesystem::path& saves,unsigned session,unsigned
  MCD2MfgStateV1 live{};live.size=sizeof(live);
  if(mfgState&&!mfgState(&live)&&!live.reserved)components=mfgComponents(identity,{live.identity,live.observedAtMs,live.strategy,live.multiplier,live.active,live.fault,live.softwarePresented,live.nativePresented},GetTickCount64());
  std::map<std::string,unsigned> fields={{"SchemaVersion",1},{"SessionId",session},{"Revision",revision},{"Sample",++sample},
-  {"WorldGeneration",projected.world},{"SrProvider",projected.sr.provider},{"SrFrames",counter(projected.sr.evaluations)},{"FsrSrVersion",sr.implementation},{"FsrHardware",sr.capabilities},
+  {"WorldGeneration",projected.world},{"SrProvider",projected.sr.provider},{"SrFrames",counter(projected.sr.evaluations)},{"SrRetained",srResult==-2&&projected.sr.provider==1?1u:0u},{"FsrSrVersion",sr.implementation},{"FsrHardware",sr.capabilities},
   {"FgStrategy",components.strategy},{"FgSoftwareGenerated",components.software},{"FgNativeGenerated",components.native},{"FgProvider",projected.fg.provider},{"FgActive",projected.fg.active},{"FgFault",projected.fg.fault},{"FgRendered",counter(projected.fg.rendered)},{"FgGenerated",counter(projected.fg.generated)},
   {"FsrFgVersion",fg.implementation},{"FgPresetStatus",GetPrivateProfileIntW(L"Runtime",L"FrameGenerationPresetStatus",0,ini.c_str())},{"ReflexMode",valid(identity)?reflexMode:0},{"ReflexFrames",valid(identity)?counter(reflexFrames):0},{"AmdMode",projected.amdMode},{"AmdFrames",counter(projected.amdFrames)}};
  const auto path=saves/L"MCD2GraphicsDiagnosticsState.sav";auto seed=read(path);std::map<std::string,unsigned> old;
