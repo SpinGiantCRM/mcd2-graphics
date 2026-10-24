@@ -41,6 +41,11 @@ State&recording(a::command_list*){return state;}bool capturing(){return true;}vo
 std::pair<uint64_t,unsigned>key(a::device*,a::descriptor_table t,unsigned b){return {t.handle,b};}
 uint64_t(*renderFrame)()=nullptr;
 
+// Match the public-resource adapter boundary without replacing observe().
+namespace fg_resources {
+auto from_view(a::device* device,a::resource_view view){return device->get_resource_from_view(view);}
+auto resource_desc(a::device* device,a::resource resource){return device->get_resource_desc(resource);}
+}
 // ACTUAL_OBSERVE
 
 void require(bool condition,const char* message){if(!condition)throw std::runtime_error(message);}

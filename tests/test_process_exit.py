@@ -33,6 +33,23 @@ class ProcessExitTests(unittest.TestCase):
         for name in ('process_exit.hpp', 'process_lifetime.hpp'):
             self.assertIn('src/latency/' + name, recipe)
 
+    def test_game_presentation_exports_guard_terminal_teardown(self):
+        groups = {
+            'experiments/fg-streamline/game_presentation_guides.hpp': (
+                'mcd2_fg_game_present_v1', 'mcd2_fg_game_present_done_v1',
+                'mcd2_fg_game_present_end_v1'),
+            'src/latency/latency_addon.cpp': (
+                'mcd2_fg_game_cpu_present_v1', 'mcd2_fg_game_cpu_present_done_v1',
+                'mcd2_fg_game_cpu_present_end_v1'),
+        }
+        for path, names in groups.items():
+            source = (ROOT / path).read_text()
+            for name in names:
+                with self.subTest(callback=name):
+                    body = re.search(r'\bint ' + name + r'\([^\{]*\)\{\s*([^\n]*)', source)
+                    self.assertIsNotNone(body)
+                    self.assertTrue(body.group(1).startswith('if(mcd2::process_exit::terminating())return 0;'))
+
     def test_ngx_unshared_shutdown_uses_the_initialization_device(self):
         source = (ROOT / 'src/native/ngx_live_fixture.hpp').read_text()
         cleanup = source.split('static bool cleanup_detached_live(', 1)[1].split('static void cleanup_live_saved(', 1)[0]

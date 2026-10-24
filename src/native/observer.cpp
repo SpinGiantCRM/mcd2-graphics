@@ -24,6 +24,7 @@
 #include <unordered_map>
 #include <vector>
 #include "dlss_model_override.hpp"
+#include "ngx_driver.hpp"
 #include "../latency/process_exit.hpp"
 static bool unload_generation_retained=false;
 static bool retain_sr_generation(){return unload_generation_retained||mcd2::process_exit::terminating();}
@@ -31,6 +32,9 @@ static bool retain_sr_generation(){return unload_generation_retained||mcd2::proc
 namespace a = reshade::api;
 namespace fs = std::filesystem;
 static std::recursive_mutex lock;
+static std::map<uint64_t,a::command_queue*> live_command_queues;
+static uint64_t game_present_owner=0;
+static thread_local bool advancing_game_present=false;
 static fs::path root; // Per-user cache/diagnostics, initialized by the UI bridge.
 static fs::path asset_root; // Installed beside this addon; no experiment-directory dependency.
 #ifndef MCD2_ENABLE_DIAGNOSTICS
@@ -557,8 +561,7 @@ static void NVSDK_CONV ngx_log_callback(const char *message,NVSDK_NGX_Logging_Le
 static void probe_ngx(a::command_queue *queue,const std::string &mode) {
  auto *device=queue->get_device();bool query=mode!="ngx-initonly";
  fs::create_directories(root/"ngx-cache");std::ofstream log(root/"ngx-probe.jsonl",std::ios::app);log.setf(std::ios::unitbuf);
- HMODULE module=LoadLibraryW(L"nvngx.dll");
- if(!module)module=LoadLibraryExW(L"Z:\\run\\host\\usr\\lib\\nvidia\\wine\\nvngx.dll",nullptr,LOAD_WITH_ALTERED_SEARCH_PATH);
+ HMODULE module=mcd2::ngx::load_driver();
  if(!module){log<<"{\"stage\":\"load_driver_ngx\",\"win32Error\":"<<GetLastError()<<"}\n";return;}
  // Driver export order differs from the linked SDK wrapper: version precedes info.
  // Signature confirmed against OptiScaler's NVNGX_Proxy.h implementation.
@@ -606,6 +609,7 @@ static void probe_ngx(a::command_queue *queue,const std::string &mode) {
 #include "render_timing.hpp"
 static void finish_present(a::command_queue *q,a::swapchain *sc) {
  std::unique_lock guard(lock);
+ if(game_present_owner&&!advancing_game_present)return;
  if(q->get_device()->get_api()!=a::device_api::d3d12)return;
  timer_present_interval();auto present_ms=GetTickCount64();frame_delta_ms=previous_present_ms?double(present_ms-previous_present_ms):0.;previous_present_ms=present_ms;
  fsr_runtime_present(q,guard);native_fg_present(q,guard);guide_probe_present(q,guard);lean_present(q,guard);timer_present(q);++frame;seen_taa=seen_ui=seen_ao=false;
@@ -650,10 +654,16 @@ static void finish_present(a::command_queue *q,a::swapchain *sc) {
 }
 static void destroy_cmd(a::command_list *cmd){if(mcd2::process_exit::terminating())return;std::lock_guard guard(lock);timer_reset(cmd);lean_forget_recording(cmd);commands.erase(cmd);}
 static void init_device(a::device *d) {mcd2::process_exit::initialize();if(d->get_api()==a::device_api::d3d12)reshade::log::message(reshade::log::level::info,"MCD2 observer D3D12 initialized; captures only on explicit request file");}
-static void init_queue(a::command_queue *q){std::lock_guard guard(lock);if(capture_probe_queue)probe_queue_api=q;}
+extern "C" __declspec(dllexport) int mcd2_graphics_game_present_v1(uint64_t owner,uint64_t nativeQueue){
+ a::command_queue*queue=nullptr;{std::lock_guard guard(lock);auto it=live_command_queues.find(nativeQueue);if(!owner||it==live_command_queues.end()||it->second->get_device()->get_api()!=a::device_api::d3d12)return 0;queue=it->second;game_present_owner=owner;}
+ const bool previous=advancing_game_present;advancing_game_present=true;finish_present(queue,nullptr);advancing_game_present=previous;return 1;
+}
+extern "C" __declspec(dllexport) int mcd2_graphics_game_present_end_v1(uint64_t owner,uint64_t){std::lock_guard guard(lock);if(game_present_owner==owner)game_present_owner=0;return 1;}
+static void init_queue(a::command_queue *q){std::lock_guard guard(lock);live_command_queues[q->get_native()]=q;if(capture_probe_queue)probe_queue_api=q;}
 static void destroy_queue(a::command_queue *q) {
  if(mcd2::process_exit::terminating())return;
  std::unique_lock guard(lock);guide_probe_destroy_queue(q);native_fg_destroy_queue(q);fsr_runtime_destroy_queue(q);
+ auto queue=live_command_queues.find(q->get_native());if(queue!=live_command_queues.end()&&queue->second==q)live_command_queues.erase(queue);
  if(native_reset_queue==q){native_reset_borrows.blocked=true;native_reset_queue=nullptr;}
  if(!live_fixture || live_fixture->integration_queue!=q)return;
  lean.terminal=true;lean.wanted=false;

@@ -786,7 +786,10 @@ public class ModActor : AActor, IModSettings {
    if(!hdrInserted && (label=="Brightness" || name.Contains("Brightness"))){foreach(var model in DisplayModels)if(model.ControlId<4)result.Add(model);hdrInserted=true;}
    if(!reflexInserted && (label=="FPS Limit" || label.Contains("Frame Rate Limit") || name.Contains("FrameRateLimit") || name.Contains("FPSLimit"))){foreach(var model in DisplayModels)if(model.ControlId==4 && ((DisplayRuntime!=null && DisplayRuntime.ReflexAvailable==1 && DisplayRuntime.ReflexFault==0) || list.Contains(model)))result.Add(model);foreach(var model in DisplayModels)if(model.ControlId==6 && AmdLatencyAvailable())result.Add(model);reflexInserted=true;}
   }
-  // Fail closed when the native anchor cannot be identified; no misplaced giant mod block.
+  // Some game builds omit Brightness; keep HDR reachable beside our own upscaler row.
+  if(!hdrInserted){int anchor=result.IndexOf(Model);
+   if(anchor>=0)foreach(var model in DisplayModels)if(model.ControlId<4)result.Insert(++anchor,model);
+  }
   bool changed=list.Count!=result.Count;if(!changed){for(int i=0;i<list.Count;i++)if(list[i]!=result[i])changed=true;}
   if(changed)panel.ListView_Settings.BP_SetListItems(result);RefreshDisplayRows();
  }

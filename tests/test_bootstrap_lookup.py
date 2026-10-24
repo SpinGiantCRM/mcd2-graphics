@@ -1,10 +1,21 @@
 from pathlib import Path
+import subprocess
+import sys
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 class BootstrapLookupTests(unittest.TestCase):
+    def test_mingw_guide_requires_guide_mode_before_loading_sdk(self):
+        result = subprocess.run([
+            sys.executable, str(ROOT / 'experiments/fg-streamline/build_probe.py'),
+            '--sdk', 'unused', '--sysroot', 'unused', '--runtime-archive', 'unused',
+            '--output', 'unused', '--guide-mingw-cxx', 'unused',
+        ], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn('--guide-mingw-cxx requires --guide-recon', result.stderr)
+
     def test_all_runtime_bootstrap_consumers_use_exact_application_path(self):
         for name in ('experiments/fg-streamline/guide_recon.cpp',
                      'experiments/fg-streamline/fg_controls.hpp',

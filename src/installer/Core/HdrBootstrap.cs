@@ -8,11 +8,10 @@ public sealed partial class InstallerEngine {
     string HdrRoot(bool projectOverride=true) {
         if(ConfigRootOverride!=null)return Path.GetFullPath(ConfigRootOverride);
         if(projectOverride)return Path.Combine(GameRoot!,"Dungeons/Config");
-        if(OperatingSystem.IsWindows())return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"Dungeons2/Saved/Config/Windows");
-        var steamapps=Directory.GetParent(GameRoot!)?.Parent?.FullName??throw new InvalidDataException("Steam library unavailable.");
-        var user=Path.Combine(steamapps,"compatdata/1912410/pfx/drive_c/users/steamuser");
+        if(OperatingSystem.IsWindows())return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),Profile!.UserConfigRelative);
+        var user=Path.Combine(Profile!.Prefix,"drive_c/users/steamuser");
         if(!Directory.Exists(user))throw new InvalidDataException("Launch the game through Steam once to create its prefix, then install.");
-        return Path.Combine(user,"AppData/Local/Dungeons2/Saved/Config/Windows");
+        return Path.Combine(user,"AppData/Local",Profile.UserConfigRelative);
     }
     string HdrPath(bool projectOverride=true){var root=HdrRoot(projectOverride);var cursor=root;while(!Directory.Exists(cursor)){cursor=Path.GetDirectoryName(cursor)??throw new InvalidDataException("Configuration folder unavailable.");}var relative=Path.GetRelativePath(cursor,root).Replace('\\','/');Target(cursor,(relative=="."?"":relative+"/")+(projectOverride?"UserEngine.ini":"Engine.ini"));return Path.Combine(root,projectOverride?"UserEngine.ini":"Engine.ini");}
     static void ValidateHdrRecord(HdrBootstrap? h){if(h!=null&&((h.AARecorded&&h.HadAAKey&&(h.PreviousAAValue==null||h.PreviousAAValue.Length>100||h.PreviousAAValue.Contains('\n')||h.PreviousAAValue.Contains('\r')))||(!h.HadAAKey&&h.PreviousAAValue!=null)))throw new InvalidDataException("Invalid temporal-AA ownership record.");if(h!=null&&((h.HadKey && (h.PreviousValue==null||h.PreviousValue.Length>100||h.PreviousValue.Contains('\n')||h.PreviousValue.Contains('\r')))||(!h.HadKey&&h.PreviousValue!=null)))throw new InvalidDataException("Invalid HDR ownership record.");}

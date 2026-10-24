@@ -28,9 +28,9 @@ public sealed partial class InstallerEngine {
     }
     (string? Config,byte[]? Data,string? Lease) PrepareHdrActivationRemoval(){
         var root=GameRoot??throw new InvalidDataException("Choose the game first.");
-        var lease=Target(root,"Dungeons/Binaries/Win64/MCD2Graphics/HdrAddonActivation.bin");if(!File.Exists(lease))return(null,null,null);
+        var lease=GameTarget(root,"Dungeons/Binaries/Win64/MCD2Graphics/HdrAddonActivation.bin");if(!File.Exists(lease))return(null,null,null);
         if(new FileInfo(lease).Length>32768)throw ActivationConflict();var receipt=DecodeActivationReceipt(File.ReadAllBytes(lease));if(receipt.Phase==4)throw ActivationConflict();
-        var config=Target(root,"Dungeons/Binaries/Win64/ReShade.ini");if(File.Exists(config)&&new FileInfo(config).Length>1024*1024)throw ActivationConflict();
+        var config=GameTarget(root,"Dungeons/Binaries/Win64/ReShade.ini");if(File.Exists(config)&&new FileInfo(config).Length>1024*1024)throw ActivationConflict();
         var bytes=File.Exists(config)?File.ReadAllBytes(config):[];bool bom=bytes.AsSpan().StartsWith(new byte[]{0xef,0xbb,0xbf});string text;
         try{text=new UTF8Encoding(false,true).GetString(bytes.AsSpan(bom?3:0));}catch(DecoderFallbackException){throw ActivationConflict();}
         var lines=Regex.Matches(text,@"[^\r\n]*(?:\r\n|\n|\r|$)").Select(m=>m.Value).Where(s=>s.Length!=0).ToList();

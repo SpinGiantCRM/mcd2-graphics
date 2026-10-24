@@ -14,7 +14,7 @@ public record Dependency(string Id, string Name, string Version, string Url, Dic
     public IEnumerable<DependencyRelease> Releases => new[]{new DependencyRelease(Version,Files,ArchiveHash)}.Concat(CompatibleReleases??[]);
 }
 public record FrameworkBootstrap(bool HadFile, string? PreviousHash);
-public record Receipt(string Version, Dictionary<string,string> Files, HdrBootstrap? Hdr = null, FrameworkBootstrap? Framework = null, Dictionary<string,string>? DependencyOverrides = null);
+public record Receipt(string Version, Dictionary<string,string> Files, HdrBootstrap? Hdr = null, FrameworkBootstrap? Framework = null, Dictionary<string,string>? DependencyOverrides = null, string? Edition = null);
 
 public sealed partial class InstallerEngine {
     public const string Shipping = "Dungeons/Binaries/Win64/Dungeons-Win64-Shipping.exe";
@@ -25,6 +25,8 @@ public sealed partial class InstallerEngine {
     const string FrameworkRecovery = "Dungeons/Binaries/Win64/MCD2GraphicsDependencyBackups/";
     readonly string? previousFrameworkHash;
     readonly string gameHash;
+    readonly string? gdkGameHash;
+    readonly string? gdkBuild;
     readonly string supportedBuild;
     readonly Func<Stream?> payload;
     readonly string? expandedPayloadRoot;
@@ -44,7 +46,7 @@ public sealed partial class InstallerEngine {
     DependencyRelease? RecognizedRelease(Dependency d) {
         if(GameRoot==null)return null;
         // Match a whole release, never a mixture of individually recognized files.
-        var hashes=d.Files.Keys.ToDictionary(path=>path,path=>selections.TryGetValue(path,out var b)?Digest(b):File.Exists(Target(GameRoot,path))?DigestFile(Target(GameRoot,path)):null);
+        var hashes=d.Files.Keys.ToDictionary(path=>path,path=>selections.TryGetValue(path,out var b)?Digest(b):File.Exists(GameTarget(GameRoot,path))?DigestFile(GameTarget(GameRoot,path)):null);
         return d.Releases.FirstOrDefault(release=>release.Files.All(f=>hashes[f.Key]==f.Value));
     }
     Dictionary<string,string> EffectiveFiles(Dependency d) {
@@ -55,19 +57,25 @@ public sealed partial class InstallerEngine {
         var d=Dependencies.Single(x=>x.Id==id);RequireClosed();
         if(!overrideEnabled.Contains(id))throw new InvalidDataException("Enable the untested-version override first.");
         var hashes=new Dictionary<string,string>();
-        foreach(var path in d.Files.Keys){var file=Target(GameRoot??throw new InvalidDataException("Choose the game first."),path);if(!File.Exists(file)||new FileInfo(file).Length==0||new FileInfo(file).Length>MaximumFile)throw new InvalidDataException("Install every required dependency file first.");hashes[path]=DigestFile(file);}
+        foreach(var path in d.Files.Keys){var file=GameTarget(GameRoot??throw new InvalidDataException("Choose the game first."),path);if(!File.Exists(file)||new FileInfo(file).Length==0||new FileInfo(file).Length>MaximumFile)throw new InvalidDataException("Install every required dependency file first.");hashes[path]=DigestFile(file);}
         foreach(var pair in hashes){overrideHashes[pair.Key]=pair.Value;overrideOriginals[pair.Key]=pair.Value;selections.Remove(pair.Key);}
     }
     public string Version { get; }
     public string Description { get; }
     public IReadOnlyList<Dependency> Dependencies { get; }
     public string? GameRoot { get; private set; }
+    public GameInstallationProfile? Profile { get; private set; }
+    string GameTarget(string root,string relative)=>Target(root,Profile?.MapDestination(relative)??relative);
     public Action RequireClosed { get; set; } = EnsureGameClosed;
     public InstallerEngine(string dependencyJson, string manifestJson, Func<Stream?> payloadFactory) {
         payload = payloadFactory;
         using var l=JsonDocument.Parse(dependencyJson); using var m=JsonDocument.Parse(manifestJson);
         if(l.RootElement.GetProperty("dependencies").TryGetProperty("ReShade",out var reshade)&&reshade.TryGetProperty("bootstrapPreviousSHA256",out var original))previousFrameworkHash=original.GetString();
         gameHash=l.RootElement.GetProperty("game").GetProperty("exeSHA256").GetString()!;
+        if(l.RootElement.GetProperty("game").TryGetProperty("winGDK",out var gdk)) {
+            gdkGameHash=gdk.GetProperty("exeSHA256").GetString();gdkBuild=gdk.GetProperty("version").GetString();
+            if(gdkGameHash==null||!Regex.IsMatch(gdkGameHash,"^[a-f0-9]{64}$"))throw new InvalidDataException("Invalid Game Pass executable pin.");
+        }
         supportedBuild=l.RootElement.GetProperty("game").GetProperty("steamBuildID").ToString();
         Version=m.RootElement.GetProperty("version").GetString()!;
         Description=m.RootElement.TryGetProperty("description",out var description)?description.GetString()??throw new InvalidDataException("Invalid package description."):"Core graphics addon\nNative Video settings\nDLSS Super Resolution and DLAA\nFrame Generation preview (DLSS/DLAA + native HDR)\nHDR support\nReflex appears only when the rendering GPU and integration support it.";
@@ -127,14 +135,15 @@ public sealed partial class InstallerEngine {
     }
     static Dictionary<string,string> ReadHashes(JsonElement e)=>e.EnumerateObject().ToDictionary(x=>x.Name,x=>x.Value.GetString()!);
     static string OfficialUrl(string id)=>id switch {"BlueprintLoader"=>"https://www.nexusmods.com/minecraftdungeons2/mods/2?tab=files", "ReShade"=>"https://reshade.me/", "RenoDXUEExtended"=>"https://github.com/marat569/renodx/releases/tag/nightly-20260928", "DLSSRuntime"=>"https://github.com/NVIDIA/DLSS", _=>throw new InvalidDataException("Unknown requirement")};
-    public void SetGame(string path) {
-        var root=Path.GetFullPath(path);
-        if(!File.Exists(Target(root,Shipping)))throw new InvalidDataException("Select the Minecraft Dungeons II folder containing Dungeons.");
-        if(GameRoot!=root){selections.Clear();overrideEnabled.Clear();overrideHashes.Clear();overrideOriginals.Clear();}
-        GameRoot=root;
+    public void SetGame(string path,GameEdition? edition=null,string? managedPrefix=null) {
+        var profile=GameInstallationProfile.Select(path,OperatingSystem.IsWindows()?GameEnvironment.Windows:GameEnvironment.Linux,edition,managedPrefix);
+        var root=profile.Root;
+        if(GameRoot!=root||Profile!=profile){selections.Clear();overrideEnabled.Clear();overrideHashes.Clear();overrideOriginals.Clear();}
+        GameRoot=root;Profile=profile;
     }
     public string GameBuild() {
         if(GameRoot==null)return "Not selected";
+        if(Profile?.Edition==GameEdition.WinGDK)return gdkBuild??"Game Pass executable not pinned in this package";
         var steamapps=Directory.GetParent(GameRoot)?.Parent?.FullName;
         var acf=steamapps==null?null:Path.Combine(steamapps,"appmanifest_1912410.acf");
         if(acf==null||!File.Exists(acf))return "Unknown (executable fingerprint checked separately)";
@@ -161,18 +170,18 @@ public sealed partial class InstallerEngine {
     }
     public IReadOnlyList<Check> Scan() {
         if(GameRoot==null)return new[] {new Check("Minecraft Dungeons II",supportedBuild,"Choose game","","")};
-        var result=new List<Check> {CheckFiles("Minecraft Dungeons II",supportedBuild,new(){{Shipping,gameHash}},false)};
+        var result=new List<Check> {CheckFiles("Minecraft Dungeons II",supportedBuild,new(){{Profile?.Shipping??Shipping,Profile?.Edition==GameEdition.WinGDK?gdkGameHash??"Not supported by this package":gameHash}},false)};
         foreach(var d in Dependencies) {
             var check=CheckFiles(d.Name,RecognizedRelease(d)?.Version??d.Version,EffectiveFiles(d),true);
             if(overrideEnabled.Contains(d.Id)&&d.Files.Keys.All(overrideHashes.ContainsKey)&&check.State is "OK" or "Ready to install")check=check with {State="Untested override",Version="Unverified; tested: "+d.Version};
             result.Add(check);
         }
-        var installed=File.Exists(Target(GameRoot,Marker));
+        var installed=File.Exists(GameTarget(GameRoot,Marker));
         var payloadCheck=CheckFiles("Graphics mod payload",Version,own,false);
         string payloadState=installed?payloadCheck.State:"Not installed";
         if(installed) {
             try {
-                var receipt=ReadReceipt(Target(GameRoot,Marker));ValidateOwnership(receipt);
+                var receipt=ReadReceipt(GameTarget(GameRoot,Marker));ValidateOwnership(receipt);
                 if(receipt.Version!=Version)payloadState="Upgrade available";
                 else if(receipt.Hdr!=null)PrepareHdr(receipt.Hdr);
             } catch(InvalidDataException) {payloadState="Receipt or HDR startup setting needs attention";}
@@ -185,7 +194,7 @@ public sealed partial class InstallerEngine {
         var expected=new List<string>();var found=new List<string>();bool missing=false,wrong=false,pending=false;
         foreach(var pair in files) {
             expected.Add(pair.Value);
-            var p=Target(GameRoot!,pair.Key);string? h=File.Exists(p)?DigestFile(p):null;
+            var p=GameTarget(GameRoot!,pair.Key);string? h=File.Exists(p)?DigestFile(p):null;
             if(h==pair.Value) {found.Add(h);continue;}
             if(staged && selections.TryGetValue(pair.Key,out var b)&&Digest(b)==pair.Value) {found.Add(pair.Value);pending=true;continue;}
             if(h==null) {missing=true;found.Add("Missing");}else {wrong=true;found.Add(h);}
@@ -217,7 +226,7 @@ public sealed partial class InstallerEngine {
             }
         }
         foreach(var f in selected) {
-            var target=Target(GameRoot??throw new InvalidDataException("Choose the game first."),f.Key);
+            var target=GameTarget(GameRoot??throw new InvalidDataException("Choose the game first."),f.Key);
             if(File.Exists(target)&&DigestFile(target)!=Digest(f.Value)&&DigestFile(target)!=d.Files[f.Key] && !(overrideOriginals.TryGetValue(f.Key,out var approved)&&DigestFile(target)==approved) && !KnownDependencyHash(d,f.Key,DigestFile(target)))throw new InvalidDataException("An existing dependency differs. Back it up and use its official upgrade workflow; the installer will not overwrite it.");
         }
         foreach(var f in selected){selections[f.Key]=f.Value;if(experimental)overrideHashes[f.Key]=Digest(f.Value);}
@@ -226,7 +235,7 @@ public sealed partial class InstallerEngine {
     public bool Ready=>GameRoot!=null&&Scan().Where(x=>x.Name!="Graphics mod payload").All(x=>x.State is "OK" or "Ready to install" or "Untested override");
     public void Install(bool repair=false) {
         RequireClosed();if(!Ready)throw new InvalidDataException("Resolve the requirements before installing.");
-        var root=GameRoot!;var marker=Target(root,Marker);Receipt? old=null;
+        var root=GameRoot!;var marker=GameTarget(root,Marker);Receipt? old=null;
         if(File.Exists(marker)) {old=ReadReceipt(marker);if(!repair)throw new InvalidDataException("Already installed. Choose Repair / Verify.");ValidateOwnership(old);}
         var source=ReadPayload(); // Complete source validation before any game write.
         FrameworkBootstrap? framework=old?.Framework;
@@ -234,7 +243,7 @@ public sealed partial class InstallerEngine {
         if(own.ContainsKey(FrameworkProxy)&&previousFrameworkHash!=null) {
             if(framework!=null)ValidateFramework(framework);
             else {
-                var existing=Target(root,FrameworkProxy);bool had=File.Exists(existing);
+                var existing=GameTarget(root,FrameworkProxy);bool had=File.Exists(existing);
                 if(had&&DigestFile(existing)!=previousFrameworkHash)throw new InvalidDataException("Unknown graphics bootstrap retained. Restore the supported ReShade version before upgrading.");
                 framework=new(had,had?previousFrameworkHash:null);
                 if(had)frameworkOriginal=File.ReadAllBytes(existing);
@@ -243,12 +252,12 @@ public sealed partial class InstallerEngine {
         // Validate every destination before the first write, including repair ownership.
         var modFiles=new Dictionary<string,string>(own);
         foreach(var dependency in Dependencies)foreach(var f in EffectiveFiles(dependency)) {
-            var p=Target(root,f.Key);
+            var p=GameTarget(root,f.Key);
             if(dependency.Id=="DLSSRuntime") {modFiles[f.Key]=f.Value;if(selections.TryGetValue(f.Key,out var b))source[f.Key]=b;else if(File.Exists(p)&&DigestFile(p)==f.Value)source[f.Key]=File.ReadAllBytes(p);}
             else if(selections.TryGetValue(f.Key,out var b)&&(!File.Exists(p)||DigestFile(p)!=f.Value))source[f.Key]=b;
         }
         foreach(var f in source) {
-            var dest=Target(root,f.Key);if(!File.Exists(dest))continue;var h=DigestFile(dest);
+            var dest=GameTarget(root,f.Key);if(!File.Exists(dest))continue;var h=DigestFile(dest);
             if(old!=null&&old.Files.TryGetValue(f.Key,out var previous)&&h==previous)continue;
             if(f.Key==FrameworkProxy&&frameworkOriginal!=null&&h==previousFrameworkHash)continue;
             if(!own.ContainsKey(f.Key)&&overrideOriginals.TryGetValue(f.Key,out var approvedHash)&&h==approvedHash)continue;
@@ -257,34 +266,34 @@ public sealed partial class InstallerEngine {
         }
         var obsolete=old?.Files.Where(f=>!modFiles.ContainsKey(f.Key)).ToList()??[];
         foreach(var f in obsolete) {
-            var path=Target(root,f.Key);
+            var path=GameTarget(root,f.Key);
             if(File.Exists(path)&&DigestFile(path)!=f.Value)throw new InvalidDataException("Modified previous mod file retained. Repair was stopped before changing anything.");
         }
         var originals=new Dictionary<string,byte[]?>();var dirs=new HashSet<string>();
         try {
             if(frameworkOriginal!=null) {
-                var recovery=Target(root,FrameworkRecovery+previousFrameworkHash+".bak");
+                var recovery=GameTarget(root,FrameworkRecovery+previousFrameworkHash+".bak");
                 if(File.Exists(recovery)) {if(DigestFile(recovery)!=previousFrameworkHash)throw new InvalidDataException("Framework recovery file differs; no upgrade performed.");}
                 else {originals[recovery]=null;var parent=Path.GetDirectoryName(recovery)!;RememberMissingDirs(parent,root,dirs);Directory.CreateDirectory(parent);AtomicWrite(recovery,frameworkOriginal);}
             }
             foreach(var f in source) {
-                var dest=Target(root,f.Key);if(File.Exists(dest)&&DigestFile(dest)==Digest(f.Value))continue;
+                var dest=GameTarget(root,f.Key);if(File.Exists(dest)&&DigestFile(dest)==Digest(f.Value))continue;
                 originals[dest]=File.Exists(dest)?File.ReadAllBytes(dest):null;
                 if(originals[dest]!=null&&!own.ContainsKey(f.Key)&&f.Key!=Runtime) {
-                    var priorHash=Digest(originals[dest]!);var backup=Target(root,"Dungeons/Binaries/Win64/MCD2GraphicsDependencyBackups/"+priorHash+".bak");
+                    var priorHash=Digest(originals[dest]!);var backup=GameTarget(root,"Dungeons/Binaries/Win64/MCD2GraphicsDependencyBackups/"+priorHash+".bak");
                     if(File.Exists(backup)){if(DigestFile(backup)!=priorHash)throw new InvalidDataException("Dependency recovery file differs; upgrade stopped.");}
                     else{originals[backup]=null;var backupDir=Path.GetDirectoryName(backup)!;RememberMissingDirs(backupDir,root,dirs);Directory.CreateDirectory(backupDir);AtomicWrite(backup,originals[dest]!);}
                 }
                 var parent=Path.GetDirectoryName(dest)!;RememberMissingDirs(parent,root,dirs);Directory.CreateDirectory(parent);AtomicWrite(dest,f.Value);
             }
             foreach(var f in obsolete) {
-                var path=Target(root,f.Key);if(!File.Exists(path))continue;
+                var path=GameTarget(root,f.Key);if(!File.Exists(path))continue;
                 originals[path]=File.ReadAllBytes(path);File.Delete(path);
             }
             originals[marker]=File.Exists(marker)?File.ReadAllBytes(marker):null;
             var bootstrap=PrepareHdr(old?.Hdr);
             if(bootstrap.Data!=null){var config=HdrPath();originals[config]=File.Exists(config)?File.ReadAllBytes(config):null;RememberMissingDirs(Path.GetDirectoryName(config)!,HdrRoot(),dirs);Directory.CreateDirectory(Path.GetDirectoryName(config)!);AtomicWrite(config,bootstrap.Data);}
-            AtomicWrite(marker,Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new Receipt(Version,modFiles,bootstrap.Record,framework,new Dictionary<string,string>(overrideHashes)),ReceiptOptions)));
+            AtomicWrite(marker,Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new Receipt(Version,modFiles,bootstrap.Record,framework,new Dictionary<string,string>(overrideHashes),Profile!.Edition.ToString()),ReceiptOptions)));
         } catch {
             foreach(var f in originals.Reverse()) {if(f.Value==null)File.Delete(f.Key);else AtomicWrite(f.Key,f.Value);}
             foreach(var dir in dirs.OrderByDescending(x=>x.Length))if(Directory.Exists(dir)&&!Directory.EnumerateFileSystemEntries(dir).Any())Directory.Delete(dir);
@@ -292,25 +301,26 @@ public sealed partial class InstallerEngine {
         }
     }
     public void Uninstall() {
-        RequireClosed();var root=GameRoot??throw new InvalidDataException("Choose the game first.");var marker=Target(root,Marker);
+        RequireClosed();var root=GameRoot??throw new InvalidDataException("Choose the game first.");var marker=GameTarget(root,Marker);
         var receipt=ReadReceipt(marker);ValidateOwnership(receipt);
-        foreach(var f in receipt.Files) {var p=Target(root,f.Key);if(File.Exists(p)&&DigestFile(p)!=f.Value)throw new InvalidDataException("Modified mod file retained. Uninstall was stopped before removing anything.");}
+        foreach(var f in receipt.Files) {var p=GameTarget(root,f.Key);if(File.Exists(p)&&DigestFile(p)!=f.Value)throw new InvalidDataException("Modified mod file retained. Uninstall was stopped before removing anything.");}
         byte[]? originalFramework=null;
-        if(receipt.Framework is {HadFile:true} remembered) {ValidateFramework(remembered);originalFramework=File.ReadAllBytes(Target(root,FrameworkRecovery+remembered.PreviousHash+".bak"));}
+        if(receipt.Framework is {HadFile:true} remembered) {ValidateFramework(remembered);originalFramework=File.ReadAllBytes(GameTarget(root,FrameworkRecovery+remembered.PreviousHash+".bak"));}
         var config=RemoveHdr(receipt.Hdr); // Validate configuration before any mutation.
         var activation=PrepareHdrActivationRemoval();
         if(activation.Data!=null)AtomicWrite(activation.Config!,activation.Data);
         if(activation.Lease!=null)File.Delete(activation.Lease);
         if(config.Data!=null)AtomicWrite(HdrPath(receipt.Hdr!.ProjectOverride),config.Data);else if(config.Delete)File.Delete(HdrPath(receipt.Hdr!.ProjectOverride));
         // All checks completed. Only our bootstrap key is restored; other configuration and saves remain.
-        foreach(var f in receipt.Files)File.Delete(Target(root,f.Key));
-        if(originalFramework!=null)AtomicWrite(Target(root,FrameworkProxy),originalFramework);
+        foreach(var f in receipt.Files)File.Delete(GameTarget(root,f.Key));
+        if(originalFramework!=null)AtomicWrite(GameTarget(root,FrameworkProxy),originalFramework);
         File.Delete(marker);
-        foreach(var dir in receipt.Files.Keys.Select(x=>Path.GetDirectoryName(Target(root,x))!).Distinct().OrderByDescending(x=>x.Length)) {
+        foreach(var dir in receipt.Files.Keys.Select(x=>Path.GetDirectoryName(GameTarget(root,x))!).Distinct().OrderByDescending(x=>x.Length)) {
             var p=dir;while(p!=root&&(Path.GetFileName(p) is "MCD2Graphics" or "ngx-runtime")) {if(!Directory.Exists(p)||Directory.EnumerateFileSystemEntries(p).Any())break;Directory.Delete(p);p=Path.GetDirectoryName(p)!;}
         }
     }
     void ValidateOwnership(Receipt r) {
+        if(r.Edition!=null&&r.Edition!=Profile?.Edition.ToString() || r.Edition==null&&Profile?.Edition==GameEdition.WinGDK)throw new InvalidDataException("Installation receipt belongs to another edition.");
         var expected=new Dictionary<string,string>(own){{Runtime,Dependencies.Single(x=>x.Id=="DLSSRuntime").Files[Runtime]}};
         if(r.Version!=Version && !previousInstalls.TryGetValue(r.Version,out expected))throw new InvalidDataException("Unknown installation version; no files were changed.");
         expected=new Dictionary<string,string>(expected!);
@@ -326,7 +336,7 @@ public sealed partial class InstallerEngine {
     }
     void ValidateFramework(FrameworkBootstrap f) {
         if(previousFrameworkHash==null||!own.ContainsKey(FrameworkProxy)||(!f.HadFile&&f.PreviousHash!=null)||(f.HadFile&&f.PreviousHash!=previousFrameworkHash))throw new InvalidDataException("Invalid graphics bootstrap ownership.");
-        if(f.HadFile) {var backup=Target(GameRoot!,FrameworkRecovery+f.PreviousHash+".bak");if(!File.Exists(backup)||DigestFile(backup)!=f.PreviousHash)throw new InvalidDataException("Graphics bootstrap recovery is missing or modified; files retained.");}
+        if(f.HadFile) {var backup=GameTarget(GameRoot!,FrameworkRecovery+f.PreviousHash+".bak");if(!File.Exists(backup)||DigestFile(backup)!=f.PreviousHash)throw new InvalidDataException("Graphics bootstrap recovery is missing or modified; files retained.");}
     }
     static readonly JsonSerializerOptions ReceiptOptions=new(){PropertyNamingPolicy=JsonNamingPolicy.CamelCase,PropertyNameCaseInsensitive=true,WriteIndented=true};
     static Receipt ReadReceipt(string p)=>JsonSerializer.Deserialize<Receipt>(File.ReadAllText(p),ReceiptOptions)??throw new InvalidDataException("Invalid install receipt.");
@@ -362,11 +372,13 @@ public sealed partial class InstallerEngine {
     static void AtomicWrite(string p,byte[] b) {var tmp=p+".mcd2-"+Guid.NewGuid().ToString("N")+".tmp";try{using(var stream=new FileStream(tmp,FileMode.CreateNew,FileAccess.Write)){stream.Write(b);stream.Flush(true);}if(DigestFile(tmp)!=Digest(b))throw new IOException("Copy verification failed.");File.Move(tmp,p,true);}finally{File.Delete(tmp);}}
     public static void EnsureGameClosed() {
         if(OperatingSystem.IsWindows()) {
-            var output=Run("tasklist","/FI","IMAGENAME eq Dungeons-Win64-Shipping.exe","/FO","CSV","/NH");
-            if(output.Split('\n').Any(x=>x.TrimStart().StartsWith("\"Dungeons-Win64-Shipping.exe\",",StringComparison.OrdinalIgnoreCase)))throw new InvalidOperationException("Close Minecraft Dungeons II before changing files.");
+            foreach(var executable in new[]{"Dungeons-Win64-Shipping.exe","Dungeons-WinGDK-Shipping.exe"}) {
+                var output=Run("tasklist","/FI","IMAGENAME eq "+executable,"/FO","CSV","/NH");
+                if(output.Split('\n').Any(x=>x.TrimStart().StartsWith("\""+executable+"\",",StringComparison.OrdinalIgnoreCase)))throw new InvalidOperationException("Close Minecraft Dungeons II before changing files.");
+            }
         } else foreach(var p in Directory.EnumerateDirectories("/proc").Where(x=>int.TryParse(Path.GetFileName(x),out _))) {
             byte[] b;try{b=File.ReadAllBytes(Path.Combine(p,"cmdline"));}catch(IOException){continue;}catch(UnauthorizedAccessException){continue;}
-            var first=Encoding.UTF8.GetString(b.TakeWhile(x=>x!=0).ToArray());if(first.Contains("Dungeons-Win64-Shipping.exe",StringComparison.OrdinalIgnoreCase))throw new InvalidOperationException("Close Minecraft Dungeons II before changing files.");
+            var first=Encoding.UTF8.GetString(b.TakeWhile(x=>x!=0).ToArray());if(first.Contains("Dungeons-Win64-Shipping.exe",StringComparison.OrdinalIgnoreCase)||first.Contains("Dungeons-WinGDK-Shipping.exe",StringComparison.OrdinalIgnoreCase))throw new InvalidOperationException("Close Minecraft Dungeons II before changing files.");
         }
     }
     static string Run(string name,params string[] args) {

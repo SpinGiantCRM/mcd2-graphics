@@ -7,6 +7,7 @@ void Check(bool b,string name){if(!b)throw new Exception(name);cases++;Console.W
 void Throws(Action a,string name){bool caught=false;try{a();}catch(Exception e)when(e is InvalidDataException or InvalidOperationException or IOException){caught=true;}Check(caught,name);}
 var temp=Path.Combine(Path.GetTempPath(),"mcd2-installer-test-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(temp);
 try {
+ ProfileTests.Run(Check,Throws,temp);
  byte[] file=Encoding.UTF8.GetBytes("qualified test payload");string hash=InstallerEngine.Digest(file);var own=new Dictionary<string,string>{{"Dungeons/Binaries/Win64/mcd2-graphics.addon64",hash}};
  var dependencies=new Dictionary<string,object>{["ReShade"]=new{version="test",file="Dungeons/Binaries/Win64/dxgi.dll",sha256=hash,url="https://reshade.me/"},["RenoDXUEExtended"]=new{version="test",file="Dungeons/Binaries/Win64/renodx-ue-extended.addon64",sha256=hash,url="https://github.com/marat569/renodx"},["DLSSRuntime"]=new{version="test",file=InstallerEngine.Runtime,sha256=hash,url="https://github.com/NVIDIA/DLSS"}};
  string lockJson=JsonSerializer.Serialize(new{game=new{steamBuildID="123",exeSHA256=hash},dependencies});
@@ -15,6 +16,24 @@ try {
  InstallerEngine Engine(Func<Stream?>? payload=null){var e=new InstallerEngine(lockJson,manifest,payload??(()=>new MemoryStream(Payload())));e.RequireClosed=()=>{};e.ConfigRootOverride=Path.Combine(temp,"Config");e.SetGame(temp);return e;}
  void Put(string path,byte[]? bytes=null){var p=Path.Combine(temp,path);Directory.CreateDirectory(Path.GetDirectoryName(p)!);File.WriteAllBytes(p,bytes??file);}
  Put(InstallerEngine.Shipping);Put("Dungeons/Binaries/Win64/dxgi.dll");Put("Dungeons/Binaries/Win64/renodx-ue-extended.addon64");
+ // The same canonical payload must install, repair and remove only the selected edition.
+ var gdkRoot=Path.Combine(temp,"GamePass");Directory.CreateDirectory(gdkRoot);
+ var managedPrefix=Path.Combine(temp,"GamePassPrefix");Directory.CreateDirectory(managedPrefix);
+ void GdkPut(string name,byte[]? bytes=null){var path=InstallerEngine.Target(gdkRoot,name);Directory.CreateDirectory(Path.GetDirectoryName(path)!);File.WriteAllBytes(path,bytes??file);}
+ GdkPut("Dungeons/Binaries/WinGDK/Dungeons-WinGDK-Shipping.exe");
+ GdkPut("Dungeons/Binaries/WinGDK/dxgi.dll");GdkPut("Dungeons/Binaries/WinGDK/renodx-ue-extended.addon64");
+ var gdkLock=JsonSerializer.Serialize(new{game=new{steamBuildID="123",exeSHA256=hash,winGDK=new{version="1.1.2.0",exeSHA256=hash}},dependencies});
+ var gdkEngine=new InstallerEngine(gdkLock,manifest,()=>new MemoryStream(Payload())){RequireClosed=()=>{},ConfigRootOverride=Path.Combine(temp,"GdkConfig")};
+ gdkEngine.SetGame(gdkRoot,GameEdition.WinGDK,managedPrefix);
+ var gdkDownload=Path.Combine(temp,"gdk-runtime.dll");File.WriteAllBytes(gdkDownload,file);gdkEngine.SelectDependency("DLSSRuntime",gdkDownload);
+ Check(gdkEngine.Ready,"Pinned Game Pass layout and mapped dependencies admit installation");
+ gdkEngine.Install();var gdkOwned=Path.Combine(gdkRoot,"Dungeons/Binaries/WinGDK/mcd2-graphics.addon64");
+ Check(File.Exists(gdkOwned)&&!File.Exists(Path.Combine(gdkRoot,own.Keys.Single())),"Game Pass install never writes Steam binary destinations");
+ Check(gdkEngine.Scan().Single(x=>x.Name=="Graphics mod payload").State=="OK","Game Pass receipt verifies after install");
+ File.Delete(gdkOwned);gdkEngine.Install(true);Check(File.Exists(gdkOwned),"Game Pass missing owned file repairs in selected directory");
+ File.WriteAllText(gdkOwned,"external change");Throws(()=>gdkEngine.Uninstall(),"Game Pass external changes prevent removal");
+ File.WriteAllBytes(gdkOwned,file);gdkEngine.Uninstall();
+ Check(!File.Exists(gdkOwned)&&File.Exists(Path.Combine(gdkRoot,"Dungeons/Binaries/WinGDK/renodx-ue-extended.addon64")),"Game Pass uninstall retains shared dependencies");
  var runtime=Path.Combine(temp,"download.dll");File.WriteAllBytes(runtime,file);
  var e=Engine();Check(!e.Ready,"Missing runtime prevents installation");e.SelectDependency("DLSSRuntime",runtime);Check(e.Ready,"Selected hash verified runtime makes install ready");
  e.Install();Check(InstallerEngine.DigestFile(Path.Combine(temp,own.Keys.Single()))==hash,"Payload installed and hashed");

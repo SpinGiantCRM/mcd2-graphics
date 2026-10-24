@@ -16,7 +16,12 @@
 #include <cstdio>
 #include <cstring>
 #include <intrin.h>
+#if defined(__MINGW32__)
+#define _ReturnAddress() __builtin_return_address(0)
+#endif
 #include "fg_bridge_contract.h"
+#include "presentation_factory.hpp"
+#include "game_presentation_swapchain.hpp"
 #include "../providers/fsr_fg_game_bridge.h"
 #include "fg_ui_protocol.hpp"
 #include "wine_reflex_pacing.hpp"
@@ -120,6 +125,27 @@ long prime_wine_cubin_capability(){
 // Bounded multi-factory counterpart to the qualified single-factory probe.
 // Routes hold COM references until explicit quiescent experiment shutdown.
 // Device-loss/concurrent shutdown and unlimited factory churn are not qualified.
+HRESULT create_nvidia_swap(IDXGIFactory2*base,IDXGIFactory2*proxy,IUnknown*queue,HWND hwnd,const DXGI_SWAP_CHAIN_DESC1*desc,const DXGI_SWAP_CHAIN_FULLSCREEN_DESC*fullscreen,IDXGIOutput*output,IDXGISwapChain1**result){
+ ID3D12CommandQueue*commandQueue=nullptr;ID3D12Device*device=nullptr;
+ auto deviceResult=queue?queue->QueryInterface(IID_PPV_ARGS(&commandQueue)):E_INVALIDARG;
+ if(SUCCEEDED(deviceResult))deviceResult=commandQueue->GetDevice(IID_PPV_ARGS(&device));
+ if(commandQueue)commandQueue->Release();int support=-1,binding=-1;
+ if(device){auto luid=device->GetAdapterLuid();support=mcd2_fg_support(&luid,sizeof(luid));if(!support)binding=mcd2_sl_set_device(device);device->Release();}
+ event("swapchain-rendering-adapter-support",support);event("pre-swapchain-device-binding",binding);
+ if(FAILED(deviceResult)||support||binding)return base->CreateSwapChainForHwnd(queue,hwnd,desc,fullscreen,output,result);
+ if(!desc)return E_INVALIDARG;
+ const MCD2FGConfig config{sizeof(MCD2FGConfig),0,desc->Width,desc->Height,desc->Width,desc->Height,unsigned(desc->Format),10,41,34,desc->BufferCount,1};
+ auto configured=mcd2_fg_configured()?0:mcd2_fg_configure(&config);event("initial-FG-configuration",configured);
+ if(configured)return base->CreateSwapChainForHwnd(queue,hwnd,desc,fullscreen,output,result);
+ const auto hr=proxy->CreateSwapChainForHwnd(queue,hwnd,desc,fullscreen,output,result);
+ if(SUCCEEDED(hr)&&result&&*result){const bool nativeWindows=!GetProcAddress(GetModuleHandleW(L"ntdll.dll"),"wine_get_version");if(nativeWindows)event("game-presentation-wrapper",mcd2::fg::wrap_game_presentation_swapchain(result,queue)?1:0);actualFgOwner=1;}event("routed-hwnd-swapchain",hr);return hr;
+}
+bool wrap_presentation_factory(IUnknown*outer,void**out){
+ IDXGIFactory7*base=nullptr;if(FAILED(outer->QueryInterface(IID_PPV_ARGS(&base))))return false;
+ auto proxy=base;if(mcd2_fg_upgrade(reinterpret_cast<void**>(&proxy))||proxy==base){base->Release();return false;}
+ auto wrapped=new(std::nothrow) mcd2::fg::PresentationFactory(base,proxy,create_nvidia_swap);if(!wrapped){proxy->Release();base->Release();return false;}
+ outer->Release();*out=wrapped;return true;
+}
 struct Route {
  using Create=HRESULT(STDMETHODCALLTYPE*)(IDXGIFactory2*,IUnknown*,HWND,const DXGI_SWAP_CHAIN_DESC1*,const DXGI_SWAP_CHAIN_FULLSCREEN_DESC*,IDXGIOutput*,IDXGISwapChain1**);
  IDXGIFactory7* base=nullptr;IDXGIFactory2* proxy=nullptr;void** original=nullptr;std::array<void*,32> table{};
@@ -150,25 +176,8 @@ HRESULT STDMETHODCALLTYPE create_swap(IDXGIFactory2* factory,IUnknown* queue,HWN
   // A failed SDK construction never makes a later NVIDIA owner silently active.
   return original(factory,queue,hwnd,desc,fullscreen,output,result);
  }
- // The actual queue identifies the rendering adapter. Bind before the SDK's
- // swapchain hooks run, rather than waiting for ReShade's post-create event.
- ID3D12CommandQueue* commandQueue=nullptr;ID3D12Device* device=nullptr;
- auto deviceResult=queue?queue->QueryInterface(IID_PPV_ARGS(&commandQueue)):E_INVALIDARG;
- if(SUCCEEDED(deviceResult))deviceResult=commandQueue->GetDevice(IID_PPV_ARGS(&device));
- if(commandQueue)commandQueue->Release();
- int support=-1,binding=-1;
- if(device){auto luid=device->GetAdapterLuid();support=mcd2_fg_support(&luid,sizeof(luid));if(!support)binding=mcd2_sl_set_device(device);device->Release();}
- event("swapchain-rendering-adapter-support",support);event("pre-swapchain-device-binding",binding);
- if(FAILED(deviceResult)||support||binding)return original(factory,queue,hwnd,desc,fullscreen,output,result);
- if(!desc)return E_INVALIDARG;
- const MCD2FGConfig config{sizeof(MCD2FGConfig),0,desc->Width,desc->Height,desc->Width,desc->Height,unsigned(desc->Format),10,41,34,desc->BufferCount,1};
- // Only the initial default. A later swapchain recreation must preserve the
- // experiment owner's explicitly requested mode instead of resetting it.
- auto configured=mcd2_fg_configured()?0:mcd2_fg_configure(&config);event("initial-FG-configuration",configured);
- if(configured)return original(factory,queue,hwnd,desc,fullscreen,output,result);
  auto previous=nested;nested=route;
- auto hr=route->proxy->CreateSwapChainForHwnd(queue,hwnd,desc,fullscreen,output,result);
- nested=previous;if(SUCCEEDED(hr)&&result&&*result)actualFgOwner=1;event("routed-hwnd-swapchain",hr);return hr;
+ auto hr=create_nvidia_swap(factory,route->proxy,queue,hwnd,desc,fullscreen,output,result);nested=previous;return hr;
 }
 bool attach(IUnknown* outer){
  constexpr GUID unwrap={0x7f2c9a11,0x3b4e,0x4d6a,{0x81,0x2f,0x5e,0x9c,0xd3,0x7a,0x1b,0x42}};
@@ -249,7 +258,10 @@ bool host_caller(void* caller){
 void route_result(HRESULT hr,void** out,void* caller){
  // Do not retain or route factories created internally by the SDK, overlays
  // or other DLLs. They are not this experiment's world presentation owner.
- if(SUCCEEDED(hr)&&out&&*out&&(amdFgSession||sdkReady)&&routeEnabled&&host_caller(caller)){auto ok=attach(static_cast<IUnknown*>(*out));event("factory-route",ok?0:-1);}
+ if(SUCCEEDED(hr)&&out&&*out&&(amdFgSession||sdkReady)&&routeEnabled&&host_caller(caller)){
+  const bool nativeWindows=!GetProcAddress(GetModuleHandleW(L"ntdll.dll"),"wine_get_version");
+  const auto ok=!amdFgSession&&nativeWindows?wrap_presentation_factory(static_cast<IUnknown*>(*out),out):attach(static_cast<IUnknown*>(*out));event("factory-route",ok?0:-1);
+ }
 }
 }
 extern "C" HRESULT WINAPI CreateDXGIFactory(REFIID iid,void** out){auto f=reinterpret_cast<HRESULT(WINAPI*)(REFIID,void**)>(factory("CreateDXGIFactory"));if(!f)return E_NOINTERFACE;auto hr=f(iid,out);if(!initializing)route_result(hr,out,_ReturnAddress());return hr;}

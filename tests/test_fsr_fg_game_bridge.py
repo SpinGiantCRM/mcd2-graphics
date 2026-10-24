@@ -33,7 +33,7 @@ class BridgeTests(unittest.TestCase):
         header=(ROOT/'experiments/providers/fsr_fg_game_bridge.h').read_text()
         bootstrap=(ROOT/'experiments/fg-streamline/bootstrap_dxgi.cpp').read_text()
         start=bootstrap.index('event("AMD-owned-swapchain",status)')
-        end=bootstrap.index('// The actual queue identifies',start)
+        end=bootstrap.index('auto previous=nested;',start)
         failed=bootstrap[start:end]
         self.assertIn('MCD2_AFG_SWAP_RETAINED = -190',header)
         self.assertLess(failed.index('if(status==MCD2_AFG_SWAP_RETAINED)return E_ABORT;'),failed.index('return original('))

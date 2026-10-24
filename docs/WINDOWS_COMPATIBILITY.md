@@ -1211,3 +1211,17 @@ The [dev.25 updated-game progress record](WINDOWS_DEV25_UPDATE_2026-10-22.md)
 separates these startup/layout results from the unresolved historical exit
 crash and from diagnostic-tool failures. Current Windows qualification remains
 incomplete; neither passing CI nor one ordinary clean exit grants approval.
+
+## Xbox integration and installation profiles
+
+The integration preserves the released Steam 25910487 layout and adds the
+separately guarded WinGDK layout. The guided installer resolves edition from
+its executable layout, maps all binary destinations and ownership receipts,
+and checks both shipping processes before mutation. Game Pass on Linux uses
+an explicitly selected existing Xodus prefix; it never inherits Steam launch
+or prefix handling. An edition requires its own package executable pin.
+
+The native Windows presentation wrapper affects Steam as well as Game Pass.
+Offline tests do not qualify either runtime path. The current FSR retirement,
+presenter recovery, diagnostic attribution and advanced-settings guards remain
+required. Existing published payloads and qualification results are unchanged.
