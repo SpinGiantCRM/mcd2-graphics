@@ -58,7 +58,13 @@ fresh and outside a game tree. A running MCD2 shipping process refuses the run.
 Execution is bounded to 180 seconds, with timeout and exit status recorded.
 
 The probe owns its queue, textures, command allocator, fences and NGX parameter
-object. It creates no swapchain and installs no hooks. The external module's
+object. Before each evaluation it declares `DLSSG.IsRecording=1`: the caller
+owns the open list and its submission. The exact inspected interface must return
+`DLSSG.FlushRequired=0`; otherwise the probe stops. Omitting the recording flag
+allowed the external backend to reset/close the caller's list, causing a
+reproducible command-state failure and heap corruption in the Linux control.
+The Microsoft ABI fixture checks that every call resets this declaration.
+It creates no swapchain and installs no hooks. The external module's
 headless behavior remains part of qualification. Images are 1280×720 RGBA16F,
 with owned depth and full-resolution current-to-previous pixel motion vectors.
 Two warm-up frames precede ten checked real-frame pairs. These are functional
@@ -83,6 +89,23 @@ qualification. The last pair is saved as `previous-real.rgba16f`,
 1280 pixels per row, no padding. Inspect phase order and content. Synthetic
 conformance cannot establish game artifact quality or presentation pacing.
 A failed fence or SDK release retains resources until process exit.
+
+## Bounded Linux software-compute result
+
+On 24 October 2026, the corrected probe passed all five requested counts on an
+RTX 4080 SUPER, NVIDIA driver 615.78.08, CachyOS Proton
+`cachyos-11.0-20261015-slr`, VKD3D-Proton 3.1.0. Across ten checked real pairs per
+count, all 150 generated images were finite/nonzero, had distinct phase hashes
+and correctly ordered stripe positions. Feature release, SDK shutdown and all
+five process exits succeeded. The 6x phase strip was visually inspected against
+the two owned real inputs. The external module was the exact pinned 4.9.0 DLL;
+automatic Proton FSR4 replacement was disabled for these controls.
+
+This is a short synthetic compute result, not a game, Radeon, image-quality,
+latency or presentation qualification. It does not establish the internal
+algorithm/provider from a DLL filename. Native NVIDIA caller-owned output and
+true mixed-provider generation remain separate gates. Preserve the failed
+missing-recording-flag controls alongside the corrected runs.
 
 ## Admission after this gate
 

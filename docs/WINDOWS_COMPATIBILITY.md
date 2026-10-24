@@ -1238,3 +1238,10 @@ Preserve completed-queue proof before context/resource release; a failed drain
 or SDK retirement retains ownership until isolated process exit. No live module
 unload, software MFG, mixed-provider generation, game presentation, output quality
 or other platform qualification follows from these build/fixture results.
+
+The isolated MFG caller declares `DLSSG.IsRecording=1` for every already-open
+command-list evaluation and requires the inspected interface's no-extra-flush
+response. Preserve this ownership contract and its Microsoft ABI regression.
+The previous omitted-flag Linux control caused the backend to reset/close the
+caller's list and fail retirement. Corrected synthetic Linux/NVIDIA 2x-6x runs
+passed with normal exits; this does not qualify Windows/Radeon or game wiring.

@@ -280,7 +280,9 @@ int wmain(int argc,wchar_t** argv) {
             for(unsigned slot=1;slot<=plan->count;++slot) {
                 p.Set("DLSSG.MultiFrameIndex",slot); p.Set("DLSSG.OutputInterpolated",s->images[3+slot].texture);
                 require(p.healthy(),"evaluate-parameters"); s->begin();
-                api("evaluate",s->backend.evaluate(s->cmd,s->backend.feature,&p,nullptr));
+                api("evaluate",s->backend.evaluate_recording(s->cmd,&p));
+                unsigned flush=~0u;
+                require(p.Get("DLSSG.FlushRequired",&flush)==NVSDK_NGX_Result_Success && flush==0,"recording-handoff");
                 s->readback(3+slot); s->submit();
                 if(frame>=2) {
                     require(batch.record(pair,slot,mcd2::mfg::Provider::Software,reinterpret_cast<uint64_t>(s->images[3+slot].texture),true),"record-phase");

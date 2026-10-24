@@ -2,9 +2,27 @@
 #define NOMINMAX
 #include <windows.h>
 #include <cassert>
-#include "../experiments/providers/mfg_ngx_parameters.hpp"
+#include "../experiments/providers/mfg_headless.hpp"
+
+unsigned evaluations=0;
+NVSDK_NGX_Result NVSDK_CONV check_recording(ID3D12GraphicsCommandList* cmd,const NVSDK_NGX_Handle* feature,NVSDK_NGX_Parameter* p,PFN_NVSDK_NGX_ProgressCallback cb) {
+    unsigned recording=0;
+    assert(cmd && feature && !cb);
+    assert(p->Get("DLSSG.IsRecording",&recording)==NVSDK_NGX_Result_Success && recording==1);
+    p->Set("DLSSG.FlushRequired",0u); ++evaluations;
+    return NVSDK_NGX_Result_Success;
+}
 int main() {
     MfgNgxParameters own; NVSDK_NGX_Parameter* p=&own;
+    MfgHeadless backend; backend.evaluate=check_recording;
+    backend.feature=reinterpret_cast<NVSDK_NGX_Handle*>(uintptr_t(0x1234));
+    auto cmd=reinterpret_cast<ID3D12GraphicsCommandList*>(uintptr_t(0x4321));
+    // Every handoff must declare the caller's open list, even after stale input.
+    for(unsigned i=0;i<2;++i) {
+        p->Set("DLSSG.IsRecording",0u);
+        assert(backend.evaluate_recording(cmd,p)==NVSDK_NGX_Result_Success);
+    }
+    assert(evaluations==2);
     unsigned u=0; int i=0; float f=0; double d=0; unsigned long long ull=0;
     p->Set("u",3u); p->Set("i",-2); p->Set("f",1.25f);
     p->Set("d",2.5); p->Set("ull",~0ull);

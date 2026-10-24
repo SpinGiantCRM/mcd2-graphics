@@ -17,6 +17,12 @@ struct MfgHeadless {
     using Shutdown=NVSDK_NGX_Result (NVSDK_CONV*)(ID3D12Device*);
     Init init{}; Populate populate{}; Scratch scratch{}; Create create{};
     Evaluate evaluate{}; Release release{}; Shutdown shutdown{};
+    NVSDK_NGX_Result evaluate_recording(ID3D12GraphicsCommandList* cmd,NVSDK_NGX_Parameter* params) {
+        // This probe owns an already-open command list and its submission.
+        // Omitting this flag lets the backend Reset/Close that same list.
+        params->Set("DLSSG.IsRecording",1u);
+        return evaluate(cmd,feature,params,nullptr);
+    }
     bool load(const wchar_t* path) {
         module=LoadLibraryExW(path,nullptr,LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR|LOAD_LIBRARY_SEARCH_SYSTEM32);
         if(!module) return false;
