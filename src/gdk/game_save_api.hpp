@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <vector>
 #include "save_slots.hpp"
+#include "identity_binding.hpp"
 #include "../latency/process_exit.hpp"
 
 namespace mcd2::gdk {
@@ -52,26 +53,19 @@ struct Api {
 struct Store {
     Api api;XUserHandle user=nullptr;XGameSaveProviderHandle provider=nullptr;
     const char* readStage="none";unsigned blobCount=0;std::uint32_t dataSize=0;
-    std::string accountBinding;
+    std::string accountBinding,scid;
     Store()=default;Store(const Store&)=delete;Store& operator=(const Store&)=delete;
     ~Store(){if(mcd2::process_exit::terminating())return;if(provider)api.closeProvider(provider);if(user)api.closeUser(user);}
-    HRESULT open(const std::filesystem::path& wgs,const std::filesystem::path& binding) {
+    HRESULT bindUser(const std::filesystem::path& wgs,const std::filesystem::path& binding) {
         const auto result=api.load(binding);if(FAILED(result))return result;
-        std::error_code error;Identity selected;
-        for(std::filesystem::directory_iterator it(wgs,error),end;!error && it!=end;it.increment(error)){
-            const auto status=it->symlink_status(error);if(error)return HRESULT_FROM_WIN32(error.value());
-            if(!std::filesystem::is_directory(status))continue;
-            Identity candidate;if(!identity(it->path().filename().string(),candidate))continue;
-            XUserHandle handle=nullptr;if(FAILED(api.findUser(candidate.user,&handle)))continue;
-            if(user){api.closeUser(handle);return E_UNEXPECTED;}
-            user=handle;selected=std::move(candidate);
-        }
-        if(error)return HRESULT_FROM_WIN32(error.value());
-        if(!user)return HRESULT_FROM_WIN32(ERROR_NO_SUCH_LOGON_SESSION);
-        const auto opened=api.initialize(user,selected.scid.c_str(),false,&provider);
-        if(SUCCEEDED(opened))accountBinding=std::to_string(selected.user)+":"+selected.scid;
-        return opened;
+        BoundIdentity selected;
+        const auto found=selectIdentity(wgs,[&](std::uint64_t id){XUserHandle handle=nullptr;return SUCCEEDED(api.findUser(id,&handle))?reinterpret_cast<std::uintptr_t>(handle):std::uintptr_t(0);},[&](std::uintptr_t handle){api.closeUser(reinterpret_cast<XUserHandle>(handle));},selected);
+        if(found!=IdentityStatus::Ready)return found==IdentityStatus::Ambiguous?E_UNEXPECTED:found==IdentityStatus::Filesystem?E_ACCESSDENIED:HRESULT_FROM_WIN32(ERROR_NO_SUCH_LOGON_SESSION);
+        user=reinterpret_cast<XUserHandle>(selected.handle);scid=selected.identity.scid;
+        accountBinding=std::to_string(selected.identity.user)+":"+scid;return S_OK;
     }
+    HRESULT openProvider(){return user?api.initialize(user,scid.c_str(),false,&provider):E_PENDING;}
+    HRESULT open(const std::filesystem::path& wgs,const std::filesystem::path& binding){const auto result=bindUser(wgs,binding);return SUCCEEDED(result)?openProvider():result;}
     HRESULT readSlot(const Slot& slot,std::vector<std::uint8_t>& bytes,std::int64_t& modified) {
         readStage="container";blobCount=0;dataSize=0;
         modified=0;

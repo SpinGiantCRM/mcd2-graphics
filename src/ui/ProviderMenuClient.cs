@@ -77,8 +77,8 @@ public class ProviderMenuClient : USaveGame {
  }
  public bool SelectSr(int provider){if(provider<0 || provider>3)return false;return Edit(8,provider);}
  public bool MenuFgPairEligible(int sr,int fg,int strategy,int multiplier){
-  return strategy==0 && multiplier==2 && ((fg==0 && (sr==1 || sr==2)) ||
-   (fg==1 && (sr==0 || sr==1 || sr==2)));
+  return (fg==0 && (sr==1 || sr==2) && ((strategy==0 && multiplier==2) || (strategy==1 && multiplier>=2 && multiplier<=6))) ||
+   (fg==1 && strategy==0 && multiplier==2 && (sr==0 || sr==1 || sr==2));
  }
  public bool SelectMenuSr(int provider){
   if(provider<0 || provider>2 || !Ready)return false;

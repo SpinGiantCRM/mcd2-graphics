@@ -13,6 +13,7 @@ std::filesystem::path settingsPath,runtimePath;
 mcd2::fgui::Intent intent{};std::vector<uint8_t> seed,lastPublished;
 std::atomic<bool> enabled{false},wanted{false};std::atomic<unsigned> fault{0};
 std::atomic<bool> retired{false};
+unsigned maximumGeneratedFrames=0,dynamicSupported=0,appliedFrameMode=0;
 unsigned presenterRoute=0,presenterCanSwitch=0,presenterSettingsRevision=0;
 unsigned session=0,available=0,availableProviders=0,startupOwner=0,previousMode=0,sessionMode=0,restartRequired=0;ULONGLONG nextPoll=0,nextSupport=0;
 mcd2::providers::FgCapabilityCache amdCapabilities;
@@ -26,7 +27,7 @@ void publish(unsigned active,bool ready){
  auto nativeRetired=nativeModule?reinterpret_cast<int(*)()>(GetProcAddress(nativeModule,"mcd2_native_fg_retired_v1")):nullptr;
  const unsigned nativeGuidesRetired=nativeRetired&&nativeRetired()==1?1u:0u;
  const unsigned phase=fault?6:(!intent.mode?0:(!intent.ready?1:(active?3:2)));
- auto bytes=mcd2::fgui::encode(seed,{{"SchemaVersion",1},{"Revision",intent.revision},{"SessionId",session},{"Available",available},{"Active",active},{"Phase",phase},{"RestartRequired",restartRequired},{"AvailableProviders",availableProviders},{"StartupOwner",startupOwner},{"PresenterRoute",presenterRoute},{"PresenterCanSwitch",presenterCanSwitch},{"PresenterSettingsRevision",presenterSettingsRevision},{"NativeGuidesRetired",nativeGuidesRetired}});
+ auto bytes=mcd2::fgui::encode(seed,{{"SchemaVersion",1},{"Revision",intent.revision},{"SessionId",session},{"Available",available},{"Active",active},{"Phase",phase},{"RestartRequired",restartRequired},{"AvailableProviders",availableProviders},{"StartupOwner",startupOwner},{"PresenterRoute",presenterRoute},{"PresenterCanSwitch",presenterCanSwitch},{"PresenterSettingsRevision",presenterSettingsRevision},{"NativeGuidesRetired",nativeGuidesRetired},{"MaximumGeneratedFrames",maximumGeneratedFrames},{"DynamicSupported",dynamicSupported},{"ActiveFrameMode",appliedFrameMode}});
  if(bytes.empty()||bytes==lastPublished)return;auto tmp=runtimePath;tmp+=L".fg.tmp";std::ofstream f(tmp,std::ios::binary|std::ios::trunc);if(!f.write(reinterpret_cast<const char*>(bytes.data()),bytes.size()))return;f.close();if(MoveFileExW(tmp.c_str(),runtimePath.c_str(),MOVEFILE_REPLACE_EXISTING|MOVEFILE_WRITE_THROUGH))lastPublished=std::move(bytes);
 }
 void poll(a::device*device,const std::filesystem::path&policy,unsigned active){
@@ -39,11 +40,20 @@ void poll(a::device*device,const std::filesystem::path&policy,unsigned active){
   auto amd=shared?GetModuleHandleW(L"mcd2-fsr-fg-game-bridge.dll"):nullptr;
   auto amdSupport=amd?reinterpret_cast<int(*)(void*)>(GetProcAddress(amd,"mcd2_afg_support_v1")):nullptr;
   if(native&&amdSupport&&amdCapabilities.query(reinterpret_cast<std::uintptr_t>(device),reinterpret_cast<std::uintptr_t>(amd),[&]{return amdSupport(native);})==0)availableProviders|=2;
+ maximumGeneratedFrames=0;dynamicSupported=0;
+ if(availableProviders&1){auto bridge=GetModuleHandleW(L"fg-sdk-bridge.dll");using Capabilities=int(*)(unsigned*,unsigned*);
+  auto capabilities=bridge?reinterpret_cast<Capabilities>(GetProcAddress(bridge,"mcd2_fg_capabilities_v1")):nullptr;
+  if(capabilities){unsigned maximum=0,dynamic=0;if(!capabilities(&maximum,&dynamic)){maximumGeneratedFrames=std::min(maximum,5u);dynamicSupported=dynamic==1?1:0;}}
  }
+
+ }
+ if(seed.empty())seed=read(runtimePath);
  mcd2::fgui::Intent next{};if(!mcd2::fgui::decode(read(settingsPath),next)||!fresh(settingsPath)){intent.ready=0;wanted=false;publish(active,false);return;}
  presenterRoute=presenterCanSwitch=presenterSettingsRevision=0;
  if(shared){auto module=GetModuleHandleW(L"mcd2-fsr-fg-game-bridge.dll");using Status=int(*)(unsigned*,unsigned*);auto status=module?reinterpret_cast<Status>(GetProcAddress(module,"mcd2_afg_presenter_switch_state_v1")):nullptr;if(status&&status(&presenterRoute,&presenterCanSwitch)){presenterRoute=presenterCanSwitch=0;}}
- intent=next;available=(availableProviders&(1u<<intent.provider))?1:0;
+ intent=next;
+ const bool frameModeSupported=intent.provider==1?intent.frameMode==0:mcd2::fg::supportsFrameMode(intent.frameMode,maximumGeneratedFrames,false);
+ available=(availableProviders&(1u<<intent.provider))?1:0;
  if(intent.mode!=previousMode){if(intent.mode)fault=0;previousMode=intent.mode;}
  if(seed.empty())seed=read(runtimePath);
  auto bootstrap=mcd2::providers::bootstrapModule();auto startup=bootstrap?reinterpret_cast<unsigned(*)()>(GetProcAddress(bootstrap,"mcd2_bootstrap_fg_session_mode")):nullptr;
@@ -54,16 +64,16 @@ void poll(a::device*device,const std::filesystem::path&policy,unsigned active){
   MCD2MenuSnapshotV1 current{};current.size=sizeof(current);mcd2::providers::DecodedGraphicsRecord record;mcd2::providers::FgMenuProjection selection;
   const bool currentRequest=snapshot&&snapshot(&current)==0&&!current.load&&!current.reserved&&current.session&&
    mcd2::providers::decodeGraphicsRecord(current.record,record)&&mcd2::providers::projectFgMenu(record,selection)&&
-   mcd2::providers::fgMenuMatches(selection,intent.settingsRevision,intent.provider,intent.mode);
+   mcd2::providers::fgMenuMatches(selection,intent.settingsRevision,intent.provider,intent.mode)&&selection.frameMode==intent.frameMode;
   presenterSettingsRevision=currentRequest?record.intent.revision:0;
   restartRequired=mcd2::providers::fgMenuRestartRequired(available,intent.mode!=0,startupOwner,intent.provider,retired.load())?1:0;
   if(mcd2::providers::fgMenuNativeOffRecovered(currentRequest&&intent.session==session,available,intent.mode!=0,
       intent.provider,presenterRoute,presenterCanSwitch,fault.load(),retired.load()))restartRequired=0;
-  wanted=currentRequest&&selection.pairEligible&&available&&intent.mode&&intent.ready&&intent.session==session&&
+  wanted=frameModeSupported&&currentRequest&&selection.pairEligible&&available&&intent.mode&&intent.ready&&intent.session==session&&
    mcd2::providers::fgOwnerMatches(startupOwner,intent.provider)&&!fault&&!retired;
   publish(active,false);return;
  }
- wanted=available&&sessionMode==1&&intent.mode&&intent.ready&&intent.session==session&&!fault&&!retired;
+ wanted=frameModeSupported&&available&&sessionMode==1&&intent.mode&&intent.ready&&intent.session==session&&!fault&&!retired;
  publish(active,false);
 }
 }

@@ -25,6 +25,8 @@ struct Worker {
     WorkerCompletion completion;
 };
 Worker* worker=nullptr;
+Store* preparedStore=nullptr;
+bool addonRegistered=false,closing=false;
 std::mutex lifecycleMutex;
 std::mutex pathMutex;
 std::filesystem::path boundSaveRoot;
@@ -53,7 +55,8 @@ std::string bindingHash(const std::string& binding){
 std::uintptr_t saveOwner=0;
 void stopWorker() {
     std::lock_guard lock(lifecycleMutex);
-    if(!worker)return;
+    closing=true;clearRoot();
+    if(!worker){delete preparedStore;preparedStore=nullptr;return;}
     worker->stop=true;worker->wake.notify_all();
     clearRoot();
     // Sync XGameSave calls cannot be cancelled. The addon is process-pinned;
@@ -109,7 +112,26 @@ HRESULT cacheClock(const std::filesystem::path& path,const FILETIME& timestamp){
     else if(CompareFileTime(&info.ftLastWriteTime,&timestamp)!=0&&!SetFileTime(file,nullptr,nullptr,&timestamp))result=HRESULT_FROM_WIN32(GetLastError());
     CloseHandle(file);return result;
 }
-void run(Worker& state,std::filesystem::path wgs,std::filesystem::path cacheBase,std::filesystem::path receipt,std::filesystem::path binding) {
+HRESULT prepareBinding(HMODULE module){
+    if(closing)return E_ABORT;if(preparedStore)return S_OK;
+    std::array<wchar_t,256> family{};UINT32 length=static_cast<UINT32>(family.size());
+    if(GetCurrentPackageFamilyName(&length,family.data())!=ERROR_SUCCESS||std::wstring_view(family.data()).find(L"Microsoft.MinecraftDungeons2_")!=0)return E_ACCESSDENIED;
+    std::vector<wchar_t> local(32768),filename(32768);
+    const auto count=GetEnvironmentVariableW(L"LOCALAPPDATA",local.data(),DWORD(local.size()));
+    const auto n=GetModuleFileNameW(module,filename.data(),DWORD(filename.size()));
+    if(!count||count>=local.size()||!n||n>=filename.size())return E_INVALIDARG;
+    const auto binding=std::filesystem::path(filename.data()).parent_path()/L"MCD2Graphics"/L"gdk"/L"xgameruntime.thunks.dll";
+    const auto root=std::filesystem::path(local.data());
+    auto candidate=std::make_unique<Store>();
+    const auto result=candidate->bindUser(root/L"Packages"/family.data()/L"SystemAppData"/L"wgs",binding);
+    if(FAILED(result))return result;
+    const auto token=bindingHash(candidate->accountBinding);if(token.size()!=64)return E_FAIL;
+    const auto cache=root/L"Dungeons2"/L"Saved"/L"MCD2Graphics"/L"WinGDK"/token/L"SaveGames";
+    if(!privateDirectory(cache))return E_ACCESSDENIED;
+    HMODULE pinned=nullptr;if(!GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS|GET_MODULE_HANDLE_EX_FLAG_PIN,reinterpret_cast<LPCWSTR>(&prepareBinding),&pinned))return E_FAIL;
+    preparedStore=candidate.release();{std::lock_guard lock(pathMutex);boundSaveRoot=cache;}return S_OK;
+}
+void run(Worker& state,std::filesystem::path wgs,std::filesystem::path cacheBase,std::filesystem::path receipt,std::filesystem::path binding,std::unique_ptr<Store> initial) {
     std::ofstream log(receipt,std::ios::trunc);
     if(!log)return;
     auto report=[&](const char* operation,const char* slot,HRESULT result){
@@ -124,7 +146,7 @@ void run(Worker& state,std::filesystem::path wgs,std::filesystem::path cacheBase
         std::filesystem::path cache;
         while(!state.stop && !mcd2::process_exit::terminating()){
             if(!store){
-                auto candidate=std::make_unique<Store>();const auto result=candidate->open(wgs,binding);
+                auto candidate=initial?std::move(initial):std::make_unique<Store>();const auto result=candidate->user?candidate->openProvider():candidate->open(wgs,binding);
                 if(result!=previous){report("provider","none",result);previous=result;}
                 if(SUCCEEDED(result)&&!state.stop){
                     const auto token=bindingHash(candidate->accountBinding);
@@ -189,12 +211,18 @@ extern "C" __declspec(dllexport) int mcd2_gdk_save_root_v1(wchar_t* path,uint32_
 }
 extern "C" __declspec(dllexport) const char* DESCRIPTION="Identity-bound Xbox Game Save transport for MCD2 Graphics";
 BOOL APIENTRY DllMain(HMODULE module,DWORD reason,LPVOID reserved){
-    if(reason==DLL_PROCESS_ATTACH)return reshade::register_addon(module);
-    if(reason==DLL_PROCESS_DETACH){if(reserved)mcd2::process_exit::mark_terminating();else reshade::unregister_addon(module);}
+    if(reason==DLL_PROCESS_ATTACH)return TRUE;
+    if(reason==DLL_PROCESS_DETACH){if(reserved)mcd2::process_exit::mark_terminating();else if(addonRegistered)reshade::unregister_addon(module);}
     return TRUE;
+}
+extern "C" __declspec(dllexport) int mcd2_gdk_prepare_v1(HMODULE module){
+    mcd2::process_exit::initialize();std::lock_guard lock(lifecycleMutex);
+    try{return int(prepareBinding(module));}catch(...){return int(E_FAIL);}
 }
 extern "C" __declspec(dllexport) bool AddonInit(HMODULE module,HMODULE){
     mcd2::process_exit::initialize();std::lock_guard lock(lifecycleMutex);if(worker)return true;
+    if(!addonRegistered){if(!reshade::register_addon(module))return false;addonRegistered=true;}
+    if(closing)return false;
     std::array<wchar_t,256> family{};UINT32 length=static_cast<UINT32>(family.size());
     if(GetCurrentPackageFamilyName(&length,family.data())!=ERROR_SUCCESS || std::wstring_view(family.data()).find(L"Microsoft.MinecraftDungeons2_")!=0)return true;
     try {
@@ -210,17 +238,21 @@ extern "C" __declspec(dllexport) bool AddonInit(HMODULE module,HMODULE){
         // Unload cannot invalidate an in-flight synchronous GDK call or its return address.
         HMODULE pinned=nullptr;if(!GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS|GET_MODULE_HANDLE_EX_FLAG_PIN,reinterpret_cast<LPCWSTR>(&mcd2_gdk_save_root_v1),&pinned))return false;
         auto state=std::make_unique<Worker>();
+        // Bind identity before thread startup when available. Provider/cloud initialization stays on the worker.
+        prepareBinding(module);
+        std::unique_ptr<Store> initial(preparedStore);preparedStore=nullptr;
         auto* work=state.get();
-        state->thread=std::thread([work,wgs=root/L"Packages"/family.data()/L"SystemAppData"/L"wgs",cache,receipt=logs/L"gdk-save-bridge.log",binding]{run(*work,wgs,cache,receipt,binding);work->completion.finish();});
+        state->thread=std::thread([work,wgs=root/L"Packages"/family.data()/L"SystemAppData"/L"wgs",cache,receipt=logs/L"gdk-save-bridge.log",binding,initial=std::move(initial)]()mutable{run(*work,wgs,cache,receipt,binding,std::move(initial));work->completion.finish();});
         worker=state.release();saveOwner=0;
         reshade::register_event<reshade::addon_event::init_swapchain>(swap_init);
         reshade::register_event<reshade::addon_event::destroy_swapchain>(swap_destroy);
         return true;
     }catch(const std::exception&){return false;}
 }
-extern "C" __declspec(dllexport) void AddonUninit(HMODULE,HMODULE){
+extern "C" __declspec(dllexport) void AddonUninit(HMODULE module,HMODULE){
     if(mcd2::process_exit::terminating())return;
     reshade::unregister_event<reshade::addon_event::init_swapchain>(swap_init);
     reshade::unregister_event<reshade::addon_event::destroy_swapchain>(swap_destroy);
     stopWorker();
+    if(addonRegistered){reshade::unregister_addon(module);addonRegistered=false;}
 }

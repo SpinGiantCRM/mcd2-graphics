@@ -28,6 +28,7 @@
 #include "fg_preset_override.hpp"
 #include "../../src/providers/observed_settings.hpp"
 #include "../../src/providers/fg_menu_projection.hpp"
+#include "../../src/providers/settings_paths.hpp"
 #include <fstream>
 extern "C" __declspec(dllimport) int mcd2_sl_init(const wchar_t*,const wchar_t*,const wchar_t*);
 extern "C" __declspec(dllimport) int mcd2_sl_init_for_owner_v1(const wchar_t*,const wchar_t*,const wchar_t*,unsigned);
@@ -53,7 +54,8 @@ int(*amdSwap)(void*,void*,void*,const MCD2AmdFgSwapV1*,void**)=nullptr;
 void event(const char* stage,long result);
 unsigned shared_startup_owner(){
  auto local=std::make_unique<wchar_t[]>(32768);auto n=GetEnvironmentVariableW(L"LOCALAPPDATA",local.get(),32768);if(!n||n>=32768)return 0;
- const auto path=std::filesystem::path(local.get())/L"Dungeons2"/L"Saved"/L"MCD2Graphics"/L"ProviderSettings";
+ const auto paths=mcd2::providers::currentSettingsPaths(std::filesystem::path(local.get()));if(!paths)return 0;
+ const auto path=paths->authority/L"ProviderSettings";
  mcd2::providers::GraphicsStore store(path);mcd2::providers::DecodedGraphicsRecord record;
  mcd2::providers::FgMenuProjection projection;
  if(!mcd2::providers::store_detail::directoryReady(path)||store.load(record).status!=mcd2::providers::StoreStatus::Ok||
@@ -62,17 +64,18 @@ unsigned shared_startup_owner(){
 }
 unsigned saved_fg_mode(){
  auto local=std::make_unique<wchar_t[]>(32768);auto n=GetEnvironmentVariableW(L"LOCALAPPDATA",local.get(),32768);if(!n||n>=32768)return 0;
- auto path=std::filesystem::path(local.get())/L"Dungeons2"/L"Saved"/L"SaveGames"/L"MCD2GraphicsFGSettings.sav";
+ const auto paths=mcd2::providers::currentSettingsPaths(std::filesystem::path(local.get()));if(!paths)return 0;
+ auto path=paths->saves/L"MCD2GraphicsFGSettings.sav";
  std::ifstream file(path,std::ios::binary|std::ios::ate);if(!file)return 0;auto size=file.tellg();if(size<64||size>8192)return 0;
  std::vector<uint8_t> bytes(static_cast<size_t>(size));file.seekg(0);if(!file.read(reinterpret_cast<char*>(bytes.data()),bytes.size()))return 0;
  mcd2::fgui::Intent intent{};return mcd2::fgui::decode(bytes,intent)?intent.mode:0;
 }
 unsigned observed_fg_mode(){
  auto local=std::make_unique<wchar_t[]>(32768);auto n=GetEnvironmentVariableW(L"LOCALAPPDATA",local.get(),32768);if(!n||n>=32768)return 0;
- const auto saved=std::filesystem::path(local.get())/L"Dungeons2"/L"Saved";
+ const auto paths=mcd2::providers::currentSettingsPaths(std::filesystem::path(local.get()));if(!paths)return 0;
  mcd2::providers::LegacySnapshot snapshot;
- if(!mcd2::providers::readLegacySnapshot(saved/L"SaveGames",snapshot))return 0;
- mcd2::providers::GraphicsStore store(saved/L"MCD2Graphics"/L"ProviderMirror");
+ if(!mcd2::providers::readLegacySnapshot(paths->saves,snapshot))return 0;
+ mcd2::providers::GraphicsStore store(paths->authority/L"ProviderMirror");
  auto session=(GetTickCount64()^(uint64_t(GetCurrentProcessId())<<32));if(!session)session=1;
  const auto selection=mcd2::providers::observedStartup(store,snapshot,session);
  event("observed-settings-valid",selection.valid?1:0);
@@ -197,6 +200,16 @@ BOOL CALLBACK initialize(PINIT_ONCE,void*,void**){
  auto filename=std::make_unique<wchar_t[]>(32768);auto n=GetModuleFileNameW(self,filename.get(),32768);
  if(!n||n>=32768){initializing=false;return FALSE;}
  auto folder=std::filesystem::path(filename.get()).parent_path();
+ // Game Pass needs signed-in identity before selecting a persisted presentation owner.
+ // This entry point performs no Game Save provider initialization or cloud IO.
+ {std::vector<wchar_t> game(32768);const auto size=GetModuleFileNameW(nullptr,game.data(),DWORD(game.size()));
+  if(size&&size<game.size()&&_wcsicmp(std::filesystem::path(game.data()).filename().c_str(),L"Dungeons-WinGDK-Shipping.exe")==0){
+   auto transport=LoadLibraryExW((folder/L"mcd2-gdk-save-bridge.addon64").c_str(),nullptr,LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR|LOAD_LIBRARY_SEARCH_SYSTEM32);
+   auto prepare=transport?reinterpret_cast<int(*)(HMODULE)>(GetProcAddress(transport,"mcd2_gdk_prepare_v1")):nullptr;
+   if(prepare)prepare(transport);
+   // Keep this local reference: the addon loader later claims the same module.
+  }
+ }
  {std::lock_guard traceGuard(receiptMutex);fopen_s(&receipt,(folder/"bootstrap.jsonl").string().c_str(),"w");}
  // Local isolation controls are intentionally absent from the released UI.
  auto policy=mcd2::providers::observedPolicyPath(filename.get()).wstring();

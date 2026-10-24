@@ -22,6 +22,8 @@ ambiguous-account support leaves transport unavailable. Restart after changing
 accounts. Linux Game Pass through Xodus is a separate qualification target; the
 launcher being able to run the game does not establish these API/storage gates.
 
+An early identity-only entry point binds the title runtime and selects the signed-in user before FG chooses a presentation owner. It does not initialize a Game Save provider or perform cloud/blob IO; those operations stay on the worker. ReShade registers the preloaded addon through AddonInit. If identity is not ready at startup, FG stays on the native route and may require a restart.
+
 The native cache lives under an edition-specific directory with a SHA-256 opaque
 account binding, separate from Steam's settings and authority. Native consumers
 wait for this bound root and never use Steam's cache for Game Pass. Logs contain
