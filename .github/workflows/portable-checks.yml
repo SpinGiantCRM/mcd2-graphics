@@ -38,6 +38,7 @@ jobs:
           python3 -m unittest discover -s tests -p "test_fsr_probe.py" -v
           python3 -m unittest discover -s tests -p "test_fsr_fg_probe.py" -v
           python3 -m unittest discover -s tests -p "test_mfg_compute_probe.py" -v
+          python3 -m unittest discover -s tests -p "test_mfg_allocation_lock.py" -v
           python3 -m unittest discover -s tests -p "test_fsr_fg_game_bridge.py" -v
           python3 -m unittest discover -s tests -p "test_fsr_presenter_switch.py" -v
           python3 -m unittest discover -s tests -p "test_fsr_presenter_resize.py" -v
@@ -100,6 +101,8 @@ jobs:
         run: |
           g++ -std=c++20 -Wall -Wextra -Werror tests/provider_intent_test.cpp -o /tmp/provider-intent
           /tmp/provider-intent
+          g++ -std=c++20 -Wall -Wextra -Werror tests/provider_allocation_test.cpp -o /tmp/provider-allocation
+          /tmp/provider-allocation
           g++ -std=c++20 -Wall -Wextra -Werror tests/provider_legacy_test.cpp -o /tmp/provider-legacy
           /tmp/provider-legacy
           g++ -std=c++20 -Wall -Wextra -Werror tests/provider_observation_test.cpp -o /tmp/provider-observation
@@ -187,6 +190,7 @@ jobs:
           python -m unittest discover -s tests -p "test_fsr_probe.py" -v
           python -m unittest discover -s tests -p "test_fsr_fg_probe.py" -v
           python -m unittest discover -s tests -p "test_mfg_compute_probe.py" -v
+          python -m unittest discover -s tests -p "test_mfg_allocation_lock.py" -v
           python -m unittest discover -s tests -p "test_fsr_fg_game_bridge.py" -v
           python -m unittest discover -s tests -p "test_fsr_presenter_switch.py" -v
           python -m unittest discover -s tests -p "test_fsr_presenter_resize.py" -v
@@ -262,6 +266,8 @@ jobs:
           ./engine-layout.exe
           g++ -std=c++20 -Wall -Wextra -Werror tests/provider_intent_test.cpp -o provider-intent.exe
           ./provider-intent.exe
+          g++ -std=c++20 -static -Wall -Wextra -Werror tests/provider_allocation_test.cpp -o provider-allocation.exe
+          ./provider-allocation.exe
           g++ -std=c++20 -static -Wall -Wextra -Werror tests/provider_legacy_test.cpp -o provider-legacy.exe
           ./provider-legacy.exe
           g++ -std=c++20 -static -Wall -Wextra -Werror tests/provider_advanced_settings_test.cpp -o provider-advanced-settings.exe

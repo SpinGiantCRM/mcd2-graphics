@@ -206,7 +206,7 @@ public class DisplayRow : UGameSettingListEntryBase {
  public override void Construct(){Refresh();}
  public void Refresh(){var model=Setting as DisplaySetting;if(model==null || Skin==null || Manager==null || Manager.DisplaySaved==null)return;int id=model.ControlId;
   if(configured!=id){configured=id;if(Skin.Text_SettingName!=null)Skin.Text_SettingName.SetText(Manager.DisplayLabel(id));
-   var choices=new List<FText>();if(id==8){for(int n=2;n<=6;n++)choices.Add(n+"x");}else if(id==0 || id==5 || id==6){choices.Add("Off");choices.Add("On");}else if(id==7){choices.Add("NVIDIA DLSS");choices.Add("AMD FSR");}else if(id==4){choices.Add("Off");choices.Add("On");choices.Add("On + Boost");}else {int max=id==1?10000:500;int step=id==1?10:1;for(int n=id==1?100:48;n<=max;n+=step)choices.Add(n+" nits");}
+   var choices=new List<FText>();if(id==8){for(int n=2;n<=6;n++)choices.Add(n+"x");}else if(id==0 || id==5 || id==6){choices.Add("Off");choices.Add("On");}else if(id==7){choices.Add("DLSS");choices.Add("FSR");}else if(id==4){choices.Add("Off");choices.Add("On");choices.Add("On + Boost");}else {int max=id==1?10000:500;int step=id==1?10:1;for(int n=id==1?100:48;n<=max;n+=step)choices.Add(n+" nits");}
    if(Skin.Rotator_SettingValue!=null)Skin.Rotator_SettingValue.PopulateTextLabels(choices);
   }
   int value=Manager.DisplayValue(id);int index=id==1?(value-100)/10:(id==2 || id==3?value-48:value);
@@ -376,7 +376,7 @@ public class ModActor : AActor, IModSettings {
   var a=ProviderMenu.Authority;int reflex=(a.W35==0 || a.W35==1)?a.W36:0;
   bool changed=DisplaySaved.Revision!=a.W19 || DisplaySaved.HDROutput!=a.W37 || DisplaySaved.PeakNits!=a.W38 || DisplaySaved.PaperWhiteNits!=a.W39 || DisplaySaved.UINits!=a.W40 || DisplaySaved.ReflexMode!=reflex;
   if(changed){DisplaySaved.Revision=a.W19;DisplaySaved.HDROutput=a.W37;DisplaySaved.PeakNits=a.W38;DisplaySaved.PaperWhiteNits=a.W39;DisplaySaved.UINits=a.W40;DisplaySaved.ReflexMode=reflex;PersistDisplay();}
-  int frameMode=a.W33!=0?a.W34-2:0;
+  int frameMode=(a.W33&255)!=0?a.W34-2:0;
   if(FGSaved!=null && (FGSaved.SettingsRevision!=a.W19 || FGSaved.Mode!=a.W31 || FGSaved.FGProvider!=a.W32 || FGSaved.FrameMode!=frameMode)){FGSaved.SettingsRevision=a.W19;FGSaved.Revision++;FGSaved.Mode=a.W31;FGSaved.FGProvider=a.W32;FGSaved.FrameMode=frameMode;PersistFG();}
  }
  public void ProjectCommittedNvidia(){
@@ -745,7 +745,23 @@ public class ModActor : AActor, IModSettings {
  public void PersistDisplay(){if(DisplaySaved!=null)UGameplayStatics.SaveGameToSlot(DisplaySaved,"MCD2GraphicsDisplaySettings",0);}
  public int SelectedFgProvider(){return SharedControls() && ProviderMenu!=null?ProviderMenu.Value(20):(FGSaved==null?0:FGSaved.FGProvider);}
  public bool SharedFgAvailable(){return SharedControls() && FGRuntime!=null && MfgModes.Any(FGRuntime.AvailableProviders,FGRuntime.SoftwareMultiplierMask,FGRuntime.MixedMultiplierMask);}
- public bool SelectedFgAvailable(){if(!SharedControls())return FGRuntime!=null && FGRuntime.Available==1;if(!SharedFgAvailable() || FGRuntime==null || ProviderMenu==null)return false;int fg=SelectedFgProvider(),sr=SelectedProvider();return ProviderMenu.MenuFgPairEligible(sr,fg,ProviderMenu.Value(21),ProviderMenu.Value(22)) && MfgModes.Selected(ProviderMenu.Value(21),sr,fg,ProviderMenu.Value(22),FGRuntime.AvailableProviders,FGRuntime.SoftwareMultiplierMask,FGRuntime.MixedMultiplierMask,FGRuntime.MaximumGeneratedFrames,FGRuntime.StartupOwner);}
+ public int FgDlssGenerated(){return SharedControls() && ProviderMenu!=null?ProviderMenu.DlssGenerated():SelectedFgProvider()==0?DisplayValue(8)+1:0;}
+ public int FgFsrGenerated(){return SharedControls() && ProviderMenu!=null?ProviderMenu.FsrGenerated():SelectedFgProvider()==1?DisplayValue(8)+1:0;}
+ public bool FgAllocationSupported(int dlss,int fsr){
+  if(!SharedControls() || ProviderMenu==null || ProviderMenu.Authority==null || FGRuntime==null || FGRuntime.SessionId!=ProviderMenu.Authority.W5)return false;
+  int vendor=DisplayRuntime!=null && DisplayRuntime.SchemaVersion==1 && DisplayRuntime.SessionId==ProviderMenu.Authority.W5?DisplayRuntime.RenderingVendorId:0;
+  return FgAllocation.Supported(dlss,fsr,SelectedProvider(),FGRuntime.AvailableProviders,FGRuntime.SoftwareMultiplierMask,FGRuntime.MaximumGeneratedFrames,FGRuntime.MfgNativeGeneratedMax,FGRuntime.StartupOwner,vendor);
+ }
+ public bool SelectedFgAvailable(){return !SharedControls()?FGRuntime!=null && FGRuntime.Available==1:FgAllocationSupported(FgDlssGenerated(),FgFsrGenerated());}
+ public void ChangeFgCount(bool dlss,int direction){
+  if(!SharedControls() || ProviderMenu==null || direction==0)return;
+  int d=FgDlssGenerated(),f=FgFsrGenerated(),value=dlss?d:f;
+  for(int i=0;i<6;i++){value=(value+(direction>0?1:5))%6;int nextD=dlss?value:d,nextF=dlss?f:value;
+   if(!FgAllocationSupported(nextD,nextF))continue;
+   ProviderMenu.SelectFgAllocation(nextD,nextF);RefreshDisplayRows();return;
+  }
+ }
+ public string FgAllocationSummary(){int d=FgDlssGenerated(),f=FgFsrGenerated();return "1 rendered + "+d+" DLSS + "+f+" FSR = "+(1+d+f)+"x"+(FgAllocationSupported(d,f)?"":" (unavailable on this runtime)");}
  public int DisplayValue(int id){if(id==8)return SharedControls() && ProviderMenu!=null?(ProviderMenu.Value(21)!=0?ProviderMenu.Value(22)-2:0):(FGSaved==null?0:FGSaved.FrameMode);if(id==7)return SelectedFgProvider();if(id==6)return SharedControls() && ProviderMenu!=null && (ProviderMenu.Value(23)==0 || ProviderMenu.Value(23)==2) && ProviderMenu.Value(24)==1?1:0;if(SharedControls() && ProviderMenu!=null){if(id==5)return ProviderMenu.Value(19);if(id==0)return ProviderMenu.Value(25);if(id==1)return ProviderMenu.Value(26);if(id==2)return ProviderMenu.Value(27);if(id==3)return ProviderMenu.Value(28);return ProviderMenu.Value(24);}if(DisplaySaved==null)return 0;if(id==5)return FGSaved==null?0:FGSaved.Mode;if(id==0)return DisplaySaved.HDROutput;if(id==1)return DisplaySaved.PeakNits;if(id==2)return DisplaySaved.PaperWhiteNits;if(id==3)return DisplaySaved.UINits;return DisplaySaved.ReflexMode;}
  public string DisplayLabel(int id){if(id==8)return "FG Multiplier";if(id==7)return "FG Provider";if(id==6)return "AMD Anti-Lag 2";if(id==5)return "Frame Generation";if(id==0)return "HDR Output";if(id==1)return "HDR Peak Brightness";if(id==2)return "HDR Paper White";if(id==3)return "HDR UI Brightness";return "NVIDIA Reflex";}
  public int SelectedMfgStrategy(){return SharedControls() && ProviderMenu!=null?ProviderMenu.Value(21):(DisplayValue(8)>0?1:0);}
@@ -753,25 +769,6 @@ public class ModActor : AActor, IModSettings {
  public bool NvidiaFrameModeAvailable(){return SelectedFgProvider()==0 && FGRuntime!=null && FGRuntime.MaximumGeneratedFrames>=1 && (ProviderOwned?SharedFgAvailable() && (FGRuntime.AvailableProviders&1)!=0 && (SelectedProvider()==1 || SelectedProvider()==2):SelectedFgAvailable());}
  public bool FrameModeAvailable(){return FGRuntime!=null && (SelectedMfgStrategy()==3?FGRuntime.SoftwareMultiplierMask!=0:SelectedMfgStrategy()==2?FGRuntime.MixedMultiplierMask!=0:NvidiaFrameModeAvailable());}
  public bool FrameModeSupported(int mode){return FGRuntime!=null && mode>=0 && mode<5 && MfgModes.Supported(SelectedMfgStrategy(),SelectedProvider(),SelectedFgProvider(),mode+2,FGRuntime.SoftwareMultiplierMask,FGRuntime.MixedMultiplierMask,FGRuntime.MaximumGeneratedFrames);}
- public bool MfgStrategyAvailable(int strategy){
-  if(strategy==0)return SharedFgAvailable();if(FGRuntime==null || (SelectedProvider()!=1 && SelectedProvider()!=2))return false;
-  if(strategy==1)return (FGRuntime.AvailableProviders&1)!=0 && (FGRuntime.MaximumGeneratedFrames>=1 || MfgModes.NativeRestartNeeded(1,SelectedProvider(),0,2,FGRuntime.AvailableProviders,FGRuntime.StartupOwner,FGRuntime.MaximumGeneratedFrames));
-  if(strategy==3)return FGRuntime.SoftwareMultiplierMask!=0;
-  return strategy==2 && FGRuntime.MixedMultiplierMask!=0;
- }
- public void ChangeMfgStrategy(int direction){
-  if(!SharedControls() || ProviderMenu==null || FGRuntime==null || direction==0)return;
-  int selected=SelectedMfgStrategy(),index=selected==3?2:selected==2?3:selected;
-  for(int n=0;n<4;n++){index=(index+(direction>0?1:3))%4;int strategy=index==2?3:index==3?2:index;
-   if(!MfgStrategyAvailable(strategy))continue;
-   int provider=strategy==3?1:strategy==1 || strategy==2?0:SelectedFgProvider();
-   int multiplier=strategy==2?4:2;
-   if(strategy!=0 && !MfgModes.Selected(strategy,SelectedProvider(),provider,multiplier,FGRuntime.AvailableProviders,FGRuntime.SoftwareMultiplierMask,FGRuntime.MixedMultiplierMask,FGRuntime.MaximumGeneratedFrames,FGRuntime.StartupOwner))
-    multiplier=MfgModes.NextCount(strategy,SelectedProvider(),provider,multiplier,1,FGRuntime.SoftwareMultiplierMask,FGRuntime.MixedMultiplierMask,FGRuntime.MaximumGeneratedFrames);
-   if(strategy!=0 && !MfgModes.Selected(strategy,SelectedProvider(),provider,multiplier,FGRuntime.AvailableProviders,FGRuntime.SoftwareMultiplierMask,FGRuntime.MixedMultiplierMask,FGRuntime.MaximumGeneratedFrames,FGRuntime.StartupOwner))continue;
-   ProviderMenu.SelectFg(provider,strategy,multiplier,DisplayValue(5)==1);RefreshDisplayRows();return;
-  }
- }
  public void ChangeDisplay(int id,int direction){if(id==8){
   if(!FrameModeAvailable() || FGSaved==null || FGRuntime==null || direction==0)return;
   int strategy=SelectedMfgStrategy();int next=MfgModes.NextCount(strategy,SelectedProvider(),SelectedFgProvider(),DisplayValue(8)+2,direction,FGRuntime.SoftwareMultiplierMask,FGRuntime.MixedMultiplierMask,FGRuntime.MaximumGeneratedFrames)-2;
@@ -880,7 +877,7 @@ public class ModActor : AActor, IModSettings {
   }
   if(!SharedControls() || ProviderMenu==null || ProviderMenu.Authority==null || ProviderMenu.Pending!=null || ProviderMenu.Dirty!=0 || FGRuntime==null || FGSaved==null || FGRuntime.SessionId!=FGSaved.SessionId || FGRuntime.PresenterCanSwitch!=1)return;
   var authority=ProviderMenu.Authority;int revision=authority.W19;
-  bool custom=authority.W33==2 || authority.W33==3;
+  bool custom=(authority.W33&255)==2 || (authority.W33&255)==3;
   if((authority.W32!=1 && !custom) || revision==PresenterAttemptRevision || FGRuntime.PresenterSettingsRevision!=revision)return;
   int target=authority.W31==0?1:custom?4:2;if(FGRuntime.PresenterRoute==target)return;
   var settings=UGameUserSettings.GetGameUserSettings();if(settings==null)return;
@@ -897,7 +894,7 @@ public class ModActor : AActor, IModSettings {
 
   if(FGSaved==null)return;
   var state=UGameplayStatics.LoadGameFromSlot("MCD2GraphicsFGRuntime",0) as FGRuntimeSave;
-  bool changed=state!=null && (FGRuntime==null || state.Available!=FGRuntime.Available || state.AvailableProviders!=FGRuntime.AvailableProviders || state.SessionId!=FGRuntime.SessionId || state.SoftwareMultiplierMask!=FGRuntime.SoftwareMultiplierMask || state.MixedMultiplierMask!=FGRuntime.MixedMultiplierMask);
+  bool changed=state!=null && (FGRuntime==null || state.Available!=FGRuntime.Available || state.AvailableProviders!=FGRuntime.AvailableProviders || state.SessionId!=FGRuntime.SessionId || state.SoftwareMultiplierMask!=FGRuntime.SoftwareMultiplierMask || state.MixedMultiplierMask!=FGRuntime.MixedMultiplierMask || state.MfgNativeGeneratedMax!=FGRuntime.MfgNativeGeneratedMax);
   if(state!=null && state.SchemaVersion==1)FGRuntime=state;PollPresenterSwitch();
   int ready=Saved!=null && Saved.RenderContextReady==1 && GameplayRenderingAllowed()?1:0;
   int session=FGRuntime==null?0:FGRuntime.SessionId;

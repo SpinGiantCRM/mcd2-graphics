@@ -49,7 +49,7 @@ bool sdkReady=false,routeEnabled=true;FILE* receipt=nullptr;
 std::mutex receiptMutex;
 unsigned fgSessionMode=1;
 bool amdFgSession=false,mfgFgSession=false;HMODULE amdFgBridge=nullptr,mfgBridge=nullptr;
-unsigned startupMfgStrategy=0,startupMfgMultiplier=2;
+unsigned startupMfgStrategy=0,startupMfgMultiplier=2,startupDlssGenerated=0,startupFsrGenerated=0;
 int(*mfgSwap)(void*,void*,void*,const MCD2AmdFgSwapV1*,void**)=nullptr;
 std::atomic<unsigned> actualFgOwner{0};
 int(*amdLoad)(const wchar_t*)=nullptr;
@@ -64,6 +64,7 @@ unsigned shared_startup_owner(){
  if(!mcd2::providers::store_detail::directoryReady(path)||store.load(record).status!=mcd2::providers::StoreStatus::Ok||
     !mcd2::providers::projectFgMenu(record,projection)||!projection.enabled||!projection.pairEligible)return 0;
  startupMfgStrategy=projection.strategy;startupMfgMultiplier=projection.frameMode+2;
+ startupDlssGenerated=projection.dlssGenerated;startupFsrGenerated=projection.fsrGenerated;
  event("shared-FG-startup-revision",projection.revision);return mcd2::providers::fgStartupOwner(projection);
 }
 unsigned saved_fg_mode(){
@@ -178,10 +179,10 @@ HRESULT STDMETHODCALLTYPE create_swap(IDXGIFactory2* factory,IUnknown* queue,HWN
   ID3D12CommandQueue* nativeQueue=nullptr;if(!queue||FAILED(queue->QueryInterface(IID_PPV_ARGS(&nativeQueue))))return E_INVALIDARG;
   auto previous=nested;nested=route;
   int admitted=0;
-  if(mfgFgSession){auto caps=reinterpret_cast<int(*)(void*,MCD2MfgCapabilitiesV1*)>(GetProcAddress(mfgBridge,"mcd2_mfg_capabilities_v1"));auto configure=reinterpret_cast<int(*)(unsigned,unsigned)>(GetProcAddress(mfgBridge,"mcd2_mfg_configure_v1"));
+  if(mfgFgSession){auto caps=reinterpret_cast<int(*)(void*,MCD2MfgCapabilitiesV1*)>(GetProcAddress(mfgBridge,"mcd2_mfg_capabilities_v1"));auto configure=reinterpret_cast<int(*)(unsigned,unsigned,unsigned,unsigned)>(GetProcAddress(mfgBridge,"mcd2_mfg_configure_v2"));
    ID3D12Device* device=nullptr;MCD2MfgCapabilitiesV1 current{};current.size=sizeof(current);
    admitted=FAILED(nativeQueue->GetDevice(IID_PPV_ARGS(&device)))||!caps||!configure?-1:caps(device,&current);if(device)device->Release();
-   if(!admitted)admitted=configure(startupMfgStrategy,startupMfgMultiplier);
+   if(!admitted)admitted=configure(startupMfgStrategy,startupMfgMultiplier,startupDlssGenerated,startupFsrGenerated);
   }
   void* out=nullptr;const auto status=admitted?admitted:selectedSwap(factory,nativeQueue,hwnd,&p,&out);nativeQueue->Release();nested=previous;
   event("AMD-owned-swapchain",status);

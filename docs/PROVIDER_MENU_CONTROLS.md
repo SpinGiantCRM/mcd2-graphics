@@ -37,14 +37,20 @@ historical inputs, not this release's qualification.
 
 ## Integration MFG controls
 
-The dev.2 advanced Frame Generation page adds **Mode** and **Multiplier** beside
-the existing DLSS preset and FSR version overrides. Basic FG On/Off and provider
-selection stay in Video settings. Standard is 2x. Native MFG uses the selected
-native provider's reported limit; Software MFG uses the external FSR-based
-headless backend; Mixed MFG combines a NVIDIA midpoint with software phases at
-4x or 6x. Software and mixed modes currently require DLSS or FSR upscaling.
-Unsupported counts are skipped rather than silently reduced. Restart or the
-existing confirmed presenter-switch protocol applies when ownership changes.
+The advanced Frame Generation page has separate **DLSS Generated Frames** and
+**FSR Generated Frames** controls alongside the existing preset/version overrides.
+Each count is added to one rendered frame: **2 DLSS + 3 FSR + 1 rendered = 6x**.
+The two providers share a maximum of five generated frames. Basic FG On/Off and
+provider selection remain in Video, where ordinary FG defaults to 2x without
+visiting the extra settings. There is no separate Standard mode selector.
+
+DLSS counts require a supported NVIDIA device. FSR works on compatible AMD and
+NVIDIA devices. Choices require the actual provider capabilities, not just a GPU
+name. A split can require a higher native interpolation grid than the number of
+DLSS images displayed, so unsupported combinations are skipped. Selecting a
+count never enables FG. Turn it Off in Video; at least one generated frame stays
+configured. Higher FSR counts and mixed generation require DLSS or FSR upscaling.
+A presentation-route change requires a confirmed switch or restart.
 
 Diagnostics remain in their own page and optional gameplay overlay. Separate
 DLSS/software component activity comes from advancing successful presentations

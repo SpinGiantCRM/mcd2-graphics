@@ -46,6 +46,7 @@ static class Test {
   w[6]=1;w[7]=10;w[4]=Crc(w,0,44);Set(a,w);probe.PollTransport();Require(probe.LoggedSequence==1);
   w[5]=124;w[6]=0;w[7]=0;w[4]=Crc(w,0,44);Set(a,w);probe.PollTransport();Require(UGameplayStatics.SaveCount==2&&probe.SentSession==124);
   w[4]^=1;Set(a,w);probe.SentSession=0;probe.PollTransport();Require(UGameplayStatics.SaveCount==2);
+  AllocationTest.Run();
   ControlsTest.Run();
   RuntimeTest.Run();
   AdvancedTest.Run();

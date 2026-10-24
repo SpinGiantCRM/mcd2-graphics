@@ -182,11 +182,13 @@ through its headless interface, rather than installed as a proxy. Its hash is
 checked before loading. The owned bridge and its receipt belong to the mod
 payload; the external runtime does not.
 
-The candidate offers Standard 2x, Native MFG, Software MFG and Mixed MFG controls.
-Software counts 2x–6x and mixed counts 4x/6x require the actual device's reported
-capability masks. Mixed uses a caller-owned NVIDIA midpoint and software phases
-from the same real pair. Native Streamline MFG retains its independent maximum;
-software capabilities never authorize a higher native count.
+The candidate offers separate DLSS and FSR generated-frame counts. One rendered
+frame plus the two counts is capped at 6x. Actual device capabilities admit the
+exact split and native interpolation grid; 2 DLSS + 3 FSR uses native positions
+2/6 and 4/6 plus FSR positions 1/6, 3/6, 5/6. Native Streamline retains its independent
+maximum. The extra page has no strategy selector; ordinary Video FG defaults to
+one generated frame (2x). These controls and the Busy-sample diagnostic correction
+supersede dev.2 and require a fresh complete-package game replay.
 
 The custom presenter owns one final swapchain timeline and a virtual application
 buffer ring. A single bounded worker schedules generated phases against measured

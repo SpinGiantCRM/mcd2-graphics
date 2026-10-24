@@ -304,10 +304,11 @@ def main():
         '--windows-sysroot', sysroot, '--clang-cl', llvm / 'clang-cl.exe',
         '--linker', llvm / 'lld-link.exe')
     run(mfg_game / 'mfg_game_bridge_abi_test.exe', mfg_game / 'mcd2-mfg-game-bridge.dll')
+    run(mfg_game / 'mfg_game_allocation_test.exe')
     mfg_game_artifact = artifact / 'mfg-game-bridge'
     mfg_game_artifact.mkdir()
     for name in ('mcd2-mfg-game-bridge.dll', 'mfg_game_bridge_abi_test.exe',
-                 'mfg_game_bridge_host.exe', 'build-receipt.json', 'NVIDIA-SDK-LICENSE.txt'):
+                 'mfg_game_bridge_host.exe', 'mfg_game_allocation_test.exe', 'build-receipt.json', 'NVIDIA-SDK-LICENSE.txt'):
         shutil.copyfile(mfg_game / name, mfg_game_artifact / name)
     sr = out / 'sr'
     build_continuous_sr(REPO, sr, reshade / 'include', ngx / 'include',

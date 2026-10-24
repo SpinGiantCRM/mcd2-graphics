@@ -11,6 +11,7 @@ _spec=importlib.util.spec_from_file_location('_mfg_probe',Path(__file__).with_na
 _probe=importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_probe)
 EXPORTS=['mcd2_mfg_'+name+'_v1' for name in ('load','capabilities','configure','state','timing')]
+EXPORTS+=['mcd2_mfg_configure_v2']
 EXPORTS+=['mcd2_afg_'+name+'_v1' for name in ('support','swap','output','scene','state','diagnostic_bind','retire','presenter_switch_state','antilag_ready','antilag')]
 EXPORTS+=['mcd2_afg_'+name+'_v2' for name in ('recording_contract','guides','world','present','diagnostics')]
 
@@ -26,7 +27,7 @@ def build(headers,output,sysroot=None,compiler='clang-cl',linker='lld-link'):
         for p in ('crt/lib/x86_64','sdk/lib/ucrt/x86_64','sdk/lib/um/x86_64'):
             libraries.append('/libpath:'+str(Path(sysroot)/p))
     outputs={}
-    sources=['experiments/providers/mfg_game_bridge.cpp','tests/mfg_game_bridge_abi_test.cpp']
+    sources=['experiments/providers/mfg_game_bridge.cpp','tests/mfg_game_bridge_abi_test.cpp','tests/mfg_game_allocation_test.cpp']
     if (ROOT/'tests/mfg_game_bridge_host.cpp').exists(): sources.append('tests/mfg_game_bridge_host.cpp')
     with (output/'build-private.log').open('w') as log:
         for source in sources:

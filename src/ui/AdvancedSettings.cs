@@ -241,3 +241,34 @@ public static class MfgModes {
   return current;
  }
 }
+
+// Generated-frame allocations. Multipliers include one rendered frame.
+public static class FgAllocation {
+ public static bool Valid(int dlss,int fsr){return dlss>=0 && fsr>=0 && dlss<=5 && fsr<=5 && dlss+fsr>=1 && dlss+fsr<=5;}
+ public static int Strategy(int dlss,int fsr){return dlss+fsr==1?0:dlss==0?3:fsr==0?1:2;}
+ public static int Provider(int dlss,int fsr){return dlss>0?0:1;}
+ public static int Pack(int strategy,int dlss,int fsr){return strategy|(dlss<<8)|(fsr<<16);}
+ public static int Dlss(int word,int provider,int total){int d=(word>>8)&255,f=(word>>16)&255;if(d+f!=0)return d;int strategy=word&255;return strategy==2?1:strategy==3 || provider!=0?0:total-1;}
+ public static int Fsr(int word,int provider,int total){int d=(word>>8)&255,f=(word>>16)&255;if(d+f!=0)return f;return total-1-Dlss(word,provider,total);}
+ public static bool WireValid(int schema,int word,int provider,int total){
+  if((schema!=5 && schema!=6) || word<0 || (word&unchecked((int)0xff000000))!=0 || (word&255)>3)return false;
+  int d=(word>>8)&255,f=(word>>16)&255;if(schema==5)return d==0 && f==0;
+  if(d+f==0)return true;
+  return Valid(d,f) && total==d+f+1 && provider==Provider(d,f) && (word&255)==Strategy(d,f);
+ }
+ static int Gcd(int a,int b){while(b!=0){int r=a%b;a=b;b=r;}return a;}
+ public static int NativeMaximumNeeded(int dlss,int fsr){
+  if(dlss==0)return 0;if(!Valid(dlss,fsr))return 6;int total=dlss+fsr+1,g=total;
+  for(int j=1;j<=dlss;j++){int slot=(2*j*total+dlss+1)/(2*(dlss+1));g=Gcd(g,slot);}return total/g-1;
+ }
+ public static bool Supported(int dlss,int fsr,int sr,int providers,int softwareMask,int nativeMaximum,int mixedNativeMaximum,int startupOwner,int vendor){
+  if(!Valid(dlss,fsr) || providers<0 || providers>3 || (softwareMask&~124)!=0 || nativeMaximum<0 || nativeMaximum>5 || mixedNativeMaximum<0 || mixedNativeMaximum>5)return false;
+  if(dlss>0 && vendor!=0x10de)return false;
+  int total=dlss+fsr+1;
+  if(total==2)return dlss==1?(providers&1)!=0 && (sr==1 || sr==2) && (nativeMaximum>=1 || startupOwner==4):(providers&2)!=0 && sr>=0 && sr<=2;
+  if(sr!=1 && sr!=2)return false;
+  if(fsr==0)return (providers&1)!=0 && nativeMaximum>=dlss;
+  if((softwareMask&(1<<total))==0)return false;
+  return dlss==0 || mixedNativeMaximum>=NativeMaximumNeeded(dlss,fsr);
+ }
+}

@@ -23,6 +23,10 @@ extern "C" {
  int mcd2_mfg_capabilities_v1(void* actualDevice,MCD2MfgCapabilitiesV1*);
  // Off=0/1; Hybrid=2 with 4 or 6; SoftwareMfg=3 with 2..6. No forced cap.
  int mcd2_mfg_configure_v1(unsigned strategy,unsigned multiplier);
+ // Additive allocation: 1 real + DLSS + FSR == multiplier, at most6 total.
+ // Off=0 requires1,0,0; Native=1 requires DLSS only; Hybrid=2 requires
+ // both; Software=3 requires FSR only. Actual device SDK caps admit each grid.
+ int mcd2_mfg_configure_v2(unsigned strategy,unsigned multiplier,unsigned dlssGenerated,unsigned fsrGenerated);
  int mcd2_mfg_state_v1(MCD2MfgStateV1*);
  int mcd2_mfg_timing_v1(MCD2MfgTimingV1*);
 }

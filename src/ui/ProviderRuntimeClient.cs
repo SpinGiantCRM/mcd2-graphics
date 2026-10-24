@@ -2,7 +2,7 @@ using NeoRune;
 using UE.Engine;
 
 public class FGSettingsSave : USaveGame {public int SchemaVersion;public int Revision;public int Mode;public int ContextReady;public int SessionId;public int FGProvider;public int SettingsRevision;public int FrameMode;}
-public class FGRuntimeSave : USaveGame {public int SchemaVersion;public int Revision;public int SessionId;public int Available;public int Active;public int Phase;public int RestartRequired;public int AvailableProviders;public int StartupOwner;public int PresenterRoute;public int PresenterCanSwitch;public int PresenterSettingsRevision;public int NativeGuidesRetired;public int MaximumGeneratedFrames;public int DynamicSupported;public int ActiveFrameMode;public int SoftwareMultiplierMask;public int MixedMultiplierMask;public int MfgTimingStatus;public int MfgRefreshMilliHz;public int MfgTargetRealMilliFps;}
+public class FGRuntimeSave : USaveGame {public int SchemaVersion;public int Revision;public int SessionId;public int Available;public int Active;public int Phase;public int RestartRequired;public int AvailableProviders;public int StartupOwner;public int PresenterRoute;public int PresenterCanSwitch;public int PresenterSettingsRevision;public int NativeGuidesRetired;public int MaximumGeneratedFrames;public int DynamicSupported;public int ActiveFrameMode;public int MfgNativeGeneratedMax;public int SoftwareMultiplierMask;public int MixedMultiplierMask;public int MfgTimingStatus;public int MfgRefreshMilliHz;public int MfgTargetRealMilliFps;}
 
 // Volatile game-thread source applier. The actor supplies current world and
 // measured console state; no persistent preference or GPU capability is inferred.
@@ -46,7 +46,7 @@ public class ProviderRuntimeClient : USaveGame {
  // acquisition still needs the independently validated current-world snapshots.
  public bool NativeTemporalRequest(ProviderMenuClient menu){
   var a=menu.Authority;
-  return menu.Ready && a!=null && a.W20==0 && a.W31==1 && a.W32==1 && a.W33==0 && a.W34==2;
+  return menu.Ready && a!=null && a.W20==0 && a.W31==1 && a.W32==1 && (a.W33&255)==0 && a.W34==2;
  }
  static bool FgTemporalAck(ProviderAuthoritySave a,FGSettingsSave? settings,FGRuntimeSave? runtime){
   return settings!=null && runtime!=null && settings.SchemaVersion==1 && runtime.SchemaVersion==1 &&

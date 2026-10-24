@@ -36,7 +36,7 @@ struct LegacyRevisions {
 };
 
 struct GraphicsIntent {
-    std::uint32_t schema = 5, revision = 1;
+    std::uint32_t schema = 6, revision = 1;
     SrProvider sr = SrProvider::Native;
     // Indexed by non-Native SrProvider minus one. Switching provider must not
     // silently relabel the previous provider's named preset or custom value.
@@ -46,6 +46,8 @@ struct GraphicsIntent {
     FgProvider fg = FgProvider::Nvidia;
     FgStrategy fgStrategy = FgStrategy::Single;
     std::uint32_t requestedMultiplier = 2;
+    // Zero/zero preserves the implicit allocation of older records.
+    std::uint32_t dlssGenerated = 0, fsrGenerated = 0;
     LatencyProvider latency = LatencyProvider::Automatic;
     LatencyMode latencyMode = LatencyMode::On;
     HdrPreference hdr;
@@ -64,14 +66,56 @@ constexpr bool validHdr(const HdrPreference& h) {
 // render ratio/multiplier. A separate compatibility resolver must validate the
 // actual device, selected SDK, dimensions, frame inputs and pacing owner.
 constexpr bool validIntent(const GraphicsIntent& i) {
-    if (i.schema != 5 || !validRevision(i.revision) || unsigned(i.sr) > 3 || unsigned(i.fg) > 2 ||
+    if ((i.schema != 5 && i.schema != 6) || !validRevision(i.revision) || unsigned(i.sr) > 3 || unsigned(i.fg) > 2 ||
         unsigned(i.fgStrategy) > 3 || unsigned(i.latency) > 3 || unsigned(i.latencyMode) > 2 ||
         !validHdr(i.hdr) || i.requestedMultiplier < 2 || i.requestedMultiplier > 16 ||
         (i.fgStrategy == FgStrategy::Single && i.requestedMultiplier != 2)) return false;
+    if (i.schema == 5 && (i.dlssGenerated || i.fsrGenerated)) return false;
+    if (i.dlssGenerated || i.fsrGenerated) {
+        const auto d=i.dlssGenerated,f=i.fsrGenerated;
+        if (d>5 || f>5 || d+f>5 || i.requestedMultiplier!=d+f+1) return false;
+        if (d && f) {
+            if (i.fgStrategy!=FgStrategy::Hybrid || i.fg!=FgProvider::Nvidia) return false;
+        } else if (d+f==1) {
+            if (i.fgStrategy!=FgStrategy::Single || i.fg!=(d?FgProvider::Nvidia:FgProvider::Amd)) return false;
+        } else if (d) {
+            if (i.fgStrategy!=FgStrategy::NativeMfg || i.fg!=FgProvider::Nvidia) return false;
+        } else if (i.fgStrategy!=FgStrategy::SoftwareMfg || i.fg!=FgProvider::Amd) return false;
+    }
     for (const auto& p : i.srPreferences)
         if (unsigned(p.quality) > 5 || !scalarScale(p.customScaleBasisPoints) ||
             !scalarScale(p.lastCustomScaleBasisPoints)) return false;
     return true;
+}
+
+struct FgAllocation {
+    std::uint32_t dlssGenerated=0, fsrGenerated=0;
+    bool operator==(const FgAllocation&) const = default;
+};
+constexpr FgAllocation fgAllocation(const GraphicsIntent& i) {
+    if (i.dlssGenerated || i.fsrGenerated) return {i.dlssGenerated,i.fsrGenerated};
+    switch (i.fgStrategy) {
+        case FgStrategy::Single: return {i.fg==FgProvider::Nvidia?1u:0u,i.fg==FgProvider::Amd?1u:0u};
+        case FgStrategy::NativeMfg: return {i.requestedMultiplier-1,0};
+        case FgStrategy::SoftwareMfg: return {0,i.requestedMultiplier-1};
+        case FgStrategy::Hybrid: return {1,i.requestedMultiplier-2};
+    }
+    return {};
+}
+// Canonical user edit. The master FG switch and all unrelated preferences stay
+// under their existing owners; allocation alone never enables generation.
+constexpr bool setFgAllocation(GraphicsIntent& i,std::uint32_t d,std::uint32_t f) {
+    if (d>5 || f>5 || (!d && !f) || d+f>5) return false;
+    auto next=i;next.schema=6;next.dlssGenerated=d;next.fsrGenerated=f;
+    next.requestedMultiplier=d+f+1;next.fg=d?FgProvider::Nvidia:FgProvider::Amd;
+    next.fgStrategy=d&&f?FgStrategy::Hybrid:d+f==1?FgStrategy::Single:d?FgStrategy::NativeMfg:FgStrategy::SoftwareMfg;
+    if (!validIntent(next)) return false;
+    i=next;return true;
+}
+constexpr bool normalizeFgAllocation(GraphicsIntent& i) {
+    if (!validIntent(i)) return false;
+    const auto allocation=fgAllocation(i);
+    return setFgAllocation(i,allocation.dlssGenerated,allocation.fsrGenerated);
 }
 
 struct RenderRatio {

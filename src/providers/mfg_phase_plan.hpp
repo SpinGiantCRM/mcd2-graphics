@@ -2,6 +2,7 @@
 #include <array>
 #include <cstdint>
 #include <optional>
+#include <numeric>
 
 // Compute scheduling only. No vendor/model whitelist, presenter or runtime
 // qualification claim lives here. Capabilities are supplied by an admitted host.
@@ -13,24 +14,53 @@ struct Capabilities {
     bool nativeCallerOwnedOutput{};
 };
 struct Phase { unsigned numerator{},denominator{}; Provider provider{}; };
-struct Plan { Mode mode{}; unsigned multiplier{},count{}; std::array<Phase,5> phases{}; };
+struct Plan {
+    Mode mode{}; unsigned multiplier{},count{}; std::array<Phase,5> phases{};
+    unsigned dlssGenerated{},fsrGenerated{};
+};
+// Native evaluations may occupy a coarser uniform grid than the total output
+// grid. Its SDK count/index describes that native grid, never the number of
+// native outputs selected from it (for example 2 DLSS +3 FSR uses thirds).
+inline unsigned native_grid_divisor(const Plan& plan) {
+    unsigned divisor=plan.multiplier;
+    for(unsigned i=0;i<plan.count && i<plan.phases.size();++i)
+        if(plan.phases[i].provider==Provider::NvidiaNative)
+            divisor=std::gcd(divisor,plan.phases[i].numerator);
+    return divisor;
+}
+inline unsigned native_generated_count(const Plan& plan) {
+    if(!plan.dlssGenerated || !plan.multiplier) return 0;
+    const auto divisor=native_grid_divisor(plan);
+    return divisor?plan.multiplier/divisor-1:0;
+}
+inline unsigned native_phase_index(const Plan& plan,unsigned slot) {
+    if(!slot || slot>plan.count || slot>plan.phases.size() ||
+       plan.phases[slot-1].provider!=Provider::NvidiaNative) return 0;
+    const auto divisor=native_grid_divisor(plan);
+    return divisor?plan.phases[slot-1].numerator/divisor:0;
+}
+inline std::optional<Plan> make_allocation_plan(unsigned dlss,unsigned fsr,Capabilities caps) {
+    if(dlss>5 || fsr>5 || dlss+fsr<1 || dlss+fsr>5) return {};
+    const unsigned total=1+dlss+fsr;
+    Plan plan{dlss?(fsr?Mode::Hybrid:Mode::Native):Mode::Software,total,total-1,{},dlss,fsr};
+    for(unsigned slot=1;slot<total;++slot) plan.phases[slot-1]={slot,total,Provider::Software};
+    for(unsigned j=1;j<=dlss;++j) {
+        // Positive-integer round-to-nearest, with a half rounded upward.
+        const unsigned slot=(2*j*total+dlss+1)/(2*(dlss+1));
+        plan.phases[slot-1].provider=Provider::NvidiaNative;
+    }
+    if(fsr && caps.softwareMaxMultiplier<total) return {};
+    if(dlss && (!caps.nativeCallerOwnedOutput ||
+                caps.nativeMaxMultiplier<native_generated_count(plan)+1)) return {};
+    return plan;
+}
 inline std::optional<Plan> make_plan(Mode mode,unsigned multiplier,Capabilities caps) {
     if(multiplier<2 || multiplier>6) return {};
-    if(mode==Mode::Software) {
-        if(caps.softwareMaxMultiplier<multiplier) return {};
-    } else if(mode==Mode::Native) {
-        if(!caps.nativeCallerOwnedOutput || caps.nativeMaxMultiplier<multiplier) return {};
-    } else if(mode==Mode::Hybrid) {
-        if((multiplier!=4 && multiplier!=6) || !caps.nativeCallerOwnedOutput ||
-           caps.nativeMaxMultiplier<2 || caps.softwareMaxMultiplier<multiplier) return {};
-    } else return {};
-    Plan plan{mode,multiplier,multiplier-1,{}};
-    for(unsigned i=0;i<plan.count;++i) {
-        auto provider=mode==Mode::Native || (mode==Mode::Hybrid && (i+1)*2==multiplier)
-            ? Provider::NvidiaNative : Provider::Software;
-        plan.phases[i]={i+1,multiplier,provider};
-    }
-    return plan;
+    if(mode==Mode::Software) return make_allocation_plan(0,multiplier-1,caps);
+    if(mode==Mode::Native) return make_allocation_plan(multiplier-1,0,caps);
+    if(mode==Mode::Hybrid && (multiplier==4 || multiplier==6))
+        return make_allocation_plan(1,multiplier-2,caps);
+    return {};
 }
 enum class Origin : unsigned { Real, Generated };
 struct RealPair {
@@ -52,8 +82,9 @@ public:
         if(active_) { valid_=false; return false; }
         if(!pair.epoch || !pair.previous || pair.current<=pair.previous ||
            pair.previousOrigin!=Origin::Real || pair.currentOrigin!=Origin::Real) return false;
-        const auto expected=make_plan(plan.mode,plan.multiplier,{6,6,true});
-        if(!expected || plan.count!=expected->count) return false;
+        const auto expected=make_allocation_plan(plan.dlssGenerated,plan.fsrGenerated,{6,6,true});
+        if(!expected || plan.mode!=expected->mode || plan.multiplier!=expected->multiplier ||
+           plan.count!=expected->count) return false;
         for(unsigned i=0;i<plan.count;++i) {
             const auto& a=plan.phases[i]; const auto& b=expected->phases[i];
             if(a.numerator!=b.numerator || a.denominator!=b.denominator || a.provider!=b.provider) return false;

@@ -5,33 +5,38 @@ unreleased PR60 work based on the FSR build, integrating contributions from
 [PR55](https://github.com/SpinGiantCRM/mcd2-graphics/pull/55) and
 [PR57](https://github.com/SpinGiantCRM/mcd2-graphics/pull/57).
 
-## Candidate modes
+## Candidate controls
 
-**Mods → MCD2 Graphics → Frame Generation → Mode / Multiplier** selects:
+**Mods → MCD2 Graphics → Frame Generation** has separate **DLSS Generated Frames**
+and **FSR Generated Frames** rows. The total includes one rendered frame:
+**2 DLSS + 3 FSR + 1 rendered = 6x**. Between one and five generated frames can
+be configured across the providers. Ordinary FG remains 2x by default through
+the Video menu; the extra page has no Standard/Native/Software/Mixed selector.
 
-- **Standard:** one generated frame per real frame (2x), using the supported
-  NVIDIA or AMD provider selected in Video.
-- **Native MFG:** fixed NVIDIA output counts 2x–6x, bounded by the actual
-  Streamline device capability. GPU model names never grant a count.
-- **Software MFG:** external FSR-based headless generation at supported 2x–6x
-  counts, independently admitted on the actual device.
-- **Mixed MFG:** one caller-owned NVIDIA midpoint plus software intermediate
-  frames at 4x or 6x, from the same pair of real frames.
+DLSS requires a supported NVIDIA device; FSR supports compatible AMD and NVIDIA
+devices. Pure DLSS uses Streamline's reported maximum. Higher FSR counts and mixed
+DLSS/FSR use the separately acquired headless runtime and require DLSS or FSR
+upscaling guides. Both runtimes must approve a mixed split. GPU names, an FSR
+capability or an optional helper alone never authorize higher DLSS counts.
+Unsupported choices are skipped without silently reducing a saved request.
 
-Software and mixed modes require DLSS or FSR SR guide producers in this
-candidate. Their capability masks do not authorize higher native counts. Preset
-A/B/C remains independent of multiplier. Dynamic adaptation is not enabled.
-One final presenter and one compatible latency owner coordinate each batch.
-Software/mixed presentation fits the multiplier to the output refresh through
-bounded backpressure. Higher counts can therefore lower the real rendering rate;
-Diagnostics shows this scheduled limit separately from measured FPS. Native Off
-removes this custom pacing. The game's saved FPS/VSync settings are preserved.
+Every generated image comes from the same two rendered frames. A uniform final
+timeline assigns DLSS positions across that interval and fills other positions
+with FSR. The native runtime must support the exact interpolation grid, which
+can exceed the number of DLSS images selected for display. For 2 DLSS + 3 FSR,
+DLSS supplies positions 2/6 and 4/6; FSR supplies 1/6, 3/6 and 5/6.
 
-The schema-5 transport assigns strategy 3 to Software MFG, retaining values
-0 Standard, 1 Native MFG and 2 Mixed MFG. Old readers that do not understand the
-new strategy refuse it. Legacy FrameMode 0–4 still maps to 2x–6x. Checksums,
-session, authority revision, world, output and real-frame identities remain
-required. See [compute/presenter work and remaining gates](MFG_COMPUTE_TESTING.md).
+Preset A/B/C remains independent of the counts. One final presenter and compatible
+latency owner coordinate the batch. Generated images never become rendered-frame
+history. Output refresh and bounded backpressure can lower the real rendering
+rate at higher counts; Diagnostics distinguishes the scheduled limit from a
+measured FPS. The saved FPS/VSync settings are preserved. Turn FG Off in Video.
+
+Schema6 keeps the 128-byte record and encodes the internal strategy and separate
+DLSS/FSR counts atomically. Schema5 settings retain their identity until edited;
+new edits preserve unrelated settings and use schema6. Old readers refuse the
+new format. Checksums, session/revision/world, source pair and queue completion
+remain required. See [compute/presenter checks](MFG_COMPUTE_TESTING.md).
 
 ## Qualification and external inputs
 

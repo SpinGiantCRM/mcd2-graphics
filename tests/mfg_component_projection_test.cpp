@@ -8,7 +8,8 @@ int main(){
  assert(!mfgComponents(id,s,99).strategy);assert(!mfgComponents(id,s,1601).strategy);
  auto wrong=id;wrong.world++;assert(!mfgComponents(wrong,s,110).strategy);
  s.active=0;assert(!mfgComponents(id,s,110).strategy);s.active=1;s.fault=1;assert(!mfgComponents(id,s,110).strategy);s.fault=0;
- s.multiplier=3;assert(!mfgComponents(id,s,110).strategy);
+ for(unsigned total=3;total<=6;++total){s.multiplier=total;p=mfgComponents(id,s,110);assert(p.strategy==2&&p.software==20&&p.native==10);}
+ s.multiplier=2;assert(!mfgComponents(id,s,110).strategy);
  s.strategy=3;s.multiplier=6;assert(!mfgComponents(id,s,110).strategy);s.native=0;
  p=mfgComponents(id,s,110);assert(p.strategy==3&&p.software==20&&p.native==0);
  s.strategy=4;assert(!mfgComponents(id,s,110).strategy);

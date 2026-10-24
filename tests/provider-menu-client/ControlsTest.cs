@@ -69,7 +69,8 @@ static class ControlsTest {
    Check(c.MenuFgPairEligible(sr,fg,3,2)==(fg==1&&(sr==1||sr==2)),"software MFG uses either shared SR producer");
    Check(c.MenuFgPairEligible(sr,fg,2,4)==(fg==0&&(sr==1||sr==2)),"true mixed4x route");
    Check(c.MenuFgPairEligible(sr,fg,2,6)==(fg==0&&(sr==1||sr==2)),"true mixed6x route");
-   Check(!c.MenuFgPairEligible(sr,fg,1,7)&&!c.MenuFgPairEligible(sr,fg,2,3)&&!c.MenuFgPairEligible(sr,fg,0,3),"unsupported strategy/count refused");
+   Check(c.MenuFgPairEligible(sr,fg,2,3)==(fg==0&&(sr==1||sr==2)),"mixed3x allocation route");
+   Check(!c.MenuFgPairEligible(sr,fg,1,7)&&!c.MenuFgPairEligible(sr,fg,0,3),"unsupported strategy/count refused");
   }
   a=Authority();c=Client(a);Check(c.SelectMenuSr(2)&&c.SelectFg(1,3,6,true),"software6x request");c.Poll();r=Sent();
   Check(c.RequestValid(r)&&r.W15==4&&r.W30==1&&r.W31==3&&r.W32==6,"software owner and selection sealed together");

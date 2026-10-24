@@ -1316,3 +1316,24 @@ The reported Game Pass 1.1.3.0 on-disk executable is now separately hash-pinned.
 Contributor willingness to test is not integrated runtime acceptance. Keep issue
 #8 open until support works and is merged. Native Windows Game Pass and Linux
 Xodus checks remain pending; existing Steam qualification is not transferable.
+
+
+### Independent generated-frame allocations
+
+The dev.3 candidate replaces the extra mode/multiplier rows with separate DLSS
+and FSR generated-frame counts. One rendered frame plus both counts is bounded
+at 6x. Schema6 packs the counts into the existing 128-byte settings record;
+schema5 records retain their original checksums until a new user edit. Preserve
+CAS stamps, all unrelated preferences, exact source identity and both platforms.
+NVIDIA and FSR capabilities are checked independently. Mixed admission requires
+the native runtime's exact interpolation grid, which can exceed the displayed
+DLSS image count; software capability never raises Streamline's maximum.
+
+The legacy configure entry point must not hold a second recursive gate level
+while v2 retires an active worker. The CPU actual-function fixture verifies that
+the worker can acquire the released gate during both Off and changed-allocation
+retirement. Component diagnostics cover every mixed total from 3x through 6x,
+with identity, original-observation freshness and fault checks unchanged.
+Offline fixtures and Microsoft-ABI compilation do not qualify a new mixed split,
+Windows MFG or clean game exit. Use the complete new candidate for runtime work;
+retain the separate Linux-first and Windows/Radeon-startup-with-MFG-Off gates.

@@ -6,8 +6,8 @@
   "sourceCommit": "c39c7b129b348770e9e77f27be8bf6112c5bd642",
   "requestedSourceCommit": "c956576704770958fdf7af7c97394f0e197ae47b",
   "sourceTree": "6174680080d63fd9527f6c7ef2d8433dc446b650",
-  "selectionNeedsRebuild": false,
-  "sourceChangedAfterSelection": false,
+  "selectionNeedsRebuild": true,
+  "sourceChangedAfterSelection": true,
   "runtimeQualified": false,
   "windowsRadeonRuntimeQualified": false,
   "linuxFullArtifactRuntimeQualified": false,
@@ -91,5 +91,6 @@
     "crtVersion": "14.44.35207",
     "windowsSDK": "10.0.26100.0"
   },
-  "selectionNote": "Verified complete dev.2 native archive, API digest and CI merge tree match reviewed source c956576. All owned members and 239 source pins were checked. This selector update changes metadata only; game/platform/display qualification remains pending. Game Pass 1.1.3.0 executable identity is pinned separately, without a runtime support claim."
+  "selectionNote": "Verified complete dev.2 native archive, API digest and CI merge tree match reviewed source c956576. All owned members and 239 source pins were checked. This selector update changes metadata only; game/platform/display qualification remains pending. Game Pass 1.1.3.0 executable identity is pinned separately, without a runtime support claim.",
+  "requestedCandidateVersion": "0.5.0-integration.dev.3"
 }

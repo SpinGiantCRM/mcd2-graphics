@@ -35,6 +35,51 @@ int main() {
     assert(!make_plan(Mode::Native,6,Capabilities{6,4,true}));
     assert(!make_plan(static_cast<Mode>(99),4,software));
 
+    // Additive allocations must use the requested providers, exact real-pair
+    // phases and exact native SDK grid, rather than a fixed hybrid midpoint.
+    struct Allocation { unsigned d,f,nativeCount; unsigned nativeSlots[5]; };
+    const Allocation allocations[]={
+      {0,1,0,{}},{1,0,1,{1}},{0,2,0,{}},{1,1,2,{2}},{2,0,2,{1,2}},
+      {0,3,0,{}},{1,2,1,{2}},{2,1,3,{1,3}},{3,0,3,{1,2,3}},
+      {0,4,0,{}},{1,3,4,{3}},{2,2,4,{2,3}},{3,1,4,{1,3,4}},{4,0,4,{1,2,3,4}},
+      {0,5,0,{}},{1,4,1,{3}},{2,3,2,{2,4}},{3,2,5,{2,3,5}},{4,1,5,{1,2,4,5}},{5,0,5,{1,2,3,4,5}}
+    };
+    for(const auto& a:allocations){
+      auto p=make_allocation_plan(a.d,a.f,{6,6,true});assert(p);
+      assert(p->count==a.d+a.f && p->multiplier==a.d+a.f+1);
+      assert(p->dlssGenerated==a.d && p->fsrGenerated==a.f);
+      assert(native_generated_count(*p)==a.nativeCount);
+      assert(make_allocation_plan(a.d,a.f,{a.f?a.d+a.f+1:0,a.d?a.nativeCount+1:0,a.d!=0}));
+      unsigned nativeSeen=0,softwareSeen=0;
+      Batch allocated;assert(allocated.begin(*p,{1,1,2}));
+      for(unsigned slot=1;slot<=p->count;++slot){
+        const auto& phase=p->phases[slot-1];
+        assert(phase.numerator==slot && phase.denominator==p->multiplier);
+        if(phase.provider==Provider::NvidiaNative){
+          assert(slot==a.nativeSlots[nativeSeen++]);
+          assert(native_phase_index(*p,slot)*p->multiplier==slot*(a.nativeCount+1));
+        }else {++softwareSeen;assert(native_phase_index(*p,slot)==0);}
+        assert(allocated.record({1,1,2},slot,phase.provider,100+slot,true));
+      }
+      assert(nativeSeen==a.d && softwareSeen==a.f && allocated.complete());
+      if(a.d){assert(!make_allocation_plan(a.d,a.f,{6,a.nativeCount,false}));
+        assert(!make_allocation_plan(a.d,a.f,{6,a.nativeCount,true}));}
+      if(a.f)assert(!make_allocation_plan(a.d,a.f,{a.d+a.f,6,true}));
+    }
+    assert(!make_allocation_plan(0,0,{6,6,true}));
+    assert(!make_allocation_plan(6,0,{6,6,true}));
+    assert(!make_allocation_plan(0,6,{6,6,true}));
+    assert(!make_allocation_plan(5,1,{6,6,true}));
+    assert(!make_allocation_plan(UINT32_MAX,2,{6,6,true}));
+    assert(make_allocation_plan(2,3,{6,3,true}));
+    assert(!make_allocation_plan(1,1,{6,2,true})); // midpoint rounds to2/3, not1/2
+    auto allocated=*make_allocation_plan(2,3,{6,3,true});
+    auto corruptAllocation=allocated;corruptAllocation.dlssGenerated=1;
+    Batch allocationBatch;assert(!allocationBatch.begin(corruptAllocation,{1,1,2}));
+    corruptAllocation=allocated;corruptAllocation.phases[1].provider=Provider::Software;
+    assert(!allocationBatch.begin(corruptAllocation,{1,1,2}));
+    assert(native_phase_index(allocated,0)==0 && native_phase_index(allocated,6)==0);
+
     Batch batch;
     RealPair pair{7,10,11}; // generation epoch, previous real ID, current real ID
     assert(!batch.begin(*four,RealPair{0,10,11}));

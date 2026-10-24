@@ -21,7 +21,7 @@ public class AdvancedSettingsPanel : ModWidget, IModResettable {
  public FMargin OriginalPagePadding,OwnedPagePadding;public bool LayoutMounted,LayoutYielded,LayoutShapeLogged;public int LayoutBindAttempts;
  public int Category;public int Selected;public List<AdvancedSettingRow> Rows=new List<AdvancedSettingRow>();
  public UE.SpicewoodSettings.Spicewood.UI.SettingsScreen.W_SettingsPanel.UW_SettingsPanel_C? HelpShell;
- public AdvancedInfoWidget? Details;public UGameSettingDetailView? NativeHelp;public List<UAS_SpicewoodButtonTabAction> Tabs=new List<UAS_SpicewoodButtonTabAction>();
+ public UTextBlock? AllocationSummary;public AdvancedInfoWidget? Details;public UGameSettingDetailView? NativeHelp;public List<UAS_SpicewoodButtonTabAction> Tabs=new List<UAS_SpicewoodButtonTabAction>();
  protected override UWidget? Build(UWidgetTree tree){
   StyledCategory=-1;
   var column=Ui.Column(tree);if(column==null)return null;
@@ -52,8 +52,8 @@ public class AdvancedSettingsPanel : ModWidget, IModResettable {
   foreach(var tab in Tabs)tab.OnButtonBaseClicked-=TabClicked;Manager=null;}
  public void Upscaling(){Category=0;Populate();}public void FrameGeneration(){Category=1;Populate();}public void Diagnostics(){Category=2;Populate();}
  public void Populate(){
-  if(Controls==null||Manager==null)return;Controls.ClearChildren();Rows.Clear();Details=null;
-  if(Category==0){Add(0);Add(1);}else if(Category==1){Add(7);Add(6);Add(2);Add(3);}else{Add(4);Add(5);Details=Ui.Create(this,Unreal.ClassOf<AdvancedInfoWidget>()) as AdvancedInfoWidget;if(Details!=null){var scroll=UGameplayStatics.SpawnObject(Unreal.ClassOf<UScrollBox>(),WidgetTree) as UScrollBox;if(scroll!=null){scroll.AddChild(Details);var box=UGameplayStatics.SpawnObject(Unreal.ClassOf<USizeBox>(),WidgetTree) as USizeBox;if(box!=null){box.SetHeightOverride(300);box.AddChild(scroll);Controls.AddChild(box);}}}}
+  if(Controls==null||Manager==null)return;Controls.ClearChildren();Rows.Clear();Details=null;AllocationSummary=null;
+  if(Category==0){Add(0);Add(1);}else if(Category==1){Add(7);Add(6);Add(2);Add(3);AllocationSummary=Ui.Text(WidgetTree,Manager.FgAllocationSummary(),18);if(AllocationSummary!=null)Controls.AddChild(AllocationSummary);}else{Add(4);Add(5);Details=Ui.Create(this,Unreal.ClassOf<AdvancedInfoWidget>()) as AdvancedInfoWidget;if(Details!=null){var scroll=UGameplayStatics.SpawnObject(Unreal.ClassOf<UScrollBox>(),WidgetTree) as UScrollBox;if(scroll!=null){scroll.AddChild(Details);var box=UGameplayStatics.SpawnObject(Unreal.ClassOf<USizeBox>(),WidgetTree) as USizeBox;if(box!=null){box.SetHeightOverride(300);box.AddChild(scroll);Controls.AddChild(box);}}}}
   SelectCategory();
   Selected=Category==0?0:Category==1?2:4;ShowHelp(Selected);Refresh();
  }
@@ -64,7 +64,7 @@ public class AdvancedSettingsPanel : ModWidget, IModResettable {
   if(TabGroup!=null)TabGroup.SetSelectionRequired(true);for(int i=0;i<Tabs.Count;i++)if(i!=Category)Tabs[i].ClearSelection();
   if(TabGroup!=null)TabGroup.SelectButtonAtIndex(Category,false);else if(Category>=0&&Category<Tabs.Count)Tabs[Category].SetIsSelected(true,false);StyledCategory=Category;
  }
- public void Refresh(){if(ActiveBranch(this))SelectCategory();foreach(var row in Rows)row.Refresh();ShowHelp(Selected);}
+ public void Refresh(){if(AllocationSummary!=null && Manager!=null)AllocationSummary.SetText(Manager.FgAllocationSummary());if(ActiveBranch(this))SelectCategory();foreach(var row in Rows)row.Refresh();ShowHelp(Selected);}
  // A bounded, reversible layout lease on this mod's Loader page. Header widgets
  // and the master toggle stay Loader-owned; only their page slot is narrowed.
  public bool DescendantOf(UWidget? widget,UWidget? ancestor){for(int i=0;widget!=null&&i<64;i++){if(widget==ancestor)return true;widget=widget.GetParent();}return false;}
@@ -120,20 +120,19 @@ public class AdvancedSettingsPanel : ModWidget, IModResettable {
   if(LeftSlot!=null)LeftSlot.SetSize(new FSlateChildSize{SizeRule=ESlateSizeRule.Fill,Value=2});PageSlot=null;HelpRootSlot=null;LeasedPage=null;LayoutMounted=false;
  }
  public void FocusRow(int setting,int direction){for(int i=0;i<Rows.Count;i++)if(Rows[i].Setting==setting){int target=i+direction;if(target<0)target=Rows.Count-1;if(target>=Rows.Count)target=0;Rows[target].SetUserFocus(World.PlayerController(this));ShowHelp(Rows[target].Setting);return;}}
- public string Title(int setting){if(setting==7)return "Frame Generation Mode";if(setting==6)return "FG Multiplier";if(setting==0)return "DLSS Model Preset";if(setting==1)return "FSR Upscaling Version";if(setting==2)return "DLSS FG Preset";if(setting==3)return "FSR FG Version";if(setting==4)return "Show Runtime Details";return "Show In-Game Diagnostics";}
+ public string Title(int setting){if(setting==7)return "DLSS Generated Frames";if(setting==6)return "FSR Generated Frames";if(setting==0)return "DLSS Model Preset";if(setting==1)return "FSR Upscaling Version";if(setting==2)return "DLSS FG Preset";if(setting==3)return "FSR FG Version";if(setting==4)return "Show Runtime Details";return "Show In-Game Diagnostics";}
  public bool OfficialSr(){return Manager!=null&&Manager.Diagnostics!=null&&Manager.Diagnostics.Fresh&&Manager.Diagnostics.State!=null&&(Manager.Diagnostics.State.FsrHardware&1)!=0;}
  public bool OfficialFg(){return Manager!=null&&Manager.Diagnostics!=null&&Manager.Diagnostics.Fresh&&Manager.Diagnostics.State!=null&&(Manager.Diagnostics.State.FsrHardware&2)!=0;}
  public List<FText> Choices(int setting){
-  if(setting==7)return new List<FText>{"Standard 2x","Native MFG","Software MFG (FSR)","Mixed MFG (DLSS + FSR)"};
-  if(setting==6){var choices=new List<FText>{"2x","3x","4x","5x","6x"};if(Manager!=null && (Manager.DisplayValue(8)<0 || Manager.DisplayValue(8)>4))choices.Add("Saved "+(Manager.DisplayValue(8)+2)+"x (Unavailable)");return choices;}
+  if(setting==7 || setting==6)return new List<FText>{"0","1","2","3","4","5"};
   if(setting==0)return new List<FText>{"Auto","E - CNN (Legacy)","F - CNN (Legacy)","J - Transformer","K - Transformer","L - Transformer 2nd Gen","M - Transformer 2nd Gen"};
   if(setting==1)return new List<FText>{"Auto","3.1 - Analytical",OfficialSr()?"4.1 - Official AMD":"4.1 - INT8 (Experimental)"};
   if(setting==2)return new List<FText>{"Auto","A - Standard","B - UI Recomposition","C - Performance"};
   if(setting==3)return new List<FText>{"Auto","3.1 - Analytical",OfficialFg()?"4.0 - ML":"4.0 - ML (Unsupported GPU)"};return new List<FText>{"Off","On"};
  }
- public int Value(int setting){if(Manager==null)return 0;if(setting==7){int strategy=Manager.SelectedMfgStrategy();return strategy==3?2:strategy==2?3:strategy;}if(setting==6)return Manager.DisplayValue(8)<0 || Manager.DisplayValue(8)>4?5:Manager.DisplayValue(8);if(setting==0)return Manager.Advanced==null?0:AdvancedMenuClient.PresetChoice(Manager.Advanced.Hint);if(setting==1)return Manager.AdvancedFSR==null?0:Manager.AdvancedFSR.Hint;if(setting==2)return Manager.AdvancedFG==null?0:Manager.AdvancedFG.Hint;if(setting==3)return Manager.AdvancedFSRFG==null?0:Manager.AdvancedFSRFG.Hint;if(setting==4)return Manager.ShowMenuDiagnostics?1:0;return Manager.ShowDiagnostics?1:0;}
+ public int Value(int setting){if(Manager==null)return 0;if(setting==7)return Manager.FgDlssGenerated();if(setting==6)return Manager.FgFsrGenerated();if(setting==0)return Manager.Advanced==null?0:AdvancedMenuClient.PresetChoice(Manager.Advanced.Hint);if(setting==1)return Manager.AdvancedFSR==null?0:Manager.AdvancedFSR.Hint;if(setting==2)return Manager.AdvancedFG==null?0:Manager.AdvancedFG.Hint;if(setting==3)return Manager.AdvancedFSRFG==null?0:Manager.AdvancedFSRFG.Hint;if(setting==4)return Manager.ShowMenuDiagnostics?1:0;return Manager.ShowDiagnostics?1:0;}
  public void Change(int setting,int direction){
-  if(Manager==null)return;if(setting==7){Manager.ChangeMfgStrategy(direction);ShowHelp(setting);Refresh();Sounds.Click(this);return;}if(setting==6){Manager.ChangeDisplay(8,direction);ShowHelp(setting);Refresh();Sounds.Click(this);return;}int count=Choices(setting).Count;int value=Value(setting)+direction;if(value<0)value=count-1;if(value>=count)value=0;
+  if(Manager==null)return;if(setting==7){Manager.ChangeFgCount(true,direction);ShowHelp(setting);Refresh();Sounds.Click(this);return;}if(setting==6){Manager.ChangeFgCount(false,direction);ShowHelp(setting);Refresh();Sounds.Click(this);return;}int count=Choices(setting).Count;int value=Value(setting)+direction;if(value<0)value=count-1;if(value>=count)value=0;
   string key=setting==0?"dlss_sr_preset":setting==1?"fsr_sr_version":setting==2?"dlss_fg_preset":setting==3?"fsr_fg_version":setting==4?"show_runtime_details":"show_runtime_info";
   if(setting<4){ModSettings.SetInt(Manager,key,value);Manager.OnSettingChanged(key,""+value);}else{ModSettings.SetBool(Manager,key,value==1);Manager.OnSettingChanged(key,value==1?"true":"false");}
   ShowHelp(setting);Refresh();Sounds.Click(this);
@@ -147,16 +146,15 @@ public class AdvancedSettingsPanel : ModWidget, IModResettable {
   if(setting==2)body="Choose the DLSS frame-generation model.\n\nA: standard path.\nB: separate scene and UI interpolation.\nC: lighter optical-flow path.\n\nRestart after changes. C uses a driver override; see Diagnostics for whether the request was accepted.";
   if(setting==3)body=OfficialFg()?"Choose FSR frame generation independently of upscaling.\n\n• 3.1\nAnalytical frame generation.\n\n• 4.0 ML\nOfficial AMD machine-learning frame generation. Requires a compatible driver.\n\nRestart after changes.":"Choose FSR frame generation independently of upscaling.\n\n• 3.1\nAnalytical frame generation.\n\n• 4.0 ML\nRequires a supported Radeon GPU. Portable FSR upscaling does not add this support.\n\nRestart after changes.";
   if(Manager!=null&&(Manager.SelectedMfgStrategy()==2||Manager.SelectedMfgStrategy()==3)){
-   if(setting==2)body+="\n\nSoftware/Mixed MFG uses a separate headless backend. Streamline A/B recomposition overrides apply to Standard/Native NVIDIA FG; they are saved for that path.";
-   if(setting==3)body+="\n\nThis selector applies to Standard AMD FG. Software/Mixed MFG uses the separately pinned headless runtime, not this implementation selector.";
+   if(setting==2)body+="\n\nMixed DLSS/FSR uses a separate headless backend. Streamline A/B recomposition overrides apply to Standard/Native NVIDIA FG; they are saved for that path.";
+   if(setting==3)body+="\n\nThis selector applies to Standard AMD FG. FSR multi-frame generation and mixed DLSS/FSR use the separately pinned headless runtime, not this implementation selector.";
   }
   if(setting==4){body="Show runtime library versions, requested presets and the last verified FSR implementations in this Diagnostics section.\n\nA loaded library or saved setting does not prove a model is active.";footer="Recommended: OFF";}
-  if(setting==7){body="Choose how intermediate frames are generated.\n\nStandard: one frame from the selected provider.\nNative MFG: the provider’s own supported multi-frame path.\nSoftware MFG: FSR-based intermediate frames on compatible AMD or NVIDIA hardware.\nMixed MFG: a native DLSS midpoint plus software phases on one timeline.\n\nChoices require actual runtime support. Software/mixed pacing fits generated frames to the display refresh; higher multipliers can lower the real rendering rate. Changing the presentation route may require a restart.";footer="Recommended: Standard 2x";}
-  if(setting==6){body="Choose a fixed frame-generation multiplier.\n\n2x adds one generated frame; 6x adds five. Only counts reported by the selected runtime path can be selected.\n\nThis is independent of the A/B/C model preset. Higher modes may need additional provider support. Mixed mode offers 4x and 6x when both generation paths are available. Dynamic mode is not offered.\n\n"+(Manager==null?"Waiting for runtime capabilities.":Manager.NativeFgRestartNeeded()?"Restart to check native NVIDIA multipliers. This session does not report their maximum.":Manager.FrameModeSupported(Manager.DisplayValue(8))?"Selected multiplier is supported.":"The saved multiplier is unavailable. Choose a supported mode, turn FG Off, or change providers in Video.");footer="Recommended: 2x";}
+  if(setting==7 || setting==6){body="Choose how many frames "+(setting==7?"DLSS":"FSR")+" generates between rendered frames.\n\nThe two providers share a maximum of five generated frames: 1 rendered + 2 DLSS + 3 FSR = 6x. At least one generated frame must remain selected; use Video → Frame Generation to turn it Off.\n\nDLSS requires a supported NVIDIA GPU. FSR works on compatible AMD and NVIDIA GPUs. Only combinations supported by the current runtimes are selectable.\n\nNormal FG defaults to one generated frame (2x). Changing these extra settings does not turn FG On. A presentation-route change may require a restart.\n\n"+(Manager==null?"Waiting for runtime capabilities.":Manager.FgAllocationSummary());footer="Default: 1 frame from the Video provider";}
   if(setting==5){body="Show runtime activity while playing.\n\nReports advancing upscaler, generated-frame and low-latency counters. Stale or suspended activity is shown as waiting.\n\nReflex and AMD Anti-Lag 2 remain independently selectable in Video when supported.";footer="Recommended: OFF";}
   if(NativeHelp.RichText_Description!=null)NativeHelp.RichText_Description.SetText(body);
   if(NativeHelp.RichText_DynamicDetails!=null)NativeHelp.RichText_DynamicDetails.SetText("");if(NativeHelp.RichText_WarningDetails!=null)NativeHelp.RichText_WarningDetails.SetText("");if(NativeHelp.RichText_DisabledDetails!=null)NativeHelp.RichText_DisabledDetails.SetText("");
-  if(Manager!=null)Manager.ShowRecommendation(NativeHelp,setting==7?"Standard 2x":setting==6?"2x":footer=="Recommended: OFF"?"Off":"Auto");
+  if(Manager!=null)Manager.ShowRecommendation(NativeHelp,(setting==7 || setting==6)?"2x total":footer=="Recommended: OFF"?"Off":"Auto");
  }
 }
 public class AdvancedSettingRow : ModWidget {

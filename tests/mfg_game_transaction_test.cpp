@@ -58,4 +58,24 @@ int main(){
  assert(tx.begin(id,pair,plan));
  assert(!tx.record(pair,1,Provider::Software,77,false));
  assert(!tx.submitted({33,44,10}));
+ // Additive mixed batches retain the same real pair and publish all five
+ // ordered images only after exact completion on the owning queue.
+ tx.invalidate();const auto allocated=*make_allocation_plan(2,3,{6,3,true});
+ assert(tx.begin(id,pair,allocated));
+ assert(tx.record(pair,1,Provider::Software,101,true));
+ assert(tx.record(pair,2,Provider::NvidiaNative,102,true));
+ assert(tx.record(pair,3,Provider::Software,103,true));
+ assert(tx.record(pair,4,Provider::NvidiaNative,104,true));
+ assert(tx.record(pair,5,Provider::Software,105,true));
+ assert(!tx.output(id,pair,1));assert(tx.submitted({33,44,11}));
+ assert(!tx.completed({34,44,11},11));assert(!tx.output(id,pair,1));
+ assert(tx.completed({33,44,11},11));
+ for(unsigned slot=1;slot<=5;++slot){assert(tx.output(id,pair,slot)==100+slot);assert(tx.presented(id,pair,slot,true));}
+ assert(tx.realPresented(id,pair,true));
+ assert(tx.nativeGenerated()==3 && tx.softwareGenerated()==5 && tx.rendered()==2);
+ assert(tx.retire({33,44,12},12));
+ assert(!tx.begin(id,{8,100,101,Origin::Generated,Origin::Real},allocated));
+ assert(tx.begin(id,pair,allocated));assert(tx.record(pair,1,Provider::Software,101,true));
+ assert(!tx.record(pair,2,Provider::NvidiaNative,101,true)); // same-image duplicate remains fatal
+ assert(!tx.submitted({33,44,13}));
 }

@@ -103,7 +103,7 @@ static int run(const fs::path& root, int argc, char** argv) {
     // Valid checksums cannot authorize malformed enums, booleans, owner,
     // revisions, calibration or migration metadata.
     constexpr std::array<std::pair<unsigned,unsigned>, 13> mutations{{
-        {8,2}, {12,124}, {20,2}, {24,6}, {28,0}, {32,4}, {36,6},
+        {8,2}, {12,124}, {20,2}, {24,7}, {28,0}, {32,4}, {36,6},
         {72,2}, {76,2}, {100,2}, {104,411}, {116,0}, {124,10}
     }};
     for (auto [offset, word] : mutations) {
