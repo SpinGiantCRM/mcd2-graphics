@@ -90,16 +90,16 @@ inline bool valid(const Slot& slot, const std::vector<std::uint8_t>& bytes,bool 
         return fields["Enabled"]<=1;
     }
     if(name=="MCD2GraphicsDiagnosticsState"){
-        const std::set<std::string> allowed={"SchemaVersion","SessionId","Revision","Sample","WorldGeneration","SrProvider","SrFrames","FsrSrVersion","FsrHardware","FgProvider","FgActive","FgFault","FgRendered","FgGenerated","FsrFgVersion","FgPresetStatus","ReflexMode","ReflexFrames","AmdMode","AmdFrames"};
+        const std::set<std::string> allowed={"SchemaVersion","SessionId","Revision","Sample","WorldGeneration","SrProvider","SrFrames","FsrSrVersion","FsrHardware","FgProvider","FgActive","FgFault","FgRendered","FgGenerated","FsrFgVersion","FgPresetStatus","ReflexMode","ReflexFrames","AmdMode","AmdFrames","FgStrategy","FgSoftwareGenerated","FgNativeGenerated"};
         for(const auto& [key,value]:fields)if(!allowed.contains(key))return false;
-        return fields["SrProvider"]<=3&&fields["FgProvider"]<=2&&fields["FgActive"]<=1&&fields["ReflexMode"]<=2&&fields["AmdMode"]<=1;
+        return fields["SrProvider"]<=3&&fields["FgProvider"]<=2&&fields["FgActive"]<=1&&fields["ReflexMode"]<=2&&fields["AmdMode"]<=1&&fields["FgStrategy"]<=3;
     }
     const std::set<std::string> allowed=name=="MCD2GraphicsDisplayRuntime"?
         std::set<std::string>{"SchemaVersion","Revision","SessionId","ReflexAvailable","ReflexMode","ReflexFault","HDRRevision","HDRRestartRequired","RenderingVendorId","AmdAntiLagAvailable","AmdAntiLagMode","AmdAntiLagFault","AmdAntiLagRevision","AmdAntiLagFgCompatible"}:
-        std::set<std::string>{"SchemaVersion","Revision","SessionId","Available","Active","Phase","RestartRequired","AvailableProviders","StartupOwner","PresenterRoute","PresenterCanSwitch","PresenterSettingsRevision","NativeGuidesRetired","MaximumGeneratedFrames","DynamicSupported","ActiveFrameMode"};
+        std::set<std::string>{"SchemaVersion","Revision","SessionId","Available","Active","Phase","RestartRequired","AvailableProviders","StartupOwner","PresenterRoute","PresenterCanSwitch","PresenterSettingsRevision","NativeGuidesRetired","MaximumGeneratedFrames","DynamicSupported","ActiveFrameMode","SoftwareMultiplierMask","MixedMultiplierMask","MfgTimingStatus","MfgRefreshMilliHz","MfgTargetRealMilliFps"};
     for(const auto& [key,value]:fields)if(!allowed.contains(key))return false;
     if(name=="MCD2GraphicsDisplayRuntime")return fields["ReflexAvailable"]<=1 && fields["ReflexMode"]<=2 && fields["ReflexFault"]<=1 && fields["HDRRestartRequired"]<=1 && fields["RenderingVendorId"]<=65535 && fields["AmdAntiLagAvailable"]<=1 && fields["AmdAntiLagMode"]<=1 && fields["AmdAntiLagFault"]<=1 && fields["AmdAntiLagFgCompatible"]<=1;
-    return fields["Available"]<=1 && fields["Active"]<=1 && fields["Phase"]<=6 && fields["RestartRequired"]<=1 && fields["AvailableProviders"]<=3 && fields["StartupOwner"]<=2 && fields["PresenterRoute"]<=2 && fields["PresenterCanSwitch"]<=1 && fields["NativeGuidesRetired"]<=1 && fields["MaximumGeneratedFrames"]<=5 && fields["ActiveFrameMode"]<=4 && fields["DynamicSupported"]<=1;
+    return fields["Available"]<=1 && fields["Active"]<=1 && fields["Phase"]<=6 && fields["RestartRequired"]<=1 && fields["AvailableProviders"]<=3 && (fields["StartupOwner"]<=2||fields["StartupOwner"]==4) && (fields["PresenterRoute"]<=2||fields["PresenterRoute"]==4) && fields["PresenterCanSwitch"]<=1 && fields["NativeGuidesRetired"]<=1 && fields["MaximumGeneratedFrames"]<=5 && fields["ActiveFrameMode"]<=4 && fields["DynamicSupported"]<=1 && (fields["SoftwareMultiplierMask"]&~124u)==0 && (fields["MixedMultiplierMask"]&~80u)==0 && fields["MfgTimingStatus"]<=5 && fields["MfgRefreshMilliHz"]<=2000000 && fields["MfgTargetRealMilliFps"]<=500000;
 }
 struct Identity { std::uint64_t user=0; std::string scid; };
 inline bool identity(std::string_view folder, Identity& out) {

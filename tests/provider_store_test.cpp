@@ -64,7 +64,7 @@ static int run(const fs::path& root, int argc, char** argv) {
     GraphicsRecord bytes;
     for (unsigned sr = 0; sr <= 3; ++sr)
         for (unsigned fg = 0; fg <= 2; ++fg)
-            for (unsigned strategy = 0; strategy <= 2; ++strategy)
+            for (unsigned strategy = 0; strategy <= 3; ++strategy)
                 for (unsigned latency = 0; latency <= 3; ++latency) {
                     GraphicsIntent value;
                     value.sr = SrProvider(sr); value.fgEnabled = true; value.fg = FgProvider(fg);

@@ -31,7 +31,7 @@ public class AdvancedInfoWidget : ModWidget {
   var mfg=Manager.FGRuntime;string mfgInfo="";
   if(Manager.SelectedMfgStrategy()==2||Manager.SelectedMfgStrategy()==3){
    mfgInfo="\n\nSoftware/Mixed FG backend: "+(mfg!=null&&mfg.SoftwareMultiplierMask>0?"DLSS Enabler 4.9.0 (capabilities available)":"Unavailable");
-   mfgInfo+="\nPresentation pacing: "+(mfg==null||mfg.MfgTimingStatus==0?"Waiting":mfg.MfgTimingStatus==1?"Following real-frame cadence":mfg.MfgTimingStatus==2?"Limited to fit display refresh":mfg.MfgTimingStatus==3?"Display refresh unavailable":"Presenter error");
+   mfgInfo+="\nPresentation pacing: "+(mfg==null||mfg.MfgTimingStatus==0?"Waiting":mfg.MfgTimingStatus==1?"Following real-frame cadence":mfg.MfgTimingStatus==2?"Limited to fit display refresh":mfg.MfgTimingStatus==3?"Display refresh unavailable":mfg.MfgTimingStatus==5?"Real-frame fallback: timing window missed":"Presenter error");
    if(mfg!=null&&mfg.MfgRefreshMilliHz>0)mfgInfo+="\nOutput refresh: "+(mfg.MfgRefreshMilliHz/1000)+" Hz";
    if(mfg!=null&&mfg.MfgTimingStatus==2&&mfg.MfgTargetRealMilliFps>0)mfgInfo+="\nScheduled real-frame limit: ~"+(mfg.MfgTargetRealMilliFps/1000)+" FPS (not a measured FPS)";
    if(d!=null)mfgInfo+="\nSuccessful software / native phase presents: "+d.FgSoftwareGenerated+" / "+d.FgNativeGenerated;

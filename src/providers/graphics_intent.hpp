@@ -12,10 +12,10 @@ namespace mcd2::providers {
 enum class SrProvider : std::uint32_t { Native, NvidiaDlss, AmdFsr, IntelXeSs };
 enum class Quality : std::uint32_t { NativeAA, Quality, Balanced, Performance, UltraPerformance, Custom };
 enum class FgProvider : std::uint32_t { Nvidia, Amd, Intel };
-enum class FgStrategy : std::uint32_t { Single, NativeMfg, Hybrid };
+enum class FgStrategy : std::uint32_t { Single, NativeMfg, Hybrid, SoftwareMfg };
 enum class LatencyProvider : std::uint32_t { Automatic, NvidiaReflex, RadeonAntiLag2, IntelXeLL };
 enum class LatencyMode : std::uint32_t { Off, On, OnBoost };
-enum class PresentationOwner : std::uint32_t { Native, NvidiaStreamline, AmdFidelityFX, IntelXeSs };
+enum class PresentationOwner : std::uint32_t { Native, NvidiaStreamline, AmdFidelityFX, IntelXeSs, Mcd2Mfg };
 
 struct SrPreference {
     Quality quality = Quality::Quality;
@@ -65,7 +65,7 @@ constexpr bool validHdr(const HdrPreference& h) {
 // actual device, selected SDK, dimensions, frame inputs and pacing owner.
 constexpr bool validIntent(const GraphicsIntent& i) {
     if (i.schema != 5 || !validRevision(i.revision) || unsigned(i.sr) > 3 || unsigned(i.fg) > 2 ||
-        unsigned(i.fgStrategy) > 2 || unsigned(i.latency) > 3 || unsigned(i.latencyMode) > 2 ||
+        unsigned(i.fgStrategy) > 3 || unsigned(i.latency) > 3 || unsigned(i.latencyMode) > 2 ||
         !validHdr(i.hdr) || i.requestedMultiplier < 2 || i.requestedMultiplier > 16 ||
         (i.fgStrategy == FgStrategy::Single && i.requestedMultiplier != 2)) return false;
     for (const auto& p : i.srPreferences)
@@ -142,6 +142,7 @@ constexpr bool migrateV4(const LegacyV4& v, GraphicsIntent& out) {
 // still approve it before the bootstrap creates any vendor owner.
 constexpr PresentationOwner requestedOwner(const GraphicsIntent& i) {
     if (!validIntent(i) || !i.fgEnabled) return PresentationOwner::Native;
+    if(i.fgStrategy==FgStrategy::Hybrid||i.fgStrategy==FgStrategy::SoftwareMfg)return PresentationOwner::Mcd2Mfg;
     switch (i.fg) {
         case FgProvider::Nvidia: return PresentationOwner::NvidiaStreamline;
         case FgProvider::Amd: return PresentationOwner::AmdFidelityFX;

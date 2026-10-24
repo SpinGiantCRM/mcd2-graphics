@@ -1,3 +1,5 @@
+import ast
+import types
 import hashlib
 from pathlib import Path, PureWindowsPath
 import tempfile
@@ -35,6 +37,28 @@ class SourceReceiptTests(unittest.TestCase):
                 'src/providers/test.hpp': hashlib.sha256(b'header').hexdigest(),
                 'bootstrap.cpp': hashlib.sha256(b'bootstrap').hexdigest()})
             self.assertEqual(provider_sources(repository), ['src/providers/runtime_diagnostics.h', 'src/providers/test.hpp'])
+
+    def test_each_settings_consumer_records_transitive_parser_bytes(self):
+        experiment=Path(__file__).resolve().parent
+        repository=experiment.parents[1]
+        tree=ast.parse((experiment/'build_probe.py').read_text())
+        start=next(i for i,node in enumerate(tree.body) if isinstance(node,ast.Assign)
+                   and any(isinstance(t,ast.Name) and t.id=='sources' for t in node.targets))
+        statements=[]
+        for node in tree.body[start:]:
+            if isinstance(node,ast.Expr):break
+            statements.append(node)
+        recipe=compile(ast.Module(body=statements,type_ignores=[]),'receipt-source-selection','exec')
+        for bootstrap,guide in ((True,False),(False,True),(True,True)):
+            with self.subTest(bootstrap=bootstrap,guide=guide):
+                values={'a':types.SimpleNamespace(probe='owned',reshade_headers=True,
+                    early_bootstrap=bootstrap,guide_recon=guide,guide_mingw_cxx=False),
+                    'host':'owned_inputs_probe.cpp','repo':repository,'provider_sources':provider_sources}
+                exec(recipe,values)
+                hashes=source_hashes(repository,experiment,values['sources'])
+                for name in ('src/latency/display_protocol.hpp','src/native/settings_bridge.hpp'):
+                    self.assertIn(name,hashes)
+                    self.assertEqual(hashes[name],hashlib.sha256((repository/name).read_bytes()).hexdigest())
 
 
 if __name__ == '__main__':

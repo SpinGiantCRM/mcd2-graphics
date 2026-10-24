@@ -93,7 +93,7 @@ int main(int argc,char** argv){
   assert(projectFgMenu(record,unqualified)&&unqualified.pairEligible==(multiplier<=6));
   assert(unqualified.frameMode==multiplier-2);
  }
- intent.fgStrategy=static_cast<FgStrategy>(3);intent.requestedMultiplier=2;
+ intent.fgStrategy=static_cast<FgStrategy>(4);intent.requestedMultiplier=2;
  assert(!encodeGraphicsRecord(intent,bytes));
  intent.fgStrategy=FgStrategy::Single;intent.requestedMultiplier=2;
  intent.latency=LatencyProvider::RadeonAntiLag2;intent.latencyMode=LatencyMode::On;

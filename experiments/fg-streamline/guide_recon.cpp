@@ -97,8 +97,9 @@ bool amdRetiredForClose=false;
 bool nvidiaAlphaRetiredForClose=false;
 std::atomic<bool> sharedQuiesceIssued{false},retainedUnload{false};
 std::atomic<bool> captureEnabled{false},guideTags{false},imageTags{false},legacyEnable{false};unsigned cachedRevision=0;
-bool amd_owner(){auto bootstrap=mcd2::providers::bootstrapModule();auto owner=bootstrap?reinterpret_cast<unsigned(*)()>(GetProcAddress(bootstrap,"mcd2_bootstrap_amd_fg_session")):nullptr;return owner&&owner()==1;}
-HMODULE amd_bridge(){return amd_owner()?GetModuleHandleW(L"mcd2-fsr-fg-game-bridge.dll"):nullptr;}
+bool mfg_owner(){auto bootstrap=mcd2::providers::bootstrapModule();auto owner=bootstrap?reinterpret_cast<unsigned(*)()>(GetProcAddress(bootstrap,"mcd2_bootstrap_mfg_fg_session")):nullptr;return owner&&owner()==1;}
+bool amd_owner(){if(mfg_owner())return true;auto bootstrap=mcd2::providers::bootstrapModule();auto owner=bootstrap?reinterpret_cast<unsigned(*)()>(GetProcAddress(bootstrap,"mcd2_bootstrap_amd_fg_session")):nullptr;return owner&&owner()==1;}
+HMODULE amd_bridge(){return mfg_owner()?GetModuleHandleW(L"mcd2-mfg-game-bridge.dll"):amd_owner()?GetModuleHandleW(L"mcd2-fsr-fg-game-bridge.dll"):nullptr;}
 ID3D12GraphicsCommandList* native_command(void* proxy){
  constexpr GUID unwrap={0x7f2c9a11,0x3b4e,0x4d6a,{0x81,0x2f,0x5e,0x9c,0xd3,0x7a,0x1b,0x42}};
  ID3D12GraphicsCommandList* out=nullptr;
@@ -519,6 +520,7 @@ void present(a::command_queue*q,a::swapchain*swap,const a::rect*,const a::rect*,
   if(id<UINT32_MAX&&!retiring&&!ownerClosing){auto f=gameFrames.find(uint32_t(id));if(f!=gameFrames.end()){data=f->second;ready=mcd2::fg::nvidiaInputsReady(data.guides,data.images,data.sdrFinalColor);if(data.scene){data.scene->AddRef();sceneBorrow.reset(data.scene);}}}
   wanted=fg_controls::enabled?fg_controls::wanted.load()&&GetForegroundWindow()==outputWindow:legacyEnable.load()&&fgTrialFrames<600&&GetForegroundWindow()==outputWindow;
  }
+ if(wanted&&fg_controls::enabled&&!fg_controls::current_selection())wanted=false;
  const unsigned mode=ready&&wanted&&fg_alpha::submission_queue(q)?1:0;
  const auto identityRead=wanted?diagnostic_identity(previousIdentity):mcd2::diagnostics::IdentityRead{};
  const auto identity=identityRead.identity;

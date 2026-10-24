@@ -296,6 +296,19 @@ def main():
     mfg_artifact.mkdir()
     for name in ('mfg-compute-probe.exe', 'mfg-parameters-abi-test.exe', 'build-receipt.json', 'NVIDIA-SDK-LICENSE.txt'):
         shutil.copyfile(mfg_probe / name, mfg_artifact / name)
+    # Build the owned game bridge separately. This fixture checks its dynamic
+    # C ABI without loading vendor runtimes or submitting any GPU work in CI.
+    mfg_game = out / 'mfg-game-bridge'
+    run(sys.executable, REPO / 'experiments/providers/build_mfg_game_bridge.py',
+        '--ngx-headers', ngx / 'include', '--output', mfg_game,
+        '--windows-sysroot', sysroot, '--clang-cl', llvm / 'clang-cl.exe',
+        '--linker', llvm / 'lld-link.exe')
+    run(mfg_game / 'mfg_game_bridge_abi_test.exe', mfg_game / 'mcd2-mfg-game-bridge.dll')
+    mfg_game_artifact = artifact / 'mfg-game-bridge'
+    mfg_game_artifact.mkdir()
+    for name in ('mcd2-mfg-game-bridge.dll', 'mfg_game_bridge_abi_test.exe',
+                 'mfg_game_bridge_host.exe', 'build-receipt.json', 'NVIDIA-SDK-LICENSE.txt'):
+        shutil.copyfile(mfg_game / name, mfg_game_artifact / name)
     sr = out / 'sr'
     build_continuous_sr(REPO, sr, reshade / 'include', ngx / 'include',
                         llvm / 'clang++.exe', mingw, out / 'dxc/bin/x64/dxc.exe',

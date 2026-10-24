@@ -6,8 +6,8 @@
   "sourceCommit": "d75b1bb795ce29a3b3fd3fc428b56e98ee398d90",
   "requestedSourceCommit": "916e862aeb7ae3ca2a90b2ba4dcb5efed77eb7f7",
   "sourceTree": "d271b4aaf9260d7c04aa879d06a2243192158fe6",
-  "selectionNeedsRebuild": false,
-  "sourceChangedAfterSelection": false,
+  "selectionNeedsRebuild": true,
+  "sourceChangedAfterSelection": true,
   "runtimeQualified": false,
   "windowsRadeonRuntimeQualified": false,
   "linuxFullArtifactRuntimeQualified": false,
@@ -81,5 +81,5 @@
     "crtVersion": "14.44.35207",
     "windowsSDK": "10.0.26100.0"
   },
-  "selectionNote": "Verified native archive and CI merge tree match the reviewed integration source. Build evidence only; runtime qualification and Game Pass executable admission remain pending."
+  "selectionNote": "Historical dev.1 input retained for provenance only. The complete dev.2 source requires a fresh native build and selector before installer assembly."
 }

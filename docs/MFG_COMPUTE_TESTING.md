@@ -196,12 +196,16 @@ rate to fit that output cadence; they do not rewrite the game's stored FPS cap.
 The Diagnostics page distinguishes this scheduled limit from measured FPS.
 Incoming VSync Off remains Off. Unknown refresh reports unavailable timing and
 presents real frames. Displayed cadence and VRR still require game qualification.
- It publishes only complete ordered batches, keeps generated images
+It publishes only complete ordered batches, keeps generated images
 out of real history, binds source/session/world/epoch, and retains resources until
 the actual queue fence completes. Off disables generation immediately; an
 engine-confirmed resize switches back to native buffers and presentation without
 its frame-copy work. Enabling the custom route again requires another confirmed
-resize or a restart. Failed resize retains the previous valid route.
+resize or a restart. If an application has obtained a virtual waitable handle,
+live native switching requires a restart, while normal resize remains available
+on the virtual real-only path. Failed resize retains the previous valid route.
+A missed scheduling window presents only the real frame and reports that
+fallback; it does not publish a late burst or claim a generated batch.
 
 Software mode uses the existing hardware-supported low-latency path. Anti-Lag 2
 requires the actual AMD driver interface; it is not offered merely because FSR

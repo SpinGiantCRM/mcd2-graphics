@@ -11,7 +11,7 @@ inline bool parse(const std::vector<uint8_t>&bytes,const char*className,std::map
  if(r.str()!=std::string("/Game/Mods/MCD2Graphics/")+className+"."+className+"_C"||r.u8()!=0)return false;header=r.at;
  for(unsigned n=0;n<24;++n){auto name=r.str();if(!r.ok)return false;if(name=="None")return r.u32()==0&&r.ok&&r.at==bytes.size()&&values["SchemaVersion"]==1;
   if(values.count(name))return false;auto type=r.str();auto array=r.u32(),size=r.u32();auto flags=r.u8();if(!r.ok||type!="IntProperty"||array||size!=4||flags)return false;
-  auto value=r.u32();if(!r.ok||value>0x7fffffff)return false;values[name]=value;
+  auto value=r.u32();if(!r.ok||(value>0x7fffffff&&!(std::string(className)=="DiagnosticsStateSave"&&name=="FgPresetStatus")))return false;values[name]=value;
  }return false;
 }
 inline bool decode(const std::vector<uint8_t>&bytes,Intent&intent){std::map<std::string,unsigned> v;size_t h=0;if(!parse(bytes,"DisplaySettingsSave",v,h))return false;

@@ -69,8 +69,22 @@ int main() {
     auto invalidDisplay=named("DisplayRuntimeSave",{{"SchemaVersion",1},{"AmdAntiLagMode",2}});assert(!valid(slot("MCD2GraphicsDisplayRuntime"),invalidDisplay));
     auto fg=named("FGRuntimeSave",{{"SchemaVersion",1},{"SessionId",123},{"PresenterRoute",1},{"PresenterCanSwitch",1},{"NativeGuidesRetired",1},{"MaximumGeneratedFrames",5},{"ActiveFrameMode",4}});
     assert(valid(slot("MCD2GraphicsFGRuntime"),fg));
+    auto customFg=named("FGRuntimeSave",{{"SchemaVersion",1},{"StartupOwner",4},{"PresenterRoute",4},{"SoftwareMultiplierMask",124},{"MixedMultiplierMask",80},{"MfgTimingStatus",2},{"MfgRefreshMilliHz",240000},{"MfgTargetRealMilliFps",40000}});
+    assert(valid(slot("MCD2GraphicsFGRuntime"),customFg));
+    assert(valid(slot("MCD2GraphicsFGRuntime"),named("FGRuntimeSave",{{"SchemaVersion",1},{"MfgTimingStatus",5}})));
+    for(const auto& bad:std::map<std::string,unsigned>{{"StartupOwner",3},{"PresenterRoute",3},{"SoftwareMultiplierMask",125},{"MixedMultiplierMask",64+8},{"MfgTimingStatus",6},{"MfgRefreshMilliHz",2000001},{"MfgTargetRealMilliFps",500001}}){
+        auto fields=std::map<std::string,unsigned>{{"SchemaVersion",1},{bad.first,bad.second}};
+        assert(!valid(slot("MCD2GraphicsFGRuntime"),named("FGRuntimeSave",fields)));
+    }
     auto diagnostics=named("DiagnosticsRequestSave",{{"SchemaVersion",1},{"SessionId",123},{"Enabled",1}});assert(valid(slot("MCD2GraphicsDiagnosticsRequest"),diagnostics));
     auto diagnosticState=named("DiagnosticsStateSave",{{"SchemaVersion",1},{"SessionId",123},{"Sample",1},{"SrProvider",2},{"FgProvider",2},{"AmdMode",1}});assert(valid(slot("MCD2GraphicsDiagnosticsState"),diagnosticState));
+    auto components=named("DiagnosticsStateSave",{{"SchemaVersion",1},{"FgStrategy",2},{"FgSoftwareGenerated",17},{"FgNativeGenerated",8},{"FgPresetStatus",static_cast<unsigned>(-20)}});
+    assert(valid(slot("MCD2GraphicsDiagnosticsState"),components));
+    auto next=mcd2::display::encode_runtime(components,{{"SchemaVersion",1},{"Sample",2},{"FgPresetStatus",static_cast<unsigned>(-21)}},"DiagnosticsStateSave");
+    assert(!next.empty()&&valid(slot("MCD2GraphicsDiagnosticsState"),next));
+    assert(!valid(slot("MCD2GraphicsDiagnosticsState"),named("DiagnosticsStateSave",{{"SchemaVersion",1},{"FgStrategy",4}})));
+    assert(!valid(slot("MCD2GraphicsDiagnosticsState"),named("DiagnosticsStateSave",{{"SchemaVersion",1},{"FgNativeGenerated",0xffffffffu}})));
+    assert(!valid(slot("MCD2GraphicsFGRuntime"),named("FGRuntimeSave",{{"SchemaVersion",1},{"FgPresetStatus",0xffffffffu}})));
     auto wrongDiagnostics=named("DiagnosticsStateSave",{{"SchemaVersion",1},{"AmdMode",2}});assert(!valid(slot("MCD2GraphicsDiagnosticsState"),wrongDiagnostics));
     assert(!valid({"PlayerSave","AdvancedRequestSave",false},seed("AdvancedRequestSave")));
     assert(!valid({"MCD2GraphicsAdvancedRequest","PlayerSave",false},seed("PlayerSave")));

@@ -1292,7 +1292,17 @@ The CPU fixture covers both routes, a loaded inactive bridge and failed drain.
 
 Custom presentation uses virtual application buffers until a confirmed native
 Off resize. Native Off must expose the real buffers/index and bypass all custom
-copy/submission work. Refused/outstanding-reference resize must preserve the old
+copy/submission work. If the application has already received a virtual
+waitable handle, live native switching requires a restart: preserve that handle
+and permit ordinary resize on the real-only virtual route while Off. Preserve
+application frame-latency values across permitted route changes.
+
+The bounded worker must hold a stable session lease across open-gate waits and
+revalidate closing/epoch after reacquiring the gate. Last swapchain Release must
+drain the worker and active operations before destroying their session/resources.
+Re-query actual output refresh at admission; reject an overdue batch before
+publication and report the real-frame fallback. Refused/outstanding-reference
+resize must preserve the old
 route, with one presenter and no partially published batch. The owned hardware
 host is a bounded functional control; it does not qualify MCD2 or Windows MFG.
 
