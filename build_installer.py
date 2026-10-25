@@ -40,6 +40,7 @@ for name,data in snapshots.items():assert (output/name).read_bytes()==data,'Embe
 for relative,path in paths:
  target=output/'payload'/relative;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(path,target)
  assert hashlib.sha256(target.read_bytes()).hexdigest()==manifest['files'][relative]
+shutil.copyfile(root/'LICENSE',output/'LICENSE.txt')
 shutil.copyfile(root/'third-party/INSTALLER_NOTICES.txt',output/'INSTALLER_NOTICES.txt')
 for name in ('FSR-SDK-HEADERS-LICENSE.txt','AntiLag2/LICENSE.txt','NVIDIA-SDK-LICENSE.txt'):
  target=output/'licenses'/name;target.parent.mkdir(parents=True,exist_ok=True)

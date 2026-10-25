@@ -142,7 +142,12 @@ public sealed class InstallerWindow:Window {
             if(acquisition.FindCached(r.Dependency) is {} cached){await Task.Run(()=>engine.SelectDependency(r.Dependency.Id,cached));continue;}
             if(r.Acquisition.Method=="direct"){
                 using var cancellation=new CancellationTokenSource();downloadCancellation=cancellation;cancelDownload.IsVisible=true;
-                try{var staged=await acquisition.StageAsync(r,cancellation.Token,new Progress<AcquisitionProgress>(p=>message.Text="Downloading "+p.Requirement+"…"));await Task.Run(()=>engine.SelectDependency(r.Dependency.Id,staged.Path));}
+                try{
+                    VerifiedDependency staged;
+                    try{staged=await acquisition.StageAsync(r,cancellation.Token,new Progress<AcquisitionProgress>(p=>message.Text="Downloading "+p.Requirement+"…"));}
+                    catch(Exception e)when(e is HttpRequestException or IOException or InvalidDataException){OpenLink(r.Dependency.Url);watchDownloads=true;Draw();message.Text="The download could not be verified. Use "+r.Dependency.Name+"'s official page and import its supported download. Nothing was installed.";return;}
+                    await Task.Run(()=>engine.SelectDependency(r.Dependency.Id,staged.Path));
+                }
                 finally{downloadCancellation=null;cancelDownload.IsVisible=false;}
                 continue;
             }

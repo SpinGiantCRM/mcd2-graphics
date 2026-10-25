@@ -45,3 +45,5 @@ The synthetic cross-adapter test exercises legacy standalone → Vortex → stan
 `mcd2-install.json` is generated from the selected manifest and platform lock. Standalone embeds the same contract as the distributed sidecar; the Vortex ZIP contains the contract and `payload/` only. Both routes use identical graphics bytes. Frameworks and vendor runtimes stay separate.
 
 An `-install.N` suffix identifies an installer-only revision. The manifest separately records the native/UI candidate version; graphics binaries are not rebuilt or relabelled merely to change installation. Published 0.4.0 archives remain unchanged.
+
+Developer builds of the GUI require the generated embedded contract: use `build_installer.py` with the selected manifest/lock. A bare `dotnet build` is a compile check, not a runnable installer package.

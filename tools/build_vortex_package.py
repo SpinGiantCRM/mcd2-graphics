@@ -23,6 +23,7 @@ def build_package(manifest,dependency_lock,payload,output):
     output.parent.mkdir(parents=True,exist_ok=True)
     try:
         with zipfile.ZipFile(output,'w',zipfile.ZIP_DEFLATED) as z:
+            z.write(Path(__file__).resolve().parents[1]/'LICENSE','LICENSE.txt')
             z.writestr('mcd2-install.json',json.dumps(contract,indent=2)+'\n')
             for relative,target in verified:
                 # Recheck the exact bytes being archived, not just an earlier stat/hash.

@@ -21,12 +21,17 @@ async function beforeDeploy(ctx){const {old}=await preflightDeployment(ctx);let 
  await applyOwnedConfiguration({...ctx,framework});}
 function cOwnsProxy(ctx){return Object.hasOwn(ctx.contract.payload,'Dungeons/Binaries/Win64/dxgi.dll');}
 async function verifyDeployed(ctx){await (ctx.requireClosed??requireClosed)();for(const [p,h] of Object.entries(ctx.contract.payload))if(await currentHash(ctx.root,mapPath(ctx.contract,ctx.edition,p))!==h)throw Error('Vortex deployment is incomplete; repair/deploy again before launching');await applyOwnedConfiguration(ctx);}
-async function beforeRemove(ctx){await (ctx.requireClosed??requireClosed)();const r=await receipt(ctx);if(!r)return;for(const [p,h] of Object.entries({...r.previousFiles,...r.files})){const actual=await currentHash(ctx.root,mapPath(r.contract,ctx.edition,p));if(actual!==null&&actual!==h&&!(r.phase==='prepared'&&r.previousFiles?.[p]===actual))throw Error('Modified mod file retained. Restore it before purging');}await validateFramework(ctx,r);await restoreOwnedConfiguration(ctx,r);}
+async function preflightRemoval(ctx){await (ctx.requireClosed??requireClosed)();const r=await receipt(ctx);if(!r)return;for(const [p,h] of Object.entries({...r.previousFiles,...r.files})){const actual=await currentHash(ctx.root,mapPath(r.contract,ctx.edition,p));if(actual!==null&&actual!==h&&!(r.phase==='prepared'&&r.previousFiles?.[p]===actual)&&!(r.phase==='removing'&&p==='Dungeons/Binaries/Win64/dxgi.dll'&&r.framework?.hadFile&&actual===r.framework.previousHash))throw Error('Modified mod file retained. Restore it before purging');}await validateFramework(ctx,r);return r;}
+async function beforeRemove(ctx){const r=await preflightRemoval(ctx);if(r)await restoreOwnedConfiguration(ctx,r);}
 async function validateFramework(ctx,r){const f=r.framework;if(!f)return;if(typeof f.hadFile!=='boolean'||f.hadFile&&f.previousHash!==r.contract.configuration.frameworkPreviousSHA256||!f.hadFile&&f.previousHash!==null)throw Error('Invalid graphics bootstrap receipt');if(f.hadFile&&await currentHash(ctx.root,mapPath(r.contract,ctx.edition,'Dungeons/Binaries/Win64/MCD2GraphicsDependencyBackups/'+f.previousHash+'.bak'))!==f.previousHash)throw Error('Graphics bootstrap recovery is missing or modified');}
 async function afterRemove(ctx){await (ctx.requireClosed??requireClosed)();const r=await receipt(ctx);if(!r)return;if(r.phase!=='removing')throw Error('Purge did not restore configuration. Retry purge before changing managers');await validateFramework(ctx,r);
  // Never replace a deployed hardlink. The prior proxy is restored only after
  // Vortex has removed this type's links and no new owner occupies the path.
  if(r.framework?.hadFile){const proxy=mapPath(r.contract,ctx.edition,'Dungeons/Binaries/Win64/dxgi.dll');const actual=await currentHash(ctx.root,proxy);if(actual!==null&&actual!==r.framework.previousHash)throw Error('Graphics bootstrap is still deployed; retry purge');const backup=mapPath(r.contract,ctx.edition,'Dungeons/Binaries/Win64/MCD2GraphicsDependencyBackups/'+r.framework.previousHash+'.bak');if(actual===null)await io.write(ctx.root,proxy,await io.read(ctx.root,backup,512*1024*1024));}
- for(const p of Object.keys({...r.previousFiles,...r.files}))if(p!=='Dungeons/Binaries/Win64/dxgi.dll'&&await currentHash(ctx.root,mapPath(r.contract,ctx.edition,p))!==null)throw Error('Mod files remain deployed; purge through Vortex before changing managers');
+ for(const p of Object.keys({...r.previousFiles,...r.files})){
+  const h=await currentHash(ctx.root,mapPath(r.contract,ctx.edition,p));
+  const restored=p==='Dungeons/Binaries/Win64/dxgi.dll'&&r.framework?.hadFile&&h===r.framework.previousHash;
+  if(h!==null&&!restored)throw Error('Mod files remain deployed; purge through Vortex before changing managers');
+ }
  await fs.rm(await io.target(ctx.root,mapPath(r.contract,ctx.edition,MARKER)),{force:true});}
-module.exports={requireClosed,currentHash,preflightDeployment,beforeDeploy,verifyDeployed,beforeRemove,afterRemove};
+module.exports={requireClosed,currentHash,preflightDeployment,preflightRemoval,beforeDeploy,verifyDeployed,beforeRemove,afterRemove};

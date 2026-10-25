@@ -2,6 +2,7 @@ using MCD2.Installer;
 using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
+if(args.Length==2&&args[0]=="--inspect-resources"){ResourceInspection.Run(args[1]);return;}
 if(args.Length==7&&args[0]=="--transition-fixture"){TransitionHarness.Run(args);return;}
 int cases=0;
 void Check(bool b,string name){if(!b)throw new Exception(name);cases++;Console.WriteLine("PASS "+name);}

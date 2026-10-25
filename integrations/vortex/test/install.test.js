@@ -4,6 +4,7 @@ const {readContract,planDeployment}=require('../src/contract');
 const {applyOwnedConfiguration,restoreOwnedConfiguration}=require('../src/configuration');
 const {preflightDeployment}=require('../src/deployment');
 const hash=b=>crypto.createHash('sha256').update(b).digest('hex');
+function completeStock(stock){stock.externalChanges??=async()=>[];stock.prePurge??=async()=>{};return stock;}
 function contract(){return {schemaVersion:1,kind:'mcd2-graphics',packageVersion:'candidate.test',editionProfiles:{Steam:{binaryDirectory:'Dungeons/Binaries/Win64',shipping:'Dungeons/Binaries/Win64/Dungeons-Win64-Shipping.exe',exeSHA256:hash('game')}},payload:{'Dungeons/Binaries/Win64/own.addon64':hash('payload')},dependencies:[],configuration:{startup:{path:'Dungeons/Config/UserEngine.ini',section:'SystemSettings',keys:{'r.AllowHDR':'1','r.AntiAliasingMethod':'2'}},hdrActivation:{path:'Dungeons/Binaries/Win64/ReShade.ini',lease:'Dungeons/Binaries/Win64/MCD2Graphics/HdrAddonActivation.bin'},frameworkPreviousSHA256:null},migration:{previousInstalls:{}}};}
 async function fixture(t){const root=await fs.mkdtemp(path.join(os.tmpdir(),'mcd2-vortex-'));t.after(()=>fs.rm(root,{recursive:true,force:true}));return root;}
 async function put(root,relative,data){const p=path.join(root,relative);await fs.mkdir(path.dirname(p),{recursive:true});await fs.writeFile(p,data);}
@@ -51,7 +52,7 @@ test('guarded stock hardlink calls refuse writes when preflight fails and preser
  const root=await fixture(t),stage=await fixture(t),c=contract();await put(root,c.editionProfiles.Steam.shipping,'wrong game');await put(stage,'own','payload');
  const stock={id:'hardlink_activator',prepare:async()=>{},finalize:async()=>{await fs.link(path.join(stage,'own'),path.join(root,'deployed'));return [];},prePurge:async()=>{},purge:async()=>{await fs.rm(path.join(root,'keep'));},postPurge:async()=>{}};
  const ctx={root,contract:c,edition:'Steam',profileId:'a',stagedFiles:new Map([['Dungeons/Binaries/Win64/own.addon64',path.join(stage,'own')]]),requireClosed:async()=>{}};
- require('../src/guarded-hardlink').guardHardlink(stock,async data=>data===root?ctx:null);
+ require('../src/guarded-hardlink').guardHardlink(completeStock(stock),async data=>data===root?ctx:null);
  assert.equal(stock.id,'hardlink_activator');await assert.rejects(stock.prepare(root,true,[],x=>x));
  assert.equal(await fs.stat(path.join(root,'deployed')).then(()=>true,()=>false),false);
  await put(root,c.editionProfiles.Steam.shipping,'game');await put(root,'keep','keep');
@@ -65,7 +66,7 @@ test('real hardlink lifecycle deploys, disables, re-enables and releases ownersh
  const destination='Dungeons/Binaries/Win64/own.addon64';let enabled=true;
  const ctx={root,contract:c,edition:'Steam',profileId:'a',expectedFiles:new Map([[destination,hash('payload')]]),stagedFiles:new Map([[destination,path.join(stage,destination)]]),requireClosed:async()=>{}};
  const stock={id:'hardlink_activator',prepare:async()=>{},finalize:async()=>{const p=path.join(root,destination);if(enabled){await fs.rm(p,{force:true});await fs.link(path.join(stage,destination),p);}else await fs.rm(p,{force:true});return [];},prePurge:async()=>{},purge:async()=>{await fs.rm(path.join(root,destination),{force:true});},postPurge:async()=>{}};
- require('../src/guarded-hardlink').guardHardlink(stock,async data=>data===root?{...ctx,remove:!enabled}:null);
+ require('../src/guarded-hardlink').guardHardlink(completeStock(stock),async data=>data===root?{...ctx,remove:!enabled}:null);
  await stock.prepare(root,true,[],x=>x);await stock.finalize('minecraftdungeons2',root,stage);
  assert.equal((await fs.stat(path.join(root,destination))).ino,(await fs.stat(path.join(stage,destination))).ino);
  let r=JSON.parse(await fs.readFile(path.join(root,'Dungeons/Binaries/Win64/MCD2Graphics/install-manifest.json')));assert.equal(r.phase,'active');
@@ -80,7 +81,7 @@ test('real package installer recognises only its contract and verifies before re
  const root=await fixture(t),extracted=await fixture(t),c=contract();await put(root,c.editionProfiles.Steam.shipping,'game');await put(extracted,'mcd2-install.json',JSON.stringify(c));await put(extracted,'payload/Dungeons/Binaries/Win64/own.addon64','payload');
  let install,once,type;const state={settings:{gameMode:{discovered:{minecraftdungeons2:{path:root}}},mods:{activator:{minecraftdungeons2:'hardlink_activator'}}},persistent:{mods:{minecraftdungeons2:{}}}};
  const stock={id:'hardlink_activator',prepare:async()=>{},finalize:async()=>[],purge:async()=>{},postPurge:async()=>{}};
- require('../src/index').init({api:{getState:()=>state,store:{dispatch:()=>{}}},once:f=>{once=f;},registerInstaller:(...args)=>{install=args;},registerModType:(...args)=>{type=args;}},{util:{getActivator:()=>stock,getCurrentActivator:()=>stock},selectors:{},actions:{}});once();
+ require('../src/index').init({api:{getState:()=>state,store:{dispatch:()=>{}}},once:f=>{once=f;},registerInstaller:(...args)=>{install=args;},registerModType:(...args)=>{type=args;}},{util:{getActivator:()=>completeStock(stock),getCurrentActivator:()=>stock},selectors:{},actions:{}});once();
  assert.equal((await install[2](['mod.pak'],'minecraftdungeons2')).supported,false);assert.equal((await install[2](['mcd2-install.json'],'minecraftdungeons2')).supported,true);
  const result=await install[3](['mcd2-install.json','payload/Dungeons/Binaries/Win64/own.addon64'],extracted,'minecraftdungeons2');
  assert.equal(result.instructions.find(i=>i.type==='setmodtype').value,'mcd2-graphics-root');assert.equal(result.instructions.find(i=>i.type==='copy').destination,'Dungeons/Binaries/Win64/own.addon64');
@@ -100,7 +101,7 @@ test('interrupted candidate upgrade retries safely against journaled previous pa
 test('prePurge guard runs before stock preparation or external-change handling',async t=>{
  const root=await fixture(t),c=contract();await put(root,'keep','keep');await put(root,'Dungeons/Binaries/Win64/MCD2Graphics/install-manifest.json','{"schemaVersion":1,"owner":"standalone"}');
  const stock={id:'hardlink_activator',prepare:async()=>{},finalize:async()=>[],prePurge:async()=>{await fs.rm(path.join(root,'keep'));},purge:async()=>{},postPurge:async()=>{}};
- require('../src/guarded-hardlink').guardHardlink(stock,async()=>({root,contract:c,edition:'Steam',profileId:'a',requireClosed:async()=>{}}));
+ require('../src/guarded-hardlink').guardHardlink(completeStock(stock),async()=>({root,contract:c,edition:'Steam',profileId:'a',requireClosed:async()=>{}}));
  await assert.rejects(stock.prePurge('staging'));assert.equal(await fs.readFile(path.join(root,'keep'),'utf8'),'keep');
 });
 
@@ -109,4 +110,38 @@ test('active configuration repair yields to external edits even if they equal th
  await put(root,c.configuration.startup.path,'[SystemSettings]\nr.AllowHDR=0\n');await applyOwnedConfiguration(ctx);
  const p=path.join(root,c.configuration.startup.path);await fs.writeFile(p,(await fs.readFile(p,'utf8')).replace('r.AllowHDR=1','r.AllowHDR=0'));
  await assert.rejects(applyOwnedConfiguration(ctx));assert.match(await fs.readFile(p,'utf8'),/r.AllowHDR=0/);
+});
+
+test('purging MCD2 while another game is active still restores owned configuration',async t=>{
+ const root=await fixture(t),stage=await fixture(t),c=contract(),destination='Dungeons/Binaries/Win64/own.addon64';await put(root,c.editionProfiles.Steam.shipping,'game');await put(root,destination,'payload');await put(root,c.configuration.startup.path,'[SystemSettings]\nr.AllowHDR=0\n');
+ const ctx={root,contract:c,edition:'Steam',profileId:'mcd2-profile'};await applyOwnedConfiguration(ctx);
+ const stock={id:'hardlink_activator',prepare:async()=>{},finalize:async()=>[],prePurge:async()=>{},purge:async()=>{await fs.rm(path.join(root,destination),{force:true});},postPurge:async()=>{}};
+ const state={settings:{gameMode:{discovered:{minecraftdungeons2:{path:root}}},mods:{activator:{minecraftdungeons2:'hardlink_activator'}}},persistent:{mods:{minecraftdungeons2:{main:{attributes:{mcd2InstallContract:c,mcd2PackageRole:'payload'}}}}}};
+ let once;require('../src/index').init({api:{getState:()=>state,store:{dispatch:()=>{}}},once:f=>{once=f;},registerInstaller:()=>{},registerModType:()=>{}},{util:{getActivator:()=>completeStock(stock)},selectors:{activeProfile:()=>({id:'other-profile',gameId:'other-game'}),installPathForGame:()=>stage},actions:{}});once();
+ await stock.prePurge(stage);await stock.purge(stage,root,'minecraftdungeons2');await stock.postPurge();
+ assert.match(await fs.readFile(path.join(root,c.configuration.startup.path),'utf8'),/r.AllowHDR=0/);
+ assert.equal(await fs.stat(path.join(root,'Dungeons/Binaries/Win64/MCD2Graphics/install-manifest.json')).then(()=>true,()=>false),false);
+});
+
+test('early external-change boundary refuses unsafe deployment before reconciliation writes',async t=>{
+ const root=await fixture(t),stage=await fixture(t),c=contract();await put(root,c.editionProfiles.Steam.shipping,'wrong game');await put(root,'keep','keep');
+ const stock={id:'hardlink_activator',prepare:async()=>{},finalize:async()=>[],prePurge:async()=>{},purge:async()=>{},postPurge:async()=>{},externalChanges:async()=>{await fs.rm(path.join(root,'keep'));return [];}};
+ require('../src/guarded-hardlink').guardHardlink(completeStock(stock),async()=>({root,contract:c,edition:'Steam',profileId:'a',stagedFiles:new Map(),expectedFiles:new Map(),requireClosed:async()=>{}}));
+ await assert.rejects(stock.externalChanges('minecraftdungeons2',stage,root,[]));assert.equal(await fs.readFile(path.join(root,'keep'),'utf8'),'keep');
+});
+test('post-finalize configuration failure preserves activation list for Vortex manifest commit',async t=>{
+ const root=await fixture(t),stage=await fixture(t),c=contract(),destination='Dungeons/Binaries/Win64/own.addon64';await put(root,c.editionProfiles.Steam.shipping,'game');await put(stage,destination,'payload');
+ const activation=[{relPath:destination,source:'main',target:'',time:1}],errors=[];
+ const stock={id:'hardlink_activator',prepare:async()=>{},finalize:async()=>{await fs.link(path.join(stage,destination),path.join(root,destination));await fs.writeFile(path.join(root,c.configuration.startup.path),'[SystemSettings]\nr.AllowHDR=9\n');return activation;},prePurge:async()=>{},purge:async()=>{},postPurge:async()=>{}};
+ const ctx={root,contract:c,edition:'Steam',profileId:'a',stagedFiles:new Map([[destination,path.join(stage,destination)]]),expectedFiles:new Map([[destination,hash('payload')]]),requireClosed:async()=>{}};
+ require('../src/guarded-hardlink').guardHardlink(completeStock(stock),async()=>ctx,e=>errors.push(e));await stock.prepare(root,true,[],x=>x);
+ assert.deepEqual(await stock.finalize('minecraftdungeons2',root,stage),activation);assert.equal(errors.length,1);
+ const r=JSON.parse(await fs.readFile(path.join(root,'Dungeons/Binaries/Win64/MCD2Graphics/install-manifest.json')));assert.equal(r.phase,'prepared');
+});
+
+test('partial purge retaining only a fresh proxy cannot release ownership',async t=>{
+ const root=await fixture(t),c=contract();c.payload={'Dungeons/Binaries/Win64/dxgi.dll':hash('proxy')};await put(root,'Dungeons/Binaries/Win64/dxgi.dll','proxy');
+ const ctx={root,contract:c,edition:'Steam',profileId:'a',framework:{hadFile:false,previousHash:null},requireClosed:async()=>{}};
+ await applyOwnedConfiguration(ctx);const {beforeRemove,afterRemove}=require('../src/deployment');await beforeRemove(ctx);
+ await assert.rejects(afterRemove(ctx));assert.equal(await fs.stat(path.join(root,'Dungeons/Binaries/Win64/MCD2Graphics/install-manifest.json')).then(()=>true,()=>false),true);
 });

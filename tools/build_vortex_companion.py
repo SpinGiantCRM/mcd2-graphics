@@ -10,6 +10,7 @@ def build(output):
     members=[source/'index.js',source/'info.json',*sorted((source/'src').glob('*.js'))]
     output.parent.mkdir(parents=True,exist_ok=True)
     with zipfile.ZipFile(output,'w',zipfile.ZIP_DEFLATED) as z:
+        z.write(ROOT/'LICENSE','LICENSE.txt')
         for member in members:z.write(member,member.relative_to(source).as_posix())
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--output',type=Path,required=True);build(p.parse_args().output)

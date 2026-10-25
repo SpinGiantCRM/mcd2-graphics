@@ -43,6 +43,8 @@ def acquisition_route(name,definition,url):
     explicit=definition.get('acquisition')
     if explicit is not None:
         return explicit['method'],explicit.get('url',url)
+    if name=='GDKRuntime' and definition.get('archiveSHA256') and re.fullmatch(r'https://api\.nuget\.org/v3-flatcontainer/microsoft\.gdk\.windows/([0-9.]+)/microsoft\.gdk\.windows\.\1\.nupkg',url):
+        return 'direct',url
     if name=='ReShade' and definition.get('file','').endswith('/d3d12.asi'):
         return 'browser','https://www.nexusmods.com/minecraftdungeons2/mods/87?tab=files'
     if name=='DLSSRuntime' and re.fullmatch(r'https://raw\.githubusercontent\.com/NVIDIA/DLSS/[a-f0-9]{40}/lib/Windows_x86_64/rel/nvngx_dlss\.dll',url):
@@ -80,7 +82,7 @@ def build_contract(manifest,dependency_lock,profiles=None):
         files=hashes(definition.get('files') or {definition['file']:definition['sha256']})
         if any(p.casefold() in destinations for p in files):raise ValueError('Overlapping payload/dependency destinations')
         destinations.update(p.casefold() for p in files)
-        url=next((definition[k] for k in ('download','source','url') if k in definition),None)
+        url=next((definition[k] for k in ('download','url','source') if k in definition),None)
         if not url or urlparse(url).scheme!='https' or not urlparse(url).hostname:raise ValueError('Requirement needs an HTTPS publisher route')
         releases=[{'version':str(definition.get('version',definition.get('releaseTag','Pinned'))),'files':files,'archiveSHA256':definition.get('archiveSHA256')}]
         for release in definition.get('compatibleReleases',[]):

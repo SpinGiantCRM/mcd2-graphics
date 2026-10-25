@@ -45,7 +45,7 @@ public sealed class DependencyAcquisition {
  public IReadOnlyList<string> FindDownloads(string directory,IReadOnlyList<Dependency> dependencies){
   if(!Directory.Exists(directory))return [];
   var pins=dependencies.SelectMany(AcceptedHashes).ToHashSet();var result=new List<string>();long total=0;
-  foreach(var f in new DirectoryInfo(directory).EnumerateFiles().Where(f=>f.Extension.ToLowerInvariant() is ".zip" or ".dll" or ".asi" or ".addon64").OrderByDescending(f=>f.LastWriteTimeUtc).Take(40)){
+  foreach(var f in new DirectoryInfo(directory).EnumerateFiles().Where(f=>f.Extension.ToLowerInvariant() is ".zip" or ".dll" or ".asi" or ".addon64" or ".nupkg").OrderByDescending(f=>f.LastWriteTimeUtc).Take(40)){
    if(f.Length<=0||f.Length>Limit||(f.Attributes&FileAttributes.ReparsePoint)!=0)continue;
    if(total+f.Length>2L*1024*1024*1024)break;total+=f.Length;
    if(pins.Contains(InstallerEngine.DigestFile(f.FullName)))result.Add(f.FullName);

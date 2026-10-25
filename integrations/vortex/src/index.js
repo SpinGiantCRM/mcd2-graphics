@@ -4,15 +4,17 @@ const GAME='minecraftdungeons2',TYPE='mcd2-graphics-root',HARDLINK='hardlink_act
 function cleanFiles(files){const result=files.filter(f=>!/[\\/]$/.test(f)).map(f=>f.replaceAll('\\','/'));const seen=new Set();for(const f of result){safeRelative(f);if(seen.has(f.toLowerCase()))throw Error('Duplicate archive member');seen.add(f.toLowerCase());}return result;}
 function savedContracts(state){return Object.values(state.persistent?.mods?.[GAME]??{}).filter(m=>m.attributes?.mcd2InstallContract).map(m=>readContract(JSON.stringify(m.attributes.mcd2InstallContract)));}
 async function editionFor(root,c){const found=[];for(const [name,p] of Object.entries(c.editionProfiles)){const file=await io.target(root,p.shipping);if(await io.exists(file))found.push(name);}if(found.length!==1)throw Error('Choose an installation containing one supported Steam or Game Pass executable layout');return found[0];}
-function init(context,runtime=null){const api=context.api;const {util,selectors,actions}=runtime??require('vortex-api');let ready=false;
+function init(context,runtime=null){const api=context.api;const {util,selectors,actions}=runtime??require('vortex-api');let ready=false,targetProfileId=null;
+ api.events?.on('will-deploy',profileId=>{targetProfileId=profileId;});
+ api.events?.on('did-deploy',()=>{targetProfileId=null;});
  const root=()=>api.getState().settings.gameMode.discovered[GAME]?.path;
  const ensureHardlink=()=>{if(!ready)throw Error('The Vortex hardlink safety adapter has not loaded. Restart Vortex before installing this package.');const state=api.getState(),current=util.getCurrentActivator(state,GAME,true);if(current?.id!==HARDLINK)throw Error('Select Hardlink Deployment in Vortex Settings → Mods, then retry. MCD2 Graphics does not support symlink or copy deployment.');if(state.settings.mods.activator[GAME]===undefined)api.store.dispatch(actions.setActivator(GAME,HARDLINK));};
- async function contextForPath(dataPath,removing=false,purgeStaging=null){const state=api.getState(),gameRoot=root();if(!gameRoot)return null;if(purgeStaging&&path.resolve(purgeStaging)!==path.resolve(selectors.installPathForGame(state,GAME)))return null;if(dataPath!==undefined&&(process.platform==='win32'?path.resolve(dataPath).toLowerCase()!==path.resolve(gameRoot).toLowerCase():path.resolve(dataPath)!==path.resolve(gameRoot)))return null;const profile=selectors.activeProfile(state);if(profile?.gameId!==GAME)return null;
-  const mods=state.persistent.mods[GAME]??{};const selected=Object.values(mods).filter(m=>profile.modState[m.id]?.enabled&&m.attributes?.mcd2PackageRole==='payload');
+ async function contextForPath(dataPath,removing=false,purgeStaging=null){const state=api.getState(),gameRoot=root();if(!gameRoot)return null;if(purgeStaging&&path.resolve(purgeStaging)!==path.resolve(selectors.installPathForGame(state,GAME)))return null;if(dataPath!==undefined&&(process.platform==='win32'?path.resolve(dataPath).toLowerCase()!==path.resolve(gameRoot).toLowerCase():path.resolve(dataPath)!==path.resolve(gameRoot)))return null;const profile=targetProfileId?state.persistent.profiles?.[targetProfileId]:selectors.activeProfile(state);
+  const mods=state.persistent.mods[GAME]??{};const selected=profile?.gameId===GAME?Object.values(mods).filter(m=>profile.modState[m.id]?.enabled&&m.attributes?.mcd2PackageRole==='payload'):[];
   if(selected.length>1)throw Error('Enable only one MCD2 Graphics package per profile');
   if(removing||selected.length===0){
    // Purge/profile change must use the recorded old profile, not a new active one.
-   for(const c of savedContracts(state))for(const edition of Object.keys(c.editionProfiles)){const b=await io.read(gameRoot,mapPath(c,edition,MARKER));if(!b)continue;const r=JSON.parse(b.toString());if(r.owner!=='vortex')continue;return {root:gameRoot,contract:readContract(JSON.stringify(r.contract)),edition:r.edition,profileId:r.profileId,remove:true};}
+   for(const edition of ['Steam','WinGDK']){const marker=edition==='Steam'?MARKER:MARKER.replace('/Win64/','/WinGDK/');const b=await io.read(gameRoot,marker);if(!b)continue;const r=JSON.parse(b.toString());if(r.owner!=='vortex')continue;return {root:gameRoot,contract:readContract(JSON.stringify(r.contract)),edition:r.edition,profileId:r.profileId,remove:true};}
    return null;
   }
   const c=readContract(JSON.stringify(selected[0].attributes.mcd2InstallContract));const edition=selected[0].attributes.mcd2Edition;if(await editionFor(gameRoot,c)!==edition)throw Error('Installation edition changed; reinstall the Vortex package');
@@ -24,7 +26,7 @@ function init(context,runtime=null){const api=context.api;const {util,selectors,
   }
   return {root:gameRoot,contract:c,edition,profileId:profile.id,stagedFiles,expectedFiles};
  }
- context.once(()=>{const stock=util.getActivator(HARDLINK);if(!stock)throw Error('Stock Vortex hardlink deployment is unavailable');guardHardlink(stock,contextForPath);ready=true;});
+ context.once(()=>{const stock=util.getActivator(HARDLINK);if(!stock)throw Error('Stock Vortex hardlink deployment is unavailable');guardHardlink(stock,contextForPath,(error)=>api.showErrorNotification('MCD2 Graphics needs attention before launch',error,{allowReport:false}));ready=true;});
  context.registerModType(TYPE,20,id=>id===GAME,()=>{const state=api.getState();if(savedContracts(state).length&&state.settings.mods.activator[GAME]!==HARDLINK)throw Error('Use Hardlink Deployment for MCD2 Graphics; purge/remove it before changing deployment methods');return root();},instructions=>Promise.resolve(instructions.some(i=>i.type==='attribute'&&i.key==='mcd2PackageRole')),{name:'MCD2 Graphics (game root)'});
  context.registerInstaller('mcd2-graphics-contract',21,async(files,gameId)=>{
   if(gameId!==GAME)return {supported:false,requiredFiles:[]};

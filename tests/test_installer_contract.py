@@ -37,7 +37,7 @@ class ContractTests(unittest.TestCase):
             output=root/'vortex.zip'
             load('build_vortex_package').build_package(self.manifest,self.lock,payload,output)
             with zipfile.ZipFile(output) as z:
-                self.assertEqual(sorted(z.namelist()),['mcd2-install.json','payload/Dungeons/Binaries/Win64/mcd2-graphics.addon64'])
+                self.assertEqual(sorted(z.namelist()),['LICENSE.txt','mcd2-install.json','payload/Dungeons/Binaries/Win64/mcd2-graphics.addon64'])
                 self.assertEqual(z.read('payload/'+next(iter(self.manifest['files']))),b'payload')
                 self.assertEqual(json.loads(z.read('mcd2-install.json'))['packageVersion'],'candidate.test')
             target.write_bytes(b'wrong')
@@ -61,3 +61,12 @@ class InstallerRevisionTests(unittest.TestCase):
         self.assertEqual(result['upgradeFrom']['0.5.0-integration.dev.4'][runtime],'b'*64)
         self.assertEqual(result['files'],m['files']);self.assertEqual(m['version'],'0.5.0-integration.dev.4')
         with self.assertRaises(ValueError):load('build_install_contract').installer_revision(m,l,'0.6.0')
+
+class AcquisitionPolicyTests(unittest.TestCase):
+    def test_download_routes_use_pinned_artifact_urls_instead_of_credit_pages(self):
+        h='a'*64
+        m={'version':'candidate.test','files':{'Dungeons/Binaries/Win64/own.addon64':h}}
+        url='https://api.nuget.org/v3-flatcontainer/microsoft.gdk.windows/2510.5.6322/microsoft.gdk.windows.2510.5.6322.nupkg'
+        l={'game':{'steamBuildID':'1','exeSHA256':h,'winGDK':{'version':'1','exeSHA256':h}},'dependencies':{},'editionDependencies':{'WinGDK':{'GDKRuntime':{'version':'2510.5.6322','source':'https://github.com/microsoft/GDK','url':url,'files':{'Dungeons/Binaries/Win64/MCD2Graphics/gdk/xgameruntime.thunks.dll':h},'archiveSHA256':'b'*64,'gamePassOnly':True}}}}
+        c=load('build_install_contract').build_contract(m,l)
+        self.assertEqual(c['dependencies'][0]['acquisition'],{'method':'direct','url':url})

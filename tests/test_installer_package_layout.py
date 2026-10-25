@@ -21,6 +21,7 @@ class FolderPackageTests(unittest.TestCase):
         self.manifest={'version':'0.0.0-test','files':{self.relative:hashlib.sha256(self.data).hexdigest()}}
         self.lock={'game':{'steamBuildID':'1','exeSHA256':'a'*64},'dependencies':{}}
         (self.root/'manifest.json').write_text(json.dumps(self.manifest));(self.root/'dependencies.lock.json').write_text(json.dumps(self.lock))
+        shutil.copyfile(ROOT/'LICENSE',self.root/'LICENSE')
         (self.root/'third-party').mkdir();(self.root/'third-party/INSTALLER_NOTICES.txt').write_text('fixture notices')
         for name in ('FSR-SDK-HEADERS-LICENSE.txt','AntiLag2/LICENSE.txt','NVIDIA-SDK-LICENSE.txt'):
             p=self.root/'third-party'/name;p.parent.mkdir(parents=True,exist_ok=True);p.write_text('fixture AMD license')
