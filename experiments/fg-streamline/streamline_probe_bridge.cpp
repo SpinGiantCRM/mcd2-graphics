@@ -109,7 +109,8 @@ int mcd2_sl_report_range(uint64_t*first,uint64_t*last,uint64_t*sim,uint64_t*pres
  }return 0;
 }
 int mcd2_sl_pcl_message(unsigned*message){if(!getPclState||!message)return -1;sl::PCLState s{};auto r=getPclState(s);*message=s.statsWindowMessage;return int(r);}
-int mcd2_sl_shutdown(){sharedShutdownReady.store(false,std::memory_order_release);int r=initialized?int(shutdown()):0;if(r)return r;initialized=false;boundDevice=nullptr;fgConfigured=false;fgConfiguration.clear();getState=nullptr;getPclState=nullptr;setOptions=nullptr;sleepFrame=nullptr;markFrame=nullptr;init=nullptr;shutdown=nullptr;feature=nullptr;setDevice=nullptr;newToken=nullptr;return r;}
+std::atomic<unsigned> fgMaximumGeneratedFrames{0},fgDynamicSupported{0};
+int mcd2_sl_shutdown(){sharedShutdownReady.store(false,std::memory_order_release);int r=initialized?int(shutdown()):0;if(r)return r;initialized=false;boundDevice=nullptr;fgMaximumGeneratedFrames=0;fgDynamicSupported=0;fgConfigured=false;fgConfiguration.clear();getState=nullptr;getPclState=nullptr;setOptions=nullptr;sleepFrame=nullptr;markFrame=nullptr;init=nullptr;shutdown=nullptr;feature=nullptr;setDevice=nullptr;newToken=nullptr;return r;}
 // This startup-only discovery is completed before a graphics device is bound.
 // Save the SDK's real support result for each actual adapter LUID, then load
 // only Reflex/PCL for an AMD presenter. No SDK/private-device capability is
@@ -158,10 +159,19 @@ extern "C" int mcd2_fg_state(unsigned* maximum,unsigned* status,unsigned* minimu
  auto r=bindFeature(get,sl::kFeatureDLSS_G,"slDLSSGGetState");if(r||!get)return r?r:-1;
  sl::DLSSGState s{};
  auto result=get(sl::ViewportHandle(0),s,nullptr);
+ if(result==sl::Result::eOk){fgMaximumGeneratedFrames=s.numFramesToGenerateMax;fgDynamicSupported=s.bIsDynamicMFGSupported==sl::Boolean::eTrue?1:0;}else{fgMaximumGeneratedFrames=0;fgDynamicSupported=0;}
  *maximum=s.numFramesToGenerateMax;*status=unsigned(s.status);*minimum=s.minWidthOrHeight;*presented=s.numFramesActuallyPresented;
  return int(result);
 }
 
+// Read on the present thread. Later polls reuse state captured after Present.
+extern "C" int mcd2_fg_capabilities_v1(unsigned* maximum,unsigned* dynamic){
+ if(!maximum||!dynamic||!initialized)return -1;
+ if(!fgMaximumGeneratedFrames){unsigned status=0,minimum=0,presented=0;
+  const auto result=mcd2_fg_state(maximum,&status,&minimum,&presented);if(result)return result;
+ }
+ *maximum=fgMaximumGeneratedFrames;*dynamic=fgDynamicSupported;return 0;
+}
 // Release only after proxy COM interfaces have been destroyed.
 extern "C" void mcd2_fg_unload(){if(!initialized && dll){FreeLibrary(dll);dll=nullptr;}}
 
@@ -174,10 +184,15 @@ extern "C" long mcd2_fg_api_error(){return lastApiError.load();}
 extern "C" int mcd2_fg_configured(){return fgConfigured?1:0;}
 extern "C" int mcd2_fg_last_config(MCD2FGConfig* out){if(!out||!fgConfiguration.last.size)return -1;*out=fgConfiguration.last;return 0;}
 extern "C" int mcd2_fg_configure(const MCD2FGConfig* config){
- if(!initialized||!config||config->size!=sizeof(*config)||config->mode>1||!config->width||!config->height||!config->motionWidth||!config->motionHeight||!config->backBuffers||config->backBuffers>16||config->generatedFrames!=1)return -1;
+ if(!initialized||!config||config->size!=sizeof(*config)||config->mode>1||!config->width||!config->height||!config->motionWidth||!config->motionHeight||!config->backBuffers||config->backBuffers>16||(!config->generatedFrames||config->generatedFrames>5))return -1;
  PFun_slDLSSGSetOptions* set=nullptr;auto r=bindFeature(set,sl::kFeatureDLSS_G,"slDLSSGSetOptions");if(r||!set)return r?r:-1;
+ if(config->mode){unsigned maximum=0,dynamic=0;auto capability=mcd2_fg_capabilities_v1(&maximum,&dynamic);
+  if(capability)return capability;
+  if(!mcd2::fg::supportsGeneratedFrames(config->generatedFrames,maximum,dynamic!=0))return -4;
+ }
  const auto normalized=fgConfiguration.prepare(*config);config=&normalized;
- sl::DLSSGOptions o{};o.mode=config->mode?sl::DLSSGMode::eOn:sl::DLSSGMode::eOff;o.numFramesToGenerate=config->generatedFrames;
+ sl::DLSSGOptions o{};o.mode=!config->mode?sl::DLSSGMode::eOff:sl::DLSSGMode::eOn;o.numFramesToGenerate=config->generatedFrames;
+ o.dynamicTargetFrameRate=0.f;
  o.numBackBuffers=config->backBuffers;o.colorWidth=config->width;o.colorHeight=config->height;o.mvecDepthWidth=config->motionWidth;o.mvecDepthHeight=config->motionHeight;
  o.colorBufferFormat=o.hudLessBufferFormat=config->colorFormat;o.uiBufferFormat=config->uiFormat;
  o.depthBufferFormat=config->depthFormat;o.mvecBufferFormat=config->motionFormat;

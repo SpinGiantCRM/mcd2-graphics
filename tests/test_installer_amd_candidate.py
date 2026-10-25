@@ -59,16 +59,87 @@ class CandidateAssemblyTests(unittest.TestCase):
         for ident,(n,pin) in assembler.FSR_RUNTIME.items():self.assertEqual(lock['dependencies'][ident]['sha256'],pin)
         self.assertFalse(any(p.name.startswith(('amd_fidelityfx_','nvngx_','sl.')) or p.name in ['ReShade64.dll','fg-chain-observer.addon64'] or p.suffix=='.exe' for p in (self.out/'payload').rglob('*')))
         for n,b in before.items():self.assertEqual((self.root/n).read_bytes(),b)
+    def integration_inputs(self):
+        addon='gdk-save-bridge/mcd2-gdk-save-bridge.addon64'
+        self.content[addon]=b'own GDK transport fixture'
+        self.content['gdk-save-bridge/build-result.json']=json.dumps({
+            'runtimeQualified':False,'sourceSHA256':{'src/gdk/save_bridge_addon.cpp':'a'*64},
+            'files':{Path(addon).name:sha(self.content[addon])}}).encode()
+        ui=json.loads(self.content['ui/build-receipt.json']);ui['version']='0.5.0-integration.dev.1'
+        self.content['ui/build-receipt.json']=json.dumps(ui).encode()
+        self.lock['game']['winGDK']={'version':'fixture','exeSHA256':'1'*64}
+        (self.root/'dependencies.lock.json').write_text(json.dumps(self.lock))
+        upgrade=self.root/'qualification/providers/dev25-upgrade-files.json'
+        upgrade.parent.mkdir(parents=True)
+        upgrade.write_text(json.dumps({'version':'0.4.0-amd.dev.25','files':{
+            assembler.BIN+'released.addon64':'2'*64,assembler.BIN+'MCD2Graphics/ngx-runtime/nvngx_dlss.dll':'3'*64}}))
+    def test_integration_delivers_bridge_provenance_edition_identity_and_dev25_upgrade(self):
+        self.integration_inputs()
+        r=self.build(version='0.5.0-integration.dev.1')
+        m=json.loads((self.out/'manifest.json').read_text())
+        lock=json.loads((self.out/'dependencies.lock.json').read_text())
+        self.assertEqual(lock['game']['winGDK'],self.lock['game']['winGDK'])
+        self.assertEqual(m['files'][assembler.BIN+'mcd2-gdk-save-bridge.addon64'],sha(b'own GDK transport fixture'))
+        self.assertIn('0.4.0-amd.dev.25',m['upgradeFrom'])
+        self.assertEqual(m['upgradeFrom']['0.4.0-amd.dev.25'][assembler.BIN+'released.addon64'],'2'*64)
+        self.assertIn('gdk-save-bridge/build-result.json',r['sourceBuildReceipts'])
+        self.assertTrue((self.out/'provenance/gdk-save-bridge/build-result.json').is_file())
+        self.assertFalse((self.out/'payload'/assembler.BIN/'xgameruntime.thunks.dll').exists())
+    def complete_mfg_inputs(self):
+        self.integration_inputs()
+        ui=json.loads(self.content['ui/build-receipt.json']);ui['version']='0.5.0-integration.dev.2';self.content['ui/build-receipt.json']=json.dumps(ui).encode()
+        self.content['mfg-game-bridge/mcd2-mfg-game-bridge.dll']=b'own MFG fixture'
+        self.content['mfg-game-bridge/build-receipt.json']=json.dumps({'schemaVersion':1,'kind':'mfg-game-bridge','abi':'Microsoft C++ x64','runtimeBundled':False,'binarySHA256':{'mcd2-mfg-game-bridge.dll':sha(b'own MFG fixture')}}).encode()
+        p=self.root/'third-party/NVIDIA-SDK-LICENSE.txt';p.write_text('Fixture declaration license')
+    def test_complete_mfg_package_requires_own_bridge_and_external_pinned_runtime(self):
+        self.complete_mfg_inputs();r=self.build(version='0.5.0-integration.dev.2')
+        m=json.loads((self.out/'manifest.json').read_text());lock=json.loads((self.out/'dependencies.lock.json').read_text())
+        self.assertEqual(m['files'][assembler.BIN+'mcd2-mfg-game-bridge.dll'],sha(b'own MFG fixture'))
+        self.assertEqual(lock['game']['winGDK']['version'],'1.1.3.0')
+        self.assertEqual(lock['game']['winGDK']['exeSHA256'],'22581b59ebf5675f706b5f27657d12b5de4c433908363800c7ac391ff586142e')
+        runtime=lock['dependencies']['MfgSoftwareRuntime']
+        self.assertEqual(runtime['archiveMembers'][assembler.BIN+'MCD2Graphics/mfg/dlss-enabler-headless.dll'],'version.dll')
+        self.assertEqual(runtime['sha256'],'f131734e9bf1fd191a9f60fad54231cd88e45ada3c957bd02c8763f8e9ad4440')
+        self.assertFalse((self.out/'payload'/runtime['file']).exists())
+    def test_complete_mfg_package_refuses_missing_bridge_before_output(self):
+        self.complete_mfg_inputs();del self.content['mfg-game-bridge/mcd2-mfg-game-bridge.dll']
+        with self.assertRaisesRegex(ValueError,'MFG'):self.build(version='0.5.0-integration.dev.2')
+        self.assertFalse(self.out.exists())
+    def test_complete_mfg_package_refuses_wrong_bridge_receipt(self):
+        self.complete_mfg_inputs();self.content['mfg-game-bridge/build-receipt.json']=json.dumps({'binarySHA256':{'mcd2-mfg-game-bridge.dll':'0'*64}}).encode()
+        with self.assertRaisesRegex(ValueError,'MFG'):self.build(version='0.5.0-integration.dev.2')
+        self.assertFalse(self.out.exists())
+    def test_integration_refuses_missing_or_mismatched_gdk_receipt_before_output(self):
+        self.integration_inputs()
+        self.content['gdk-save-bridge/build-result.json']=json.dumps({'files':{'mcd2-gdk-save-bridge.addon64':'0'*64}}).encode()
+        with self.assertRaisesRegex(ValueError,'GDK'):
+            self.build(version='0.5.0-integration.dev.1')
+        self.assertFalse(self.out.exists())
+    def test_integration_platform_locks_preserve_released_runtimes_and_new_binding(self):
+        assembled={'game':{'steamBuildID':'new','winGDK':{'exeSHA256':'1'*64}},
+                   'dependencies':{'ReShade':{'sha256':'2'*64},'Streamline':{'version':'old'}},
+                   'editionDependencies':{'WinGDK':{'GDKRuntime':{'sha256':'3'*64}}}}
+        released={'game':{'steamBuildID':'old'},'dependencies':{
+            'ReShade':{'file':assembler.BIN+'d3d12.asi','sha256':'4'*64},'Streamline':{'version':'2.14.16'},'BlueprintLoader':{'version':'2.7'}}}
+        result=assembler.integration_dependency_lock(assembled,released)
+        self.assertEqual(result['game'],assembled['game'])
+        self.assertEqual(result['dependencies']['ReShade']['sha256'],assembled['dependencies']['ReShade']['sha256'])
+        self.assertIn({assembler.BIN+'d3d12.asi':'4'*64},result['dependencies']['ReShade']['upgradeFromFileSets'])
+        self.assertEqual(result['dependencies']['Streamline'],released['dependencies']['Streamline'])
+        self.assertEqual(result['dependencies']['BlueprintLoader'],released['dependencies']['BlueprintLoader'])
+        self.assertEqual(result['editionDependencies'],assembled['editionDependencies'])
+        assembled['dependencies']['MfgSoftwareRuntime']={'file':'external.dll','sha256':'5'*64}
+        self.assertEqual(assembler.integration_dependency_lock(assembled,released)['dependencies']['MfgSoftwareRuntime'],assembled['dependencies']['MfgSoftwareRuntime'])
     def test_workflow_uses_a_bounded_selectable_current_receipt(self):
         workflow=(ROOT/'.github/workflows/amd-installer-candidate.yml').read_text()
         self.assertIn('qualification_receipt:',workflow)
-        self.assertIn('qualification/providers/windows-candidate-current.json',workflow)
+        self.assertIn('qualification/providers/windows-candidate-integration.json',workflow)
         self.assertIn("qualification/providers/windows-candidate-*.json",workflow)
         self.assertIn('re.fullmatch(',workflow)
         self.assertNotIn('windows-candidate-pr52-2026-10-12.json',workflow)
         self.assertIn("p.get('selectionNeedsRebuild',False)",workflow)
         self.assertIn("p.get('sourceChangedAfterSelection',False)",workflow)
-        self.assertEqual(workflow.count("if: steps.candidate.outputs.ready == 'true'"),2)
+        self.assertEqual(workflow.count("if: steps.candidate.outputs.ready == 'true'"),3)
         pin=json.loads((ROOT/'qualification/providers/windows-candidate-current.json').read_text())
         self.assertRegex(pin['archiveSHA256'],r'^[0-9a-f]{64}$')
         self.assertRegex(pin['sourceCommit'],r'^[0-9a-f]{40}$')
@@ -103,7 +174,7 @@ class CandidateAssemblyTests(unittest.TestCase):
             try:
                 import os
                 os.chdir(ROOT)
-                exec(code,{'p':selected,'stage':stage,'pathlib':__import__('pathlib'),
+                exec(code,{'p':selected,'stage':stage,'pathlib':__import__('pathlib'),'sys':__import__('sys'),
                            'hashlib':hashlib,'json':json,'re':__import__('re')})
             finally:os.chdir(original)
         execute(pin)

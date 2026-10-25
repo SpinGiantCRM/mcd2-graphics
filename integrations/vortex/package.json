@@ -1,0 +1,8 @@
+{
+  "name": "mcd2-graphics-vortex-companion",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src/index.js",
+  "scripts": { "test": "node --test" },
+  "engines": { "node": ">=22" }
+}

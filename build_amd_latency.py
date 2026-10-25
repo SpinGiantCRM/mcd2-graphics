@@ -48,6 +48,7 @@ def build(sysroot, output, clang_cl='clang-cl', linker='lld-link', with_tests=Fa
     receipt = {'sdkCommit': SDK_COMMIT, 'sdkSHA256': PINNED,
                'sourceSHA256': hashlib.sha256(source.read_bytes()).hexdigest(),
                'recipeSHA256': hashlib.sha256((ROOT / 'build_amd_latency.py').read_bytes()).hexdigest(),
+               'bootstrapModuleSHA256': hashlib.sha256((ROOT / 'src/providers/bootstrap_module.hpp').read_bytes()).hexdigest(),
                'testSourceSHA256': {name: hashlib.sha256((ROOT / 'tests' / name).read_bytes()).hexdigest()
                                     for name in ['amd_antilag_fake_driver.cpp','amd_antilag_fake_presenter.cpp', 'amd_antilag_bridge_test.cpp']} if with_tests else {},
                'contractSHA256':hashlib.sha256((ROOT/'src/latency/amd_fg_private_data.hpp').read_bytes()).hexdigest(),

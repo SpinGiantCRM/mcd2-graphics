@@ -101,11 +101,11 @@ int main() {
     for (unsigned field = 0; field < 9; ++field) {
         auto invalid = request;
         switch (field) {
-            case 0: invalid.schema = 6; break;
+            case 0: invalid.schema = 8; break;
             case 1: invalid.revision = 0; break;
             case 2: invalid.sr = static_cast<SrProvider>(4); break;
             case 3: invalid.fg = static_cast<FgProvider>(3); break;
-            case 4: invalid.fgStrategy = static_cast<FgStrategy>(3); break;
+            case 4: invalid.fgStrategy = static_cast<FgStrategy>(4); break;
             case 5: invalid.latency = static_cast<LatencyProvider>(4); break;
             case 6: invalid.latencyMode = static_cast<LatencyMode>(3); break;
             case 7: invalid.requestedMultiplier = 17; break;

@@ -121,6 +121,25 @@
     "NVIDIASDKCommit": "374959484e79a640feaba44c93ac8cfb0a03f5b5",
     "StreamlineSDK": "2.14.1",
     "Avalonia": "11.3.22",
-    "dotnetReferencePack": "10.0.13"
+    "dotnetReferencePack": "10.0.13",
+    "MicrosoftGDK": "2510.5.6322"
+  },
+  "editionDependencies": {
+    "WinGDK": {
+      "GDKRuntime": {
+        "version": "2510.5.6322",
+        "url": "https://api.nuget.org/v3-flatcontainer/microsoft.gdk.windows/2510.5.6322/microsoft.gdk.windows.2510.5.6322.nupkg",
+        "source": "https://github.com/microsoft/GDK/releases/tag/October-2025-Update-5-v2510.5.6322",
+        "archiveSHA256": "66ce779cb38c6391952a75682d6688dee998d875668d5763b0a930471d087b11",
+        "files": {
+          "Dungeons/Binaries/Win64/MCD2Graphics/gdk/xgameruntime.thunks.dll": "e85def0efc13c0375221bc041138be9936e81c6f8d4505509d38f60b62080ea3"
+        },
+        "archiveMembers": {
+          "Dungeons/Binaries/Win64/MCD2Graphics/gdk/xgameruntime.thunks.dll": "native/251005/windows/bin/x64/xgameruntime.thunks.dll"
+        },
+        "bundled": false,
+        "gamePassOnly": true
+      }
+    }
   }
 }

@@ -2,9 +2,14 @@
 
 What changed and why?
 
+State the observable acceptance criteria and link the reproduction when fixing a bug.
+
 ## Evidence
 
 List checks run and their scope. Identify untested platforms/lifecycle cases.
+
+Tie runtime claims to exact source, payload and dependency identities. Include
+the negative/fallback check and rollback when behavior or installed files change.
 
 ## Release impact
 

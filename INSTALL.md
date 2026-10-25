@@ -1,8 +1,10 @@
 # Guided installation — 0.4.0-amd.dev.25
 
-Download the compiled **Windows** or **Linux** installer and separate **MCD2-Graphics-dev25-ReShade-dependency.zip** from the [release Assets](https://github.com/SpinGiantCRM/mcd2-graphics/releases/tag/v0.4.0-amd.dev.25). Extract the **entire installer folder** before running it. GitHub's automatic source archives are for developers. No separate Python or .NET installation is needed.
+Download the compiled **Windows** or **Linux** installer and separate **MCD2-Graphics-dev25-ReShade-dependency.zip** from [Nexus Files](https://www.nexusmods.com/minecraftdungeons2/mods/87?tab=files). Extract the **entire installer folder** before running it. GitHub's automatic source archives are for developers. No separate Python or .NET installation is needed.
 
 The exact [published hashes and signing/scan status](qualification/providers/dev25-release-artifacts-2026-10-24.json) identify the packages. [Release scope and advanced controls](docs/DEV25_RELEASE_CANDIDATE.md).
+
+> PR60 development installers use the [new standalone/Vortex flow and manager-transition steps](docs/INSTALLER_MANAGERS.md). The instructions below describe the unchanged published 0.4.0 installer.
 
 ## Install
 
@@ -51,3 +53,10 @@ For crashes, black lines or shutdown faults, use the [bug report form](https://g
 
 Bounded [Linux/NVIDIA](docs/LINUX_DEV25_ACCEPTANCE_2026-10-24.md) and [Windows/Radeon](docs/WINDOWS_DEV25_ACCEPTANCE_2026-10-24.md) acceptance applies to the exact [published inputs](qualification/providers/dev25-release-artifacts-2026-10-24.json), with known issues. Intermittent shutdown failures remain recorded; Windows reproduced its worker fault without this mod's graphics payload, and identical Linux ownership is unproven. Some successful Windows exits took about 89 seconds. Native Windows NVIDIA features/profile overrides, Windows HDR, physical controllers, wider hardware, long sessions and device loss remain outside this scope.
 The mod does not force offline mode. Online/co-op permission and compatibility remain unverified; offline play is safer. [Online use](docs/ONLINE_USE.md). Packages are unsigned; transparent packaging does not guarantee Nexus clearance. Await Nexus staff clearance for quarantined files; do not use external links to bypass that review or disable security protection.
+
+## Integration installer development
+
+The forthcoming combined candidate adds folder/executable selection for both
+editions. See [integration game selection](docs/INSTALLER_GAME_SELECTION.md) for
+its bounded path rules and remaining checks. This does not change the released
+dev.25 instructions above.

@@ -95,6 +95,12 @@ with (out/'build-private.log').open('w') as log:
     'generatedSourceSHA256':hashlib.sha256(source.encode()).hexdigest(),
     'engineLayoutSHA256':hashlib.sha256((repo/'src/latency/engine_layout.hpp').read_bytes()).hexdigest(),
     'amdLatencySHA256':hashlib.sha256((repo/'src/latency/amd_latency.hpp').read_bytes()).hexdigest(),
+    'diagnosticsTransportSHA256':hashlib.sha256((repo/'src/latency/runtime_diagnostics_transport.hpp').read_bytes()).hexdigest(),
+    'latencyHeadersSHA256':{path.relative_to(repo).as_posix():hashlib.sha256(path.read_bytes()).hexdigest()
+                            for path in sorted((repo/'src/latency').glob('*.hpp'))},
+    'settingsBridgeSHA256':hashlib.sha256((repo/'src/native/settings_bridge.hpp').read_bytes()).hexdigest(),
+    'providerBridgeHeadersSHA256':{name:hashlib.sha256((repo/'experiments/providers'/name).read_bytes()).hexdigest()
+                                  for name in ('fsr_fg_game_bridge.h','mfg_game_bridge.h')},
     'processExitSHA256':{name:hashlib.sha256((repo/'src/latency'/name).read_bytes()).hexdigest()
                          for name in ('process_exit.hpp','process_lifetime.hpp')},
     'providerHeadersSHA256':{path.name:hashlib.sha256(path.read_bytes()).hexdigest()

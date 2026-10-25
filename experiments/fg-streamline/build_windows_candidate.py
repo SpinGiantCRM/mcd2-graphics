@@ -19,6 +19,12 @@ def run(*args):
     subprocess.run([str(arg) for arg in args], check=True)
 
 
+def checkout_ngx(checkout,commit):
+    # Hash the exact upstream declaration bytes on Windows too. Its default
+    # core.autocrlf=true would otherwise rewrite pinned LF files during checkout.
+    run('git','-C',checkout,'-c','core.autocrlf=false','checkout',commit)
+
+
 def sha(path):
     with Path(path).open('rb') as stream:
         return hashlib.file_digest(stream, 'sha256').hexdigest()
@@ -266,6 +272,7 @@ def main():
     run(sys.executable, scripts / 'build_probe.py', '--sdk', sdk, '--sysroot', sysroot,
         '--runtime-archive', sdk_zip, '--output', probe, '--reshade-headers', reshade / 'include',
         '--early-bootstrap', '--guide-recon', '--dxc', out / 'dxc/bin/x64/dxc.exe',
+        '--guide-mingw-cxx', mingw,
         '--clang-cl', llvm / 'clang-cl.exe', '--lld-link', llvm / 'lld-link.exe')
     latency = out / 'latency'
     run(sys.executable, scripts / 'build_game_candidate.py', '--probe-output', probe,
@@ -276,7 +283,33 @@ def main():
     run(amd_latency / 'amd-antilag-test.exe')
     ngx = out / 'ngx'
     run('git', 'clone', '--no-checkout', 'https://github.com/NVIDIA/DLSS.git', ngx)
-    run('git', '-C', ngx, 'checkout', lock['buildDependencies']['NVIDIASDKCommit'])
+    checkout_ngx(ngx,lock['buildDependencies']['NVIDIASDKCommit'])
+    # Build only our owned-input compute probe. The headless provider stays
+    # external; CI runs the CPU-only public parameter ABI fixture, never GPU FG.
+    mfg_spec = importlib.util.spec_from_file_location('mfg_recipe', REPO / 'experiments/providers/build_mfg_compute_probe.py')
+    mfg_recipe = importlib.util.module_from_spec(mfg_spec)
+    mfg_spec.loader.exec_module(mfg_recipe)
+    mfg_probe = out / 'mfg-compute-probe'
+    mfg_recipe.build(ngx / 'include', mfg_probe, sysroot, llvm / 'clang-cl.exe', llvm / 'lld-link.exe')
+    run(mfg_probe / 'mfg-parameters-abi-test.exe')
+    mfg_artifact = artifact / 'isolated-mfg-compute-probe'
+    mfg_artifact.mkdir()
+    for name in ('mfg-compute-probe.exe', 'mfg-parameters-abi-test.exe', 'build-receipt.json', 'NVIDIA-SDK-LICENSE.txt'):
+        shutil.copyfile(mfg_probe / name, mfg_artifact / name)
+    # Build the owned game bridge separately. This fixture checks its dynamic
+    # C ABI without loading vendor runtimes or submitting any GPU work in CI.
+    mfg_game = out / 'mfg-game-bridge'
+    run(sys.executable, REPO / 'experiments/providers/build_mfg_game_bridge.py',
+        '--ngx-headers', ngx / 'include', '--output', mfg_game,
+        '--windows-sysroot', sysroot, '--clang-cl', llvm / 'clang-cl.exe',
+        '--linker', llvm / 'lld-link.exe')
+    run(mfg_game / 'mfg_game_bridge_abi_test.exe', mfg_game / 'mcd2-mfg-game-bridge.dll')
+    run(mfg_game / 'mfg_game_allocation_test.exe')
+    mfg_game_artifact = artifact / 'mfg-game-bridge'
+    mfg_game_artifact.mkdir()
+    for name in ('mcd2-mfg-game-bridge.dll', 'mfg_game_bridge_abi_test.exe',
+                 'mfg_game_bridge_host.exe', 'mfg_game_allocation_test.exe', 'build-receipt.json', 'NVIDIA-SDK-LICENSE.txt'):
+        shutil.copyfile(mfg_game / name, mfg_game_artifact / name)
     sr = out / 'sr'
     build_continuous_sr(REPO, sr, reshade / 'include', ngx / 'include',
                         llvm / 'clang++.exe', mingw, out / 'dxc/bin/x64/dxc.exe',
@@ -306,6 +339,15 @@ def main():
             names = {'mcd2-display-latency.addon64' if folder == latency else 'mcd2-graphics.addon64': ''}
         for name in names:
             shutil.copyfile(folder / name, destination / name)
+    gdk_pin=lock['editionDependencies']['WinGDK']['GDKRuntime']
+    gdk_zip=out/'gdk.nupkg'
+    download(gdk_pin['url'],gdk_zip,gdk_pin['archiveSHA256'])
+    gdk_sdk=out/'gdk-sdk'
+    with zipfile.ZipFile(gdk_zip) as archive:archive.extractall(gdk_sdk)
+    gdk_output=out/'gdk-save-bridge'
+    run(sys.executable,REPO/'build_gdk_save_bridge.py','--reshade-include',reshade/'include','--gdk-include',gdk_sdk,'--mingw-cxx',mingw,'--output',gdk_output)
+    gdk_destination=artifact/'gdk-save-bridge';gdk_destination.mkdir()
+    for name in ['mcd2-gdk-save-bridge.addon64','build-result.json']:shutil.copyfile(gdk_output/name,gdk_destination/name)
     copy_current_ui(REPO, artifact)
     amd_destination = artifact / 'amd-latency'
     amd_destination.mkdir()

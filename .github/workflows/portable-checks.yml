@@ -24,6 +24,9 @@ jobs:
         run: python3 -m unittest discover -s tests -p "test_installer_*.py" -v
       - name: Native build recipe regressions
         run: |
+          python3 -m unittest discover -s tests -p "test_ci_contracts.py" -v
+          python3 -m unittest discover -s tests -p "test_gdk_build.py" -v
+          python3 -m unittest discover -s tests -p "test_gdk_reinitialize.py" -v
           python3 -m unittest discover -s tests -p "test_build_toolchain.py" -v
           python3 -m unittest discover -s tests -p "test_amd_latency_build.py" -v
           python3 -m unittest discover -s tests -p "test_ui_build.py" -v
@@ -34,6 +37,8 @@ jobs:
           python3 tests/test_bootstrap_shutdown_trace.py
           python3 -m unittest discover -s tests -p "test_fsr_probe.py" -v
           python3 -m unittest discover -s tests -p "test_fsr_fg_probe.py" -v
+          python3 -m unittest discover -s tests -p "test_mfg_compute_probe.py" -v
+          python3 -m unittest discover -s tests -p "test_mfg_allocation_lock.py" -v
           python3 -m unittest discover -s tests -p "test_fsr_fg_game_bridge.py" -v
           python3 -m unittest discover -s tests -p "test_fsr_presenter_switch.py" -v
           python3 -m unittest discover -s tests -p "test_fsr_presenter_resize.py" -v
@@ -60,10 +65,46 @@ jobs:
           /tmp/fg-configuration
       - name: Generate synthetic parser fixtures
         run: python3 tests/make_synthetic_saves.py /tmp/mcd2-fixtures
+      - name: GDK provider transport and lifecycle validation
+        run: |
+          g++ -std=c++20 tests/gdk_save_slots_test.cpp -o /tmp/gdk-save-slots
+          /tmp/gdk-save-slots /tmp/mcd2-fixtures
+          g++ -std=c++20 tests/fg_multi_frame_test.cpp -o /tmp/fg-multi-frame
+          /tmp/fg-multi-frame /tmp/mcd2-fixtures
+          g++ -std=c++20 tests/gdk_cache_time_test.cpp -o /tmp/gdk-cache-time
+          /tmp/gdk-cache-time
+          g++ -std=c++20 tests/gdk_provider_transport_test.cpp -o /tmp/gdk-provider-transport
+          /tmp/gdk-provider-transport
+          g++ -std=c++20 -pthread tests/gdk_save_lifecycle_test.cpp -o /tmp/gdk-save-lifecycle
+          /tmp/gdk-save-lifecycle
+          g++ -std=c++20 tests/settings_paths_test.cpp -o /tmp/settings-paths
+          /tmp/settings-paths
+          g++ -std=c++20 tests/gdk_identity_binding_test.cpp -o /tmp/gdk-identity
+          /tmp/gdk-identity
+          g++ -std=c++20 tests/fixed_mfg_policy_test.cpp -o /tmp/fixed-mfg-policy
+          /tmp/fixed-mfg-policy
+          g++ -std=c++20 -Wall -Wextra -Werror tests/mfg_phase_plan_test.cpp -o /tmp/mfg-phase-plan
+          /tmp/mfg-phase-plan
+          g++ -std=c++20 -Wall -Wextra -Werror tests/fg_frame_order_test.cpp -o /tmp/fg-frame-order
+          /tmp/fg-frame-order
+          g++ -std=c++20 -Wall -Wextra -Werror tests/mfg_game_transaction_test.cpp -o /tmp/mfg-game-transaction
+          /tmp/mfg-game-transaction
+          g++ -std=c++20 -Wall -Wextra -Werror tests/mfg_game_selection_test.cpp -o /tmp/mfg-game-selection
+          /tmp/mfg-game-selection
+          g++ -std=c++20 -Wall -Wextra -Werror tests/mfg_component_projection_test.cpp -o /tmp/mfg-components
+          /tmp/mfg-components
+          g++ -std=c++20 -Wall -Wextra -Werror tests/mfg_game_timeline_test.cpp -o /tmp/mfg-timeline
+          /tmp/mfg-timeline
+          g++ -std=c++20 -Wall -Wextra -Werror tests/mfg_parameters_test.cpp -o /tmp/mfg-parameters
+          /tmp/mfg-parameters
+          g++ -std=c++20 -Wall -Wextra -Werror tests/mfg_owned_pattern_test.cpp -o /tmp/mfg-owned-pattern
+          /tmp/mfg-owned-pattern
       - name: Settings framing and semantic checks
         run: |
           g++ -std=c++20 -Wall -Wextra -Werror tests/provider_intent_test.cpp -o /tmp/provider-intent
           /tmp/provider-intent
+          g++ -std=c++20 -Wall -Wextra -Werror tests/provider_allocation_test.cpp -o /tmp/provider-allocation
+          /tmp/provider-allocation
           g++ -std=c++20 -Wall -Wextra -Werror tests/provider_legacy_test.cpp -o /tmp/provider-legacy
           /tmp/provider-legacy
           g++ -std=c++20 -Wall -Wextra -Werror tests/provider_observation_test.cpp -o /tmp/provider-observation
@@ -137,6 +178,9 @@ jobs:
         run: python -m unittest discover -s tests -p "test_installer_*.py" -v
       - name: Native build recipe regressions
         run: |
+          python -m unittest discover -s tests -p "test_ci_contracts.py" -v
+          python -m unittest discover -s tests -p "test_gdk_build.py" -v
+          python -m unittest discover -s tests -p "test_gdk_reinitialize.py" -v
           python -m unittest discover -s tests -p "test_build_toolchain.py" -v
           python -m unittest discover -s tests -p "test_amd_latency_build.py" -v
           python -m unittest discover -s tests -p "test_ui_build.py" -v
@@ -147,6 +191,8 @@ jobs:
           python tests/test_bootstrap_shutdown_trace.py
           python -m unittest discover -s tests -p "test_fsr_probe.py" -v
           python -m unittest discover -s tests -p "test_fsr_fg_probe.py" -v
+          python -m unittest discover -s tests -p "test_mfg_compute_probe.py" -v
+          python -m unittest discover -s tests -p "test_mfg_allocation_lock.py" -v
           python -m unittest discover -s tests -p "test_fsr_fg_game_bridge.py" -v
           python -m unittest discover -s tests -p "test_fsr_presenter_switch.py" -v
           python -m unittest discover -s tests -p "test_fsr_presenter_resize.py" -v
@@ -163,6 +209,11 @@ jobs:
           python -m unittest discover -s tests -p "test_provider_baseline.py" -v
           python -m unittest discover -s tests -p "test_provider_menu_overlay.py" -v
           python tools/provider_baseline.py verify
+      - name: Windows NGX driver loader
+        shell: bash
+        run: |
+          g++ -std=c++20 -static -Wall -Wextra -Werror tests/ngx_driver_load_test.cpp -ladvapi32 -o ngx-driver-load.exe
+          ./ngx-driver-load.exe || test "$?" -eq 77
       - name: Provider intent contract
         shell: bash
         run: |
@@ -177,6 +228,38 @@ jobs:
           python tests/test_ngx_shutdown_abi.py
           g++ -std=c++20 -static tests/display_protocol_test.cpp -o display-protocol.exe
           ./display-protocol.exe display-fixtures/display-settings.sav display-fixtures/display-runtime.sav
+          g++ -std=c++20 -static tests/gdk_save_slots_test.cpp -o gdk-save-slots.exe
+          ./gdk-save-slots.exe display-fixtures
+          g++ -std=c++20 -static tests/fg_multi_frame_test.cpp -o fg-multi-frame.exe
+          ./fg-multi-frame.exe display-fixtures
+          g++ -std=c++20 -static tests/gdk_cache_time_test.cpp -o gdk-cache-time.exe
+          ./gdk-cache-time.exe
+          g++ -std=c++20 -static tests/gdk_provider_transport_test.cpp -o gdk-provider-transport.exe
+          ./gdk-provider-transport.exe
+          g++ -std=c++20 -static -pthread tests/gdk_save_lifecycle_test.cpp -o gdk-save-lifecycle.exe
+          ./gdk-save-lifecycle.exe
+          g++ -std=c++20 -static tests/settings_paths_test.cpp -o settings-paths.exe
+          ./settings-paths.exe
+          g++ -std=c++20 -static tests/gdk_identity_binding_test.cpp -o gdk-identity.exe
+          ./gdk-identity.exe
+          g++ -std=c++20 -static tests/fixed_mfg_policy_test.cpp -o fixed-mfg-policy.exe
+          ./fixed-mfg-policy.exe
+          g++ -std=c++20 -static -Wall -Wextra -Werror tests/mfg_phase_plan_test.cpp -o mfg-phase-plan.exe
+          ./mfg-phase-plan.exe
+          g++ -std=c++20 -static -Wall -Wextra -Werror tests/fg_frame_order_test.cpp -o fg-frame-order.exe
+          ./fg-frame-order.exe
+          g++ -std=c++20 -static -Wall -Wextra -Werror tests/mfg_game_transaction_test.cpp -o mfg-game-transaction.exe
+          ./mfg-game-transaction.exe
+          g++ -std=c++20 -static -Wall -Wextra -Werror tests/mfg_game_selection_test.cpp -o mfg-game-selection.exe
+          ./mfg-game-selection.exe
+          g++ -std=c++20 -static -Wall -Wextra -Werror tests/mfg_component_projection_test.cpp -o mfg-components.exe
+          ./mfg-components.exe
+          g++ -std=c++20 -Wall -Wextra -Werror -static tests/mfg_game_timeline_test.cpp -o mfg-timeline.exe
+          ./mfg-timeline.exe
+          g++ -std=c++20 -static -Wall -Wextra -Werror tests/mfg_parameters_test.cpp -o mfg-parameters.exe
+          ./mfg-parameters.exe
+          g++ -std=c++20 -static -Wall -Wextra -Werror tests/mfg_owned_pattern_test.cpp -o mfg-owned-pattern.exe
+          ./mfg-owned-pattern.exe
           g++ -std=c++20 -static -Isrc/native tests/lean_borrow_lifetime_test.cpp -o lean-borrow-lifetime.exe
           ./lean-borrow-lifetime.exe
           g++ -std=c++20 -static -pthread -Wall -Wextra -Werror tests/amd_latency_test.cpp -o amd-latency.exe
@@ -187,6 +270,8 @@ jobs:
           ./engine-layout.exe
           g++ -std=c++20 -Wall -Wextra -Werror tests/provider_intent_test.cpp -o provider-intent.exe
           ./provider-intent.exe
+          g++ -std=c++20 -static -Wall -Wextra -Werror tests/provider_allocation_test.cpp -o provider-allocation.exe
+          ./provider-allocation.exe
           g++ -std=c++20 -static -Wall -Wextra -Werror tests/provider_legacy_test.cpp -o provider-legacy.exe
           ./provider-legacy.exe
           g++ -std=c++20 -static -Wall -Wextra -Werror tests/provider_advanced_settings_test.cpp -o provider-advanced-settings.exe
@@ -243,16 +328,32 @@ jobs:
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9
         with:
           dotnet-version: '10.0.402'
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Vortex contract and hardlink lifecycle fixtures
+        working-directory: integrations/vortex
+        run: node --test
       - name: Temporal SR foliage ownership checks
         run: python tests/test_fg_foliage_policy.py
       - name: Presenter confirmation preservation
         run: python tests/test_presenter_confirmation.py
       - name: Native temporal end-play retirement
         run: python tests/test_temporal_endplay.py
+      - name: HDR menu fallback checks
+        run: |
+          python tests/test_hdr_rows.py
+          python tests/test_fg_multiplier_ui.py
       - name: Consolidated provider menu controls
         run: dotnet run --project tests/provider-menu-client/ProviderMenuClient.Tests.csproj -c Release
       - name: Guided installer file-safety checks
         run: dotnet run --project tests/installer-core/InstallerCore.Tests.csproj -c Release
+      - name: Standalone and Vortex transition parity
+        shell: pwsh
+        run: |
+          $env:MCD2_TEST_DOTNET = (Get-Command dotnet).Source
+          python -m unittest discover -s tests -p "test_installer_adapter_parity.py" -v
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Compile standalone GUI
         run: dotnet build src/installer/MCD2.Installer.csproj -c Release -p:SelfContained=false -p:RestoreLockedMode=true --nologo
 

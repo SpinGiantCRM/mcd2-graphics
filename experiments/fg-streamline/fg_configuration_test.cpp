@@ -1,10 +1,20 @@
 #include "fg_configuration.hpp"
+#include "fg_frame_inputs.hpp"
 #include "streamline_feature_policy.hpp"
 #include <cassert>
 #include <cstring>
 #include <array>
 int main() {
  using namespace mcd2::fg;
+ for(unsigned maximum=0;maximum<=5;++maximum)for(bool dynamic:{false,true}){
+  for(unsigned mode=0;mode<=6;++mode){
+   assert(supportsFrameMode(mode,maximum,dynamic)==(mode<5?mode+1<=maximum:false));
+   if(mode<=5)assert(generatedFrames(mode)==(mode==5?0:mode+1));
+  }
+  for(unsigned generated=0;generated<=6;++generated)
+   assert(supportsGeneratedFrames(generated,maximum,dynamic)==(generated>=1&&generated<=5&&generated<=maximum));
+ }
+
  assert(loadNvidiaFg(0)&&loadNvidiaFg(1)&&!loadNvidiaFg(2));
  NvidiaFgCapabilities capabilities;
  assert(capabilities.find({1,2})==-1);
@@ -23,6 +33,24 @@ int main() {
  assert(!permanentOff(0,false,0)); // No UI acknowledgement yet.
  assert(!permanentOff(1,false,0)); // Previous-process saved On.
  Configuration c;
+ assert(!nvidiaInputsReady(false,false,false));
+ assert(!nvidiaInputsReady(false,true,true));
+ assert(!nvidiaInputsReady(true,false,false));
+ assert(nvidiaInputsReady(true,true,false));
+ assert(nvidiaInputsReady(true,false,true));
+ MCD2FGCamera camera{};camera.frame=42;camera.width=1920;camera.height=1080;
+ FrameInputs colorFirst{};colorFirst.sdrFinalColor=true;
+ assert(!nvidiaInputsReady(colorFirst.guides,colorFirst.images,colorFirst.sdrFinalColor));
+ colorFirst.setGuides(camera,true);
+ assert(nvidiaInputsReady(colorFirst.guides,colorFirst.images,colorFirst.sdrFinalColor)&&colorFirst.camera.frame==42);
+ FrameInputs guidesFirst{};guidesFirst.setGuides(camera,true);
+ assert(!nvidiaInputsReady(guidesFirst.guides,guidesFirst.images,guidesFirst.sdrFinalColor));
+ guidesFirst.sdrFinalColor=true;
+ assert(nvidiaInputsReady(guidesFirst.guides,guidesFirst.images,guidesFirst.sdrFinalColor));
+ colorFirst.images=true;colorFirst.setGuides(camera,false);
+ assert(colorFirst.images&&colorFirst.sdrFinalColor&&!nvidiaInputsReady(colorFirst.guides,colorFirst.images,colorFirst.sdrFinalColor));
+ colorFirst.setGuides(camera,true);
+ assert(colorFirst.images&&colorFirst.sdrFinalColor&&nvidiaInputsReady(colorFirst.guides,colorFirst.images,colorFirst.sdrFinalColor));
  const MCD2FGConfig on{48,1,3840,2160,2560,1440,24,61,41,34,3,1};
  assert(sameConfiguration(on,on));
  assert(sameConfiguration(configurationForPresent(on,{}),on));
@@ -33,6 +61,12 @@ int main() {
   assert(!sameConfiguration(resized,on));
   assert(sameConfiguration(configurationForPresent(resized,on),suspended));
   assert(sameConfiguration(configurationForPresent(resized,suspended),resized));
+ }
+ for(unsigned frames=0;frames<=5;++frames){
+  auto changed=on;changed.generatedFrames=frames;
+  auto suspended=configurationForPresent(changed,on);
+  assert(suspended.mode==(frames==1?1u:0u));
+  assert(sameConfiguration(configurationForPresent(changed,suspended),changed));
  }
  for(unsigned field=0;field<12;++field) {
   auto changed=on;
@@ -51,6 +85,13 @@ int main() {
  assert(std::memcmp(&suspended,&expected,sizeof(expected))==0);
  c.accepted(suspended);
  assert(c.prepare(off).motionWidth==2560);
+ for(unsigned cycle=0;cycle<3;++cycle){
+  const auto resumed=configurationForPresent(on,c.last);
+  assert(sameConfiguration(resumed,on));c.accepted(resumed);
+  const auto paused=configurationForPresent(off,c.last);
+  assert(!paused.mode&&paused.motionWidth==on.motionWidth);c.accepted(paused);
+ }
+
  auto changed=on;changed.width=1920;changed.height=1080;changed.motionWidth=1280;changed.motionHeight=720;changed.backBuffers=2;
  prepared=c.prepare(changed);assert(std::memcmp(&prepared,&changed,sizeof(changed))==0);
  assert(c.prepare(off).motionWidth==2560); // Failed resize retains the accepted configuration.

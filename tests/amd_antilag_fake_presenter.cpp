@@ -41,3 +41,6 @@ extern "C" __declspec(dllexport) int test_fg_present(unsigned generated){
 }
 extern "C" __declspec(dllexport) void test_fg_drain_failure(unsigned fail){failDrain=fail!=0;}
 extern "C" __declspec(dllexport) unsigned test_fg_count(unsigned field){return field==0?publishes:field==1?drains:enabled?1u:0u;}
+
+// Also used as an isolated application-local bootstrap fixture.
+extern "C" __declspec(dllexport) unsigned mcd2_bootstrap_fg_owner(){return 4;}

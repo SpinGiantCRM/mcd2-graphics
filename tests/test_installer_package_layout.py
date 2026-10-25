@@ -19,21 +19,24 @@ class FolderPackageTests(unittest.TestCase):
         self.relative='Dungeons/Binaries/Win64/own.addon64';self.data=b'fixture only'
         p=self.source/self.relative;p.parent.mkdir(parents=True);p.write_bytes(self.data)
         self.manifest={'version':'0.0.0-test','files':{self.relative:hashlib.sha256(self.data).hexdigest()}}
-        (self.root/'manifest.json').write_text(json.dumps(self.manifest));(self.root/'dependencies.lock.json').write_text('{}')
+        self.lock={'game':{'steamBuildID':'1','exeSHA256':'a'*64},'dependencies':{}}
+        (self.root/'manifest.json').write_text(json.dumps(self.manifest));(self.root/'dependencies.lock.json').write_text(json.dumps(self.lock))
+        shutil.copyfile(ROOT/'LICENSE',self.root/'LICENSE')
         (self.root/'third-party').mkdir();(self.root/'third-party/INSTALLER_NOTICES.txt').write_text('fixture notices')
-        for name in ('FSR-SDK-HEADERS-LICENSE.txt','AntiLag2/LICENSE.txt'):
+        for name in ('FSR-SDK-HEADERS-LICENSE.txt','AntiLag2/LICENSE.txt','NVIDIA-SDK-LICENSE.txt'):
             p=self.root/'third-party'/name;p.parent.mkdir(parents=True,exist_ok=True);p.write_text('fixture AMD license')
         shutil.copyfile(ROOT/'build_installer.py',self.root/'build_installer.py')
 
-    def build(self, nested=False, extra=(), during_build=None):
+    def build(self, nested=False, extra=(), during_build=None, symbols=False):
         def compiler(args,check):
             self.assertTrue(check);self.assertIn('-p:PublishSingleFile=false',args)
             self.assertNotIn('-p:PublishSingleFile=true',args)
-            for prop,name in [('InstallerManifestPath','manifest.json'),('InstallerDependencyLockPath','dependencies.lock.json')]:
+            for prop,name in [('InstallerManifestPath','manifest.json'),('InstallerDependencyLockPath','dependencies.lock.json'),('InstallerContractPath','mcd2-install.json')]:
                 self.assertIn('-p:'+prop+'='+str((self.output/name).resolve()),args)
             (self.output/'mcd2-graphics-installer.exe').write_bytes(b'fixture host')
             (self.output/'runtime.dll').write_bytes(b'fixture runtime')
             if nested:(self.output/'unexpected.zip').write_bytes(b'fixture')
+            if symbols:(self.output/'MCD2.Installer.Core.pdb').write_bytes(b'private build path')
             if during_build:during_build()
         with patch.object(sys,'argv',['build_installer.py','--dotnet',str(self.root/'dotnet'),'--payload',str(self.source),'--rid','win-x64','--output',str(self.output),*extra]),patch('subprocess.run',side_effect=compiler):
             runpy.run_path(str(self.root/'build_installer.py'),run_name='__main__')
@@ -43,7 +46,7 @@ class FolderPackageTests(unittest.TestCase):
         candidate=dict(self.manifest,version='0.0.0-candidate')
         pins=self.root/'candidate';pins.mkdir()
         (pins/'manifest.json').write_text(json.dumps(candidate))
-        (pins/'dependencies.lock.json').write_text('{"candidateOnly":true}')
+        (pins/'dependencies.lock.json').write_text(json.dumps(dict(self.lock,candidateOnly=True)))
         self.build(extra=('--manifest',str(pins/'manifest.json'),'--dependency-lock',str(pins/'dependencies.lock.json')))
         receipt=json.loads((self.output/'installer-build.json').read_text())
         self.assertEqual(receipt['candidateVersion'],candidate['version'])
@@ -51,7 +54,7 @@ class FolderPackageTests(unittest.TestCase):
             self.assertEqual((self.output/name).read_bytes(),(pins/name).read_bytes())
             self.assertEqual(receipt[key],hashlib.sha256((pins/name).read_bytes()).hexdigest())
         self.assertEqual((self.root/'manifest.json').read_bytes(),original_manifest)
-        self.assertEqual((self.root/'dependencies.lock.json').read_text(),'{}')
+        self.assertEqual(json.loads((self.root/'dependencies.lock.json').read_text()),self.lock)
 
     def test_original_pin_edits_during_publish_do_not_change_embedded_snapshot(self):
         original=(self.root/'manifest.json').read_bytes()
@@ -66,23 +69,25 @@ class FolderPackageTests(unittest.TestCase):
     def test_external_runtimes_cannot_enter_owned_payload(self):
         for name in ('sl.reflex.dll','nvngx_dlss.dll','nvngx_dlssg.dll',
                      'amd_fidelityfx_upscaler_dx12.dll','amd_fidelityfx_framegeneration_dx12.dll',
-                     'NvLowLatencyVk.dll','ReShade64.dll','d3d12.asi'):
+                     'NvLowLatencyVk.dll','ReShade64.dll','d3d12.asi','dlss-enabler-headless.dll'):
             with self.subTest(name=name):
                 relative='Dungeons/Binaries/Win64/'+name
                 (self.source/relative).write_bytes(self.data)
                 manifest=dict(self.manifest,files={relative:hashlib.sha256(self.data).hexdigest()})
                 (self.root/'manifest.json').write_text(json.dumps(manifest))
-                with self.assertRaisesRegex(AssertionError,'runtime is not owned payload'):self.build()
+                with self.assertRaisesRegex(ValueError,'runtime is not owned payload'):self.build()
                 self.assertFalse(self.output.exists())
 
     def test_visible_payload_and_complete_receipt(self):
         self.build();r=json.loads((self.output/'installer-build.json').read_text())
         self.assertEqual((self.output/'payload'/self.relative).read_bytes(),self.data)
         self.assertEqual(r['deployment'],'self-contained-folder');self.assertFalse(r['selfExtraction']);self.assertFalse(r['embeddedPayloadArchive'])
+        self.assertIn('mcd2-install.json',r['files']);self.assertEqual(json.loads((self.output/'mcd2-install.json').read_bytes())['payload'],self.manifest['files'])
         self.assertIn('runtime.dll',r['files']);self.assertIn('MCD2-Graphics-Installer.exe',r['files'])
         self.assertIn('payload/'+self.relative,r['files']);self.assertFalse(r['signedReleaseQualified'])
         self.assertIn('licenses/FSR-SDK-HEADERS-LICENSE.txt',r['files'])
         self.assertIn('licenses/AntiLag2/LICENSE.txt',r['files'])
+        self.assertIn('licenses/NVIDIA-SDK-LICENSE.txt',r['files'])
         for name,h in r['files'].items():self.assertEqual(hashlib.sha256((self.output/name).read_bytes()).hexdigest(),h)
 
     def test_modified_source_prevents_publish(self):
@@ -94,6 +99,11 @@ class FolderPackageTests(unittest.TestCase):
         self.output.mkdir();(self.output/'keep.txt').write_text('retain')
         with self.assertRaises(ValueError):self.build()
         self.assertEqual((self.output/'keep.txt').read_text(),'retain')
+
+    def test_debug_symbols_cannot_enter_the_public_installer(self):
+        with self.assertRaisesRegex(AssertionError,'Debug symbols'):
+            self.build(symbols=True)
+        self.assertFalse((self.output/'installer-build.json').exists())
 
     def test_nested_archive_rejected(self):
         with self.assertRaises(AssertionError):self.build(nested=True)

@@ -4,6 +4,7 @@
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
+#include "../providers/settings_paths.hpp"
 #include "../providers/bootstrap_module.hpp"
 #include "../providers/hdr_addon_activation.hpp"
 #include "../providers/graphics_store.hpp"
@@ -126,6 +127,7 @@ using RegistryCount=int(*)(void*,uint64_t);
 RegistryMutation add=nullptr,remove=nullptr;
 
 thread_local bool presentActive=false;
+std::atomic<uint64_t> cpuPresentationOwner{0};
 thread_local uint64_t presentIdentity=0;
 void record(unsigned,uint64_t,float=0){} // No per-frame diagnostics or copies.
 std::shared_ptr<sr::TokenCoordinator> controller(){return std::atomic_load(&coordinator);}
@@ -167,7 +169,14 @@ LRESULT CALLBACK pcl_messages(int code,WPARAM removed,LPARAM data){
 }
 
 std::vector<uint8_t> read_slot(const std::filesystem::path&p){std::ifstream f(p,std::ios::binary|std::ios::ate);if(!f)return {};auto n=f.tellg();if(n<64||n>8192)return {};std::vector<uint8_t>b(size_t(n),0);f.seekg(0);f.read(reinterpret_cast<char*>(b.data()),n);return f?b:std::vector<uint8_t>{};}
-void settings_loop(){std::map<std::string,unsigned> last;auto nextStatus=std::chrono::steady_clock::now();
+void settings_loop(){
+ while(!workerStop&&savesPath.empty()){
+  std::vector<wchar_t> local(32768);auto n=GetEnvironmentVariableW(L"LOCALAPPDATA",local.data(),DWORD(local.size()));
+  if(n&&n<local.size()){auto paths=mcd2::providers::currentSettingsPaths(std::filesystem::path(local.data()));if(paths){savesPath=paths->saves;std::error_code error;std::filesystem::create_directories(paths->authority,error);if(error)savesPath.clear();}}
+  if(savesPath.empty()){std::unique_lock lock(workerMutex);workerWake.wait_for(lock,std::chrono::milliseconds(100),[]{return workerStop.load();});}
+ }
+ if(workerStop)return;
+ std::map<std::string,unsigned> last;auto nextStatus=std::chrono::steady_clock::now();
  std::ofstream status(savesPath.parent_path()/L"MCD2Graphics"/L"display-latency-status.jsonl",std::ios::trunc);
  mcd2::providers::ObservedSettings observations;
  mcd2::providers::ObservationResult observation;
@@ -468,9 +477,9 @@ void init(a::device*device){
  add(registry,latencyName,&marker.modular);add(registry,pacingName,&pacer.modular);installed=true;
  log<<"{\"kind\":\"registered\",\"gameThread\":"<<GetCurrentThreadId()<<"}\n";log.flush();
 }
-void present(a::command_queue*,a::swapchain* swapchain,const a::rect*,const a::rect*,unsigned,const a::rect*){if(installed&&swapchain->get_device()->get_native()==boundNative){record(9,presentActive?presentIdentity:UINT64_MAX);record(11,*reinterpret_cast<uint64_t*>(base+engineLayout->renderCounter));if(presentActive){if(amdLatencyOptIn){if(auto amd=amd_controller())amd->pre_present(presentIdentity);}forward(presentIdentity,sr::Marker::RenderEnd);forward(presentIdentity,sr::Marker::PresentStart);}}}
+void present(a::command_queue*,a::swapchain* swapchain,const a::rect*,const a::rect*,unsigned,const a::rect*){if(cpuPresentationOwner)return;if(installed&&swapchain->get_device()->get_native()==boundNative){record(9,presentActive?presentIdentity:UINT64_MAX);record(11,*reinterpret_cast<uint64_t*>(base+engineLayout->renderCounter));if(presentActive){if(amdLatencyOptIn){if(auto amd=amd_controller())amd->pre_present(presentIdentity);}forward(presentIdentity,sr::Marker::RenderEnd);forward(presentIdentity,sr::Marker::PresentStart);}}}
 void finish(a::command_queue*,a::swapchain*){
- auto c=controller();if(installed&&c){if(presentActive)forward(presentIdentity,sr::Marker::PresentEnd);
+ auto c=controller();if(installed&&c){if(presentActive&&!cpuPresentationOwner)forward(presentIdentity,sr::Marker::PresentEnd);
   if(!capabilityChecked){capabilityChecked=true;unsigned available=0,valid=0,complete=0;auto result=provider.state(&available,&valid,&complete);
    if(!result&&c->attach()){reflexAvailable=available?1:0;}else fault();workerWake.notify_all();
   }
@@ -525,7 +534,7 @@ extern "C" __declspec(dllexport) bool AddonInit(HMODULE module,HMODULE){
  amdLatencyOptIn=GetPrivateProfileIntW(L"Providers",L"AmdAntiLag2",0,mcd2::providers::observedPolicyPath(filename.get()).c_str())==1;
  amdProvider.path=std::filesystem::path(filename.get()).parent_path()/L"mcd2-antilag2-bridge.dll";
  std::ofstream receipt(logs/L"bootstrap.json");receipt<<"{\"initialized\":"<<(success?"true":"false")<<",\"result\":"<<provider.lastResult<<",\"stage\":\"AddonInit before native D3D12 device; DXGI factory may already exist\",\"fgBootstrapQualified\":false}\n";
- savesPath=std::filesystem::path(local.get())/L"Dungeons2"/L"Saved"/L"SaveGames";
+ savesPath.clear(); // Worker waits for the edition-specific, bound transport root.
  sessionId=unsigned((GetTickCount64()^(uint64_t(GetCurrentProcessId())<<12))&0x7fffffff);if(!sessionId)sessionId=1;
  workerStop=false;settingsWorker=std::thread(settings_loop);
  }catch(...){reflexAvailable=0;reflexFault=1;}return true;
@@ -535,4 +544,15 @@ extern "C" __declspec(dllexport) void AddonUninit(HMODULE,HMODULE){
  // ReShade may unload a probing device before init_device claims it. Release
  // our bootstrap outside DllMain as well; shutdown is deliberately idempotent.
  workerStop=true;workerWake.notify_all();if(settingsWorker.joinable())settingsWorker.join();cleanup();amdProvider.unload();
+}
+extern "C" __declspec(dllexport) int mcd2_fg_game_cpu_present_v1(uint64_t owner,uint64_t){
+ if(mcd2::process_exit::terminating())return 0;
+ if(!owner||!installed||!presentActive)return 0;
+ cpuPresentationOwner=owner;forward(presentIdentity,sr::Marker::RenderEnd);forward(presentIdentity,sr::Marker::PresentStart);return 1;
+}
+extern "C" __declspec(dllexport) int mcd2_fg_game_cpu_present_end_v1(uint64_t owner,uint64_t){if(mcd2::process_exit::terminating())return 0;uint64_t expected=owner;cpuPresentationOwner.compare_exchange_strong(expected,0);return 1;}
+extern "C" __declspec(dllexport) int mcd2_fg_game_cpu_present_done_v1(uint64_t owner,uint64_t){
+ if(mcd2::process_exit::terminating())return 0;
+ if(!owner||cpuPresentationOwner!=owner||!installed||!presentActive)return 0;
+ forward(presentIdentity,sr::Marker::PresentEnd);return 1;
 }

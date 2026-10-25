@@ -8,25 +8,27 @@ Release history is in the [changelog](docs/RELEASE_NOTES.md). See [validation](d
 
 ### 1. FSR parity with DLSS
 
-Consolidate and publish the implemented FSR Super Resolution, Native AA, Frame Generation and compatible Radeon Anti-Lag 2 paths. Dev.25 has bounded [Windows/Radeon and Linux/NVIDIA acceptance](docs/VALIDATION.md), with known issues disclosed. SR and FG are independently selectable, including DLSS SR + FSR FG and FSR SR + DLSS FG where supported. Full benchmarks follow release.
+The FSR Super Resolution, Native AA, Frame Generation and compatible Radeon Anti-Lag 2 paths shipped in **0.4.0-amd.dev.25**. That release has bounded [Windows/Radeon and Linux/NVIDIA acceptance](docs/VALIDATION.md), with known issues disclosed. SR and FG are independently selectable, including DLSS SR + FSR FG and FSR SR + DLSS FG where supported. Full benchmarks remain on hold at the maintainer's request.
 
 Prepare shared provider interfaces and frame inputs while preserving existing DLSS, FG, Reflex, HDR, saved settings and Native fallback. Qualify analytical paths first; enable ML paths only when their runtime and hardware requirements are met.
 
 ### 2. Multi Frame Generation
 
-Add supported native multipliers, then investigate hybrid MFG that can mix and match frame-generation providers. Keep one final presentation owner and a compatible latency solution.
+Deliver MFG paths for both Radeon and NVIDIA GPUs. Include single-provider software MFG on compatible older hardware and native-provider MFG where the actual device/runtime supports it. On newer hardware, retain a choice between supported native, software and mixed-provider modes; use the same admission and qualification standards for both vendors.
 
-Expose only combinations with verified frame inputs, output access and stable pacing. Reserve the same interfaces for later XeSS SR, FG/MFG and XeLL support.
+Add DLSS Enabler-style hybrid MFG in which two FG providers contribute different intermediate frames to one output timeline. Independent upscaler and FG choices alone do not satisfy this goal. Keep one final presentation owner and a compatible latency solution.
 
-### 3. Ray Reconstruction and further technology
+The fixed NVIDIA multiplier integration is one foundation for this work. It does not complete Radeon/software MFG or mixed-provider generation, which remain required milestones.
 
-Investigate DLSS Ray Reconstruction, FSR Ray Regeneration and independent denoisers after FSR and MFG. Proceed only where the game provides usable noisy lighting signals, matching guides and a replaceable rendering stage.
+Expose only combinations with verified frame inputs, output access and stable pacing. Keep additional providers outside this milestone.
 
-Keep joint denoising/reconstruction distinct from independent denoisers. Investigate late camera reprojection separately when actual camera inputs and presentation compatibility can be established.
+### 3. Installation, stability and optimisation
 
-### 4. Shadows / lighting
+Finish the agreed Game Pass and MFG candidate, then make installation straightforward through both Vortex and the independent Windows/Linux installer. Share package identity and dependency policy, preserve settings when switching managers, and keep ownership-aware repair/removal. The [development installation guide](docs/INSTALLER_MANAGERS.md) records current behaviour and unrun qualification.
 
-Investigate remaining shadow shimmer and lighting instability while preserving the game's visual identity.
+Remove redundant installer/UI work where correctness can be demonstrated. Keep graphics timing, presentation ownership, Native fallback and diagnostics freshness intact. Benchmarks remain on hold; source cleanups do not establish an FPS gain.
+
+No additional major graphics features are in the active milestone. Ray reconstruction/regeneration, new denoisers/providers and larger lighting changes are deferred.
 
 ## Parallel work
 

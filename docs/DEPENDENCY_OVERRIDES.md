@@ -1,36 +1,26 @@
 # Trying other dependency versions
 
-0.3.0-preview.1 has a minimum API policy and an explicit override for every
-external dependency. Earlier releases retain their own requirements.
-Shared dependencies are downloaded separately.
+The released **0.4.0-amd.dev.25** installer uses separate, exact
+[Windows and Linux dependency locks](DEV25_RELEASE_CANDIDATE.md#exact-packages-and-dependencies).
+The root preview.1 lock is a historical build input, not this release's
+installation baseline. All graphics dependencies are acquired separately.
 
-| Dependency | Requirement | Newer versions |
+| Dependency | Tested dev.25 input | Override limits |
 | --- | --- | --- |
-| Blueprint Loader | **2.0+**; ModInfo/settings API, no popup API | Official 2.0, 2.2 and 2.3 sets recognized; other sets use the override |
-| NVIDIA DLSS runtime | **310.9.1+** NGX SR baseline | Use the override for an untested DLL; optional model hint below |
-| Streamline | **2.14.1+** production x64 module baseline | Use the override for an untested complete module set |
-| ReShade | Native D3D12 PR435 access and successful-Reset lifetime API | Use the override; a newer stock release may lack required interfaces |
-| RenoDX UE Extended | Required shader/configuration contract | Use the override for an untested nightly |
+| Blueprint Loader | 2.6 Windows/Radeon; 2.7 Linux/NVIDIA | Required ModInfo/settings APIs remain mandatory |
+| NVIDIA DLSS | 310.9.16 | Unsupported hardware and missing SDK entry points remain refused |
+| Streamline | 2.14.16 complete module set | No mixed module versions or fabricated capability |
+| ReShade | Separate dev.25 patched framework | A newer stock build can lack the required device/queue/reset interfaces |
+| RenoDX UE Extended | 0.2026.1023.0826 | Preserve native HDR configuration and shader contracts |
+| AMD FSR | SDK 2.3.0; analytical SR 3.1.5 and FG 3.1.6 exercised | ML/INT8 choices have separate runtime and hardware gates |
 
 A minimum states the API baseline, not a guarantee about every future release.
 The default installer recognizes complete, hash-verified release sets. It never
-infers compatibility from an archive filename, accepts mixed versions, or forces
-a recognized installed version to upgrade. All five dependencies support an
-explicit untested-version override. Loader 1.x is below the supported API
-baseline; its known files can be backed up during an upgrade. The generic
-recognized-release mechanism also works for single-file dependencies such as DLSS.
-
-If popups are adopted later, raise the Loader minimum to **2.2+**. Loader 2.3
-adds immediate settings-page refresh and text/widget indentation according to
-[its official changelog](https://www.nexusmods.com/minecraftdungeons2/mods/2?tab=files).
-These additions do not require a new graphics UI build. The final Linux/NVIDIA and Windows/AMD qualification used Loader 2.3; future releases still require their own checks.
-
-Blueprint Loader **2.5** is not yet a recognized or qualified release set. Use the explicit untested-version override to try it; the existing API minimum is unchanged.
-
-For Blueprint Loader, ReShade, RenoDX, DLSS or Streamline, select **Try an
-untested dependency version** beside that requirement. Select an official
-download, or explicitly select **Use installed version** to keep the files
-already installed. Overrides start disabled each time the installer opens.
+infers compatibility from an archive filename or treats a minimum API version as
+qualification of a newer release. Untested-version overrides start disabled each
+time the installer opens. Select the override beside the applicable requirement,
+then choose an official download or **Use installed version** where available.
+Keep required dependency files complete and mutually compatible.
 
 The installer records the selected hashes and labels the version untested.
 It still checks the supported game executable, this mod's payload, required
@@ -44,10 +34,15 @@ ReShade build may not provide it. Streamline still needs its required modules;
 NVIDIA signature and hardware checks remain active. Revert to the tested
 versions if startup or graphics fail.
 
-See [why the patched ReShade framework is required](FG_CANDIDATE.md#why-this-reshade-build-is-required)
-for its device/queue access, reset-lifetime protection and direct ZIP download.
+See the [dev.25 dependency section](DEV25_RELEASE_CANDIDATE.md#exact-packages-and-dependencies) for the current framework download and provenance. The old preview.1 framework is not a substitute.
 
-## DLSS model hint
+## DLSS model preset
+
+Use **Mods → MCD2 Graphics → Upscaling → DLSS Model Preset** for normal changes.
+Auto follows the quality mode; E/F/J/K/L/M are explicit overrides. The menu
+preserves unrelated INI keys and adopts a valid existing override on first use.
+See [advanced settings](ADVANCED_SETTINGS.md). The manual interface below is
+retained for existing configurations; prefer the menu.
 
 To request a model from the installed NVIDIA DLSS runtime, create
 `Dungeons/Binaries/Win64/MCD2Graphics/DependencyOverrides.ini`:
@@ -57,12 +52,12 @@ To request a model from the installed NVIDIA DLSS runtime, create
 ModelPreset=0
 ```
 
-Zero (or an absent file) uses the runtime's default model. A nonzero integer
+Zero (or an absent key) uses the runtime's quality-dependent selection. A nonzero integer
 from 1 to 255 sends that model hint for every DLSS/DLAA render-scale preset.
 Use only values documented by NVIDIA for the DLL you installed. An unknown
 hint may be ignored or rejected by that runtime. Restart after editing.
 This setting does not change the in-game Quality/Balanced choices or render
-scale. Delete the file to restore default model selection.
+scale. Return the menu to Auto to restore default selection; do not delete a file containing unrelated overrides.
 
 The file is a user preference and is not installed or removed by the installer.
 It cannot enable an unsupported GPU or an unimplemented feature.

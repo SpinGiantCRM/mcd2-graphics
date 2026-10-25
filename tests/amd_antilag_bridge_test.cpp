@@ -3,6 +3,8 @@
 #include <windows.h>
 #include <cassert>
 #include <iostream>
+#include <string>
+#include <cwchar>
 extern "C" unsigned mcd2_al2_abi();
 extern "C" HRESULT mcd2_al2_init(void*);
 extern "C" HRESULT mcd2_al2_update(unsigned);
@@ -57,6 +59,34 @@ int main(){
     const auto idleDelayCalls=count(3),idleModeCalls=count(1)+count(2);
     mcd2_al2_shutdown();assert(count(6)==3);
     assert(count(3)==idleDelayCalls&&count(1)+count(2)==idleModeCalls);
+    std::cerr<<"Legacy Anti-Lag fixture passed; checking MFG owner routing\n";
+    // A loaded MFG module alone must not steal the old AMD presenter's context.
+    wchar_t app[MAX_PATH]{};assert(GetModuleFileNameW(nullptr,app,MAX_PATH));
+    auto slash=wcsrchr(app,L'\\');assert(slash);slash[1]=0;
+    const std::wstring folder=app;
+    const auto mfgPath=folder+L"mcd2-mfg-game-bridge.dll",dxgiPath=folder+L"dxgi.dll";
+    assert(CopyFileW((folder+L"mcd2-fsr-fg-game-bridge.dll").c_str(),mfgPath.c_str(),TRUE));
+    std::cerr<<"MFG fixture copied\n";
+    auto mfg=LoadLibraryExW(mfgPath.c_str(),nullptr,LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR|LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);assert(mfg);
+    auto mfgCount=reinterpret_cast<unsigned(*)(unsigned)>(GetProcAddress(mfg,"test_fg_count"));
+    auto mfgPresent=reinterpret_cast<int(*)(unsigned)>(GetProcAddress(mfg,"test_fg_present"));assert(mfgCount&&mfgPresent);
+    assert(mcd2_al2_init(reinterpret_cast<void*>(123))==S_OK);
+    const auto oldPublications=fgCount(0);
+    assert(mcd2_al2_frame_generation(1,1)==S_OK&&fgCount(0)==oldPublications+1&&mfgCount(0)==0);
+    assert(mcd2_al2_frame_generation(0,0)==S_OK);
+    // Only actual bootstrap owner 4 routes the SDK context to the MFG bridge.
+    assert(CopyFileW(mfgPath.c_str(),dxgiPath.c_str(),TRUE));
+    auto bootstrap=LoadLibraryExW(dxgiPath.c_str(),nullptr,LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR|LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);assert(bootstrap);
+    std::cerr<<"Application-local bootstrap fixture loaded\n";
+    const auto oldBeforeMfg=fgCount(0),realBeforeMfg=count(5),generatedBeforeMfg=count(7);
+    assert(mcd2_al2_fg_supported()==1&&mcd2_al2_frame_generation(1,1)==S_OK);
+    if(mfgCount(0)!=1||fgCount(0)!=oldBeforeMfg){std::cerr<<"FAIL: owner 4 did not route Anti-Lag context exclusively to MFG\n";return 41;}
+    assert(mfgPresent(1)==S_OK&&count(7)==generatedBeforeMfg+1);
+    assert(mfgPresent(0)==S_OK&&count(5)==realBeforeMfg+1);
+    assert(mcd2_al2_frame_generation(0,0)==S_OK&&mfgCount(1)==1&&mfgPresent(1)==E_NOINTERFACE);
+    mcd2_al2_shutdown();assert(mcd2_al2_can_unload()==1);
+    FreeLibrary(bootstrap);FreeLibrary(mfg);
+    assert(DeleteFileW(dxgiPath.c_str())&&DeleteFileW(mfgPath.c_str()));
     FreeLibrary(presenter);FreeLibrary(fake);
     std::cout<<"Official Anti-Lag SDK ABI fixture passed; synthetic driver, no hardware qualification\n";
 }

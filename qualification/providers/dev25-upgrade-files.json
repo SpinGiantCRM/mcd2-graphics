@@ -1,0 +1,24 @@
+{
+  "version": "0.4.0-amd.dev.25",
+  "releaseArchiveSHA256": "a497d1ec222d73a0436b22b57150957719a5c0bfb38e067c50831b1f3c7fe2a8",
+  "files": {
+    "Dungeons/Binaries/Win64/FGBootstrap.ini": "486d64f34c6b9e95be96bae8dc511d699aa96026cbdc2bfd1f8792c552ef6cba",
+    "Dungeons/Binaries/Win64/FGGuideCapture.ini": "492c4233a4803fe3bcf1b472727ec142ec1d242669030bb7d95b735c22398ca0",
+    "Dungeons/Binaries/Win64/FG_SCENE_COPY.cso": "57416d6e20dc6cfcd66f99f4a5c660ba654c9a94500f729e91e85586fa432373",
+    "Dungeons/Binaries/Win64/FG_UI_ALPHA.cso": "fce79e558c20bfafd859f37e397b8a04b5d820670f6aa0214522cef276cca8c1",
+    "Dungeons/Binaries/Win64/MCD2Graphics/fsr/mcd2-fsr-game-bridge.dll": "e10c72a20fb51430e5409d52fb2f49e672ccf4b3d952c93211b38dd1f550493d",
+    "Dungeons/Binaries/Win64/MCD2Graphics/fsr_dense.cso": "089cef22d81092bd9ed2bdf0ec7a9bb6fcfe10268c52e0a57273dc69df68da68",
+    "Dungeons/Binaries/Win64/MCD2Graphics/live_dense.cso": "4a65a33ba983124b7c47d5822507613231abef7ec1fca8fa7fc51437fd0c29d2",
+    "Dungeons/Binaries/Win64/MCD2Graphics/ngx-runtime/nvngx_dlss.dll": "d00b5b0ab29c3ca101b70c3a5ecb3a01b7ef33766a3383a28a18623083e6123e",
+    "Dungeons/Binaries/Win64/dxgi.dll": "0e758acdce909476d53fe4a7b36faf5b95c8b59aa0af2298424cc07c76ddfc54",
+    "Dungeons/Binaries/Win64/fg-sdk-bridge.dll": "778f311586c7d982ceea6e72369df070d79c31165d40a80be13a02b2ac0437c7",
+    "Dungeons/Binaries/Win64/mcd2-antilag2-bridge.dll": "0c73aa700c2218cde1e5c8770ff136051a1517caaaf8b71b1a2b147591395d11",
+    "Dungeons/Binaries/Win64/mcd2-display-latency.addon64": "3a5e96fba694efd8cd9db58810bb466702710ac41791c5bb06866d93282dc151",
+    "Dungeons/Binaries/Win64/mcd2-fg-guide-recon.addon64": "0aa4a61ba08ecbafbe924664b5ee79cf4d83a5bd7000dd66ccb2333d8465f67f",
+    "Dungeons/Binaries/Win64/mcd2-fsr-fg-game-bridge.dll": "02e70ccb271009fa95eac3a5e776a537ff2ec56c015f674d162a83df343c0820",
+    "Dungeons/Binaries/Win64/mcd2-graphics.addon64": "2636958f6c00bc4736a32e7c219ec32cf5d8a7f3b72c4d8ebf04e2edcaf85dd7",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.pak": "3cb89a41f4b50b220001df737e63e87eb3576aff2c1250e68c6476f3e4700e11",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.ucas": "33223f08027b8dbf0a1b5dd229c9f9d2c8fd6f740960063b9e7706550be63f70",
+    "Dungeons/Content/Paks/~mods/MCD2Graphics/MCD2Graphics_P.utoc": "21bd3a4c3f05ea9c06a7ccb506b8062db0796c84a5a246a6293b34dc9d170c16"
+  }
+}

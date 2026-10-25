@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "scope": "owned-input synthetic D3D12 compute",
+  "sourceCommit": "377c3476f7fcf4e7810d40afe76f8bc798413382",
+  "nativeBuildRun": 40079305728,
+  "artifactId": 12555016073,
+  "artifactArchiveSHA256": "c69936219badfa360ca0f2406465c6783f3c7536fa01be18a91c665004c4d8c3",
+  "probeSHA256": "b0dc61a0b762be181558ab5bb6443180083367b17724258acf0fc9b34aaa613a",
+  "externalModule": {
+    "name": "DLSS Enabler4.9.0 headless interface",
+    "sha256": "f131734e9bf1fd191a9f60fad54231cd88e45ada3c957bd02c8763f8e9ad4440",
+    "bundled": false
+  },
+  "platform": {
+    "gpu": "NVIDIA GeForce RTX4080SUPER",
+    "driver": "615.78.08",
+    "proton": "cachyos-11.0-20261015-slr",
+    "vkd3d": "3.1.0 / 0bb64c56c8f0dcc",
+    "automaticFsr4Upgrade": false
+  },
+  "runs": [
+    {
+      "multiplier": 2,
+      "checkedImages": 10,
+      "functionalImageChecksPassed": true,
+      "exitCode": 0,
+      "timedOut": false
+    },
+    {
+      "multiplier": 3,
+      "checkedImages": 20,
+      "functionalImageChecksPassed": true,
+      "exitCode": 0,
+      "timedOut": false
+    },
+    {
+      "multiplier": 4,
+      "checkedImages": 30,
+      "functionalImageChecksPassed": true,
+      "exitCode": 0,
+      "timedOut": false
+    },
+    {
+      "multiplier": 5,
+      "checkedImages": 40,
+      "functionalImageChecksPassed": true,
+      "exitCode": 0,
+      "timedOut": false
+    },
+    {
+      "multiplier": 6,
+      "checkedImages": 50,
+      "functionalImageChecksPassed": true,
+      "exitCode": 0,
+      "timedOut": false
+    }
+  ],
+  "totalCheckedImages": 150,
+  "rawLastPairsMatchVisuallyReviewedControl": true,
+  "featureReleaseAndShutdownPassed": true,
+  "gameIntegrationQualified": false,
+  "windowsRadeonQualified": false,
+  "nativeNvidiaOutputQualified": false,
+  "mixedProviderQualified": false,
+  "benchmark": false
+}

@@ -1,0 +1,2 @@
+edb84f7fb1e7b112de6890b3f284c9d8863b146138ab816278e2c017111868e6  MCD2-Graphics-GamePass-main-1f8e166-Sources.zip
+c4522ddcf98e6f51f1b59b864d0da3aa932a6a63e216e993ca123b6352f454b0  MCD2-Graphics-GamePass-main-1f8e166-Windows-x64.zip

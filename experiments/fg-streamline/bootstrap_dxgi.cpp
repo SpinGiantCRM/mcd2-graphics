@@ -16,13 +16,20 @@
 #include <cstdio>
 #include <cstring>
 #include <intrin.h>
+#if defined(__MINGW32__)
+#define _ReturnAddress() __builtin_return_address(0)
+#endif
 #include "fg_bridge_contract.h"
+#include "presentation_factory.hpp"
+#include "game_presentation_swapchain.hpp"
 #include "../providers/fsr_fg_game_bridge.h"
+#include "../providers/mfg_game_bridge.h"
 #include "fg_ui_protocol.hpp"
 #include "wine_reflex_pacing.hpp"
 #include "fg_preset_override.hpp"
 #include "../../src/providers/observed_settings.hpp"
 #include "../../src/providers/fg_menu_projection.hpp"
+#include "../../src/providers/settings_paths.hpp"
 #include <fstream>
 extern "C" __declspec(dllimport) int mcd2_sl_init(const wchar_t*,const wchar_t*,const wchar_t*);
 extern "C" __declspec(dllimport) int mcd2_sl_init_for_owner_v1(const wchar_t*,const wchar_t*,const wchar_t*,unsigned);
@@ -41,33 +48,39 @@ bool sdkReady=false,routeEnabled=true;FILE* receipt=nullptr;
 // Serialize ownership as well as stdio: checking receipt before fclose races.
 std::mutex receiptMutex;
 unsigned fgSessionMode=1;
-bool amdFgSession=false;HMODULE amdFgBridge=nullptr;
+bool amdFgSession=false,mfgFgSession=false;HMODULE amdFgBridge=nullptr,mfgBridge=nullptr;
+unsigned startupMfgStrategy=0,startupMfgMultiplier=2,startupDlssGenerated=0,startupFsrGenerated=0,startupFrameOrder=0;
+int(*mfgSwap)(void*,void*,void*,const MCD2AmdFgSwapV1*,void**)=nullptr;
 std::atomic<unsigned> actualFgOwner{0};
 int(*amdLoad)(const wchar_t*)=nullptr;
 int(*amdSwap)(void*,void*,void*,const MCD2AmdFgSwapV1*,void**)=nullptr;
 void event(const char* stage,long result);
 unsigned shared_startup_owner(){
  auto local=std::make_unique<wchar_t[]>(32768);auto n=GetEnvironmentVariableW(L"LOCALAPPDATA",local.get(),32768);if(!n||n>=32768)return 0;
- const auto path=std::filesystem::path(local.get())/L"Dungeons2"/L"Saved"/L"MCD2Graphics"/L"ProviderSettings";
+ const auto paths=mcd2::providers::currentSettingsPaths(std::filesystem::path(local.get()));if(!paths)return 0;
+ const auto path=paths->authority/L"ProviderSettings";
  mcd2::providers::GraphicsStore store(path);mcd2::providers::DecodedGraphicsRecord record;
  mcd2::providers::FgMenuProjection projection;
  if(!mcd2::providers::store_detail::directoryReady(path)||store.load(record).status!=mcd2::providers::StoreStatus::Ok||
     !mcd2::providers::projectFgMenu(record,projection)||!projection.enabled||!projection.pairEligible)return 0;
- event("shared-FG-startup-revision",projection.revision);return projection.provider+1;
+ startupMfgStrategy=projection.strategy;startupMfgMultiplier=projection.frameMode+2;
+ startupDlssGenerated=projection.dlssGenerated;startupFsrGenerated=projection.fsrGenerated;startupFrameOrder=projection.frameOrder;
+ event("shared-FG-startup-revision",projection.revision);return mcd2::providers::fgStartupOwner(projection);
 }
 unsigned saved_fg_mode(){
  auto local=std::make_unique<wchar_t[]>(32768);auto n=GetEnvironmentVariableW(L"LOCALAPPDATA",local.get(),32768);if(!n||n>=32768)return 0;
- auto path=std::filesystem::path(local.get())/L"Dungeons2"/L"Saved"/L"SaveGames"/L"MCD2GraphicsFGSettings.sav";
+ const auto paths=mcd2::providers::currentSettingsPaths(std::filesystem::path(local.get()));if(!paths)return 0;
+ auto path=paths->saves/L"MCD2GraphicsFGSettings.sav";
  std::ifstream file(path,std::ios::binary|std::ios::ate);if(!file)return 0;auto size=file.tellg();if(size<64||size>8192)return 0;
  std::vector<uint8_t> bytes(static_cast<size_t>(size));file.seekg(0);if(!file.read(reinterpret_cast<char*>(bytes.data()),bytes.size()))return 0;
  mcd2::fgui::Intent intent{};return mcd2::fgui::decode(bytes,intent)?intent.mode:0;
 }
 unsigned observed_fg_mode(){
  auto local=std::make_unique<wchar_t[]>(32768);auto n=GetEnvironmentVariableW(L"LOCALAPPDATA",local.get(),32768);if(!n||n>=32768)return 0;
- const auto saved=std::filesystem::path(local.get())/L"Dungeons2"/L"Saved";
+ const auto paths=mcd2::providers::currentSettingsPaths(std::filesystem::path(local.get()));if(!paths)return 0;
  mcd2::providers::LegacySnapshot snapshot;
- if(!mcd2::providers::readLegacySnapshot(saved/L"SaveGames",snapshot))return 0;
- mcd2::providers::GraphicsStore store(saved/L"MCD2Graphics"/L"ProviderMirror");
+ if(!mcd2::providers::readLegacySnapshot(paths->saves,snapshot))return 0;
+ mcd2::providers::GraphicsStore store(paths->authority/L"ProviderMirror");
  auto session=(GetTickCount64()^(uint64_t(GetCurrentProcessId())<<32));if(!session)session=1;
  const auto selection=mcd2::providers::observedStartup(store,snapshot,session);
  event("observed-settings-valid",selection.valid?1:0);
@@ -120,6 +133,27 @@ long prime_wine_cubin_capability(){
 // Bounded multi-factory counterpart to the qualified single-factory probe.
 // Routes hold COM references until explicit quiescent experiment shutdown.
 // Device-loss/concurrent shutdown and unlimited factory churn are not qualified.
+HRESULT create_nvidia_swap(IDXGIFactory2*base,IDXGIFactory2*proxy,IUnknown*queue,HWND hwnd,const DXGI_SWAP_CHAIN_DESC1*desc,const DXGI_SWAP_CHAIN_FULLSCREEN_DESC*fullscreen,IDXGIOutput*output,IDXGISwapChain1**result){
+ ID3D12CommandQueue*commandQueue=nullptr;ID3D12Device*device=nullptr;
+ auto deviceResult=queue?queue->QueryInterface(IID_PPV_ARGS(&commandQueue)):E_INVALIDARG;
+ if(SUCCEEDED(deviceResult))deviceResult=commandQueue->GetDevice(IID_PPV_ARGS(&device));
+ if(commandQueue)commandQueue->Release();int support=-1,binding=-1;
+ if(device){auto luid=device->GetAdapterLuid();support=mcd2_fg_support(&luid,sizeof(luid));if(!support)binding=mcd2_sl_set_device(device);device->Release();}
+ event("swapchain-rendering-adapter-support",support);event("pre-swapchain-device-binding",binding);
+ if(FAILED(deviceResult)||support||binding)return base->CreateSwapChainForHwnd(queue,hwnd,desc,fullscreen,output,result);
+ if(!desc)return E_INVALIDARG;
+ const MCD2FGConfig config{sizeof(MCD2FGConfig),0,desc->Width,desc->Height,desc->Width,desc->Height,unsigned(desc->Format),10,41,34,desc->BufferCount,1};
+ auto configured=mcd2_fg_configured()?0:mcd2_fg_configure(&config);event("initial-FG-configuration",configured);
+ if(configured)return base->CreateSwapChainForHwnd(queue,hwnd,desc,fullscreen,output,result);
+ const auto hr=proxy->CreateSwapChainForHwnd(queue,hwnd,desc,fullscreen,output,result);
+ if(SUCCEEDED(hr)&&result&&*result){const bool nativeWindows=!GetProcAddress(GetModuleHandleW(L"ntdll.dll"),"wine_get_version");if(nativeWindows)event("game-presentation-wrapper",mcd2::fg::wrap_game_presentation_swapchain(result,queue)?1:0);actualFgOwner=1;}event("routed-hwnd-swapchain",hr);return hr;
+}
+bool wrap_presentation_factory(IUnknown*outer,void**out){
+ IDXGIFactory7*base=nullptr;if(FAILED(outer->QueryInterface(IID_PPV_ARGS(&base))))return false;
+ auto proxy=base;if(mcd2_fg_upgrade(reinterpret_cast<void**>(&proxy))||proxy==base){base->Release();return false;}
+ auto wrapped=new(std::nothrow) mcd2::fg::PresentationFactory(base,proxy,create_nvidia_swap);if(!wrapped){proxy->Release();base->Release();return false;}
+ outer->Release();*out=wrapped;return true;
+}
 struct Route {
  using Create=HRESULT(STDMETHODCALLTYPE*)(IDXGIFactory2*,IUnknown*,HWND,const DXGI_SWAP_CHAIN_DESC1*,const DXGI_SWAP_CHAIN_FULLSCREEN_DESC*,IDXGIOutput*,IDXGISwapChain1**);
  IDXGIFactory7* base=nullptr;IDXGIFactory2* proxy=nullptr;void** original=nullptr;std::array<void*,32> table{};
@@ -131,9 +165,10 @@ HRESULT STDMETHODCALLTYPE create_swap(IDXGIFactory2* factory,IUnknown* queue,HWN
  if(!route)return E_UNEXPECTED;
  auto original=reinterpret_cast<Route::Create>(route->original[15]);
  if(nested==route)return original(factory,queue,hwnd,desc,fullscreen,output,result);
- if(amdFgSession){
+ if(amdFgSession||mfgFgSession){
+  const auto selectedSwap=mfgFgSession?mfgSwap:amdSwap;
   wchar_t ownerClass[256]{};DWORD pid=0;GetClassNameW(hwnd,ownerClass,256);GetWindowThreadProcessId(hwnd,&pid);
-  if(!amdSwap||!desc||!result||output||pid!=GetCurrentProcessId()||wcscmp(ownerClass,L"UnrealWindow"))return original(factory,queue,hwnd,desc,fullscreen,output,result);
+  if(!selectedSwap||!desc||!result||output||pid!=GetCurrentProcessId()||wcscmp(ownerClass,L"UnrealWindow"))return original(factory,queue,hwnd,desc,fullscreen,output,result);
   MCD2AmdFgSwapV1 p{sizeof(p),desc->Width,desc->Height,unsigned(desc->Format),desc->SampleDesc.Count,desc->SampleDesc.Quality,desc->BufferUsage,desc->BufferCount,unsigned(desc->Scaling),unsigned(desc->SwapEffect),unsigned(desc->AlphaMode),desc->Flags,
    fullscreen?1u:0u,fullscreen?unsigned(fullscreen->Windowed):1u,fullscreen?fullscreen->RefreshRate.Numerator:0u,fullscreen?fullscreen->RefreshRate.Denominator:1u,fullscreen?unsigned(fullscreen->ScanlineOrdering):0u,fullscreen?unsigned(fullscreen->Scaling):0u};
   RECT client{};if((!p.width||!p.height)&&GetClientRect(hwnd,&client)){
@@ -143,32 +178,21 @@ HRESULT STDMETHODCALLTYPE create_swap(IDXGIFactory2* factory,IUnknown* queue,HWN
   {std::lock_guard traceGuard(receiptMutex);if(receipt){fprintf(receipt,"{\"stage\":\"AMD-swap-description\",\"width\":%u,\"height\":%u,\"format\":%u,\"samples\":%u,\"buffers\":%u}\n",p.width,p.height,p.format,p.samples,p.buffers);fflush(receipt);}}
   ID3D12CommandQueue* nativeQueue=nullptr;if(!queue||FAILED(queue->QueryInterface(IID_PPV_ARGS(&nativeQueue))))return E_INVALIDARG;
   auto previous=nested;nested=route;
-  void* out=nullptr;const auto status=amdSwap(factory,nativeQueue,hwnd,&p,&out);nativeQueue->Release();nested=previous;
+  int admitted=0;
+  if(mfgFgSession){auto caps=reinterpret_cast<int(*)(void*,MCD2MfgCapabilitiesV1*)>(GetProcAddress(mfgBridge,"mcd2_mfg_capabilities_v1"));auto configure=reinterpret_cast<int(*)(unsigned,unsigned,unsigned,unsigned,unsigned)>(GetProcAddress(mfgBridge,"mcd2_mfg_configure_v3"));
+   ID3D12Device* device=nullptr;MCD2MfgCapabilitiesV1 current{};current.size=sizeof(current);
+   admitted=FAILED(nativeQueue->GetDevice(IID_PPV_ARGS(&device)))||!caps||!configure?-1:caps(device,&current);if(device)device->Release();
+   if(!admitted)admitted=configure(startupMfgStrategy,startupMfgMultiplier,startupDlssGenerated,startupFsrGenerated,startupFrameOrder);
+  }
+  void* out=nullptr;const auto status=admitted?admitted:selectedSwap(factory,nativeQueue,hwnd,&p,&out);nativeQueue->Release();nested=previous;
   event("AMD-owned-swapchain",status);
-  if(!status&&out){*result=static_cast<IDXGISwapChain1*>(out);actualFgOwner=2;return S_OK;}
+  if(!status&&out){*result=static_cast<IDXGISwapChain1*>(out);actualFgOwner=mfgFgSession?4u:2u;return S_OK;}
   if(status==MCD2_AFG_SWAP_RETAINED)return E_ABORT;
   // A failed SDK construction never makes a later NVIDIA owner silently active.
   return original(factory,queue,hwnd,desc,fullscreen,output,result);
  }
- // The actual queue identifies the rendering adapter. Bind before the SDK's
- // swapchain hooks run, rather than waiting for ReShade's post-create event.
- ID3D12CommandQueue* commandQueue=nullptr;ID3D12Device* device=nullptr;
- auto deviceResult=queue?queue->QueryInterface(IID_PPV_ARGS(&commandQueue)):E_INVALIDARG;
- if(SUCCEEDED(deviceResult))deviceResult=commandQueue->GetDevice(IID_PPV_ARGS(&device));
- if(commandQueue)commandQueue->Release();
- int support=-1,binding=-1;
- if(device){auto luid=device->GetAdapterLuid();support=mcd2_fg_support(&luid,sizeof(luid));if(!support)binding=mcd2_sl_set_device(device);device->Release();}
- event("swapchain-rendering-adapter-support",support);event("pre-swapchain-device-binding",binding);
- if(FAILED(deviceResult)||support||binding)return original(factory,queue,hwnd,desc,fullscreen,output,result);
- if(!desc)return E_INVALIDARG;
- const MCD2FGConfig config{sizeof(MCD2FGConfig),0,desc->Width,desc->Height,desc->Width,desc->Height,unsigned(desc->Format),10,41,34,desc->BufferCount,1};
- // Only the initial default. A later swapchain recreation must preserve the
- // experiment owner's explicitly requested mode instead of resetting it.
- auto configured=mcd2_fg_configured()?0:mcd2_fg_configure(&config);event("initial-FG-configuration",configured);
- if(configured)return original(factory,queue,hwnd,desc,fullscreen,output,result);
  auto previous=nested;nested=route;
- auto hr=route->proxy->CreateSwapChainForHwnd(queue,hwnd,desc,fullscreen,output,result);
- nested=previous;if(SUCCEEDED(hr)&&result&&*result)actualFgOwner=1;event("routed-hwnd-swapchain",hr);return hr;
+ auto hr=create_nvidia_swap(factory,route->proxy,queue,hwnd,desc,fullscreen,output,result);nested=previous;return hr;
 }
 bool attach(IUnknown* outer){
  constexpr GUID unwrap={0x7f2c9a11,0x3b4e,0x4d6a,{0x81,0x2f,0x5e,0x9c,0xd3,0x7a,0x1b,0x42}};
@@ -188,6 +212,16 @@ BOOL CALLBACK initialize(PINIT_ONCE,void*,void**){
  auto filename=std::make_unique<wchar_t[]>(32768);auto n=GetModuleFileNameW(self,filename.get(),32768);
  if(!n||n>=32768){initializing=false;return FALSE;}
  auto folder=std::filesystem::path(filename.get()).parent_path();
+ // Game Pass needs signed-in identity before selecting a persisted presentation owner.
+ // This entry point performs no Game Save provider initialization or cloud IO.
+ {std::vector<wchar_t> game(32768);const auto size=GetModuleFileNameW(nullptr,game.data(),DWORD(game.size()));
+  if(size&&size<game.size()&&_wcsicmp(std::filesystem::path(game.data()).filename().c_str(),L"Dungeons-WinGDK-Shipping.exe")==0){
+   auto transport=LoadLibraryExW((folder/L"mcd2-gdk-save-bridge.addon64").c_str(),nullptr,LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR|LOAD_LIBRARY_SEARCH_SYSTEM32);
+   auto prepare=transport?reinterpret_cast<int(*)(HMODULE)>(GetProcAddress(transport,"mcd2_gdk_prepare_v1")):nullptr;
+   if(prepare)prepare(transport);
+   // Keep this local reference: the addon loader later claims the same module.
+  }
+ }
  {std::lock_guard traceGuard(receiptMutex);fopen_s(&receipt,(folder/"bootstrap.jsonl").string().c_str(),"w");}
  // Local isolation controls are intentionally absent from the released UI.
  auto policy=mcd2::providers::observedPolicyPath(filename.get()).wstring();
@@ -221,12 +255,22 @@ BOOL CALLBACK initialize(PINIT_ONCE,void*,void**){
   event("AMD-pinned-runtime",loaded);
   if(amdFgSession){routeEnabled=factoryRoutingRequested&&!loaded&&(privateAmdTrial||sharedOwner==2);fgSessionMode=routeEnabled?1:0;}
  }
+ if(sharedMenu){
+  mfgBridge=LoadLibraryExW((folder/L"mcd2-mfg-game-bridge.dll").c_str(),nullptr,LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR|LOAD_LIBRARY_SEARCH_SYSTEM32);
+  auto load=mfgBridge?reinterpret_cast<int(*)(const wchar_t*,const wchar_t*)>(GetProcAddress(mfgBridge,"mcd2_mfg_load_v1")):nullptr;
+  mfgSwap=mfgBridge?reinterpret_cast<decltype(mfgSwap)>(GetProcAddress(mfgBridge,"mcd2_afg_swap_v1")):nullptr;
+  const auto nativePath=folder/L"nvngx_dlssg.dll";
+  auto loaded=load?load((folder/L"MCD2Graphics"/L"mfg"/L"dlss-enabler-headless.dll").c_str(),std::filesystem::is_regular_file(nativePath)?nativePath.c_str():nullptr):-1;
+  event("MFG-external-runtime",loaded);
+  mfgFgSession=sharedOwner==4;
+  if(mfgFgSession){amdFgSession=false;routeEnabled=factoryRoutingRequested&&!loaded&&mfgSwap;fgSessionMode=routeEnabled?1:0;}
+ }
  event("FG-session-mode",fgSessionMode);
  const auto presetStatus=mcd2::fg_preset::configure(folder);event("DLSS-FG-preset-request",presetStatus);
  WritePrivateProfileStringW(L"Runtime",L"FrameGenerationPresetStatus",std::to_wstring(presetStatus).c_str(),(folder/L"MCD2Graphics"/L"DependencyOverrides.ini").c_str());
  auto enableSdk=GetPrivateProfileIntW(L"Experiment",L"EnableSDK",1,policy.c_str())!=0;
- auto result=!enableSdk?-100:(mcd2_fg_initialized()?0:mcd2_sl_init_for_owner_v1((folder/L"sl.interposer.dll").c_str(),folder.c_str(),folder.c_str(),sharedOwner));
- event("Streamline-NVIDIA-FG-plugin-requested",sharedOwner==2?0:1);
+ auto result=!enableSdk?-100:(mcd2_fg_initialized()?0:mcd2_sl_init_for_owner_v1((folder/L"sl.interposer.dll").c_str(),folder.c_str(),folder.c_str(),sharedOwner==4?2:sharedOwner));
+ event("Streamline-NVIDIA-FG-plugin-requested",sharedOwner==2||sharedOwner==4?0:1);
  sdkReady=result==0;event("early-SDK-init",result);
  if(sdkReady)configure_wine_reflex_pacing(policy.c_str());
  if(sdkReady&&GetPrivateProfileIntW(L"Experiment",L"PrimeWineCubin",1,policy.c_str()))event("wine-cubin-capability-prime",prime_wine_cubin_capability());
@@ -249,7 +293,10 @@ bool host_caller(void* caller){
 void route_result(HRESULT hr,void** out,void* caller){
  // Do not retain or route factories created internally by the SDK, overlays
  // or other DLLs. They are not this experiment's world presentation owner.
- if(SUCCEEDED(hr)&&out&&*out&&(amdFgSession||sdkReady)&&routeEnabled&&host_caller(caller)){auto ok=attach(static_cast<IUnknown*>(*out));event("factory-route",ok?0:-1);}
+ if(SUCCEEDED(hr)&&out&&*out&&(amdFgSession||sdkReady)&&routeEnabled&&host_caller(caller)){
+  const bool nativeWindows=!GetProcAddress(GetModuleHandleW(L"ntdll.dll"),"wine_get_version");
+  const auto ok=!amdFgSession&&nativeWindows?wrap_presentation_factory(static_cast<IUnknown*>(*out),out):attach(static_cast<IUnknown*>(*out));event("factory-route",ok?0:-1);
+ }
 }
 }
 extern "C" HRESULT WINAPI CreateDXGIFactory(REFIID iid,void** out){auto f=reinterpret_cast<HRESULT(WINAPI*)(REFIID,void**)>(factory("CreateDXGIFactory"));if(!f)return E_NOINTERFACE;auto hr=f(iid,out);if(!initializing)route_result(hr,out,_ReturnAddress());return hr;}
@@ -260,6 +307,7 @@ extern "C" HRESULT WINAPI DXGIGetDebugInterface1(UINT flags,REFIID iid,void** ou
 extern "C" __declspec(dllexport) void mcd2_bootstrap_detach(){std::lock_guard guard(routesMutex);for(auto& r:routes)r.detach();event("factory-routes-detached",0);std::lock_guard traceGuard(receiptMutex);if(receipt){fclose(receipt);receipt=nullptr;}}
 extern "C" __declspec(dllexport) unsigned mcd2_bootstrap_fg_session_mode(){return fgSessionMode;}
 extern "C" __declspec(dllexport) unsigned mcd2_bootstrap_amd_fg_session(){return amdFgSession&&routeEnabled?1:0;}
+extern "C" __declspec(dllexport) unsigned mcd2_bootstrap_mfg_fg_session(){return mfgFgSession&&routeEnabled?1:0;}
 extern "C" __declspec(dllexport) unsigned mcd2_bootstrap_fg_owner(){return actualFgOwner.load();}
 BOOL APIENTRY DllMain(HMODULE module,DWORD reason,LPVOID){if(reason==DLL_PROCESS_ATTACH)self=module;return TRUE;}
 
