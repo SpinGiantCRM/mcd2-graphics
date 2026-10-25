@@ -1,0 +1,8 @@
+'use strict';
+const fs=require('node:fs/promises');const path=require('node:path');const crypto=require('node:crypto');const {safeRelative}=require('./contract');
+async function target(root,relative){safeRelative(relative);root=path.resolve(root);let current=root;const rootStat=await fs.lstat(root);if(rootStat.isSymbolicLink()||!rootStat.isDirectory())throw Error('Choose a real game or staging folder');for(const part of relative.split('/')){current=path.join(current,part);let st;try{st=await fs.lstat(current);}catch(e){if(e.code!=='ENOENT')throw e;}if(st?.isSymbolicLink())throw Error('Linked destination refused');}return current;}
+async function exists(p){try{await fs.lstat(p);return true;}catch(e){if(e.code==='ENOENT')return false;throw e;}}
+async function read(root,relative,limit=4*1024*1024){const p=await target(root,relative);if(!await exists(p))return null;const s=await fs.stat(p);if(!s.isFile()||s.size>limit)throw Error('Invalid or oversized file');return fs.readFile(p);}
+async function digest(p){const h=crypto.createHash('sha256');const handle=await fs.open(p,'r');try{const s=await handle.stat();if(!s.isFile()||s.size>512*1024*1024)throw Error('Invalid file size');for await(const block of handle.createReadStream({autoClose:false}))h.update(block);return h.digest('hex');}finally{await handle.close();}}
+async function write(root,relative,data){const p=await target(root,relative);await fs.mkdir(path.dirname(p),{recursive:true});await target(root,relative);const temp=p+'.mcd2-'+crypto.randomUUID()+'.tmp';try{await fs.writeFile(temp,data,{flag:'wx'});await fs.rename(temp,p);}finally{await fs.rm(temp,{force:true});}}
+module.exports={target,exists,read,digest,write};

@@ -1,0 +1,7 @@
+{
+  "name": "MCD2 Graphics installation companion (development)",
+  "author": "SpinGiantCRM",
+  "version": "0.1.0",
+  "description": "Installs pinned MCD2 Graphics packages and requirements through Vortex hardlinks, with ownership and startup-setting restoration. Development candidate; game qualification pending.",
+  "requiredVersion": ">=2.9.0"
+}
