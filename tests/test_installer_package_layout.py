@@ -27,7 +27,7 @@ class FolderPackageTests(unittest.TestCase):
             p=self.root/'third-party'/name;p.parent.mkdir(parents=True,exist_ok=True);p.write_text('fixture AMD license')
         shutil.copyfile(ROOT/'build_installer.py',self.root/'build_installer.py')
 
-    def build(self, nested=False, extra=(), during_build=None):
+    def build(self, nested=False, extra=(), during_build=None, symbols=False):
         def compiler(args,check):
             self.assertTrue(check);self.assertIn('-p:PublishSingleFile=false',args)
             self.assertNotIn('-p:PublishSingleFile=true',args)
@@ -36,6 +36,7 @@ class FolderPackageTests(unittest.TestCase):
             (self.output/'mcd2-graphics-installer.exe').write_bytes(b'fixture host')
             (self.output/'runtime.dll').write_bytes(b'fixture runtime')
             if nested:(self.output/'unexpected.zip').write_bytes(b'fixture')
+            if symbols:(self.output/'MCD2.Installer.Core.pdb').write_bytes(b'private build path')
             if during_build:during_build()
         with patch.object(sys,'argv',['build_installer.py','--dotnet',str(self.root/'dotnet'),'--payload',str(self.source),'--rid','win-x64','--output',str(self.output),*extra]),patch('subprocess.run',side_effect=compiler):
             runpy.run_path(str(self.root/'build_installer.py'),run_name='__main__')
@@ -98,6 +99,11 @@ class FolderPackageTests(unittest.TestCase):
         self.output.mkdir();(self.output/'keep.txt').write_text('retain')
         with self.assertRaises(ValueError):self.build()
         self.assertEqual((self.output/'keep.txt').read_text(),'retain')
+
+    def test_debug_symbols_cannot_enter_the_public_installer(self):
+        with self.assertRaisesRegex(AssertionError,'Debug symbols'):
+            self.build(symbols=True)
+        self.assertFalse((self.output/'installer-build.json').exists())
 
     def test_nested_archive_rejected(self):
         with self.assertRaises(AssertionError):self.build(nested=True)

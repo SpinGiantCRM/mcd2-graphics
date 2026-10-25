@@ -35,7 +35,7 @@ output.mkdir(parents=True,exist_ok=True)
 # file is edited while the compiler is running.
 snapshots={'manifest.json':manifest_bytes,'dependencies.lock.json':lock_bytes,'mcd2-install.json':contract_bytes}
 for name,data in snapshots.items():(output/name).write_bytes(data)
-subprocess.run([str(a.dotnet.resolve()),'publish',str(root/'src/installer/MCD2.Installer.csproj'),'-c','Release','-r',a.rid,'--self-contained','true','-maxcpucount:2','-p:PublishSingleFile=false','-p:RestoreLockedMode=true','-p:Version='+manifest['version'],'-p:InstallerContractPath='+str(output/'mcd2-install.json'),'-p:InstallerManifestPath='+str(output/'manifest.json'),'-p:InstallerDependencyLockPath='+str(output/'dependencies.lock.json'),'-o',str(output),'--nologo'],check=True)
+subprocess.run([str(a.dotnet.resolve()),'publish',str(root/'src/installer/MCD2.Installer.csproj'),'-c','Release','-r',a.rid,'--self-contained','true','-maxcpucount:2','-p:DebugType=None','-p:DebugSymbols=false','-p:PublishSingleFile=false','-p:RestoreLockedMode=true','-p:Version='+manifest['version'],'-p:InstallerContractPath='+str(output/'mcd2-install.json'),'-p:InstallerManifestPath='+str(output/'manifest.json'),'-p:InstallerDependencyLockPath='+str(output/'dependencies.lock.json'),'-o',str(output),'--nologo'],check=True)
 for name,data in snapshots.items():assert (output/name).read_bytes()==data,'Embedded resource snapshot changed: '+name
 for relative,path in paths:
  target=output/'payload'/relative;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(path,target)
@@ -45,6 +45,7 @@ shutil.copyfile(root/'third-party/INSTALLER_NOTICES.txt',output/'INSTALLER_NOTIC
 for name in ('FSR-SDK-HEADERS-LICENSE.txt','AntiLag2/LICENSE.txt','NVIDIA-SDK-LICENSE.txt'):
  target=output/'licenses'/name;target.parent.mkdir(parents=True,exist_ok=True)
  shutil.copyfile(root/'third-party'/name,target)
+assert not any(p.suffix.lower()=='.pdb' for p in output.rglob('*') if p.is_file()),'Debug symbols are not public installer payload'
 assert not any(p.suffix.lower() in ('.zip','.7z','.rar') for p in output.rglob('*') if p.is_file()),'Nested archive refused'
 exe=a.output.resolve()/('mcd2-graphics-installer.exe' if a.rid=='win-x64' else 'mcd2-graphics-installer')
 if a.rid=='win-x64':
