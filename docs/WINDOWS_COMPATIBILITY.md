@@ -1356,3 +1356,11 @@ Portable tests cover all patterns, caps and malformed codes; the managed/native
 comparison covers 7,680 combinations. These checks and Microsoft-ABI builds do
 not qualify game quality, Windows MFG or display cadence. Keep the Linux-first
 campaign, Windows/Radeon startup-with-MFG-Off gate and separate edition checks.
+
+## Shared installer and Vortex candidate
+
+Installer-only revisions retain exact native/UI payload hashes and pin their own package/contract identity. Keep Windows and Linux GUI/core checks, plus cross-adapter filesystem fixtures in both guided-installer jobs. A UI ScanSnapshot is never transaction authority: Install/Repair refreshes all hashes before writing. Legacy receipts remain recognisable only through existing version/file pins; new receipts identify standalone ownership. Vortex ownership blocks standalone mutation and vice versa.
+
+The Vortex companion delegates deployment to stock `hardlink_activator`. Its directly awaited prepare/finalize/prePurge/purge/postPurge boundaries carry the checks; ordinary asynchronous pre-events in Vortex 2.9.0 swallow rejections and cannot supply the safety gate. Preserve stock activator identity, manifests, same-filesystem requirements and non-MCD2 behaviour. Restore startup keys/RenoDX leases before removal, and restore any owned prior proxy only after deployment links are gone. Keep interrupted-removal journals until cleanup succeeds. Never mutate a deployed hardlink in place.
+
+The installer [manager guide](INSTALLER_MANAGERS.md) distinguishes source/fixture checks from outstanding live Windows/Linux/Vortex and Game Pass checks. No benchmarks or graphics-runtime qualification follows from packaging or filesystem fixtures.

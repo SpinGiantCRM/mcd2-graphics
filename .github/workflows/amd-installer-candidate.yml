@@ -6,6 +6,11 @@ on:
       - 'tools/assemble_amd_candidate.py'
       - 'src/installer/**'
       - 'build_installer.py'
+      - 'packaging/**'
+      - 'integrations/vortex/**'
+      - 'tools/build_install_contract.py'
+      - 'tools/build_vortex_package.py'
+      - 'tools/build_vortex_companion.py'
       - 'dependencies.lock.json'
       - 'tests/test_installer_amd_candidate.py'
       - 'qualification/providers/windows-candidate-*.json'
@@ -75,6 +80,13 @@ jobs:
                   assembled=json.loads((stage/'inputs/dependencies.lock.json').read_bytes())
                   data=(json.dumps(integration_dependency_lock(assembled,json.loads(data)),indent=2)+'\n').encode()
               (stage/f'{rid}-dependencies.lock.json').write_bytes(data)
+          if p.get('installerPackageVersion'):
+              sys.path.insert(0,str(pathlib.Path.cwd()/'tools'))
+              from build_install_contract import installer_revision
+              manifest_path=stage/'inputs/manifest.json'
+              manifest=json.loads(manifest_path.read_bytes())
+              lock=json.loads((stage/'win-x64-dependencies.lock.json').read_bytes())
+              manifest_path.write_text(json.dumps(installer_revision(manifest,lock,p['installerPackageVersion']),indent=2)+'\n',encoding='utf-8')
           with open(os.environ['GITHUB_OUTPUT'],'a') as out: out.write('ready=true\n')
           '@ | python
       - name: Build visible installer folders
@@ -86,6 +98,14 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python build_installer.py --dotnet $sdk --payload dist/amd/inputs/payload --rid win-x64 --manifest dist/amd/inputs/manifest.json --dependency-lock dist/amd/win-x64-dependencies.lock.json --output dist/amd/installers/windows
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Build matching Vortex payload and companion
+        if: steps.candidate.outputs.ready == 'true'
+        shell: pwsh
+        run: |
+          python tools/build_vortex_package.py --payload dist/amd/inputs/payload --manifest dist/amd/inputs/manifest.json --dependency-lock dist/amd/win-x64-dependencies.lock.json --output dist/amd/vortex/MCD2-Graphics-Vortex.zip
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/build_vortex_companion.py --output dist/amd/vortex/MCD2-Graphics-Companion.zip
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Upload development installers and provenance (not a release)
         if: steps.candidate.outputs.ready == 'true'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -95,6 +115,7 @@ jobs:
           if-no-files-found: error
           path: |
             dist/amd/installers/**
+            dist/amd/vortex/**
             dist/amd/inputs/assembly-receipt.json
             dist/amd/inputs/AMD_BRIDGE_NOTICES.txt
             dist/amd/inputs/provenance/**

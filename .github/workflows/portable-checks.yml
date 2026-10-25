@@ -328,6 +328,11 @@ jobs:
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9
         with:
           dotnet-version: '10.0.402'
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Vortex contract and hardlink lifecycle fixtures
+        run: node --test integrations/vortex/test
       - name: Temporal SR foliage ownership checks
         run: python tests/test_fg_foliage_policy.py
       - name: Presenter confirmation preservation
@@ -342,6 +347,12 @@ jobs:
         run: dotnet run --project tests/provider-menu-client/ProviderMenuClient.Tests.csproj -c Release
       - name: Guided installer file-safety checks
         run: dotnet run --project tests/installer-core/InstallerCore.Tests.csproj -c Release
+      - name: Standalone and Vortex transition parity
+        shell: pwsh
+        run: |
+          $env:MCD2_TEST_DOTNET = (Get-Command dotnet).Source
+          python -m unittest discover -s tests -p "test_installer_adapter_parity.py" -v
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Compile standalone GUI
         run: dotnet build src/installer/MCD2.Installer.csproj -c Release -p:SelfContained=false -p:RestoreLockedMode=true --nologo
 

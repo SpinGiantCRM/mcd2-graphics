@@ -1,8 +1,10 @@
 # Guided installation — 0.4.0-amd.dev.25
 
-Download the compiled **Windows** or **Linux** installer and separate **MCD2-Graphics-dev25-ReShade-dependency.zip** from the [release Assets](https://github.com/SpinGiantCRM/mcd2-graphics/releases/tag/v0.4.0-amd.dev.25). Extract the **entire installer folder** before running it. GitHub's automatic source archives are for developers. No separate Python or .NET installation is needed.
+Download the compiled **Windows** or **Linux** installer and separate **MCD2-Graphics-dev25-ReShade-dependency.zip** from [Nexus Files](https://www.nexusmods.com/minecraftdungeons2/mods/87?tab=files). Extract the **entire installer folder** before running it. GitHub's automatic source archives are for developers. No separate Python or .NET installation is needed.
 
 The exact [published hashes and signing/scan status](qualification/providers/dev25-release-artifacts-2026-10-24.json) identify the packages. [Release scope and advanced controls](docs/DEV25_RELEASE_CANDIDATE.md).
+
+> PR60 development installers use the [new standalone/Vortex flow and manager-transition steps](docs/INSTALLER_MANAGERS.md). The instructions below describe the unchanged published 0.4.0 installer.
 
 ## Install
 

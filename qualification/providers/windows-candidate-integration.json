@@ -92,5 +92,6 @@
     "crtVersion": "14.44.35207",
     "windowsSDK": "10.0.26100.0"
   },
-  "selectionNote": "Verified dev.4 native archive and API digest; its CI merge tree matches reviewed source8e66fce. All owned members and247 consumed source pins were checked. This selector update changes metadata only. Automatic and custom DLSS/FSR frame order, separate counts and Busy-sample diagnostics still need complete-package game qualification. Game Pass and Windows MFG remain untested."
+  "selectionNote": "Verified dev.4 native archive and API digest; its CI merge tree matches reviewed source8e66fce. All owned members and247 consumed source pins were checked. This selector update changes metadata only. Automatic and custom DLSS/FSR frame order, separate counts and Busy-sample diagnostics still need complete-package game qualification. Game Pass and Windows MFG remain untested.",
+  "installerPackageVersion": "0.5.0-integration.dev.4-install.1"
 }

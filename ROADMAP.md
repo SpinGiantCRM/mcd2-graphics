@@ -20,17 +20,15 @@ Add DLSS Enabler-style hybrid MFG in which two FG providers contribute different
 
 The fixed NVIDIA multiplier integration is one foundation for this work. It does not complete Radeon/software MFG or mixed-provider generation, which remain required milestones.
 
-Expose only combinations with verified frame inputs, output access and stable pacing. Reserve the same interfaces for later XeSS SR, FG/MFG and XeLL support.
+Expose only combinations with verified frame inputs, output access and stable pacing. Keep additional providers outside this milestone.
 
-### 3. Ray Reconstruction and further technology
+### 3. Installation, stability and optimisation
 
-Investigate DLSS Ray Reconstruction, FSR Ray Regeneration and independent denoisers after FSR and MFG. Proceed only where the game provides usable noisy lighting signals, matching guides and a replaceable rendering stage.
+Finish the agreed Game Pass and MFG candidate, then make installation straightforward through both Vortex and the independent Windows/Linux installer. Share package identity and dependency policy, preserve settings when switching managers, and keep ownership-aware repair/removal. The [development installation guide](docs/INSTALLER_MANAGERS.md) records current behaviour and unrun qualification.
 
-Keep joint denoising/reconstruction distinct from independent denoisers. Investigate late camera reprojection separately when actual camera inputs and presentation compatibility can be established.
+Remove redundant installer/UI work where correctness can be demonstrated. Keep graphics timing, presentation ownership, Native fallback and diagnostics freshness intact. Benchmarks remain on hold; source cleanups do not establish an FPS gain.
 
-### 4. Shadows / lighting
-
-Investigate remaining shadow shimmer and lighting instability while preserving the game's visual identity.
+No additional major graphics features are in the active milestone. Ray reconstruction/regeneration, new denoisers/providers and larger lighting changes are deferred.
 
 ## Parallel work
 

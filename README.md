@@ -1,6 +1,6 @@
 # MCD2 Graphics — DLSS, FSR, Frame Generation, HDR and low latency
 
-[Download 0.4.0-amd.dev.25](https://github.com/SpinGiantCRM/mcd2-graphics/releases/tag/v0.4.0-amd.dev.25) · [Nexus page](https://www.nexusmods.com/minecraftdungeons2/mods/87) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md) · [Validation](docs/VALIDATION.md) · [Documentation](docs/README.md)
+[Download 0.4.0-amd.dev.25](https://www.nexusmods.com/minecraftdungeons2/mods/87?tab=files) · [Nexus page](https://www.nexusmods.com/minecraftdungeons2/mods/87) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md) · [Validation](docs/VALIDATION.md) · [Documentation](docs/README.md)
 
 DLSS/DLAA, FSR upscaling, independent Frame Generation, HDR and supported low-latency controls in Minecraft Dungeons II's menus, with a guided Windows/Linux installer.
 
@@ -53,3 +53,5 @@ Use the [bug form](https://github.com/SpinGiantCRM/mcd2-graphics/issues/new?temp
 Read [Windows compatibility requirements](docs/WINDOWS_COMPATIBILITY.md) before changing the native addon, installer or build recipe. Source builders should use the explicit dev.25 selection and platform locks; the root preview.1 manifests remain historical baseline inputs.
 
 Thanks to ReShade, RenoDX/UE Extended, NeoRune, Blueprint Loader, NVIDIA and AMD/GPUOpen contributors. [Third-party notices](THIRD_PARTY_NOTICES.md). Development used AI assistance with local build and runtime checks. Packages are unsigned; no current local antivirus clean-scan result is claimed.
+
+Installation work in PR60 adds shared standalone/Vortex packaging and guarded manager transitions. See [development installer instructions](docs/INSTALLER_MANAGERS.md); these changes still need qualification.

@@ -139,7 +139,7 @@ class CandidateAssemblyTests(unittest.TestCase):
         self.assertNotIn('windows-candidate-pr52-2026-10-12.json',workflow)
         self.assertIn("p.get('selectionNeedsRebuild',False)",workflow)
         self.assertIn("p.get('sourceChangedAfterSelection',False)",workflow)
-        self.assertEqual(workflow.count("if: steps.candidate.outputs.ready == 'true'"),2)
+        self.assertEqual(workflow.count("if: steps.candidate.outputs.ready == 'true'"),3)
         pin=json.loads((ROOT/'qualification/providers/windows-candidate-current.json').read_text())
         self.assertRegex(pin['archiveSHA256'],r'^[0-9a-f]{64}$')
         self.assertRegex(pin['sourceCommit'],r'^[0-9a-f]{40}$')
