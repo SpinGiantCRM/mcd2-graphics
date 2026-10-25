@@ -7,7 +7,7 @@ The package installer recognises `mcd2-install.json` and complete hash-pinned re
 This deliberately avoids async `will-deploy`/`will-purge` listeners: Vortex 2.9.0's `emitAndAwait` catches their errors and continues. Do not move blocking checks into those listeners. The boundary fixtures reject work before underlying hardlink operations, and use real temporary files and links for successful deploy/disable/re-enable/purge and configuration recovery. Live Vortex qualification is still required.
 
 ```sh
-node --test integrations/vortex/test
+npm --prefix integrations/vortex test
 python tools/build_vortex_companion.py --output dist/MCD2-Graphics-Companion.zip
 ```
 
