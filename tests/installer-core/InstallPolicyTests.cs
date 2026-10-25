@@ -23,5 +23,10 @@ static class InstallPolicyTests {
   throws(()=>e.Uninstall(),"Standalone cannot remove Vortex deployment");
   File.Delete(marker);
   check(e.RefreshScan().Checks[0].State=="OK","Explicit rescan sees restored executable");
+  var privateRuntime=Path.Combine(root,InstallerEngine.Runtime);Directory.CreateDirectory(Path.GetDirectoryName(privateRuntime)!);File.WriteAllBytes(privateRuntime,b);
+  var vortexManifest=Path.Combine(root,"vortex.deployment.mcd2-graphics-root.json");
+  File.WriteAllText(vortexManifest,JsonSerializer.Serialize(new{version=1,gameId="minecraftdungeons2",deploymentMethod="hardlink_activator",files=new[]{new{relPath=InstallerEngine.Runtime,source="DLSSRuntime",target=""}}}));
+  throws(()=>e.Install(),"Standalone cannot adopt a private runtime still tracked by Vortex");
+  check(!File.Exists(Path.Combine(root,files.Keys.Single())),"Vortex dependency handoff refusal occurs before payload/configuration writes");
  }
 }

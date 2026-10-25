@@ -145,3 +145,12 @@ test('partial purge retaining only a fresh proxy cannot release ownership',async
  await applyOwnedConfiguration(ctx);const {beforeRemove,afterRemove}=require('../src/deployment');await beforeRemove(ctx);
  await assert.rejects(afterRemove(ctx));assert.equal(await fs.stat(path.join(root,'Dungeons/Binaries/Win64/MCD2Graphics/install-manifest.json')).then(()=>true,()=>false),true);
 });
+
+test('standalone handoff waits until Vortex releases its private DLSS requirement',async t=>{
+ const root=await fixture(t),c=contract(),runtime='Dungeons/Binaries/Win64/MCD2Graphics/ngx-runtime/nvngx_dlss.dll';
+ c.dependencies=[{id:'DLSSRuntime',role:'common',editions:['Steam'],files:{[runtime]:hash('runtime')},releases:[{version:'1',files:{[runtime]:hash('runtime')}}],acquisition:{method:'browser',url:'https://example.com/dlss'}}];
+ await put(root,'Dungeons/Binaries/Win64/own.addon64','payload');await put(root,runtime,'runtime');const ctx={root,contract:c,edition:'Steam',profileId:'a',privateRuntimeManaged:true,requireClosed:async()=>{}};
+ await applyOwnedConfiguration(ctx);const {beforeRemove,afterRemove}=require('../src/deployment');await beforeRemove(ctx);await fs.rm(path.join(root,'Dungeons/Binaries/Win64/own.addon64'));await afterRemove(ctx);
+ assert.equal((await require('../src/ownership').checkOwnership(ctx)).owner,'vortex');assert.equal(await fs.readFile(path.join(root,runtime),'utf8'),'runtime');
+ await fs.rm(path.join(root,runtime));await afterRemove(ctx);assert.equal((await require('../src/ownership').checkOwnership(ctx)).owner,'unmanaged');
+});

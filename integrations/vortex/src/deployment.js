@@ -18,7 +18,7 @@ async function preflightDeployment(ctx){await (ctx.requireClosed??requireClosed)
 async function beforeDeploy(ctx){const {old}=await preflightDeployment(ctx);let framework=old?.framework??null;const relative='Dungeons/Binaries/Win64/dxgi.dll';if(!framework&&cOwnsProxy(ctx)){const p=mapPath(ctx.contract,ctx.edition,relative);const h=await currentHash(ctx.root,p);framework={hadFile:h!==null,previousHash:h};if(h!==null){if(h!==ctx.contract.configuration.frameworkPreviousSHA256)throw Error('Unknown graphics bootstrap retained');const backup=mapPath(ctx.contract,ctx.edition,'Dungeons/Binaries/Win64/MCD2GraphicsDependencyBackups/'+h+'.bak');if(await currentHash(ctx.root,backup)!==null&&await currentHash(ctx.root,backup)!==h)throw Error('Graphics bootstrap backup changed');if(await currentHash(ctx.root,backup)===null)await io.write(ctx.root,backup,await io.read(ctx.root,p,512*1024*1024));}}
  // Configuration is applied before Vortex changes files. A crash leaves a WAL
  // which the next deploy/purge reconciles; it cannot become an unmanaged install.
- await applyOwnedConfiguration({...ctx,framework});}
+ const dlss=ctx.contract.dependencies.find(d=>d.id==='DLSSRuntime');const privateRuntimeManaged=!!dlss&&Object.keys(dlss.files).some(p=>ctx.stagedFiles?.has(mapPath(ctx.contract,ctx.edition,p)));await applyOwnedConfiguration({...ctx,framework,privateRuntimeManaged});}
 function cOwnsProxy(ctx){return Object.hasOwn(ctx.contract.payload,'Dungeons/Binaries/Win64/dxgi.dll');}
 async function verifyDeployed(ctx){await (ctx.requireClosed??requireClosed)();for(const [p,h] of Object.entries(ctx.contract.payload))if(await currentHash(ctx.root,mapPath(ctx.contract,ctx.edition,p))!==h)throw Error('Vortex deployment is incomplete; repair/deploy again before launching');await applyOwnedConfiguration(ctx);}
 async function preflightRemoval(ctx){await (ctx.requireClosed??requireClosed)();const r=await receipt(ctx);if(!r)return;for(const [p,h] of Object.entries({...r.previousFiles,...r.files})){const actual=await currentHash(ctx.root,mapPath(r.contract,ctx.edition,p));if(actual!==null&&actual!==h&&!(r.phase==='prepared'&&r.previousFiles?.[p]===actual)&&!(r.phase==='removing'&&p==='Dungeons/Binaries/Win64/dxgi.dll'&&r.framework?.hadFile&&actual===r.framework.previousHash))throw Error('Modified mod file retained. Restore it before purging');}await validateFramework(ctx,r);return r;}
@@ -32,6 +32,14 @@ async function afterRemove(ctx){await (ctx.requireClosed??requireClosed)();const
   const h=await currentHash(ctx.root,mapPath(r.contract,ctx.edition,p));
   const restored=p==='Dungeons/Binaries/Win64/dxgi.dll'&&r.framework?.hadFile&&h===r.framework.previousHash;
   if(h!==null&&!restored)throw Error('Mod files remain deployed; purge through Vortex before changing managers');
+ }
+ const privateRuntime=r.contract.dependencies.find(d=>d.id==='DLSSRuntime');
+ if(privateRuntime&&r.privateRuntimeManaged)for(const relative of Object.keys(privateRuntime.files)){
+  // The standalone receipt owns this private copy. Keep Vortex's handoff
+  // journal until the requirement's managed link has also been released.
+  if(await currentHash(ctx.root,mapPath(r.contract,ctx.edition,relative))!==null){
+   r.transitionBlockedBy='DLSSRuntime';await saveReceipt(ctx,r);return;
+  }
  }
  await fs.rm(await io.target(ctx.root,mapPath(r.contract,ctx.edition,MARKER)),{force:true});}
 module.exports={requireClosed,currentHash,preflightDeployment,preflightRemoval,beforeDeploy,verifyDeployed,beforeRemove,afterRemove};

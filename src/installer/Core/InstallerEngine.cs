@@ -285,6 +285,7 @@ public sealed partial class InstallerEngine {
             if(dependency.Id=="DLSSRuntime") {modFiles[f.Key]=f.Value;if(selections.TryGetValue(f.Key,out var b))source[f.Key]=b;else if(File.Exists(p)&&DigestFile(p)==f.Value)source[f.Key]=File.ReadAllBytes(p);}
             else if(selections.TryGetValue(f.Key,out var b)&&(!File.Exists(p)||DigestFile(p)!=f.Value))source[f.Key]=b;
         }
+        ProtectVortexOwnership(modFiles.Keys.Concat(source.Keys));
         foreach(var f in source) {
             var dest=GameTarget(root,f.Key);if(!File.Exists(dest))continue;var h=DigestFile(dest);
             if(old!=null&&old.Files.TryGetValue(f.Key,out var previous)&&h==previous)continue;
@@ -333,7 +334,7 @@ public sealed partial class InstallerEngine {
     }
     public void Uninstall() {
         RequireClosed();InvalidateScan();var root=GameRoot??throw new InvalidDataException("Choose the game first.");var marker=GameTarget(root,Marker);
-        var receipt=ReadReceipt(marker);ValidateOwnership(receipt);
+        var receipt=ReadReceipt(marker);ValidateOwnership(receipt);ProtectVortexOwnership(receipt.Files.Keys);
         foreach(var f in receipt.Files) {var p=GameTarget(root,f.Key);if(File.Exists(p)&&DigestFile(p)!=f.Value)throw new InvalidDataException("Modified mod file retained. Uninstall was stopped before removing anything.");}
         byte[]? originalFramework=null;
         if(receipt.Framework is {HadFile:true} remembered) {ValidateFramework(remembered);originalFramework=File.ReadAllBytes(GameTarget(root,FrameworkRecovery+remembered.PreviousHash+".bak"));}

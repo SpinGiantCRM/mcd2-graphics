@@ -32,7 +32,7 @@ Official Vortex distribution currently targets Windows. Linux users have the ind
 | Current installation | Next action |
 | --- | --- |
 | Old or current standalone → Vortex | Close the game. Use **Prepare for Vortex** in the new installer, or **Uninstall** in the original installer. Keep shared requirements and downloads. Then import/enable the matching Vortex package and Deploy. |
-| Vortex → standalone | Close the game. In Vortex, disable MCD2 Graphics and Deploy, or Purge. Keep the companion enabled until this finishes. Open standalone, choose the same game and **Check again**, then Install. |
+| Vortex → standalone | Close the game. In Vortex, disable MCD2 Graphics and its private DLSSRuntime requirement (nvngx_dlss.dll), then Deploy, or Purge. Keep the companion enabled until this finishes. Open standalone, choose the same game and **Check again**, then Install. |
 | Interrupted removal | Retry removal through the recorded manager. The ownership journal is retained until configuration and deployment cleanup complete. |
 | Unknown or edited receipt/payload | Keep the files and restore a trusted backup or use the original installer. Neither manager adopts unknown files. Do not delete DLLs or edit receipts to force a takeover. |
 
@@ -47,3 +47,5 @@ The synthetic cross-adapter test exercises legacy standalone → Vortex → stan
 An `-install.N` suffix identifies an installer-only revision. The manifest separately records the native/UI candidate version; graphics binaries are not rebuilt or relabelled merely to change installation. Published 0.4.0 archives remain unchanged.
 
 Developer builds of the GUI require the generated embedded contract: use `build_installer.py` with the selected manifest/lock. A bare `dotnet build` is a compile check, not a runnable installer package.
+
+When switching to standalone, the private DLSS requirement must also be released by Vortex because standalone owns that private copy. Other shared requirements may remain enabled and be reused. If a shared requirement needs replacing while Vortex still owns it, the standalone installer asks you to update or release it through Vortex first.
