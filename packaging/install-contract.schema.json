@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mcd2-graphics.invalid/install-contract.schema.json",
+  "title": "MCD2 Graphics install contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "packageVersion",
+    "manifestIdentity",
+    "dependencyIdentity",
+    "editionProfiles",
+    "payload",
+    "dependencies",
+    "configuration",
+    "migration"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "kind": {
+      "const": "mcd2-graphics"
+    },
+    "packageVersion": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9.+_-]{1,100}$"
+    },
+    "manifestIdentity": {
+      "$ref": "#/$defs/hash"
+    },
+    "dependencyIdentity": {
+      "$ref": "#/$defs/hash"
+    },
+    "editionProfiles": {
+      "type": "object",
+      "required": [
+        "Steam"
+      ],
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "binaryDirectory",
+          "shipping",
+          "exeSHA256",
+          "build"
+        ]
+      }
+    },
+    "payload": {
+      "$ref": "#/$defs/files"
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "role",
+          "editions",
+          "files",
+          "releases",
+          "acquisition"
+        ],
+        "properties": {
+          "role": {
+            "enum": [
+              "common",
+              "feature",
+              "edition"
+            ]
+          },
+          "files": {
+            "$ref": "#/$defs/files"
+          },
+          "acquisition": {
+            "type": "object",
+            "required": [
+              "method",
+              "url"
+            ],
+            "properties": {
+              "method": {
+                "enum": [
+                  "browser",
+                  "direct"
+                ]
+              },
+              "url": {
+                "type": "string",
+                "pattern": "^https://"
+              }
+            }
+          }
+        }
+      }
+    },
+    "configuration": {
+      "type": "object",
+      "required": [
+        "startup",
+        "hdrActivation",
+        "frameworkPreviousSHA256"
+      ]
+    },
+    "migration": {
+      "type": "object",
+      "required": [
+        "receiptSchemaVersion",
+        "owners",
+        "legacyOwner",
+        "previousInstalls"
+      ]
+    }
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "files": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/$defs/hash"
+      }
+    }
+  }
+}

@@ -2,11 +2,14 @@ using MCD2.Installer;
 using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
+if(args.Length==7&&args[0]=="--transition-fixture"){TransitionHarness.Run(args);return;}
 int cases=0;
 void Check(bool b,string name){if(!b)throw new Exception(name);cases++;Console.WriteLine("PASS "+name);}
 void Throws(Action a,string name){bool caught=false;try{a();}catch(Exception e)when(e is InvalidDataException or InvalidOperationException or IOException){caught=true;}Check(caught,name);}
 var temp=Path.Combine(Path.GetTempPath(),"mcd2-installer-test-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(temp);
 try {
+ AcquisitionTests.Run(Check,Throws,temp);
+ InstallPolicyTests.Run(Check,Throws,temp);
  ProfileTests.Run(Check,Throws,temp);
  GameLocationTests.Run(Check,Throws,temp);
  byte[] file=Encoding.UTF8.GetBytes("qualified test payload");string hash=InstallerEngine.Digest(file);var own=new Dictionary<string,string>{{"Dungeons/Binaries/Win64/mcd2-graphics.addon64",hash}};
